@@ -46,7 +46,7 @@ class Message:
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
-        assert self._check_consistency(), "Message initialization inconsistent."
+        assert self._is_consistent(), "Message initialization inconsistent."
 
     @property
     def counterparty(self) -> Address:
@@ -104,7 +104,7 @@ class Message:
         """Check value is set for key."""
         return key in self._body
 
-    def _check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """Check that the data is consistent."""
         return True
 
@@ -216,9 +216,7 @@ class Protocol(ABC):
     """
     This class implements a specifications for a protocol.
 
-    It includes:
-    - a serializer, to encode/decode a message.
-    - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
+    It includes a serializer to encode/decode a message.
     """
 
     def __init__(
@@ -249,13 +247,3 @@ class Protocol(ABC):
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
         return self._config
-
-    def check(self, msg: Message) -> bool:
-        """
-        Check whether the message belongs to the allowed messages.
-
-        :param msg: the message.
-        :return: True if the message is valid wrt the protocol, False otherwise.
-        """
-        # TODO 'check' should check the message against the protocol rules, if such rules are provided.
-        return True

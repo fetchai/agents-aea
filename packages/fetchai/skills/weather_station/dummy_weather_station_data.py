@@ -110,7 +110,7 @@ class Forecast:
 
     def generate(self):
         """Generate weather data."""
-        while True:
+        while True:  # nosec
             dict_of_data = {
                 "abs_pressure": random.randrange(1022.0, 1025, 1),
                 "delay": random.randint(2, 7),

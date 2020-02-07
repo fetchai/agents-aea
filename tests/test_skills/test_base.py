@@ -28,10 +28,12 @@ from queue import Queue
 import aea.registries.base
 from aea.aea import AEA, Resources
 from aea.connections.base import ConnectionStatus
+from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.identity.base import Identity
 from aea.skills.base import Skill, SkillContext
 
 from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
@@ -39,17 +41,18 @@ from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({"default": private_key_pem_path})
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
     connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
+    identity = Identity("name", address=wallet.addresses[FETCHAI])
     my_aea = AEA(
-        "Agent0",
+        identity,
         connections,
         wallet,
         ledger_apis,
         resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-        programmatic=False,
+        is_programmatic=False,
     )
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
@@ -61,20 +64,23 @@ class TestSkillContext:
     @classmethod
     def setup_class(cls):
         """Test the initialisation of the AEA."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        private_key_txt_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        eth_private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+        fet_private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {"default": private_key_pem_path, FETCHAI: private_key_txt_path}
+            {ETHEREUM: eth_private_key_path, FETCHAI: fet_private_key_path}
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        cls.identity = Identity(
+            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI
+        )
         cls.my_aea = AEA(
-            "Agent0",
+            cls.identity,
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.skill_context = SkillContext(cls.my_aea.context)
 
@@ -82,17 +88,13 @@ class TestSkillContext:
         """Test the agent's name."""
         assert self.skill_context.agent_name == self.my_aea.name
 
-    def test_agent_public_keys(self):
-        """Test the agent's public keys."""
-        assert self.skill_context.agent_public_keys == self.my_aea.wallet.public_keys
-
     def test_agent_addresses(self):
         """Test the agent's address."""
-        assert self.skill_context.agent_addresses == self.my_aea.wallet.addresses
+        assert self.skill_context.agent_addresses == self.my_aea.identity.addresses
 
     def test_agent_address(self):
         """Test the default agent's address."""
-        assert self.skill_context.agent_address == self.my_aea.wallet.addresses[FETCHAI]
+        assert self.skill_context.agent_address == self.my_aea.identity.address
 
     def test_connection_status(self):
         """Test the default agent's connection status."""
@@ -151,54 +153,48 @@ class TestSkillFromDir:
         cls._patch_logger()
 
         cls.cwd = os.getcwd()
-        cls.t = tempfile.mktemp()
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.t)
+        cls.t = tempfile.mkdtemp()
+        cls.skill_directory = Path(cls.t, "dummy_skill")
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.skill_directory)
         os.chdir(cls.t)
 
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({"default": private_key_pem_path})
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        cls.identity = Identity("name", address=cls.wallet.addresses[FETCHAI])
         cls.my_aea = AEA(
-            "agent_name",
+            cls.identity,
             cls.connections,
             cls.wallet,
             ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.agent_context = cls.my_aea.context
 
     def test_missing_handler(self):
         """Test that when parsing a skill and an handler is missing, we behave correctly."""
-        Path(self.t, "handlers.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+        Path(self.skill_directory, "handlers.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
             "Handler 'DummyInternalHandler' cannot be found."
         )
 
     def test_missing_behaviour(self):
         """Test that when parsing a skill and a behaviour is missing, we behave correctly."""
-        Path(self.t, "behaviours.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+        Path(self.skill_directory, "behaviours.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
             "Behaviour 'DummyBehaviour' cannot be found."
         )
 
-    def test_missing_task(self):
-        """Test that when parsing a skill and a task is missing, we behave correctly."""
-        Path(self.t, "tasks.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+    def test_missing_model(self):
+        """Test that when parsing a skill and a model is missing, we behave correctly."""
+        Path(self.skill_directory, "dummy.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
-            "Task 'DummyTask' cannot be found."
-        )
-
-    def test_missing_shared_class(self):
-        """Test that when parsing a skill and a shared_class is missing, we behave correctly."""
-        Path(self.t, "dummy.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
-        self.mocked_logger_warning.assert_called_with(
-            "Shared class 'DummySharedClass' cannot be found."
+            "Model 'DummyModel' cannot be found."
         )
 
     @classmethod

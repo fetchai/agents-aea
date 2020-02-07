@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the implementation of the error tasks."""
-
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 
 class ErrorTask(Task):
@@ -33,11 +32,10 @@ class ErrorTask(Task):
         """
         pass  # pragma: no cover
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         pass  # pragma: no cover

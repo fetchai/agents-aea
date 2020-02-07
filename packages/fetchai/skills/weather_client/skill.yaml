@@ -1,7 +1,7 @@
 name: weather_client
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The weather client skill implements the skill to purchase weather data."
 behaviours:
@@ -19,8 +19,7 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:
@@ -29,7 +28,7 @@ shared_classes:
       max_buyer_tx_fee: 1
       currency_id: 'FET'
       ledger_id: 'fetchai'
-      is_ledger_tx: False
+      is_ledger_tx: True
   dialogues:
     class_name: Dialogues
     args: {}

@@ -20,6 +20,7 @@
 """This module contains the tests of the ethereum module."""
 
 import os
+from unittest.mock import MagicMock
 
 from aea.crypto.ethereum import EthereumCrypto
 
@@ -55,3 +56,9 @@ def test_sign_and_recover_message():
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
     assert recovered_addr == account.address, "Failed to recover the correct address."
+
+
+def test_dump_positive():
+    """Test dump."""
+    account = EthereumCrypto(PRIVATE_KEY_PATH)
+    account.dump(MagicMock())

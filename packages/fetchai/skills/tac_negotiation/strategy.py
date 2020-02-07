@@ -28,7 +28,7 @@ from typing import Dict, Optional, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -41,7 +41,7 @@ logger = logging.getLogger("aea.tac_negotiation_skill")
 ROUNDING_ADJUSTMENT = 1
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines an abstract strategy for the agent."""
 
     class RegisterAs(Enum):
@@ -209,7 +209,7 @@ class Strategy(SharedClass):
         if not proposals:
             return None
         else:
-            return random.choice(proposals)
+            return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
         self, query: Query, is_seller: bool
@@ -330,9 +330,7 @@ class Strategy(SharedClass):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.check_transaction_is_affordable(
-            transaction_msg
-        ):
+        if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
             return False
         proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(
             ownership_state_after_locks, transaction_msg

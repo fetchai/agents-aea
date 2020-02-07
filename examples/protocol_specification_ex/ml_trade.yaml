@@ -1,19 +1,19 @@
 name: ml_trade
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A protocol for trading data for training and prediction purposes.'
 speech_acts:
   cfp:
-    query: Query
+    query: ct:Query
   terms:
-    terms: Descrition
+    terms: ct:Description
   accept:
-    terms: Descrition
+    terms: ct:Description
     tx_digest: pt:str
   data:
-    terms: Descrition
-    data: pt:list[Array]
+    terms: ct:Description
+    data: pt:list[ct:Array]
 
   # Differences:
   # data -> data was of type Tuple[np.ndarrays, np.ndarrays]. Now Array as a custom type is used instead of np.ndarrays.

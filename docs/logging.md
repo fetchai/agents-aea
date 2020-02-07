@@ -13,7 +13,7 @@ cd my_aea
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.1.17
+aea_version: 0.2.0
 agent_name: my_aea
 author: ''
 connections:
@@ -27,7 +27,7 @@ license: ''
 logging_config:
   disable_existing_loggers: false
   version: 1
-private_key_paths: []
+private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 registry_path: ../packages

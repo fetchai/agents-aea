@@ -1,4 +1,4 @@
-aea_version: 0.1.17
+aea_version: 0.2.0
 agent_name: car_data_buyer
 author: fetchai
 connections:
@@ -11,7 +11,7 @@ fingerprint: ''
 ledger_apis:
   fetchai:
     network: testnet
-license: Apache 2.0
+license: Apache-2.0
 logging_config:
   disable_existing_loggers: False
   version: 1

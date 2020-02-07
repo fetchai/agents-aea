@@ -22,10 +22,10 @@
 import datetime
 from typing import Set
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 
-class Search(SharedClass):
+class Search(Model):
     """This class deals with the services search state."""
 
     def __init__(self, **kwargs):

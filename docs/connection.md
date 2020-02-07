@@ -13,7 +13,7 @@ The `connection.yaml` file in the AEA directory contains protocol details and co
 name: oef
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The oef connection provides a wrapper around the OEF sdk."
 class_name: OEFConnection

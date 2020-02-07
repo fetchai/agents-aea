@@ -39,18 +39,11 @@
       "type": "string"
     },
     "private_key_paths": {
-      "type": "array",
-      "additionalProperties": false,
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "required": [
-          "private_key_path"
-        ],
-        "properties": {
-          "private_key_path": {
-            "$ref": "definitions.json#/definitions/private_key_path"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "definitions.json#/definitions/private_key_path"
         }
       }
     },

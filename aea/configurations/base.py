@@ -29,7 +29,7 @@ DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
+DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
 T = TypeVar("T")
 
 """
@@ -171,7 +171,7 @@ class PublicId(JSONSerializable):
     >>> assert public_id == another_public_id
     """
 
-    AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
+    AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
     PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
@@ -278,27 +278,6 @@ class PackageConfiguration(Configuration, ABC):
     def public_id(self) -> PublicId:
         """Get the public id."""
         return PublicId(self.author, self.name, self.version)
-
-
-class PrivateKeyPathConfig(Configuration):
-    """Handle a private key path configuration."""
-
-    def __init__(self, ledger: str = "", path: str = ""):
-        """Initialize a handler configuration."""
-        self.ledger = ledger
-        self.path = path
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"ledger": self.ledger, "path": self.path}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        ledger = cast(str, obj.get("ledger"))
-        path = cast(str, obj.get("path"))
-        return PrivateKeyPathConfig(ledger=ledger, path=path)
 
 
 class ConnectionConfig(PackageConfiguration):
@@ -464,11 +443,11 @@ class BehaviourConfig(Configuration):
         return BehaviourConfig(class_name=class_name, **obj.get("args", {}))
 
 
-class TaskConfig(Configuration):
-    """Handle a skill task configuration."""
+class ModelConfig(Configuration):
+    """Handle a skill model configuration."""
 
     def __init__(self, class_name: str = "", **args):
-        """Initialize a task configuration."""
+        """Initialize a model configuration."""
         self.class_name = class_name
         self.args = args
 
@@ -481,27 +460,7 @@ class TaskConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         class_name = cast(str, obj.get("class_name"))
-        return TaskConfig(class_name=class_name, **obj.get("args", {}))
-
-
-class SharedClassConfig(Configuration):
-    """Handle a skill shared class configuration."""
-
-    def __init__(self, class_name: str = "", **args):
-        """Initialize a shared class configuration."""
-        self.class_name = class_name
-        self.args = args
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"class_name": self.class_name, "args": self.args}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("class_name"))
-        return SharedClassConfig(class_name=class_name, **obj.get("args", {}))
+        return ModelConfig(class_name=class_name, **obj.get("args", {}))
 
 
 class SkillConfig(PackageConfiguration):
@@ -528,8 +487,7 @@ class SkillConfig(PackageConfiguration):
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
-        self.tasks = CRUDCollection[TaskConfig]()
-        self.shared_classes = CRUDCollection[SharedClassConfig]()
+        self.models = CRUDCollection[ModelConfig]()
 
     @property
     def json(self) -> Dict:
@@ -544,10 +502,7 @@ class SkillConfig(PackageConfiguration):
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
-            "tasks": {key: t.json for key, t in self.tasks.read_all()},
-            "shared_classes": {
-                key: s.json for key, s in self.shared_classes.read_all()
-            },
+            "models": {key: m.json for key, m in self.models.read_all()},
             "description": self.description,
         }
 
@@ -578,17 +533,13 @@ class SkillConfig(PackageConfiguration):
             behaviour_config = BehaviourConfig.from_json(behaviour_data)
             skill_config.behaviours.create(behaviour_id, behaviour_config)
 
-        for task_id, task_data in obj.get("tasks", {}).items():  # type: ignore
-            task_config = TaskConfig.from_json(task_data)
-            skill_config.tasks.create(task_id, task_config)
-
         for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
             handler_config = HandlerConfig.from_json(handler_data)
             skill_config.handlers.create(handler_id, handler_config)
 
-        for shared_class_id, shared_class_data in obj.get("shared_classes", {}).items():  # type: ignore
-            shared_class_config = SharedClassConfig.from_json(shared_class_data)
-            skill_config.shared_classes.create(shared_class_id, shared_class_config)
+        for model_id, model_data in obj.get("models", {}).items():  # type: ignore
+            model_config = ModelConfig.from_json(model_data)
+            skill_config.models.create(model_id, model_config)
 
         return skill_config
 
@@ -606,7 +557,6 @@ class AgentConfig(PackageConfiguration):
         fingerprint: str = "",
         registry_path: str = "",
         description: str = "",
-        private_key_paths: Dict[str, str] = None,
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -617,12 +567,8 @@ class AgentConfig(PackageConfiguration):
         self.fingerprint = fingerprint
         self.registry_path = registry_path
         self.description = description
-        self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        self.private_key_paths = CRUDCollection[str]()
         self.ledger_apis = CRUDCollection[Dict]()
-
-        private_key_paths = private_key_paths if private_key_paths is not None else {}
-        for ledger, path in private_key_paths.items():
-            self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_ledger = None  # type: Optional[str]
@@ -684,10 +630,9 @@ class AgentConfig(PackageConfiguration):
             "fingerprint": self.fingerprint,
             "registry_path": self.registry_path,
             "description": self.description,
-            "private_key_paths": [
-                {"private_key_path": p.json}
-                for l, p in self.private_key_paths.read_all()
-            ],
+            "private_key_paths": {
+                key: path for key, path in self.private_key_paths.read_all()
+            },
             "ledger_apis": {key: config for key, config in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
             "default_ledger": self.default_ledger,
@@ -700,11 +645,6 @@ class AgentConfig(PackageConfiguration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        private_key_paths = {}
-        for p in obj.get("private_key_paths", []):  # type: ignore
-            private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
-            private_key_paths[private_key_path.ledger] = private_key_path.path
-
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -714,8 +654,10 @@ class AgentConfig(PackageConfiguration):
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            private_key_paths=cast(Dict, private_key_paths),
         )
+
+        for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
+            agent_config.private_key_paths.create(crypto_id, path)
 
         for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
             agent_config.ledger_apis.create(ledger_id, ledger_data)

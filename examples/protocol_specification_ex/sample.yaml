@@ -1,14 +1,21 @@
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
-    query: DataModel
+    query: ct:DataModel
   propose:
-    query: DataModel
-    price: float
+    number: pt:int
+    price: pt:float
+    description: pt:str
+    flag: pt:bool
+    query: ct:DataModel
+    proposal: pt:optional[pt:dict[ct:IOTApp7, pt:bytes]]
+    rounds: pt:set[pt:int]
+    items: pt:list[ct:Unit]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:bytes, pt:float]]]
   accept: {}
   decline: {}
   match_accept: {}

@@ -234,11 +234,9 @@ def test_run_unknown_private_key(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: fetchai-not
-    path: fet_private_key.txt"""
+        fetchai-not: fet_private_key.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -301,7 +299,8 @@ def test_run_unknown_ledger(pytestconfig):
     replace_text = """ledger_apis:
     unknown:
         address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-        chain_id: 3"""
+        chain_id: 3
+        gas_price: 20"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -318,64 +317,6 @@ def test_run_unknown_ledger(pytestconfig):
         error_msg = str(e)
 
     assert error_msg == "Unsupported identifier in ledger apis."
-
-    os.chdir(cwd)
-    try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
-
-
-def test_run_default_private_key_config(pytestconfig):
-    """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
-    runner = CliRunner()
-    agent_name = "myagent"
-    cwd = os.getcwd()
-    t = tempfile.mkdtemp()
-    # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
-
-    os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
-    assert result.exit_code == 0
-
-    os.chdir(Path(t, agent_name))
-
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
-    )
-    assert result.exit_code == 0
-
-    # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode="r")
-
-    # read all lines at once
-    whole_file = file.read()
-
-    find_text = "private_key_paths: []"
-    replace_text = """private_key_paths:
-- private_key_path:
-    ledger: default
-    path: default_private_key_not.txt"""
-
-    whole_file = whole_file.replace(find_text, replace_text)
-
-    # close the file
-    file.close()
-
-    with open("aea-config.yaml", "w") as f:
-        f.write(whole_file)
-
-    error_msg = ""
-    try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
-    except SystemExit as e:
-        error_msg = str(e)
-
-    assert error_msg == "1"
 
     os.chdir(cwd)
     try:
@@ -413,11 +354,9 @@ def test_run_fet_private_key_config(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: fetchai
-    path: default_private_key_not.txt"""
+    fetchai: default_private_key_not.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -471,11 +410,9 @@ def test_run_ethereum_private_key_config(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: ethereum
-    path: default_private_key_not.txt"""
+    ethereum: default_private_key_not.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -535,6 +472,7 @@ def test_run_ledger_apis(pytestconfig):
     ethereum:
         address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
         chain_id: 3
+        gas_price: 20
     fetchai:
         network: testnet"""
 

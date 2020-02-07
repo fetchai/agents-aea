@@ -19,13 +19,34 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from aea.skills.base import Behaviour
 
 
 class SimpleBehaviour(Behaviour, ABC):
     """This class implements a simple behaviour."""
+
+    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs):
+        """
+        Initialize a simple behaviour.
+
+        :param act: the act callable.
+        :param kwargs: the keyword arguments to be passed to the parent class.
+        """
+        super().__init__(**kwargs)
+        if act is not None:
+            self.act = act  # type: ignore
+
+    def setup(self) -> None:
+        """Set the behaviour up."""
+
+    def act(self) -> None:
+        """Do the action."""
+        raise NotImplementedError
+
+    def teardown(self) -> None:
+        """Tear the behaviour down."""
 
 
 class CompositeBehaviour(Behaviour, ABC):
@@ -42,11 +63,11 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        if not self.done():
+        if not self.is_done():
             self.act()
             self._number_of_executions += 1
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """
         Return True if the behaviour is terminated, False otherwise.
 
@@ -63,7 +84,7 @@ class OneShotBehaviour(SimpleBehaviour, ABC):
         super().__init__(**kwargs)
         self._already_executed = False  # type
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self._already_executed
 
@@ -117,7 +138,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        if not self.done() and self.is_time_to_act():
+        if not self.is_done() and self.is_time_to_act():
             self._last_act_time = datetime.datetime.now()
             self.act()
 
@@ -170,20 +191,20 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
     def act(self) -> None:
         """Implement the behaviour."""
         while (
-            not self.done()
+            not self.is_done()
             and self.current_behaviour is not None
-            and self.current_behaviour.done()
+            and self.current_behaviour.is_done()
         ):
             self._increase_index_if_possible()
 
         if (
-            not self.done()
+            not self.is_done()
             and self.current_behaviour is not None
-            and not self.current_behaviour.done()
+            and not self.current_behaviour.is_done()
         ):
             self.current_behaviour.act_wrapper()
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self._index >= len(self._behaviour_sequence)
 
@@ -278,6 +299,6 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         if current_state.done():
             self.current = current_state.next_state
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self.current is None

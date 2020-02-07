@@ -36,7 +36,7 @@ from aea.decision_maker.messages.transaction import (
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.helpers import tx_hash_from_values
 
@@ -45,7 +45,7 @@ logger = logging.getLogger("aea.tac_negotiation_skill")
 MessageId = int
 
 
-class Transactions(SharedClass):
+class Transactions(Model):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
     def __init__(self, **kwargs) -> None:

@@ -1,14 +1,14 @@
 name: 'ml_train'
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
 behaviours:
   search:
     class_name: MySearchBehaviour
     args:
-      search_interval: 30
+      search_interval: 10
 handlers:
   oef:
     class_name: OEFHandler
@@ -19,8 +19,7 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:
@@ -30,8 +29,8 @@ shared_classes:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: False
-  model:
-    class_name: Model
+  ml_model:
+    class_name: MLModel
     args:
       model_config_path: "./skills/ml_train/model.json"
 protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']

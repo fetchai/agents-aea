@@ -29,7 +29,6 @@ from typing import Any, Tuple, cast
 import gym
 
 from aea.configurations.base import PublicId
-from aea.crypto.wallet import DEFAULT
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -69,8 +68,7 @@ class ProxyEnv(gym.Env):
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
-        crypto_object = self._agent.wallet.crypto_objects.get(DEFAULT)
-        self._agent_address = crypto_object.address
+        self._agent_address = self._agent.identity.address
         self._agent_thread = Thread(target=self._agent.start)
 
     def step(self, action: Action) -> Feedback:

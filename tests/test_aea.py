@@ -30,10 +30,12 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig
-from aea.crypto.default import DEFAULT
+from aea.configurations.base import ProtocolConfig, PublicId
+from aea.connections.stub.connection import StubConnection
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
@@ -51,22 +53,24 @@ from .conftest import (
     LOCAL_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
+from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
+from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_initialise_aea():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    address_1 = "address"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
+    identity = Identity("my_name", address=wallet.addresses[FETCHAI])
     connections1 = [
         OEFLocalConnection(
-            address_1, node, connection_id=OEFLocalConnection.connection_id
+            identity.address, node, connection_id=OEFLocalConnection.connection_id
         )
     ]
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({"default": private_key_pem_path})
-    ledger_apis = LedgerApis({}, "default")
+    ledger_apis = LedgerApis({}, FETCHAI)
     my_AEA = AEA(
-        "Agent0",
+        identity,
         connections1,
         wallet,
         ledger_apis,
@@ -83,30 +87,27 @@ def test_initialise_aea():
     assert (
         my_AEA.context.shared_state is not None
     ), "Shared state must not be None after set"
-    assert (
-        my_AEA.context.public_key is not None
-    ), "Public key must not be None after set."
+    assert my_AEA.context.identity is not None, "Identity must not be None after set."
     my_AEA.stop()
-    assert (
-        my_AEA.context.task_queue is not None
-    ), "Task queue must not be None after set."
 
 
 def test_act():
     """Tests the act function of the AEA."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        ledger_apis = LedgerApis({}, FETCHAI)
         connections = [
-            OEFLocalConnection(address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID)
+            OEFLocalConnection(
+                identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
+            )
         ]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -126,29 +127,29 @@ def test_react():
     """Tests income messages."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        ledger_apis = LedgerApis({}, FETCHAI)
         connection = OEFLocalConnection(
-            address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
+            identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        msg.counterparty = address
+        msg.counterparty = identity.address
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address,
-            sender=address,
+            to=identity.address,
+            sender=identity.address,
             protocol_id=DefaultMessage.protocol_id,
             message=message_bytes,
         )
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -177,12 +178,12 @@ async def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         connection = OEFLocalConnection(
-            address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
+            identity.address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
         )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
@@ -192,14 +193,14 @@ async def test_handle():
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address,
-            sender=address,
+            to=identity.address,
+            sender=identity.address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -216,8 +217,8 @@ async def test_handle():
             #   DECODING ERROR
             msg = "hello".encode("utf-8")
             envelope = Envelope(
-                to=address,
-                sender=address,
+                to=identity.address,
+                sender=identity.address,
                 protocol_id=DefaultMessage.protocol_id,
                 message=msg,
             )
@@ -236,8 +237,8 @@ async def test_handle():
                 )
             )
             envelope = Envelope(
-                to=address,
-                sender=address,
+                to=identity.address,
+                sender=identity.address,
                 protocol_id=FIPAMessage.protocol_id,
                 message=msg,
             )
@@ -260,9 +261,10 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.node = LocalNode()
         cls.node.start()
         cls.agent_name = "MyAgent"
-        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, DEFAULT)
+        cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
+        cls.ledger_apis = LedgerApis({}, FETCHAI)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID,
         )
@@ -270,12 +272,12 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
         cls.aea = AEA(
-            cls.agent_name,
+            cls.identity,
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
             cls.resources,
-            programmatic=False,
+            is_programmatic=False,
         )
 
         cls.expected_message = DefaultMessage(
@@ -306,12 +308,13 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task_name = "dummy"
-        dummy_task = self.aea.resources.task_registry.fetch(
-            (dummy_skill_id, dummy_task_name)
-        )
-        assert dummy_task is not None
-        assert dummy_task.nb_execute_called > 0
+        # TODO the previous code caused an error:
+        #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
+        dummy_task = DummyTask()
+        task_id = self.aea.task_manager.enqueue_task(dummy_task)
+        async_result = self.aea.task_manager.get_task_result(task_id)
+        expected_dummy_task = async_result.get(2.0)
+        assert expected_dummy_task.nb_execute_called > 0
 
         dummy_handler = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
             DefaultMessage.protocol_id, dummy_skill_id
@@ -341,9 +344,10 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.node = LocalNode()
         cls.node.start()
         cls.agent_name = "MyAgent"
-        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({"default": cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, "default")
+        cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
+        cls.ledger_apis = LedgerApis({}, FETCHAI)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
@@ -352,7 +356,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
         cls.aea = AEA(
-            cls.agent_name,
+            cls.identity,
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
@@ -410,12 +414,11 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task_name = "dummy"
-        dummy_task = self.aea.resources.task_registry.fetch(
-            (dummy_skill_id, dummy_task_name)
-        )
-        assert dummy_task is not None
-        assert dummy_task.nb_execute_called > 0
+        dummy_task = DummyTask()
+        task_id = self.aea.task_manager.enqueue_task(dummy_task)
+        async_result = self.aea.task_manager.get_task_result(task_id)
+        expected_dummy_task = async_result.get(2.0)
+        assert expected_dummy_task.nb_execute_called > 0
 
         dummy_handler_name = "dummy"
         dummy_handler = self.aea.resources.handler_registry.fetch(
@@ -436,3 +439,53 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.t.join()
         cls.node.stop()
         Path(cls.temp).rmdir()
+
+
+class TestAddBehaviourDynamically:
+    """Test that we can add a behaviour dynamically."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        agent_name = "MyAgent"
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        input_file = tempfile.mktemp()
+        output_file = tempfile.mktemp()
+        cls.agent = AEA(
+            identity,
+            [StubConnection(input_file, output_file)],
+            wallet,
+            ledger_apis,
+            resources,
+            is_programmatic=False,
+        )
+
+        cls.t = Thread(target=cls.agent.start)
+        cls.t.start()
+        time.sleep(1.0)
+
+    def test_add_behaviour_dynamically(self):
+        """Test the dynamic registration of a behaviour."""
+        dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
+        dummy_skill = self.agent.resources.get_skill(dummy_skill_id)
+        assert dummy_skill is not None
+        new_behaviour = DummyBehaviour(
+            name="dummy2", skill_context=dummy_skill.skill_context
+        )
+        dummy_skill.skill_context.new_behaviours.put(new_behaviour)
+        time.sleep(1.0)
+        assert new_behaviour.nb_act_called > 0
+        assert (
+            len(self.agent.resources.behaviour_registry.fetch_by_skill(dummy_skill_id))
+            == 2
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the class down."""
+        cls.agent.stop()
+        cls.t.join()

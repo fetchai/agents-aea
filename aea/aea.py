@@ -20,7 +20,6 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from asyncio import AbstractEventLoop
-from concurrent.futures import Executor
 from typing import List, Optional, cast
 
 from aea.agent import Agent
@@ -29,6 +28,7 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import Filter, Resources
@@ -44,54 +44,49 @@ class AEA(Agent):
 
     def __init__(
         self,
-        name: str,
+        identity: Identity,
         connections: List[Connection],
         wallet: Wallet,
         ledger_apis: LedgerApis,
         resources: Resources,
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 0.0,
-        debug: bool = False,
-        programmatic: bool = True,
+        is_debug: bool = False,
+        is_programmatic: bool = True,
         max_reactions: int = 20,
-        executor: Optional[Executor] = None,
     ) -> None:
         """
         Instantiate the agent.
 
-        :param name: the name of the agent
+        :param identity: the identity of the agent
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the ledger apis of the agent.
         :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
+        :param is_debug: if True, run the agent in debug mode.
+        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of messages per iteration.
-        :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
         super().__init__(
-            name=name,
-            wallet=wallet,
+            identity=identity,
             connections=connections,
             loop=loop,
             timeout=timeout,
-            debug=debug,
-            programmatic=programmatic,
+            is_debug=is_debug,
+            is_programmatic=is_programmatic,
         )
 
         self.max_reactions = max_reactions
-        self._task_manager = TaskManager(executor)
+        self._task_manager = TaskManager()
         self._decision_maker = DecisionMaker(
-            self.name, self.max_reactions, self.outbox, self.wallet, ledger_apis
+            self.name, self.max_reactions, self.outbox, wallet, ledger_apis
         )
         self._context = AgentContext(
-            self.name,
-            self.wallet.public_keys,
-            self.wallet.addresses,
+            self.identity,
             ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
@@ -99,7 +94,7 @@ class AEA(Agent):
             self.decision_maker.ownership_state,
             self.decision_maker.preferences,
             self.decision_maker.goal_pursuit_readiness,
-            self.task_manager.task_queue,
+            self.task_manager,
         )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
@@ -140,11 +135,11 @@ class AEA(Agent):
 
         :return: None
         """
-        if not self.programmatic:
+        if not self.is_programmatic:
             self.resources.load(self.context)
-        self.resources.setup()
         self.task_manager.start()
         self.decision_maker.start()
+        self.resources.setup()
 
     def act(self) -> None:
         """
@@ -198,10 +193,6 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        if not protocol.check(msg):  # pragma: no cover
-            error_handler.send_invalid_message(envelope)  # pragma: no cover
-            return  # pragma: no cover
-
         handlers = self.filter.get_active_handlers(protocol.id)
         if len(handlers) == 0:
             if error_handler is not None:
@@ -217,9 +208,6 @@ class AEA(Agent):
 
         :return None
         """
-        # TODO: task should be submitted by the behaviours and handlers
-        for task in self.filter.get_active_tasks():
-            task.execute()
         self.filter.handle_internal_messages()
 
     def teardown(self) -> None:

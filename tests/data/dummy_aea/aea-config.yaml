@@ -1,4 +1,4 @@
-aea_version: 0.1.17
+aea_version: 0.2.0
 agent_name: Agent0
 author: dummy_author
 connections:
@@ -6,7 +6,7 @@ connections:
 default_connection: fetchai/local:0.1.0
 default_ledger: fetchai
 description: dummy_aea agent description [Fill in]
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 ledger_apis:
    fetchai:
@@ -17,19 +17,13 @@ ledger_apis:
      args:
        address: example.ethereum.com
        chain_id: 8080
+       gas_price: 20
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths:
-- private_key_path:
-    ledger: default
-    path: default_private_key.pem
-- private_key_path:
-    ledger: fetchai
-    path: fet_private_key.txt
-- private_key_path:
-    ledger: ethereum
-    path: eth_private_key.txt
+   fetchai: fet_private_key.txt
+   ethereum: eth_private_key.txt
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0

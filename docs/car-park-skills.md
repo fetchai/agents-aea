@@ -1,15 +1,20 @@
-The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+The AEA car-park skills demonstrate an interaction between two AEAs.
 
-This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
-
-It demonstrates how the AEAs trade car park information.
-
+* The carpark_detection AEA provides information on the number of car parking spaces available in a given vicinity.
+* The carpark_client AEA is interested in purchasing information on available car parking spaces in the same vicinity.
 
 ## Preparation instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+##Discussion
+The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
+
+It demonstrates how the AEAs trade car park information.
+
 
 ### Launch the OEF
 
@@ -20,8 +25,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following.
 
-
-## Demo instructions
+## Demo instructions: Ledger payment
 
 ### Create car detector AEA
 
@@ -32,13 +36,6 @@ cd car_detector
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/carpark_detection:0.1.0
 aea install
-```
-
-Second, add the ledger info to the aea config (`car_detector/aea-config.yaml`):
-``` bash
-ledger_apis:
-  fetchai:
-    network: testnet
 ```
 
 Alternatively to the previous two steps, simply run:
@@ -59,13 +56,6 @@ aea add skill fetchai/carpark_client:0.1.0
 aea install
 ```
 
-Second, add the ledger info to the aea config (`car_data_buyer/aea-config.yaml`):
-``` bash
-ledger_apis:
-  fetchai:
-    network: testnet
-```
-
 Alternatively to the previous two steps, simply run:
 ``` bash
 aea fetch fetchai/car_data_buyer:0.1.0
@@ -73,38 +63,112 @@ cd car_data_buyer
 aea install
 ```
 
-### Generate wealth for the car data buyer AEA
+Additionally, create the private key for the car data buyer AEA based on the network you want to transact.
 
-Add a private key to the car data buyer AEA:
-``` bash
+To generate and add a key for Fetch.ai use:
+```bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-To fund the car data buyer AEA on test-net you need to request some test tokens from a faucet.
-
-First, print the address:
-``` bash
-aea get-address fetchai
+To generate and add a key for Ethereum use:
+```bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
 ```
 
-This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet [here](https://explore-testnet.fetch.ai/tokentap). It will take a while for the tokens to become available.
+### Update the AEA configs
 
-Second, after some time, check the wealth associated with the address:
-``` bash
-aea get-wealth fetchai
+Both in `car_detector/aea-config.yaml` and
+`car_data_buyer/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect.
+
+To connect to Fetchai:
+``` yaml
+ledger_apis:
+  fetchai:
+    network: testnet
 ```
 
-Alternatively, to the previous steps, simply run:
+To connect to Ethereum:
+```yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 50
+```
+
+### Generate wealth for the car data buyer AEA
+
+Create some wealth for your car data buyer based on the network you want to transact with: 
+
+On the Fetch.ai `testnet` network.
 ``` bash
 aea generate-wealth fetchai
 ```
 
-### Update skill configurations
-
-Then, in the car detector AEA we disable the detection logic:
+On the Ethereum `ropsten` . (It takes a while).
 ``` bash
-aea config set vendor.fetchai.skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd False --type bool
+aea generate-wealth ethereum
+```
+
+### Update the skill configs
+
+In the thermometer skill config (`car_detector/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|models:                            |models:                           |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      data_price_fet: 2000         |      data_price_fet: 2000        |
+|      db_is_rel_to_cwd: False      |      db_is_rel_to_cwd: False     |
+|      db_rel_dir: ../temp_files    |      db_rel_dir: ../temp_files   |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd False --type bool
+```
+
+In the carpark data buyer skill config (`car_data_buyer/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|models:                            |models:                           |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      country: UK                  |      country: UK                 |
+|      search_interval: 120         |      search_interval: 120        |
+|      no_find_search_interval: 5   |      no_find_search_interval: 5  |
+|      max_price: 40000             |      max_price: 40000            |
+|      max_detection_age: 36000000  |      max_detection_age: 36000000 |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|      max_buyer_tx_fee: 6000       |      max_buyer_tx_fee: 6000      |
+|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.max_buyer_tx_fee 6000 --type int
+aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.ledger_id ethereum
 ```
 
 ### Run both AEAs

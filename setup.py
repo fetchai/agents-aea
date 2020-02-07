@@ -123,8 +123,6 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     install_requires=[
-        "cryptography",
-        "base58",
         *all_extras.get("crypto", []),
         *all_extras.get("cli", []),
     ],

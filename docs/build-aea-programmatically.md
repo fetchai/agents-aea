@@ -25,10 +25,11 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
@@ -65,15 +66,18 @@ We use the private key file we created to initialise a wallet, we also create th
 Then we pass all of this into the AEA constructor to create our AEA.
 ``` python
 # Set up the wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
+wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
 stub_connection = StubConnection(
     input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
 )
-ledger_apis = LedgerApis({}, DEFAULT)
+ledger_apis = LedgerApis({}, FETCHAI)
 resources = Resources()
 
+# Create an identity
+identity = Identity(name="my_aea", address=wallet.addresses.get(FETCHAI), default_address_key=FETCHAI,)
+
 # Create our AEA
-my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 ```
 
 Create the default protocol and add it to the AEA.
@@ -168,10 +172,11 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
@@ -184,7 +189,7 @@ OUTPUT_FILE = "output.txt"
 
 def run():
     # Create a private key
-    _create_default_private_key()
+    _create_fetchai_private_key()
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -193,15 +198,21 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # set up the Wallet, stub connection, ledger and (empty) resources
-    wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
+    wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    ledger_apis = LedgerApis({}, DEFAULT)
+    ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
+    # Create an identity
+    identity = Identity(
+        name="my_aea",
+        address=wallet.addresses.get(FETCHAI),
+        default_address_key=FETCHAI,
+    )
 
     # Create our AEA
-    my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol_configuration = ProtocolConfig.from_json(
@@ -220,7 +231,7 @@ def run():
 
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), 
         my_aea.context,
     )
     resources.add_skill(echo_skill)

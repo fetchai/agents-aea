@@ -39,7 +39,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
-GAS_PRICE = "50"
+DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
 
 
@@ -169,13 +169,14 @@ class EthereumApi(LedgerApi):
 
     identifier = ETHEREUM
 
-    def __init__(self, address: str):
+    def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
         """
         Initialize the Ethereum ledger APIs.
 
         :param address: the endpoint for Web3 APIs.
         """
         self._api = Web3(HTTPProvider(endpoint_uri=address))
+        self._gas_price = gas_price
 
     @property
     def api(self) -> Web3:
@@ -192,12 +193,14 @@ class EthereumApi(LedgerApi):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
-        chain_id: int = 1,
+        tx_nonce: str,
+        chain_id: int = 3,
         **kwargs
     ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
@@ -208,6 +211,7 @@ class EthereumApi(LedgerApi):
         nonce = self._api.eth.getTransactionCount(
             self._api.toChecksumAddress(crypto.address)
         )
+
         # TODO : handle misconfiguration
         transaction = {
             "nonce": nonce,
@@ -215,10 +219,19 @@ class EthereumApi(LedgerApi):
             "to": destination_address,
             "value": amount,
             "gas": tx_fee,
-            "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
+            "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
+            "data": tx_nonce,
         }
+        gas_estimation = self._api.eth.estimateGas(transaction=transaction)
+        assert (
+            tx_fee >= gas_estimation
+        ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
+            gas_estimation
+        )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:
             try:
@@ -238,3 +251,46 @@ class EthereumApi(LedgerApi):
         if tx_status is not None:
             is_successful = True
         return is_successful
+
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = Web3.keccak(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hex()
+
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+
+        tx = self._api.eth.getTransaction(tx_digest)
+        is_valid = (
+            tx.get("input") == tx_nonce
+            and tx.get("value") == amount
+            and tx.get("from") == client
+            and tx.get("to") == seller
+        )
+        return is_valid

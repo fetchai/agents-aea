@@ -1,15 +1,14 @@
 name: exception
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
-behaviours: {}
-handlers: {}
-tasks:
+behaviours:
   exception:
-    class_name: ExceptionTask
+    class_name: ExceptionBehaviour
     args: {}
-shared_classes: {}
+handlers: {}
+models: {}
 protocols: []
 dependencies: {}
 description: "Raise an exception, at some point."

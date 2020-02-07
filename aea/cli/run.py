@@ -43,7 +43,6 @@ from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
-    PrivateKeyPathConfig,
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader
@@ -51,15 +50,12 @@ from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
-    _create_default_private_key,
     _create_ethereum_private_key,
     _create_fetchai_private_key,
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
-    _try_validate_private_key_pem_path,
 )
 from aea.crypto.ledger_apis import (
     LedgerApis,
@@ -67,12 +63,13 @@ from aea.crypto.ledger_apis import (
     _try_to_instantiate_ethereum_ledger_api,
     _try_to_instantiate_fetchai_ledger_api,
 )
-from aea.crypto.wallet import DEFAULT, SUPPORTED_CRYPTOS, Wallet
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
     load_agent_component_package,
     load_module,
 )
+from aea.identity.base import Identity
 from aea.registries.base import Resources
 
 
@@ -91,74 +88,32 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
-    default_private_key_config = aea_conf.private_key_paths.read(DEFAULT)
-    if default_private_key_config is None:
-        _create_default_private_key()
-        default_private_key_config = PrivateKeyPathConfig(
-            DEFAULT, DEFAULT_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            default_private_key_config.ledger, default_private_key_config
-        )
-    else:
-        default_private_key_config = cast(
-            PrivateKeyPathConfig, default_private_key_config
-        )
-        try:
-            _try_validate_private_key_pem_path(default_private_key_config.path)
-        except FileNotFoundError:
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(default_private_key_config.path),
-                    default_private_key_config.ledger,
-                )
-            )
-            sys.exit(1)
-
-    fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_config is None:
+    fetchai_private_key_path = aea_conf.private_key_paths.read(FETCHAI)
+    if fetchai_private_key_path is None:
         _create_fetchai_private_key()
-        fetchai_private_key_config = PrivateKeyPathConfig(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            fetchai_private_key_config.ledger, fetchai_private_key_config
-        )
+        aea_conf.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
     else:
-        fetchai_private_key_config = cast(
-            PrivateKeyPathConfig, fetchai_private_key_config
-        )
         try:
-            _try_validate_fet_private_key_path(fetchai_private_key_config.path)
+            _try_validate_fet_private_key_path(fetchai_private_key_path)
         except FileNotFoundError:
             logger.error(
                 "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_config.path),
-                    fetchai_private_key_config.ledger,
+                    repr(fetchai_private_key_path), FETCHAI,
                 )
             )
             sys.exit(1)
 
-    ethereum_private_key_config = aea_conf.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_config is None:
+    ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
+    if ethereum_private_key_path is None:
         _create_ethereum_private_key()
-        ethereum_private_key_config = PrivateKeyPathConfig(
-            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            ethereum_private_key_config.ledger, ethereum_private_key_config
-        )
+        aea_conf.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
     else:
-        ethereum_private_key_config = cast(
-            PrivateKeyPathConfig, ethereum_private_key_config
-        )
         try:
-            _try_validate_ethereum_private_key_path(ethereum_private_key_config.path)
+            _try_validate_ethereum_private_key_path(ethereum_private_key_path)
         except FileNotFoundError:
             logger.error(
                 "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_config.path),
-                    ethereum_private_key_config.ledger,
+                    repr(ethereum_private_key_path), ETHEREUM,
                 )
             )
             sys.exit(1)
@@ -297,7 +252,7 @@ def _setup_connection(
 )
 @click.option(
     "--install-deps",
-    "install_deps",
+    "is_install_deps",
     is_flag=True,
     required=False,
     default=False,
@@ -305,7 +260,7 @@ def _setup_connection(
 )
 @pass_context
 def run(
-    click_context, connection_ids: List[PublicId], env_file: str, install_deps: bool
+    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
@@ -315,12 +270,10 @@ def run(
 
     _verify_or_create_private_keys(ctx)
     _verify_ledger_apis_access()
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     ledger_api_configs = dict(
         [
             (identifier, cast(Dict[str, Union[str, int]], config))
@@ -329,6 +282,16 @@ def run(
     )
 
     wallet = Wallet(private_key_paths)
+    if len(wallet.addresses) > 1:
+        identity = Identity(
+            agent_name,
+            addresses=wallet.addresses,
+            default_address_key=ctx.agent_config.default_ledger,
+        )
+    else:
+        identity = Identity(
+            agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
+        )
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
     default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
@@ -339,32 +302,30 @@ def run(
     _try_to_load_protocols(ctx)
     try:
         for connection_id in connection_ids:
-            connection = _setup_connection(
-                connection_id, wallet.addresses[ctx.agent_config.default_ledger], ctx
-            )
+            connection = _setup_connection(connection_id, identity.address, ctx)
             connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))
         sys.exit(1)
 
-    if install_deps:
+    if is_install_deps:
         if Path("requirements.txt").exists():
             click_context.invoke(install, requirement="requirements.txt")
         else:
             click_context.invoke(install)
 
     agent = AEA(
-        agent_name,
+        identity,
         connections,
         wallet,
         ledger_apis,
         resources=Resources(str(Path("."))),
-        programmatic=False,
+        is_programmatic=False,
     )
     try:
         agent.start()
     except KeyboardInterrupt:
-        logger.info("Interrupted.")  # pragma: no cover
+        click.echo("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
         sys.exit(1)

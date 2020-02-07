@@ -122,7 +122,7 @@ class OwnershipState:
         assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         return copy.copy(self._quantities_by_good_id)
 
-    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
@@ -162,9 +162,7 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        assert self.check_transaction_is_affordable(
-            tx_message
-        ), "Inconsistent transaction."
+        assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
 
@@ -237,7 +235,7 @@ class LedgerStateProxy:
         """Get the initialization status."""
         return self._ledger_apis.has_default_ledger
 
-    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable on the ledger.
 
@@ -480,6 +478,10 @@ class DecisionMaker:
         return self._message_out_queue
 
     @property
+    def wallet(self) -> Wallet:
+        return self._wallet
+
+    @property
     def ledger_apis(self) -> LedgerApis:
         """Get outbox."""
         return self._ledger_apis
@@ -688,18 +690,14 @@ class DecisionMaker:
         """
         is_affordable = True
         if self.ownership_state.is_initialized:
-            is_affordable = self.ownership_state.check_transaction_is_affordable(
-                tx_message
-            )
+            is_affordable = self.ownership_state.is_affordable_transaction(tx_message)
         if self.ledger_state_proxy.is_initialized and (
             tx_message.ledger_id != OFF_CHAIN
         ):
             if tx_message.ledger_id in self.ledger_apis.apis.keys():
                 is_affordable = (
                     is_affordable
-                    and self.ledger_state_proxy.check_transaction_is_affordable(
-                        tx_message
-                    )
+                    and self.ledger_state_proxy.is_affordable_transaction(tx_message)
                 )
             else:
                 logger.error(
@@ -736,12 +734,14 @@ class DecisionMaker:
             tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
-            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
             tx_digest = self.ledger_apis.transfer(
                 crypto_object,
                 tx_message.tx_counterparty_addr,
                 tx_message.counterparty_amount,
                 tx_message.fees,
+                info=tx_message.info,
+                tx_nonce=cast(str, tx_message.get("tx_nonce")),
             )
         return tx_digest
 
@@ -800,10 +800,10 @@ class DecisionMaker:
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self._wallet.crypto_objects.get(ETHEREUM)
+            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
-            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get("tx_hash")
         tx_signature = crypto_object.sign_message(tx_hash)
         return tx_signature

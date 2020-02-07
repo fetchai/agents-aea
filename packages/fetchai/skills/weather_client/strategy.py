@@ -22,18 +22,18 @@
 from typing import cast
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_COUNTRY = "UK"
 SEARCH_TERM = "country"
 DEFAULT_MAX_ROW_PRICE = 5
-DEFAULT_MAX_TX_FEE = 2
+DEFAULT_MAX_BUYER_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = False
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:
@@ -44,7 +44,7 @@ class Strategy(SharedClass):
         """
         self._country = kwargs.pop("country", DEFAULT_COUNTRY)
         self._max_row_price = kwargs.pop("max_row_price", DEFAULT_MAX_ROW_PRICE)
-        self.max_buyer_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
+        self.max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_BUYER_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)

@@ -157,4 +157,13 @@ It has two message types: `BYTES` and `ERROR`, and provides error messages for t
 
 The serialisation methods `encode` and `decode` implement transformations from `Message` type to bytes and back.
 
+
+## Interaction Protocols
+
+Protocols are not to be conflated with Interaction Protocols. The latter consist of three components in the AEA:
+
+- Protocols: which deal with the syntax and potentially semantics of the message exchange
+- Handlers: which handle incoming messages
+- Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type.
+
 <br />

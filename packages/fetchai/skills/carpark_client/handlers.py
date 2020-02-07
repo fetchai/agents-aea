@@ -145,10 +145,9 @@ class FIPAHandler(Handler):
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
+
             acceptable = strategy.is_acceptable_proposal(proposal)
-            affordable = self.context.ledger_apis.token_balance(
-                "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
-            ) >= cast(int, proposal.values.get("price"))
+            affordable = strategy.is_affordable_proposal(proposal)
             if acceptable and affordable:
                 logger.info(
                     "[{}]: accepting the proposal from sender={}".format(
@@ -211,36 +210,60 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info(
-            "[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(
-                self.context.agent_name, msg.counterparty[-5:]
-            )
-        )
-        info = msg.info
-        address = cast(str, info.get("address"))
-        proposal = cast(Description, dialogue.proposal)
         strategy = cast(Strategy, self.context.strategy)
-        tx_msg = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=[PublicId("fetchai", "carpark_client", "0.1.0")],
-            tx_id="transaction0",
-            tx_sender_addr=self.context.agent_addresses["fetchai"],
-            tx_counterparty_addr=address,
-            tx_amount_by_currency_id={
-                proposal.values["currency_id"]: -proposal.values["price"]
-            },
-            tx_sender_fee=strategy.max_buyer_tx_fee,
-            tx_counterparty_fee=proposal.values["seller_tx_fee"],
-            tx_quantities_by_good_id={},
-            ledger_id=proposal.values["ledger_id"],
-            info={"dialogue_label": dialogue.dialogue_label.json},
-        )
-        self.context.decision_maker_message_queue.put_nowait(tx_msg)
-        logger.info(
-            "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
-                self.context.agent_name
+        if strategy.is_ledger_tx:
+            logger.info(
+                "[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(
+                    self.context.agent_name, msg.counterparty[-5:]
+                )
             )
-        )
+            info = msg.info
+            address = cast(str, info.get("address"))
+            proposal = cast(Description, dialogue.proposal)
+            strategy = cast(Strategy, self.context.strategy)
+            tx_msg = TransactionMessage(
+                performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                skill_callback_ids=[PublicId("fetchai", "carpark_client", "0.1.0")],
+                tx_id="transaction0",
+                tx_sender_addr=self.context.agent_addresses["fetchai"],
+                tx_counterparty_addr=address,
+                tx_amount_by_currency_id={
+                    proposal.values["currency_id"]: -proposal.values["price"]
+                },
+                tx_sender_fee=strategy.max_buyer_tx_fee,
+                tx_counterparty_fee=proposal.values["seller_tx_fee"],
+                tx_quantities_by_good_id={},
+                ledger_id=proposal.values["ledger_id"],
+                info={"dialogue_label": dialogue.dialogue_label.json},
+            )
+            self.context.decision_maker_message_queue.put_nowait(tx_msg)
+            logger.info(
+                "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
+                    self.context.agent_name
+                )
+            )
+        else:
+            new_message_id = msg.message_id + 1
+            new_target = msg.message_id
+            inform_msg = FIPAMessage(
+                message_id=new_message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                target=new_target,
+                performative=FIPAMessage.Performative.INFORM,
+                info={"Done": "Sending payment via bank transfer"},
+            )
+            dialogue.outgoing_extend(inform_msg)
+            self.context.outbox.put_message(
+                to=msg.counterparty,
+                sender=self.context.agent_address,
+                protocol_id=FIPAMessage.protocol_id,
+                message=FIPASerializer().encode(inform_msg),
+            )
+            logger.info(
+                "[{}]: informing counterparty={} of payment.".format(
+                    self.context.agent_name, msg.counterparty[-5:]
+                )
+            )
 
     def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """

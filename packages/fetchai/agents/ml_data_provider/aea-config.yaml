@@ -1,4 +1,4 @@
-aea_version: 0.1.17
+aea_version: 0.2.0
 agent_name: ml_data_provider
 author: fetchai
 connections:
@@ -9,7 +9,7 @@ default_ledger: fetchai
 description: 'An agent that sells data.'
 fingerprint: ''
 ledger_apis: {}
-license: Apache 2.0
+license: Apache-2.0
 logging_config:
   disable_existing_loggers: False
   version: 1

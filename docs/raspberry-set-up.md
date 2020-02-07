@@ -1,5 +1,4 @@
-## Prerequisites:
-
+## Prerequisites
 Raspberry Pi 4  <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE">link</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
 
 I use a wireless network because, once your Raspberry Pi is set up, you want as few wires going to it as possible.
@@ -31,14 +30,12 @@ You will need to install pipenv. This is a virtual environment for python. Open 
 
 sudo apt-get install pipenv
 
-## Create and launch a virtual environment:
-
+## Create and launch a virtual environment
 ```bash
 pipenv --python 3.7 && pipenv shell
 ```
 
 ## Installing the AEA-framework
-
 Install the package from source:
 ``` bash
 pip install aea[all]

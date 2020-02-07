@@ -20,28 +20,62 @@
 
 from unittest import TestCase, mock
 
-from aea.cli.publish import _save_agent_locally
+from click import ClickException
 
-from tests.test_cli.tools_for_testing import ContextMock
+from aea.cli.publish import _check_is_item_in_local_registry, _save_agent_locally
+
+from tests.test_cli.tools_for_testing import (
+    ContextMock,
+    PublicIdMock,
+    raise_click_exception,
+)
 
 
+@mock.patch("aea.cli.publish._check_is_item_in_local_registry")
 @mock.patch("aea.cli.publish.copyfile")
 @mock.patch("aea.cli.publish.os.makedirs")
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
-@mock.patch("aea.cli.publish.try_get_item_target_path", return_value="target-dir")
+@mock.patch(
+    "aea.cli.publish.try_get_vendorized_item_target_path", return_value="target-dir"
+)
 @mock.patch("aea.cli.publish.os.path.join", return_value="joined-path")
 class SaveAgentLocallyTestCase(TestCase):
-    """Test case for save_agent_locally method."""
+    """Test case for _save_agent_locally method."""
 
     def test_save_agent_locally_positive(
         self,
         path_join_mock,
-        try_get_item_target_path_mock,
+        try_get_vendorized_item_target_path_mock,
         path_exists_mock,
         makedirs_mock,
         copyfile_mock,
+        _check_is_item_in_local_registry_mock,
     ):
         """Test for save_agent_locally positive result."""
         _save_agent_locally(ContextMock())
         makedirs_mock.assert_called_once_with("target-dir", exist_ok=True)
         copyfile_mock.assert_called_once_with("joined-path", "joined-path")
+
+
+class CheckIsItemInLocalRegistryTestCase(TestCase):
+    """Test case for _check_is_item_in_local_registry method."""
+
+    @mock.patch("aea.cli.publish.try_get_item_source_path")
+    def test__check_is_item_in_local_registry_positive(self, get_path_mock):
+        """Test for _check_is_item_in_local_registry positive result."""
+        public_id = PublicIdMock.from_str("author/name:version")
+        registry_path = "some-registry-path"
+        item_type_plural = "items"
+        _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
+        get_path_mock.assert_called_once_with(
+            registry_path, public_id.author, item_type_plural, public_id.name
+        )
+
+    @mock.patch("aea.cli.publish.try_get_item_source_path", raise_click_exception)
+    def test__check_is_item_in_local_registry_negative(self):
+        """Test for _check_is_item_in_local_registry negative result."""
+        public_id = PublicIdMock.from_str("author/name:version")
+        registry_path = "some-registry-path"
+        item_type_plural = "items"
+        with self.assertRaises(ClickException):
+            _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)

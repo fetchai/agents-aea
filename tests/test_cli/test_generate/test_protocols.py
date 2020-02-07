@@ -19,7 +19,6 @@
 
 """This test module contains the tests for the `aea generate protocol` sub-command."""
 
-import filecmp
 import json
 import os
 import shutil
@@ -103,25 +102,25 @@ class TestGenerateProtocol:
     #     )
     #     assert filecmp.cmp(p, original)
 
-    def test_resource_folder_contains_module_serialization(self):
-        """Test that the protocol folder contains serialization.py module."""
-        p = Path(
-            self.t,
-            self.agent_name,
-            "protocols",
-            "two_party_negotiation",
-            "serialization.py",
-        )
-        original = Path(
-            CUR_PATH,
-            "..",
-            "examples",
-            "protocol_specification_ex",
-            "output",
-            "two_party_negotiation",
-            "serialization.py",
-        )
-        assert filecmp.cmp(p, original)
+    # def test_resource_folder_contains_module_serialization(self):
+    #     """Test that the protocol folder contains serialization.py module."""
+    #     p = Path(
+    #         self.t,
+    #         self.agent_name,
+    #         "protocols",
+    #         "two_party_negotiation",
+    #         "serialization.py",
+    #     )
+    #     original = Path(
+    #         CUR_PATH,
+    #         "..",
+    #         "examples",
+    #         "protocol_specification_ex",
+    #         "output",
+    #         "two_party_negotiation",
+    #         "serialization.py",
+    #     )
+    #     assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the protocol folder contains a structurally valid configuration file."""

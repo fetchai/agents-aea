@@ -20,6 +20,7 @@
 """This module contains the tests of the ml_messages module."""
 
 import logging
+from unittest import mock
 
 import numpy as np
 
@@ -52,6 +53,15 @@ def test_ml_wrong_message_creation():
     """Test the creation of a ml message."""
     with pytest.raises(AssertionError):
         MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query="")
+
+
+def test_ml_messge_consistency():
+    """Test the consistency of the message."""
+    dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
+    query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
+    msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
+    with mock.patch.object(MLTradeMessage.Performative, "__eq__", return_value=False):
+        assert not msg._is_consistent()
 
 
 def test_ml_message_creation():

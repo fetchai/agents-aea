@@ -1,7 +1,7 @@
 name: local
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The local connection provides a stub for an OEF node."
 class_name: OEFLocalConnection

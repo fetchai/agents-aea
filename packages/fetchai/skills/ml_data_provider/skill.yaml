@@ -1,7 +1,7 @@
 name: 'ml_data_provider'
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
 behaviours:
@@ -13,8 +13,7 @@ handlers:
   ml_trade:
     class_name: MLTradeHandler
     args: {}
-tasks: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:
@@ -25,6 +24,7 @@ shared_classes:
       dataset_id: 'fmnist'
       currency_id: 'FET'
       ledger_id: 'fetchai'
+      is_ledger_tx: False
 protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
 dependencies:
   tensorflow: {}

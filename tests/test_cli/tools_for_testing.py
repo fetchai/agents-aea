@@ -20,7 +20,14 @@
 
 from typing import List
 
+from click import ClickException
+
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
+
+
+def raise_click_exception(*args):
+    """Raise ClickException."""
+    raise ClickException("Message")
 
 
 class AgentConfigMock:
@@ -52,3 +59,8 @@ class PublicIdMock:
         self.name = name
         self.author = author
         self.version = version
+
+    @classmethod
+    def from_str(cls, public_id):
+        author, name, version = public_id.replace(":", "/").split("/")
+        return cls(author, name, version)

@@ -18,3 +18,22 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the behaviours for the 'exception' skill."""
+from aea.skills.base import Behaviour
+
+
+class ExceptionBehaviour(Behaviour):
+    """A behaviour that raises an exception.."""
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+
+    def act(self) -> None:
+        """Act."""
+        raise Exception()
+
+    def teardown(self) -> None:
+        """Teardown the task."""

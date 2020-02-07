@@ -35,7 +35,7 @@ from aea.configurations.base import PublicId
 
 
 def request_api(
-    method: str, path: str, params=None, data=None, auth=False, filepath=None
+    method: str, path: str, params=None, data=None, is_auth=False, filepath=None
 ) -> Dict:
     """
     Request Registry API.
@@ -44,13 +44,13 @@ def request_api(
     :param path: str URL path.
     :param params: dict GET params.
     :param data: dict POST data.
-    :param auth: bool is auth requied (default False).
+    :param is_auth: bool is auth requied (default False).
     :param filepath: str path to file to upload (default None).
 
     :return: dict response from Registry API
     """
     headers = {}
-    if auth:
+    if is_auth:
         try:
             token = read_cli_config()[AUTH_TOKEN_KEY]
         except AEAConfigException:
@@ -156,27 +156,27 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
 
     :return: None
     """
-    click.echo(
+    logger.debug(
         "Fetching {obj_type} {public_id} from Registry...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
     author, name, version = public_id.author, public_id.name, public_id.version
-    plural_obj_type = obj_type + "s"  # used for API and folder paths
+    item_type_plural = obj_type + "s"  # used for API and folder paths
 
-    api_path = "/{}/{}/{}/{}".format(plural_obj_type, author, name, version)
+    api_path = "/{}/{}/{}/{}".format(item_type_plural, author, name, version)
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
-    click.echo(
+    logger.debug(
         "Downloading {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
     filepath = download_file(file_url, cwd)
-    target_folder = os.path.join(cwd, plural_obj_type)
+    target_folder = os.path.join(cwd, "vendor", author, item_type_plural)
 
-    click.echo(
+    logger.debug(
         "Extracting {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )
@@ -262,8 +262,8 @@ def read_cli_config() -> Dict:
 def _rm_tarfiles():
     cwd = os.getcwd()
     for filename in os.listdir(cwd):
-        filepath = os.path.join(cwd, filename)
-        if filepath.endswith(".tar.gz"):
+        if filename.endswith(".tar.gz"):
+            filepath = os.path.join(cwd, filename)
             os.remove(filepath)
 
 
@@ -292,7 +292,7 @@ def check_is_author_logged_in(author_name: str) -> None:
     :raise ClickException: if username and author's name are not equal.
     :return: None.
     """
-    resp = request_api("GET", "/rest-auth/user/", auth=True)
+    resp = request_api("GET", "/rest-auth/user/", is_auth=True)
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "

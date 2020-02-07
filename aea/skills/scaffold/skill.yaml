@@ -1,7 +1,7 @@
 name: scaffold
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:
@@ -14,14 +14,9 @@ handlers:
     class_name: MyScaffoldHandler
     args:
       foo: bar
-tasks:
+models:
   scaffold:
-    class_name: MyScaffoldTask
-    args:
-      foo: bar
-shared_classes:
-  scaffold:
-    class_name: MySharedClass
+    class_name: MyModel
     args:
       foo: bar
 protocols: []

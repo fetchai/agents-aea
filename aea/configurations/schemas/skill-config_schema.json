@@ -53,21 +53,12 @@
         }
       }
     },
-    "tasks": {
+    "models": {
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {
         "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/task"
-        }
-      }
-    },
-    "shared_classes": {
-      "type": "object",
-      "uniqueItems": true,
-      "patternProperties": {
-        "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/shared_class"
+          "$ref": "#/definitions/model"
         }
       }
     },
@@ -101,21 +92,6 @@
         }
       }
     },
-    "task": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "class_name"
-      ],
-      "properties": {
-        "class_name": {
-          "type": "string"
-        },
-        "args": {
-          "type": "object"
-        }
-      }
-    },
     "handler": {
       "type": "object",
       "additionalProperties": false,
@@ -131,7 +107,7 @@
         }
       }
     },
-    "shared_class": {
+    "model": {
       "type": "object",
       "additionalProperties": false,
       "required": [

@@ -23,12 +23,12 @@ import datetime
 import logging
 from typing import Set
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 logger = logging.getLogger("aea.tac_control_skill")
 
 
-class Parameters(SharedClass):
+class Parameters(Model):
     """This class contains the parameters of the game."""
 
     def __init__(self, **kwargs):

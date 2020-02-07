@@ -1,29 +1,29 @@
 name: oef
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A protocol for interacting with an OEF service.'
 speech_acts:
   register_service:
-    service_description: Description
+    service_description: ct:Description
     service_id: pt:str
   register_agent:
-    agent_description: Description
+    agent_description: ct:Description
     agent_id: pt:str
   unregister_service:
-    service_description: Description
+    service_description: ct:Description
     service_id: pt:str
   unregister_agent:
-    agent_description: Description
+    agent_description: ct:Description
     agent_id: pt:str
   search_services:
-    query: Query
+    query: ct:Query
   search_agents:
-    query: Query
+    query: ct:Query
   search_result:
     agents: pt:list[pt:str]
   oef_error:
-    operation: OEFErrorOperation
+    operation: ct:OEFErrorOperation
   dialogue_error:
     dialogue_id: pt:int
     origin: pt:str

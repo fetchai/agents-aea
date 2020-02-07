@@ -145,12 +145,12 @@ class Context(object):
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
+def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> None:
     """
     Load agent config to a click context object.
 
     :param ctx: click command context object.
-    :param exit_on_except: bool option to exit on exception (default = True).
+    :param is_exit_on_except: bool option to exit on exception (default = True).
 
     :return None
     """
@@ -160,7 +160,7 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
             ctx.agent_config = ctx.agent_loader.load(fp)
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
-        if exit_on_except:
+        if is_exit_on_except:
             logger.error(
                 "Agent configuration file '{}' not found in the current directory.".format(
                     DEFAULT_AEA_CONFIG_FILE
@@ -168,7 +168,7 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
             )
             sys.exit(1)
     except jsonschema.exceptions.ValidationError:
-        if exit_on_except:
+        if is_exit_on_except:
             logger.error(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
                     DEFAULT_AEA_CONFIG_FILE
@@ -366,7 +366,7 @@ def try_get_item_source_path(
     return source_path
 
 
-def try_get_item_target_path(
+def try_get_vendorized_item_target_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -379,7 +379,7 @@ def try_get_item_target_path(
 
     :return: the item target path
     """
-    target_path = os.path.join(path, author_name, item_type_plural, item_name)
+    target_path = os.path.join(path, "vendor", author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)

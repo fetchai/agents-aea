@@ -27,14 +27,16 @@ from typing import Optional
 import gym
 
 from aea.agent import Agent
-from aea.crypto.wallet import DEFAULT, Wallet
 from aea.helpers.base import locate
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 sys.modules["packages.fetchai.connections.gym"] = locate(
     "packages.fetchai.connections.gym"
 )
 from packages.fetchai.connections.gym.connection import GymConnection  # noqa: E402
+
+ADDRESS = "some_address"
 
 
 class ProxyAgent(Agent):
@@ -49,12 +51,9 @@ class ProxyAgent(Agent):
         :param proxy_env_queue: the queue of the proxy environment
         :return: None
         """
-        wallet = Wallet({DEFAULT: None})
+        identity = Identity(name, ADDRESS)
         super().__init__(
-            name,
-            [GymConnection(wallet.addresses.get(DEFAULT), gym_env)],
-            wallet,
-            timeout=0,
+            identity, [GymConnection(identity.address, gym_env)], timeout=0,
         )
         self.proxy_env_queue = proxy_env_queue
 

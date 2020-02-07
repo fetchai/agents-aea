@@ -103,7 +103,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
     is_registry = ctx.config.get("is_registry")
 
-    logger.info(
+    click.echo(
         "Adding {} '{}' to the agent '{}'...".format(
             item_type, item_public_id, agent_name
         )

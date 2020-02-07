@@ -11,6 +11,11 @@ There are two types of AEAs:
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC.
+An other AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid.
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -43,6 +48,7 @@ ledger_apis:
   ethereum:
     addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
+    gas_price: 20
 ```
 
 Set the default ledger to ethereum:
@@ -58,8 +64,8 @@ You must set the start time to a point in the future `start_time: 12 11 2019  15
 Alternatively, use the command line to get and set the start time:
 
 ``` bash
-aea config get skills.tac_control.shared_classes.parameters.args.start_time
-aea config set skills.tac_control.shared_classes.parameters.args.start_time '21 12 2019  07:14'
+aea config get skills.tac_control.models.parameters.args.start_time
+aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
 ```
 
 ### Run the TAC controller AEA
@@ -193,48 +199,48 @@ The `tac_negotiation` skill `skill.yaml` configuration file looks like this.
 name: tac_negotiation
 authors: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
-  - behaviour:
+  behaviour:
       class_name: GoodsRegisterAndSearchBehaviour
       args:
         services_interval: 5
+  clean_up:
+    class_name: TransactionCleanUpTask
+    args:
+      tick_interval: 5.0
 handlers:
-  - handler:
-      class_name: FIPANegotiationHandler
-      args: {}
-  - handler:
-      class_name: TransactionHandler
-      args: {}
-  - handler:
-      class_name: OEFSearchHandler
-      args: {}
-tasks:
-  - task:
-      class_name: TransactionCleanUpTask
-      args: {}
-shared_classes:
-  - shared_class:
-      class_name: Search
-      args:
-        search_interval: 5
-  - shared_class:
-      class_name: Registration
-      args:
-        update_interval: 5
-  - shared_class:
-      class_name: Strategy
-      args:
-        register_as: both
-        search_for: both
-  - shared_class:
-      class_name: Dialogues
-      args: {}
-  - shared_class:
-      class_name: Transactions
-      args:
-        pending_transaction_timeout: 30
+  fipa:
+    class_name: FIPANegotiationHandler
+    args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
+  oef:
+    class_name: OEFSearchHandler
+    args: {}
+models:
+  search:
+    class_name: Search
+    args:
+      search_interval: 5
+  registration:
+    class_name: Registration
+    args:
+      update_interval: 5
+  strategy:
+    class_name: Strategy
+    args:
+      register_as: both
+      search_for: both
+  dialogues:
+    class_name: Dialogues
+    args: {}
+  transactions:
+    class_name: Transactions
+    args:
+      pending_transaction_timeout: 30
 protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
 ```
 
@@ -248,9 +254,9 @@ The `OEFSearchHandler` deals with `OEFMessage` types returned from the OEF searc
 
 The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
-### Shared classes
+### Models
 
-The `shared_classes` element in the configuration `yaml` lists a number of important classes which are shared between the handlers, behaviours and tasks.
+The `models` element in the configuration `yaml` lists a number of important classes which are shared between the handlers, behaviours and tasks.
 
 #### Search
 

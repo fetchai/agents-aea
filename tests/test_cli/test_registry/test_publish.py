@@ -22,7 +22,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.registry.publish import _load_agent_config, publish_agent
+from aea.cli.registry.publish import _compress, _load_agent_config, publish_agent
 
 from tests.test_cli.tools_for_testing import ContextMock
 
@@ -71,7 +71,7 @@ class PublishAgentTestCase(TestCase):
                 "protocols": [],
                 "skills": [],
             },
-            auth=True,
+            is_auth=True,
             filepath="cwd/agent-name.tar.gz",
         )
 
@@ -93,3 +93,17 @@ class LoadAgentConfigTestCase(TestCase):
             _load_agent_config("path")
 
         load_yaml_mock.assert_not_called()
+
+
+@mock.patch("aea.cli.registry.publish.tarfile")
+class CompressTestCase(TestCase):
+    """Test case for _compress method."""
+
+    def test__compress_positive(self, tarfile_mock):
+        """Test for _compress positive result."""
+        tar_obj_mock = mock.MagicMock()
+        open_mock = mock.MagicMock(return_value=tar_obj_mock)
+        tarfile_mock.open = open_mock
+
+        _compress("output_filename", "file1", "file2")
+        open_mock.assert_called_once_with("output_filename", "w:gz")

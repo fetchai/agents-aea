@@ -182,3 +182,26 @@ Release History
 - Adds support for inactivating skills programmatically
 - Makes decision maker run in separate thread
 - Multiple additional minor fixes and changes
+
+0.2.0 (2020-02-07)
+-------------------
+
+- Skills can now programmatically register behaviours
+- Tasks are no longer a core component of the skill, the functor pattern is used
+- Refactors the task manager
+- Adds nonces to transaction data so transactions can be verified
+- Adds documentation for the protocol generator
+- Fixes several compatibility issues between CLI and registry
+- Adds skills to connect a thermometer to an AEA
+- Adds generic buyer and seller skills
+- Adds much more documentation on AEA vs MVC frameworks, core components, new guides and more
+- Removes the wallet from the agent constructor and moves it to the AEA constructor
+- Allows behaviours to be initialized from a skill
+- Adds multiple improvements to the protocol generator, including custom types and serialization
+- Removes the default crypto object
+- Replaces `SharedClass` with `Model` taxonomy for easier transition for web developers
+- Adds bandit to CLI for security checks
+- Makes private key paths in configs a dictionary so values can be set from CLI
+- Introduces Identity object
+- Increases test coverage
+- Multiple additional minor fixes and changes

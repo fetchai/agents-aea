@@ -35,7 +35,7 @@ from aea.helpers.preference_representations.base import (
     logarithmic_utility,
 )
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.skills.tac_control.helpers import (
@@ -425,7 +425,7 @@ class Transaction:
                 self.counterparty_amount >= 0
             ), "Counterparty_amount must be positive when the counterpary is the payment receiver."
 
-    def verify_matching_signatures(self, api: LedgerApi) -> bool:
+    def has_matching_signatures(self, api: LedgerApi) -> bool:
         """
         Check that the signatures match the terms of trade.
 
@@ -574,7 +574,7 @@ class AgentState:
     #     new_score = new_state.get_score()
     #     return new_score - current_score
 
-    def check_transaction_is_consistent(self, tx: Transaction) -> bool:
+    def is_consistent_transaction(self, tx: Transaction) -> bool:
         """
         Check if the transaction is consistent.
 
@@ -643,7 +643,7 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
-        assert self.check_transaction_is_consistent(tx), "Inconsistent transaction."
+        assert self.is_consistent_transaction(tx), "Inconsistent transaction."
 
         new_amount_by_currency_id = self.amount_by_currency_id
         if self.agent_address == tx.sender_addr:
@@ -776,7 +776,7 @@ class Registration:
         self._agent_addr_to_name.pop(agent_addr)
 
 
-class Game(SharedClass):
+class Game(Model):
     """A class to manage a TAC instance."""
 
     def __init__(self, **kwargs):
@@ -997,9 +997,9 @@ class Game(SharedClass):
         """
         sender_state = self.current_agent_states[tx.sender_addr]
         counterparty_state = self.current_agent_states[tx.counterparty_addr]
-        result = tx.verify_matching_signatures(self.context.ledger_apis.apis[ETHEREUM])
-        result = result and sender_state.check_transaction_is_consistent(tx)
-        result = result and counterparty_state.check_transaction_is_consistent(tx)
+        result = tx.has_matching_signatures(self.context.ledger_apis.apis[ETHEREUM])
+        result = result and sender_state.is_consistent_transaction(tx)
+        result = result and counterparty_state.is_consistent_transaction(tx)
         return result
 
     def settle_transaction(self, tx: Transaction) -> None:

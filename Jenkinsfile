@@ -17,6 +17,22 @@ pipeline {
 
             parallel {
 
+                stage('Security Check: Main') {
+
+                    steps {
+                        sh 'tox -e bandit-main'
+                    }
+
+                } // bandit security check main
+
+                stage('Security Check: Tests') {
+
+                    steps {
+                        sh 'tox -e bandit-tests'
+                    }
+
+                } // bandit security check tests
+
                 stage('Black Reformatting') {
 
                     steps {
@@ -41,13 +57,13 @@ pipeline {
 
                 } // static type check
 
-                stage('Docs') {
+                // stage('Docs') {
 
-                    steps {
-                        sh 'tox -e docs'
-                    }
+                //     steps {
+                //         sh 'tox -e docs'
+                //     }
 
-                } // docs
+                // } // docs
 
                 stage('Unit Tests: Python 3.6') {
 

@@ -28,7 +28,7 @@ from enum import Enum
 from typing import List, Optional
 
 from aea.connections.base import Connection
-from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
@@ -60,30 +60,27 @@ class Agent(ABC):
 
     def __init__(
         self,
-        name: str,
+        identity: Identity,
         connections: List[Connection],
-        wallet: Wallet,
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
-        debug: bool = False,
-        programmatic: bool = True,
+        is_debug: bool = False,
+        is_programmatic: bool = True,
     ) -> None:
         """
         Instantiate the agent.
 
-        :param name: the name of the agent
+        :param identity: the identity of the agent.
         :param connections: the list of connections of the agent.
-        :param wallet: the crypto wallet of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
+        :param is_debug: if True, run the agent in debug mode.
+        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """
-        self._name = name
+        self._identity = identity
         self._connections = connections
-        self._wallet = wallet
 
         self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
@@ -93,8 +90,13 @@ class Agent(ABC):
 
         self._tick = 0
 
-        self.debug = debug
-        self.programmatic = programmatic
+        self.is_debug = is_debug
+        self.is_programmatic = is_programmatic
+
+    @property
+    def identity(self) -> Identity:
+        """Get the identity."""
+        return self._identity
 
     @property
     def multiplexer(self) -> Multiplexer:
@@ -114,12 +116,7 @@ class Agent(ABC):
     @property
     def name(self) -> str:
         """Get the agent name."""
-        return self._name
-
-    @property
-    def wallet(self) -> Wallet:
-        """Get the wallet."""
-        return self._wallet
+        return self.identity.name
 
     @property
     def liveness(self) -> Liveness:
@@ -167,7 +164,7 @@ class Agent(ABC):
 
         :return: None
         """
-        if not self.debug and not self.multiplexer.connection_status.is_connected:
+        if not self.is_debug and not self.multiplexer.connection_status.is_connected:
             self.multiplexer.connect()
 
         logger.debug("[{}]: Calling setup method...".format(self.name))

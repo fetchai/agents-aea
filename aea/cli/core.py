@@ -23,6 +23,7 @@
 import os
 import shutil
 import sys
+import time
 from pathlib import Path
 from typing import Dict, Union, cast
 
@@ -45,19 +46,21 @@ from aea.cli.remove import remove
 from aea.cli.run import _verify_ledger_apis_access, _verify_or_create_private_keys, run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
-from aea.crypto.default import DefaultCrypto
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
+    TESTNETS,
     _try_generate_testnet_wealth,
     _validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+
+
+FUNDS_RELEASE_TIMEOUT = 10
 
 
 @click.group(name="aea")
@@ -93,7 +96,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting AEA project directory './{}'...".format(path))
+    click.echo("Deleting AEA project directory './{}'...".format(path))
 
     # delete the agent's directory
     try:
@@ -123,7 +126,7 @@ def gui(ctx: Context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
 
-    logger.info("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
+    click.echo("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
     aea.cli_gui.run(port)  # pragma: no cover
 
 
@@ -131,14 +134,7 @@ def gui(ctx: Context, port):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [
-            DefaultCrypto.identifier,
-            FetchAICrypto.identifier,
-            EthereumCrypto.identifier,
-            "all",
-        ]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all"]),
     required=True,
 )
 @pass_ctx
@@ -155,9 +151,6 @@ def generate_key(ctx: Context, type_):
         else:
             return True
 
-    if type_ == DefaultCrypto.identifier or type_ == "all":
-        if _can_write(DEFAULT_PRIVATE_KEY_FILE):
-            DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
     if type_ == FetchAICrypto.identifier or type_ == "all":
         if _can_write(FETCHAI_PRIVATE_KEY_FILE):
             FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
@@ -170,9 +163,7 @@ def generate_key(ctx: Context, type_):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
 @click.argument(
@@ -187,9 +178,7 @@ def add_key(ctx: Context, type_, file):
     try_to_load_agent_config(ctx)
     _validate_private_key_path(file, type_)
     try:
-        ctx.agent_config.private_key_paths.create(
-            type_, PrivateKeyPathConfig(type_, file)
-        )
+        ctx.agent_config.private_key_paths.create(type_, file)
     except ValueError as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
     ctx.agent_loader.dump(
@@ -201,9 +190,7 @@ def add_key(ctx: Context, type_, file):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
 @pass_ctx
@@ -212,18 +199,34 @@ def get_address(ctx: Context, type_):
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     try:
         wallet = Wallet(private_key_paths)
         address = wallet.addresses[type_]
         print(address)
     except ValueError as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
+
+
+def _try_get_balance(agent_config, wallet, type_):
+    try:
+        _verify_ledger_apis_access()
+        ledger_api_configs = dict(
+            [
+                (identifier, cast(Dict[str, Union[str, int]], config))
+                for identifier, config in agent_config.ledger_apis.read_all()
+            ]
+        )
+        ledger_apis = LedgerApis(ledger_api_configs, agent_config.default_ledger)
+
+        address = wallet.addresses[type_]
+        return ledger_apis.token_balance(type_, address)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
+        sys.exit(1)
 
 
 @cli.command()
@@ -239,28 +242,23 @@ def get_wealth(ctx: Context, type_):
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     wallet = Wallet(private_key_paths)
-    try:
-        _verify_ledger_apis_access()
-        ledger_api_configs = dict(
-            [
-                (identifier, cast(Dict[str, Union[str, int]], config))
-                for identifier, config in ctx.agent_config.ledger_apis.read_all()
-            ]
-        )
-        ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
+    balance = _try_get_balance(ctx.agent_config, wallet, type_)
+    click.echo(balance)
 
-        address = wallet.addresses[type_]
-        balance = ledger_apis.token_balance(type_, address)
-        print(balance)
-    except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+
+def _wait_funds_release(agent_config, wallet, type_):
+    start_balance = _try_get_balance(agent_config, wallet, type_)
+    end_time = time.time() + FUNDS_RELEASE_TIMEOUT
+    while time.time() < end_time:
+        if start_balance != _try_get_balance(agent_config, wallet, type_):
+            break  # pragma: no cover
+        else:
+            time.sleep(1)
 
 
 @cli.command()
@@ -270,23 +268,32 @@ def get_wealth(ctx: Context, type_):
     type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
+@click.option(
+    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
+)
 @pass_ctx
-def generate_wealth(ctx: Context, type_):
+def generate_wealth(ctx: Context, sync, type_):
     """Generate wealth for address on test network."""
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
-        logger.info("Requesting funds for address {}".format(address))
+        testnet = TESTNETS[type_]
+        click.echo(
+            "Requesting funds for address {} on test network '{}'".format(
+                address, testnet
+            )
+        )
         _try_generate_testnet_wealth(type_, address)
+        if sync:
+            _wait_funds_release(ctx.agent_config, wallet, type_)
+
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 

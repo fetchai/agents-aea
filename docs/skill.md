@@ -43,11 +43,74 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
+A behaviour can be registered in two ways:
+
+- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
+
+
 * `act(self)`: is how the framework calls the `Behaviour` code.
 
-!!!	Todo
-	For example.
+The framework supports different types of behaviours:
+- `OneShotBehaviour`: this behaviour is executed only once.
+- `CyclicBehaviour`: this behaviour is executed many times, 
+  as long as `done()` returns `True`.)
+- `TickerBehaviour`: the `act()` method is called every `tick_interval`.
+ E.g. if the `TickerBehaviour` subclass is instantiated
+ 
+There is another category of behaviours, called `CompositeBehaviour`. 
+- `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
+  one after the other.
+- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+    A state is in charge of scheduling the next state.
 
+
+If your behaviour fits one of the above, we suggest subclassing your
+behaviour class with that behaviour class. Otherwise, you
+can always subclass the general-purpose `Behaviour` class.
+
+!!
+Follows an example of a custom behaviour:
+
+```python
+
+from aea.skills.base import Behaviour
+
+class HelloWorldBehaviour(OneShotBehaviour):
+        
+    def setup(self):
+        """This method is called once, when the behaviour gets loaded."""
+
+    def act(self): 
+        """This methods is called in every iteration of the agent main loop."""
+        print("Hello, World!")
+
+    def teardown(self): 
+        """This method is called once, when the behaviour is teared down."""
+    
+
+```
+
+If we want to register this behaviour dynamically, in any part of the skill code
+(i.e. wherever the skill context is available), we can write:
+
+```python
+self.context.new_behaviours.put(HelloWorldBehaviour())
+```
+
+Or, equivalently:
+```python
+def hello():
+    print("Hello, World!")
+
+self.context.new_behaviours.put(OneShotBehaviour(act=hello))
+```
+
+The callable passed to the `act` parameter is equivalent to the implementation
+of the `act` method described above. 
+
+The framework is then in charge of registering the behaviour and scheduling it 
+for execution.
 
 ### `tasks.py`
 
@@ -57,53 +120,121 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
-!!!	Todo
-	For example.
+The `Task` class implements the [functor pattern](https://en.wikipedia.org/wiki/Function_object).
+An instance of the `Task` class can be invoked as if it 
+were an ordinary function. Once completed, it will store the
+result in the property `result`. Raises error if the task has not been executed yet,
+or an error occurred during computation.
 
-### Shared classes
+We suggest using the `task_manager`, accessible through the skill context,
+to manage long-running tasks. The task manager uses `multiprocessing` to 
+schedule tasks, so be aware that the changes on the task object will 
+not be updated.
 
-The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end the developer can subclass an abstract `SharedClass`. These shared classes are made available on the context level upon initialization of the AEA.
+Here's an example:
 
-Say, the developer has a class called `SomeClass`
+In `tasks.py`:
+```python
+
+from aea.skills.tasks import Task
+
+
+def nth_prime_number(n: int) -> int:
+    """A naive algorithm to find the n_th prime number."""
+    primes = [2]
+    num = 3
+    while len(primes) < n:
+        for p in primes:
+            if num % p == 0:
+                break
+        else:
+            primes.append(num)
+        num += 2
+    return primes[-1]
+
+
+class LongTask(Task):
+
+    def setup(self):
+        """Set the task up before execution."""
+        pass
+
+    def execute(self, n: int):
+        return nth_prime_number(n)
+
+    def teardown(self):
+        """Clean the task up after execution."""
+        pass
+
+
+```
+
+In `behaviours.py`:
+```python
+
+from aea.skills.behaviours import TickerBehaviour
+from packages.my_author_name.skills.my_skill.tasks import LongTask
+
+
+class MyBehaviour(TickerBehaviour):
+
+    def setup(self):
+        my_task = LongTask()
+        task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+        self.async_result = self.context.task_manager.get_task_result(task_id)  # type: multiprocessing.pool.AsyncResult
+
+    def act(self):
+        if self.async_result.ready() is False:
+            print("The task is not finished yet.")
+        else:
+            completed_task = self.async_result.get()  # type: LongTask
+            print("The result is:", completed_task.result)
+            # Stop the skill
+            self.context.is_active = False
+
+    def teardown(self):
+        pass
+
+
+```
+
+### Models
+
+The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end, the developer can subclass an abstract `Model`. These models are made available on the context level upon initialization of the AEA.
+
+Say, the developer has a class called `SomeModel`
 ``` python
-class SomeClass(SharedClass):
+class SomeModel(Model):
     ...
 ```
 
 Then, an instance of this class is available on the context level like so:
 ``` python
-some_class = self.context.some_class
+some_model = self.context.some_model
 ``` 
 
 ### Skill config
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
-It also details the protocol types used in the skill and points to shared modules, i.e. modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
+It also details the protocol types used in the skill and points to shared modules, i.e. modules of type `Model`, which allow custom classes within the skill to be accessible in the skill context.
 
 ``` yaml
 name: echo
 authors: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 behaviours:
   echo:
     class_name: EchoBehaviour
     args:
-      foo: bar
+      tick_interval: 1.0
 handlers:
   echo:
     class_name: EchoHandler
     args:
       foo: bar
-      bar: foo
-tasks:
-  echo:
-    class_name: EchoTask
-    args:
-      foo: bar
-      bar: foo
-shared_classes: {}
+models: {}
 dependencies: {}
 protocols: ["fetchai/default:0.1.0"]
 ```

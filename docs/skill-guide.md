@@ -168,7 +168,7 @@ We have implemented a behaviour and a handler. We conclude by implementing a tas
 import logging
 import time
 
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 logger = logging.getLogger("aea.my_search_skill")
 
@@ -220,7 +220,7 @@ Based on our skill components above, we create the following config file.
 name: my_search
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A simple search skill utilising the OEF.'
 behaviours:
   my_search_behaviour:
@@ -231,11 +231,10 @@ handlers:
   my_search_handler:
     class_name: MySearchHandler
     args: {}
-tasks:
   my_search_task:
     class_name: MySearchTask
     args: {}
-shared_classes: {}
+models: {}
 protocols: ['fetchai/oef:0.1.0']
 dependencies: {}
 ```

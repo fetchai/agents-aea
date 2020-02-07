@@ -92,9 +92,7 @@ class TransactionMessage(InternalMessage):
             info=info,
             **kwargs
         )
-        assert (
-            self.check_consistency()
-        ), "Transaction message initialization inconsistent."
+        assert self._is_consistent(), "Transaction message initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -167,6 +165,12 @@ class TransactionMessage(InternalMessage):
         return cast(Dict[str, Any], self.get("info"))
 
     @property
+    def tx_nonce(self) -> str:
+        """Get the tx_nonce from the message."""
+        assert self.is_set("tx_nonce"), "Tx_nonce is not set."
+        return cast(str, self.get("tx_nonce"))
+
+    @property
     def tx_digest(self) -> str:
         """Get the transaction digest."""
         assert self.is_set("tx_digest"), "Tx_digest is not set."
@@ -209,7 +213,7 @@ class TransactionMessage(InternalMessage):
         """Get the tx fees."""
         return self.tx_sender_fee + self.tx_counterparty_fee
 
-    def check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """
         Check that the data is consistent.
 
@@ -280,7 +284,8 @@ class TransactionMessage(InternalMessage):
                 self.Performative.REJECTED_SETTLEMENT,
                 self.Performative.FAILED_SETTLEMENT,
             }:
-                assert len(self.body) == 11
+                assert isinstance(self.tx_nonce, str), "Tx_nonce must be of type str."
+                assert len(self.body) == 12
             elif self.performative == self.Performative.SUCCESSFUL_SETTLEMENT:
                 assert isinstance(self.tx_digest, str), "Tx_digest must be of type str."
                 assert len(self.body) == 12
@@ -335,6 +340,7 @@ class TransactionMessage(InternalMessage):
                 tx_quantities_by_good_id=other.tx_quantities_by_good_id,
                 ledger_id=other.ledger_id,
                 info=other.info,
+                tx_nonce=other.tx_nonce,
             )
         else:
             tx_msg = TransactionMessage(

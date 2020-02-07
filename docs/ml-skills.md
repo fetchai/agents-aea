@@ -11,6 +11,14 @@ There are two types of AEAs:
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The scope of the specific demo is to demonstrate how to create a simple AEA with integration of machine learning, and the usage of the AEA framework. The ml_data_provider AEA
+will provide some sample data and will deliver to the client upon payment. Once the client gets the data, it will train the model. The process can be found in the `tasks.py` file.
+This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
+
+Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
+The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -22,18 +30,16 @@ Keep it running for all the following demos.
 
 ## Demo instructions 1 - no ledger payment:
 
-
 ### Create the data provider AEA
-In the root directory, create the data provider AEA and enter the project.
+
+Create the AEA that will provide the data.
+
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-```
-
-Add the `ml_data_provider` skill and `oef` connection.
-``` bash
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_data_provider:0.1.0
+aea install
 ```
 
 ### Alternatively, install the AEA directly
@@ -56,16 +62,14 @@ aea run --connections fetchai/oef:0.1.0
 ```
 
 ### Create the model trainer AEA
-In a separate terminal, in the root directory, create the model trainer AEA and enter the project.
+In a separate terminal, in the root directory, create the model trainer AEA.
+
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-```
-
-Add the `ml_train` skill and `oef` connection.
-``` bash
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_train:0.1.0
+aea install
 ```
 
 ### Alternatively, install the AEA directly
@@ -89,35 +93,140 @@ aea run --connections fetchai/oef:0.1.0
 After some time, you should see the AEAs transact and the model trainer train its model.
 
 
-## Demo instructions 2 - Fetch.ai ledger payment:
+## Demo instructions - Ledger payment:
 
+We will now run the same demo but with a real ledger transaction on Fetch.ai or Ethereum `ropsten` network. This demo assumes the buyer
+trusts the seller AEA to send the data upon successful payment.
 
-We will now run the same demo but with a real ledger transaction on Fetch.ai test net.
+### Create the data provider AEA
+
+Create the AEA that will provide the data.
+
+``` bash
+aea create ml_data_provider
+cd ml_data_provider
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/ml_data_provider:0.1.0
+aea install
+```
+
+### Create the model trainer AEA
+
+In a separate terminal, in the root directory, create the model trainer AEA.
+
+``` bash
+aea create ml_model_trainer
+cd ml_model_trainer
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/ml_train:0.1.0
+aea install
+```
+
+Additionally, create the private key for the model trainer AEA based on the network you want to transact.
+
+To generate and add a key for Fetch.ai use:
+```bash
+aea generate-key fetchai
+aea add-key fetchai fet_private_key.txt
+```
+
+To generate and add a key for Ethereum use:
+```bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
 
 ### Update the AEA configs
 
 Both in `ml_model_trainer/aea-config.yaml` and
-`ml_data_provider/aea-config.yaml`, replace `ledger_apis: {}` with the following.
+`ml_data_provider/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect.
 
+To connect to Fetchai:
 ``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
 
+To connect to Ethereum:
+```yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 50
+```
+
 ### Fund the ml model trainer AEA
 
-Create some wealth for your ml model trainer on the Fetch.ai `testnet`. (It takes a while).
+Create some wealth for your ml model trainer based on the network you want to transact with: 
+
+On the Fetch.ai `testnet` network.
 ``` bash
 aea generate-wealth fetchai
 ```
 
-### Update the ml model trainer AEA skills config
-
-We tell the ml model trainer skill to use the ledger, by using the following command:
+On the Ethereum `ropsten` . (It takes a while).
 ``` bash
-aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.is_ledger_tx True --type bool
+aea generate-wealth ethereum
 ```
+
+### Update the skill configs
+
+In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|models:                            |models:                           |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      price_per_data_batch: 100    |      price_per_data_batch: 100   |
+|      batch_size: 2                |      batch_size: 2               |
+|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
+|      buyer_tx_fee: 10             |      buyer_tx_fee: 10            |
+|      dataset_id: 'fmnist'         |      dataset_id: 'fmnist'        |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id ethereum
+```
+
+
+In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|models:                            |models:                           |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      dataset_id: 'fmnist'         |      dataset_id: 'fmnist'        |
+|      max_unit_price: 70           |      max_unit_price: 70          |
+|      max_buyer_tx_fee: 20         |      max_buyer_tx_fee: 20        |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id ethereum
+```
+
 
 ### Run both AEAs
 
