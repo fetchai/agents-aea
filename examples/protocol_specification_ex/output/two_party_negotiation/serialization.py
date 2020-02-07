@@ -1,12 +1,11 @@
 """Serialization for two_party_negotiation protocol."""
 
-import base64
-import json
-import pickle
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
+from packages.fetchai.protocols.two_party_negotiation import two_party_negotiation_pb2
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
@@ -17,33 +16,32 @@ class TwoPartyNegotiationSerializer(Serializer):
 
     def encode(self, msg: Message) -> bytes:
         """Encode a 'TwoPartyNegotiation' message into bytes."""
-        body = {}  # Dict[str, Any]
-        body["message_id"] = msg.get("message_id")
-        body["target"] = msg.get("target")
-        body["performative"] = msg.get("performative")
-
-        contents_dict = msg.get("contents")
-        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode(
-            "utf-8"
+        msg = cast(TwoPartyNegotiationMessage, msg)
+        two_party_negotiation_msg = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
         )
-        body["contents"] = contents_dict_bytes
+        two_party_negotiation_msg.message_id = msg.message_id
+        dialogue_reference = msg.dialogue_reference
+        two_party_negotiation_msg.dialogue_starter_reference = dialogue_reference[0]
+        two_party_negotiation_msg.dialogue_responder_reference = dialogue_reference[1]
+        two_party_negotiation_msg.target = msg.target
 
-        bytes_msg = json.dumps(body).encode("utf-8")
-        return bytes_msg
+        two_party_negotiation_bytes = two_party_negotiation_msg.SerializeToString()
+        return two_party_negotiation_bytes
 
     def decode(self, obj: bytes) -> Message:
         """Decode bytes into a 'TwoPartyNegotiation' message."""
-        json_body = json.loads(obj.decode("utf-8"))
-        message_id = json_body["message_id"]
-        target = json_body["target"]
-        performative = json_body["performative"]
-
-        contents_dict_bytes = base64.b64decode(json_body["contents"])
-        contents_dict = pickle.loads(contents_dict_bytes)
+        two_party_negotiation_pb = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        )
+        two_party_negotiation_pb.ParseFromString(obj)
+        message_id = two_party_negotiation_pb.message_id
+        dialogue_reference = (
+            two_party_negotiation_pb.dialogue_starter_reference,
+            two_party_negotiation_pb.dialogue_responder_reference,
+        )
+        target = two_party_negotiation_pb.target
 
         return TwoPartyNegotiationMessage(
-            message_id=message_id,
-            target=target,
-            performative=performative,
-            contents=contents_dict,
+            message_id=message_id, dialogue_reference=dialogue_reference, target=target,
         )
