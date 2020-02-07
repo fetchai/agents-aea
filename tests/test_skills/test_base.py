@@ -20,10 +20,10 @@
 
 import os
 import shutil
+import tempfile
 import unittest.mock
 from pathlib import Path
 from queue import Queue
-from tempfile import NamedTemporaryFile
 
 import aea.registries.base
 from aea.aea import AEA, Resources
@@ -153,7 +153,7 @@ class TestSkillFromDir:
         cls._patch_logger()
 
         cls.cwd = os.getcwd()
-        cls.t = NamedTemporaryFile()
+        cls.t = tempfile.mkdtemp()
         shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.t)
         os.chdir(cls.t)
 
