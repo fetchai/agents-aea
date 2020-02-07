@@ -1,7 +1,7 @@
 """This module contains two_party_negotiation's message definition."""
 
 from enum import Enum
-from typing import Dict, FrozenSet, Optional, Set, Tuple, cast
+from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -102,6 +102,12 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
+    def conditions(self) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]]:
+        """Get the conditions from the message."""
+        assert self.is_set("conditions"), "conditions is not set"
+        return cast(Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]], self.get("conditions"))
+
+    @property
     def description(self) -> str:
         """Get the description from the message."""
         assert self.is_set("description"), "description is not set"
@@ -178,7 +184,7 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents = 1
                 assert type(self.query) == DataModel, "query is not 'DataModel'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.PROPOSE:
-                expected_nb_of_contents = 8
+                expected_nb_of_contents = 9
                 assert type(self.number) == int, "number is not 'int'."
                 assert type(self.price) == float, "price is not 'float'."
                 assert type(self.description) == str, "description is not 'str'."
@@ -201,14 +207,13 @@ class TwoPartyNegotiationMessage(Message):
                 assert all(
                     type(element) == Unit for element in self.items
                 ), "Elements of items are not 'Unit'."
+                if self.is_set("conditions"):
+                    assert type(self.conditions) == Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]], "conditions is not 'Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif (
-                self.performative
-                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
-            ):
+            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
 
             # # Check correct content count

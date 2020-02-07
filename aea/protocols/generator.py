@@ -23,7 +23,7 @@ import os
 import re
 from os import path
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List
 
 from aea.configurations.base import ProtocolSpecification
 
@@ -36,7 +36,6 @@ INIT_FILE_NAME = "__init__.py"
 MESSAGE_FILE_NAME = "message.py"
 SERIALIZATION_FILE_NAME = "serialization.py"
 PROTOCOL_FILE_NAME = "protocol.yaml"
-PATH_TO_PROTO_SCHEMA_FILE = "packages.protocols."
 
 BASIC_FIELDS_AND_TYPES = {
     "name": str,
@@ -118,13 +117,19 @@ class ProtocolGenerator:
         self._all_custom_types = sorted(all_custom_types_set)
 
     def _get_sub_types_of_compositional_types(self, compositional_type: str) -> tuple:
+        """
+        Extracts the sub-types of compositional types (e.g. Set[], Tuple[], Union[], Optional[], Union[]).
+
+        :return: tuple of sub-types
+        """
+        sub_types_list = list()
         if compositional_type.startswith("Optional") or compositional_type.startswith(
             "pt:optional"
         ):
             sub_type1 = compositional_type[
                 compositional_type.index("[") + 1 : compositional_type.rindex("]")
             ].strip()
-            sub_types = (sub_type1,)
+            sub_types_list.append(sub_type1)
         if (
             compositional_type.startswith("FrozenSet")
             or compositional_type.startswith("pt:set")
@@ -134,7 +139,7 @@ class ProtocolGenerator:
             sub_type1 = compositional_type[
                 compositional_type.index("[") + 1 : compositional_type.rindex("]")
             ].strip()
-            sub_types = (sub_type1,)
+            sub_types_list.append(sub_type1)
         if compositional_type.startswith("Dict") or compositional_type.startswith(
             "pt:dict"
         ):
@@ -144,14 +149,13 @@ class ProtocolGenerator:
             sub_type2 = compositional_type[
                 compositional_type.index(",") + 1 : compositional_type.rindex("]")
             ].strip()
-            sub_types = (sub_type1, sub_type2)
+            sub_types_list.extend([sub_type1, sub_type2])
         if compositional_type.startswith("Union") or compositional_type.startswith(
             "pt:union"
         ):
             inside_union = compositional_type[
                 compositional_type.index("[") + 1 : compositional_type.rindex("]")
             ].strip()
-            sub_type_list = list()
             while inside_union != "":
                 if inside_union.startswith("Dict") or inside_union.startswith(
                     "pt:dict"
@@ -179,9 +183,8 @@ class ProtocolGenerator:
                         inside_union = inside_union[
                             inside_union.index(",") + 1 :
                         ].strip()
-                sub_type_list.append(sub_type)
-            sub_types = tuple(sub_type_list)
-        return sub_types
+                sub_types_list.append(sub_type)
+        return tuple(sub_types_list)
 
     def _handle_o(self, specification_type: str) -> str:
         """
@@ -394,6 +397,11 @@ class ProtocolGenerator:
 
     @staticmethod
     def _check_content_type_str(no_of_indents: int, content_name, content_type) -> str:
+        """
+        Produce the checks of elements of compositional types.
+
+        :return: the string containing the checks.
+        """
         check_str = ""
         indents = ""
         for _ in itertools.repeat(None, no_of_indents):
