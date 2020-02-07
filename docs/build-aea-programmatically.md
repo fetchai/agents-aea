@@ -74,7 +74,7 @@ ledger_apis = LedgerApis({}, FETCHAI)
 resources = Resources()
 
 # Create an identity
-identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=FETCHAI)
+identity = Identity(name="my_aea", address=wallet.addresses.get(FETCHAI), default_address_key=FETCHAI,)
 
 # Create our AEA
 my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
@@ -170,10 +170,9 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.agent import Identity
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import FETCHAI
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -190,7 +189,7 @@ OUTPUT_FILE = "output.txt"
 
 def run():
     # Create a private key
-    _create_default_private_key()
+    _create_fetchai_private_key()
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -205,9 +204,12 @@ def run():
     )
     ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
-
     # Create an identity
-    identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=FETCHAI)
+    identity = Identity(
+        name="my_aea",
+        address=wallet.addresses.get(FETCHAI),
+        default_address_key=FETCHAI,
+    )
 
     # Create our AEA
     my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
@@ -229,7 +231,7 @@ def run():
 
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), 
         my_aea.context,
     )
     resources.add_skill(echo_skill)
