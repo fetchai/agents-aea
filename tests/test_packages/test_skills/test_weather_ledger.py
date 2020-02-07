@@ -28,10 +28,12 @@ import sys
 import tempfile
 import threading
 import time
+from pathlib import Path
 
 import pytest
 
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
@@ -87,6 +89,26 @@ class TestWeatherSkillsFetchaiLedger:
             cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
         )
         assert result.exit_code == 0
+
+        # add fetchai ledger in both configuration files
+        find_text = "ledger_apis: {}"
+        replace_text = """ledger_apis:
+        fetchai:
+            network: testnet"""
+
+        agent_one_config = Path(self.agent_name_one, DEFAULT_AEA_CONFIG_FILE)
+        agent_one_config_content = agent_one_config.read_text()
+        agent_one_config_content = agent_one_config_content.replace(
+            find_text, replace_text
+        )
+        agent_one_config.write_text(agent_one_config_content)
+
+        agent_two_config = Path(self.agent_name_two, DEFAULT_AEA_CONFIG_FILE)
+        agent_two_config_content = agent_two_config.read_text()
+        agent_two_config_content = agent_two_config_content.replace(
+            find_text, replace_text
+        )
+        agent_two_config.write_text(agent_two_config_content)
 
         # add packages for agent one and run it
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
@@ -149,26 +171,6 @@ class TestWeatherSkillsFetchaiLedger:
             cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
         )
         assert result.exit_code == 0
-
-        # Load the agent yaml file and manually insert the things we need
-        file = open("aea-config.yaml", mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        # add in the ledger address
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        whole_file = whole_file.replace(find_text, replace_text)
-
-        # close the file
-        file.close()
-
-        with open("aea-config.yaml", "w") as f:
-            f.write(whole_file)
 
         # Generate the private keys
         result = self.runner.invoke(
