@@ -74,7 +74,7 @@ ledger_apis = LedgerApis({}, FETCHAI)
 resources = Resources()
 
 # Create an identity
-    identity = Identity(name="my_aea", address=wallet.addresses.get(FETCHAI), default_address_key=FETCHAI,)
+identity = Identity(name="my_aea", address=wallet.addresses.get(FETCHAI), default_address_key=FETCHAI,)
 
 # Create our AEA
 my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
