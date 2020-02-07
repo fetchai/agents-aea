@@ -154,7 +154,8 @@ class TestSkillFromDir:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.t)
+        cls.skill_directory = Path(cls.t, "dummy_skill")
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.skill_directory)
         os.chdir(cls.t)
 
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
@@ -174,24 +175,24 @@ class TestSkillFromDir:
 
     def test_missing_handler(self):
         """Test that when parsing a skill and an handler is missing, we behave correctly."""
-        Path(self.t, "handlers.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+        Path(self.skill_directory, "handlers.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
             "Handler 'DummyInternalHandler' cannot be found."
         )
 
     def test_missing_behaviour(self):
         """Test that when parsing a skill and a behaviour is missing, we behave correctly."""
-        Path(self.t, "behaviours.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+        Path(self.skill_directory, "behaviours.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
             "Behaviour 'DummyBehaviour' cannot be found."
         )
 
     def test_missing_model(self):
         """Test that when parsing a skill and a model is missing, we behave correctly."""
-        Path(self.t, "dummy.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
+        Path(self.skill_directory, "dummy.py").write_text("")
+        Skill.from_dir(self.skill_directory, self.agent_context)
         self.mocked_logger_warning.assert_called_with(
             "Model 'DummyModel' cannot be found."
         )
