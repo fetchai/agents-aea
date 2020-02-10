@@ -72,6 +72,7 @@ nav:
         - Blockchain & OEF usage: 'blockchain-oef-usage.md'
         - Discovery & communication: 'discovery-and-communication.md'
         - Connect a database: 'connect-a-database.md'
+        - Connect a stream of data: 'connect-a-stream-of-data.md'
 
 
 plugins:
