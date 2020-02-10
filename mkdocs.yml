@@ -67,6 +67,9 @@ nav:
       - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'
       - Use multiplexer stand-alone: 'multiplexer-standalone.md'
+    - Q&A:
+        - Understanding messaging: 'understanding-context.md'
+        - Blockchain & OEF usage: 'blockchain-oef-usage.md'
 
 
 plugins:
