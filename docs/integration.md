@@ -10,7 +10,7 @@ To this end, the framework wraps APIs to interact with the two ledgers and expos
 The `Wallet` holds instantiation of the abstract `Crypto` base class, in particular `FetchaiCrypto` and `EthereumCrypto`.
 
 The `LedgerApis` holds instantiation of the abstract `LedgerApi` base class, in particular `FetchaiLedgerApi` and `EthereumLedgerApi`.
-You can consider the `Ledger Api` implementation of each block-chain as a wrapper of their python library. 
+You can think the `Ledger Api` implementation of each block-chain as a wrapper of their python library. 
 
 
 ## Fetch.ai Ledger
