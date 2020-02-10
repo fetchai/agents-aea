@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
-description: "The weather station skill implements the functionality to sell weather data."
+description: "The generic seller skill implements the functionality to sell weather data."
 behaviours:
   service_registration:
     class_name: ServiceRegistrationBehaviour
@@ -17,7 +17,7 @@ models:
   strategy:
     class_name: Strategy
     args:
-      total_price: 10
+      total_price: 1
       seller_tx_fee: 0
       currency_id: 'FET'
       ledger_id: 'fetchai'
