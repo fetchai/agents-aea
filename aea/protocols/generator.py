@@ -409,11 +409,100 @@ class ProtocolGenerator:
             indents += "    "
             content_type = self._get_sub_types_of_compositional_types(content_type)[0]
         if content_type.startswith("Union["):
+            element_types = self._get_sub_types_of_compositional_types(content_type)
+            unique_standard_types = set()
+            for typing_content_type in element_types:
+                if typing_content_type.startswith("FrozenSet"):
+                    unique_standard_types.add("frozenset")
+                elif typing_content_type.startswith("Tuple"):
+                    unique_standard_types.add("tuple")
+                elif typing_content_type.startswith("Dict"):
+                    unique_standard_types.add("dict")
+                else:
+                    unique_standard_types.add(typing_content_type)
+            check_str += indents
+            check_str += "assert "
+            for unique_type in unique_standard_types:
+                check_str += "type(self.{}) == {} or ".format(content_name, unique_type)
+            check_str = check_str[:-4]
+            check_str += ", \"Content '{}' should be either of the following types: {}.\"\n".format(
+                        content_name, [unique_standard_type for unique_standard_type in unique_standard_types]
+                    )
+            if "frozenset" in unique_standard_types:
+                check_str += indents + "if type(self.{}) == frozenset:\n".format(content_name)
+                check_str += indents + "    assert (\n"
+                frozen_set_element_types = set()
+                for element_type in element_types:
+                    if element_type.startswith("FrozenSet"):
+                        frozen_set_element_types.add(self._get_sub_types_of_compositional_types(element_type)[0])
+                for frozen_set_element_type in frozen_set_element_types:
+                    check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(frozen_set_element_type, content_name)
+                check_str = check_str[:-4]
+                check_str += "\n"
+                if len(frozen_set_element_types) == 1:
+                    check_str += indents + "    ), \"Elements of the content '{}' should be of type ".format(
+                        content_name)
+                    for frozen_set_element_type in frozen_set_element_types:
+                        check_str += "'{}'".format(frozen_set_element_type)
+                    check_str += ".\"\n"
+                else:
+                    check_str += indents + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
+                        content_name)
+                    for frozen_set_element_type in frozen_set_element_types:
+                        check_str += "'{}' or ".format(frozen_set_element_type)
+                    check_str = check_str[:-4]
+                    check_str += ".\"\n"
+            if "tuple" in unique_standard_types:
+                check_str += indents + "if type(self.{}) == tuple:\n".format(content_name)
+                check_str += indents + "    assert (\n"
+                tuple_element_types = set()
+                for element_type in element_types:
+                    if element_type.startswith("Tuple"):
+                        tuple_element_types.add(self._get_sub_types_of_compositional_types(element_type)[0])
+                for tuple_element_type in tuple_element_types:
+                    check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(tuple_element_type, content_name)
+                check_str = check_str[:-4]
+                check_str += "\n"
+                if len(tuple_element_types) == 1:
+                    check_str += indents + "    ), \"Elements of the content '{}' should be of type ".format(
+                        content_name)
+                    for tuple_element_type in tuple_element_types:
+                        check_str += "'{}'".format(tuple_element_type)
+                    check_str += ".\"\n"
+                else:
+                    check_str += indents + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
+                        content_name)
+                    for tuple_element_type in tuple_element_types:
+                        check_str += "'{}' or ".format(tuple_element_type)
+                    check_str = check_str[:-4]
+                    check_str += ".\"\n"
+            if "dict" in unique_standard_types:
+                check_str += indents + "if type(self.{}) == dict:\n".format(content_name)
+                check_str += indents + "    for key, value in self.{}.items():\n".format(content_name)
+                check_str += indents + "        assert (\n"
+                dict_key_value_types = dict()
+                for element_type in element_types:
+                    if element_type.startswith("Dict"):
+                        dict_key_value_types[self._get_sub_types_of_compositional_types(element_type)[0]] = self._get_sub_types_of_compositional_types(element_type)[1]
+                for element1_type, element2_type in dict_key_value_types.items():
+                    check_str += indents + "                (type(key) == {} and type(value) == {}) or\n".format(element1_type, element2_type)
+                check_str = check_str[:-4]
+                check_str += "\n"
 
-            check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
-            indents += "    "
-            content_type = self._get_sub_types_of_compositional_types(content_type)[0]
-        if content_type.startswith("FrozenSet["):
+                if len(dict_key_value_types) == 1:
+                    check_str += indents + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
+                        content_name)
+                    for key, value in dict_key_value_types.items():
+                        check_str += "'{}' and '{}' respectively".format(key, value)
+                    check_str += ".\"\n"
+                else:
+                    check_str += indents + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
+                        content_name)
+                    for key, value in dict_key_value_types.items():
+                        check_str += "'{}','{}' or ".format(key, value)
+                    check_str = check_str[:-4]
+                    check_str += ".\"\n"
+        elif content_type.startswith("FrozenSet["):
             # check the type
             check_str += (
                 indents
