@@ -114,7 +114,7 @@ aea generate-wealth ethereum
 
 ### Update the skill configs
 
-In the thermometer skill config (`car_detector/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
+In the thermometer skill config (`car_detector/vendor/fetchai/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
 
 ```bash
 |----------------------------------------------------------------------|
@@ -141,7 +141,7 @@ aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.ledg
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd False --type bool
 ```
 
-In the carpark data buyer skill config (`car_data_buyer/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+In the carpark data buyer skill config (`car_data_buyer/vendors/fetchai/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
 ```bash
 |----------------------------------------------------------------------|
