@@ -118,9 +118,12 @@ class ProtocolGenerator:
 
     def _get_sub_types_of_compositional_types(self, compositional_type: str) -> tuple:
         """
-        Extracts the sub-types of compositional types (e.g. Set[], Tuple[], Union[], Optional[], Union[]).
+        Extract the sub-types of compositional types. 
+        
+        This method handles both specification types (e.g. pt:set[], pt:dict[]) as well as python types (e.g. FrozenSet[], Union[]).
 
-        :return: tuple of sub-types
+        :param compositional_type: the compositional type string whose sub-types are to be extracted.
+        :return: tuple containing all extracted sub-types.
         """
         sub_types_list = list()
         if compositional_type.startswith("Optional") or compositional_type.startswith(
@@ -186,11 +189,11 @@ class ProtocolGenerator:
                 sub_types_list.append(sub_type)
         return tuple(sub_types_list)
 
-    def _handle_o(self, specification_type: str) -> str:
+    def _optional_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle an optional type.
+        Convert an 'pt:optional' specification type into its python equivalent.
 
-        :param specification_type: the type described in the specification
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         self._imports["Optional"] = True
@@ -201,31 +204,31 @@ class ProtocolGenerator:
         python_type = "Optional[{}]".format(element_type_in_python)
         return python_type
 
-    def _handle_ct(self, specification_type: str) -> str:
+    def _ct_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle a custom type.
+        Convert a custom specification type into its python equivalent.
 
-        :param specification_type: the type described in the specification
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         python_type = specification_type[3:]
         return python_type
 
-    def _handle_pt(self, specification_type: str) -> str:
+    def _pt_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle a primitive type.
+        Convert a primitive specification type into its python equivalent.
 
-        :param specification_type: the type described in the specification
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         python_type = specification_type[3:]
         return python_type
 
-    def _handle_pct(self, specification_type: str) -> str:
+    def _pct_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle a primitive collection type.
+        Convert a primitive collection specification type into its python equivalent.
 
-        :param specification_type: the type described in the specification
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         element_types = self._get_sub_types_of_compositional_types(specification_type)
@@ -240,11 +243,11 @@ class ProtocolGenerator:
             python_type = "Tuple[{}]".format(element_type_in_python)
         return python_type
 
-    def _handle_pmt(self, specification_type: str) -> str:
+    def _pmt_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle a primitive mapping type.
+        Convert a primitive mapping specification type into its python equivalent.
 
-        :param specification_type: the type described in the specification
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         self._imports["Dict"] = True
@@ -260,11 +263,11 @@ class ProtocolGenerator:
         )
         return python_type
 
-    def _handle_mt(self, specification_type: str) -> str:
+    def _mt_specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Handle a multi type.
+        Convert a multi type 'pt:union' in a protocol specification into its python equivalent.
 
-        :param specification_type: the set of types which were separated with "or" in the protocol specification.
+        :param specification_type: the specification type
         :return: The Python equivalent
         """
         self._imports["Union"] = True
@@ -282,18 +285,15 @@ class ProtocolGenerator:
         """
         Convert a data type in protocol specification into its Python equivalent using the _handle_...() methods.
 
-        :param specification_type: the type described in the specification
-        :return: The Python equivalent
+        :param specification_type: the data type described from a protocol specification.
+        :return: The Python equivalent of the data type.
         """
-        python_type = ""
         if specification_type.startswith("pt:optional"):
-            python_type = self._handle_o(specification_type)
+            python_type = self._optional_specification_type_to_python_type(specification_type)
         elif specification_type.startswith("pt:union"):
-            python_type = self._handle_mt(specification_type)
-            # specification_types = set(specification_type.split(" or "))
-            # if len(specification_types) == 1:  # just one type (not a Union[])
+            python_type = self._mt_specification_type_to_python_type(specification_type)
         elif specification_type.startswith("ct:"):
-            python_type = self._handle_ct(specification_type)
+            python_type = self._ct_specification_type_to_python_type(specification_type)
         elif specification_type in [
             "pt:bytes",
             "pt:int",
@@ -301,17 +301,15 @@ class ProtocolGenerator:
             "pt:bool",
             "pt:str",
         ]:
-            python_type = self._handle_pt(specification_type)
+            python_type = self._pt_specification_type_to_python_type(specification_type)
         elif specification_type.startswith("pt:set") or specification_type.startswith(
             "pt:list"
         ):
-            python_type = self._handle_pct(specification_type)
+            python_type = self._pct_specification_type_to_python_type(specification_type)
         elif specification_type.startswith("pt:dict"):
-            python_type = self._handle_pmt(specification_type)
+            python_type = self._pmt_specification_type_to_python_type(specification_type)
         else:
             raise TypeError("Unsupported type: '{}'".format(specification_type))
-            # elif len(specification_types) > 1:  # has more than one type 'or' separated
-            #     python_type = self._handle_mt(specification_types)
         return python_type
 
     def _import_from_typing_str(self) -> str:
@@ -338,9 +336,9 @@ class ProtocolGenerator:
 
     def _performatives_str(self) -> str:
         """
-        Generate the speech-act dictionary where content types are actual types (not strings).
+        Generate the performatives instance property string, a set containing all valid performatives of this protocol.
 
-        :return: the speech-act dictionary string
+        :return: the performatives set string
         """
         performatives_str = "{"
         for performative in self._all_performatives:
@@ -353,7 +351,7 @@ class ProtocolGenerator:
         """
         Generate classes for every custom type.
 
-        :return: the string containing class signatures and NotImplemented for every custom type
+        :return: the string containing class stubs for every custom type
         """
         cls_str = ""
 
@@ -395,8 +393,7 @@ class ProtocolGenerator:
 
         return enum_str
 
-    @staticmethod
-    def _check_content_type_str(no_of_indents: int, content_name, content_type) -> str:
+    def _check_content_type_str(self, no_of_indents: int, content_name, content_type) -> str:
         """
         Produce the checks of elements of compositional types.
 
@@ -410,21 +407,21 @@ class ProtocolGenerator:
             # check if the content exists then...
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
             indents += "    "
-            content_type = content_type[
-                content_type.index("[") + 1 : content_type.rindex("]")
-            ]
+            content_type = self._get_sub_types_of_compositional_types(content_type)[0]
+        if content_type.startswith("Union["):
+
+            check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
+            indents += "    "
+            content_type = self._get_sub_types_of_compositional_types(content_type)[0]
         if content_type.startswith("FrozenSet["):
             # check the type
             check_str += (
                 indents
-                + "assert type(self.{}) == frozenset, \"{} is not 'frozenset'.\"\n".format(
+                + "assert type(self.{}) == frozenset, \"Content '{}' is not of type 'frozenset'.\"\n".format(
                     content_name, content_name
                 )
             )
-            element_type = content_type[
-                content_type.index("[") + 1 : content_type.rindex("]")
-            ]
-            # check the elements types
+            element_type = self._get_sub_types_of_compositional_types(content_type)[0]
             check_str += indents + "assert all(\n"
             check_str += (
                 indents
@@ -432,21 +429,18 @@ class ProtocolGenerator:
                     element_type, content_name
                 )
             )
-            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+            check_str += indents + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
                 content_name, element_type
             )
         elif content_type.startswith("Tuple["):
             # check the type
             check_str += (
                 indents
-                + "assert type(self.{}) == tuple, \"{} is not 'tuple'.\"\n".format(
+                + "assert type(self.{}) == tuple, \"Content '{}' is not of type 'tuple'.\"\n".format(
                     content_name, content_name
                 )
             )
-            element_type = content_type[
-                content_type.index("[") + 1 : content_type.rindex("]")
-            ]
-            # check the elements types
+            element_type = self._get_sub_types_of_compositional_types(content_type)[0]
             check_str += indents + "assert all(\n"
             check_str += (
                 indents
@@ -454,49 +448,45 @@ class ProtocolGenerator:
                     element_type, content_name
                 )
             )
-            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+            check_str += indents + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
                 content_name, element_type
             )
         elif content_type.startswith("Dict["):
             # check the type
             check_str += (
                 indents
-                + "assert type(self.{}) == dict, \"{} is not 'dict'.\"\n".format(
+                + "assert type(self.{}) == dict, \"Content '{}' is not of type 'dict'.\"\n".format(
                     content_name, content_name
                 )
             )
-            element1_type = content_type[
-                content_type.index("[") + 1 : content_type.index(",")
-            ]
-            element2_type = content_type[
-                content_type.index(",") + 2 : content_type.rindex("]")
-            ]
+            element_type_1 = self._get_sub_types_of_compositional_types(content_type)[0]
+            element_type_2 = self._get_sub_types_of_compositional_types(content_type)[1]
             # check the keys type then check the values type
             check_str += indents + "for key, value in self.{}.items():\n".format(
                 content_name
             )
             check_str += indents + "    assert (\n"
-            check_str += indents + "        type(key) == {}\n".format(element1_type)
+            check_str += indents + "        type(key) == {}\n".format(element_type_1)
             check_str += (
                 indents
-                + "    ), \"Keys of {} dictionary are not '{}'.\"\n".format(
-                    content_name, element1_type
+                + "    ), \"Keys of '{}' dictionary are not of type '{}'.\"\n".format(
+                    content_name, element_type_1
                 )
             )
 
             check_str += indents + "    assert (\n"
-            check_str += indents + "        type(value) == {}\n".format(element2_type)
+            check_str += indents + "        type(value) == {}\n".format(element_type_2)
             check_str += (
                 indents
-                + "    ), \"Values of {} dictionary are not '{}'.\"\n".format(
-                    content_name, element2_type
+                + "    ), \"Values of '{}' dictionary are not of type '{}'.\"\n".format(
+                    content_name, element_type_2
                 )
             )
         else:
             # check the type
             check_str += (
                 indents
-                + "assert type(self.{}) == {}, \"{} is not '{}'.\"\n".format(
+                + "assert type(self.{}) == {}, \"Content '{}' is not of type '{}'.\"\n".format(
                     content_name, content_type, content_name, content_type
                 )
             )
@@ -552,7 +542,7 @@ class ProtocolGenerator:
         cls_str += "        performative: str,\n"
         cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
-        cls_str += '        """Initialise."""\n'
+        cls_str += '        """Initialise an instance of {}Message."""\n'.format(self.protocol_specification_in_camel_case)
         cls_str += "        super().__init__(\n"
         cls_str += "            dialogue_reference=dialogue_reference,\n"
         cls_str += "            message_id=message_id,\n"
@@ -565,7 +555,7 @@ class ProtocolGenerator:
         )
         cls_str += "        assert (\n"
         cls_str += "            self._is_consistent()\n"
-        cls_str += "        ), \"This message is invalid according to the '{}' protocol\"\n\n".format(
+        cls_str += "        ), \"This message is invalid according to the '{}' protocol.\"\n\n".format(
             self.protocol_specification.name
         )
 
@@ -577,20 +567,20 @@ class ProtocolGenerator:
         cls_str += "    @property\n"
         cls_str += "    def dialogue_reference(self) -> Tuple[str, str]:\n"
         cls_str += '        """Get the dialogue_reference of the message."""\n'
-        cls_str += '        assert self.is_set("dialogue_reference"), "dialogue_reference is not set"\n'
+        cls_str += '        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."\n'
         cls_str += (
             '        return cast(Tuple[str, str], self.get("dialogue_reference"))\n\n'
         )
         cls_str += "    @property\n"
         cls_str += "    def message_id(self) -> int:\n"
         cls_str += '        """Get the message_id of the message."""\n'
-        cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
+        cls_str += '        assert self.is_set("message_id"), "message_id is not set."\n'
         cls_str += '        return cast(int, self.get("message_id"))\n\n'
         cls_str += "    @property\n"
         cls_str += "    def performative(self) -> Performative:  # noqa: F821\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
-            '        assert self.is_set("performative"), "performative is not set"\n'
+            '        assert self.is_set("performative"), "performative is not set."\n'
         )
         cls_str += '        return cast({}Message.Performative, self.get("performative"))\n\n'.format(
             self.protocol_specification_in_camel_case
@@ -604,10 +594,10 @@ class ProtocolGenerator:
             content_type = self._all_unique_contents[content_name]
             cls_str += "    @property\n"
             cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
-            cls_str += '        """Get the {} from the message."""\n'.format(
+            cls_str += '        """Get the \'{}\' content from the message."""\n'.format(
                 content_name
             )
-            cls_str += '        assert self.is_set("{}"), "{} is not set"\n'.format(
+            cls_str += '        assert self.is_set("{}"), "\'{}\' content is not set."\n'.format(
                 content_name, content_name
             )
             cls_str += '        return cast({}, self.get("{}"))\n\n'.format(
