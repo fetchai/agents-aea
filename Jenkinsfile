@@ -47,8 +47,15 @@ pipeline {
                         sh 'tox -e liccheck'
                     }
 
-            } // license check
+                } // license check
 
+                stage('Copyright Check')
+
+                    steps {
+                        sh 'tox -e copyright_check'
+                    }
+
+                } // license check
 
                 stage('Black Reformatting') {
 
