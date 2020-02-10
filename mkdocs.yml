@@ -70,6 +70,8 @@ nav:
     - Q&A:
         - Understanding messaging: 'understanding-context.md'
         - Blockchain & OEF usage: 'blockchain-oef-usage.md'
+        - Discovery & communication: 'discovery-and-communication.md'
+        - Connect a database: 'connect-a-database.md'
 
 
 plugins:

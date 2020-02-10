@@ -15,7 +15,8 @@ sign a transaction and send it to the network.
 
 ## OEF
 
-The 'Open Economic Framework' (OEF) is a node that enables us to search, discover and communicate with possible clients or services. For the AEAs to be able to find each other, one must register as a service and the other must query the OEF node for a service.  
+The 'Open Economic Framework' (OEF) is a node that enables us to search, discover and communicate with possible clients or services. 
+For the AEAs to be able to find each other, one must register as a service and the other must query the OEF node for a service.  
 
 ## Communication
 
