@@ -33,6 +33,23 @@ pipeline {
 
                 } // bandit security check tests
 
+                stage('Safety Check') {
+
+                    steps {
+                        sh 'tox -e safety'
+                    }
+
+                } // safety check
+
+//                stage('License Check') {
+//
+//                    steps {
+//                        sh 'tox -e liccheck'
+//                    }
+//
+//            } // license check
+
+
                 stage('Black Reformatting') {
 
                     steps {
