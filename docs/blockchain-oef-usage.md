@@ -1,17 +1,16 @@
-The AEA framework enables the agents to interact with the blockchain in the form of transaction completion. Currently, the framework supports
+The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
 two different networks natively: the `Fetch.ai` network and the `Ethereum` network.
 
 Consider the following use case:
 
-Once the AEAs successfully end the negotiations, the buyer should send the correct amount to the specified wallet address. Then, the provider
-validates the transaction digest and sends the data to the client.
+Once the AEAs successfully end a negotiation, the buyer should send the correct amount to the specified wallet address of the provider (seller). Then, the provider
+validates the transaction digest and sends the data to the buyer.
 
 The limitation of the previous use case is that we should trust the provider that he will send the data upon successful payment.
 
 ## Ledger Apis
 
-We interact with the blockchains through a module called `LedgerApis`. The `ledger_apis` module contains implementations of each ledger API object (abstract class) that wraps the libraries of each network. With these implementations, we can create accounts for the specified networks. The account contains the private/public key pair and a wallet address. Also with the account, we will be able to
-sign a transaction and send it to the network.  
+We interact with the blockchains through a module called `LedgerApis`. The `LedgerApis` module contains implementations of each network, in particular `FetchAILedgerApi` and `EthereumLedgerApi`.
 
 ## OEF
 
