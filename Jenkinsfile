@@ -49,13 +49,13 @@ pipeline {
 
                 } // license check
 
-                stage('Copyright Check')
+                stage('Copyright Check') {
 
                     steps {
                         sh 'tox -e copyright_check'
                     }
 
-                } // license check
+                } // copyright check
 
                 stage('Black Reformatting') {
 
@@ -81,13 +81,13 @@ pipeline {
 
                 } // static type check
 
-                // stage('Docs') {
+                stage('Docs') {
 
-                //     steps {
-                //         sh 'tox -e docs'
-                //     }
+                    steps {
+                        sh 'tox -e docs'
+                    }
 
-                // } // docs
+                } // docs
 
                 stage('Unit Tests: Python 3.6') {
 
