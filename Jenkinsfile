@@ -41,13 +41,13 @@ pipeline {
 
                 } // safety check
 
-//                stage('License Check') {
-//
-//                    steps {
-//                        sh 'tox -e liccheck'
-//                    }
-//
-//            } // license check
+                stage('License Check') {
+
+                    steps {
+                        sh 'tox -e liccheck'
+                    }
+
+            } // license check
 
 
                 stage('Black Reformatting') {
