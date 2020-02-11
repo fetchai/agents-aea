@@ -54,7 +54,7 @@ class PublicIdMock:
 
     DEFAULT_VERSION = DEFAULT_TESTING_VERSION
 
-    def __init__(self, name="name", author="author", version=DEFAULT_TESTING_VERSION):
+    def __init__(self, author="author", name="name", version=DEFAULT_TESTING_VERSION):
         """Init the Public ID mock object."""
         self.name = name
         self.author = author
