@@ -85,7 +85,8 @@ if __name__ == "__main__":
         Path("packages").glob("**/*.py"),
         Path("tests").glob("**/*.py"),
         Path("scripts").glob("**/*.py"),
-        Path("examples").glob("**/*.py"),
+        Path("examples", "gym_ex").glob("**/*.py"),
+        Path("examples", "ml_ex").glob("**/*.py"),
         [Path("setup.py")],
     )
 
