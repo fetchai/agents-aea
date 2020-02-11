@@ -33,6 +33,30 @@ pipeline {
 
                 } // bandit security check tests
 
+                stage('Safety Check') {
+
+                    steps {
+                        sh 'tox -e safety'
+                    }
+
+                } // safety check
+
+                stage('License Check') {
+
+                    steps {
+                        sh 'tox -e liccheck'
+                    }
+
+                } // license check
+
+                stage('Copyright Check') {
+
+                    steps {
+                        sh 'tox -e copyright_check'
+                    }
+
+                } // copyright check
+
                 stage('Black Reformatting') {
 
                     steps {
@@ -57,13 +81,13 @@ pipeline {
 
                 } // static type check
 
-                // stage('Docs') {
+                stage('Docs') {
 
-                //     steps {
-                //         sh 'tox -e docs'
-                //     }
+                    steps {
+                        sh 'tox -e docs'
+                    }
 
-                // } // docs
+                } // docs
 
                 stage('Unit Tests: Python 3.6') {
 

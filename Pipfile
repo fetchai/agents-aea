@@ -19,7 +19,7 @@ flake8-import-order = "==0.18.1"
 gym = "==0.15.6"
 mkdocs = "==1.0.4"
 mkdocs-material = "==4.6.0"
-mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git", version = "==0.1.1"}
+mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git",version = "==0.1.1"}
 mypy = "==0.761"
 numpy = "==1.18.1"
 pydocstyle = "==3.0.0"
@@ -32,6 +32,8 @@ scikit-image = "==0.16.2"
 tensorflow = "==2.1.0"
 tox = "==3.7.0"
 tox-pipenv = "==1.9.0"
+safety = "==1.8.5"
+liccheck = "==0.4.0"
 
 [packages]
 click = "*"
