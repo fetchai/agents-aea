@@ -23,7 +23,7 @@
 import base64
 import copy
 import json
-import pickle
+import pickle  # nosec
 from typing import Any, cast
 
 from aea.protocols.base import Message
@@ -48,21 +48,21 @@ class GymSerializer(Serializer):
 
         if msg.performative == GymMessage.Performative.ACT:
             action = msg.action  # type: Any
-            action_bytes = base64.b64encode(pickle.dumps(action)).decode("utf-8")
+            action_bytes = base64.b64encode(pickle.dumps(action)).decode("utf-8")  # nosec
             new_body["action"] = action_bytes
             new_body["step_id"] = msg.step_id
         elif msg.performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation = msg.observation
-            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode(
+            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode(  # nosec
                 "utf-8"
             )
             new_body["observation"] = observation_bytes
             reward = msg.reward
-            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")
+            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")  # nosec
             new_body["reward"] = reward_bytes
             info = msg.info
-            info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")
+            info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")  # nosec
             new_body["info"] = info_bytes
             new_body["step_id"] = msg.step_id
 
@@ -83,19 +83,19 @@ class GymSerializer(Serializer):
 
         if performative == GymMessage.Performative.ACT:
             action_bytes = base64.b64decode(json_msg["action"])
-            action = pickle.loads(action_bytes)
+            action = pickle.loads(action_bytes)  # nosec
             new_body["action"] = action
             new_body["step_id"] = json_msg["step_id"]
         elif performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation_bytes = base64.b64decode(json_msg["observation"])
-            observation = pickle.loads(observation_bytes)
+            observation = pickle.loads(observation_bytes)  # nosec
             new_body["observation"] = observation
             reward_bytes = base64.b64decode(json_msg["reward"])
-            reward = pickle.loads(reward_bytes)
+            reward = pickle.loads(reward_bytes)  # nosec
             new_body["reward"] = reward
             info_bytes = base64.b64decode(json_msg["info"])
-            info = pickle.loads(info_bytes)
+            info = pickle.loads(info_bytes)  # nosec
             new_body["info"] = info
             new_body["step_id"] = json_msg["step_id"]
 
