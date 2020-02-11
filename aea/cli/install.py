@@ -20,7 +20,7 @@
 """Implementation of the 'aea install' subcommand."""
 
 import pprint
-import subprocess
+import subprocess  # nosec
 import sys
 from typing import Optional
 
