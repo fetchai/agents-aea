@@ -128,7 +128,7 @@ In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`, replace the `
 ```
 The `search_schema` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/vendors/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
+In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
 ```bash
 |----------------------------------------------------------------------|
