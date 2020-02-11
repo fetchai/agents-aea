@@ -10,7 +10,7 @@ To this end, the framework wraps APIs to interact with the two ledgers and expos
 The `Wallet` holds instantiation of the abstract `Crypto` base class, in particular `FetchaiCrypto` and `EthereumCrypto`.
 
 The `LedgerApis` holds instantiation of the abstract `LedgerApi` base class, in particular `FetchaiLedgerApi` and `EthereumLedgerApi`.
-You can think the `Ledger Api` implementation of each blockchain as a wrapper of their python library. 
+You can think the concrete implementations of the base class `LedgerApi` as wrappers of the blockchain specific python SDK. 
 
 
 ## Abstract class LedgerApi
@@ -31,7 +31,6 @@ class LedgerApi(ABC):
         """
 ```
 The api property can be used for low-level operation with the concrete ledger APIs.
-Enables us to create an object based on the implementation of each ledger support.
 
 ```
 
@@ -46,7 +45,7 @@ Enables us to create an object based on the implementation of each ledger suppor
         :return: the balance.
         """
 ```
-The `get_balance` method will return the amount of tokens we hold for a specific address.
+The `get_balance` method returns the amount of tokens we hold for a specific address.
 ```
 
     @abstractmethod
@@ -73,7 +72,7 @@ The `get_balance` method will return the amount of tokens we hold for a specific
         :return: tx digest if successful, otherwise None
         """
 ```
-The `send_transaction` is where we must implement the logic for sending a transaction to the ledger we want. 
+The `send_transaction` is where we must implement the logic for sending a transaction to the ledger. 
 
 ```
     @abstractmethod
@@ -106,7 +105,7 @@ The `send_transaction` is where we must implement the logic for sending a transa
         :return: True if the transaction referenced by the tx_digest matches the terms.
         """
 ```
-The `is_transaction_settled` and `validate_transaction` are two functions that helps us to verify a transaction digest that we received.
+The `is_transaction_settled` and `validate_transaction` are two functions that helps us to verify a transaction digest.
 ```
     @abstractmethod
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
@@ -118,10 +117,10 @@ The `is_transaction_settled` and `validate_transaction` are two functions that h
         :return: return the hash in hex.
         """
 ```
-Lastly, we implemented a support function that generates a random hash to help us with security issues. The sender of the funds must include this hash in the transaction
-as extra data for the transaction to considered valid.
+Lastly, we implemented a support function that generates a random hash to help us with verifying the uniqueness of transactions. The sender of the funds must include this hash in the transaction
+as extra data for the transaction to be considered valid.
 
-Moving forward, we are going to discuss the different implementation of `send_transaction` and `validate_transacaction` for the two natively supported ledgers of the framework.
+Next, we are going to discuss the different implementation of `send_transaction` and `validate_transacaction` for the two natively supported ledgers of the framework.
 
 ## Fetch.ai Ledger
 ```
@@ -141,8 +140,12 @@ Moving forward, we are going to discuss the different implementation of `send_tr
          self._api.sync(tx_digest)
          return tx_digest
 ```
-As you can see, the implementation for sending a transcation to the Fetch.ai ledger is not that trivial.
-The only drawback is that we cannot use the tx_nonce yet. 
+As you can see, the implementation for sending a transcation to the Fetch.ai ledger is relatively trivial.
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>We cannot use the tx_nonce yet in the Fetch.ai ledger.</p>
+</div>
 
 ```
     def is_transaction_settled(self, tx_digest: str) -> bool:
@@ -185,8 +188,8 @@ The only drawback is that we cannot use the tx_nonce yet.
          return result
 ```
 Inside the `validate_transcation` we request the contents of the transaction based on the tx_digest we received. We are checking that the address
-of the client is the same as the one that is inside the `from` field of the transaction. Lastly, we are checking that the transaction is settled if both of these return 
-True we consider the transaction as valid.
+of the client is the same as the one that is inside the `from` field of the transaction. Lastly, we are checking that the transaction is settled.
+If both of these checks return True we consider the transaction as valid.
 
 ## Ethereum Ledger
 
@@ -300,8 +303,8 @@ def validate_transaction(
          return is_valid
 ```
 The `validate_transaction` and `is_transaction_settled` functions help us to check if a transaction digest is valid and is settled. 
-In the Ethereum API, we can pass the tx_nonce, so we can check that it's the same. If it is different, we consider that transaction as no valid. The same happens if any of amount, client address
-or the seller address is different.
+In the Ethereum API, we can pass the `tx_nonce`, so we can check that it's the same. If it is different, we consider that transaction as no valid. The same happens if any of `amount`, `client` address
+or the `seller` address is different.
 
 Lastly, the `generate_tx_nonce` function is the same for both `LedgerApi` implementations but we use different hashing functions. 
 Both use the timestamp as a random factor alongside the seller and client addresses.

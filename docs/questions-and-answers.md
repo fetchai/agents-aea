@@ -1,4 +1,4 @@
-<details><summary>What is the Open Economic Framework?</summary>
+<details><summary>What is the Open Economic Framework (OEF)?</summary>
 The 'Open Economic Framework' (OEF) is a node that enables us to search, discover and communicate with possible clients or services. 
 <br><br>
 You can read more about the ledgers and the OEF <a href="/oef-ledger/"> here </a>
@@ -39,7 +39,7 @@ For a detailed example of how to use ORM follow the <a href='/orm-integration-to
 
 
 <details><summary>How does one connect a lifestream of data?</summary>
-You can create a wrapper class that communicates with the source and import this class in your strategy class that inherits from the Model abstract class,
+You can create a wrapper class that communicates with the source and import this class in your skill,
 or you can use a third-party library by listing the dependency in the skill's `.yaml` file. Then you can import this library in a strategy class that inherits
 from the Model abstract class.
 <br><br>
