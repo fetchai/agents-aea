@@ -16,6 +16,3 @@ Then the OEF messaging relay can be used to send envelopes from the AEA to the f
 The major difference between these two approaches is that in the first case we should know the IP of the AEA to be able to communicate. 
 In case 2 though, the whole communication is handled by the OEF.
 
-The other difference is that in the first case we are limited to communicate with one or a list of known AEAs and it is less dynamic since we will have to manually update
-the known AEAs each time we want to communicate with someone else. On the contrary, case 2 would return different results based on the search query in the OEF. This implementation makes
-harder to communicate with specific AEA since that both ends must be connected to the OEF.

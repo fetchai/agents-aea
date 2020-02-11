@@ -27,16 +27,17 @@ You can read more about the intergration of ledger <a href="/integration/">here<
 
 </details>
 
-<details><summary>How does one connect a DB?</summary>
-The AEA framework uses models that enable us to create custom behaviour for each agent. Moreover, the framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
+<details><summary>How does one install third party libraries?</summary>
+The framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file.
-So if you want to connect a database you have two options. Either create a wrapper that communicates with the database and imported in a Model,
+
+<details><summary>How does one connect a DB?</summary>
+If you want to connect a database you have two options. Either create a wrapper that communicates with the database and imported in a Model,
 you can find this implementation in the weather_station package, or use ORM (Object-relational-mapping), you have to implement the logic inside 
 a class that inherits from the Model abstract class.
 <br><br>
 For a detailed example of how to use ORM follow the <a href='/orm-integration-to-generic/'>ORM use case</a>  
 </details>
-
 
 <details><summary>How does one connect a lifestream of data?</summary>
 You can create a wrapper class that communicates with the source and import this class in your skill,
