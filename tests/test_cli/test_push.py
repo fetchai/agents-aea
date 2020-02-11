@@ -112,7 +112,7 @@ class TestPushLocalFailsArgumentNotPublicId:
 @mock.patch("aea.cli.push.try_to_load_agent_config")
 @mock.patch("aea.cli.push._save_item_locally")
 @mock.patch("aea.cli.push.push_item")
-class LoginTestCase(TestCase):
+class PushCommandTestCase(TestCase):
     """Test case for CLI push command."""
 
     def setUp(self):
