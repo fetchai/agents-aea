@@ -1,3 +1,8 @@
+If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
+you can use the Fetch.ai AEA framework. 
+
+This example will take you through the simplest AEA in order to make you familiar with the framework.
+
 ## Preliminaries
 
 Create and enter into a new working directory.
@@ -28,10 +33,6 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
 (e.g. to run an OEF Node).
  
-If you don't have it, please check the official documentation [here](https://docs.docker.com/install/) 
-and follow the instructions for your platform.
-
-
 ### Download the scripts and packages directories
 
 Download folders containing examples, scripts and packages:
@@ -42,7 +43,6 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
 
-
 ## Installation
 
 The following installs the entire AEA package which also includes a command-line interface (CLI).
@@ -50,7 +50,6 @@ The following installs the entire AEA package which also includes a command-line
 ``` bash
 pip install aea[all]
 ```
-
 
 ### Known issues
 
@@ -68,52 +67,9 @@ sudo apt-get install python3.7-dev
 
 ## Echo skill demo
 
-The echo skill is a simple demo that introduces you to the main business logic components of an AEA.
+The echo skill is a simple demo that introduces you to the main business logic components of an AEA. 
+The fastest way to create your first AEA is to fetch it! 
 
-## Option 1 - Step-by-step
-
-### Create a new AEA
-
-First, create a new AEA project and enter it.
-``` bash
-aea create my_first_aea
-cd my_first_aea
-```
-
-### Add the echo skill 
-
-Second, add the echo skill to the project.
-``` bash
-aea add skill fetchai/echo:0.1.0
-```
-
-This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
-
-### Add a stub connection
-
-AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.
-
-The stub connection is already added to the AEA by default.
-
-A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
-
-The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
-
-The format of each line is the following:
-
-``` bash
-TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
-```
-        
-For example:
-
-``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
-```
-
-## Option 2 - Fetch the entire AEA
-
-The preceding three steps can be executed at once with the command
 ``` bash
 aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
@@ -181,5 +137,14 @@ Delete the AEA from the parent directory (`cd ..` to go to the parent directory)
 aea delete my_first_aea
 ```
 
+For more detailed analysis of the core components of the framework, please check the following:
+
+- <a href="/aea/core-components/">Core components</a>
+
+For more demos, use cases or step by step guides, please check the following:
+
+- <a href="/aea/generic-skills">Generic skill use case</a>
+- <a href='/aea/weather-skills/'>Weather skill demo</a> 
+- <a href='/aea/thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
 
 <br />
