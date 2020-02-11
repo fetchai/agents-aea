@@ -54,3 +54,8 @@ The other option is to create a Frontend client that will communicate with the a
 You can find a more detailed approach <a href="/connect-a-frontend/">here</a>
 </details>
 
+<details><summary>Is the AEA framework ideal for agent based modelling?</summary>
+The goal of agent-based modeling is to search for explanatory insight into the collective behavior of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems. 
+Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
+</details>
+
