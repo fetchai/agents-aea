@@ -5,7 +5,7 @@ the two options we are going to discuss.
 
 ## Case 1
 The first option we have is to create a connection that will handle the incoming requests from the rest API. In this scenario,
-the rest API communicates with the AEA and requests are handled from a connection that we developed. The rest API should send envelops to the AEA, then the multiplexer will pass the message to the correct skill. 
+the rest API communicates with the AEA and requests are handled from a connection that we developed. The rest API should send envelopes to the AEA, then the multiplexer will pass the message to the correct skill. 
 
 ## Case 2
 The other option would be to create a stand-alone `Multiplexer` with an `OEF` connection that will be able to search and discover other AEAs. In this scenario,
