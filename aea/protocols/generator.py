@@ -51,6 +51,205 @@ def to_camel_case(text):
     return "".join(word.title() for word in text.split("_"))
 
 
+def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
+    """
+    Extract the sub-types of compositional types.
+
+    This method handles both specification types (e.g. pt:set[], pt:dict[]) as well as python types (e.g. FrozenSet[], Union[]).
+
+    :param compositional_type: the compositional type string whose sub-types are to be extracted.
+    :return: tuple containing all extracted sub-types.
+    """
+    sub_types_list = list()
+    if compositional_type.startswith("Optional") or compositional_type.startswith(
+            "pt:optional"
+    ):
+        sub_type1 = compositional_type[
+                    compositional_type.index("[") + 1: compositional_type.rindex("]")
+                    ].strip()
+        sub_types_list.append(sub_type1)
+    if (
+            compositional_type.startswith("FrozenSet")
+            or compositional_type.startswith("pt:set")
+            or compositional_type.startswith("Tuple")
+            or compositional_type.startswith("pt:list")
+    ):
+        sub_type1 = compositional_type[
+                    compositional_type.index("[") + 1: compositional_type.rindex("]")
+                    ].strip()
+        sub_types_list.append(sub_type1)
+    if compositional_type.startswith("Dict") or compositional_type.startswith(
+            "pt:dict"
+    ):
+        sub_type1 = compositional_type[
+                    compositional_type.index("[") + 1: compositional_type.index(",")
+                    ].strip()
+        sub_type2 = compositional_type[
+                    compositional_type.index(",") + 1: compositional_type.rindex("]")
+                    ].strip()
+        sub_types_list.extend([sub_type1, sub_type2])
+    if compositional_type.startswith("Union") or compositional_type.startswith(
+            "pt:union"
+    ):
+        inside_union = compositional_type[
+                       compositional_type.index("[") + 1: compositional_type.rindex("]")
+                       ].strip()
+        while inside_union != "":
+            if inside_union.startswith("Dict") or inside_union.startswith(
+                    "pt:dict"
+            ):
+                sub_type = inside_union[: inside_union.index("]") + 1].strip()
+                rest_of_inside_union = inside_union[
+                                       inside_union.index("]") + 1:
+                                       ].strip()
+                if rest_of_inside_union.find(",") == -1:
+                    # it is the last sub-type
+                    inside_union = rest_of_inside_union.strip()
+                else:
+                    # it is not the last sub-type
+                    inside_union = rest_of_inside_union[
+                                   rest_of_inside_union.index(",") + 1:
+                                   ].strip()
+            else:
+                if inside_union.find(",") == -1:
+                    # it is the last sub-type
+                    sub_type = inside_union.strip()
+                    inside_union = ""
+                else:
+                    # it is not the last sub-type
+                    sub_type = inside_union[: inside_union.index(",")].strip()
+                    inside_union = inside_union[
+                                   inside_union.index(",") + 1:
+                                   ].strip()
+            sub_types_list.append(sub_type)
+    return tuple(sub_types_list)
+
+
+def _optional_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a 'pt:optional' specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
+    element_type_in_python = _specification_type_to_python_type(
+        element_type
+    )
+    python_type = "Optional[{}]".format(element_type_in_python)
+    return python_type
+
+
+def _mt_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a 'pt:union' specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    sub_types = _get_sub_types_of_compositional_types(specification_type)
+    python_type = "Union["
+    for sub_type in sub_types:
+        python_type += "{}, ".format(
+            _specification_type_to_python_type(sub_type)
+        )
+    python_type = python_type[:-2]
+    python_type += "]"
+    return python_type
+
+
+def _ct_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a custom specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    python_type = specification_type[3:]
+    return python_type
+
+
+def _pt_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a primitive specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    python_type = specification_type[3:]
+    return python_type
+
+
+def _pct_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a primitive collection specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
+    element_type_in_python = _specification_type_to_python_type(
+        element_type
+    )
+    if specification_type.startswith("pt:set"):
+        python_type = "FrozenSet[{}]".format(element_type_in_python)
+    else:
+        python_type = "Tuple[{}]".format(element_type_in_python)
+    return python_type
+
+
+def _pmt_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a primitive mapping specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    element_types = _get_sub_types_of_compositional_types(specification_type)
+    element1_type_in_python = _specification_type_to_python_type(
+        element_types[0]
+    )
+    element2_type_in_python = _specification_type_to_python_type(
+        element_types[1]
+    )
+    python_type = "Dict[{}, {}]".format(
+        element1_type_in_python, element2_type_in_python
+    )
+    return python_type
+
+
+def _specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a data type in protocol specification into its Python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    if specification_type.startswith("pt:optional"):
+        python_type = _optional_specification_type_to_python_type(specification_type)
+    elif specification_type.startswith("pt:union"):
+        python_type = _mt_specification_type_to_python_type(specification_type)
+    elif specification_type.startswith("ct:"):
+        python_type = _ct_specification_type_to_python_type(specification_type)
+    elif specification_type in [
+        "pt:bytes",
+        "pt:int",
+        "pt:float",
+        "pt:bool",
+        "pt:str",
+    ]:
+        python_type = _pt_specification_type_to_python_type(specification_type)
+    elif specification_type.startswith("pt:set"):
+        python_type = _pct_specification_type_to_python_type(specification_type)
+    elif specification_type.startswith("pt:list"):
+        python_type = _pct_specification_type_to_python_type(specification_type)
+    elif specification_type.startswith("pt:dict"):
+        python_type = _pmt_specification_type_to_python_type(specification_type)
+    else:
+        raise TypeError("Unsupported type: '{}'".format(specification_type))
+    return python_type
+
+
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
@@ -74,10 +273,10 @@ class ProtocolGenerator:
             "Set": True,
             "Tuple": True,
             "cast": True,
+            "FrozenSet": False,
             "Dict": False,
             "Union": False,
             "Optional": False,
-            "FrozenSet": False,
         }
 
         self._speech_acts = dict()  # type: Dict[str, Dict[str, str]]
@@ -104,213 +303,25 @@ class ProtocolGenerator:
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
                 custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
+                if len(re.findall("pt:set\\[", content_type)) >= 1:
+                    self._imports["FrozenSet"] = True
+                if len(re.findall("pt:dict\\[", content_type)) >= 1:
+                    self._imports["Dict"] = True
+                if len(re.findall("pt:union\\[", content_type)) >= 1:
+                    self._imports["Union"] = True
+                if len(re.findall("pt:optional\\[", content_type)) >= 1:
+                    self._imports["Optional"] = True
                 for custom_type in custom_types:
                     all_custom_types_set.add(
-                        self._specification_type_to_python_type(custom_type)
+                        _specification_type_to_python_type(custom_type)
                     )
-                pythonic_content_type = self._specification_type_to_python_type(
+                pythonic_content_type = _specification_type_to_python_type(
                     content_type
                 )
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
-
-    def _get_sub_types_of_compositional_types(self, compositional_type: str) -> tuple:
-        """
-        Extract the sub-types of compositional types. 
-        
-        This method handles both specification types (e.g. pt:set[], pt:dict[]) as well as python types (e.g. FrozenSet[], Union[]).
-
-        :param compositional_type: the compositional type string whose sub-types are to be extracted.
-        :return: tuple containing all extracted sub-types.
-        """
-        sub_types_list = list()
-        if compositional_type.startswith("Optional") or compositional_type.startswith(
-            "pt:optional"
-        ):
-            sub_type1 = compositional_type[
-                compositional_type.index("[") + 1 : compositional_type.rindex("]")
-            ].strip()
-            sub_types_list.append(sub_type1)
-        if (
-            compositional_type.startswith("FrozenSet")
-            or compositional_type.startswith("pt:set")
-            or compositional_type.startswith("Tuple")
-            or compositional_type.startswith("pt:list")
-        ):
-            sub_type1 = compositional_type[
-                compositional_type.index("[") + 1 : compositional_type.rindex("]")
-            ].strip()
-            sub_types_list.append(sub_type1)
-        if compositional_type.startswith("Dict") or compositional_type.startswith(
-            "pt:dict"
-        ):
-            sub_type1 = compositional_type[
-                compositional_type.index("[") + 1 : compositional_type.index(",")
-            ].strip()
-            sub_type2 = compositional_type[
-                compositional_type.index(",") + 1 : compositional_type.rindex("]")
-            ].strip()
-            sub_types_list.extend([sub_type1, sub_type2])
-        if compositional_type.startswith("Union") or compositional_type.startswith(
-            "pt:union"
-        ):
-            inside_union = compositional_type[
-                compositional_type.index("[") + 1 : compositional_type.rindex("]")
-            ].strip()
-            while inside_union != "":
-                if inside_union.startswith("Dict") or inside_union.startswith(
-                    "pt:dict"
-                ):
-                    sub_type = inside_union[: inside_union.index("]") + 1].strip()
-                    rest_of_inside_union = inside_union[
-                        inside_union.index("]") + 1 :
-                    ].strip()
-                    if rest_of_inside_union.find(",") == -1:
-                        # it is the last sub-type
-                        inside_union = rest_of_inside_union.strip()
-                    else:
-                        # it is not the last sub-type
-                        inside_union = rest_of_inside_union[
-                            rest_of_inside_union.index(",") + 1 :
-                        ].strip()
-                else:
-                    if inside_union.find(",") == -1:
-                        # it is the last sub-type
-                        sub_type = inside_union.strip()
-                        inside_union = ""
-                    else:
-                        # it is not the last sub-type
-                        sub_type = inside_union[: inside_union.index(",")].strip()
-                        inside_union = inside_union[
-                            inside_union.index(",") + 1 :
-                        ].strip()
-                sub_types_list.append(sub_type)
-        return tuple(sub_types_list)
-
-    def _optional_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert an 'pt:optional' specification type into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        self._imports["Optional"] = True
-        element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element_type_in_python = self._specification_type_to_python_type(
-            element_types[0]
-        )
-        python_type = "Optional[{}]".format(element_type_in_python)
-        return python_type
-
-    def _ct_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a custom specification type into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        python_type = specification_type[3:]
-        return python_type
-
-    def _pt_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a primitive specification type into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        python_type = specification_type[3:]
-        return python_type
-
-    def _pct_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a primitive collection specification type into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element_type_in_python = self._specification_type_to_python_type(
-            element_types[0]
-        )
-        if specification_type.startswith("pt:set"):
-            self._imports["FrozenSet"] = True
-            python_type = "FrozenSet[{}]".format(element_type_in_python)
-        else:
-            self._imports["Tuple"] = True
-            python_type = "Tuple[{}]".format(element_type_in_python)
-        return python_type
-
-    def _pmt_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a primitive mapping specification type into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        self._imports["Dict"] = True
-        element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element1_type_in_python = self._specification_type_to_python_type(
-            element_types[0]
-        )
-        element2_type_in_python = self._specification_type_to_python_type(
-            element_types[1]
-        )
-        python_type = "Dict[{}, {}]".format(
-            element1_type_in_python, element2_type_in_python
-        )
-        return python_type
-
-    def _mt_specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a multi type 'pt:union' in a protocol specification into its python equivalent.
-
-        :param specification_type: the specification type
-        :return: The Python equivalent
-        """
-        self._imports["Union"] = True
-        sub_types = self._get_sub_types_of_compositional_types(specification_type)
-        python_type = "Union["
-        for sub_type in sub_types:
-            python_type += "{}, ".format(
-                self._specification_type_to_python_type(sub_type)
-            )
-        python_type = python_type[:-2]
-        python_type += "]"
-        return python_type
-
-    def _specification_type_to_python_type(self, specification_type: str) -> str:
-        """
-        Convert a data type in protocol specification into its Python equivalent using the _handle_...() methods.
-
-        :param specification_type: the data type described from a protocol specification.
-        :return: The Python equivalent of the data type.
-        """
-        if specification_type.startswith("pt:optional"):
-            python_type = self._optional_specification_type_to_python_type(specification_type)
-        elif specification_type.startswith("pt:union"):
-            python_type = self._mt_specification_type_to_python_type(specification_type)
-        elif specification_type.startswith("ct:"):
-            python_type = self._ct_specification_type_to_python_type(specification_type)
-        elif specification_type in [
-            "pt:bytes",
-            "pt:int",
-            "pt:float",
-            "pt:bool",
-            "pt:str",
-        ]:
-            python_type = self._pt_specification_type_to_python_type(specification_type)
-        elif specification_type.startswith("pt:set") or specification_type.startswith(
-            "pt:list"
-        ):
-            python_type = self._pct_specification_type_to_python_type(specification_type)
-        elif specification_type.startswith("pt:dict"):
-            python_type = self._pmt_specification_type_to_python_type(specification_type)
-        else:
-            raise TypeError("Unsupported type: '{}'".format(specification_type))
-        return python_type
 
     def _import_from_typing_str(self) -> str:
         """
@@ -407,9 +418,9 @@ class ProtocolGenerator:
             # check if the content exists then...
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
             indents += "    "
-            content_type = self._get_sub_types_of_compositional_types(content_type)[0]
+            content_type = _get_sub_types_of_compositional_types(content_type)[0]
         if content_type.startswith("Union["):
-            element_types = self._get_sub_types_of_compositional_types(content_type)
+            element_types = _get_sub_types_of_compositional_types(content_type)
             unique_standard_types = set()
             for typing_content_type in element_types:
                 if typing_content_type.startswith("FrozenSet"):
@@ -434,7 +445,7 @@ class ProtocolGenerator:
                 frozen_set_element_types = set()
                 for element_type in element_types:
                     if element_type.startswith("FrozenSet"):
-                        frozen_set_element_types.add(self._get_sub_types_of_compositional_types(element_type)[0])
+                        frozen_set_element_types.add(_get_sub_types_of_compositional_types(element_type)[0])
                 for frozen_set_element_type in frozen_set_element_types:
                     check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(frozen_set_element_type, content_name)
                 check_str = check_str[:-4]
@@ -458,7 +469,7 @@ class ProtocolGenerator:
                 tuple_element_types = set()
                 for element_type in element_types:
                     if element_type.startswith("Tuple"):
-                        tuple_element_types.add(self._get_sub_types_of_compositional_types(element_type)[0])
+                        tuple_element_types.add(_get_sub_types_of_compositional_types(element_type)[0])
                 for tuple_element_type in tuple_element_types:
                     check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(tuple_element_type, content_name)
                 check_str = check_str[:-4]
@@ -483,7 +494,7 @@ class ProtocolGenerator:
                 dict_key_value_types = dict()
                 for element_type in element_types:
                     if element_type.startswith("Dict"):
-                        dict_key_value_types[self._get_sub_types_of_compositional_types(element_type)[0]] = self._get_sub_types_of_compositional_types(element_type)[1]
+                        dict_key_value_types[_get_sub_types_of_compositional_types(element_type)[0]] = _get_sub_types_of_compositional_types(element_type)[1]
                 for element1_type, element2_type in dict_key_value_types.items():
                     check_str += indents + "                (type(key) == {} and type(value) == {}) or\n".format(element1_type, element2_type)
                 check_str = check_str[:-4]
@@ -510,7 +521,7 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             )
-            element_type = self._get_sub_types_of_compositional_types(content_type)[0]
+            element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += indents + "assert all(\n"
             check_str += (
                 indents
@@ -529,7 +540,7 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             )
-            element_type = self._get_sub_types_of_compositional_types(content_type)[0]
+            element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += indents + "assert all(\n"
             check_str += (
                 indents
@@ -548,8 +559,8 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             )
-            element_type_1 = self._get_sub_types_of_compositional_types(content_type)[0]
-            element_type_2 = self._get_sub_types_of_compositional_types(content_type)[1]
+            element_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
+            element_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
             # check the keys type then check the values type
             check_str += indents + "for key, value in self.{}.items():\n".format(
                 content_name
