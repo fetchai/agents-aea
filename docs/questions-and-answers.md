@@ -57,5 +57,7 @@ You can find a more detailed approach <a href="/connect-a-frontend/">here</a>
 <details><summary>Is the AEA framework ideal for agent based modelling?</summary>
 The goal of agent-based modeling is to search for explanatory insight into the collective behavior of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems. 
 Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
+<br><br>
+You can find more details <a href="/app-areas/">here</a>
 </details>
 
