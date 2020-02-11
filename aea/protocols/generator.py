@@ -51,6 +51,13 @@ def to_camel_case(text):
     return "".join(word.title() for word in text.split("_"))
 
 
+def get_indent_str(no_of_indents: int) -> str:
+    indents_str = ""
+    for _ in itertools.repeat(None, no_of_indents):
+        indents_str += "    "
+    return indents_str
+
+
 def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
     """
     Extract the sub-types of compositional types.
@@ -62,54 +69,52 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
     """
     sub_types_list = list()
     if compositional_type.startswith("Optional") or compositional_type.startswith(
-            "pt:optional"
+        "pt:optional"
     ):
         sub_type1 = compositional_type[
-                    compositional_type.index("[") + 1: compositional_type.rindex("]")
-                    ].strip()
+            compositional_type.index("[") + 1 : compositional_type.rindex("]")
+        ].strip()
         sub_types_list.append(sub_type1)
     if (
-            compositional_type.startswith("FrozenSet")
-            or compositional_type.startswith("pt:set")
-            or compositional_type.startswith("Tuple")
-            or compositional_type.startswith("pt:list")
+        compositional_type.startswith("FrozenSet")
+        or compositional_type.startswith("pt:set")
+        or compositional_type.startswith("Tuple")
+        or compositional_type.startswith("pt:list")
     ):
         sub_type1 = compositional_type[
-                    compositional_type.index("[") + 1: compositional_type.rindex("]")
-                    ].strip()
+            compositional_type.index("[") + 1 : compositional_type.rindex("]")
+        ].strip()
         sub_types_list.append(sub_type1)
     if compositional_type.startswith("Dict") or compositional_type.startswith(
-            "pt:dict"
+        "pt:dict"
     ):
         sub_type1 = compositional_type[
-                    compositional_type.index("[") + 1: compositional_type.index(",")
-                    ].strip()
+            compositional_type.index("[") + 1 : compositional_type.index(",")
+        ].strip()
         sub_type2 = compositional_type[
-                    compositional_type.index(",") + 1: compositional_type.rindex("]")
-                    ].strip()
+            compositional_type.index(",") + 1 : compositional_type.rindex("]")
+        ].strip()
         sub_types_list.extend([sub_type1, sub_type2])
     if compositional_type.startswith("Union") or compositional_type.startswith(
-            "pt:union"
+        "pt:union"
     ):
         inside_union = compositional_type[
-                       compositional_type.index("[") + 1: compositional_type.rindex("]")
-                       ].strip()
+            compositional_type.index("[") + 1 : compositional_type.rindex("]")
+        ].strip()
         while inside_union != "":
-            if inside_union.startswith("Dict") or inside_union.startswith(
-                    "pt:dict"
-            ):
+            if inside_union.startswith("Dict") or inside_union.startswith("pt:dict"):
                 sub_type = inside_union[: inside_union.index("]") + 1].strip()
                 rest_of_inside_union = inside_union[
-                                       inside_union.index("]") + 1:
-                                       ].strip()
+                    inside_union.index("]") + 1 :
+                ].strip()
                 if rest_of_inside_union.find(",") == -1:
                     # it is the last sub-type
                     inside_union = rest_of_inside_union.strip()
                 else:
                     # it is not the last sub-type
                     inside_union = rest_of_inside_union[
-                                   rest_of_inside_union.index(",") + 1:
-                                   ].strip()
+                        rest_of_inside_union.index(",") + 1 :
+                    ].strip()
             else:
                 if inside_union.find(",") == -1:
                     # it is the last sub-type
@@ -118,9 +123,7 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
                 else:
                     # it is not the last sub-type
                     sub_type = inside_union[: inside_union.index(",")].strip()
-                    inside_union = inside_union[
-                                   inside_union.index(",") + 1:
-                                   ].strip()
+                    inside_union = inside_union[inside_union.index(",") + 1 :].strip()
             sub_types_list.append(sub_type)
     return tuple(sub_types_list)
 
@@ -133,9 +136,7 @@ def _optional_specification_type_to_python_type(specification_type: str) -> str:
     :return: The equivalent data type in Python
     """
     element_type = _get_sub_types_of_compositional_types(specification_type)[0]
-    element_type_in_python = _specification_type_to_python_type(
-        element_type
-    )
+    element_type_in_python = _specification_type_to_python_type(element_type)
     python_type = "Optional[{}]".format(element_type_in_python)
     return python_type
 
@@ -150,9 +151,7 @@ def _mt_specification_type_to_python_type(specification_type: str) -> str:
     sub_types = _get_sub_types_of_compositional_types(specification_type)
     python_type = "Union["
     for sub_type in sub_types:
-        python_type += "{}, ".format(
-            _specification_type_to_python_type(sub_type)
-        )
+        python_type += "{}, ".format(_specification_type_to_python_type(sub_type))
     python_type = python_type[:-2]
     python_type += "]"
     return python_type
@@ -188,9 +187,7 @@ def _pct_specification_type_to_python_type(specification_type: str) -> str:
     :return: The equivalent data type in Python
     """
     element_type = _get_sub_types_of_compositional_types(specification_type)[0]
-    element_type_in_python = _specification_type_to_python_type(
-        element_type
-    )
+    element_type_in_python = _specification_type_to_python_type(element_type)
     if specification_type.startswith("pt:set"):
         python_type = "FrozenSet[{}]".format(element_type_in_python)
     else:
@@ -206,12 +203,8 @@ def _pmt_specification_type_to_python_type(specification_type: str) -> str:
     :return: The equivalent data type in Python
     """
     element_types = _get_sub_types_of_compositional_types(specification_type)
-    element1_type_in_python = _specification_type_to_python_type(
-        element_types[0]
-    )
-    element2_type_in_python = _specification_type_to_python_type(
-        element_types[1]
-    )
+    element1_type_in_python = _specification_type_to_python_type(element_types[0])
+    element2_type_in_python = _specification_type_to_python_type(element_types[1])
     python_type = "Dict[{}, {}]".format(
         element1_type_in_python, element2_type_in_python
     )
@@ -315,9 +308,7 @@ class ProtocolGenerator:
                     all_custom_types_set.add(
                         _specification_type_to_python_type(custom_type)
                     )
-                pythonic_content_type = _specification_type_to_python_type(
-                    content_type
-                )
+                pythonic_content_type = _specification_type_to_python_type(content_type)
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
         self._all_performatives = sorted(all_performatives_set)
@@ -404,16 +395,16 @@ class ProtocolGenerator:
 
         return enum_str
 
-    def _check_content_type_str(self, no_of_indents: int, content_name, content_type) -> str:
+    def _check_content_type_str(
+        self, no_of_indents: int, content_name, content_type
+    ) -> str:
         """
         Produce the checks of elements of compositional types.
 
         :return: the string containing the checks.
         """
         check_str = ""
-        indents = ""
-        for _ in itertools.repeat(None, no_of_indents):
-            indents += "    "
+        indents = get_indent_str(no_of_indents)
         if content_type.startswith("Optional["):
             # check if the content exists then...
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
@@ -437,82 +428,140 @@ class ProtocolGenerator:
                 check_str += "type(self.{}) == {} or ".format(content_name, unique_type)
             check_str = check_str[:-4]
             check_str += ", \"Content '{}' should be either of the following types: {}.\"\n".format(
-                        content_name, [unique_standard_type for unique_standard_type in unique_standard_types]
-                    )
+                content_name,
+                [
+                    unique_standard_type
+                    for unique_standard_type in unique_standard_types
+                ],
+            )
             if "frozenset" in unique_standard_types:
-                check_str += indents + "if type(self.{}) == frozenset:\n".format(content_name)
+                check_str += indents + "if type(self.{}) == frozenset:\n".format(
+                    content_name
+                )
                 check_str += indents + "    assert (\n"
                 frozen_set_element_types = set()
                 for element_type in element_types:
                     if element_type.startswith("FrozenSet"):
-                        frozen_set_element_types.add(_get_sub_types_of_compositional_types(element_type)[0])
+                        frozen_set_element_types.add(
+                            _get_sub_types_of_compositional_types(element_type)[0]
+                        )
                 for frozen_set_element_type in frozen_set_element_types:
-                    check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(frozen_set_element_type, content_name)
+                    check_str += (
+                        indents
+                        + "        all(type(element) == {} for element in self.{}) or ".format(
+                            frozen_set_element_type, content_name
+                        )
+                    )
                 check_str = check_str[:-4]
                 check_str += "\n"
                 if len(frozen_set_element_types) == 1:
-                    check_str += indents + "    ), \"Elements of the content '{}' should be of type ".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"Elements of the content '{}' should be of type ".format(
+                            content_name
+                        )
+                    )
                     for frozen_set_element_type in frozen_set_element_types:
                         check_str += "'{}'".format(frozen_set_element_type)
-                    check_str += ".\"\n"
+                    check_str += '."\n'
                 else:
-                    check_str += indents + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
+                            content_name
+                        )
+                    )
                     for frozen_set_element_type in frozen_set_element_types:
                         check_str += "'{}' or ".format(frozen_set_element_type)
                     check_str = check_str[:-4]
-                    check_str += ".\"\n"
+                    check_str += '."\n'
             if "tuple" in unique_standard_types:
-                check_str += indents + "if type(self.{}) == tuple:\n".format(content_name)
+                check_str += indents + "if type(self.{}) == tuple:\n".format(
+                    content_name
+                )
                 check_str += indents + "    assert (\n"
                 tuple_element_types = set()
                 for element_type in element_types:
                     if element_type.startswith("Tuple"):
-                        tuple_element_types.add(_get_sub_types_of_compositional_types(element_type)[0])
+                        tuple_element_types.add(
+                            _get_sub_types_of_compositional_types(element_type)[0]
+                        )
                 for tuple_element_type in tuple_element_types:
-                    check_str += indents + "        all(type(element) == {} for element in self.{}) or ".format(tuple_element_type, content_name)
+                    check_str += (
+                        indents
+                        + "        all(type(element) == {} for element in self.{}) or ".format(
+                            tuple_element_type, content_name
+                        )
+                    )
                 check_str = check_str[:-4]
                 check_str += "\n"
                 if len(tuple_element_types) == 1:
-                    check_str += indents + "    ), \"Elements of the content '{}' should be of type ".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"Elements of the content '{}' should be of type ".format(
+                            content_name
+                        )
+                    )
                     for tuple_element_type in tuple_element_types:
                         check_str += "'{}'".format(tuple_element_type)
-                    check_str += ".\"\n"
+                    check_str += '."\n'
                 else:
-                    check_str += indents + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"The type of the elements of the content '{}' should be either .\"\n".format(
+                            content_name
+                        )
+                    )
                     for tuple_element_type in tuple_element_types:
                         check_str += "'{}' or ".format(tuple_element_type)
                     check_str = check_str[:-4]
-                    check_str += ".\"\n"
+                    check_str += '."\n'
             if "dict" in unique_standard_types:
-                check_str += indents + "if type(self.{}) == dict:\n".format(content_name)
-                check_str += indents + "    for key, value in self.{}.items():\n".format(content_name)
+                check_str += indents + "if type(self.{}) == dict:\n".format(
+                    content_name
+                )
+                check_str += (
+                    indents
+                    + "    for key, value in self.{}.items():\n".format(content_name)
+                )
                 check_str += indents + "        assert (\n"
                 dict_key_value_types = dict()
                 for element_type in element_types:
                     if element_type.startswith("Dict"):
-                        dict_key_value_types[_get_sub_types_of_compositional_types(element_type)[0]] = _get_sub_types_of_compositional_types(element_type)[1]
+                        dict_key_value_types[
+                            _get_sub_types_of_compositional_types(element_type)[0]
+                        ] = _get_sub_types_of_compositional_types(element_type)[1]
                 for element1_type, element2_type in dict_key_value_types.items():
-                    check_str += indents + "                (type(key) == {} and type(value) == {}) or\n".format(element1_type, element2_type)
+                    check_str += (
+                        indents
+                        + "                (type(key) == {} and type(value) == {}) or\n".format(
+                            element1_type, element2_type
+                        )
+                    )
                 check_str = check_str[:-4]
                 check_str += "\n"
 
                 if len(dict_key_value_types) == 1:
-                    check_str += indents + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
+                            content_name
+                        )
+                    )
                     for key, value in dict_key_value_types.items():
                         check_str += "'{}' and '{}' respectively".format(key, value)
-                    check_str += ".\"\n"
+                    check_str += '."\n'
                 else:
-                    check_str += indents + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
-                        content_name)
+                    check_str += (
+                        indents
+                        + "    ), \"The type of keys and values of '{}' dictionary must be ".format(
+                            content_name
+                        )
+                    )
                     for key, value in dict_key_value_types.items():
                         check_str += "'{}','{}' or ".format(key, value)
                     check_str = check_str[:-4]
-                    check_str += ".\"\n"
+                    check_str += '."\n'
         elif content_type.startswith("FrozenSet["):
             # check the type
             check_str += (
@@ -529,8 +578,11 @@ class ProtocolGenerator:
                     element_type, content_name
                 )
             )
-            check_str += indents + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
-                content_name, element_type
+            check_str += (
+                indents
+                + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
+                    content_name, element_type
+                )
             )
         elif content_type.startswith("Tuple["):
             # check the type
@@ -548,8 +600,11 @@ class ProtocolGenerator:
                     element_type, content_name
                 )
             )
-            check_str += indents + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
-                content_name, element_type
+            check_str += (
+                indents
+                + "), \"Elements of the content '{}' are not of type '{}'.\"\n".format(
+                    content_name, element_type
+                )
             )
         elif content_type.startswith("Dict["):
             # check the type
@@ -642,7 +697,9 @@ class ProtocolGenerator:
         cls_str += "        performative: str,\n"
         cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
-        cls_str += '        """Initialise an instance of {}Message."""\n'.format(self.protocol_specification_in_camel_case)
+        cls_str += '        """Initialise an instance of {}Message."""\n'.format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += "        super().__init__(\n"
         cls_str += "            dialogue_reference=dialogue_reference,\n"
         cls_str += "            message_id=message_id,\n"
@@ -674,7 +731,9 @@ class ProtocolGenerator:
         cls_str += "    @property\n"
         cls_str += "    def message_id(self) -> int:\n"
         cls_str += '        """Get the message_id of the message."""\n'
-        cls_str += '        assert self.is_set("message_id"), "message_id is not set."\n'
+        cls_str += (
+            '        assert self.is_set("message_id"), "message_id is not set."\n'
+        )
         cls_str += '        return cast(int, self.get("message_id"))\n\n'
         cls_str += "    @property\n"
         cls_str += "    def performative(self) -> Performative:  # noqa: F821\n"
@@ -908,28 +967,108 @@ class ProtocolGenerator:
 
         return cls_str
 
+    def _python_pt_type_to_proto_type(self, content_name, content_type, tag_no, no_of_indents) -> str:
+        python_type_to_proto_type = {
+            "bytes": "bytes",
+            "int": "int32",
+            "float": "float",
+            "bool": "bool",
+            "str": "string"
+        }
+        indents = get_indent_str(no_of_indents)
+
+        if content_type in python_type_to_proto_type.keys():
+            # content_type content_name = tag;
+            proto_type = python_type_to_proto_type[content_type]
+            entry = indents + "{} {} = {};".format(proto_type, content_name, tag_no)
+        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
+            # repeated element_type content_name = tag;
+            element_type = _get_sub_types_of_compositional_types(content_type)[0]
+            proto_type = python_type_to_proto_type[element_type]
+            entry = indents + "repeated {} {} = {};".format(proto_type, content_name, tag_no)
+        elif content_type.startswith("Dict"):
+            # map<key_type, value_type> content_name = tag;
+            key_type = _get_sub_types_of_compositional_types(content_type)[0]
+            value_type = _get_sub_types_of_compositional_types(content_type)[1]
+            proto_key_type = python_type_to_proto_type[key_type]
+            proto_value_type = python_type_to_proto_type[value_type]
+            entry = indents + "map<{}, {}> {} = {};".format(
+                proto_key_type, proto_value_type, content_name, tag_no
+            )
+        elif content_type.startswith("Union"):
+            # entry = indents + "oneof {} {{\n".format(content_name)
+            entry = ""
+            sub_type_name_counter = 1
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            for sub_type in sub_types:
+                if sub_type.startswith("FrozenSet"):
+                    sub_type_name_simplified = "set"
+                elif sub_type.startswith("Tuple"):
+                    sub_type_name_simplified = "tuple"
+                elif sub_type.startswith("Dict"):
+                    sub_type_name_simplified = "dict"
+                else:
+                    sub_type_name_simplified = sub_type
+                sub_type_name = "{}_in_{}_{}".format(content_name, sub_type_name_simplified, sub_type_name_counter)
+                entry += "{}\n".format(self._python_pt_type_to_proto_type(sub_type_name, sub_type, tag_no, no_of_indents))
+                tag_no += 1
+                sub_type_name_counter += 1
+            entry = entry[:-1]
+            # entry += indents + "}"
+        elif content_type.startswith("Optional"):
+            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+            entry = self._python_pt_type_to_proto_type(content_name, sub_type, tag_no, no_of_indents)
+        else:
+            raise TypeError("Invalid type: '{}' in content '{}'".format(content_type, content_name))
+        return entry
+
     def _protocol_buffer_schema_str(self) -> str:
         """
         Produce the content of the Protocol Buffers schema.
 
         :return: the protocol buffers schema string
         """
-        indents = ""
-        cls_str = ""
-        cls_str += indents + 'syntax = "proto3";\n'
-        cls_str += indents + "package fetch.aea.{};\n".format(
+        indents = get_indent_str(0)
+
+        # heading
+        proto_buff_schema_str = ""
+        proto_buff_schema_str += indents + 'syntax = "proto3";\n'
+        proto_buff_schema_str += indents + "package fetch.aea.{};\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += indents + "message {}Message{{\n\n".format(
+        proto_buff_schema_str += indents + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
         )
-        indents += "    "
-        cls_str += indents + "int32 message_id = 1;\n"
-        cls_str += indents + "string dialogue_starter_reference = 2;\n"
-        cls_str += indents + "string dialogue_responder_reference = 3;\n"
-        cls_str += indents + "int32 target = 4;\n"
-        cls_str += "}\n"
-        return cls_str
+
+        # performatives
+        indents = get_indent_str(1)
+        for performative, contents in self._speech_acts.items():
+            proto_buff_schema_str += indents + "message {}{{".format(performative.title())
+            tag_no = 1
+            for content_name, content_type in contents.items():
+                proto_buff_schema_str += "\n"
+                proto_buff_schema_str += self._python_pt_type_to_proto_type(content_name, content_type, tag_no, 2)
+                tag_no += 1
+            proto_buff_schema_str += "\n"
+            proto_buff_schema_str += indents + "}\n\n"
+
+        # meta-data
+        proto_buff_schema_str += indents + "int32 message_id = 1;\n"
+        proto_buff_schema_str += indents + "string dialogue_starter_reference = 2;\n"
+        proto_buff_schema_str += indents + "string dialogue_responder_reference = 3;\n"
+        proto_buff_schema_str += indents + "int32 target = 4;\n"
+        proto_buff_schema_str += indents + "oneof performative {\n"
+        indents = get_indent_str(2)
+        tag_no = 5
+        for performative in self._speech_acts.keys():
+            proto_buff_schema_str += indents + "{} {} = {};\n".format(performative.title(), performative, tag_no)
+            tag_no += 1
+        indents = get_indent_str(1)
+        proto_buff_schema_str += indents + "}\n"
+
+        indents = get_indent_str(0)
+        proto_buff_schema_str += indents + "}\n"
+        return proto_buff_schema_str
 
     def _generate_message_class(self) -> None:
         """
