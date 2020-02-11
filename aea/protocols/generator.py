@@ -21,8 +21,6 @@
 import itertools
 import os
 import re
-import shlex
-import subprocess # nosec
 from os import path
 from pathlib import Path
 from typing import Dict, List
@@ -944,5 +942,4 @@ class ProtocolGenerator:
             self.protocol_specification.name, self.protocol_specification_in_camel_case
         )
         print("executing command:\n{}".format(cmd))
-        cmd_list = shlex.split(cmd)
-        subprocess.run(cmd_list)  # nosec
+        os.system(cmd)  # nosec

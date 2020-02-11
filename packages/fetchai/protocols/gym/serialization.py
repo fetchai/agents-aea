@@ -48,18 +48,24 @@ class GymSerializer(Serializer):
 
         if msg.performative == GymMessage.Performative.ACT:
             action = msg.action  # type: Any
-            action_bytes = base64.b64encode(pickle.dumps(action)).decode("utf-8")  # nosec
+            action_bytes = base64.b64encode(pickle.dumps(action)).decode(
+                "utf-8"
+            )  # nosec
             new_body["action"] = action_bytes
             new_body["step_id"] = msg.step_id
         elif msg.performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation = msg.observation
-            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode(  # nosec
+            observation_bytes = base64.b64encode(
+                pickle.dumps(observation)
+            ).decode(  # nosec
                 "utf-8"
             )
             new_body["observation"] = observation_bytes
             reward = msg.reward
-            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")  # nosec
+            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode(
+                "utf-8"
+            )  # nosec
             new_body["reward"] = reward_bytes
             info = msg.info
             info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")  # nosec

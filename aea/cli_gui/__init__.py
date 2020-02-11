@@ -279,7 +279,7 @@ def _call_aea(param_list: List[str], dir_arg: str) -> int:
     with lock:
         old_cwd = os.getcwd()
         os.chdir(dir_arg)
-        ret = subprocess.call(param_list) # nosec
+        ret = subprocess.call(param_list)  # nosec
         os.chdir(old_cwd)
     return ret
 
@@ -542,7 +542,7 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
 
 def _kill_running_oef_nodes():
     logging.info("Kill off any existing OEF nodes which are running...")
-    subprocess.call(["docker", "kill", oef_node_name]) # nosec
+    subprocess.call(["docker", "kill", oef_node_name])  # nosec
 
 
 def create_app():
