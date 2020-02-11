@@ -967,13 +967,15 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _python_pt_type_to_proto_type(self, content_name, content_type, tag_no, no_of_indents) -> str:
+    def _python_pt_type_to_proto_type(
+        self, content_name, content_type, tag_no, no_of_indents
+    ) -> str:
         python_type_to_proto_type = {
             "bytes": "bytes",
             "int": "int32",
             "float": "float",
             "bool": "bool",
-            "str": "string"
+            "str": "string",
         }
         indents = get_indent_str(no_of_indents)
 
@@ -985,7 +987,9 @@ class ProtocolGenerator:
             # repeated element_type content_name = tag;
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             proto_type = python_type_to_proto_type[element_type]
-            entry = indents + "repeated {} {} = {};".format(proto_type, content_name, tag_no)
+            entry = indents + "repeated {} {} = {};".format(
+                proto_type, content_name, tag_no
+            )
         elif content_type.startswith("Dict"):
             # map<key_type, value_type> content_name = tag;
             key_type = _get_sub_types_of_compositional_types(content_type)[0]
@@ -1009,17 +1013,27 @@ class ProtocolGenerator:
                     sub_type_name_simplified = "dict"
                 else:
                     sub_type_name_simplified = sub_type
-                sub_type_name = "{}_in_{}_{}".format(content_name, sub_type_name_simplified, sub_type_name_counter)
-                entry += "{}\n".format(self._python_pt_type_to_proto_type(sub_type_name, sub_type, tag_no, no_of_indents))
+                sub_type_name = "{}_in_{}_{}".format(
+                    content_name, sub_type_name_simplified, sub_type_name_counter
+                )
+                entry += "{}\n".format(
+                    self._python_pt_type_to_proto_type(
+                        sub_type_name, sub_type, tag_no, no_of_indents
+                    )
+                )
                 tag_no += 1
                 sub_type_name_counter += 1
             entry = entry[:-1]
             # entry += indents + "}"
         elif content_type.startswith("Optional"):
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            entry = self._python_pt_type_to_proto_type(content_name, sub_type, tag_no, no_of_indents)
+            entry = self._python_pt_type_to_proto_type(
+                content_name, sub_type, tag_no, no_of_indents
+            )
         else:
-            raise TypeError("Invalid type: '{}' in content '{}'".format(content_type, content_name))
+            raise TypeError(
+                "Invalid type: '{}' in content '{}'".format(content_type, content_name)
+            )
         return entry
 
     def _protocol_buffer_schema_str(self) -> str:
@@ -1043,11 +1057,15 @@ class ProtocolGenerator:
         # performatives
         indents = get_indent_str(1)
         for performative, contents in self._speech_acts.items():
-            proto_buff_schema_str += indents + "message {}{{".format(performative.title())
+            proto_buff_schema_str += indents + "message {}{{".format(
+                performative.title()
+            )
             tag_no = 1
             for content_name, content_type in contents.items():
                 proto_buff_schema_str += "\n"
-                proto_buff_schema_str += self._python_pt_type_to_proto_type(content_name, content_type, tag_no, 2)
+                proto_buff_schema_str += self._python_pt_type_to_proto_type(
+                    content_name, content_type, tag_no, 2
+                )
                 tag_no += 1
             proto_buff_schema_str += "\n"
             proto_buff_schema_str += indents + "}\n\n"
@@ -1061,7 +1079,9 @@ class ProtocolGenerator:
         indents = get_indent_str(2)
         tag_no = 5
         for performative in self._speech_acts.keys():
-            proto_buff_schema_str += indents + "{} {} = {};\n".format(performative.title(), performative, tag_no)
+            proto_buff_schema_str += indents + "{} {} = {};\n".format(
+                performative.title(), performative, tag_no
+            )
             tag_no += 1
         indents = get_indent_str(1)
         proto_buff_schema_str += indents + "}\n"
