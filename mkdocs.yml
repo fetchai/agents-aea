@@ -44,6 +44,7 @@ nav:
     - Use cases:
         - "Generic skills": 'generic-skills.md'
         - "ORM integration" : 'orm-integration-to-generic.md'
+        - "Frontend intergration": 'connect-a-frontend.md'
     - Step by step guides:
         - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Architecture:

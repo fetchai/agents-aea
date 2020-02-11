@@ -1,0 +1,20 @@
+This demo will discuss the options we would have if we wanted to connect a frontend to the AEA. The following diagram illustrates 
+the two options we are going to discuss.
+
+<center>![How to connect frontend to your AEA](assets/http-integration.png)</center> 
+
+## Case 1
+The first option we have is to create a connection that will handle the incoming requests from the rest API. In this scenario,
+the rest API communicates with the AEA and requests are handled from a connection that we developed. The rest API should send envelops to the AEA, then the multiplexer will pass the message to the correct skill. 
+
+## Case 2
+The other option would be to create a stand-alone `Multiplexer` with an `OEF` connection that will be able to search and discover other AEAs. In this scenario,
+the frontend should query the OEF for results. Then we can communicate with the AEA by sending envelopes.
+
+## Conclusion
+
+The major difference between these two approaches is that in the first case we should know the IP of the AEA to be able to communicate. In case 2 though, the whole search and discovery are handled by the OEF.
+
+The other difference is that in the first case we are limited to communicate with one or a list of known AEAs and it is less dynamic since we will have to manually update
+the known AEAs each time we want to communicate with someone else. On the contrary, case 2 would return different results based on the search query in the OEF. This implementation makes
+harder to communicate with specific AEA since that both ends must be connected to the OEF.

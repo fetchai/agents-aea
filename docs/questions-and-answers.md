@@ -21,7 +21,9 @@ You can read more about the Search and Discovery <a href="/oef-ledger/">here</a>
 
 <details><summary>How does an AEA use blockchain?</summary>
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
-two different networks natively: the `Fetch.ai` network and the `Ethereum` network.
+two different networks natively: the `Fetch.ai` network and the `Ethereum` network. 
+<br><br>
+You can read more about the intergration of ledger <a href="/integration/">here</a>
 
 </details>
 
@@ -45,6 +47,10 @@ You can find example of this implementation in the <a href='/thermometer-skills-
 </details>
 
 <details><summary>How does one connect a frontend?</summary>
-TODO://
+There are two options that one could connect a frontend. The first option would be to create an HTTP connection and then create an app that will communicate with this
+connections.
+The other option is to create a Frontend client that will communicate with the agent via the OEF.
+<br><br>
+You can find a more detailed approach <a href="/connect-a-frontend/">here</a>
 </details>
 
