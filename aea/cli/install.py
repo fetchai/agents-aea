@@ -45,19 +45,19 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             command += ["-i", index] if index is not None else []
             command += [dependency_name + version_constraint]
         logger.debug("Calling '{}'".format(" ".join(command)))
-        subp = subprocess.Popen(command)
+        subp = subprocess.Popen(command)  # nosec
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception as e:
         logger.error(
-            "An error occurred while installing {}: {}".format(dependency, str(e))
+            "An error occurred while installing {}: {}".format(dependency_name, str(e))
         )
         sys.exit(1)
 
 
 def _install_from_requirement(file: str):
     try:
-        subp = subprocess.Popen([sys.executable, "-m", "pip", "install", "-r", file])
+        subp = subprocess.Popen([sys.executable, "-m", "pip", "install", "-r", file])  # nosec
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception:
@@ -73,7 +73,7 @@ def _install_from_requirement(file: str):
 @click.option(
     "-r",
     "--requirement",
-    type=str,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True),
     required=False,
     default=None,
     help="Install from the given requirements file.",
