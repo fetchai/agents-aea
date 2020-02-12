@@ -24,11 +24,15 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.common import (
+    PublicIdParameter,
+    _try_to_load_protocols,
     format_items,
     format_skills,
     try_get_item_source_path,
     try_get_vendorized_item_target_path,
 )
+
+from tests.test_cli.tools_for_testing import ContextMock
 
 
 class FormatItemsTestCase(TestCase):
@@ -129,3 +133,23 @@ class TryGetItemTargetPathTestCase(TestCase):
             try_get_vendorized_item_target_path(
                 "skills", "author", "skill-name", "packages_path"
             )
+
+
+@mock.patch("aea.cli.common.Path.exists", return_value=False)
+class TryToLoadProtocolsTestCase(TestCase):
+    """Test case for _try_to_load_protocols method."""
+
+    def _try_to_load_protocols_protocol_dir_not_exists(self, *mocks):
+        """Test for _try_to_load_protocols protocols dir not exists."""
+        ctx_mock = ContextMock(protocols=["author/protocol-1:0.1.0"])
+        _try_to_load_protocols(ctx_mock)
+
+
+class PublicIdParameterTestCase(TestCase):
+    """Test case for PublicIdParameter method."""
+
+    def test_get_metavar_positive(self):
+        """Test for get_metavar positive result."""
+        result = PublicIdParameter.get_metavar("obj", "param")
+        expected_result = "PUBLIC_ID"
+        self.assertEqual(result, expected_result)
