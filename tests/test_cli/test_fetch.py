@@ -20,9 +20,18 @@
 
 from unittest import TestCase, mock
 
+from click import ClickException
+from click.testing import CliRunner
+
+from aea.cli import cli
 from aea.cli.fetch import _fetch_agent_locally
 
+from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
+
+
+def _raise_sys_exit(self, *args, **kwargs):
+    raise SystemExit()
 
 
 @mock.patch("aea.cli.fetch.copy_tree")
@@ -32,8 +41,10 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 class FetchAgentLocallyTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
+    @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     def test_fetch_agent_locally_positive(
         self,
+        exists_mock,
         try_to_load_agent_config_mock,
         try_get_item_source_path_mock,
         join_mock,
@@ -42,3 +53,46 @@ class FetchAgentLocallyTestCase(TestCase):
         """Test for fetch_agent_locally method positive result."""
         _fetch_agent_locally(ContextMock(), PublicIdMock(), ContextMock())
         copy_tree.assert_called_once_with("path", "joined-path")
+
+    @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)
+    def test_fetch_agent_locally_already_exists(self, *mocks):
+        """Test for fetch_agent_locally method agent already exists."""
+        with self.assertRaises(ClickException):
+            _fetch_agent_locally(ContextMock(), PublicIdMock(), ContextMock())
+
+    @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
+    def test__fetch_agent_locally_with_deps_positive(self, *mocks):
+        """Test for fetch_agent_locally method with deps positive result."""
+        click_context_mock = ContextMock()
+        ctx_mock = ContextMock(connections=["1"], protocols=["2"], skills=["3"])
+        _fetch_agent_locally(ctx_mock, PublicIdMock(), click_context_mock)
+        click_context_mock.invoke.assert_called()
+
+    @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
+    def test__fetch_agent_locally_with_deps_sys_exit(self, *mocks):
+        """Test for fetch_agent_locally method with deps system exit catch."""
+        click_context_mock = ContextMock()
+        click_context_mock.invoke = _raise_sys_exit
+        ctx_mock = ContextMock(connections=["1"])
+        _fetch_agent_locally(ctx_mock, PublicIdMock(), click_context_mock)
+
+
+@mock.patch("aea.cli.fetch.fetch_agent")
+@mock.patch("aea.cli.fetch._fetch_agent_locally")
+class FetchCommandTestCase(TestCase):
+    """Test case for CLI fetch command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_fetch_positive(self, *mocks):
+        """Test for CLI push connection positive result."""
+        self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "fetch", "--registry", "author/name:0.1.0"],
+            standalone_mode=False,
+        )
+        self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "fetch", "author/name:0.1.0"], standalone_mode=False,
+        )

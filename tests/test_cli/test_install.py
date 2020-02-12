@@ -21,13 +21,14 @@
 
 import os
 import tempfile
-import unittest.mock
 from pathlib import Path
+from unittest import TestCase, mock
 
 import yaml
 
 import aea.cli.common
 from aea.cli import cli
+from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 
 from ..common.click_testing import CliRunner
@@ -92,7 +93,7 @@ class TestInstallFailsWhenDependencyDoesNotExist:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
@@ -163,3 +164,17 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+
+
+@mock.patch("aea.cli.install.subprocess.Popen")
+@mock.patch("aea.cli.install.subprocess.Popen.wait")
+@mock.patch("aea.cli.install.sys.exit")
+class InstallDependencyTestCase(TestCase):
+    """Test case for _install_dependency method."""
+
+    def test__install_dependency_with_git_url(self, *mocks):
+        """Test for _install_dependency method with git url."""
+        dependency = {
+            "git": "url",
+        }
+        _install_dependency("dependency_name", dependency)
