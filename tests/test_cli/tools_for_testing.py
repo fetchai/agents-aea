@@ -39,6 +39,7 @@ class AgentConfigMock:
         self.connections: List[str] = kwargs.get("connections", [])
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
+        self.agent_name: str = kwargs.get("agent_name", "agent-name")
 
     registry_path = "registry"
     name = "name"

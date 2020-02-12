@@ -32,7 +32,7 @@ from aea.cli.common import (
     try_get_vendorized_item_target_path,
 )
 
-from tests.test_cli.tools_for_testing import ContextMock
+from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
 class FormatItemsTestCase(TestCase):
@@ -136,17 +136,22 @@ class TryGetItemTargetPathTestCase(TestCase):
 
 
 @mock.patch("aea.cli.common.Path.exists", return_value=False)
+@mock.patch("aea.cli.common.load_agent_component_package")
+@mock.patch("aea.cli.common.add_agent_component_module_to_sys_modules")
+@mock.patch("builtins.open", mock.mock_open())
 class TryToLoadProtocolsTestCase(TestCase):
     """Test case for _try_to_load_protocols method."""
 
-    def _try_to_load_protocols_protocol_dir_not_exists(self, *mocks):
+    def test__try_to_load_protocols_protocol_dir_not_exists(self, *mocks):
         """Test for _try_to_load_protocols protocols dir not exists."""
-        ctx_mock = ContextMock(protocols=["author/protocol-1:0.1.0"])
+        ctx_mock = ContextMock(protocols=[PublicIdMock()])
+        ctx_mock.protocol_loader = mock.Mock()
+        ctx_mock.protocol_loader.load = mock.Mock()
         _try_to_load_protocols(ctx_mock)
 
 
 class PublicIdParameterTestCase(TestCase):
-    """Test case for PublicIdParameter method."""
+    """Test case for PublicIdParameter class."""
 
     def test_get_metavar_positive(self):
         """Test for get_metavar positive result."""
