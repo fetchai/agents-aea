@@ -96,6 +96,14 @@ def get_all_extras() -> Dict:
 
 all_extras = get_all_extras()
 
+base_deps = [
+   *all_extras.get("crypto", []),
+    "PyYAML",
+    "jsonschema",
+    "protobuf",
+    "watchdog"
+]
+
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
 with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
@@ -122,10 +130,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    install_requires=[
-        *all_extras.get("crypto", []),
-        *all_extras.get("cli", []),
-    ],
+    install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
     entry_points={
