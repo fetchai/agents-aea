@@ -49,12 +49,13 @@ class SaveItemLocallyTestCase(TestCase):
         """Test for save_item_locally positive result."""
         item_type = "skill"
         item_id = PublicIdMock()
-        _save_item_locally(ContextMock(), item_type, item_id)
+        ctx_mock = ContextMock()
+        _save_item_locally(ctx_mock, item_type, item_id)
         try_get_item_source_path_mock.assert_called_once_with(
             "cwd", item_id.author, "skills", item_id.name
         )
         try_get_vendorized_item_target_path_mock.assert_called_once_with(
-            ContextMock.agent_config.registry_path,
+            ctx_mock.agent_config.registry_path,
             item_id.author,
             item_type + "s",
             item_id.name,
