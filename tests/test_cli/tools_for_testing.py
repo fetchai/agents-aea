@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
-from unittest.mock import Mock
 
 from typing import List
+from unittest.mock import Mock
 
 from click import ClickException
 

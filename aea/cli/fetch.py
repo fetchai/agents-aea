@@ -34,7 +34,6 @@ from aea.cli.common import (
     Context,
     DEFAULT_REGISTRY_PATH,
     PublicIdParameter,
-    logger,
     try_get_item_source_path,
     try_to_load_agent_config,
 )
