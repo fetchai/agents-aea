@@ -22,7 +22,7 @@
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -112,7 +112,7 @@ class TestGymSkill:
         skill_config.handlers.read("gym").args["nb_steps"] = 20
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
-        process = subprocess.Popen(
+        process = subprocess.Popen(  # nosec
             [
                 sys.executable,
                 "-m",
@@ -127,7 +127,7 @@ class TestGymSkill:
 
         # check the gym run ends
 
-        time.sleep(5.0)
+        time.sleep(10.0)
         process.send_signal(signal.SIGINT)
         process.wait(timeout=5)
 

@@ -21,7 +21,7 @@
 
 import base64
 import json
-import pickle
+import pickle  # nosec
 from typing import cast
 
 from aea.protocols.base import Message
@@ -41,27 +41,27 @@ class MLTradeSerializer(Serializer):
 
         if msg.performative == MLTradeMessage.Performative.CFT:
             query = msg.query
-            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
+            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")  # nosec
             body["query"] = query_bytes
         elif msg.performative == MLTradeMessage.Performative.TERMS:
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
+            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
             body["terms"] = terms_bytes
         elif msg.performative == MLTradeMessage.Performative.ACCEPT:
             # encoding terms
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
+            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
             body["terms"] = terms_bytes
             # encoding tx_digest
             body["tx_digest"] = msg.tx_digest
         elif msg.performative == MLTradeMessage.Performative.DATA:
             # encoding terms
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
+            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
             body["terms"] = terms_bytes
             # encoding data
             data = msg.data
-            data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")
+            data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")  # nosec
             body["data"] = data_bytes
         else:  # pragma: no cover
             raise ValueError("Type not recognized.")
@@ -78,25 +78,25 @@ class MLTradeSerializer(Serializer):
         body["performative"] = msg_type
         if msg_type == MLTradeMessage.Performative.CFT:
             query_bytes = base64.b64decode(json_body["query"])
-            query = pickle.loads(query_bytes)
+            query = pickle.loads(query_bytes)  # nosec
             body["query"] = query
         elif msg_type == MLTradeMessage.Performative.TERMS:
             terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)
+            terms = pickle.loads(terms_bytes)  # nosec
             body["terms"] = terms
         elif msg_type == MLTradeMessage.Performative.ACCEPT:
             terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)
+            terms = pickle.loads(terms_bytes)  # nosec
             body["terms"] = terms
             body["tx_digest"] = json_body["tx_digest"]
         elif msg_type == MLTradeMessage.Performative.DATA:
             # encoding terms
             terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)
+            terms = pickle.loads(terms_bytes)  # nosec
             body["terms"] = terms
             # encoding data
             data_bytes = base64.b64decode(json_body["data"])
-            data = pickle.loads(data_bytes)
+            data = pickle.loads(data_bytes)  # nosec
             body["data"] = data
         else:  # pragma: no cover
             raise ValueError("Type not recognized.")

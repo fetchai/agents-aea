@@ -942,4 +942,4 @@ class ProtocolGenerator:
             self.protocol_specification.name, self.protocol_specification_in_camel_case
         )
         print("executing command:\n{}".format(cmd))
-        os.system(cmd)
+        os.system(cmd)  # nosec

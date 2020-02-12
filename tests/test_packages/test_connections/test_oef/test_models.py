@@ -19,7 +19,7 @@
 
 """This test module contains the tests for the OEF models."""
 
-import pickle
+import pickle  # nosec
 from unittest import mock
 
 import pytest

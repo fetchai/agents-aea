@@ -21,7 +21,7 @@
 
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 from typing import Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -97,7 +97,7 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
             logger.info(
                 "[{}]:Launchng process {}".format(self.context.agent_name, param_list)
             )
-            self.process_id = subprocess.Popen(param_list)
+            self.process_id = subprocess.Popen(param_list)  # nosec
             os.chdir(old_cwp)
             logger.info(
                 "[{}]: detection and gui process launched, process_id {}".format(

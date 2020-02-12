@@ -21,7 +21,7 @@
 
 import os
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import time
 from pathlib import Path
@@ -37,7 +37,7 @@ def test_gym_ex(pytestconfig):
         pytest.skip("Skipping the test since it doesn't work in CI.")
 
     # run the example
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),

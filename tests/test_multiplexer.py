@@ -133,7 +133,7 @@ def test_multiplexer_connect_all_raises_error():
 def test_multiplexer_connect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the connection of one connection."""
     node = LocalNode()
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -208,7 +208,7 @@ def test_multiplexer_disconnect_all_raises_error():
 async def test_multiplexer_disconnect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the disconnection of one connection."""
     with LocalNode() as node:
-        tmpdir = Path(tempfile.mktemp())
+        tmpdir = Path(tempfile.mkdtemp())
         d = tmpdir / "test_stub"
         d.mkdir(parents=True)
         input_file_path = d / "input_file.csv"
