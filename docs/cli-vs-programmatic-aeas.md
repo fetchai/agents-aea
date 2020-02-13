@@ -1,9 +1,9 @@
-The AEA framework enables us to create agents either from the cli tool or programmatically.
+The AEA framework enables us to create agents either from the CLI tool or programmatically.
 
 The following demo demonstrates an interaction between two AEAs.
 
-The provider of weather data (cli based).
-The buyer of weather data (programmatic based).
+The provider of weather data (managed with the CLI).
+The buyer of weather data (managed programmatically).
 
 ## Preparation instructions
 
@@ -13,7 +13,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ##Discussion
 
-The scope of the specific demo is to demonstrate how a cli based AEA can interact with a programmatic based AEA. In order 
+The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
 to achieve this we are going to use the weather station skills. 
 This demo does not utilize a smart contract or a ledger interaction. 
 
@@ -24,7 +24,7 @@ In a separate terminal, launch a local OEF node (for search and discovery).
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
-Keep it running for all the following demos.
+Keep it running for the entire demo.
 
 ## Demo instructions:
 
@@ -218,3 +218,5 @@ In a new terminal window, navigate to the folder that you created the script and
 ``` bash
 python weather_client.py
 ```
+
+You should see both AEAs interacting now.
