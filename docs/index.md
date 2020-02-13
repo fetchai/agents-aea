@@ -6,7 +6,7 @@ AEAs act independently of constant user input and autonomously execute actions t
 
 The AEA framework is a Python-based development suite which equips you with an efficient and easy to understand set of tools for building autonomous economic agents. The framework is truly modular, easily extensible, and highly composable. This framework attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-To get started developing your own AEA, check out the <a href="../quickstart">next page</a>.
+To get started developing your own AEA, check out the <a href="../quickstart">quick start</a>.
 
 To start learning about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="../agent-oriented-development">agent-oriented development</a>.
 

@@ -22,6 +22,7 @@ nav:
       - Ways to build an AEA: 'steps.md'
       - AEA quick start: 'quickstart.md'
       - AEA and Web Frameworks: 'aea-vs-mvc.md'
+      - Build an AEA with the CLI: 'build-aea-step-by-step.md'
       - Build a skill for an AEA: 'skill-guide.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
       - AEAs vs Agents: 'agent-vs-aea.md'
