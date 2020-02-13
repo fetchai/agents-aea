@@ -82,7 +82,7 @@ aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
 ```
 
-## Add a stub connection		
+## Usage of the stub connection	
 
 AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.		
 		
