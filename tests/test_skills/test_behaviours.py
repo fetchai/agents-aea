@@ -21,9 +21,11 @@
 from collections import Counter
 
 from aea.skills.behaviours import (
+    FSMBehaviour,
     OneShotBehaviour,
     SequenceBehaviour,
-    FSMBehaviour, State)
+    State,
+)
 
 
 def test_sequence_behaviour():
@@ -77,7 +79,6 @@ def test_fms_behaviour():
             pass
 
     class SimpleOneShotBehaviour(State):
-
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             self.executed = False

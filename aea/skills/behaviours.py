@@ -367,7 +367,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """Return True if the behaviour is terminated, False otherwise."""
         return self.current is None
 
-    def register_transition(self, source: str, destination: str, event: Optional[str] = None):
+    def register_transition(
+        self, source: str, destination: str, event: Optional[str] = None
+    ):
         """
         Register a transition.
 
@@ -377,7 +379,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         :return: None
         :raise ValueError: if a transition from source with event is already present.
         """
-        if source in self.transitions and event in self.transitions.get(event, {}):
+        if source in self.transitions and event in self.transitions.get(source, {}):
             raise ValueError("Transition already registered.")
 
         self.transitions.setdefault(source, {})[event] = destination
