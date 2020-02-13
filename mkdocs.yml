@@ -70,6 +70,7 @@ nav:
       - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'
       - Use multiplexer stand-alone: 'multiplexer-standalone.md'
+      - 'Create stand-alone transaction': 'standalone-transaction.md'
     - Q&A: 'questions-and-answers.md'
 
 
