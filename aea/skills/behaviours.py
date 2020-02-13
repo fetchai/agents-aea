@@ -253,7 +253,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         self.current = None  # type: Optional[str]
 
         # mapping from state to mappings event-next_state
-        self.transitions = {}  # type: Dict[str, Dict[str, str]]
+        self.transitions = {}  # type: Dict[str, Dict[Optional[str], str]]
 
     @property
     def is_started(self) -> bool:
@@ -367,7 +367,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """Return True if the behaviour is terminated, False otherwise."""
         return self.current is None
 
-    def register_transition(self, source: str, destination: str, event: str):
+    def register_transition(self, source: str, destination: str, event: Optional[str] = None):
         """
         Register a transition.
 
