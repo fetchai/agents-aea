@@ -1,5 +1,7 @@
 syntax = "proto3";
+
 package fetch.aea.TwoPartyNegotiation;
+
 message TwoPartyNegotiationMessage{
 
     message Cfp{
@@ -15,20 +17,17 @@ message TwoPartyNegotiationMessage{
         map<string, bytes> proposal = 6;
         repeated int32 rounds = 7;
         repeated int32 items = 8;
-        string conditions_in_str_1 = 9;
-        map<string, int32> conditions_in_dict_2 = 10;
-        repeated string conditions_in_set_3 = 11;
-        map<string, float> conditions_in_dict_4 = 12;
+        string conditions_type_str = 9;
+        map<string, int32> conditions_type_dict_of_str_int = 10;
+        repeated string conditions_type_set_of_str = 11;
+        map<string, float> conditions_type_dict_of_str_float = 12;
     }
 
-    message Accept{
-    }
+    message Accept{}
 
-    message Decline{
-    }
+    message Decline{}
 
-    message Match_Accept{
-    }
+    message Match_Accept{}
 
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
