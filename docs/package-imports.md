@@ -1,0 +1,41 @@
+An agent that is generated from the AEA framework is a modular system with different skills, connections, and protocols.
+When we create a new agent with the command `aea create my_aea` we create the file structure that looks like the following :
+- connections
+- protocols
+- skills
+- vendor
+- aea-config.yaml
+
+In all the folders except the `vendor`, we can locate the packages we developed. On the other hand, if we download a 
+package from the registry it will be located inside the `vendor's folder` that follows a similar structure.
+
+To use a package, the path for the package must be listed inside the `aea-config.yaml` file.
+```yaml
+connections:
+- fetchai/stub:0.1.0
+```
+The above shows a part of the `aea-config.yaml`. If you see the connections, you will see that we follow a pattern of `author/name_package: version` to identify each package. The author that we are using is the author of the package and not 
+the author that shows the `aea-config.yaml` file. This indicates, that we are using a package that is made by Fetch.ai and is located inside the `vendor/fetchai/connections` folder.
+
+The way we import packages inside the agent is in the form of `packages.author.package_type.package_name.module`. This happens
+because when we run the agent, it is created a virtual folder with the name packages. 
+
+## Create a package
+
+If you want to create a package, you can use `aea scaffold connection/skill/protocol name` and this will create the package
+and put it inside the respective folder based on the command for example if we `scaffold` skill with the name `my_skill`
+it will be located inside the folder skills in the root directory of the agent (`my_aea/skills/my_skill`). On the other hand,
+if you use a package from the registry or the packages folder that comes along with the aea framework. You will be able to locate
+the package and the folder `vendor`. To sum up, your packages should be in the root folders and all the other packages under
+the vendor's folder.
+
+## Difference of vendor and own packages
+
+The main difference of the packages that are located under the vendor's folder and your own is that these packages are located under the vendor folder based on the author. For example, all the packages that we are using are under the folder `vendor/fetchai`
+Your packages exist in the root directory of your `aea`.
+
+
+## Name and author
+
+When you create a package, you should consider changing the author and the name of the package. You can find these inside
+the `.yaml` file of your newly created package.
