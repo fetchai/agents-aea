@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -23,7 +22,7 @@
 import base64
 import copy
 import json
-import pickle
+import pickle  # nosec
 from typing import cast
 
 from aea.protocols.base import Message
@@ -56,7 +55,7 @@ class OEFSerializer(Serializer):
         }:
             service_description = msg.service_description
             service_description_bytes = base64.b64encode(
-                pickle.dumps(service_description)
+                pickle.dumps(service_description)  # nosec
             ).decode("utf-8")
             new_body["service_description"] = service_description_bytes
         elif msg.type in {
@@ -65,7 +64,7 @@ class OEFSerializer(Serializer):
         }:
             agent_description = msg.agent_description
             agent_description_bytes = base64.b64encode(
-                pickle.dumps(agent_description)
+                pickle.dumps(agent_description)  # nosec
             ).decode("utf-8")
             new_body["agent_description"] = agent_description_bytes
         elif msg.type in {
@@ -73,7 +72,7 @@ class OEFSerializer(Serializer):
             OEFMessage.Type.SEARCH_AGENTS,
         }:
             query = msg.query
-            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
+            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")  # nosec
             new_body["query"] = query_bytes
         elif msg.type in {OEFMessage.Type.SEARCH_RESULT}:
             # we need this cast because the "agents" field might contains
@@ -104,21 +103,21 @@ class OEFSerializer(Serializer):
             service_description_bytes = base64.b64decode(
                 json_msg["service_description"]
             )
-            service_description = pickle.loads(service_description_bytes)
+            service_description = pickle.loads(service_description_bytes)  # nosec
             new_body["service_description"] = service_description
         elif oef_type in {
             OEFMessage.Type.REGISTER_AGENT,
             OEFMessage.Type.UNREGISTER_AGENT,
         }:
             agent_description_bytes = base64.b64decode(json_msg["agent_description"])
-            agent_description = pickle.loads(agent_description_bytes)
+            agent_description = pickle.loads(agent_description_bytes)  # nosec
             new_body["agent_description"] = agent_description
         elif oef_type in {
             OEFMessage.Type.SEARCH_SERVICES,
             OEFMessage.Type.SEARCH_AGENTS,
         }:
             query_bytes = base64.b64decode(json_msg["query"])
-            query = pickle.loads(query_bytes)
+            query = pickle.loads(query_bytes)  # nosec
             new_body["query"] = query
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
             new_body["agents"] = list(json_msg["agents"])

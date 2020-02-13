@@ -875,7 +875,6 @@ handlers:
  fipa:
    class_name: FIPAHandler
    args: {}
-tasks: {}
 models:
  strategy:
    class_name: Strategy
@@ -1731,7 +1730,6 @@ handlers:
  transaction:
    class_name: MyTransactionHandler
    args: {}
-tasks: {}
 models:
  strategy:
    class_name: Strategy

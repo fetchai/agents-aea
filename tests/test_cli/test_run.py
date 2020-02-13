@@ -22,7 +22,7 @@
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -68,7 +68,7 @@ def test_run(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             "-m",
@@ -118,7 +118,7 @@ def test_run_with_default_connection(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [sys.executable, "-m", "aea.cli", "run"],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
@@ -180,7 +180,7 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     )
     assert result.exit_code == 1
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
@@ -484,7 +484,7 @@ def test_run_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             "-m",
@@ -560,7 +560,7 @@ def test_run_fet_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             "-m",
@@ -614,7 +614,7 @@ def test_run_with_install_deps(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             "-m",
@@ -672,7 +672,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     assert result.exit_code == 0
     Path(t, agent_name, "requirements.txt").write_text(result.output)
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         [
             sys.executable,
             "-m",

@@ -1190,4 +1190,4 @@ class ProtocolGenerator:
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
             self.protocol_specification.name, self.protocol_specification_in_camel_case
         )
-        os.system(cmd)
+        os.system(cmd)  # nosec
