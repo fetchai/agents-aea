@@ -19,13 +19,9 @@
 
 """This module contains the tests for the behaviours."""
 
-from collections import Counter
-
 from aea.skills.behaviours import (
-    FSMBehaviour,
     OneShotBehaviour,
     SequenceBehaviour,
-    State,
 )
 
 
@@ -68,65 +64,65 @@ def test_sequence_behaviour():
     assert outputs == ["a", "b", "c"]
 
 
-def test_fms_behaviour():
-    """Test the finite-state machine behaviour."""
-    outputs = []
-
-    class MyFSMBehaviour(FSMBehaviour):
-        def setup(self) -> None:
-            pass
-
-        def teardown(self) -> None:
-            pass
-
-    class SimpleOneShotBehaviour(State):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.executed = False
-
-        def setup(self) -> None:
-            pass
-
-        def teardown(self) -> None:
-            pass
-
-        def act(self) -> None:
-            outputs.append(self.name)
-            self.next_state = chr(ord(self.name) + 1)
-            self.executed = True
-
-        def done(self) -> bool:
-            return self.executed
-
-    # TODO let the initialization of a behaviour action from constructor
-    a = SimpleOneShotBehaviour(name="a", skill_context=object())
-    b = SimpleOneShotBehaviour(name="b", skill_context=object())
-    c = SimpleOneShotBehaviour(name="c", skill_context=object())
-    fsm = MyFSMBehaviour(name="abc", skill_context=object())
-    fsm.register_state(str(a.name), a, initial=True)
-    fsm.register_state(str(b.name), b)
-    fsm.register_state(str(c.name), c)
-
-    max_iterations = 10
-    i = 0
-    while not fsm.is_done() and i < max_iterations:
-        fsm.act()
-        i += 1
-
-    assert outputs == ["a", "b", "c"]
-
-
-def test_act_parameter():
-    """Test the 'act' parameter."""
-    counter = Counter(i=0)
-
-    def increment_counter(counter=counter):
-        counter += Counter(i=1)
-
-    assert counter["i"] == 0
-
-    one_shot_behaviour = OneShotBehaviour(
-        act=lambda: increment_counter(), skill_context=object(), name="my_behaviour"
-    )
-    one_shot_behaviour.act()
-    assert counter["i"] == 1
+# def test_fms_behaviour():
+#     """Test the finite-state machine behaviour."""
+#     outputs = []
+#
+#     class MyFSMBehaviour(FSMBehaviour):
+#         def setup(self) -> None:
+#             pass
+#
+#         def teardown(self) -> None:
+#             pass
+#
+#     class SimpleOneShotBehaviour(State):
+#         def __init__(self, **kwargs):
+#             super().__init__(**kwargs)
+#             self.executed = False
+#
+#         def setup(self) -> None:
+#             pass
+#
+#         def teardown(self) -> None:
+#             pass
+#
+#         def act(self) -> None:
+#             outputs.append(self.name)
+#             self.next_state = chr(ord(self.name) + 1)
+#             self.executed = True
+#
+#         def done(self) -> bool:
+#             return self.executed
+#
+#     # TODO let the initialization of a behaviour action from constructor
+#     a = SimpleOneShotBehaviour(name="a", skill_context=object())
+#     b = SimpleOneShotBehaviour(name="b", skill_context=object())
+#     c = SimpleOneShotBehaviour(name="c", skill_context=object())
+#     fsm = MyFSMBehaviour(name="abc", skill_context=object())
+#     fsm.register_state(str(a.name), a, initial=True)
+#     fsm.register_state(str(b.name), b)
+#     fsm.register_state(str(c.name), c)
+#
+#     max_iterations = 10
+#     i = 0
+#     while not fsm.is_done() and i < max_iterations:
+#         fsm.act()
+#         i += 1
+#
+#     assert outputs == ["a", "b", "c"]
+#
+#
+# def test_act_parameter():
+#     """Test the 'act' parameter."""
+#     counter = Counter(i=0)
+#
+#     def increment_counter(counter=counter):
+#         counter += Counter(i=1)
+#
+#     assert counter["i"] == 0
+#
+#     one_shot_behaviour = OneShotBehaviour(
+#         act=lambda: increment_counter(), skill_context=object(), name="my_behaviour"
+#     )
+#     one_shot_behaviour.act()
+#     assert counter["i"] == 1
