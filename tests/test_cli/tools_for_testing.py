@@ -23,6 +23,9 @@ from unittest.mock import Mock
 
 from click import ClickException
 
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
@@ -32,7 +35,7 @@ def raise_click_exception(*args):
 
 
 class AgentConfigMock:
-    """An object to mock Agent config."""
+    """A class to mock Agent config."""
 
     def __init__(self, *args, **kwargs):
         """Init the AgentConfigMock object."""
@@ -47,7 +50,7 @@ class AgentConfigMock:
 
 
 class ContextMock:
-    """An object to mock Context."""
+    """A class to mock Context."""
 
     cwd = "cwd"
 
@@ -58,7 +61,7 @@ class ContextMock:
 
 
 class PublicIdMock:
-    """An object to mock PublicId."""
+    """A class to mock PublicId."""
 
     DEFAULT_VERSION = DEFAULT_TESTING_VERSION
 
@@ -73,3 +76,27 @@ class PublicIdMock:
         """Create object from str public_id without validation."""
         author, name, version = public_id.replace(":", "/").split("/")
         return cls(author, name, version)
+
+
+class AEAConfMock:
+    """A class to mock AgentConfig."""
+
+    def __init__(self, *args, **kwargs):
+        """Init the AEAConf mock object."""
+        self.ledger_apis = Mock()
+        ledger_apis = ((ETHEREUM, "value"), (FETCHAI, "value"))
+        self.ledger_apis.read_all = Mock(return_value=ledger_apis)
+        ledger_api_config = {"host": "host", "port": "port", "address": "address"}
+        self.ledger_apis.read = Mock(return_value=ledger_api_config)
+
+
+class ConfigLoaderMock:
+    """A class to mock ConfigLoader."""
+
+    def __init__(self, *args, **kwargs):
+        """Init the ConfigLoader mock object."""
+        pass
+
+    def load(self, *args, **kwargs):
+        """Mock the load method."""
+        return AEAConfMock()

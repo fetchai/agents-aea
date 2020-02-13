@@ -95,7 +95,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     else:
         try:
             _try_validate_fet_private_key_path(fetchai_private_key_path)
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: no cover
             logger.error(
                 "File {} for private key {} not found.".format(
                     repr(fetchai_private_key_path), FETCHAI,
@@ -110,7 +110,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     else:
         try:
             _try_validate_ethereum_private_key_path(ethereum_private_key_path)
-        except FileNotFoundError:
+        except FileNotFoundError:  # pragma: no cover
             logger.error(
                 "File {} for private key {} not found.".format(
                     repr(ethereum_private_key_path), ETHEREUM,
@@ -147,7 +147,7 @@ def _verify_ledger_apis_access() -> None:
             _try_to_instantiate_fetchai_ledger_api(network=network)
         elif host is not None and port is not None:
             _try_to_instantiate_fetchai_ledger_api(host=host, port=port)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Either network or host and port must be specified.")
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
@@ -156,7 +156,7 @@ def _verify_ledger_apis_access() -> None:
         address = cast(str, ethereum_ledger_config.get("address"))
         if address is not None:
             _try_to_instantiate_ethereum_ledger_api(address)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Address must be specified.")
 
 
@@ -184,7 +184,7 @@ def _setup_connection(
     connection_dir = Path(
         "vendor", connection_public_id.author, "connections", connection_public_id.name
     )
-    if not connection_dir.exists():
+    if not connection_dir.exists():  # pragma: no cover
         connection_dir = Path("connections", connection_public_id.name)
 
     try:
@@ -288,7 +288,7 @@ def run(
             addresses=wallet.addresses,
             default_address_key=ctx.agent_config.default_ledger,
         )
-    else:
+    else:  # pragma: no cover
         identity = Identity(
             agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
         )
