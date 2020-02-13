@@ -309,18 +309,11 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         # if it is a final state, remove from the final state set.
         if name in self._final_states:
             self._final_states.remove(name)
-        # remove outgoing transitions.
-        self.transitions.pop(name)
-        # remove incoming transitions
-        transitions_to_remove = set()
-        for state in self.transitions:
-            for event in self.transitions[state]:
-                if self.transitions[state][event] == name:
-                    transitions_to_remove.add((state, event))
-        for state, event in transitions_to_remove:
-            self.transitions[state].pop(event)
-            if len(self.transitions[state]) == 0:
-                self.transitions.pop(state)
+
+    @property
+    def states(self) -> Set[str]:
+        """Get all the state names."""
+        return set(self._name_to_state.keys())
 
     @property
     def initial_state(self) -> Optional[str]:
@@ -333,6 +326,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         if name not in self._name_to_state:
             raise ValueError("Name is not registered as state.")
         self._initial_state = name
+        self.current = self._initial_state
 
     @property
     def final_states(self) -> Set[str]:
@@ -373,6 +367,8 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """
         Register a transition.
 
+        No sanity check is done.
+
         :param source: the source state name.
         :param destination:  the destination state name.
         :param event: the event.
@@ -384,7 +380,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
 
         self.transitions.setdefault(source, {})[event] = destination
 
-    def unregister_transition(self, source: str, destination: str, event: str):
+    def unregister_transition(
+        self, source: str, destination: str, event: Optional[str] = None
+    ):
         """
         Unregister a transition.
 
