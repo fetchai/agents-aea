@@ -51,6 +51,11 @@ The following installs the entire AEA package which also includes a command-line
 pip install aea[all]
 ```
 
+If you are using `zsh` rather than `bash` type 
+```zsh
+pip install 'aea[all]'
+```
+
 ### Known issues
 
 If the installation steps fail, it might be a dependency issue. 
@@ -69,6 +74,8 @@ sudo apt-get install python3.7-dev
 
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA. 
 The fastest way to create your first AEA is to fetch it! 
+
+If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
 aea fetch fetchai/my_first_aea:0.1.0
@@ -148,3 +155,44 @@ For more demos, use cases or step by step guides, please check the following:
 - <a href='/aea/thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
 
 <br />
+
+<details><summary>Step by step install</summary>
+
+<b> Create a new AEA </b>		
+<br>		
+First, create a new AEA project and enter it.		
+``` bash		
+aea create my_first_aea		
+cd my_first_aea		
+```
+<br>  
+<b>Add the echo skill</b> 		
+<br>    
+Second, add the echo skill to the project.		
+```bash
+aea add skill fetchai/echo:0.1.0		
+```		
+This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
+<br><br>
+<b>Add a stub connection</b>		
+<br>		
+AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.		
+		
+The stub connection is already added to the AEA by default.		
+		
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.		
+		
+The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
+		
+The format of each line is the following:		
+		
+``` bash		
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE		
+```
+         		
+For example:		
+		
+```bash		
+recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+```
+</details>
