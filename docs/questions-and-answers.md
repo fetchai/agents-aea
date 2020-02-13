@@ -30,6 +30,7 @@ You can read more about the intergration of ledger <a href="/integration/">here<
 <details><summary>How does one install third party libraries?</summary>
 The framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file.
+</details>
 
 <details><summary>How does one connect a DB?</summary>
 If you want to connect a database you have two options. Either create a wrapper that communicates with the database and imported in a Model,
