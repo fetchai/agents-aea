@@ -82,6 +82,28 @@ aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
 ```
 
+## Add a stub connection		
+
+AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.		
+		
+The stub connection is already added to the AEA by default.		
+		
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.		
+		
+The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
+		
+The format of each line is the following:		
+		
+``` bash		
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE		
+```
+         		
+For example:		
+		
+```bash		
+recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+```
+
 ## Run the AEA
 
 Run the AEA with the default `stub` connection.
@@ -173,26 +195,4 @@ Second, add the echo skill to the project.
 aea add skill fetchai/echo:0.1.0		
 ```		
 This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
-<br><br>
-<b>Add a stub connection</b>		
-<br>		
-AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.		
-		
-The stub connection is already added to the AEA by default.		
-		
-A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.		
-		
-The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
-		
-The format of each line is the following:		
-		
-``` bash		
-TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE		
-```
-         		
-For example:		
-		
-```bash		
-recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
-```
 </details>
