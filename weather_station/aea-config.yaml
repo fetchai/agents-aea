@@ -1,0 +1,29 @@
+aea_version: 0.2.0
+agent_name: weather_station
+author: author
+connections:
+- fetchai/oef:0.1.0
+- fetchai/stub:0.1.0
+default_connection: fetchai/stub:0.1.0
+default_ledger: fetchai
+description: ''
+fingerprint: ''
+ledger_apis:
+  fetchai:
+    network: testnet
+license: Apache-2.0
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths:
+  ethereum: eth_private_key.txt
+  fetchai: fet_private_key.txt
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef:0.1.0
+registry_path: ../packages
+skills:
+- fetchai/error:0.1.0
+- fetchai/weather_station:0.1.0
+version: 0.1.0

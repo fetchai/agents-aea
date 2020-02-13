@@ -45,6 +45,7 @@ nav:
         - "Generic skills": 'generic-skills.md'
         - "ORM integration" : 'orm-integration-to-generic.md'
         - "Frontend intergration": 'connect-a-frontend.md'
+        - "Cli interaction with programmatically based AEA" : 'cli-and-programmaticaly-aeas-interacting.md'
     - Step by step guides:
         - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Architecture:
