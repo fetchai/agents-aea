@@ -76,7 +76,9 @@ def _get_default_configuration_file_name_from_type(
     elif item_type == ConfigurationType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
     else:
-        raise ValueError("Item type not valid: {}".format(str(item_type)))
+        raise ValueError(
+            "Item type not valid: {}".format(str(item_type))
+        )  # pragma: no cover
 
 
 class ProtocolSpecificationParseError(Exception):

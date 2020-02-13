@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the aea.configurations.base module."""
+from unittest import TestCase
 
 import pytest
 
@@ -29,6 +30,7 @@ from aea.configurations.base import (
     ConnectionConfig,
     ProtocolConfig,
     SkillConfig,
+    _get_default_configuration_file_name_from_type,
 )
 
 from ..conftest import (
@@ -161,3 +163,14 @@ class TestAgentConfig:
         actual_config = AgentConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
+
+
+class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
+    """Test case for _get_default_configuration_file_name_from_type method."""
+
+    def test__get_default_configuration_file_name_from_type_positive(self):
+        """Test for _get_default_configuration_file_name_from_type method positive result."""
+        _get_default_configuration_file_name_from_type("agent")
+        _get_default_configuration_file_name_from_type("connection")
+        _get_default_configuration_file_name_from_type("protocol")
+        _get_default_configuration_file_name_from_type("skill")
