@@ -265,9 +265,7 @@ def _union_sub_type_to_protobuf_variable_name(content_name, content_type) -> str
     else:
         expanded_type_str = content_type
 
-    protobuf_variable_name = "{}_type_{}".format(
-        content_name, expanded_type_str
-    )
+    protobuf_variable_name = "{}_type_{}".format(content_name, expanded_type_str)
 
     return protobuf_variable_name
 
@@ -876,33 +874,51 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _encoding_message_field_from_python_to_protobuf(self, content_name, content_type, no_indents) -> str:
+    def _encoding_message_field_from_python_to_protobuf(
+        self, content_name, content_type, no_indents
+    ) -> str:
         encoding_str = ""
         indents = get_indent_str(no_indents)
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{} = {}\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{} = {}\n".format(
+                content_name, content_name
+            )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{}.extend({})\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{}.extend({})\n".format(
+                content_name, content_name
+            )
         elif content_type.startswith("Dict"):
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{}.update({})\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{}.update({})\n".format(
+                content_name, content_name
+            )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
-                sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(content_name, sub_type)
-                encoding_str += indents + 'if msg.is_set("{}"):\n'.format(sub_type_name_in_protobuf)
-                encoding_str += self._encoding_message_field_from_python_to_protobuf(sub_type_name_in_protobuf, sub_type, no_indents+1)
+                sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(
+                    content_name, sub_type
+                )
+                encoding_str += indents + 'if msg.is_set("{}"):\n'.format(
+                    sub_type_name_in_protobuf
+                )
+                encoding_str += self._encoding_message_field_from_python_to_protobuf(
+                    sub_type_name_in_protobuf, sub_type, no_indents + 1
+                )
         elif content_type.startswith("Optional"):
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
             if not sub_type.startswith("Union"):
                 encoding_str += indents + 'if msg.is_set("{}"):\n'.format(content_name)
                 no_indents += 1
-            encoding_str += self._encoding_message_field_from_python_to_protobuf(content_name, sub_type, no_indents)
+            encoding_str += self._encoding_message_field_from_python_to_protobuf(
+                content_name, sub_type, no_indents
+            )
         else:
             raise TypeError(
-                "Invalid type for serialising to protocol buffer: '{}' in content '{}'".format(content_type, content_name)
+                "Invalid type for serialising to protocol buffer: '{}' in content '{}'".format(
+                    content_type, content_name
+                )
             )
         return encoding_str
 
@@ -976,15 +992,27 @@ class ProtocolGenerator:
         cls_str += "        {}_msg.target = msg.target\n\n".format(
             self.protocol_specification.name
         )
-        cls_str += "        {}_msg.target = msg.target\n\n".format(self.protocol_specification.name)
+        cls_str += "        {}_msg.target = msg.target\n\n".format(
+            self.protocol_specification.name
+        )
         cls_str += "        performative_id = msg.performative\n"
         indents = get_indent_str(3)
         for performative, contents in self._speech_acts.items():
-            cls_str += "        if performative_id == {}Message.Performative.{}:\n".format(self.protocol_specification_in_camel_case, performative.upper())
-            cls_str += "            performative = {}_pb2.{}Message.{}()  # type: ignore\n".format(self.protocol_specification_in_camel_case, self.protocol_specification_in_camel_case, performative.title())
+            cls_str += "        if performative_id == {}Message.Performative.{}:\n".format(
+                self.protocol_specification_in_camel_case, performative.upper()
+            )
+            cls_str += "            performative = {}_pb2.{}Message.{}()  # type: ignore\n".format(
+                self.protocol_specification_in_camel_case,
+                self.protocol_specification_in_camel_case,
+                performative.title(),
+            )
             for content_name, content_type in contents.items():
-                cls_str += self._encoding_message_field_from_python_to_protobuf(content_name, content_type, 3)
-            cls_str += indents + "{}_msg.{}.CopyFrom(performative)\n".format(self.protocol_specification.name, performative)
+                cls_str += self._encoding_message_field_from_python_to_protobuf(
+                    content_name, content_type, 3
+                )
+            cls_str += indents + "{}_msg.{}.CopyFrom(performative)\n".format(
+                self.protocol_specification.name, performative
+            )
 
         cls_str += "        {}_bytes = {}_msg.SerializeToString()\n".format(
             self.protocol_specification.name, self.protocol_specification.name
@@ -1063,7 +1091,9 @@ class ProtocolGenerator:
             sub_type_name_counter = 1
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
-                sub_type_name = _union_sub_type_to_protobuf_variable_name(content_name, sub_type)
+                sub_type_name = _union_sub_type_to_protobuf_variable_name(
+                    content_name, sub_type
+                )
                 entry += "{}\n".format(
                     self._python_pt_type_to_proto_type(
                         sub_type_name, sub_type, tag_no, no_of_indents
@@ -1160,9 +1190,7 @@ class ProtocolGenerator:
         """
         pathname = path.join(
             self.output_folder_path,
-            "{}.proto".format(
-                self.protocol_specification_in_camel_case,
-            ),
+            "{}.proto".format(self.protocol_specification_in_camel_case,),
         )
         protobuf_schema_file = self._protocol_buffer_schema_str()
 

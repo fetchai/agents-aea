@@ -5,9 +5,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.two_party_negotiation import (
-    TwoPartyNegotiation_pb2,
-)
+from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation_pb2
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
@@ -58,13 +56,21 @@ class TwoPartyNegotiationSerializer(Serializer):
                 performative.conditions_type_str = conditions_type_str
             if msg.is_set("conditions_type_dict_of_str_int"):
                 conditions_type_dict_of_str_int = msg.conditions_type_dict_of_str_int
-                performative.conditions_type_dict_of_str_int.update(conditions_type_dict_of_str_int)
+                performative.conditions_type_dict_of_str_int.update(
+                    conditions_type_dict_of_str_int
+                )
             if msg.is_set("conditions_type_set_of_str"):
                 conditions_type_set_of_str = msg.conditions_type_set_of_str
-                performative.conditions_type_set_of_str.extend(conditions_type_set_of_str)
+                performative.conditions_type_set_of_str.extend(
+                    conditions_type_set_of_str
+                )
             if msg.is_set("conditions_type_dict_of_str_float"):
-                conditions_type_dict_of_str_float = msg.conditions_type_dict_of_str_float
-                performative.conditions_type_dict_of_str_float.update(conditions_type_dict_of_str_float)
+                conditions_type_dict_of_str_float = (
+                    msg.conditions_type_dict_of_str_float
+                )
+                performative.conditions_type_dict_of_str_float.update(
+                    conditions_type_dict_of_str_float
+                )
             two_party_negotiation_msg.propose.CopyFrom(performative)
         if performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Accept()  # type: ignore
@@ -90,7 +96,5 @@ class TwoPartyNegotiationSerializer(Serializer):
         target = two_party_negotiation_pb.target
 
         return TwoPartyNegotiationMessage(
-            message_id=message_id,
-            dialogue_reference=dialogue_reference,
-            target=target,
+            message_id=message_id, dialogue_reference=dialogue_reference, target=target,
         )
