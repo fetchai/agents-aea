@@ -63,7 +63,7 @@ Although it would be potentially possible, it would be inefficient to use the AE
 You can find more details <a href="/app-areas/">here</a>
 </details>
 
-<details><summary>Can you manage multiple AEA projects at once with the CLI??</summary>
+<details><summary>Can you manage multiple AEA projects at once with the CLI?</summary>
 Individual CLI calls are currently scoped to a single project. You can have multiple AEA projects in a given root directory but you will have to use the CLI for each project independently.
 <br>
 We are looking to add support for interacting with multiple AEA projects via a single CLI call in the future.
@@ -78,6 +78,6 @@ You can find more details about the file structure <a href="/file-structure/">he
 </details>
 
 <details><summary>Is there a standardization for private key files?</summary>
-Currently, the private keys are stored in `.txt` files. Though, this is a temporary fix and will change shortly.
+Currently, the private keys are stored in `.txt` files. Though, this is a temporary fix and will be improved soon.
 </details>
 
