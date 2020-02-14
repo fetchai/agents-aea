@@ -36,6 +36,8 @@ wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
 
 We need to create the LedgerApis object in order to be able to interact with the Fetch.ai `testnet`
 ```python
+from aea.crypto.ledger_apis import LedgerApis
+
 # Set up the LedgerApis
 ledger_apis = LedgerApis({FETCHAI: {'network': 'testnet'}}, FETCHAI)
 ```
