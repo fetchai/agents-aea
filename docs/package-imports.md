@@ -39,5 +39,5 @@ Your packages exist in the root directory of your `aea`.
 
 ## Name and author
 
-When you create a package, you should consider changing the author and the name of the package. You can find these inside
+When you create a package, you must change the author name in the package to match your author handle. You can find these inside
 the `.yaml` file of your newly created package.
