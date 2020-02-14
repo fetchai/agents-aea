@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n9protocols/two_party_negotiation/TwoPartyNegotiation.proto\x12\x1d\x66\x65tch.aea.TwoPartyNegotiation"\xb1\n\n\x1aTwoPartyNegotiationMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12L\n\x03\x63\x66p\x18\x05 \x01(\x0b\x32=.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.CfpH\x00\x12T\n\x07propose\x18\x06 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.ProposeH\x00\x12R\n\x06\x61\x63\x63\x65pt\x18\x07 \x01(\x0b\x32@.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.AcceptH\x00\x12T\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DeclineH\x00\x12^\n\x0cmatch_accept\x18\t \x01(\x0b\x32\x46.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Match_AcceptH\x00\x1a\x14\n\x03\x43\x66p\x12\r\n\x05query\x18\x01 \x01(\t\x1a\xab\x05\n\x07Propose\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12\r\n\x05price\x18\x02 \x01(\x02\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x08\x12\r\n\x05query\x18\x05 \x01(\t\x12\x61\n\x08proposal\x18\x06 \x03(\x0b\x32O.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ProposalEntry\x12\x0e\n\x06rounds\x18\x07 \x03(\x05\x12\r\n\x05items\x18\x08 \x03(\x05\x12\x1b\n\x13\x63onditions_in_str_1\x18\t \x01(\t\x12v\n\x14\x63onditions_in_dict_2\x18\n \x03(\x0b\x32X.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry\x12\x1b\n\x13\x63onditions_in_set_3\x18\x0b \x03(\t\x12v\n\x14\x63onditions_in_dict_4\x18\x0c \x03(\x0b\x32X.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry\x1a/\n\rProposalEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43onditionsInDict2Entry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x38\n\x16\x43onditionsInDict4Entry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\t\n\x07\x44\x65\x63line\x1a\x0e\n\x0cMatch_AcceptB\x0e\n\x0cperformativeb\x06proto3'
+        '\n9protocols/two_party_negotiation/TwoPartyNegotiation.proto\x12\x1d\x66\x65tch.aea.TwoPartyNegotiation"\xfa\n\n\x1aTwoPartyNegotiationMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12L\n\x03\x63\x66p\x18\x05 \x01(\x0b\x32=.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.CfpH\x00\x12T\n\x07propose\x18\x06 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.ProposeH\x00\x12R\n\x06\x61\x63\x63\x65pt\x18\x07 \x01(\x0b\x32@.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.AcceptH\x00\x12T\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DeclineH\x00\x12^\n\x0cmatch_accept\x18\t \x01(\x0b\x32\x46.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Match_AcceptH\x00\x1a\x14\n\x03\x43\x66p\x12\r\n\x05query\x18\x01 \x01(\t\x1a\xf4\x05\n\x07Propose\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12\r\n\x05price\x18\x02 \x01(\x02\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x08\x12\r\n\x05query\x18\x05 \x01(\t\x12\x61\n\x08proposal\x18\x06 \x03(\x0b\x32O.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ProposalEntry\x12\x0e\n\x06rounds\x18\x07 \x03(\x05\x12\r\n\x05items\x18\x08 \x03(\x05\x12\x1b\n\x13\x63onditions_type_str\x18\t \x01(\t\x12\x8a\x01\n\x1f\x63onditions_type_dict_of_str_int\x18\n \x03(\x0b\x32\x61.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry\x12"\n\x1a\x63onditions_type_set_of_str\x18\x0b \x03(\t\x12\x8e\x01\n!conditions_type_dict_of_str_float\x18\x0c \x03(\x0b\x32\x63.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry\x1a/\n\rProposalEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x41\n\x1f\x43onditionsTypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x43\n!ConditionsTypeDictOfStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\t\n\x07\x44\x65\x63line\x1a\x0e\n\x0cMatch_AcceptB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
@@ -116,20 +116,20 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1206,
-    serialized_end=1253,
+    serialized_start=1259,
+    serialized_end=1306,
 )
 
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY = _descriptor.Descriptor(
-    name="ConditionsInDict2Entry",
-    full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry",
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY = _descriptor.Descriptor(
+    name="ConditionsTypeDictOfStrIntEntry",
+    full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry.key",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry.key",
             index=0,
             number=1,
             type=9,
@@ -147,7 +147,7 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY = _descriptor.Descrip
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry.value",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry.value",
             index=1,
             number=2,
             type=5,
@@ -172,20 +172,20 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY = _descriptor.Descrip
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1255,
-    serialized_end=1311,
+    serialized_start=1308,
+    serialized_end=1373,
 )
 
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY = _descriptor.Descriptor(
-    name="ConditionsInDict4Entry",
-    full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry",
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY = _descriptor.Descriptor(
+    name="ConditionsTypeDictOfStrFloatEntry",
+    full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry.key",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry.key",
             index=0,
             number=1,
             type=9,
@@ -203,7 +203,7 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY = _descriptor.Descrip
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry.value",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry.value",
             index=1,
             number=2,
             type=2,
@@ -228,8 +228,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY = _descriptor.Descrip
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1313,
-    serialized_end=1369,
+    serialized_start=1375,
+    serialized_end=1442,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
@@ -384,8 +384,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="conditions_in_str_1",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_in_str_1",
+            name="conditions_type_str",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_type_str",
             index=8,
             number=9,
             type=9,
@@ -402,8 +402,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="conditions_in_dict_2",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_in_dict_2",
+            name="conditions_type_dict_of_str_int",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_type_dict_of_str_int",
             index=9,
             number=10,
             type=11,
@@ -420,8 +420,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="conditions_in_set_3",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_in_set_3",
+            name="conditions_type_set_of_str",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_type_set_of_str",
             index=10,
             number=11,
             type=9,
@@ -438,8 +438,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
-            name="conditions_in_dict_4",
-            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_in_dict_4",
+            name="conditions_type_dict_of_str_float",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.conditions_type_dict_of_str_float",
             index=11,
             number=12,
             type=11,
@@ -459,8 +459,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[
         _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY,
-        _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY,
-        _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY,
+        _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY,
+        _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY,
     ],
     enum_types=[],
     serialized_options=None,
@@ -469,7 +469,7 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=686,
-    serialized_end=1369,
+    serialized_end=1442,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_ACCEPT = _descriptor.Descriptor(
@@ -487,8 +487,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_ACCEPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1371,
-    serialized_end=1379,
+    serialized_start=1444,
+    serialized_end=1452,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_DECLINE = _descriptor.Descriptor(
@@ -506,8 +506,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_DECLINE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1381,
-    serialized_end=1390,
+    serialized_start=1454,
+    serialized_end=1463,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_MATCH_ACCEPT = _descriptor.Descriptor(
@@ -525,8 +525,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_MATCH_ACCEPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1392,
-    serialized_end=1406,
+    serialized_start=1465,
+    serialized_end=1479,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE = _descriptor.Descriptor(
@@ -722,28 +722,28 @@ _TWOPARTYNEGOTIATIONMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=93,
-    serialized_end=1422,
+    serialized_end=1495,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_CFP.containing_type = _TWOPARTYNEGOTIATIONMESSAGE
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY.containing_type = (
     _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE
 )
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY.containing_type = (
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY.containing_type = (
     _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE
 )
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY.containing_type = (
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY.containing_type = (
     _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE
 )
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE.fields_by_name[
     "proposal"
 ].message_type = _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE.fields_by_name[
-    "conditions_in_dict_2"
-].message_type = _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY
+    "conditions_type_dict_of_str_int"
+].message_type = _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE.fields_by_name[
-    "conditions_in_dict_4"
-].message_type = _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY
+    "conditions_type_dict_of_str_float"
+].message_type = _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE.containing_type = _TWOPARTYNEGOTIATIONMESSAGE
 _TWOPARTYNEGOTIATIONMESSAGE_ACCEPT.containing_type = _TWOPARTYNEGOTIATIONMESSAGE
 _TWOPARTYNEGOTIATIONMESSAGE_DECLINE.containing_type = _TWOPARTYNEGOTIATIONMESSAGE
@@ -824,22 +824,22 @@ TwoPartyNegotiationMessage = _reflection.GeneratedProtocolMessageType(
                         # @@protoc_insertion_point(class_scope:fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ProposalEntry)
                     ),
                 ),
-                ConditionsInDict2Entry=_reflection.GeneratedProtocolMessageType(
-                    "ConditionsInDict2Entry",
+                ConditionsTypeDictOfStrIntEntry=_reflection.GeneratedProtocolMessageType(
+                    "ConditionsTypeDictOfStrIntEntry",
                     (_message.Message,),
                     dict(
-                        DESCRIPTOR=_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY,
+                        DESCRIPTOR=_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY,
                         __module__="protocols.two_party_negotiation.TwoPartyNegotiation_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry)
+                        # @@protoc_insertion_point(class_scope:fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry)
                     ),
                 ),
-                ConditionsInDict4Entry=_reflection.GeneratedProtocolMessageType(
-                    "ConditionsInDict4Entry",
+                ConditionsTypeDictOfStrFloatEntry=_reflection.GeneratedProtocolMessageType(
+                    "ConditionsTypeDictOfStrFloatEntry",
                     (_message.Message,),
                     dict(
-                        DESCRIPTOR=_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY,
+                        DESCRIPTOR=_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY,
                         __module__="protocols.two_party_negotiation.TwoPartyNegotiation_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry)
+                        # @@protoc_insertion_point(class_scope:fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry)
                     ),
                 ),
                 DESCRIPTOR=_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE,
@@ -883,14 +883,18 @@ _sym_db.RegisterMessage(TwoPartyNegotiationMessage)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Cfp)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Propose)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Propose.ProposalEntry)
-_sym_db.RegisterMessage(TwoPartyNegotiationMessage.Propose.ConditionsInDict2Entry)
-_sym_db.RegisterMessage(TwoPartyNegotiationMessage.Propose.ConditionsInDict4Entry)
+_sym_db.RegisterMessage(
+    TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry
+)
+_sym_db.RegisterMessage(
+    TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry
+)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Accept)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Decline)
 _sym_db.RegisterMessage(TwoPartyNegotiationMessage.Match_Accept)
 
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY._options = None
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT2ENTRY._options = None
-_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSINDICT4ENTRY._options = None
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY._options = None
+_TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY._options = None
 # @@protoc_insertion_point(module_scope)

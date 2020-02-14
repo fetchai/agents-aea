@@ -5,17 +5,17 @@ license: Apache-2.0
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
-    query: ct:DataModel
+    query: pt:str
   propose:
     number: pt:int
     price: pt:float
     description: pt:str
     flag: pt:bool
-    query: ct:DataModel
-    proposal: pt:optional[pt:dict[ct:IOTApp7, pt:bytes]]
+    query: pt:str
+    proposal: pt:optional[pt:dict[pt:str, pt:bytes]]
     rounds: pt:set[pt:int]
-    items: pt:list[ct:Unit]
-    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:bytes, pt:float]]]
+    items: pt:list[pt:int]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:str], pt:dict[pt:str, pt:float]]]
   accept: {}
   decline: {}
   match_accept: {}
