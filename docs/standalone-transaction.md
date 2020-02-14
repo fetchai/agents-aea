@@ -1,9 +1,9 @@
 In this guide, we will generate some wealth for the `Fetch.ai testnet` and create a standalone transaction. After the completion of the transaction,
-we get the transaction digest. With this we can search the transaction it in the <a href='https://explore-testnet.fetch.ai'>block explorer</a>
+we get the transaction digest. With this we can search the transaction on the <a href='https://explore-testnet.fetch.ai'>block explorer</a>
 
-## Create the wallets
+## Create the private keys
 
-We will need to create two different addresses for this demo. To do this we instantiate two different wallets 
+Firstly, we will create the private key files. To do this we instantiate two different wallets 
 
 ```python
     wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
@@ -56,12 +56,15 @@ def run():
     _try_generate_testnet_wealth('fetchai', wallet_1.addresses['fetchai'])
 
     logger.info("Sending amount to {}".format(wallet_2.addresses.get(FETCHAI)))
-    ledger_apis.apis['fetchai'].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                                 destination_address=wallet_2.addresses.get(FETCHAI),
-                                                 amount=1,
-                                                 tx_fee=1,
-                                                 tx_nonce="this_is_a_transaction_nonce",
-                                                 )
+    tx_digest = ledger_apis.apis['fetchai'].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
+                                                             destination_address=wallet_2.addresses.get(FETCHAI),
+                                                             amount=1,
+                                                             tx_fee=1,
+                                                             tx_nonce=ledger_apis.apis.get(FETCHAI).generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
+                                                                                                                      wallet_1.addresses.get(FETCHAI)),
+                                                             )
+    logger.info("The transaction digest is {}".format(tx_digest))
+
 
 if __name__ == "__main__":
     run()
