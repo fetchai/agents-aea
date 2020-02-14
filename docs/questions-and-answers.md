@@ -63,3 +63,15 @@ Although it would be potentially possible, it would be inefficient to use the AE
 You can find more details <a href="/app-areas/">here</a>
 </details>
 
+<details><summary>Can you delete multiple agents at a time using `aea delete` command?</summary>
+You cannot delete multiple agents with the `aea delete` command. All the `aea` commands are currently scoped to a single project.
+<br><br>
+You can find more details about the CLI commands <a href="/cli-commands/">here</a>
+</details>
+
+<details><summary>When a new AEA is created, is the vendor folder populated by some default packages?</summary>
+All AEA projects by default hold the `stub` connection, the `default` protocol and the `error` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+<br><br>
+You can find more details about the file structure <a href="/file-structure/">here</a>
+</details>
+
