@@ -287,5 +287,4 @@ class ProtocolSpecificationTestCase(TestCase):
         speech_act_content_config.args = {1: 2}
         read_all_mock = mock.Mock(return_value=[["1", speech_act_content_config]])
         obj.speech_acts.read_all = read_all_mock
-        # with self.assertRaises(ProtocolSpecificationParseError):
         obj._check_consistency()
