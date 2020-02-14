@@ -19,8 +19,8 @@
 
 """This module contains the classes for specific behaviours."""
 import datetime
-from abc import ABC
-from typing import Callable, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import Callable, Dict, List, Optional, Set
 
 from aea.skills.base import Behaviour
 
@@ -210,30 +210,34 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         return self._index >= len(self._behaviour_sequence)
 
 
-class State(OneShotBehaviour, ABC):
-    """A state of a FSMBehaviour is a OneShotBehaviour."""
+class State(SimpleBehaviour, ABC):
+    """
+    A state of a FSMBehaviour.
+
+    A State behaviour is a simple behaviour with a
+    special property 'event' that is opportunely set
+    by the implementer. The event is read by the framework
+    when the behaviour is done in order to pick the
+    transition to trigger.
+    """
 
     def __init__(self, **kwargs):
         """Initialize a state of the state machine."""
         super().__init__(**kwargs)
-        self._next_state = None
+        self._event = None  # type: Optional[str]
 
     @property
-    def next_state(self) -> Optional[str]:
-        """Get the next state name. If None, the current state is supposed to be final."""
-        return self._next_state
+    def event(self) -> Optional[str]:
+        """Get the event to be triggered at the end of the behaviour."""
+        return self._event
 
-    @next_state.setter
-    def next_state(self, state_name):
-        """
-        Set the state to transition to when this state is finished.
+    @abstractmethod
+    def is_done(self) -> bool:
+        """Return True if the behaviour is terminated, False otherwise."""
+        raise NotImplementedError
 
-        The argument 'state_name' must be a valid state and the transition must be registered.
-        If the setter is not called then current state is a final state.
-
-        :param: state_name: the name of the state to transition to
-        """
-        self._next_state = state_name
+    def reset(self) -> None:
+        """Reset initial conditions."""
 
 
 class FSMBehaviour(CompositeBehaviour, ABC):
@@ -243,11 +247,13 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """Initialize the finite-state machine behaviour."""
         super().__init__(**kwargs)
 
-        self.name_to_state = {}  # type: Dict[str, State]
+        self._name_to_state = {}  # type: Dict[str, State]
         self._initial_state = None  # type: Optional[str]
+        self._final_states = set()  # type: Set[str]
         self.current = None  # type: Optional[str]
 
-        self.transitions = {}  # type: Dict[str, Dict[str, str]]
+        # mapping from state to mappings event-next_state
+        self.transitions = {}  # type: Dict[str, Dict[Optional[str], str]]
 
     @property
     def is_started(self) -> bool:
@@ -260,12 +266,54 @@ class FSMBehaviour(CompositeBehaviour, ABC):
 
         :param name: the name of the state.
         :param state: the behaviour in that state.
+        :param initial: whether the state is an initial state.
         :return: None
+        :raise ValueError: if a state with the provided name already exists.
         """
-        self.name_to_state[name] = state
+        if name in self._name_to_state:
+            raise ValueError("State name already existing.")
+        self._name_to_state[name] = state
         if initial:
             self._initial_state = name
             self.current = self._initial_state
+
+    def register_final_state(self, name: str, state: State) -> None:
+        """
+        Register a final state.
+
+        :param name: the name of the state.
+        :param state: the state.
+        :return: None
+        :raise ValueError: if a state with the provided name already exists.
+        """
+        if name in self._name_to_state:
+            raise ValueError("State name already existing.")
+        self._name_to_state[name] = state
+        self._final_states.add(name)
+
+    def unregister_state(self, name: str) -> None:
+        """
+        Unregister a state.
+
+        :param name: the state name to unregister.
+        :return: None
+        :raise ValueError: if the state is not registered.
+        """
+        if name not in self._name_to_state:
+            raise ValueError("State name not registered.")
+        # remove state from mapping
+        self._name_to_state.pop(name)
+        # if it is an initial state, reset it to None.
+        if name == self._initial_state:
+            self._initial_state = None
+        # if it is a final state, remove from the final state set.
+        if name in self._final_states:
+            self._final_states.remove(name)
+
+    @property
+    def states(self) -> Set[str]:
+        """Get all the state names."""
+        return set(self._name_to_state.keys())
 
     @property
     def initial_state(self) -> Optional[str]:
@@ -275,17 +323,19 @@ class FSMBehaviour(CompositeBehaviour, ABC):
     @initial_state.setter
     def initial_state(self, name: str):
         """Set the initial state."""
-        if name not in self.name_to_state:
+        if name not in self._name_to_state:
             raise ValueError("Name is not registered as state.")
         self._initial_state = name
+        self.current = self._initial_state
+
+    @property
+    def final_states(self) -> Set[str]:
+        """Get the final state names."""
+        return self._final_states
 
     def get_state(self, name) -> Optional[State]:
         """Get a state from its name."""
-        return self.name_to_state.get(name, None)
-
-    def reset(self):
-        """Reset the behaviour to its initial conditions."""
-        self.current = None
+        return self._name_to_state.get(name, None)
 
     def act(self):
         """Implement the behaviour."""
@@ -297,9 +347,58 @@ class FSMBehaviour(CompositeBehaviour, ABC):
             return
         current_state.act_wrapper()
 
-        if current_state.done():
-            self.current = current_state.next_state
+        if current_state.is_done():
+            if current_state in self._final_states:
+                # we reached a final state - return.
+                self.current = None
+                return
+            else:
+                event = current_state.event
+                next_state = self.transitions.get(self.current, {}).get(event, None)
+                self.current = next_state
 
     def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self.current is None
+
+    def register_transition(
+        self, source: str, destination: str, event: Optional[str] = None
+    ):
+        """
+        Register a transition.
+
+        No sanity check is done.
+
+        :param source: the source state name.
+        :param destination:  the destination state name.
+        :param event: the event.
+        :return: None
+        :raise ValueError: if a transition from source with event is already present.
+        """
+        if source in self.transitions and event in self.transitions.get(source, {}):
+            raise ValueError("Transition already registered.")
+
+        self.transitions.setdefault(source, {})[event] = destination
+
+    def unregister_transition(
+        self, source: str, destination: str, event: Optional[str] = None
+    ):
+        """
+        Unregister a transition.
+
+        :param source: the source state name.
+        :param destination:  the destination state name.
+        :param event: the event.
+        :return: None
+        :raise ValueError: if a transition from source with event is not present.
+        """
+        if (
+            source not in self.transitions.keys()
+            or event not in self.transitions[source].keys()
+            or self.transitions[source][event] != destination
+        ):
+            raise ValueError("Transaction not registered.")
+
+        self.transitions.get(source, {}).pop(event, None)
+        if len(self.transitions[source]) == 0:
+            self.transitions.pop(source, None)
