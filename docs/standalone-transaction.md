@@ -51,9 +51,8 @@ from aea.crypto.helpers import _try_generate_testnet_wealth
 _try_generate_testnet_wealth(FETCHAI, wallet_1.addresses[FETCHAI])
 ```
 
-
-
 ## Send transaction
+
 Finally, we create a transaction that sends the funds to the `wallet_2`
 
 ```python
@@ -69,6 +68,7 @@ legdder_api.send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
                              tx_fee=1,
                              tx_nonce=tx_nonce,
                              )
+logger.info("The transaction digest is {}".format(tx_digest))
 ```
 
 <details><summary>Stand-alone transaction full code</summary>
