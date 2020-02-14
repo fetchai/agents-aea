@@ -102,7 +102,9 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
         )  # pragma: no cover
 
 
-def _create_fetchai_private_key(private_key_file: str = FETCHAI_PRIVATE_KEY_FILE) -> None:
+def _create_fetchai_private_key(
+    private_key_file: str = FETCHAI_PRIVATE_KEY_FILE,
+) -> None:
     """
     Create a fetchai private key.
 
@@ -113,7 +115,9 @@ def _create_fetchai_private_key(private_key_file: str = FETCHAI_PRIVATE_KEY_FILE
         file.write(entity.private_key_hex)
 
 
-def _create_ethereum_private_key(private_key_file: str = ETHEREUM_PRIVATE_KEY_FILE) -> None:
+def _create_ethereum_private_key(
+    private_key_file: str = ETHEREUM_PRIVATE_KEY_FILE,
+) -> None:
     """
     Create an ethereum private key.
 
