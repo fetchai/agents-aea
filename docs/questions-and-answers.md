@@ -63,15 +63,21 @@ Although it would be potentially possible, it would be inefficient to use the AE
 You can find more details <a href="/app-areas/">here</a>
 </details>
 
-<details><summary>Can you delete multiple agents at a time using `aea delete` command?</summary>
-You cannot delete multiple agents with the `aea delete` command. All the `aea` commands are currently scoped to a single project.
+<details><summary>Can you manage multiple AEA projects at once with the CLI??</summary>
+Individual CLI calls are currently scoped to a single project. You can have multiple AEA projects in a given root directory but you will have to use the CLI for each project independently.
+<br>
+We are looking to add support for interacting with multiple AEA projects via a single CLI call in the future.
 <br><br>
 You can find more details about the CLI commands <a href="/cli-commands/">here</a>
 </details>
 
-<details><summary>When a new AEA is created, is the vendor folder populated by some default packages?</summary>
+<details><summary>When a new AEA is created, is the `vendor` folder populated by some default packages?</summary>
 All AEA projects by default hold the `stub` connection, the `default` protocol and the `error` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="/file-structure/">here</a>
+</details>
+
+<details><summary>Is there a standardization for private key files?</summary>
+Currently, the private keys are stored in `.txt` files. Though, this is a temporary fix and will change shortly.
 </details>
 
