@@ -3,28 +3,59 @@ we get the transaction digest. With this we can search the transaction on the <a
 
 ## Create the private keys
 
-Firstly, we will create the private key files. To do this we instantiate two different wallets 
+Firstly, we will create the private key files.
 
 ```python
-    wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-    wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+from aea.crypto.helpers import _create_fetchai_private_key
+
+FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
+FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
+# Create a private key
+_create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+_create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 ```
+
+## Create the wallets
+
+Once we created the private keys we need to generate the wallets.
+
+```python
+
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.wallet import Wallet
+
+FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
+FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
+
+# Set up the wallet
+wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_1})
+wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+```
+
+## Generate wealth
 
 Since we want to send funds from `wallet_1` to `wallet_2`, we need to generate some wealth for the `wallet_1`. We can
 do this with the following code
 ```python
-    _try_generate_testnet_wealth('fetchai', wallet_1.addresses['fetchai'])
+from aea.crypto.helpers import _try_generate_testnet_wealth
+
+# Generate some wealth
+_try_generate_testnet_wealth(FETCHAI, wallet_1.addresses[FETCHAI])
 ```
 
 Finally, we create a transaction that sends the funds to the `wallet_2`
 
 ```python
-  ledger_apis.apis['fetchai'].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                                 destination_address=wallet_2.addresses.get(FETCHAI),
-                                                 amount=1,
-                                                 tx_fee=1,
-                                                 tx_nonce="this_is_a_transaction_nonce",
-                                                 )
+from aea.crypto.ledger_apis import LedgerApis
+
+# Create the transaction and send it to the ledger.
+ledger_apis.apis['fetchai'].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
+                                             destination_address=wallet_2.addresses.get(FETCHAI),
+                                             amount=1,
+                                             tx_fee=1,
+                                             tx_nonce=ledger_apis.apis.get(FETCHAI).generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
+                                                                                                      wallet_1.addresses.get(FETCHAI)),
+                                             )
 ```
 
 <details><summary>Stand-alone transaction full code</summary>
@@ -33,7 +64,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 import logging
 import os
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
+from aea.crypto.helpers import _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.crypto.helpers import _try_generate_testnet_wealth
@@ -43,26 +74,34 @@ ROOT_DIR = os.getcwd()
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
+FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 def run():
     # Create a private key
-    _create_fetchai_private_key()
+    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 
-    # Set up the wallet, identity, oef connection, ledger and (empty) resources
-    wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+    # Set up the wallet
+    wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_1})
     wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
-    ledger_apis = LedgerApis({'fetchai': {'network': 'testnet'}}, 'fetchai')
-    _try_generate_testnet_wealth('fetchai', wallet_1.addresses['fetchai'])
+    
+    # Set up the LedgerApis
+    ledger_apis = LedgerApis({FETCHAI: {'network': 'testnet'}}, FETCHAI)
+    
+    # Generate some wealth
+    _try_generate_testnet_wealth(FETCHAI, wallet_1.addresses[FETCHAI])
 
     logger.info("Sending amount to {}".format(wallet_2.addresses.get(FETCHAI)))
-    tx_digest = ledger_apis.apis['fetchai'].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                                             destination_address=wallet_2.addresses.get(FETCHAI),
-                                                             amount=1,
-                                                             tx_fee=1,
-                                                             tx_nonce=ledger_apis.apis.get(FETCHAI).generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
-                                                                                                                      wallet_1.addresses.get(FETCHAI)),
-                                                             )
+    
+    # Create the transaction and send it to the ledger.
+    tx_digest = ledger_apis.apis[FETCHAI].send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
+                                                           destination_address=wallet_2.addresses.get(FETCHAI),
+                                                           amount=1,
+                                                           tx_fee=1,
+                                                           tx_nonce=ledger_apis.apis.get(FETCHAI).generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
+                                                                                                                    wallet_1.addresses.get(FETCHAI)),
+                                                           )
     logger.info("The transaction digest is {}".format(tx_digest))
 
 
