@@ -931,7 +931,12 @@ class ProtocolGenerator:
         return encoding_str
 
     def _decoding_message_field_from_protobuf_to_python(
-        self, performative, content_name, content_type, no_indents, variable_name_in_protobuf: Optional[str] = ""
+        self,
+        performative,
+        content_name,
+        content_type,
+        no_indents,
+        variable_name_in_protobuf: Optional[str] = "",
     ) -> str:
         """
         Produce the decoding of message contents for the serialisation class.
@@ -946,25 +951,55 @@ class ProtocolGenerator:
         indents = get_indent_str(no_indents)
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             if variable_name_in_protobuf == "":
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, content_name)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    content_name,
+                )
             else:
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, variable_name_in_protobuf)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    variable_name_in_protobuf,
+                )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
             if variable_name_in_protobuf == "":
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, content_name)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    content_name,
+                )
             else:
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, variable_name_in_protobuf)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    variable_name_in_protobuf,
+                )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("Dict"):
             if variable_name_in_protobuf == "":
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, content_name)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    content_name,
+                )
             else:
-                decoding_str += indents + '{} = {}_pb.{}.{}\n'.format(content_name, self.protocol_specification.name, performative, variable_name_in_protobuf)
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    variable_name_in_protobuf,
+                )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
@@ -976,15 +1011,23 @@ class ProtocolGenerator:
                     content_name, sub_type
                 )
                 decoding_str += indents + 'if {}_pb.{}.HasField("{}"):\n'.format(
-                    self.protocol_specification.name, performative, sub_type_name_in_protobuf
+                    self.protocol_specification.name,
+                    performative,
+                    sub_type_name_in_protobuf,
                 )
                 decoding_str += self._decoding_message_field_from_protobuf_to_python(
-                    performative, content_name, sub_type, no_indents + 1, variable_name_in_protobuf=sub_type_name_in_protobuf
+                    performative,
+                    content_name,
+                    sub_type,
+                    no_indents + 1,
+                    variable_name_in_protobuf=sub_type_name_in_protobuf,
                 )
         elif content_type.startswith("Optional"):
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
             if not sub_type.startswith("Union"):
-                decoding_str += indents + 'if {}_pb.{}.HasField("{}"):\n'.format(self.protocol_specification.name, performative, content_name)
+                decoding_str += indents + 'if {}_pb.{}.HasField("{}"):\n'.format(
+                    self.protocol_specification.name, performative, content_name
+                )
                 no_indents += 1
             decoding_str += self._decoding_message_field_from_protobuf_to_python(
                 performative, content_name, sub_type, no_indents
@@ -1099,7 +1142,10 @@ class ProtocolGenerator:
         indents = get_indent_str(2)
         cls_str += indents + "else:\n"
         indents = get_indent_str(3)
-        cls_str += indents + 'raise ValueError("Performative not valid: {}".format(performative_id))\n\n'
+        cls_str += (
+            indents
+            + 'raise ValueError("Performative not valid: {}".format(performative_id))\n\n'
+        )
 
         cls_str += "        {}_bytes = {}_msg.SerializeToString()\n".format(
             self.protocol_specification.name, self.protocol_specification.name
@@ -1137,9 +1183,13 @@ class ProtocolGenerator:
         cls_str += "        target = {}_pb.target\n\n".format(
             self.protocol_specification.name
         )
-        cls_str += '        performative = {}_pb.WhichOneof("performative")\n'.format(self.protocol_specification.name)
-        cls_str += '        performative_id = {}Message.Performative(str(performative))\n'.format(self.protocol_specification_in_camel_case)
-        cls_str += '        performative_content = dict()\n'
+        cls_str += '        performative = {}_pb.WhichOneof("performative")\n'.format(
+            self.protocol_specification.name
+        )
+        cls_str += "        performative_id = {}Message.Performative(str(performative))\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        cls_str += "        performative_content = dict()\n"
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -1152,7 +1202,7 @@ class ProtocolGenerator:
                 )
             if len(contents.keys()) == 0:
                 indents = get_indent_str(3)
-                cls_str += indents + 'pass\n'
+                cls_str += indents + "pass\n"
             else:
                 for content_name, content_type in contents.items():
                     cls_str += self._decoding_message_field_from_protobuf_to_python(
@@ -1162,7 +1212,10 @@ class ProtocolGenerator:
         indents = get_indent_str(2)
         cls_str += indents + "else:\n"
         indents = get_indent_str(3)
-        cls_str += indents + 'raise ValueError("Performative not valid: {}.".format(performative_id))\n\n'
+        cls_str += (
+            indents
+            + 'raise ValueError("Performative not valid: {}.".format(performative_id))\n\n'
+        )
 
         cls_str += str.format(
             "        return {}Message(\n", self.protocol_specification_in_camel_case,
