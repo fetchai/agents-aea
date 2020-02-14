@@ -5,7 +5,9 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation_pb2
+from packages.fetchai.protocols.two_party_negotiation import (
+    TwoPartyNegotiation_pb2,
+)
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
@@ -32,7 +34,7 @@ class TwoPartyNegotiationSerializer(Serializer):
             query = msg.query
             performative.query = query
             two_party_negotiation_msg.cfp.CopyFrom(performative)
-        if performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
+        elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Propose()  # type: ignore
             number = msg.number
             performative.number = number
@@ -56,31 +58,26 @@ class TwoPartyNegotiationSerializer(Serializer):
                 performative.conditions_type_str = conditions_type_str
             if msg.is_set("conditions_type_dict_of_str_int"):
                 conditions_type_dict_of_str_int = msg.conditions_type_dict_of_str_int
-                performative.conditions_type_dict_of_str_int.update(
-                    conditions_type_dict_of_str_int
-                )
+                performative.conditions_type_dict_of_str_int.update(conditions_type_dict_of_str_int)
             if msg.is_set("conditions_type_set_of_str"):
                 conditions_type_set_of_str = msg.conditions_type_set_of_str
-                performative.conditions_type_set_of_str.extend(
-                    conditions_type_set_of_str
-                )
+                performative.conditions_type_set_of_str.extend(conditions_type_set_of_str)
             if msg.is_set("conditions_type_dict_of_str_float"):
-                conditions_type_dict_of_str_float = (
-                    msg.conditions_type_dict_of_str_float
-                )
-                performative.conditions_type_dict_of_str_float.update(
-                    conditions_type_dict_of_str_float
-                )
+                conditions_type_dict_of_str_float = msg.conditions_type_dict_of_str_float
+                performative.conditions_type_dict_of_str_float.update(conditions_type_dict_of_str_float)
             two_party_negotiation_msg.propose.CopyFrom(performative)
-        if performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
+        elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Accept()  # type: ignore
             two_party_negotiation_msg.accept.CopyFrom(performative)
-        if performative_id == TwoPartyNegotiationMessage.Performative.DECLINE:
+        elif performative_id == TwoPartyNegotiationMessage.Performative.DECLINE:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Decline()  # type: ignore
             two_party_negotiation_msg.decline.CopyFrom(performative)
-        if performative_id == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+        elif performative_id == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Match_Accept()  # type: ignore
             two_party_negotiation_msg.match_accept.CopyFrom(performative)
+        else:
+            raise ValueError("Performative not valid: {}".format(performative_id))
+
         two_party_negotiation_bytes = two_party_negotiation_msg.SerializeToString()
         return two_party_negotiation_bytes
 
@@ -95,6 +92,55 @@ class TwoPartyNegotiationSerializer(Serializer):
         )
         target = two_party_negotiation_pb.target
 
+        performative = two_party_negotiation_pb.WhichOneof("performative")
+        performative_id = TwoPartyNegotiationMessage.Performative(str(performative))
+        performative_content = dict()
+        if performative_id == TwoPartyNegotiationMessage.Performative.CFP:
+            query = two_party_negotiation_pb.cfp.query
+            performative_content["query"] = query
+        elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
+            number = two_party_negotiation_pb.propose.number
+            performative_content["number"] = number
+            price = two_party_negotiation_pb.propose.price
+            performative_content["price"] = price
+            description = two_party_negotiation_pb.propose.description
+            performative_content["description"] = description
+            flag = two_party_negotiation_pb.propose.flag
+            performative_content["flag"] = flag
+            query = two_party_negotiation_pb.propose.query
+            performative_content["query"] = query
+            if two_party_negotiation_pb.propose.HasField("proposal"):
+                proposal = two_party_negotiation_pb.propose.proposal
+                performative_content["proposal"] = proposal
+            rounds = two_party_negotiation_pb.propose.rounds
+            performative_content["rounds"] = rounds
+            items = two_party_negotiation_pb.propose.items
+            performative_content["items"] = items
+            if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
+                conditions = two_party_negotiation_pb.propose.conditions_type_str
+                performative_content["conditions"] = conditions
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_int"):
+                conditions = two_party_negotiation_pb.propose.conditions_type_dict_of_str_int
+                performative_content["conditions"] = conditions
+            if two_party_negotiation_pb.propose.HasField("conditions_type_set_of_str"):
+                conditions = two_party_negotiation_pb.propose.conditions_type_set_of_str
+                performative_content["conditions"] = conditions
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_float"):
+                conditions = two_party_negotiation_pb.propose.conditions_type_dict_of_str_float
+                performative_content["conditions"] = conditions
+        elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
+            pass
+        elif performative_id == TwoPartyNegotiationMessage.Performative.DECLINE:
+            pass
+        elif performative_id == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+            pass
+        else:
+            raise ValueError("Performative not valid: {}.".format(performative_id))
+
         return TwoPartyNegotiationMessage(
-            message_id=message_id, dialogue_reference=dialogue_reference, target=target,
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=performative,
+            **performative_content
         )
