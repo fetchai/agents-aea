@@ -249,7 +249,7 @@ class PublicId(JSONSerializable):
             author=self.author, name=self.name, version=self.version
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # pragma: no cover
         """Compare with another object."""
         return (
             isinstance(other, PublicId)
@@ -258,7 +258,7 @@ class PublicId(JSONSerializable):
             and self.version == other.version
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other):  # pragma: no cover
         """Compare two public ids."""
         return str(self) < str(other)
 
@@ -277,7 +277,7 @@ class PackageConfiguration(Configuration, ABC):
         self.version = version
 
     @property
-    def public_id(self) -> PublicId:
+    def public_id(self) -> PublicId:  # pragma: no cover
         """Get the public id."""
         return PublicId(self.author, self.name, self.version)
 
@@ -786,7 +786,7 @@ class ProtocolSpecification(ProtocolConfig):
                 )
             for content_name, content_type in speech_act_content_config.args.items():
                 if content_name in content_dict.keys():
-                    if content_type != content_dict[content_name]:
+                    if content_type != content_dict[content_name]:  # pragma: no cover
                         raise ProtocolSpecificationParseError(
                             "The content '{}' appears more than once with different types in speech_acts.".format(
                                 content_name
