@@ -19,18 +19,16 @@
 
 """This module contains the tests for the code-blocks in the skill-guide.md file."""
 
+import filecmp
+import json
 import logging
 import os
 import shutil
 import signal
-import sys
-import time
-
-from ..helper import extract_code_blocks
-import filecmp
-import json
 import subprocess  # nosec
+import sys
 import tempfile
+import time
 from pathlib import Path
 
 import jsonschema
@@ -39,6 +37,7 @@ from jsonschema import Draft4Validator
 from aea import AEA_DIR
 from aea.cli import cli
 
+from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
 from ...conftest import (
     CLI_LOG_OPTION,
@@ -86,20 +85,22 @@ class TestBuildSkill:
         )
 
     def test_read_md_file(self):
-        assert (
-            self.code_blocks != []
-        ), "File must not be empty."
+        assert self.code_blocks != [], "File must not be empty."
 
     def test_update_skill_and_run(self):
         """Test that the resource folder contains scaffold handlers.py module."""
 
-        path = Path(self.t, self.agent_name, "skills", self.resource_name, "behaviours.py")
+        path = Path(
+            self.t, self.agent_name, "skills", self.resource_name, "behaviours.py"
+        )
         original = Path(AEA_DIR, "skills", "scaffold", "behaviours.py")
         assert filecmp.cmp(path, original)
         with open(path, "w") as file:
             file.write(self.code_blocks[0])
 
-        path = Path(self.t, self.agent_name, "skills", self.resource_name, "handlers.py")
+        path = Path(
+            self.t, self.agent_name, "skills", self.resource_name, "handlers.py"
+        )
         original = Path(AEA_DIR, "skills", "scaffold", "handlers.py")
         assert filecmp.cmp(path, original)
         with open(path, "w") as file:
@@ -111,8 +112,8 @@ class TestBuildSkill:
 
         # Update the yaml file.
         path = Path(self.t, self.agent_name, "skills", self.resource_name, "skill.yaml")
-        yaml_code_block = extract_code_blocks(self.path, filter='yaml')
-        with open(path, 'w') as file:
+        yaml_code_block = extract_code_blocks(self.path, filter="yaml")
+        with open(path, "w") as file:
             file.write(yaml_code_block[0])
 
         # run the agent
@@ -129,14 +130,20 @@ class TestBuildSkill:
             env=os.environ.copy(),
         )
 
-        time.sleep(20.0)
+        time.sleep(5.0)
         process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=20)
+        process_one.wait(timeout=5)
 
         poll_one = process_one.poll()
         if poll_one is None:
             process_one.terminate()
             process_one.wait(2)
+
+        os.chdir(self.t)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
     @classmethod
     def teardown_class(cls):
