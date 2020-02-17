@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import logging
 from random import randrange
 from typing import Any, Dict, Tuple
 
@@ -39,8 +38,6 @@ DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_HAS_SENSOR = True
-
-logger = logging.getLogger(__name__)
 
 
 class Strategy(Model):
@@ -138,9 +135,11 @@ class Strategy(Model):
                 if "internal temperature" in results[0].keys():
                     degrees = {"thermometer_data": results}
                 else:
-                    logger.debug("Couldn't read the sensor I am re-trying.")
+                    self.context.logger.debug(
+                        "Couldn't read the sensor I am re-trying."
+                    )
         else:
             degrees = {"thermometer_data": randrange(10, 25)}  # nosec
-            logger.info(degrees)
+            self.context.logger.info(degrees)
 
         return degrees

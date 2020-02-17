@@ -19,7 +19,6 @@
 
 """This module contains the handler for the 'gym' skill."""
 
-import logging
 from typing import cast
 
 from aea.protocols.base import Message
@@ -29,8 +28,6 @@ from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS
 from packages.fetchai.skills.gym.tasks import GymTask
 
-logger = logging.getLogger("aea.gym_skill")
-
 
 class GymHandler(Handler):
     """Gym handler."""
@@ -39,7 +36,7 @@ class GymHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
+        self.context.logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
         nb_steps = kwargs.get("nb_steps", DEFAULT_NB_STEPS)
@@ -50,7 +47,7 @@ class GymHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        logger.info("Gym handler: setup method called.")
+        self.context.logger.info("Gym handler: setup method called.")
 
     def handle(self, message: Message) -> None:
         """
@@ -73,5 +70,5 @@ class GymHandler(Handler):
 
         :return: None
         """
-        logger.info("Gym handler: teardown method called.")
+        self.context.logger.info("Gym handler: teardown method called.")
         self.task.teardown()

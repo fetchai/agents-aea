@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import logging
 import threading
 from pathlib import Path
 
@@ -27,8 +26,6 @@ from tensorflow import keras
 from aea.skills.base import Model
 
 DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
-
-logger = logging.getLogger("aea.gym_skill")
 
 
 class MLModel(Model):
@@ -80,10 +77,10 @@ class MLModel(Model):
 
     def _update(self, X, y, epochs):
         """Update the ML model."""
-        logger.info("Start training with {} rows".format(X.shape[0]))
+        self.context.logger.info("Start training with {} rows".format(X.shape[0]))
         self.fit(X, y, epochs=epochs)
         loss, acc = self.evaluate(X, y, verbose=2)
-        logger.info("Loss: {}, Acc: {}".format(loss, acc))
+        self.context.logger.info("Loss: {}, Acc: {}".format(loss, acc))
 
     def update(self, X, y, epochs):
         """Update the ML model."""

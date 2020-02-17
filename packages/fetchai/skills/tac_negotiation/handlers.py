@@ -19,7 +19,6 @@
 
 """This package contains a scaffold of a handler."""
 
-import logging
 import pprint
 from typing import Dict, List, Optional, cast
 
@@ -41,8 +40,6 @@ from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAM
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
-
-logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class FIPANegotiationHandler(Handler):
@@ -71,7 +68,7 @@ class FIPANegotiationHandler(Handler):
         if dialogue is None:
             return
 
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling FIPAMessage of performative={}".format(
                 self.context.agent_name, fipa_msg.performative
             )
@@ -102,7 +99,7 @@ class FIPANegotiationHandler(Handler):
         :param fipa_msg: the fipa message
         :return: the dialogue or None
         """
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Identifying dialogue of FIPAMessage={}".format(
                 self.context.agent_name, fipa_msg
             )
@@ -131,14 +128,16 @@ class FIPANegotiationHandler(Handler):
                 dialogue.incoming_extend(fipa_msg)
                 return dialogue
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: Query has no data model, ignoring CFP!".format(
                         self.context.agent_name
                     )
                 )
                 return None
         else:
-            logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
+            self.context.logger.debug(
+                "[{}]: Unidentified dialogue.".format(self.context.agent_name)
+            )
             default_msg = DefaultMessage(
                 type=DefaultMessage.Type.BYTES,
                 content=b"This message belongs to an unidentified dialogue.",
@@ -168,7 +167,7 @@ class FIPANegotiationHandler(Handler):
         )
 
         if proposal_description is None:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: sending to {} a Decline{}".format(
                     self.context.agent_name,
                     dialogue.dialogue_label.dialogue_opponent_addr[-5:],
@@ -206,7 +205,7 @@ class FIPANegotiationHandler(Handler):
             transactions.add_pending_proposal(
                 dialogue.dialogue_label, new_msg_id, transaction_msg
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: sending to {} a Propose{}".format(
                     self.context.agent_name,
                     dialogue.dialogue_label.dialogue_opponent_addr[-5:],
@@ -249,7 +248,7 @@ class FIPANegotiationHandler(Handler):
         new_msg_id = propose.message_id + 1
         strategy = cast(Strategy, self.context.strategy)
         proposals = propose.proposal
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: on Propose as {}.".format(self.context.agent_name, dialogue.role)
         )
 
@@ -268,7 +267,7 @@ class FIPANegotiationHandler(Handler):
             if strategy.is_profitable_transaction(
                 transaction_msg, is_seller=dialogue.is_seller
             ):
-                logger.info(
+                self.context.logger.info(
                     "[{}]: Accepting propose (as {}).".format(
                         self.context.agent_name, dialogue.role
                     )
@@ -286,7 +285,7 @@ class FIPANegotiationHandler(Handler):
                     target=propose.message_id,
                 )
             else:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: Declining propose (as {})".format(
                         self.context.agent_name, dialogue.role
                     )
@@ -317,7 +316,7 @@ class FIPANegotiationHandler(Handler):
         :param dialogue: the dialogue
         :return: None
         """
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: on_decline: msg_id={}, dialogue_reference={}, origin={}, target={}".format(
                 self.context.agent_name,
                 decline.message_id,
@@ -359,7 +358,7 @@ class FIPANegotiationHandler(Handler):
         :param dialogue: the dialogue
         :return: None
         """
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: on_accept: msg_id={}, dialogue_reference={}, origin={}, target={}".format(
                 self.context.agent_name,
                 accept.message_id,
@@ -378,7 +377,7 @@ class FIPANegotiationHandler(Handler):
         if strategy.is_profitable_transaction(
             transaction_msg, is_seller=dialogue.is_seller
         ):
-            logger.info(
+            self.context.logger.info(
                 "[{}]: locking the current state (as {}).".format(
                     self.context.agent_name, dialogue.role
                 )
@@ -386,7 +385,7 @@ class FIPANegotiationHandler(Handler):
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: decline the Accept (as {}).".format(
                     self.context.agent_name, dialogue.role
                 )
@@ -417,7 +416,7 @@ class FIPANegotiationHandler(Handler):
         :param dialogue: the dialogue
         :return: None
         """
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: on_match_accept: msg_id={}, dialogue_reference={}, origin={}, target={}".format(
                 self.context.agent_name,
                 match_accept.message_id,
@@ -448,7 +447,7 @@ class FIPANegotiationHandler(Handler):
             )
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: match_accept did not contain tx_signature and tx_id!".format(
                     self.context.agent_name
                 )
@@ -480,7 +479,7 @@ class TransactionHandler(Handler):
             tx_message.performative
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker".format(
                     self.context.agent_name
                 )
@@ -496,7 +495,7 @@ class TransactionHandler(Handler):
                 fipa_message is not None
                 and fipa_message.performative == FIPAMessage.Performative.ACCEPT
             ):
-                logger.info(
+                self.context.logger.info(
                     "[{}]: sending match accept to {}.".format(
                         self.context.agent_name,
                         dialogue.dialogue_label.dialogue_opponent_addr[-5:],
@@ -520,13 +519,13 @@ class TransactionHandler(Handler):
                     message=FIPASerializer().encode(fipa_msg),
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: last message should be of performative accept.".format(
                         self.context.agent_name
                     )
                 )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was not successful.".format(self.context.agent_name)
             )
 
@@ -593,7 +592,7 @@ class OEFSearchHandler(Handler):
         """
         searched_for = "sellers" if is_searching_for_sellers else "buyers"
         if len(agents) > 0:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found potential {} agents={} on search_id={}.".format(
                     self.context.agent_name,
                     searched_for,
@@ -611,7 +610,7 @@ class OEFSearchHandler(Handler):
                     self.context.agent_address,
                     not is_searching_for_sellers,
                 )
-                logger.info(
+                self.context.logger.info(
                     "[{}]: sending CFP to agent={}".format(
                         self.context.agent_name, opponent_addr[-5:]
                     )
@@ -631,7 +630,7 @@ class OEFSearchHandler(Handler):
                     message=FIPASerializer().encode(fipa_msg),
                 )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found no {} agents on search_id={}, continue searching.".format(
                     self.context.agent_name, searched_for, search_id
                 )

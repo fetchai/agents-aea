@@ -52,13 +52,13 @@ class Parameters(Model):
         super().__init__(**kwargs)
         now = datetime.datetime.now()
         if now > self.registration_start_time:
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: TAC registration start time {} is in the past!".format(
                     self.context.agent_name, self.registration_start_time
                 )
             )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: TAC registation start time: {}, and start time: {}, and end time: {}".format(
                     self.context.agent_name,
                     self.registration_start_time,
