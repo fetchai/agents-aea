@@ -16,7 +16,7 @@ You can think the concrete implementations of the base class `LedgerApi` as wrap
 ## Abstract class LedgerApi
 
 Each `LedgerApi` must implement all the methods based on the abstract class.
-```
+```python
 class LedgerApi(ABC):
     """Interface for ledger APIs."""
 
@@ -32,7 +32,7 @@ class LedgerApi(ABC):
 ```
 The api property can be used for low-level operation with the concrete ledger APIs.
 
-```
+```python
 
     @abstractmethod
     def get_balance(self, address: AddressLike) -> int:
@@ -46,7 +46,7 @@ The api property can be used for low-level operation with the concrete ledger AP
         """
 ```
 The `get_balance` method returns the amount of tokens we hold for a specific address.
-```
+```python
 
     @abstractmethod
     def send_transaction(
@@ -74,7 +74,7 @@ The `get_balance` method returns the amount of tokens we hold for a specific add
 ```
 The `send_transaction` is where we must implement the logic for sending a transaction to the ledger. 
 
-```
+```python
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """
@@ -106,7 +106,7 @@ The `send_transaction` is where we must implement the logic for sending a transa
         """
 ```
 The `is_transaction_settled` and `validate_transaction` are two functions that helps us to verify a transaction digest.
-```
+```python
     @abstractmethod
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -123,7 +123,7 @@ as extra data for the transaction to be considered valid.
 Next, we are going to discuss the different implementation of `send_transaction` and `validate_transacaction` for the two natively supported ledgers of the framework.
 
 ## Fetch.ai Ledger
-```
+```python
  def send_transaction(
          self,
          crypto: Crypto,
@@ -147,7 +147,7 @@ As you can see, the implementation for sending a transcation to the Fetch.ai led
   <p>We cannot use the tx_nonce yet in the Fetch.ai ledger.</p>
 </div>
 
-```
+```python
     def is_transaction_settled(self, tx_digest: str) -> bool:
          """Check whether a transaction is settled or not."""
          tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
@@ -156,7 +156,7 @@ As you can see, the implementation for sending a transcation to the Fetch.ai led
              is_successful = True
          return is_successful
 ```
-```
+```python
     def validate_transaction(
          self,
          tx_digest: str,
@@ -193,8 +193,8 @@ If both of these checks return True we consider the transaction as valid.
 
 ## Ethereum Ledger
 
-```
-		     def send_transaction(
+```python
+     def send_transaction(
          self,
          crypto: Crypto,
          destination_address: AddressLike,
@@ -263,7 +263,7 @@ the transaction dictionary and send a raw transaction.
 Once we filled the transaction dictionary. We are checking that the transaction fee is more than the estimated gas for the transaction otherwise we will not be able to complete the transfer. Then we are signing and we are sending the transaction. Once we get the transaction receipt we consider the transaction completed and
 we return the transaction digest. 
 
-```
+```python
  def is_transaction_settled(self, tx_digest: str) -> bool:
          """Check whether a transaction is settled or not."""
          tx_status = self._api.eth.getTransactionReceipt(tx_digest)
@@ -272,7 +272,7 @@ we return the transaction digest.
              is_successful = True
          return is_successful
 ```
-```
+```python
 def validate_transaction(
          self,
          tx_digest: str,
@@ -310,29 +310,28 @@ Lastly, the `generate_tx_nonce` function is the same for both `LedgerApi` implem
 Both use the timestamp as a random factor alongside the seller and client addresses.
 
 #### Fetch.ai implementation 
-```
- def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-         """
-         Generate a random str message.
+```python
+def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+    """
+    Generate a random str message.
 
-         :param seller: the address of the seller.
-         :param client: the address of the client.
-         :return: return the hash in hex.
-         """
+    :param seller: the address of the seller.
+    :param client: the address of the client.
+    :return: return the hash in hex.
+    """
 
-         time_stamp = int(time.time())
-         seller = cast(str, seller)
-         client = cast(str, client)
-         aggregate_hash = sha256_hash(
-             b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-         )
+    time_stamp = int(time.time())
+    seller = cast(str, seller)
+    client = cast(str, client)
+    aggregate_hash = sha256_hash(
+        b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+    )
 
-         return aggregate_hash.hex()```
-
+    return aggregate_hash.hex()
 
 ```
 #### Ethereum implementation
-```
+```python
 def generate_tx_nonce(self, seller: Address, client: Address) -> str:
          """
          Generate a unique hash to distinguish txs with the same terms.
