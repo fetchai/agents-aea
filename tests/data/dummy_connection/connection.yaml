@@ -2,7 +2,7 @@ name: dummy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {}
 class_name: DummyConnection
 protocols: []
 restricted_to_protocols:

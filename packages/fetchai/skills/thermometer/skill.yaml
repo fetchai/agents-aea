@@ -2,7 +2,7 @@ name: thermometer
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {'behaviours.py': 'QmPPhhDcb539SCdXEERSjnSq7vjyYs5bGGhZHVhdEYT7d2', 'handlers.py': 'QmYus6v3A9CEV19bdzpv2YJHxv3KhqpbnkDYkxcq9QneyP', '__init__.py': 'QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta', 'strategy.py': 'QmeYuZMsH8CJDe3HbKhPMdXM8SLr2RRBh3WxLmHWpNivCb', 'thermometer_data_model.py': 'QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE', 'dialogues.py': 'QmfWunM9V3kRU9BYD5dtBgkdMpt5vXDCZ78zMFiyq6Mkgx'}
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
   service_registration:

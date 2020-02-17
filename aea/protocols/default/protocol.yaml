@@ -2,6 +2,6 @@ name: 'default'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {'__init__.py': 'QmcuYWBYAcx3mLhKPfTNGwU1dD9xe7CCBeTHHpbPg3uepY', 'message.py': 'QmXZoV53hcvvAaWPSgT9Sc5MTD6MKg5FZWHP1zw3GPKt5n', 'serialization.py': 'QmXCJDxKVDTk4CBuEHtrdXeTDpaRRH65FUtQhMEJiGmg1k'}
 description: "The default protocol allows for any bytes message."
 dependencies: {}

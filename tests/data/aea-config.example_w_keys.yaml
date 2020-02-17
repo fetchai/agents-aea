@@ -3,7 +3,7 @@ agent_name: myagent
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {}
 connections:
 - fetchai/oef:0.1.0
 default_connection: fetchai/oef:0.1.0

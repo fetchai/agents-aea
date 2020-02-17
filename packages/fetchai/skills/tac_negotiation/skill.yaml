@@ -2,7 +2,7 @@ name: 'tac_negotiation'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {'registration.py': 'QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g', 'behaviours.py': 'QmTTDTXUiYg6N61HtfCkrVMFb1SwyogPRaAxqPs3oHqVpt', 'tasks.py': 'QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi', 'transactions.py': 'QmNQkEUy9H6M8fC4b4Z8HLwGUM5yeY6md5tWpMr5q7dY2e', 'handlers.py': 'QmWcZckJ7KBanGdqngbeWMfyBcPVWskXDbmyCtytkgakmV', '__init__.py': 'QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy', 'strategy.py': 'QmXaK3nT2NEXW4G6MS1uutuHkBygxiibuXZSunhh4jvh8M', 'search.py': 'QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT', 'helpers.py': 'QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu', 'dialogues.py': 'Qmeuqeb4anuc1PsW2GbckbiT9CrYka6G8nhj2xaJELqVjB'}
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
   tac_negotiation:

@@ -23,8 +23,6 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
-# from aea.helpers.base import generate_fingerprint
-
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
@@ -300,7 +298,7 @@ class ConnectionConfig(PackageConfiguration):
         """Initialize a connection configuration object."""
         super().__init__(name, author, version)
         self.license = license
-        self.fingerprint = ""
+        self.fingerprint = {}  # type: Dict[str, str]
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = (
@@ -372,7 +370,7 @@ class ProtocolConfig(PackageConfiguration):
         """Initialize a connection configuration object."""
         super().__init__(name, author, version)
         self.license = license
-        self.fingerprint = ""
+        self.fingerprint = {}  # type: Dict[str, str]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
@@ -479,7 +477,7 @@ class SkillConfig(PackageConfiguration):
         """Initialize a skill configuration."""
         super().__init__(name, author, version)
         self.license = license
-        self.fingerprint = ""
+        self.fingerprint = {}  # type: Dict[str, str]
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]
@@ -554,9 +552,9 @@ class AgentConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
-        fingerprint: str = "",
         registry_path: str = "",
         description: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -564,7 +562,7 @@ class AgentConfig(PackageConfiguration):
         self.agent_name = agent_name
         self.aea_version = aea_version
         self.license = license
-        self.fingerprint = fingerprint
+        self.fingerprint = fingerprint if fingerprint is not None else {}
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
@@ -653,6 +651,7 @@ class AgentConfig(PackageConfiguration):
             license=cast(str, obj.get("license")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
+            fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
             logging_config=cast(Dict, obj.get("logging_config", {})),
         )
 

@@ -51,6 +51,7 @@ python-dotenv = "*"
 pyyaml = ">=4.2b1"
 watchdog = "*"
 web3 = "==5.2.2"
+ipfshttpclient = "*"
 
 [requires]
 python_version = "3.7"
