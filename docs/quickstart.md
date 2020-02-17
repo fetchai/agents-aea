@@ -126,7 +126,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the `Behaviour` method, `act` and `execute`. This is the main agent loop in action.
+The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method act. This is the main agent loop in action.
 
 Let's look at the `Handler` in more depth.
 
