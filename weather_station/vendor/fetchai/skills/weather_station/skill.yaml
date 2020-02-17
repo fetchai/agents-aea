@@ -1,0 +1,31 @@
+name: weather_station
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+fingerprint: ""
+description: "The weather station skill implements the functionality to sell weather data."
+behaviours:
+  service_registration:
+    class_name: ServiceRegistrationBehaviour
+    args:
+      services_interval: 60
+handlers:
+  fipa:
+    class_name: FIPAHandler
+    args: {}
+models:
+  strategy:
+    class_name: Strategy
+    args:
+      date_one: "1/10/2019"
+      date_two: "1/12/2019"
+      price_per_row: 1
+      seller_tx_fee: 0
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+  dialogues:
+    class_name: Dialogues
+    args: {}
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+ledgers: ['fetchai']
