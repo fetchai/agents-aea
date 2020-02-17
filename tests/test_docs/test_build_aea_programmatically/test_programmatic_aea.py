@@ -17,16 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-block in the build-aea-programmatically.md file."""
+"""This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
-import os
 import logging
+import os
 
 from .programmatic_aea import run
-
-
-from ...conftest import ROOT_DIR, CUR_PATH
 from ..helper import extract_code_blocks
+from ...conftest import CUR_PATH, ROOT_DIR
 
 MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
@@ -35,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestProgrammaticAEA:
-    """This class contains the tests for the code-block in the build-aea-programmatically.md file."""
+    """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     @classmethod
     def setup_class(cls):
