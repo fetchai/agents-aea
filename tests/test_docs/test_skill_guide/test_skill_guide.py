@@ -123,8 +123,6 @@ class TestBuildSkill:
                 "-m",
                 "aea.cli",
                 "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
             ],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
