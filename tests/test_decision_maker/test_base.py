@@ -21,7 +21,7 @@
 import os
 import time
 from queue import Queue
-from unittest import mock
+from unittest import TestCase, mock
 
 import pytest
 
@@ -1024,3 +1024,19 @@ class TestLedgerStateProxy:
                 tx_message=tx_message
             )
         assert result
+
+
+class DecisionMakerTestCase(TestCase):
+    """Test case for DecisionMaker class."""
+
+    @mock.patch(
+        "aea.decision_maker.base.DecisionMaker._is_acceptable_for_signing",
+        return_value=True,
+    )
+    @mock.patch("aea.decision_maker.base.DecisionMaker._sign_tx")
+    @mock.patch("aea.decision_maker.base.TransactionMessage.respond_signing")
+    def test__handle_tx_message_for_signing_positive(self, *mocks):
+        """Test for _handle_tx_message_for_signing positive result."""
+        ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        dm = DecisionMaker("agent-name", 1, "OutBox", "Wallet", ledger_apis)
+        dm._handle_tx_message_for_signing("tx_message")

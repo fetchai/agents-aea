@@ -20,6 +20,7 @@
 """Miscellaneous helpers."""
 
 import builtins
+import hashlib
 import importlib.util
 import logging
 import os
@@ -154,8 +155,6 @@ def generate_fingerprint(
     :param nonce: Enable the developer to generate two different fingerprints for the same package.
            (Can be used with different configuration)
     """
-    import hashlib
-
     if nonce is not None:
         string_for_hash = "".join([author, package_name, version, str(nonce)])
     else:

@@ -514,7 +514,7 @@ class DecisionMaker:
     def start(self):
         """Start the decision maker."""
         with self._lock:
-            if not self._stopped:
+            if not self._stopped:  # pragma: no cover
                 logger.debug("Decision maker already started.")
                 return
 
@@ -606,7 +606,7 @@ class DecisionMaker:
                 "[{}]: Unexpected transaction message performative".format(
                     self._agent_name
                 )
-            )
+            )  # pragma: no cover
 
     def _handle_tx_message_for_settlement(self, tx_message) -> None:
         """
@@ -709,7 +709,7 @@ class DecisionMaker:
         if not self.ownership_state.is_initialized and not (
             self.ledger_state_proxy.is_initialized
             and (tx_message.ledger_id != OFF_CHAIN)
-        ):
+        ):  # pragma: no cover
             logger.warning(
                 "[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(
                     self._agent_name

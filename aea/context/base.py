@@ -131,4 +131,4 @@ class AgentContext:
     @property
     def task_manager(self) -> TaskManager:
         """Get the task manager."""
-        return self._task_manager
+        return self._task_manager  # pragma: no cover
