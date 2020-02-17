@@ -53,18 +53,23 @@ def ipfs_hashing(
 ):
     """Hashes a package and its components."""
     print("Processing package {} of type {}".format(package_name, package_type))
-    fingerprints = ""
-    fingerprints_dict = {}
 
-    # hash inner components (all `.py` files)
-    result_list = client.add(target_dir, pattern="*.py")
+    if package_type == "agents":
+        fingerprints = str({})
+    else:
+        # hash inner components (all `.py` files)
+        result_list = client.add(target_dir, pattern="*.py")
 
-    for result_dict in result_list:
-        if package_name == result_dict["Name"]:
-            continue
-        key = result_dict["Name"].replace(package_name + "/", "", 1)
-        fingerprints_dict[key] = result_dict["Hash"]
-    fingerprints = str(fingerprints_dict)
+        fingerprints_dict = {}
+        # get hashes of all `.py` files
+        for result_dict in result_list:
+            if package_name == result_dict["Name"]:
+                continue
+            if not result_dict["Name"][-3:] == ".py":
+                continue
+            key = result_dict["Name"].replace(package_name + "/", "", 1)
+            fingerprints_dict[key] = result_dict["Hash"]
+        fingerprints = str(fingerprints_dict)
 
     # update fingerprints
     file_name = (
@@ -94,8 +99,8 @@ def ipfs_hashing(
     with open(yaml_path, "w") as f:
         f.write(whole_file)
 
-    # hash again to get outer hash:
-    result_list = client.add(target_dir, pattern="*.py")
+    # hash again to get outer hash (this time all files):
+    result_list = client.add(target_dir)
     for result_dict in result_list:
         if package_name == result_dict["Name"]:
             key = os.path.join(AUTHOR, package_type, package_name)

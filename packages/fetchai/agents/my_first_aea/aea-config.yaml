@@ -6,7 +6,7 @@ connections:
 default_connection: fetchai/stub:0.1.0
 default_ledger: fetchai
 description: 'A simple agent to demo the echo skill.'
-fingerprint: ''
+fingerprint: {}
 ledger_apis: {}
 license: Apache-2.0
 logging_config:
