@@ -27,8 +27,6 @@ from typing import Dict, List, Optional
 
 from aea.configurations.base import ProtocolSpecification
 
-CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
-
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
 PATH_TO_PACKAGES = "packages"
@@ -37,6 +35,8 @@ MESSAGE_FILE_NAME = "message.py"
 SERIALIZATION_FILE_NAME = "serialization.py"
 PROTOCOL_FILE_NAME = "protocol.yaml"
 
+CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
+PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
 BASIC_FIELDS_AND_TYPES = {
     "name": str,
     "author": str,
@@ -44,7 +44,6 @@ BASIC_FIELDS_AND_TYPES = {
     "license": str,
     "description": str,
 }
-
 PYTHON_TYPE_TO_PROTO_TYPE = {
     "bytes": "bytes",
     "int": "int32",
@@ -232,13 +231,7 @@ def _specification_type_to_python_type(specification_type: str) -> str:
         python_type = _mt_specification_type_to_python_type(specification_type)
     elif specification_type.startswith("ct:"):
         python_type = _ct_specification_type_to_python_type(specification_type)
-    elif specification_type in [
-        "pt:bytes",
-        "pt:int",
-        "pt:float",
-        "pt:bool",
-        "pt:str",
-    ]:
+    elif specification_type in PRIMITIVE_TYPES:
         python_type = _pt_specification_type_to_python_type(specification_type)
     elif specification_type.startswith("pt:set"):
         python_type = _pct_specification_type_to_python_type(specification_type)
@@ -949,62 +942,38 @@ class ProtocolGenerator:
         """
         decoding_str = ""
         indents = get_indent_str(no_indents)
+        variable_name = content_name if variable_name_in_protobuf == "" else variable_name_in_protobuf
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-            if variable_name_in_protobuf == "":
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    content_name,
-                )
-            else:
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    variable_name_in_protobuf,
-                )
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                variable_name,
+            )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            if variable_name_in_protobuf == "":
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    content_name,
-                )
-            else:
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    variable_name_in_protobuf,
-                )
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("Dict"):
-            if variable_name_in_protobuf == "":
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    content_name,
-                )
-            else:
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    variable_name_in_protobuf,
-                )
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("Union"):
-            pass
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
                 sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(
@@ -1016,10 +985,10 @@ class ProtocolGenerator:
                     sub_type_name_in_protobuf,
                 )
                 decoding_str += self._decoding_message_field_from_protobuf_to_python(
-                    performative,
-                    content_name,
-                    sub_type,
-                    no_indents + 1,
+                    performative=performative,
+                    content_name=content_name,
+                    content_type=sub_type,
+                    no_indents=no_indents + 1,
                     variable_name_in_protobuf=sub_type_name_in_protobuf,
                 )
         elif content_type.startswith("Optional"):
