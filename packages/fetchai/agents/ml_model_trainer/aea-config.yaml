@@ -13,7 +13,7 @@ license: Apache-2.0
 logging_config:
   disable_existing_loggers: False
   version: 1
-private_key_paths: []
+private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
