@@ -202,10 +202,10 @@ class TwoPartyNegotiationMessage(Message):
                 ), "Elements of the content 'items' are not of type 'int'."
                 if self.is_set("conditions"):
                     assert (
-                        type(self.conditions) == frozenset
-                        or type(self.conditions) == dict
+                        type(self.conditions) == dict
+                        or type(self.conditions) == frozenset
                         or type(self.conditions) == str
-                    ), "Content 'conditions' should be either of the following types: ['frozenset', 'dict', 'str']."
+                    ), "Content 'conditions' should be either of the following types: ['dict', 'frozenset', 'str']."
                     if type(self.conditions) == frozenset:
                         assert all(
                             type(element) == str for element in self.conditions
