@@ -942,7 +942,11 @@ class ProtocolGenerator:
         """
         decoding_str = ""
         indents = get_indent_str(no_indents)
-        variable_name = content_name if variable_name_in_protobuf == "" else variable_name_in_protobuf
+        variable_name = (
+            content_name
+            if variable_name_in_protobuf == ""
+            else variable_name_in_protobuf
+        )
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
