@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,12 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Peer to Peer connection and channel."""
+"""HTTP connection and channel."""
 
 import asyncio
 import logging
 import threading
 import time
+import json
+import yaml
 from asyncio import CancelledError
 from threading import Thread
 from typing import Any, Dict, List, Optional, Set, cast
@@ -37,8 +38,8 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 logger = logging.getLogger(__name__)
 
 
-class PeerToPeerChannel:
-    """A wrapper for an SDK or API."""
+class HTTPChannel:
+    """A wrapper for an RESTful API."""
 
     def __init__(
         self,
@@ -77,7 +78,7 @@ class PeerToPeerChannel:
                 )
                 self.stopped = False
                 self.thread.start()
-                logger.debug("P2P Channel is connected.")
+                logger.debug("HTTP Channel is connected.")
                 self.try_register()
 
     def try_register(self) -> bool:
@@ -153,26 +154,38 @@ class PeerToPeerChannel:
                 self.thread.join()
 
 
-class PeerToPeerConnection(Connection):
-    """Proxy to the functionality of the SDK or API."""
+class HTTPConnection(Connection):
+    """Proxy to the functionality of the RESTful API."""
 
-    def __init__(
-        self,
-        address: Address,
-        provider_addr: str,
-        provider_port: int = 8000,
-        *args,
-        **kwargs
-    ):
+    def __init__(self,
+                 address: Address,
+                 api_spec: str,  # In JSON serialized form, might switch to yaml later
+                 # rest_api_metadata: json,
+                 # rest_api_model: json,
+                 # server_stub: json,  # OpneAPI-based API implementation stub
+                                     # OpenAPI-based desc format of REST APIIs
+                                     # generate client SDK...
+                                     # Can accept server stubs from Swagger Codegen for any API
+                 provider_addr: str,
+                 provider_port: int = 8000,
+                 *args,
+                 **kwargs
+                ):
         """
-        Initialize a connection to an SDK or API.
+        Initialize a connection to an RESTful API.
 
         :param address: the address used in the protocols.
         """
+        try:
+            json.loads(api_spec)
+        except json.JSONDecodeError:
+            print("api_spec is not in proper JSON format.")
+
         if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "p2p", "0.1.0")
+            kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
         super().__init__(*args, **kwargs)
-        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
+        self.channel = HTTPChannel(address, api_spec, provider_addr, provider_port,
+                                   excluded_protocols=self.excluded_protocols)  # type: ignore
         self.address = address
 
     async def connect(self) -> None:
@@ -249,7 +262,7 @@ class PeerToPeerConnection(Connection):
         excluded_protocols_names = {
             p.name for p in connection_configuration.excluded_protocols
         }
-        return PeerToPeerConnection(
+        return HTTPConnection(
             address,
             addr,
             port,
