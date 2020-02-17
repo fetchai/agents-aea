@@ -19,6 +19,7 @@
 """Tools used for CLI registry testing."""
 
 from typing import List
+from unittest.mock import Mock
 
 from click import ClickException
 
@@ -33,20 +34,27 @@ def raise_click_exception(*args):
 class AgentConfigMock:
     """An object to mock Agent config."""
 
+    def __init__(self, *args, **kwargs):
+        """Init the AgentConfigMock object."""
+        self.connections: List[str] = kwargs.get("connections", [])
+        self.protocols: List[str] = kwargs.get("protocols", [])
+        self.skills: List[str] = kwargs.get("skills", [])
+        self.agent_name: str = kwargs.get("agent_name", "agent-name")
+
     registry_path = "registry"
     name = "name"
     author = "author"
-
-    connections: List[str] = []
-    protocols: List[str] = []
-    skills: List[str] = []
 
 
 class ContextMock:
     """An object to mock Context."""
 
     cwd = "cwd"
-    agent_config = AgentConfigMock()
+
+    def __init__(self, *args, **kwargs):
+        """Init the ContextMock object."""
+        self.invoke = Mock()
+        self.agent_config = AgentConfigMock(*args, **kwargs)
 
 
 class PublicIdMock:
@@ -62,5 +70,6 @@ class PublicIdMock:
 
     @classmethod
     def from_str(cls, public_id):
+        """Create object from str public_id without validation."""
         author, name, version = public_id.replace(":", "/").split("/")
         return cls(author, name, version)

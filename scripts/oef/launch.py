@@ -20,7 +20,7 @@
 
 from __future__ import print_function
 import json
-import subprocess
+import subprocess  # nosec
 import argparse
 import sys
 import os
@@ -28,7 +28,7 @@ import os
 
 def run(cmd):
     print(" ".join(cmd))
-    c = subprocess.Popen(cmd)
+    c = subprocess.Popen(cmd)  # nosec
     c.wait()
     return c.returncode
 

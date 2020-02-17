@@ -21,7 +21,7 @@
 
 import asyncio
 import logging
-import pickle
+import pickle  # nosec
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
@@ -346,7 +346,7 @@ class OEFChannel(OEFAgent):
             )
         )
         try:
-            query = pickle.loads(query)
+            query = pickle.loads(query)  # nosec
         except Exception as e:
             logger.debug(
                 "When trying to unpickle the query the following exception occured: {}".format(

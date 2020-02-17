@@ -34,7 +34,6 @@ from aea.cli.common import (
     Context,
     DEFAULT_REGISTRY_PATH,
     PublicIdParameter,
-    logger,
     try_get_item_source_path,
     try_to_load_agent_config,
 )
@@ -81,21 +80,18 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> No
 
     for item_type_plural in ("skills", "connections", "protocols"):
         required_items = getattr(ctx.agent_config, item_type_plural)
-        for public_id in required_items:
+        for item_id in required_items:
             try:
                 if item_type_plural == "connections":
                     click_context.invoke(
-                        add_connection_command, connection_public_id=public_id
+                        add_connection_command, connection_public_id=item_id
                     )
                 elif item_type_plural == "protocols":
                     click_context.invoke(
-                        add_protocol_command, protocol_public_id=public_id
+                        add_protocol_command, protocol_public_id=item_id
                     )
                 elif item_type_plural == "skills":
-                    click_context.invoke(add_skill_command, skill_public_id=public_id)
-                else:
-                    logger.debug("Wrong item type {}".format(item_type_plural))
+                    click_context.invoke(add_skill_command, skill_public_id=item_id)
             except SystemExit:
                 continue
-
     click.echo("Agent {} successfully fetched.".format(public_id.name))

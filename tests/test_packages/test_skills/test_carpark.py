@@ -23,7 +23,7 @@ import io
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import threading
@@ -133,7 +133,7 @@ class TestCarPark:
         with open(yaml_path, "w") as f:
             f.write(whole_file)
 
-        process_one = subprocess.Popen(
+        process_one = subprocess.Popen(  # nosec
             [
                 sys.executable,
                 "-m",
@@ -213,7 +213,7 @@ class TestCarPark:
         assert result.exit_code == 0
 
         os.chdir(agent_two_dir_path)
-        process_two = subprocess.Popen(
+        process_two = subprocess.Popen(  # nosec
             [
                 sys.executable,
                 "-m",

@@ -22,7 +22,7 @@
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -90,7 +90,7 @@ class TestEchoSkill:
         assert result.exit_code == 0
 
         # run the agent
-        process = subprocess.Popen(
+        process = subprocess.Popen(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),

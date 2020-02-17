@@ -30,6 +30,7 @@ You can read more about the intergration of ledger <a href="/integration/">here<
 <details><summary>How does one install third party libraries?</summary>
 The framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file.
+</details>
 
 <details><summary>How does one connect a DB?</summary>
 If you want to connect a database you have two options. Either create a wrapper that communicates with the database and imported in a Model,
@@ -60,5 +61,23 @@ The goal of agent-based modeling is to search for explanatory insight into the c
 Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
 <br><br>
 You can find more details <a href="/app-areas/">here</a>
+</details>
+
+<details><summary>Can you manage multiple AEA projects at once with the CLI?</summary>
+Individual CLI calls are currently scoped to a single project. You can have multiple AEA projects in a given root directory but you will have to use the CLI for each project independently.
+<br>
+We are looking to add support for interacting with multiple AEA projects via a single CLI call in the future.
+<br><br>
+You can find more details about the CLI commands <a href="/cli-commands/">here</a>
+</details>
+
+<details><summary>When a new AEA is created, is the `vendor` folder populated by some default packages?</summary>
+All AEA projects by default hold the `stub` connection, the `default` protocol and the `error` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+<br><br>
+You can find more details about the file structure <a href="/file-structure/">here</a>
+</details>
+
+<details><summary>Is there a standardization for private key files?</summary>
+Currently, the private keys are stored in `.txt` files. Though, this is a temporary fix and will be improved soon.
 </details>
 

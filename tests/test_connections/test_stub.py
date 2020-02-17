@@ -42,7 +42,7 @@ class TestStubConnection:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.tmpdir = Path(tempfile.mktemp())
+        cls.tmpdir = Path(tempfile.mkdtemp())
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
@@ -157,7 +157,7 @@ class TestStubConnection:
 
 def test_connection_from_config():
     """Test loading a connection from config file."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -175,7 +175,7 @@ def test_connection_from_config():
 @pytest.mark.asyncio
 async def test_disconnection_when_already_disconnected():
     """Test the case when disconnecting a connection already disconnected."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -194,7 +194,7 @@ async def test_disconnection_when_already_disconnected():
 @pytest.mark.asyncio
 async def test_connection_when_already_connected():
     """Test the case when connecting a connection already connected."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -215,7 +215,7 @@ async def test_connection_when_already_connected():
 @pytest.mark.asyncio
 async def test_receiving_returns_none_when_error_occurs():
     """Test that when we try to receive an envelope and an error occurs we return None."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
