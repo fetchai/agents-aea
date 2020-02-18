@@ -19,7 +19,6 @@
 
 """This package contains a scaffold of a behaviour."""
 
-import logging
 import os
 import subprocess  # nosec
 from typing import Optional, cast
@@ -33,8 +32,6 @@ from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.carpark_detection.strategy import Strategy
-
-logger = logging.getLogger("aea.carpark_detection_skill")
 
 REGISTER_ID = 1
 UNREGISTER_ID = 2
@@ -75,7 +72,7 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: Attempt to launch car park detection and GUI in seperate processes.".format(
                 self.context.agent_name
             )
@@ -94,19 +91,19 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
                 "-lon",
                 str(self.default_longitude),
             ]
-            logger.info(
+            self.context.logger.info(
                 "[{}]:Launchng process {}".format(self.context.agent_name, param_list)
             )
             self.process_id = subprocess.Popen(param_list)  # nosec
             os.chdir(old_cwp)
-            logger.info(
+            self.context.logger.info(
                 "[{}]: detection and gui process launched, process_id {}".format(
                     self.context.agent_name, self.process_id
                 )
             )
             strategy.other_carpark_processes_running = True
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Failed to find run_carpakragent.py - either you are running this without the rest of the carpark agent code (which can be got from here: https://github.com/fetchai/carpark_agent or you are running the aea from the wrong directory.".format(
                     self.context.agent_name
                 )
@@ -171,13 +168,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
             if fet_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on fetchai ledger={}.".format(
                         self.context.agent_name, fet_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on fetchai ledger!".format(
                         self.context.agent_name
                     )
@@ -188,13 +185,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
             if eth_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on ethereum ledger={}.".format(
                         self.context.agent_name, eth_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on ethereum ledger!".format(
                         self.context.agent_name
                     )
@@ -239,7 +236,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 protocol_id=OEFMessage.protocol_id,
                 message=OEFSerializer().encode(msg),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: updating car park detection services on OEF.".format(
                     self.context.agent_name
                 )
@@ -265,7 +262,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 protocol_id=OEFMessage.protocol_id,
                 message=OEFSerializer().encode(msg),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: unregistering car park detection services from OEF.".format(
                     self.context.agent_name
                 )
@@ -299,7 +296,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on fetchai ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -309,7 +306,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on ethereum ledger={}.".format(
                     self.context.agent_name, balance
                 )

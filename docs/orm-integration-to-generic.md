@@ -247,7 +247,7 @@ aea generate-wealth ethereum
 
 ## Run the AEAs
 
-You can change the end point's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
+You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
 
 Under config locate :
 

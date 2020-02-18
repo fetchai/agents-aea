@@ -39,13 +39,13 @@ Fetch the weather station AEA with the following command :
 ### Update the AEA configs
 
 In the terminal change the configuration:
-```
+```bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
-``` bash
+```bash
 aea run --connections fetchai/oef:0.1.0
 ```
 
@@ -57,7 +57,7 @@ Create a new python file and name it `weather_client.py` and add the following c
 
 <details><summary>Weather client full code.</summary>
 
-```
+```python
 import logging
 import os
 import time
@@ -183,7 +183,7 @@ def run():
         my_aea.context,
     )
 
-    strategy = cast(Strategy, weather_skill.models.get('strategy'))
+    strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
     strategy.max_buyer_tx_fee = 100
     strategy.max_row_price = 40

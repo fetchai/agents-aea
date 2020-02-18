@@ -18,14 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the dataModel for the generic seller aea."""
-import logging
 from typing import Any, Dict
 
 from aea.helpers.search.models import Attribute, DataModel
 
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
-
-logger = logging.getLogger(__name__)
 
 
 class Generic_Data_Model(DataModel):

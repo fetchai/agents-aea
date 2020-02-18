@@ -68,7 +68,7 @@ logging_config:
       - logfile
       - console
       level: DEBUG
-      propagate: True
+      propagate: False
 ```
 
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.

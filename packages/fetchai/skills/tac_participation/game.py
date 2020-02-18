@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a class representing the game."""
-import logging
 from enum import Enum
 from typing import Dict, List, Optional
 
@@ -27,8 +26,6 @@ from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TACMessage
-
-logger = logging.getLogger("aea.tac_participation_skill")
 
 
 class Phase(Enum):
@@ -222,7 +219,7 @@ class Game(Model):
 
         :return: None
         """
-        logger.warning(
+        self.context.logger.warning(
             "[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(
                 self.context.agent_name
             )
