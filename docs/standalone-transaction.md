@@ -75,7 +75,7 @@ logger.info("The transaction digest is {}".format(tx_digest))
 
 <details><summary>Stand-alone transaction full code</summary>
 
-```
+```python
 import logging
 import os
 from aea.crypto.fetchai import FETCHAI

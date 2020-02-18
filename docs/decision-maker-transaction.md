@@ -74,22 +74,22 @@ ROOT_DIR = "./"
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 
- tx_handler = TransactionHandler(skill_context='skill_context', name="fake_skill")
- resources = Resources()
- resources.handler_registry.register(
-    (PublicId.from_str("fetchai/fake_skill:0.1.0"), PublicId.from_str("fetchai/internal:0.1.0")), tx_handler)
+tx_handler = TransactionHandler(skill_context='skill_context', name="fake_skill")
+resources = Resources()
+resources.handler_registry.register(
+   (PublicId.from_str("fetchai/fake_skill:0.1.0"), PublicId.from_str("fetchai/internal:0.1.0")), tx_handler)
 
- stub_connection = StubConnection(
-    input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
- )
+stub_connection = StubConnection(
+   input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+)
 
- identity_1 = Identity(
-    name="my_aea",
-    address=wallet_1.addresses.get(FETCHAI),
-    default_address_key=FETCHAI,
- )
+identity_1 = Identity(
+   name="my_aea",
+   address=wallet_1.addresses.get(FETCHAI),
+   default_address_key=FETCHAI,
+)
 
- my_aea = AEA(identity_1, [stub_connection], wallet_1, ledger_apis, resources)
+my_aea = AEA(identity_1, [stub_connection], wallet_1, ledger_apis, resources)
 ```
 
 ## Create an identity for counterparty
@@ -157,7 +157,6 @@ t.join()
 
 To be able to register a handler that reads the internal messages, we have to create a class at the end of the file with the name TransactionHandler
 ```python
-import logging
 from typing import cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -165,9 +164,6 @@ from aea.protocols.base import Message
 
 from aea.skills.base import Handler
 
-
-logger = logging.getLogger("aea")
-logging.basicConfig(level=logging.INFO)
 
 class TransactionHandler(Handler):
     """Implement the transaction handler."""
@@ -186,18 +182,18 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        logger.info(tx_msg_response)
+        self.context.logger.info(tx_msg_response)
         if (
             tx_msg_response is not None
             and tx_msg_response.performative
             == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
         ):
-            logger.info(
+            self.context.logger.info(
                 "Transaction was successful."
             )
-            logger.info(tx_msg_response.tx_digest)
+            self.context.logger.info(tx_msg_response.tx_digest)
         else:
-            logger.info(
+            self.context.logger.info(
                 "Transaction was not successful."
             )
 
@@ -212,7 +208,7 @@ class TransactionHandler(Handler):
 
 <details><summary>Transaction via decision-maker full code</summary>
 
-```
+```python
 import logging
 import time
 from threading import Thread
@@ -333,18 +329,18 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        logger.info(tx_msg_response)
+        self.context.logger.info(tx_msg_response)
         if (
             tx_msg_response is not None
             and tx_msg_response.performative
             == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
         ):
-            logger.info(
+            self.context.logger.info(
                 "Transaction was successful."
             )
-            logger.info(tx_msg_response.tx_digest)
+            self.context.logger.info(tx_msg_response.tx_digest)
         else:
-            logger.info(
+            self.context.logger.info(
                 "Transaction was not successful."
             )
 

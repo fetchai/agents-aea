@@ -19,7 +19,6 @@
 
 """This package contains the handlers."""
 
-import logging
 from typing import cast
 
 from aea.protocols.base import Message
@@ -30,8 +29,6 @@ from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase, Transaction
 from packages.fetchai.skills.tac_control.parameters import Parameters
-
-logger = logging.getLogger("aea.tac_control_skill")
 
 
 class TACHandler(Handler):
@@ -61,7 +58,7 @@ class TACHandler(Handler):
 
         game = cast(Game, self.context.game)
 
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling TAC message. type={}".format(
                 self.context.agent_name, tac_type
             )
@@ -79,7 +76,7 @@ class TACHandler(Handler):
         elif tac_type == TACMessage.Type.TRANSACTION and game.phase == Phase.GAME:
             self._on_transaction(tac_message)
         else:
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: TAC Message type not recognized or not permitted.".format(
                     self.context.agent_name
                 )
@@ -97,7 +94,7 @@ class TACHandler(Handler):
         parameters = cast(Parameters, self.context.parameters)
         agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
-            logger.error(
+            self.context.logger.error(
                 "[{}]: Agent name not in whitelist: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -116,7 +113,7 @@ class TACHandler(Handler):
 
         game = cast(Game, self.context.game)
         if message.counterparty in game.registration.agent_addr_to_name:
-            logger.error(
+            self.context.logger.error(
                 "[{}]: Agent already registered: '{}'".format(
                     self.context.agent_name,
                     game.registration.agent_addr_to_name[message.counterparty],
@@ -134,7 +131,7 @@ class TACHandler(Handler):
             )
 
         if agent_name in game.registration.agent_addr_to_name.values():
-            logger.error(
+            self.context.logger.error(
                 "[{}]: Agent with this name already registered: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -151,7 +148,7 @@ class TACHandler(Handler):
             )
 
         game.registration.register_agent(message.counterparty, agent_name)
-        logger.info(
+        self.context.logger.info(
             "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
         )
 
@@ -166,7 +163,7 @@ class TACHandler(Handler):
         """
         game = cast(Game, self.context.game)
         if message.counterparty not in game.registration.agent_addr_to_name:
-            logger.error(
+            self.context.logger.error(
                 "[{}]: Agent not registered: '{}'".format(
                     self.context.agent_name, message.counterparty
                 )
@@ -182,7 +179,7 @@ class TACHandler(Handler):
                 message=TACSerializer().encode(tac_msg),
             )
         else:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Agent unregistered: '{}'".format(
                     self.context.agent_name,
                     game.configuration.agent_addr_to_name[message.counterparty],
@@ -200,7 +197,7 @@ class TACHandler(Handler):
         :return: None
         """
         transaction = Transaction.from_message(message)
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling transaction: {}".format(
                 self.context.agent_name, transaction
             )
@@ -226,7 +223,7 @@ class TACHandler(Handler):
         :return: None
         """
         game = cast(Game, self.context.game)
-        logger.info(
+        self.context.logger.info(
             "[{}]: Handling valid transaction: {}".format(
                 self.context.agent_name, transaction.id[-10:]
             )
@@ -261,12 +258,12 @@ class TACHandler(Handler):
         )
 
         # log messages
-        logger.info(
+        self.context.logger.info(
             "[{}]: Transaction '{}' settled successfully.".format(
                 self.context.agent_name, transaction.id[-10:]
             )
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: Current state:\n{}".format(
                 self.context.agent_name, game.holdings_summary
             )
@@ -275,7 +272,7 @@ class TACHandler(Handler):
     def _handle_invalid_transaction(self, message: TACMessage) -> None:
         """Handle an invalid transaction."""
         tx_id = message.tx_id[-10:]
-        logger.info(
+        self.context.logger.info(
             "[{}]: Handling invalid transaction: {}".format(
                 self.context.agent_name, tx_id
             )
@@ -324,7 +321,7 @@ class OEFRegistrationHandler(Handler):
         oef_message = cast(OEFMessage, message)
         oef_type = oef_message.type
 
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling OEF message. type={}".format(
                 self.context.agent_name, oef_type
             )
@@ -334,7 +331,7 @@ class OEFRegistrationHandler(Handler):
         elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
             self._on_dialogue_error(oef_message)
         else:
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: OEF Message type not recognized.".format(self.context.agent_name)
             )
 
@@ -346,7 +343,7 @@ class OEFRegistrationHandler(Handler):
 
         :return: None
         """
-        logger.error(
+        self.context.logger.error(
             "[{}]: Received OEF error: answer_id={}, operation={}".format(
                 self.context.agent_name, oef_error.id, oef_error.operation
             )
@@ -360,7 +357,7 @@ class OEFRegistrationHandler(Handler):
 
         :return: None
         """
-        logger.error(
+        self.context.logger.error(
             "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
                 self.context.agent_name,
                 dialogue_error.id,

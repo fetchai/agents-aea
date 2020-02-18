@@ -88,7 +88,6 @@ HOST = "127.0.0.1"
 PORT = 10000
 ROOT_DIR = os.getcwd()
 
-# Not sure what level of logging to specify to get the logging to be displayed?
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 
