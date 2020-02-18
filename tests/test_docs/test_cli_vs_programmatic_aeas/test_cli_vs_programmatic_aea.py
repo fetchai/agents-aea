@@ -71,8 +71,11 @@ class TestProgrammaticAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_cli_programmatic_communication(self):
+    def test_cli_programmatic_communication(self, pytestconfig):
         """Test the communication of the two agents."""
+
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
 
         result = self.runner.invoke(
             cli,
