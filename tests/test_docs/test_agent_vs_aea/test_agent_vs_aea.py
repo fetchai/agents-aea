@@ -23,7 +23,7 @@ import logging
 import os
 
 from .agent_code_block import run
-from ..helper import extract_code_blocks
+from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import CUR_PATH, ROOT_DIR
 
 MD_FILE = "docs/agent-vs-aea.md"
@@ -41,12 +41,7 @@ class TestProgrammaticAEA:
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = ""
-        read_python_file = []
-        with open(path, "r") as python_file:
-            read_python_file.append(python_file.readlines())
-        for i in range(21, len(read_python_file[0])):
-            cls.python_file += read_python_file[0][i]
+        cls.python_file = extract_python_code(path)
 
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""

@@ -32,7 +32,7 @@ import pytest
 from aea.cli import cli
 
 from .programmatic_aea import run
-from ..helper import extract_code_blocks
+from ..helper import extract_code_blocks, extract_python_code
 from ...common.click_testing import CliRunner
 from ...conftest import (
     CLI_LOG_OPTION,
@@ -53,12 +53,7 @@ class TestProgrammaticAEA:
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = ""
-        read_python_file = []
-        with open(path, "r") as python_file:
-            read_python_file.append(python_file.readlines())
-        for i in range(21, len(read_python_file[0])):
-            cls.python_file += read_python_file[0][i]
+        cls.python_file = extract_python_code(path)
         cls.runner = CliRunner()
 
     @pytest.fixture(autouse=True)

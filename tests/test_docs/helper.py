@@ -41,3 +41,14 @@ def extract_code_blocks(file, filter=None):
                     code_block.append(f.readline())
                 code_blocks.append("".join(code_block[:-1]))
     return code_blocks
+
+
+def extract_python_code(file):
+    """Removes the license part from the scripts"""
+    python_str = ""
+    with open(file, "r") as python_file:
+        read_python_file = python_file.readlines()
+    for i in range(21, len(read_python_file)):
+        python_str += read_python_file[i]
+
+    return python_str
