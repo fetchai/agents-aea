@@ -1,29 +1,53 @@
-"""Serialization for two_party_negotiation protocol."""
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Serialization module for two_party_negotiation protocol."""
 
 from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation_pb2
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
+)
+from packages.fetchai.protocols.two_party_negotiation import (
+    TwoPartyNegotiation_pb2,
 )
 
 
 class TwoPartyNegotiationSerializer(Serializer):
-    """Serialization for two_party_negotiation protocol."""
+    """Serialization for the 'two_party_negotiation' protocol."""
 
     def encode(self, msg: Message) -> bytes:
-        """Encode a 'TwoPartyNegotiation' message into bytes."""
+        """
+        Encode a 'TwoPartyNegotiation' message into bytes.
+
+        :param msg: the message object.
+        :return: the bytes.
+        """
         msg = cast(TwoPartyNegotiationMessage, msg)
         two_party_negotiation_msg = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage()
         two_party_negotiation_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
         two_party_negotiation_msg.dialogue_starter_reference = dialogue_reference[0]
         two_party_negotiation_msg.dialogue_responder_reference = dialogue_reference[1]
-        two_party_negotiation_msg.target = msg.target
-
         two_party_negotiation_msg.target = msg.target
 
         performative_id = msg.performative
@@ -56,21 +80,13 @@ class TwoPartyNegotiationSerializer(Serializer):
                 performative.conditions_type_str = conditions_type_str
             if msg.is_set("conditions_type_dict_of_str_int"):
                 conditions_type_dict_of_str_int = msg.conditions_type_dict_of_str_int
-                performative.conditions_type_dict_of_str_int.update(
-                    conditions_type_dict_of_str_int
-                )
+                performative.conditions_type_dict_of_str_int.update(conditions_type_dict_of_str_int)
             if msg.is_set("conditions_type_set_of_str"):
                 conditions_type_set_of_str = msg.conditions_type_set_of_str
-                performative.conditions_type_set_of_str.extend(
-                    conditions_type_set_of_str
-                )
+                performative.conditions_type_set_of_str.extend(conditions_type_set_of_str)
             if msg.is_set("conditions_type_dict_of_str_float"):
-                conditions_type_dict_of_str_float = (
-                    msg.conditions_type_dict_of_str_float
-                )
-                performative.conditions_type_dict_of_str_float.update(
-                    conditions_type_dict_of_str_float
-                )
+                conditions_type_dict_of_str_float = msg.conditions_type_dict_of_str_float
+                performative.conditions_type_dict_of_str_float.update(conditions_type_dict_of_str_float)
             two_party_negotiation_msg.propose.CopyFrom(performative)
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Accept()  # type: ignore
@@ -88,7 +104,12 @@ class TwoPartyNegotiationSerializer(Serializer):
         return two_party_negotiation_bytes
 
     def decode(self, obj: bytes) -> Message:
-        """Decode bytes into a 'TwoPartyNegotiation' message."""
+        """
+        Decode bytes into a 'TwoPartyNegotiation' message.
+
+        :param obj: the bytes object.
+        :return: the 'TwoPartyNegotiation' message.
+        """
         two_party_negotiation_pb = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage()
         two_party_negotiation_pb.ParseFromString(obj)
         message_id = two_party_negotiation_pb.message_id
@@ -125,17 +146,13 @@ class TwoPartyNegotiationSerializer(Serializer):
             if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
                 conditions = two_party_negotiation_pb.propose.conditions_type_str
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_int"
-            ):
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_int"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
             if two_party_negotiation_pb.propose.HasField("conditions_type_set_of_str"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_float"
-            ):
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_float"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:

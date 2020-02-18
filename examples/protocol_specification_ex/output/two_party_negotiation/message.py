@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
 """This module contains two_party_negotiation's message definition."""
 
 from enum import Enum
@@ -24,7 +43,7 @@ class TwoPartyNegotiationMessage(Message):
         PROPOSE = "propose"
 
         def __str__(self):
-            """Get string representation."""
+            """Get the string representation."""
             return self.value
 
     def __init__(
@@ -32,15 +51,22 @@ class TwoPartyNegotiationMessage(Message):
         dialogue_reference: Tuple[str, str],
         message_id: int,
         target: int,
-        performative: str,
+        performative: Performative,
         **kwargs,
     ):
-        """Initialise an instance of TwoPartyNegotiationMessage."""
+        """
+        Initialise an instance of TwoPartyNegotiationMessage.
+
+        :param message_id: the message id.
+        :param dialogue_reference: the dialogue reference.
+        :param target: the message target.
+        :param performative: the message performative.
+        """
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=performative,
+            performative=TwoPartyNegotiationMessage.Performative(performative),
             **kwargs,
         )
         self._performatives = {"accept", "cfp", "decline", "match_accept", "propose"}
@@ -78,15 +104,10 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def conditions(
-        self,
-    ) -> Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]]:
+    def conditions(self) -> Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]]:
         """Get the 'conditions' content from the message."""
         assert self.is_set("conditions"), "'conditions' content is not set."
-        return cast(
-            Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]],
-            self.get("conditions"),
-        )
+        return cast(Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]], self.get("conditions"))
 
     @property
     def description(self) -> str:
@@ -101,10 +122,10 @@ class TwoPartyNegotiationMessage(Message):
         return cast(bool, self.get("flag"))
 
     @property
-    def items(self) -> Tuple[int]:
+    def items(self) -> Tuple[int, ...]:
         """Get the 'items' content from the message."""
         assert self.is_set("items"), "'items' content is not set."
-        return cast(Tuple[int], self.get("items"))
+        return cast(Tuple[int, ...], self.get("items"))
 
     @property
     def number(self) -> int:
@@ -166,21 +187,13 @@ class TwoPartyNegotiationMessage(Message):
                 assert type(self.query) == str, "Content 'query' is not of type 'str'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.PROPOSE:
                 expected_nb_of_contents = 9
-                assert (
-                    type(self.number) == int
-                ), "Content 'number' is not of type 'int'."
-                assert (
-                    type(self.price) == float
-                ), "Content 'price' is not of type 'float'."
-                assert (
-                    type(self.description) == str
-                ), "Content 'description' is not of type 'str'."
+                assert type(self.number) == int, "Content 'number' is not of type 'int'."
+                assert type(self.price) == float, "Content 'price' is not of type 'float'."
+                assert type(self.description) == str, "Content 'description' is not of type 'str'."
                 assert type(self.flag) == bool, "Content 'flag' is not of type 'bool'."
                 assert type(self.query) == str, "Content 'query' is not of type 'str'."
                 if self.is_set("proposal"):
-                    assert (
-                        type(self.proposal) == dict
-                    ), "Content 'proposal' is not of type 'dict'."
+                    assert type(self.proposal) == dict, "Content 'proposal' is not of type 'dict'."
                     for key, value in self.proposal.items():
                         assert (
                             type(key) == str
@@ -188,41 +201,30 @@ class TwoPartyNegotiationMessage(Message):
                         assert (
                             type(value) == bytes
                         ), "Values of 'proposal' dictionary are not of type 'bytes'."
-                assert (
-                    type(self.rounds) == frozenset
-                ), "Content 'rounds' is not of type 'frozenset'."
+                assert type(self.rounds) == frozenset, "Content 'rounds' is not of type 'frozenset'."
                 assert all(
                     type(element) == int for element in self.rounds
                 ), "Elements of the content 'rounds' are not of type 'int'."
-                assert (
-                    type(self.items) == tuple
-                ), "Content 'items' is not of type 'tuple'."
+                assert type(self.items) == tuple, "Content 'items' is not of type 'tuple'."
                 assert all(
                     type(element) == int for element in self.items
                 ), "Elements of the content 'items' are not of type 'int'."
                 if self.is_set("conditions"):
-                    assert (
-                        type(self.conditions) == dict
-                        or type(self.conditions) == frozenset
-                        or type(self.conditions) == str
-                    ), "Content 'conditions' should be either of the following types: ['dict', 'frozenset', 'str']."
+                    assert type(self.conditions) == frozenset or type(self.conditions) == str or type(self.conditions) == dict, "Content 'conditions' should be either of the following types: ['frozenset', 'str', 'dict']."
                     if type(self.conditions) == frozenset:
-                        assert all(
-                            type(element) == str for element in self.conditions
+                        assert (
+                            all(type(element) == str for element in self.conditions)
                         ), "Elements of the content 'conditions' should be of type 'str'."
                     if type(self.conditions) == dict:
                         for key, value in self.conditions.items():
                             assert (
-                                type(key) == str and type(value) == float
-                            ), "The type of keys and values of 'conditions' dictionary must be 'str' and 'float' respectively."
+                                    (type(key) == str and type(value) == float)
+                        ), "The type of keys and values of 'conditions' dictionary must be 'str' and 'float' respectively."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif (
-                self.performative
-                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
-            ):
+            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
 
             # # Check correct content count
