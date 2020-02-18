@@ -249,7 +249,7 @@ class PublicId(JSONSerializable):
             author=self.author, name=self.name, version=self.version
         )
 
-    def __eq__(self, other):  # pragma: no cover
+    def __eq__(self, other):
         """Compare with another object."""
         return (
             isinstance(other, PublicId)
@@ -258,7 +258,7 @@ class PublicId(JSONSerializable):
             and self.version == other.version
         )
 
-    def __lt__(self, other):  # pragma: no cover
+    def __lt__(self, other):
         """Compare two public ids."""
         return str(self) < str(other)
 
@@ -277,7 +277,7 @@ class PackageConfiguration(Configuration, ABC):
         self.version = version
 
     @property
-    def public_id(self) -> PublicId:  # pragma: no cover
+    def public_id(self) -> PublicId:
         """Get the public id."""
         return PublicId(self.author, self.name, self.version)
 

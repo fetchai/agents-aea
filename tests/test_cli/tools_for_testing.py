@@ -43,6 +43,9 @@ class AgentConfigMock:
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
         self.agent_name: str = kwargs.get("agent_name", "agent-name")
+        private_key_paths = kwargs.get("private_key_paths", [])
+        self.private_key_paths = Mock()
+        self.private_key_paths.read_all = Mock(return_value=private_key_paths)
 
     registry_path = "registry"
     name = "name"
@@ -58,6 +61,7 @@ class ContextMock:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
+        self.connection_loader = ConfigLoaderMock()
 
 
 class PublicIdMock:
@@ -83,6 +87,7 @@ class AEAConfMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AEAConf mock object."""
+        self.author = "author"
         self.ledger_apis = Mock()
         ledger_apis = ((ETHEREUM, "value"), (FETCHAI, "value"))
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)
@@ -100,3 +105,14 @@ class ConfigLoaderMock:
     def load(self, *args, **kwargs):
         """Mock the load method."""
         return AEAConfMock()
+
+
+class StopTest(Exception):
+    """An exception to stop test."""
+
+    pass
+
+
+def raise_stoptest(*args, **kwargs):
+    """Raise StopTest exception."""
+    raise StopTest()

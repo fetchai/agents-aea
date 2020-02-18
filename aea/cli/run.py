@@ -184,7 +184,7 @@ def _setup_connection(
     connection_dir = Path(
         "vendor", connection_public_id.author, "connections", connection_public_id.name
     )
-    if not connection_dir.exists():  # pragma: no cover
+    if not connection_dir.exists():
         connection_dir = Path("connections", connection_public_id.name)
 
     try:

@@ -42,4 +42,4 @@ args, unknown = parser.parse_known_args()  # pragma: no cover
 
 # If we're running in stand alone mode, run the application
 if __name__ == "__main__":  # pragma: no cover
-    aea.cli_gui.run(args.port, args.host)  # pragma: no cover
+    aea.cli_gui.run(args.port, args.host)

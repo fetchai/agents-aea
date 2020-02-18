@@ -125,7 +125,7 @@ class Agent(ABC):
     @property
     def tick(self) -> int:
         """Get the tick."""
-        return self._tick  # pragma: no cover
+        return self._tick
 
     @property
     def agent_state(self) -> AgentState:

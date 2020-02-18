@@ -35,14 +35,20 @@ import yaml
 
 import aea.cli.common
 from aea.cli import cli
-from aea.cli.run import _verify_ledger_apis_access
+from aea.cli.run import _setup_connection, _verify_ledger_apis_access
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 
-from .tools_for_testing import ConfigLoaderMock
+from .tools_for_testing import (
+    ConfigLoaderMock,
+    ContextMock,
+    PublicIdMock,
+    StopTest,
+    raise_stoptest,
+)
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -1240,3 +1246,17 @@ class VerifyLedgerApiAccessTestCase(TestCase):
     def test__verify_ledger_apis_access_with_host(self, *mocks):
         """Test for _verify_ledger_apis_access method with host."""
         _verify_ledger_apis_access()
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class SetupConnectionTestCase(TestCase):
+    """Test case for _setup_connection method."""
+
+    @mock.patch("aea.cli.run.Path.exists", return_value=False)
+    @mock.patch("aea.cli.run.load_agent_component_package", raise_stoptest)
+    def test__setup_connection_no_dir(self, *mocks):
+        """Test for _setup_connection no connection dir."""
+        public_id = PublicIdMock.from_str("author/name:version")
+        ctx = ContextMock(connections=[public_id])
+        with self.assertRaises(StopTest):
+            _setup_connection(public_id, "address", ctx)

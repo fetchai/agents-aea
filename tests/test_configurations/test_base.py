@@ -199,6 +199,18 @@ class PublicIdTestCase(TestCase):
         obj = PublicId("author", "name", "version")
         obj.json
 
+    def test_public_id_eq_positive(self):
+        """Test case for json __eq__ method positive result."""
+        obj1 = PublicId("author", "name", "version")
+        obj2 = PublicId("author", "name", "version")
+        self.assertTrue(obj1 == obj2)
+
+    def test_public_id_lt_positive(self):
+        """Test case for json __lt__ method positive result."""
+        obj1 = PublicId("author", "name", "1")
+        obj2 = PublicId("author", "name", "2")
+        self.assertTrue(obj1 < obj2)
+
 
 class AgentConfigTestCase(TestCase):
     """Test case for AgentConfig class."""
@@ -212,6 +224,7 @@ class AgentConfigTestCase(TestCase):
         agent_config = AgentConfig()
         agent_config.default_connection = None
         agent_config.default_connection = 1
+        agent_config.public_id
 
 
 class SpeechActContentConfigTestCase(TestCase):
