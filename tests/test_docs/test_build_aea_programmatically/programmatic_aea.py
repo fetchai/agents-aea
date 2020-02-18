@@ -38,7 +38,7 @@ def run():
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    ledger_apis = LedgerApis({'fetchai': {'network': 'testnet'}}, 'fetchai')
+    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
     resources = Resources()
     # Create an identity
     identity = Identity(
