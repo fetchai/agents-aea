@@ -21,7 +21,7 @@
 import os
 from unittest import TestCase
 
-from aea.helpers.base import generate_fingerprint, locate
+from aea.helpers.base import locate
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
@@ -66,11 +66,3 @@ class TestHelpersBase:
 
         result = locate("ThisClassDoesNotExist")
         assert result is None
-
-
-class GenerateFingerprintTestCase(TestCase):
-    """Test case for generate_fingerprint method."""
-
-    def test_generate_fingerprint_positive(self, *mocks):
-        generate_fingerprint("author", "package_name", "version")
-        generate_fingerprint("author", "package_name", "version", 1)
