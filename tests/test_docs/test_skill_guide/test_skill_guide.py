@@ -118,7 +118,7 @@ class TestBuildSkill:
 
         # run the agent
         process_one = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run",],
+            [sys.executable, "-m", "aea.cli", "run"],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )

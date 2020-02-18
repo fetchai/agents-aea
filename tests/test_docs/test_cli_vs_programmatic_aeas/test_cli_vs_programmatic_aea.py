@@ -19,21 +19,22 @@
 
 """This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
+import io
 import logging
 import os
-import io
 import signal
 import subprocess  # nosec
 import sys
 import time
 from pathlib import Path
 from threading import Thread
+from unittest import mock
 
 import pytest
 
 from aea.cli import cli
 
-from .programmatic_aea import run
+from .programmatic_aea import run, logger
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
 from ...conftest import (
@@ -44,8 +45,6 @@ from ...conftest import (
 
 MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
-
-logger = logging.getLogger(__name__)
 
 
 def _read_tty(pid: subprocess.Popen):
@@ -62,6 +61,17 @@ class TestProgrammaticAEA:
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     @classmethod
+    def _patch_logger(cls):
+        cls.patch_logger_warning = mock.patch.object(
+            logger, "warning"
+        )
+        cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
+
+    @classmethod
+    def _unpatch_logger(cls):
+        cls.mocked_logger_warning.__exit__()
+
+    @classmethod
     def setup_class(cls):
         """Setup the test class."""
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
@@ -70,6 +80,9 @@ class TestProgrammaticAEA:
         with open(path, "r") as python_file:
             cls.read_python_file = python_file.read()
         cls.runner = CliRunner()
+        cls._patch_logger()
+
+
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -83,6 +96,9 @@ class TestProgrammaticAEA:
 
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
+
+        patch_logger_info = mock.patch.object(logger, "info")
+        mocked_logger_info = patch_logger_info.__enter__()
 
         result = self.runner.invoke(
             cli,
@@ -129,9 +145,21 @@ class TestProgrammaticAEA:
         client_thread = Thread(target=_read_tty, args=(run,))
         client_thread.start()
 
-        time.sleep(25)
+        process_one.send_signal(signal.SIGINT)
+        process_one.wait(timeout=60)
+
+        assert process_one.returncode == 0
+        poll_one = process_one.poll()
+        if poll_one is None:
+            process_one.terminate()
+            process_one.wait(2)
+
         weather_station_thread.join()
         client_thread.join()
+
+        mocked_logger_info.assert_called_with(
+            "[weather_station]: received the following weather data={}"
+        )
 
     @classmethod
     def teardown(cls):
