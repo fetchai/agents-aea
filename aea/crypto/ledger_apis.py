@@ -248,7 +248,7 @@ class LedgerApis(object):
                 )
                 tx_nonce = ""
         else:
-            logger.warning(" You didn't specify a ledger so the tx_nonce will be Empty.")
+            logger.warning("You didn't specify a ledger so the tx_nonce will be Empty.")
             tx_nonce = ""
         return tx_nonce
 
