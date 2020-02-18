@@ -21,12 +21,15 @@
 
 import logging
 import os
+import io
 import signal
 import subprocess  # nosec
 import sys
 import time
 from pathlib import Path
 from threading import Thread
+
+import pytest
 
 from aea.cli import cli
 
@@ -45,6 +48,16 @@ PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 logger = logging.getLogger(__name__)
 
 
+def _read_tty(pid: subprocess.Popen):
+    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
+        print("stdout: " + line.replace("\n", ""))
+
+
+def _read_error(pid: subprocess.Popen):
+    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
+        print("stderr: " + line.replace("\n", ""))
+
+
 class TestProgrammaticAEA:
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
@@ -58,6 +71,10 @@ class TestProgrammaticAEA:
             cls.read_python_file = python_file.read()
         cls.runner = CliRunner()
 
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
+
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         assert (
@@ -65,15 +82,15 @@ class TestProgrammaticAEA:
         ), "Files must be exactly the same."
 
     def test_cli_programmatic_communication(self):
+        """Test the communication of the two agents."""
 
-        client_thread = Thread(target=run)
-        client_thread.start()
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "fetch", "fetchai/weather_station:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
+
         path = Path(os.getcwd(), "weather_station")
         os.chdir(path)
         result = self.runner.invoke(
@@ -104,14 +121,16 @@ class TestProgrammaticAEA:
             stderr=subprocess.PIPE,
             env=os.environ.copy(),
         )
+
         time.sleep(5.0)
         process_one.send_signal(signal.SIGINT)
+        weather_station_thread = Thread(target=_read_tty, args=(process_one,))
+        weather_station_thread.start()
+        client_thread = Thread(target=_read_tty, args=(run,))
+        client_thread.start()
 
-        process_one.wait(timeout=25)
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
+        time.sleep(25)
+        weather_station_thread.join()
         client_thread.join()
 
     @classmethod
