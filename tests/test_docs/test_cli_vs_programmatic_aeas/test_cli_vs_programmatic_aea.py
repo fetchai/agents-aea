@@ -53,8 +53,12 @@ class TestProgrammaticAEA:
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
+        cls.python_file = ""
+        read_python_file = []
         with open(path, "r") as python_file:
-            cls.read_python_file = python_file.read()
+            read_python_file.append(python_file.readlines())
+        for i in range(21, len(read_python_file[0])):
+            cls.python_file += read_python_file[0][i]
         cls.runner = CliRunner()
 
     @pytest.fixture(autouse=True)
@@ -64,7 +68,7 @@ class TestProgrammaticAEA:
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         assert (
-            self.code_blocks[-1] == self.read_python_file
+            self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
     def test_cli_programmatic_communication(self):
@@ -138,6 +142,6 @@ class TestProgrammaticAEA:
                 standalone_mode=False,
             )
             assert result.exit_code == 0
-        path = Path(ROOT_DIR, "fet_private_key.txt")
+        path = Path(ROOT_DIR, "tests", "test_docs", "test_cli_vs_programmatic_aeas")
         if os.path.exists(path):
             os.remove(path)

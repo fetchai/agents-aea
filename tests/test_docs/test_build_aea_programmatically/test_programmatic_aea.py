@@ -41,13 +41,17 @@ class TestProgrammaticAEA:
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
+        cls.python_file = ""
+        read_python_file = []
         with open(path, "r") as python_file:
-            cls.read_python_file = python_file.read()
+            read_python_file.append(python_file.readlines())
+        for i in range(21, len(read_python_file[0])):
+            cls.python_file += read_python_file[0][i]
 
     def test_read_md_file(self):
         """Read the code blocks. Last block should be the whole code."""
         assert (
-            self.code_blocks[-1] == self.read_python_file
+            self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
     def test_run_agent(self):
@@ -61,7 +65,7 @@ class TestProgrammaticAEA:
         """Test that all the code-blocks exist in the python file."""
         for blocks in self.code_blocks:
             assert (
-                blocks in self.read_python_file
+                blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
 
     def test_input_file_message(self):
