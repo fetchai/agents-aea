@@ -142,6 +142,12 @@ class TestProgrammaticAEA:
                 standalone_mode=False,
             )
             assert result.exit_code == 0
-        path = Path(ROOT_DIR, "tests", "test_docs", "test_cli_vs_programmatic_aeas")
+        path = Path(
+            ROOT_DIR,
+            "tests",
+            "test_docs",
+            "test_cli_vs_programmatic_aeas",
+            "fet_private_key.txt",
+        )
         if os.path.exists(path):
             os.remove(path)
