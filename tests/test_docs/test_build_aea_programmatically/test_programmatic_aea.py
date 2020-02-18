@@ -45,6 +45,7 @@ class TestProgrammaticAEA:
             cls.read_python_file = python_file.read()
 
     def test_read_md_file(self):
+        """Read the code blocks. Last block should be the whole code."""
         assert (
             self.code_blocks[-1] == self.read_python_file
         ), "Files must be exactly the same."
