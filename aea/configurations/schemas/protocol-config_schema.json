@@ -23,7 +23,7 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"

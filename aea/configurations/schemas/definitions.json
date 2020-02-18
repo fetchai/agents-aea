@@ -39,6 +39,9 @@
     "private_key_path": {
       "type": "string"
     },
+    "fingerprint": {
+      "type": "object"
+    },
     "ledger_api": {
       "type": "object"
     },
