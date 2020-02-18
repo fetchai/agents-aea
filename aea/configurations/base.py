@@ -263,6 +263,7 @@ class PublicId(JSONSerializable):
 
 ProtocolId = PublicId
 SkillId = PublicId
+ContractId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):
@@ -791,3 +792,44 @@ class ProtocolSpecification(ProtocolConfig):
                             )
                         )
                 content_dict[content_name] = content_type
+
+
+class ContractConfig(PackageConfiguration):
+    """Handle contract configuration."""
+
+    def __init__(
+        self,
+        name: str = "",
+        author: str = "",
+        version: str = "",
+        license: str = "",
+        description: str = "",
+    ):
+        """Initialize a contract configuration object."""
+        super().__init__(name, author, version)
+        self.license = license
+        self.fingerprint = ""
+        self.description = description
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "author": self.author,
+            "version": self.version,
+            "license": self.license,
+            "fingerprint": self.fingerprint,
+            "description": self.description,
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        return ContractConfig(
+            name=cast(str, obj.get("name")),
+            author=cast(str, obj.get("author")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            description=cast(str, obj.get("description", "")),
+        )
