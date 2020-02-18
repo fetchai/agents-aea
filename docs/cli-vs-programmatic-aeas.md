@@ -183,7 +183,7 @@ def run():
         my_aea.context,
     )
 
-    strategy = cast(Strategy, weather_skill.models.get('strategy'))
+    strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
     strategy.max_buyer_tx_fee = 100
     strategy.max_row_price = 40
@@ -207,6 +207,7 @@ def run():
 
 if __name__ == "__main__":
     run()
+
 ```
 </details>
 
