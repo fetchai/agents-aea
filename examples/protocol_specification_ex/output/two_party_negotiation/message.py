@@ -229,9 +229,9 @@ class TwoPartyNegotiationMessage(Message):
                 if self.is_set("conditions"):
                     assert (
                         type(self.conditions) == frozenset
-                        or type(self.conditions) == str
                         or type(self.conditions) == dict
-                    ), "Content 'conditions' should be either of the following types: ['frozenset', 'str', 'dict']."
+                        or type(self.conditions) == str
+                    ), "Content 'conditions' should be either of the following types: ['frozenset', 'dict', 'str']."
                     if type(self.conditions) == frozenset:
                         assert all(
                             type(element) == str for element in self.conditions

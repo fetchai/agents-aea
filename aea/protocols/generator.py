@@ -1064,7 +1064,7 @@ class ProtocolGenerator:
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
-            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
+            "from {}.{}.{}.{} import (\n    {}_pb2,\n)\n",
             PATH_TO_PACKAGES,
             self.protocol_specification.author,
             "protocols",
@@ -1072,7 +1072,7 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
-            "from {}.{}.{}.{} import (\n    {}_pb2,\n)\n\n\n",
+            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n\n\n",
             PATH_TO_PACKAGES,
             self.protocol_specification.author,
             "protocols",
