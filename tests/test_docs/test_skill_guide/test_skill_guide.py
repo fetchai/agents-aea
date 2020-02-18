@@ -34,6 +34,8 @@ from pathlib import Path
 import jsonschema
 from jsonschema import Draft4Validator
 
+import pytest
+
 from aea import AEA_DIR
 from aea.cli import cli
 
@@ -87,8 +89,10 @@ class TestBuildSkill:
     def test_read_md_file(self):
         assert self.code_blocks != [], "File must not be empty."
 
-    def test_update_skill_and_run(self):
+    def test_update_skill_and_run(self, pytestconfig):
         """Test that the resource folder contains scaffold handlers.py module."""
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
 
         path = Path(
             self.t, self.agent_name, "skills", self.resource_name, "behaviours.py"
