@@ -20,14 +20,12 @@
 """Miscellaneous helpers."""
 
 import builtins
-import hashlib
 import importlib.util
 import logging
 import os
 import sys
 import types
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

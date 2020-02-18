@@ -709,7 +709,7 @@ class DecisionMaker:
         if not self.ownership_state.is_initialized and not (
             self.ledger_state_proxy.is_initialized
             and (tx_message.ledger_id != OFF_CHAIN)
-        ):  # pragma: no cover
+        ):
             logger.warning(
                 "[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(
                     self._agent_name

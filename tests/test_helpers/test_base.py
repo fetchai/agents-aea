@@ -19,7 +19,6 @@
 
 """This module contains the tests for the helper module."""
 import os
-from unittest import TestCase
 
 from aea.helpers.base import locate
 
