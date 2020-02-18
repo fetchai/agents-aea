@@ -19,7 +19,6 @@
 
 """This package contains the behaviours."""
 
-import logging
 from typing import Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -31,7 +30,6 @@ from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 
-logger = logging.getLogger("aea.ml_data_provider")
 
 SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -59,13 +57,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
             if fet_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on fetchai ledger={}.".format(
                         self.context.agent_name, fet_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on fetchai ledger!".format(
                         self.context.agent_name
                     )
@@ -76,13 +74,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
             if eth_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on ethereum ledger={}.".format(
                         self.context.agent_name, eth_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on ethereum ledger!".format(
                         self.context.agent_name
                     )
@@ -109,7 +107,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on fetchai ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -119,7 +117,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on ethereum ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -149,7 +147,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             protocol_id=OEFMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: updating ml data provider service on OEF.".format(
                 self.context.agent_name
             )
@@ -175,7 +173,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             protocol_id=OEFMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: unregistering ml data provider service from OEF.".format(
                 self.context.agent_name
             )

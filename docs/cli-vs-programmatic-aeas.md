@@ -57,7 +57,7 @@ Create a new python file and name it `weather_client.py` and add the following c
 
 <details><summary>Weather client full code.</summary>
 
-```
+```python
 import logging
 import os
 import time
@@ -88,7 +88,6 @@ HOST = "127.0.0.1"
 PORT = 10000
 ROOT_DIR = os.getcwd()
 
-# Not sure what level of logging to specify to get the logging to be displayed?
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 

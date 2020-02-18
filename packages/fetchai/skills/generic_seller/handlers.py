@@ -19,7 +19,6 @@
 
 """This package contains the handlers of a generic seller AEA."""
 
-import logging
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -33,8 +32,6 @@ from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.skills.generic_seller.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.generic_seller.strategy import Strategy
-
-logger = logging.getLogger("aea.generic_seller_skill")
 
 
 class FIPAHandler(Handler):
@@ -108,7 +105,9 @@ class FIPAHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
+        self.context.logger.info(
+            "[{}]: unidentified dialogue.".format(self.context.agent_name)
+        )
         default_msg = DefaultMessage(
             type=DefaultMessage.Type.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
@@ -134,7 +133,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
-        logger.info(
+        self.context.logger.info(
             "[{}]: received CFP from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
@@ -148,7 +147,7 @@ class FIPAHandler(Handler):
             )
             dialogue.data_for_sale = data_for_sale
             dialogue.proposal = proposal
-            logger.info(
+            self.context.logger.info(
                 "[{}]: sending sender={} a PROPOSE with proposal={}".format(
                     self.context.agent_name, msg.counterparty[-5:], proposal.values
                 )
@@ -168,7 +167,7 @@ class FIPAHandler(Handler):
                 message=FIPASerializer().encode(proposal_msg),
             )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: declined the CFP from sender={}".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
@@ -197,7 +196,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: received DECLINE from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
@@ -219,12 +218,12 @@ class FIPAHandler(Handler):
         """
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
-        logger.info(
+        self.context.logger.info(
             "[{}]: received ACCEPT from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
@@ -259,7 +258,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
-        logger.info(
+        self.context.logger.info(
             "[{}]: received INFORM from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
@@ -268,7 +267,7 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
             tx_digest = msg.info["transaction_digest"]
-            logger.info(
+            self.context.logger.info(
                 "[{}]: checking whether transaction={} has been received ...".format(
                     self.context.agent_name, tx_digest
                 )
@@ -288,7 +287,7 @@ class FIPAHandler(Handler):
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )
-                logger.info(
+                self.context.logger.info(
                     "[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(
                         self.context.agent_name,
                         tx_digest,
@@ -315,7 +314,7 @@ class FIPAHandler(Handler):
                     Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
                 )
             else:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: transaction={} not settled, aborting".format(
                         self.context.agent_name, tx_digest
                     )
@@ -340,7 +339,7 @@ class FIPAHandler(Handler):
                 Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated
             )
         else:
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: did not receive transaction digest from sender={}.".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
