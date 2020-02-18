@@ -238,14 +238,17 @@ class LedgerApis(object):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        try:
-            assert identifier in self.apis.keys()
-            api = self.apis[identifier]
-            tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
-        except Exception:
-            logger.warning(
-                "An error occurred while attempting to generate the tx_nonce. You didn't specify a ledger so the tx_nonce will be Empty."
-            )
+        if identifier in self.apis.keys():
+            try:
+                api = self.apis[identifier]
+                tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
+            except Exception:
+                logger.warning(
+                    "An error occurred while attempting to generate the tx_nonce."
+                )
+                tx_nonce = ""
+        else:
+            logger.warning(" You didn't specify a ledger so the tx_nonce will be Empty.")
             tx_nonce = ""
         return tx_nonce
 
