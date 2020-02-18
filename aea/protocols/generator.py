@@ -754,19 +754,21 @@ class ProtocolGenerator:
         :param performative: the message performative.
         """
         cls_str += '        """\n'
-        cls_str += '        Initialise an instance of {}Message.\n\n'.format(
+        cls_str += "        Initialise an instance of {}Message.\n\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += '        :param message_id: the message id.\n'
-        cls_str += '        :param dialogue_reference: the dialogue reference.\n'
-        cls_str += '        :param target: the message target.\n'
-        cls_str += '        :param performative: the message performative.\n'
+        cls_str += "        :param message_id: the message id.\n"
+        cls_str += "        :param dialogue_reference: the dialogue reference.\n"
+        cls_str += "        :param target: the message target.\n"
+        cls_str += "        :param performative: the message performative.\n"
         cls_str += '        """\n'
         cls_str += "        super().__init__(\n"
         cls_str += "            dialogue_reference=dialogue_reference,\n"
         cls_str += "            message_id=message_id,\n"
         cls_str += "            target=target,\n"
-        cls_str += "            performative={}Message.Performative(performative),\n".format(self.protocol_specification_in_camel_case)
+        cls_str += "            performative={}Message.Performative(performative),\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
         cls_str += "        self._performatives = {}\n".format(
@@ -957,12 +959,6 @@ class ProtocolGenerator:
             encoding_str += self._encoding_message_field_from_python_to_protobuf(
                 content_name, sub_type, no_indents
             )
-        # else:
-        # raise TypeError(
-        #     "Invalid type for serialising to protocol buffer: '{}' in content '{}'".format(
-        #         content_type, content_name
-        #     )
-        # )
         return encoding_str
 
     def _decoding_message_field_from_protobuf_to_python(
@@ -1047,12 +1043,6 @@ class ProtocolGenerator:
             decoding_str += self._decoding_message_field_from_protobuf_to_python(
                 performative, content_name, sub_type, no_indents
             )
-        # else:
-        #     raise TypeError(
-        #         "Invalid type for serialising to protocol buffer: '{}' in content '{}'".format(
-        #             content_type, content_name
-        #         )
-        #     )
         return decoding_str
 
     def _serialization_class_str(self) -> str:
@@ -1103,11 +1093,11 @@ class ProtocolGenerator:
         # encoder
         cls_str += str.format("    def encode(self, msg: Message) -> bytes:\n")
         cls_str += '        """\n'
-        cls_str += '        Encode a \'{}\' message into bytes.\n\n'.format(
+        cls_str += "        Encode a '{}' message into bytes.\n\n".format(
             self.protocol_specification_in_camel_case,
         )
-        cls_str += '        :param msg: the message object.\n'
-        cls_str += '        :return: the bytes.\n'
+        cls_str += "        :param msg: the message object.\n"
+        cls_str += "        :return: the bytes.\n"
         cls_str += '        """\n'
         cls_str += "        msg = cast({}Message, msg)\n".format(
             self.protocol_specification_in_camel_case
@@ -1175,11 +1165,13 @@ class ProtocolGenerator:
         # decoder
         cls_str += str.format("    def decode(self, obj: bytes) -> Message:\n")
         cls_str += '        """\n'
-        cls_str += '        Decode bytes into a \'{}\' message.\n\n'.format(
+        cls_str += "        Decode bytes into a '{}' message.\n\n".format(
             self.protocol_specification_in_camel_case,
         )
-        cls_str += '        :param obj: the bytes object.\n'
-        cls_str += '        :return: the \'{}\' message.\n'.format(self.protocol_specification_in_camel_case)
+        cls_str += "        :param obj: the bytes object.\n"
+        cls_str += "        :return: the '{}' message.\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += '        """\n'
         cls_str += "        {}_pb = {}_pb2.{}Message()\n".format(
             self.protocol_specification.name,
@@ -1249,24 +1241,6 @@ class ProtocolGenerator:
         cls_str += "        )\n"
 
         return cls_str
-
-    # def _python_type_to_proto_type(
-    #     self, content_type
-    # ) -> str:
-    #     """
-    #     Convert a message content to its representation in a protocol buffer schema.
-    #
-    #     :param content_name: the name of the content
-    #     :param content_type: the type of the content
-    #     :param content_type: the tag number
-    #     :param no_indents: the number of indents based on the previous sections of the code
-    #     :return: the protobuf string
-    #     """
-    #     if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-    #         proto_type = PYTHON_TYPE_TO_PROTO_TYPE[content_type]
-    #     else:
-    #         proto_type = ""
-    #     return proto_type
 
     def _includes_custom_type(self, content_type: str) -> bool:
         if content_type.startswith("Optional"):
@@ -1353,10 +1327,6 @@ class ProtocolGenerator:
                 entry = self._content_to_proto_field_str(
                     content_name, sub_type, tag_no, no_of_indents
                 )
-        # else:
-        # raise TypeError(
-        #     "Invalid type: '{}' in content '{}'".format(content_type, content_name)
-        # )
         return entry
 
     def _protocol_buffer_schema_str(self) -> str:
@@ -1393,7 +1363,6 @@ class ProtocolGenerator:
                         content_name, content_type, tag_no, 2
                     )
                     tag_no += 1
-                # proto_buff_schema_str += "\n"
                 proto_buff_schema_str += indents + "}\n\n"
 
         # meta-data
@@ -1522,11 +1491,11 @@ class ProtocolGenerator:
                 self.protocol_specification_in_camel_case
             )
             incomplete_generation_warning_msg += "Once you update '{}.proto' you must compile it so it generates a correct {}_pb2.py file.".format(
-                self.protocol_specification_in_camel_case, self.protocol_specification_in_camel_case
+                self.protocol_specification_in_camel_case,
+                self.protocol_specification_in_camel_case,
             )
             print(incomplete_generation_warning_msg)
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
-                        self.protocol_specification.name,
-                        self.protocol_specification_in_camel_case,
-                    )
+            self.protocol_specification.name, self.protocol_specification_in_camel_case,
+        )
         os.system(cmd)  # nosec
