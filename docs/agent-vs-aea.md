@@ -37,7 +37,7 @@ Such a lightweight agent can be used to implement simple logic.
 ## Code an `Agent`
 
 We define our `Agent` which simply receives envelopes, prints the sender address and protocol_id and returns it unopened.
-```python
+``` python
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 
@@ -91,15 +91,16 @@ class MyAgent(Agent):
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    try:
-        # Create our Agent
-        my_agent = MyAgent(identity, [stub_connection])
+
+    # Create our Agent
+    my_agent = MyAgent(identity, [stub_connection])
 ```
 
 ## Start the agent
 We run the agent from a different thread so that we can still use the main thread to pass it messages.
 ``` python
-        # Set the agent running in a different thread
+    # Set the agent running in a different thread
+    try:
         t = Thread(target=my_agent.start)
         t.start()
 
@@ -206,11 +207,12 @@ def run():
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    try:
-        # Create our Agent
-        my_agent = MyAgent(identity, [stub_connection])
 
-        # Set the agent running in a different thread
+    # Create our Agent
+    my_agent = MyAgent(identity, [stub_connection])
+
+    # Set the agent running in a different thread
+    try:
         t = Thread(target=my_agent.start)
         t.start()
 

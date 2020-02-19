@@ -67,37 +67,37 @@ def run():
         address=wallet.addresses.get(FETCHAI),
         default_address_key=FETCHAI,
     )
+
+    # Create our AEA
+    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
+
+    # Add the default protocol (which is part of the AEA distribution)
+    default_protocol_configuration = ProtocolConfig.from_json(
+        yaml.safe_load(
+            open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
+        )
+    )
+    default_protocol = Protocol(
+        PublicId.from_str("fetchai/default:0.1.0"),
+        DefaultSerializer(),
+        default_protocol_configuration,
+    )
+    resources.protocol_registry.register(
+        PublicId.from_str("fetchai/default:0.1.0"), default_protocol
+    )
+
+    # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
+    echo_skill = Skill.from_dir(
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), my_aea.context,
+    )
+    resources.add_skill(echo_skill)
+    error_skill = Skill.from_dir(
+        os.path.join(AEA_DIR, "skills", "error"), my_aea.context
+    )
+    resources.add_skill(error_skill)
+
+    # Set the AEA running in a different thread
     try:
-        # Create our AEA
-        my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
-
-        # Add the default protocol (which is part of the AEA distribution)
-        default_protocol_configuration = ProtocolConfig.from_json(
-            yaml.safe_load(
-                open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
-            )
-        )
-        default_protocol = Protocol(
-            PublicId.from_str("fetchai/default:0.1.0"),
-            DefaultSerializer(),
-            default_protocol_configuration,
-        )
-        resources.protocol_registry.register(
-            PublicId.from_str("fetchai/default:0.1.0"), default_protocol
-        )
-
-        # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
-        echo_skill = Skill.from_dir(
-            os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
-            my_aea.context,
-        )
-        resources.add_skill(echo_skill)
-        error_skill = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), my_aea.context
-        )
-        resources.add_skill(error_skill)
-
-        # Set the AEA running in a different thread
         t = Thread(target=my_aea.start)
         t.start()
 

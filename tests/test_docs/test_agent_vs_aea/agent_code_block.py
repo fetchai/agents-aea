@@ -82,11 +82,12 @@ def run():
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    try:
-        # Create our Agent
-        my_agent = MyAgent(identity, [stub_connection])
 
-        # Set the agent running in a different thread
+    # Create our Agent
+    my_agent = MyAgent(identity, [stub_connection])
+
+    # Set the agent running in a different thread
+    try:
         t = Thread(target=my_agent.start)
         t.start()
 
