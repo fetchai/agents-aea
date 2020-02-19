@@ -62,13 +62,13 @@ class TestProgrammaticAEA:
         assert os.path.exists("output.txt")
         assert os.path.exists("fet_private_key.txt")
 
-        message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
         path = os.path.join(ROOT_DIR, "input.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
 
-        message_text = 'other_agent,my_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
+        message_text = 'other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
         path = os.path.join(ROOT_DIR, "output.txt")
         with open(path, "r") as file:
             msg = file.read()

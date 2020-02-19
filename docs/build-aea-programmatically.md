@@ -74,7 +74,7 @@ Then we pass all of this into the AEA constructor to create our AEA.
     resources = Resources()
     # Create an identity
     identity = Identity(
-        name="my_agent",
+        name="my_aea",
         address=wallet.addresses.get(FETCHAI),
         default_address_key=FETCHAI,
     )
@@ -130,7 +130,7 @@ We run the AEA from a different thread so that we can still use the main thread 
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
             print("input message: " + message_text)
@@ -156,8 +156,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
-    output message: other_agent,my_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+    input message: my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+    output message: other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
 
 
 ## Entire code listing
@@ -211,7 +211,7 @@ def run():
     resources = Resources()
     # Create an identity
     identity = Identity(
-        name="my_agent",
+        name="my_aea",
         address=wallet.addresses.get(FETCHAI),
         default_address_key=FETCHAI,
     )
@@ -253,7 +253,7 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
             print("input message: " + message_text)
