@@ -21,6 +21,7 @@
 import itertools
 import os
 import re
+from datetime import date
 from os import path
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -29,11 +30,12 @@ from aea.configurations.base import ProtocolSpecification
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
+
 PATH_TO_PACKAGES = "packages"
 INIT_FILE_NAME = "__init__.py"
-MESSAGE_FILE_NAME = "message.py"
-SERIALIZATION_FILE_NAME = "serialization.py"
-PROTOCOL_FILE_NAME = "protocol.yaml"
+PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
+MESSAGEPY_FILE_NAME = "message.py"
+SERIALIZATIONPY_FILE_NAME = "serialization.py"
 
 CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
 PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
@@ -51,26 +53,32 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
-FETCHAI_COPYRIGHT = (
-    "# -*- coding: utf-8 -*-\n"
-    "# ------------------------------------------------------------------------------\n"
-    "#\n"
-    "#   Copyright 2018-2019 Fetch.AI Limited\n"
-    "#\n"
-    '#   Licensed under the Apache License, Version 2.0 (the "License");\n'
-    "#   you may not use this file except in compliance with the License.\n"
-    "#   You may obtain a copy of the License at\n"
-    "#\n"
-    "#       http://www.apache.org/licenses/LICENSE-2.0\n"
-    "#\n"
-    "#   Unless required by applicable law or agreed to in writing, software\n"
-    '#   distributed under the License is distributed on an "AS IS" BASIS,\n'
-    "#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n"
-    "#   See the License for the specific language governing permissions and\n"
-    "#   limitations under the License.\n"
-    "#\n"
-    "# ------------------------------------------------------------------------------\n"
-)
+
+
+def _copyright_header_str(author: str) -> str:
+    copy_right_str = (
+        "# -*- coding: utf-8 -*-\n"
+        "# ------------------------------------------------------------------------------\n"
+        "#\n"
+    )
+    copy_right_str += "#   Copyright {} {} Limited\n".format(date.today().year, author)
+    copy_right_str += (
+        "#\n"
+        '#   Licensed under the Apache License, Version 2.0 (the "License");\n'
+        "#   you may not use this file except in compliance with the License.\n"
+        "#   You may obtain a copy of the License at\n"
+        "#\n"
+        "#       http://www.apache.org/licenses/LICENSE-2.0\n"
+        "#\n"
+        "#   Unless required by applicable law or agreed to in writing, software\n"
+        '#   distributed under the License is distributed on an "AS IS" BASIS,\n'
+        "#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n"
+        "#   See the License for the specific language governing permissions and\n"
+        "#   limitations under the License.\n"
+        "#\n"
+        "# ------------------------------------------------------------------------------\n"
+    )
+    return copy_right_str
 
 
 def to_camel_case(text):
@@ -269,7 +277,14 @@ def _specification_type_to_python_type(specification_type: str) -> str:
     return python_type
 
 
-def _union_sub_type_to_protobuf_variable_name(content_name, content_type) -> str:
+def _union_sub_type_to_protobuf_variable_name(content_name: str, content_type: str) -> str:
+    """
+    Given a content of type union, create a variable name for its sub-type for protobuf.
+
+    :param content_name: the name of the content
+    :param content_type: the sub-type of a union type
+    :return: The variable name
+    """
     if content_type.startswith("FrozenSet"):
         sub_type = _get_sub_types_of_compositional_types(content_type)[0]
         expanded_type_str = "set_of_{}".format(sub_type)
@@ -286,6 +301,20 @@ def _union_sub_type_to_protobuf_variable_name(content_name, content_type) -> str
     protobuf_variable_name = "{}_type_{}".format(content_name, expanded_type_str)
 
     return protobuf_variable_name
+
+
+def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
+    """
+    Convert a PT or CT from python to their protobuf equivalent.
+
+    :param content_type: the python type
+    :return: The protobuf equivalent
+    """
+    if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
+        proto_type = PYTHON_TYPE_TO_PROTO_TYPE[content_type]
+    else:
+        proto_type = content_type
+    return proto_type
 
 
 class ProtocolGenerator:
@@ -699,7 +728,7 @@ class ProtocolGenerator:
         :return: the message class string
         """
         # Header
-        cls_str = FETCHAI_COPYRIGHT + "\n"
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
 
         # Module docstring
         cls_str += str.format(
@@ -930,15 +959,21 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{}.extend({})\n".format(
-                content_name, content_name
-            )
+            if not self._includes_custom_type(content_type):
+                encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+                encoding_str += indents + "performative.{}.extend({})\n".format(
+                    content_name, content_name
+                )
+            else:
+                encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
         elif content_type.startswith("Dict"):
-            encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{}.update({})\n".format(
-                content_name, content_name
-            )
+            if not self._includes_custom_type(content_type):
+                encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+                encoding_str += indents + "performative.{}.update({})\n".format(
+                    content_name, content_name
+                )
+            else:
+                encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -959,6 +994,8 @@ class ProtocolGenerator:
             encoding_str += self._encoding_message_field_from_python_to_protobuf(
                 content_name, sub_type, no_indents
             )
+        else:
+            encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
         return encoding_str
 
     def _decoding_message_field_from_protobuf_to_python(
@@ -996,25 +1033,31 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                content_name,
-                self.protocol_specification.name,
-                performative,
-                content_name,
-            )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
-                content_name, content_name
-            )
+            if not self._includes_custom_type(content_type):
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    content_name,
+                )
+                decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+                    content_name, content_name
+                )
+            else:
+                decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
         elif content_type.startswith("Dict"):
-            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                content_name,
-                self.protocol_specification.name,
-                performative,
-                content_name,
-            )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
-                content_name, content_name
-            )
+            if not self._includes_custom_type(content_type):
+                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    content_name,
+                )
+                decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+                    content_name, content_name
+                )
+            else:
+                decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1043,7 +1086,36 @@ class ProtocolGenerator:
             decoding_str += self._decoding_message_field_from_protobuf_to_python(
                 performative, content_name, sub_type, no_indents
             )
+        else:
+            decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+
         return decoding_str
+
+    def _includes_custom_type(self, content_type: str) -> bool:
+        if content_type.startswith("Optional"):
+            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+            result = self._includes_custom_type(sub_type)
+        elif content_type.startswith("Union"):
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            result = False
+            for sub_type in sub_types:
+                if self._includes_custom_type(sub_type):
+                    result = True
+                    break
+        elif content_type.startswith("Dict"):
+            sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
+            sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
+            result = self._includes_custom_type(
+                sub_type_1
+            ) or self._includes_custom_type(sub_type_2)
+        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
+            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+            result = self._includes_custom_type(sub_type)
+        elif content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
+            result = False
+        else:
+            result = True
+        return result
 
     def _serialization_class_str(self) -> str:
         """
@@ -1052,7 +1124,7 @@ class ProtocolGenerator:
         :return: the serialization class string
         """
         # Header
-        cls_str = FETCHAI_COPYRIGHT + "\n"
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
 
         # Module docstring
         cls_str += '"""Serialization module for {} protocol."""\n\n'.format(
@@ -1138,10 +1210,9 @@ class ProtocolGenerator:
                 performative.title(),
             )
             for content_name, content_type in contents.items():
-                if not self._includes_custom_type(content_type):
-                    cls_str += self._encoding_message_field_from_python_to_protobuf(
-                        content_name, content_type, 3
-                    )
+                cls_str += self._encoding_message_field_from_python_to_protobuf(
+                    content_name, content_type, 3
+                )
             cls_str += indents + "{}_msg.{}.CopyFrom(performative)\n".format(
                 self.protocol_specification.name, performative
             )
@@ -1217,10 +1288,10 @@ class ProtocolGenerator:
                 cls_str += indents + "pass\n"
             else:
                 for content_name, content_type in contents.items():
-                    if not self._includes_custom_type(content_type):
-                        cls_str += self._decoding_message_field_from_protobuf_to_python(
-                            performative, content_name, content_type, 3
-                        )
+                    # if not self._includes_custom_type(content_type):
+                    cls_str += self._decoding_message_field_from_protobuf_to_python(
+                        performative, content_name, content_type, 3
+                    )
             counter += 1
         indents = get_indent_str(2)
         cls_str += indents + "else:\n"
@@ -1242,32 +1313,6 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _includes_custom_type(self, content_type: str) -> bool:
-        if content_type.startswith("Optional"):
-            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            result = self._includes_custom_type(sub_type)
-        elif content_type.startswith("Union"):
-            sub_types = _get_sub_types_of_compositional_types(content_type)
-            result = False
-            for sub_type in sub_types:
-                if self._includes_custom_type(sub_type):
-                    result = True
-                    break
-        elif content_type.startswith("Dict"):
-            sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
-            sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
-            result = self._includes_custom_type(
-                sub_type_1
-            ) or self._includes_custom_type(sub_type_2)
-        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            result = self._includes_custom_type(sub_type)
-        elif content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-            result = False
-        else:
-            result = True
-        return result
-
     def _content_to_proto_field_str(
         self, content_name, content_type, tag_no, no_of_indents
     ) -> str:
@@ -1285,55 +1330,54 @@ class ProtocolGenerator:
 
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             # content_type content_name = tag;
-            proto_type = PYTHON_TYPE_TO_PROTO_TYPE[content_type]
+            proto_type = _python_pt_or_ct_type_to_proto_type(content_type)
             entry = indents + "{} {} = {};\n".format(proto_type, content_name, tag_no)
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
             # repeated element_type content_name = tag;
-            if not self._includes_custom_type(content_type):
-                element_type = _get_sub_types_of_compositional_types(content_type)[0]
-                proto_type = PYTHON_TYPE_TO_PROTO_TYPE[element_type]
-                entry = indents + "repeated {} {} = {};\n".format(
-                    proto_type, content_name, tag_no
-                )
+            element_type = _get_sub_types_of_compositional_types(content_type)[0]
+            proto_type = _python_pt_or_ct_type_to_proto_type(element_type)
+            entry = indents + "repeated {} {} = {};\n".format(
+                proto_type, content_name, tag_no
+            )
         elif content_type.startswith("Dict"):
             # map<key_type, value_type> content_name = tag;
-            if not self._includes_custom_type(content_type):
-                key_type = _get_sub_types_of_compositional_types(content_type)[0]
-                value_type = _get_sub_types_of_compositional_types(content_type)[1]
-                proto_key_type = PYTHON_TYPE_TO_PROTO_TYPE[key_type]
-                proto_value_type = PYTHON_TYPE_TO_PROTO_TYPE[value_type]
-                entry = indents + "map<{}, {}> {} = {};\n".format(
-                    proto_key_type, proto_value_type, content_name, tag_no
-                )
+            key_type = _get_sub_types_of_compositional_types(content_type)[0]
+            value_type = _get_sub_types_of_compositional_types(content_type)[1]
+            proto_key_type = _python_pt_or_ct_type_to_proto_type(key_type)
+            proto_value_type = _python_pt_or_ct_type_to_proto_type(value_type)
+            entry = indents + "map<{}, {}> {} = {};\n".format(
+                proto_key_type, proto_value_type, content_name, tag_no
+            )
         elif content_type.startswith("Union"):
-            if not self._includes_custom_type(content_type):
-                sub_type_name_counter = 1
-                sub_types = _get_sub_types_of_compositional_types(content_type)
-                for sub_type in sub_types:
-                    sub_type_name = _union_sub_type_to_protobuf_variable_name(
-                        content_name, sub_type
-                    )
-                    entry += "{}\n".format(
-                        self._content_to_proto_field_str(
-                            sub_type_name, sub_type, tag_no, no_of_indents
-                        )
-                    )
-                    tag_no += 1
-                    sub_type_name_counter += 1
-                entry = entry[:-1]
-        elif content_type.startswith("Optional"):
-            if not self._includes_custom_type(content_type):
-                sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-                entry = self._content_to_proto_field_str(
-                    content_name, sub_type, tag_no, no_of_indents
+            sub_type_name_counter = 1
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            for sub_type in sub_types:
+                sub_type_name = _union_sub_type_to_protobuf_variable_name(
+                    content_name, sub_type
                 )
+                entry += "{}".format(
+                    self._content_to_proto_field_str(
+                        sub_type_name, sub_type, tag_no, no_of_indents
+                    )
+                )
+                tag_no += 1
+                sub_type_name_counter += 1
+            # entry = entry[:-1]
+        elif content_type.startswith("Optional"):
+            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+            entry = self._content_to_proto_field_str(
+                content_name, sub_type, tag_no, no_of_indents
+            )
+        else:  # it is a CT
+            proto_type = _python_pt_or_ct_type_to_proto_type(content_type)
+            entry = indents + "{} {} = {};\n".format(proto_type, content_name, tag_no)
         return entry
 
     def _protocol_buffer_schema_str(self) -> str:
         """
         Produce the content of the Protocol Buffers schema.
 
-        :return: the protocol buffers schema string
+        :return: the protocol buffers schema content
         """
         indents = get_indent_str(0)
 
@@ -1347,8 +1391,20 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case
         )
 
-        # performatives
+        # custom types
         indents = get_indent_str(1)
+        if len(self._all_custom_types) != 0:
+            proto_buff_schema_str += indents + "// Custom Types\n"
+            for content_type in self._all_custom_types:
+                proto_buff_schema_str += indents + 'message {}{{\n'.format(content_type)
+                indents = get_indent_str(2)
+                proto_buff_schema_str += indents + '// Implement this\n'
+                indents = get_indent_str(1)
+                proto_buff_schema_str += indents + '}\n\n'
+            proto_buff_schema_str += '\n'
+
+        # performatives
+        proto_buff_schema_str += indents + "// Performatives and contents\n"
         for performative, contents in self._speech_acts.items():
             proto_buff_schema_str += indents + "message {}{{".format(
                 performative.title()
@@ -1364,8 +1420,10 @@ class ProtocolGenerator:
                     )
                     tag_no += 1
                 proto_buff_schema_str += indents + "}\n\n"
+        proto_buff_schema_str += '\n'
 
         # meta-data
+        proto_buff_schema_str += indents + "// Standard {}Message fields\n".format(self.protocol_specification_in_camel_case)
         proto_buff_schema_str += indents + "int32 message_id = 1;\n"
         proto_buff_schema_str += indents + "string dialogue_starter_reference = 2;\n"
         proto_buff_schema_str += indents + "string dialogue_responder_reference = 3;\n"
@@ -1385,86 +1443,45 @@ class ProtocolGenerator:
         proto_buff_schema_str += indents + "}\n"
         return proto_buff_schema_str
 
-    def _generate_message_class(self) -> None:
+    def _protocol_yaml_str(self) -> str:
         """
-        Create the Message class file.
+        Produce the content of the protocol.yaml file.
+
+        :return: the protocol.yaml content
+        """
+        protocol_yaml_str = 'name: \'{}\'\n'.format(self.protocol_specification.name)
+        protocol_yaml_str += 'author: \'{}\'\n'.format(self.protocol_specification.author)
+        protocol_yaml_str += 'version: \'{}\'\n'.format(self.protocol_specification.version)
+        protocol_yaml_str += 'license: \'{}\'\n'.format(self.protocol_specification.license)
+        protocol_yaml_str += 'fingerprint: \'\'\n'
+        protocol_yaml_str += 'dependencies: \n'
+        protocol_yaml_str += '    protobuf: {} \n'
+        protocol_yaml_str += 'description: \'{}\'\n'.format(self.protocol_specification.description)
+
+        return protocol_yaml_str
+
+    def _init_str(self) -> str:
+        """
+        Produce the content of the __init__.py file.
+
+        :return: the __init__.py content
+        """
+        init_str = _copyright_header_str(self.protocol_specification.author)
+        init_str += '\n'
+        init_str += '"""This module contains the support resources for the {} protocol."""\n'.format(self.protocol_specification.name)
+
+        return init_str
+
+    def _generate_file(self, file_name: str, file_content: str) -> None:
+        """
+        Create a protocol file.
 
         :return: None
         """
-        pathname = path.join(self.output_folder_path, MESSAGE_FILE_NAME)
-        message_class = self._message_class_str()
+        pathname = path.join(self.output_folder_path, file_name)
 
-        with open(pathname, "w") as pyfile:
-            pyfile.write(message_class)
-
-    def _generate_protobuf_schema_file(self) -> None:
-        """
-        Create the protocol buffers schema file.
-
-        :return: None
-        """
-        pathname = path.join(
-            self.output_folder_path,
-            "{}.proto".format(self.protocol_specification_in_camel_case,),
-        )
-        protobuf_schema_file = self._protocol_buffer_schema_str()
-
-        with open(pathname, "w") as pyfile:
-            pyfile.write(protobuf_schema_file)
-
-    def _generate_serialisation_class(self) -> None:
-        """
-        Create the Serialization class file.
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, SERIALIZATION_FILE_NAME)
-        serialization_class = self._serialization_class_str()
-
-        with open(pathname, "w") as pyfile:
-            pyfile.write(serialization_class)
-
-    def _generate_init_file(self) -> None:
-        """
-        Create the __init__ file.
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, INIT_FILE_NAME)
-
-        with open(pathname, "w") as pyfile:
-            pyfile.write(
-                FETCHAI_COPYRIGHT
-                + "\n"
-                + '"""This module contains the support resources for the {} protocol."""\n'.format(
-                    self.protocol_specification.name,
-                )
-            )
-
-    def _generate_protocol_yaml(self) -> None:
-        """
-        Create the protocol.yaml file.
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, PROTOCOL_FILE_NAME)
-
-        with open(pathname, "w") as yamlfile:
-            yamlfile.write(str.format("name: '{}'\n", self.protocol_specification.name))
-            yamlfile.write(
-                str.format("author: '{}'\n", self.protocol_specification.author)
-            )
-            yamlfile.write(
-                str.format("version: '{}'\n", self.protocol_specification.version)
-            )
-            yamlfile.write(
-                str.format("license: '{}'\n", self.protocol_specification.license)
-            )
-            yamlfile.write(
-                str.format(
-                    "description: '{}'\n", self.protocol_specification.description
-                )
-            )
+        with open(pathname, "w") as file:
+            file.write(file_content)
 
     def generate(self) -> None:
         """
@@ -1477,12 +1494,14 @@ class ProtocolGenerator:
         if not output_folder.exists():
             os.mkdir(output_folder)
 
-        self._generate_message_class()
-        self._generate_serialisation_class()
-        self._generate_protobuf_schema_file()
-        self._generate_init_file()
-        self._generate_protocol_yaml()
+        # Generate the protocol files
+        self._generate_file(INIT_FILE_NAME, self._init_str())
+        self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
+        self._generate_file(MESSAGEPY_FILE_NAME, self._message_class_str())
+        self._generate_file(SERIALIZATIONPY_FILE_NAME, self._serialization_class_str())
+        self._generate_file("{}.proto".format(self.protocol_specification_in_camel_case), self._protocol_buffer_schema_str())
 
+        # Warn if specification has custom types
         if len(self._all_custom_types) != 0:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
                 self._all_custom_types
@@ -1495,6 +1514,8 @@ class ProtocolGenerator:
                 self.protocol_specification_in_camel_case,
             )
             print(incomplete_generation_warning_msg)
+
+        # Compile protobuf schema
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
             self.protocol_specification.name, self.protocol_specification_in_camel_case,
         )
