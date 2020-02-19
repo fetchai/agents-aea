@@ -8,12 +8,12 @@ pipeline {
     }
 
     options {
-        timeout(time: 2, unit: 'HOURS')
+        timeout(time: 1, unit: 'HOURS')
     }
 
     stages {
 
-        stage('Unit Tests & Code Style Check') {
+        stage('Code Style & Other Checks') {
 
             parallel {
 
@@ -86,8 +86,14 @@ pipeline {
                     steps {
                         sh 'tox -e docs'
                     }
-
                 } // docs
+
+            }
+        } // code style and other checks
+
+        stage('Unit Tests: py37') {
+
+            parallel {
 
                 stage('Unit Tests: Python 3.6') {
 
@@ -96,6 +102,14 @@ pipeline {
                     }
 
                 }  // unit tests: python 3.6
+
+            }
+
+        } // unit tests py37
+
+        stage('Unit Tests: py36, py38') {
+
+            parallel {
 
                 stage('Unit Tests: Python 3.7') {
 
@@ -115,7 +129,7 @@ pipeline {
 
             } // parallel
 
-        }  // unit tests & code style check
+        }  // unit tests py36, py38
 
     } // stages
 
