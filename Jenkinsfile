@@ -98,7 +98,7 @@ pipeline {
                 stage('Unit Tests: Python 3.7') {
 
                     steps {
-                        sh 'tox -e py37 -- --no-integration-tests --ci'
+                        sh 'tox -e py3.7 -- --no-integration-tests --ci'
                     }
 
                 }  // unit tests: python 3.7
@@ -114,7 +114,7 @@ pipeline {
                 stage('Unit Tests: Python 3.6') {
 
                     steps {
-                        sh 'tox -e py36 -- --no-integration-tests --ci'
+                        sh 'tox -e py3.6 -- --no-integration-tests --ci'
                     }
 
                 } // unit tests: python 3.6
@@ -122,7 +122,7 @@ pipeline {
                 stage('Unit Tests: Python 3.8') {
 
                     steps {
-                        sh 'tox -e py38 -- --no-integration-tests --ci'
+                        sh 'tox -e py3.8 -- --no-integration-tests --ci'
                     }
 
                 } // unit tests: python 3.8

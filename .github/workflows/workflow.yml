@@ -7,7 +7,7 @@ jobs:
       matrix: 
 #        os: [ubuntu-latest, macos-latest, windows-latest]
         os: [ubuntu-latest]
-        python-version: [3.7]
+        python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -16,8 +16,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pipenv
-        pipenv install --dev
-        pip install .[all]
         pip install tox
     - name: Security Check - Main
       run: tox -e bandit-main
@@ -31,16 +29,14 @@ jobs:
       run: tox -e mypy
     - name: Unit tests and coverage
       run: |
-        tox -e py -- --no-integration-tests
-        ls -l
-        head -n 10 coverage.xml
-    - name: Upload coverage to Codecov  
+        tox -e py${{ matrix.python-version }} -- --no-integration-tests
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        yml: ./codecov.yml 
+        yml: ./codecov.yml
         fail_ci_if_error: true
 
