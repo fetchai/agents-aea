@@ -75,13 +75,14 @@ class HTTPChannel:
         """
         with self.lock:
             if self.stopped:
-                self._httpCall = HTTPCalls(
-                    server_address=self.provider_addr, port=self.provider_port
-                )
-                self.stopped = False
-                self.thread.start()
-                logger.debug("HTTP Channel is connected.")
-                self.try_register()
+                pass
+                # self._httpCall = HTTPCalls(
+                #     server_address=self.provider_addr, port=self.provider_port
+                # )
+                # self.stopped = False
+                # self.thread.start()
+                # logger.debug("HTTP Channel is connected.")
+                # self.try_register()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -101,12 +102,12 @@ class HTTPChannel:
                 )
                 raise ValueError("Cannot send message.")
 
-        self._httpCall.send_message(
-            sender_address=envelope.sender,
-            receiver_address=envelope.to,
-            protocol=str(envelope.protocol_id),
-            context=b"None",
-            payload=envelope.message,
+        # self._httpCall.send_message(
+        #     sender_address=envelope.sender,
+        #     receiver_address=envelope.to,
+        #     protocol=str(envelope.protocol_id),
+        #     context=b"None",
+        #     payload=envelope.message,
         )
 
     def receiving_loop(self) -> None:
@@ -150,7 +151,7 @@ class HTTPConnection(Connection):
 
     def __init__(self,
                  address: Address,
-                 api_spec: str,  # In JSON serialized form, might switch to yaml or server_stub later
+                 api_spec_path: str,  # Directory path of the API YAML file.
                  provider_addr: str,
                  provider_port: int = 10000,
                  *args,
@@ -163,6 +164,13 @@ class HTTPConnection(Connection):
         """
 
         # the following api_spec format checks will be in their own function check_api(api_spec)
+        api_spec = yaml.safe_load(api_spec_path)
+
+        try:
+            self.validator.validate(instance=configuration_file_json)
+        except Exception:
+            raise
+
         try:
             json.loads(api_spec)
         except json.JSONDecodeError:
@@ -241,13 +249,12 @@ class HTTPConnection(Connection):
         :param connection_configuration: the connection configuration object.
             :addr - RESTful API address
             :port - RESTful API port
-            :api_spec - configuation of setting-up a RESTful-to-envelope messaging with given skill or other core component
+            :api - Directory path and filename of the API spec YAML source file.
         :return: the connection object
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
-        api_spec_package = cast(str, connection_configuration.config.get("api"))
-        api_spec = locate(api_spec_package)
+        api_spec_path = cast(str, connection_configuration.config.get("api"))
 
         restricted_to_protocols_names = {
             p.name for p in connection_configuration.restricted_to_protocols
@@ -257,7 +264,7 @@ class HTTPConnection(Connection):
         }
         return HTTPConnection(
             address,
-            api_spec,
+            api_spec_path,
             addr,
             port,
             connection_id=connection_configuration.public_id,
