@@ -277,7 +277,9 @@ def _specification_type_to_python_type(specification_type: str) -> str:
     return python_type
 
 
-def _union_sub_type_to_protobuf_variable_name(content_name: str, content_type: str) -> str:
+def _union_sub_type_to_protobuf_variable_name(
+    content_name: str, content_type: str
+) -> str:
     """
     Given a content of type union, create a variable name for its sub-type for protobuf.
 
@@ -960,20 +962,34 @@ class ProtocolGenerator:
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
             if not self._includes_custom_type(content_type):
-                encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+                encoding_str += indents + "{} = msg.{}\n".format(
+                    content_name, content_name
+                )
                 encoding_str += indents + "performative.{}.extend({})\n".format(
                     content_name, content_name
                 )
             else:
-                encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+                encoding_str += (
+                    indents
+                    + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+                        content_name, content_type
+                    )
+                )
         elif content_type.startswith("Dict"):
             if not self._includes_custom_type(content_type):
-                encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+                encoding_str += indents + "{} = msg.{}\n".format(
+                    content_name, content_name
+                )
                 encoding_str += indents + "performative.{}.update({})\n".format(
                     content_name, content_name
                 )
             else:
-                encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+                encoding_str += (
+                    indents
+                    + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+                        content_name, content_type
+                    )
+                )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -995,7 +1011,12 @@ class ProtocolGenerator:
                 content_name, sub_type, no_indents
             )
         else:
-            encoding_str += indents + 'raise NotImplementedError("The encoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+            encoding_str += (
+                indents
+                + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+                    content_name, content_type
+                )
+            )
         return encoding_str
 
     def _decoding_message_field_from_protobuf_to_python(
@@ -1044,7 +1065,12 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             else:
-                decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+                decoding_str += (
+                    indents
+                    + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+                        content_name, content_type
+                    )
+                )
         elif content_type.startswith("Dict"):
             if not self._includes_custom_type(content_type):
                 decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
@@ -1057,7 +1083,12 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             else:
-                decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+                decoding_str += (
+                    indents
+                    + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+                        content_name, content_type
+                    )
+                )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1087,7 +1118,12 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-            decoding_str += indents + 'raise NotImplementedError("The decoding of content \'{}\' of type \'{}\' is missing.")\n'.format(content_name, content_type)
+            decoding_str += (
+                indents
+                + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+                    content_name, content_type
+                )
+            )
 
         return decoding_str
 
@@ -1288,7 +1324,6 @@ class ProtocolGenerator:
                 cls_str += indents + "pass\n"
             else:
                 for content_name, content_type in contents.items():
-                    # if not self._includes_custom_type(content_type):
                     cls_str += self._decoding_message_field_from_protobuf_to_python(
                         performative, content_name, content_type, 3
                     )
@@ -1396,12 +1431,12 @@ class ProtocolGenerator:
         if len(self._all_custom_types) != 0:
             proto_buff_schema_str += indents + "// Custom Types\n"
             for content_type in self._all_custom_types:
-                proto_buff_schema_str += indents + 'message {}{{\n'.format(content_type)
+                proto_buff_schema_str += indents + "message {}{{\n".format(content_type)
                 indents = get_indent_str(2)
-                proto_buff_schema_str += indents + '// Implement this\n'
+                proto_buff_schema_str += indents + "// Implement this\n"
                 indents = get_indent_str(1)
-                proto_buff_schema_str += indents + '}\n\n'
-            proto_buff_schema_str += '\n'
+                proto_buff_schema_str += indents + "}\n\n"
+            proto_buff_schema_str += "\n"
 
         # performatives
         proto_buff_schema_str += indents + "// Performatives and contents\n"
@@ -1420,10 +1455,12 @@ class ProtocolGenerator:
                     )
                     tag_no += 1
                 proto_buff_schema_str += indents + "}\n\n"
-        proto_buff_schema_str += '\n'
+        proto_buff_schema_str += "\n"
 
         # meta-data
-        proto_buff_schema_str += indents + "// Standard {}Message fields\n".format(self.protocol_specification_in_camel_case)
+        proto_buff_schema_str += indents + "// Standard {}Message fields\n".format(
+            self.protocol_specification_in_camel_case
+        )
         proto_buff_schema_str += indents + "int32 message_id = 1;\n"
         proto_buff_schema_str += indents + "string dialogue_starter_reference = 2;\n"
         proto_buff_schema_str += indents + "string dialogue_responder_reference = 3;\n"
@@ -1449,14 +1486,20 @@ class ProtocolGenerator:
 
         :return: the protocol.yaml content
         """
-        protocol_yaml_str = 'name: \'{}\'\n'.format(self.protocol_specification.name)
-        protocol_yaml_str += 'author: \'{}\'\n'.format(self.protocol_specification.author)
-        protocol_yaml_str += 'version: \'{}\'\n'.format(self.protocol_specification.version)
-        protocol_yaml_str += 'license: \'{}\'\n'.format(self.protocol_specification.license)
-        protocol_yaml_str += 'fingerprint: \'\'\n'
-        protocol_yaml_str += 'dependencies: \n'
-        protocol_yaml_str += '    protobuf: {} \n'
-        protocol_yaml_str += 'description: \'{}\'\n'.format(self.protocol_specification.description)
+        protocol_yaml_str = "name: '{}'\n".format(self.protocol_specification.name)
+        protocol_yaml_str += "author: '{}'\n".format(self.protocol_specification.author)
+        protocol_yaml_str += "version: '{}'\n".format(
+            self.protocol_specification.version
+        )
+        protocol_yaml_str += "license: '{}'\n".format(
+            self.protocol_specification.license
+        )
+        protocol_yaml_str += "fingerprint: ''\n"
+        protocol_yaml_str += "dependencies: \n"
+        protocol_yaml_str += "    protobuf: {} \n"
+        protocol_yaml_str += "description: '{}'\n".format(
+            self.protocol_specification.description
+        )
 
         return protocol_yaml_str
 
@@ -1467,8 +1510,10 @@ class ProtocolGenerator:
         :return: the __init__.py content
         """
         init_str = _copyright_header_str(self.protocol_specification.author)
-        init_str += '\n'
-        init_str += '"""This module contains the support resources for the {} protocol."""\n'.format(self.protocol_specification.name)
+        init_str += "\n"
+        init_str += '"""This module contains the support resources for the {} protocol."""\n'.format(
+            self.protocol_specification.name
+        )
 
         return init_str
 
@@ -1499,7 +1544,10 @@ class ProtocolGenerator:
         self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
         self._generate_file(MESSAGEPY_FILE_NAME, self._message_class_str())
         self._generate_file(SERIALIZATIONPY_FILE_NAME, self._serialization_class_str())
-        self._generate_file("{}.proto".format(self.protocol_specification_in_camel_case), self._protocol_buffer_schema_str())
+        self._generate_file(
+            "{}.proto".format(self.protocol_specification_in_camel_case),
+            self._protocol_buffer_schema_str(),
+        )
 
         # Warn if specification has custom types
         if len(self._all_custom_types) != 0:
