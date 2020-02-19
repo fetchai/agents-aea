@@ -17,23 +17,25 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the multiplexer-standalone.md file."""
+"""This module contains the tests for the code-blocks in the standalone-transaction.md file."""
 
 import logging
 import os
 
-from .multiplexer_standalone import run
+import pytest
+
+from .standalone_transaction import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import CUR_PATH, ROOT_DIR
 
-MD_FILE = "docs/multiplexer-standalone.md"
-PY_FILE = "test_docs/test_multiplexer_stand_alone/multiplexer_standalone.py"
+MD_FILE = "docs/standalone-transaction.md"
+PY_FILE = "test_docs/test_standalone_transaction/standalone_transaction.py"
 
 logger = logging.getLogger(__name__)
 
 
 class TestProgrammaticAEA:
-    """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
+    """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod
     def setup_class(cls):
@@ -44,16 +46,16 @@ class TestProgrammaticAEA:
         cls.python_file = extract_python_code(path)
 
     def test_read_md_file(self):
-        """Read the code blocks. Last block should be the whole code."""
+        """Test the last code block, that is the full listing of the demo from the Markdown."""
         assert (
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_run_agent(self):
+    def test_run_agent(self, pytestconfig):
         """Run the agent from the file."""
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
         run()
-        assert os.path.exists("input.txt")
-        assert os.path.exists("output.txt")
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
@@ -61,28 +63,3 @@ class TestProgrammaticAEA:
             assert (
                 blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
-
-    def test_input_file_message(self):
-        """Test the input message is the correct one."""
-        message_text = 'multiplexer,some_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-        path = os.path.join(ROOT_DIR, "input.txt")
-        with open(path, "r") as file:
-            msg = file.read()
-        assert msg == message_text, "The messages must be identical."
-
-    def test_output_file_message(self):
-        """Test the input message is the correct one."""
-        message_text = 'some_agent,multiplexer,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
-        path = os.path.join(ROOT_DIR, "output.txt")
-        with open(path, "r") as file:
-            msg = file.read()
-        assert msg == message_text, "The messages must be identical."
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        input_path = os.path.join(ROOT_DIR, "input.txt")
-        output_path = os.path.join(ROOT_DIR, "output.txt")
-        paths = [input_path, output_path]
-        for path in paths:
-            os.remove(path)
