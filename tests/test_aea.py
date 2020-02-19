@@ -87,6 +87,7 @@ def test_initialise_aea():
     assert (
         my_AEA.context.shared_state is not None
     ), "Shared state must not be None after set"
+    assert my_AEA.context.task_manager is not None
     assert my_AEA.context.identity is not None, "Identity must not be None after set."
     my_AEA.stop()
 

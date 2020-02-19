@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the aea.configurations.base module."""
+from unittest import TestCase, mock
 
 import pytest
 
@@ -28,7 +29,12 @@ from aea.configurations.base import (
     CRUDCollection,
     ConnectionConfig,
     ProtocolConfig,
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+    PublicId,
     SkillConfig,
+    SpeechActContentConfig,
+    _get_default_configuration_file_name_from_type,
 )
 
 from ..conftest import (
@@ -161,3 +167,137 @@ class TestAgentConfig:
         actual_config = AgentConfig.from_json(expected_json)
         actual_json = actual_config.json
         assert expected_json == actual_json
+
+
+class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
+    """Test case for _get_default_configuration_file_name_from_type method."""
+
+    def test__get_default_configuration_file_name_from_type_positive(self):
+        """Test for _get_default_configuration_file_name_from_type method positive result."""
+        _get_default_configuration_file_name_from_type("agent")
+        _get_default_configuration_file_name_from_type("connection")
+        _get_default_configuration_file_name_from_type("protocol")
+        _get_default_configuration_file_name_from_type("skill")
+
+
+class PublicIdTestCase(TestCase):
+    """Test case for PublicId class."""
+
+    @mock.patch("aea.configurations.base.re.match", return_value=False)
+    def test_public_id_from_str_not_matching(self, *mocks):
+        """Test case for from_str method regex not matching."""
+        with self.assertRaises(ValueError):
+            PublicId.from_str("public_id_str")
+
+    def test_public_id_from_json_positive(self):
+        """Test case for from_json method positive result."""
+        obj = {"author": "author", "name": "name", "version": "version"}
+        PublicId.from_json(obj)
+
+    def test_public_id_json_positive(self):
+        """Test case for json property positive result."""
+        obj = PublicId("author", "name", "version")
+        obj.json
+
+    def test_public_id_eq_positive(self):
+        """Test case for json __eq__ method positive result."""
+        obj1 = PublicId("author", "name", "version")
+        obj2 = PublicId("author", "name", "version")
+        self.assertTrue(obj1 == obj2)
+
+    def test_public_id_lt_positive(self):
+        """Test case for json __lt__ method positive result."""
+        obj1 = PublicId("author", "name", "1")
+        obj2 = PublicId("author", "name", "2")
+        self.assertTrue(obj1 < obj2)
+
+
+class AgentConfigTestCase(TestCase):
+    """Test case for AgentConfig class."""
+
+    def test_init_logging_config_positive(self):
+        """Test case for from_json method positive result."""
+        AgentConfig(logging_config={})
+
+    def test_default_connection(self):
+        """Test case for default_connection setter positive result."""
+        agent_config = AgentConfig()
+        agent_config.default_connection = None
+        agent_config.default_connection = 1
+        agent_config.public_id
+
+
+class SpeechActContentConfigTestCase(TestCase):
+    """Test case for SpeechActContentConfig class."""
+
+    @mock.patch("aea.configurations.base.SpeechActContentConfig._check_consistency")
+    def test_speech_act_content_config_init_positive(self, arg):
+        """Test case for __init__ method positive result."""
+        SpeechActContentConfig()
+
+    def test__check_consistency_positive(self):
+        """Test case for _check_consistency method positive result."""
+        SpeechActContentConfig(arg1="arg1", arg2="arg2")
+        with self.assertRaises(ProtocolSpecificationParseError):
+            SpeechActContentConfig(arg1=None, arg2=1)
+        with self.assertRaises(ProtocolSpecificationParseError):
+            SpeechActContentConfig(arg1="", arg2="")
+
+    def test_json_positive(self):
+        """Test case for json property positive result."""
+        config = SpeechActContentConfig()
+        config.json
+
+    def test_from_json_positive(self):
+        """Test case for from_json method positive result."""
+        SpeechActContentConfig.from_json({})
+
+
+class ProtocolSpecificationTestCase(TestCase):
+    """Test case for ProtocolSpecification class."""
+
+    def test_init_positive(self):
+        """Test case for __init__ method positive result."""
+        ProtocolSpecification()
+
+    def test_json_positive(self):
+        """Test case for json property positive result."""
+        obj = ProtocolSpecification()
+        obj.json
+
+    @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
+    @mock.patch("aea.configurations.base.ProtocolSpecification._check_consistency")
+    def test_from_json_positive(self, *mocks):
+        """Test case for from_json method positive result."""
+        json_disc = {
+            "name": "name",
+            "author": "author",
+            "version": "version",
+            "license": "license",
+            "description": "description",
+            "speech_acts": {"arg1": "arg1", "arg2": "arg2"},
+        }
+        ProtocolSpecification.from_json(json_disc)
+
+    def test__check_consistency_positive(self):
+        """Test case for _check_consistency method positive result."""
+        obj = ProtocolSpecification()
+        with self.assertRaises(ProtocolSpecificationParseError):
+            obj._check_consistency()
+
+        obj.speech_acts = mock.Mock()
+        read_all_mock = mock.Mock(return_value=[(1, 2)])
+        obj.speech_acts.read_all = read_all_mock
+        with self.assertRaises(ProtocolSpecificationParseError):
+            obj._check_consistency()
+
+        read_all_mock = mock.Mock(return_value=[["", 1]])
+        obj.speech_acts.read_all = read_all_mock
+        with self.assertRaises(ProtocolSpecificationParseError):
+            obj._check_consistency()
+
+        speech_act_content_config = mock.Mock()
+        speech_act_content_config.args = {1: 2}
+        read_all_mock = mock.Mock(return_value=[["1", speech_act_content_config]])
+        obj.speech_acts.read_all = read_all_mock
+        obj._check_consistency()
