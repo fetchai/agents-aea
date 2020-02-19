@@ -22,6 +22,8 @@
 import logging
 import os
 
+import pytest
+
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import CUR_PATH, ROOT_DIR
@@ -49,8 +51,12 @@ class TestProgrammaticAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_run_agent(self):
+    def test_run_agent(self, pytestconfig):
         """Run the agent from the file."""
+
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
+
         run()
         assert os.path.exists("input.txt")
         assert os.path.exists("output.txt")
