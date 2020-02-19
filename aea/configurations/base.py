@@ -474,6 +474,7 @@ class SkillConfig(PackageConfiguration):
         version: str = "",
         license: str = "",
         protocols: List[PublicId] = None,
+        contracts: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
@@ -483,6 +484,9 @@ class SkillConfig(PackageConfiguration):
         self.fingerprint = ""
         self.protocols = (
             protocols if protocols is not None else []
+        )  # type: List[PublicId]
+        self.contracts = (
+            contracts if contracts is not None else []
         )  # type: List[PublicId]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -500,6 +504,7 @@ class SkillConfig(PackageConfiguration):
             "license": self.license,
             "fingerprint": self.fingerprint,
             "protocols": sorted(map(str, self.protocols)),
+            "contracts": sorted(map(str, self.contracts)),
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
@@ -518,6 +523,10 @@ class SkillConfig(PackageConfiguration):
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
         )
+        contracts = cast(
+            List[PublicId],
+            [PublicId.from_str(id_) for id_ in obj.get("contracts", [])],
+        )
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -526,6 +535,7 @@ class SkillConfig(PackageConfiguration):
             version=version,
             license=license,
             protocols=protocols,
+            contracts=contracts,
             dependencies=dependencies,
             description=description,
         )

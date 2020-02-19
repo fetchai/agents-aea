@@ -34,6 +34,14 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
+    "contracts": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
     "handlers": {
       "type": "object",
       "additionalProperties": false,
