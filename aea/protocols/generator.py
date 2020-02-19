@@ -56,6 +56,12 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
 
 
 def _copyright_header_str(author: str) -> str:
+    """
+    Produce the copyright header text for a protocol.
+
+    :param author: the author of the protocol.
+    :return: The copyright header text.
+    """
     copy_right_str = (
         "# -*- coding: utf-8 -*-\n"
         "# ------------------------------------------------------------------------------\n"
@@ -81,12 +87,23 @@ def _copyright_header_str(author: str) -> str:
     return copy_right_str
 
 
-def to_camel_case(text):
-    """Convert a text in snake_case format into the CamelCase format."""
+def to_camel_case(text: str) -> str:
+    """
+    Convert a text in snake_case format into the CamelCase format
+
+    :param text: the text to be converted.
+    :return: The text in CamelCase format.
+    """
     return "".join(word.title() for word in text.split("_"))
 
 
 def get_indent_str(no_of_indents: int) -> str:
+    """
+    Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
+
+    :param no_of_indents: The number of indents.
+    :return: The string containing spaces.
+    """
     indents_str = ""
     for _ in itertools.repeat(None, no_of_indents):
         indents_str += "    "
@@ -168,35 +185,6 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
     return tuple(sub_types_list)
 
 
-def _optional_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a 'pt:optional' specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
-    element_type_in_python = _specification_type_to_python_type(element_type)
-    python_type = "Optional[{}]".format(element_type_in_python)
-    return python_type
-
-
-def _mt_specification_type_to_python_type(specification_type: str) -> str:
-    """
-    Convert a 'pt:union' specification type into its python equivalent.
-
-    :param specification_type: a protocol specification data type
-    :return: The equivalent data type in Python
-    """
-    sub_types = _get_sub_types_of_compositional_types(specification_type)
-    python_type = "Union["
-    for sub_type in sub_types:
-        python_type += "{}, ".format(_specification_type_to_python_type(sub_type))
-    python_type = python_type[:-2]
-    python_type += "]"
-    return python_type
-
-
 def _ct_specification_type_to_python_type(specification_type: str) -> str:
     """
     Convert a custom specification type into its python equivalent.
@@ -248,6 +236,35 @@ def _pmt_specification_type_to_python_type(specification_type: str) -> str:
     python_type = "Dict[{}, {}]".format(
         element1_type_in_python, element2_type_in_python
     )
+    return python_type
+
+
+def _mt_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a 'pt:union' specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    sub_types = _get_sub_types_of_compositional_types(specification_type)
+    python_type = "Union["
+    for sub_type in sub_types:
+        python_type += "{}, ".format(_specification_type_to_python_type(sub_type))
+    python_type = python_type[:-2]
+    python_type += "]"
+    return python_type
+
+
+def _optional_specification_type_to_python_type(specification_type: str) -> str:
+    """
+    Convert a 'pt:optional' specification type into its python equivalent.
+
+    :param specification_type: a protocol specification data type
+    :return: The equivalent data type in Python
+    """
+    element_type = _get_sub_types_of_compositional_types(specification_type)[0]
+    element_type_in_python = _specification_type_to_python_type(element_type)
+    python_type = "Optional[{}]".format(element_type_in_python)
     return python_type
 
 
@@ -359,7 +376,7 @@ class ProtocolGenerator:
         """
         Extract all relevant data structures from the specification.
 
-        :return: Dict[performatives, Dict[content names, content types]]
+        :return: None
         """
         all_performatives_set = set()
         all_custom_types_set = set()
@@ -453,7 +470,7 @@ class ProtocolGenerator:
         """
         Generate the performatives Enum class.
 
-        :return: the performatives Enum class set string
+        :return: the performatives Enum string
         """
         enum_str = ""
         enum_str += "    class Performative(Enum):\n"
@@ -472,7 +489,7 @@ class ProtocolGenerator:
         return enum_str
 
     def _check_content_type_str(
-        self, no_of_indents: int, content_name, content_type
+        self, no_of_indents: int, content_name: str, content_type: str
     ) -> str:
         """
         Produce the checks of elements of compositional types.
@@ -727,7 +744,7 @@ class ProtocolGenerator:
         """
         Produce the content of the Message class.
 
-        :return: the message class string
+        :return: the message.py file content
         """
         # Header
         cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
@@ -942,8 +959,8 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _encoding_message_field_from_python_to_protobuf(
-        self, content_name, content_type, no_indents
+    def _encoding_message_content_from_python_to_protobuf(
+        self, content_name: str, content_type: str, no_indents: int
     ) -> str:
         """
         Produce the encoding of message contents for the serialisation class.
@@ -999,7 +1016,7 @@ class ProtocolGenerator:
                 encoding_str += indents + 'if msg.is_set("{}"):\n'.format(
                     sub_type_name_in_protobuf
                 )
-                encoding_str += self._encoding_message_field_from_python_to_protobuf(
+                encoding_str += self._encoding_message_content_from_python_to_protobuf(
                     sub_type_name_in_protobuf, sub_type, no_indents + 1
                 )
         elif content_type.startswith("Optional"):
@@ -1007,7 +1024,7 @@ class ProtocolGenerator:
             if not sub_type.startswith("Union"):
                 encoding_str += indents + 'if msg.is_set("{}"):\n'.format(content_name)
                 no_indents += 1
-            encoding_str += self._encoding_message_field_from_python_to_protobuf(
+            encoding_str += self._encoding_message_content_from_python_to_protobuf(
                 content_name, sub_type, no_indents
             )
         else:
@@ -1019,12 +1036,12 @@ class ProtocolGenerator:
             )
         return encoding_str
 
-    def _decoding_message_field_from_protobuf_to_python(
+    def _decoding_message_content_from_protobuf_to_python(
         self,
-        performative,
-        content_name,
-        content_type,
-        no_indents,
+        performative: str,
+        content_name: str,
+        content_type: str,
+        no_indents: int,
         variable_name_in_protobuf: Optional[str] = "",
     ) -> str:
         """
@@ -1100,7 +1117,7 @@ class ProtocolGenerator:
                     performative,
                     sub_type_name_in_protobuf,
                 )
-                decoding_str += self._decoding_message_field_from_protobuf_to_python(
+                decoding_str += self._decoding_message_content_from_protobuf_to_python(
                     performative=performative,
                     content_name=content_name,
                     content_type=sub_type,
@@ -1114,7 +1131,7 @@ class ProtocolGenerator:
                     self.protocol_specification.name, performative, content_name
                 )
                 no_indents += 1
-            decoding_str += self._decoding_message_field_from_protobuf_to_python(
+            decoding_str += self._decoding_message_content_from_protobuf_to_python(
                 performative, content_name, sub_type, no_indents
             )
         else:
@@ -1128,6 +1145,11 @@ class ProtocolGenerator:
         return decoding_str
 
     def _includes_custom_type(self, content_type: str) -> bool:
+        """
+        Evaluate whether a content type is a custom type or has a custom type as a sub-type.
+
+        :return: Boolean result
+        """
         if content_type.startswith("Optional"):
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
             result = self._includes_custom_type(sub_type)
@@ -1157,7 +1179,7 @@ class ProtocolGenerator:
         """
         Produce the content of the Serialization class.
 
-        :return: the serialization class string
+        :return: the serialization.py file content
         """
         # Header
         cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
@@ -1246,7 +1268,7 @@ class ProtocolGenerator:
                 performative.title(),
             )
             for content_name, content_type in contents.items():
-                cls_str += self._encoding_message_field_from_python_to_protobuf(
+                cls_str += self._encoding_message_content_from_python_to_protobuf(
                     content_name, content_type, 3
                 )
             cls_str += indents + "{}_msg.{}.CopyFrom(performative)\n".format(
@@ -1324,7 +1346,7 @@ class ProtocolGenerator:
                 cls_str += indents + "pass\n"
             else:
                 for content_name, content_type in contents.items():
-                    cls_str += self._decoding_message_field_from_protobuf_to_python(
+                    cls_str += self._decoding_message_content_from_protobuf_to_python(
                         performative, content_name, content_type, 3
                     )
             counter += 1
@@ -1349,7 +1371,7 @@ class ProtocolGenerator:
         return cls_str
 
     def _content_to_proto_field_str(
-        self, content_name, content_type, tag_no, no_of_indents
+        self, content_name: str, content_type: str, tag_no: int, no_of_indents: int
     ) -> str:
         """
         Convert a message content to its representation in a protocol buffer schema.
@@ -1358,7 +1380,7 @@ class ProtocolGenerator:
         :param content_type: the type of the content
         :param content_type: the tag number
         :param no_of_indents: the number of indents based on the previous sections of the code
-        :return: the protobuf string
+        :return: the content in protocol buffer schema
         """
         indents = get_indent_str(no_of_indents)
         entry = ""
