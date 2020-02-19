@@ -6,11 +6,12 @@ First, import the python and application specific libraries and set the static v
 ``` python
 import logging
 import os
+
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key
+from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.crypto.helpers import _try_generate_testnet_wealth
+
 
 ROOT_DIR = os.getcwd()
 
@@ -44,7 +45,7 @@ Once we created the private keys we need to generate the wallets.
 We need to create the LedgerApis object in order to be able to interact with the Fetch.ai `testnet`
 ``` python
     # Set up the LedgerApis
-    ledger_apis = LedgerApis({FETCHAI: {'network': 'testnet'}}, FETCHAI)
+    ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
 ```
 
 ## Generate wealth
@@ -63,14 +64,17 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ``` python
     # Create the transaction and send it to the ledger.
     ledger_api = ledger_apis.apis[FETCHAI]
-    tx_nonce = ledger_api.generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
-                                            wallet_1.addresses.get(FETCHAI))
-    tx_digest = ledger_api.send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                            destination_address=wallet_2.addresses.get(FETCHAI),
-                                            amount=1,
-                                            tx_fee=1,
-                                            tx_nonce=tx_nonce,
-                                            )
+    tx_nonce = ledger_api.generate_tx_nonce(
+        wallet_2.addresses.get(FETCHAI), wallet_1.addresses.get(FETCHAI)
+    )
+    tx_digest = ledger_api.send_transaction(
+        crypto=wallet_1.crypto_objects.get(FETCHAI),
+        destination_address=wallet_2.addresses.get(FETCHAI),
+        amount=1,
+        tx_fee=1,
+        tx_nonce=tx_nonce,
+    )
+    logger.info("Transaction complete.")
     logger.info("The transaction digest is {}".format(tx_digest))
 ```
 
@@ -79,11 +83,12 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ``` python
 import logging
 import os
+
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key
+from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.crypto.helpers import _try_generate_testnet_wealth
+
 
 ROOT_DIR = os.getcwd()
 
@@ -92,6 +97,7 @@ logging.basicConfig(level=logging.INFO)
 
 FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
+
 
 def run():
     # Create a private keys
@@ -103,7 +109,7 @@ def run():
     wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
 
     # Set up the LedgerApis
-    ledger_apis = LedgerApis({FETCHAI: {'network': 'testnet'}}, FETCHAI)
+    ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
 
     # Generate some wealth
     _try_generate_testnet_wealth(FETCHAI, wallet_1.addresses[FETCHAI])
@@ -112,14 +118,17 @@ def run():
 
     # Create the transaction and send it to the ledger.
     ledger_api = ledger_apis.apis[FETCHAI]
-    tx_nonce = ledger_api.generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
-                                            wallet_1.addresses.get(FETCHAI))
-    tx_digest = ledger_api.send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                            destination_address=wallet_2.addresses.get(FETCHAI),
-                                            amount=1,
-                                            tx_fee=1,
-                                            tx_nonce=tx_nonce,
-                                            )
+    tx_nonce = ledger_api.generate_tx_nonce(
+        wallet_2.addresses.get(FETCHAI), wallet_1.addresses.get(FETCHAI)
+    )
+    tx_digest = ledger_api.send_transaction(
+        crypto=wallet_1.crypto_objects.get(FETCHAI),
+        destination_address=wallet_2.addresses.get(FETCHAI),
+        amount=1,
+        tx_fee=1,
+        tx_nonce=tx_nonce,
+    )
+    logger.info("Transaction complete.")
     logger.info("The transaction digest is {}".format(tx_digest))
 
 

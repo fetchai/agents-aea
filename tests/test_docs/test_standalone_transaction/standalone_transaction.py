@@ -47,7 +47,7 @@ def run():
     wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
 
     # Set up the LedgerApis
-    ledger_apis = LedgerApis({FETCHAI: {'network': 'testnet'}}, FETCHAI)
+    ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
 
     # Generate some wealth
     _try_generate_testnet_wealth(FETCHAI, wallet_1.addresses[FETCHAI])
@@ -56,14 +56,17 @@ def run():
 
     # Create the transaction and send it to the ledger.
     ledger_api = ledger_apis.apis[FETCHAI]
-    tx_nonce = ledger_api.generate_tx_nonce(wallet_2.addresses.get(FETCHAI),
-                                            wallet_1.addresses.get(FETCHAI))
-    tx_digest = ledger_api.send_transaction(crypto=wallet_1.crypto_objects.get(FETCHAI),
-                                            destination_address=wallet_2.addresses.get(FETCHAI),
-                                            amount=1,
-                                            tx_fee=1,
-                                            tx_nonce=tx_nonce,
-                                            )
+    tx_nonce = ledger_api.generate_tx_nonce(
+        wallet_2.addresses.get(FETCHAI), wallet_1.addresses.get(FETCHAI)
+    )
+    tx_digest = ledger_api.send_transaction(
+        crypto=wallet_1.crypto_objects.get(FETCHAI),
+        destination_address=wallet_2.addresses.get(FETCHAI),
+        amount=1,
+        tx_fee=1,
+        tx_nonce=tx_nonce,
+    )
+    logger.info("Transaction complete.")
     logger.info("The transaction digest is {}".format(tx_digest))
 
 
