@@ -26,8 +26,8 @@ import subprocess  # nosec
 import sys
 import tempfile
 import time
-import unittest.mock
 from pathlib import Path
+from unittest import TestCase, mock
 
 import pytest
 
@@ -35,12 +35,20 @@ import yaml
 
 import aea.cli.common
 from aea.cli import cli
+from aea.cli.run import _setup_connection, _verify_ledger_apis_access
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 
+from .tools_for_testing import (
+    ConfigLoaderMock,
+    ContextMock,
+    PublicIdMock,
+    StopTest,
+    raise_stoptest,
+)
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -768,7 +776,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -819,7 +827,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -873,7 +881,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.agent_name = "myagent"
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -926,7 +934,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_name = cls.connection_id.name
         cls.connection_author = cls.connection_id.author
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -991,7 +999,7 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1055,7 +1063,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1119,7 +1127,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1178,7 +1186,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1227,3 +1235,28 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@mock.patch("aea.cli.run._try_to_instantiate_fetchai_ledger_api")
+@mock.patch("aea.cli.run.ConfigLoader", ConfigLoaderMock)
+@mock.patch("aea.cli.run.Path.open")
+class VerifyLedgerApiAccessTestCase(TestCase):
+    """Test case for _verify_ledger_apis_access method."""
+
+    def test__verify_ledger_apis_access_with_host(self, *mocks):
+        """Test for _verify_ledger_apis_access method with host."""
+        _verify_ledger_apis_access()
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class SetupConnectionTestCase(TestCase):
+    """Test case for _setup_connection method."""
+
+    @mock.patch("aea.cli.run.Path.exists", return_value=False)
+    @mock.patch("aea.cli.run.load_agent_component_package", raise_stoptest)
+    def test__setup_connection_no_dir(self, *mocks):
+        """Test for _setup_connection no connection dir."""
+        public_id = PublicIdMock.from_str("author/name:version")
+        ctx = ContextMock(connections=[public_id])
+        with self.assertRaises(StopTest):
+            _setup_connection(public_id, "address", ctx)

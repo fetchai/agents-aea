@@ -16,30 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Test module for aea.cli.remove._remove_item method."""
 
-"""Main entry point for CLI GUI."""
+from unittest import TestCase, mock
 
-import argparse
+from click import ClickException
 
-import aea.cli_gui
+from aea.cli.remove import _remove_item
 
-parser = argparse.ArgumentParser(
-    description="Launch the gui through python"
-)  # pragma: no cover
-parser.add_argument(
-    "-p", "--port", help="Port that the web server listens on", type=int, default=8080
-)  # pragma: no cover
+from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
-parser.add_argument(
-    "-H",
-    "--host",
-    help="host that the web server serves from",
-    type=str,
-    default="127.0.0.1",
-)  # pragma: no cover
 
-args, unknown = parser.parse_known_args()  # pragma: no cover
+@mock.patch("aea.cli.remove.shutil.rmtree")
+@mock.patch("aea.cli.remove.Path.exists", return_value=False)
+class RemoveItemTestCase(TestCase):
+    """Test case for _remove_item method."""
 
-# If we're running in stand alone mode, run the application
-if __name__ == "__main__":  # pragma: no cover
-    aea.cli_gui.run(args.port, args.host)
+    def test__remove_item_item_folder_not_exists(self, *mocks):
+        """Test for save_agent_locally item folder not exists."""
+        public_id = PublicIdMock.from_str("author/name:0.1.0")
+        with self.assertRaises(ClickException):
+            _remove_item(ContextMock(protocols=[public_id]), "protocol", public_id)
