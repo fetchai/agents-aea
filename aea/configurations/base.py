@@ -59,6 +59,7 @@ class ConfigurationType(Enum):
     AGENT = "agent"
     PROTOCOL = "protocol"
     CONNECTION = "connection"
+    CONTRACT = "contract"
     SKILL = "skill"
 
 
@@ -813,12 +814,14 @@ class ContractConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
-        """Initialize a contract configuration object."""
+        """Initialize a protocol configuration object."""
         super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
     @property
@@ -830,16 +833,19 @@ class ContractConfig(PackageConfiguration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
+            "dependencies": self.dependencies,
             "description": self.description,
         }
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        return ContractConfig(
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        return ProtocolConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )

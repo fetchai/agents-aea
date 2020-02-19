@@ -36,6 +36,7 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
     SkillConfig,
@@ -49,6 +50,7 @@ T = TypeVar(
     AgentConfig,
     SkillConfig,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
 )
@@ -110,6 +112,8 @@ class ConfigLoader(Generic[T]):
             return ConfigLoader("connection-config_schema.json", ConnectionConfig)
         elif configuration_type == ConfigurationType.SKILL:
             return ConfigLoader("skill-config_schema.json", SkillConfig)
+        elif configuration_type == ConfigurationType.CONTRACT:
+            return ConfigLoader("contract-config_schema.json", ContractConfig)
         else:
             raise ValueError("Invalid configuration type.")
 
