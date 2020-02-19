@@ -53,7 +53,9 @@ def _generate_item(ctx: Context, item_type, specification_path):
     # check protocol buffer compiler is installed
     res = shutil.which("protoc")
     if res is None:
-        print("Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/")
+        print(
+            "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
+        )
         sys.exit(1)
 
     # Get existing items

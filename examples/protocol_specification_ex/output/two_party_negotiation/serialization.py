@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,8 +51,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         performative_id = msg.performative
         if performative_id == TwoPartyNegotiationMessage.Performative.CFP:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Cfp()  # type: ignore
-            query = msg.query
-            performative.query = query
+            raise NotImplementedError(
+                "The encoding of content 'query' of type 'DataModel' is missing."
+            )
             two_party_negotiation_msg.cfp.CopyFrom(performative)
         elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Propose()  # type: ignore
@@ -64,15 +65,18 @@ class TwoPartyNegotiationSerializer(Serializer):
             performative.description = description
             flag = msg.flag
             performative.flag = flag
-            query = msg.query
-            performative.query = query
+            raise NotImplementedError(
+                "The encoding of content 'query' of type 'DataModel' is missing."
+            )
             if msg.is_set("proposal"):
-                proposal = msg.proposal
-                performative.proposal.update(proposal)
+                raise NotImplementedError(
+                    "The encoding of content 'proposal' of type 'Dict[str, IOTApp7]' is missing."
+                )
             rounds = msg.rounds
             performative.rounds.extend(rounds)
-            items = msg.items
-            performative.items.extend(items)
+            raise NotImplementedError(
+                "The encoding of content 'items' of type 'Tuple[Unit, ...]' is missing."
+            )
             if msg.is_set("conditions_type_str"):
                 conditions_type_str = msg.conditions_type_str
                 performative.conditions_type_str = conditions_type_str
@@ -81,10 +85,9 @@ class TwoPartyNegotiationSerializer(Serializer):
                 performative.conditions_type_dict_of_str_int.update(
                     conditions_type_dict_of_str_int
                 )
-            if msg.is_set("conditions_type_set_of_str"):
-                conditions_type_set_of_str = msg.conditions_type_set_of_str
-                performative.conditions_type_set_of_str.extend(
-                    conditions_type_set_of_str
+            if msg.is_set("conditions_type_set_of_DataModel"):
+                raise NotImplementedError(
+                    "The encoding of content 'conditions_type_set_of_DataModel' of type 'FrozenSet[DataModel]' is missing."
                 )
             if msg.is_set("conditions_type_dict_of_str_float"):
                 conditions_type_dict_of_str_float = (
@@ -129,8 +132,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         performative_id = TwoPartyNegotiationMessage.Performative(str(performative))
         performative_content = dict()
         if performative_id == TwoPartyNegotiationMessage.Performative.CFP:
-            query = two_party_negotiation_pb.cfp.query
-            performative_content["query"] = query
+            raise NotImplementedError(
+                "The decoding of content 'query' of type 'DataModel' is missing."
+            )
         elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
             number = two_party_negotiation_pb.propose.number
             performative_content["number"] = number
@@ -140,15 +144,18 @@ class TwoPartyNegotiationSerializer(Serializer):
             performative_content["description"] = description
             flag = two_party_negotiation_pb.propose.flag
             performative_content["flag"] = flag
-            query = two_party_negotiation_pb.propose.query
-            performative_content["query"] = query
+            raise NotImplementedError(
+                "The decoding of content 'query' of type 'DataModel' is missing."
+            )
             if two_party_negotiation_pb.propose.HasField("proposal"):
-                proposal = two_party_negotiation_pb.propose.proposal
-                performative_content["proposal"] = proposal
+                raise NotImplementedError(
+                    "The decoding of content 'proposal' of type 'Dict[str, IOTApp7]' is missing."
+                )
             rounds = two_party_negotiation_pb.propose.rounds
             performative_content["rounds"] = rounds
-            items = two_party_negotiation_pb.propose.items
-            performative_content["items"] = items
+            raise NotImplementedError(
+                "The decoding of content 'items' of type 'Tuple[Unit, ...]' is missing."
+            )
             if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
                 conditions = two_party_negotiation_pb.propose.conditions_type_str
                 performative_content["conditions"] = conditions
@@ -157,9 +164,12 @@ class TwoPartyNegotiationSerializer(Serializer):
             ):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField("conditions_type_set_of_str"):
-                conditions = two_party_negotiation_pb.propose.conditions
-                performative_content["conditions"] = conditions
+            if two_party_negotiation_pb.propose.HasField(
+                "conditions_type_set_of_DataModel"
+            ):
+                raise NotImplementedError(
+                    "The decoding of content 'conditions' of type 'FrozenSet[DataModel]' is missing."
+                )
             if two_party_negotiation_pb.propose.HasField(
                 "conditions_type_dict_of_str_float"
             ):
