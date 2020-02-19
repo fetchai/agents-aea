@@ -22,6 +22,8 @@
 import logging
 import os
 
+import pytest
+
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import CUR_PATH, ROOT_DIR
@@ -49,12 +51,28 @@ class TestProgrammaticAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_run_agent(self):
+    def test_run_agent(self, pytestconfig):
         """Run the agent from the file."""
+
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
+
         run()
         assert os.path.exists("input.txt")
         assert os.path.exists("output.txt")
         assert os.path.exists("fet_private_key.txt")
+
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        path = os.path.join(ROOT_DIR, "input.txt")
+        with open(path, "r") as file:
+            msg = file.read()
+        assert msg == message_text
+
+        message_text = 'other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
+        path = os.path.join(ROOT_DIR, "output.txt")
+        with open(path, "r") as file:
+            msg = file.read()
+        assert msg == message_text
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
@@ -62,22 +80,6 @@ class TestProgrammaticAEA:
             assert (
                 blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
-
-    def test_input_file_message(self):
-        """Test the input message is the correct one."""
-        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-        path = os.path.join(ROOT_DIR, "input.txt")
-        with open(path, "r") as file:
-            msg = file.read()
-        assert msg == message_text
-
-    def test_output_file_message(self):
-        """Test the input message is the correct one."""
-        message_text = 'other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
-        path = os.path.join(ROOT_DIR, "output.txt")
-        with open(path, "r") as file:
-            msg = file.read()
-        assert msg == message_text
 
     @classmethod
     def teardown_class(cls):
@@ -87,4 +89,5 @@ class TestProgrammaticAEA:
         fet_path = os.path.join(ROOT_DIR, "fet_private_key.txt")
         paths = [input_path, output_path, fet_path]
         for path in paths:
-            os.remove(path)
+            if os.path.exists(path):
+                os.remove(path)
