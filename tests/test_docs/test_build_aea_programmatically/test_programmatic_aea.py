@@ -56,28 +56,24 @@ class TestProgrammaticAEA:
         assert os.path.exists("output.txt")
         assert os.path.exists("fet_private_key.txt")
 
-    def test_code_blocks_exist(self):
-        """Test that all the code-blocks exist in the python file."""
-        for blocks in self.code_blocks:
-            assert (
-                blocks in self.python_file
-            ), "Code-block doesn't exist in the python file."
-
-    def test_input_file_message(self):
-        """Test the input message is the correct one."""
         message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
         path = os.path.join(ROOT_DIR, "input.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
 
-    def test_output_file_message(self):
-        """Test the input message is the correct one."""
         message_text = 'other_agent,my_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
         path = os.path.join(ROOT_DIR, "output.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
+
+    def test_code_blocks_exist(self):
+        """Test that all the code-blocks exist in the python file."""
+        for blocks in self.code_blocks:
+            assert (
+                blocks in self.python_file
+            ), "Code-block doesn't exist in the python file."
 
     @classmethod
     def teardown_class(cls):
