@@ -20,9 +20,9 @@ jobs:
         pip install .[all]
         pip install tox
     - name: Security Check - Main
-      run: tox -e py,bandit-main
+      run: tox -e bandit-main
     - name: Security Check - Tests
-      run: tox -e py,bandit-tests
+      run: tox -e bandit-tests
     - name: Code style check
       run: |
         tox -e black-check
@@ -32,13 +32,15 @@ jobs:
     - name: Unit tests and coverage
       run: |
         tox -e py -- --no-integration-tests
-        #    - name: Upload coverage to Codecov  
-        #      uses: codecov/codecov-action@v1
-        #      with:
-        #        token: ${{ secrets.CODECOV_TOKEN }}
-        #        file: ./coverage.xml
-        #        flags: unittests
-        #        name: codecov-umbrella
-        #        yml: ./codecov.yml 
-        #        fail_ci_if_error: true
+        ls -l
+        head -n 10 coverage.xml
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        yml: ./codecov.yml 
+        fail_ci_if_error: true
 
