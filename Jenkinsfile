@@ -95,13 +95,13 @@ pipeline {
 
             parallel {
 
-                stage('Unit Tests: Python 3.6') {
+                stage('Unit Tests: Python 3.7') {
 
                     steps {
-                        sh 'tox -e py36 -- --no-integration-tests --ci'
+                        sh 'tox -e py37 -- --no-integration-tests --ci'
                     }
 
-                }  // unit tests: python 3.6
+                }  // unit tests: python 3.7
 
             }
 
@@ -111,13 +111,13 @@ pipeline {
 
             parallel {
 
-                stage('Unit Tests: Python 3.7') {
+                stage('Unit Tests: Python 3.6') {
 
                     steps {
-                        sh 'tox -e py37 -- --no-integration-tests --ci'
+                        sh 'tox -e py36 -- --no-integration-tests --ci'
                     }
 
-                } // unit tests: python 3.7
+                } // unit tests: python 3.6
 
                 stage('Unit Tests: Python 3.8') {
 
