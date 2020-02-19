@@ -33,7 +33,8 @@ from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import AEAConnectionError, Address, Envelope
+from aea.helpers.base import locate
+from aea.mail.base import AEAConnectionError, Address, Envelope, EnvelopeContext
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,7 @@ class HTTPChannel:
     def __init__(
         self,
         address: Address,
+        api_spec: str,
         provider_addr: str,
         provider_port: int,
         excluded_protocols: Optional[Set[PublicId]] = None,
@@ -63,7 +65,7 @@ class HTTPChannel:
         self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
-        logger.info("Initialised the peer to peer channel")
+        logger.info("Initialised the http channel")
 
     def connect(self):
         """
@@ -80,17 +82,6 @@ class HTTPChannel:
                 self.thread.start()
                 logger.debug("HTTP Channel is connected.")
                 self.try_register()
-
-    def try_register(self) -> bool:
-        """Try to register to the provider."""
-        try:
-            assert self._httpCall is not None
-            logger.info(self.address)
-            query = self._httpCall.register(sender_address=self.address, mailbox=True)
-            return query["status"] == "OK"
-        except Exception:  # pragma: no cover
-            logger.warning("Could not register to the provider.")
-            raise AEAConnectionError()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -159,23 +150,19 @@ class HTTPConnection(Connection):
 
     def __init__(self,
                  address: Address,
-                 api_spec: str,  # In JSON serialized form, might switch to yaml later
-                 # rest_api_metadata: json,
-                 # rest_api_model: json,
-                 # server_stub: json,  # OpneAPI-based API implementation stub
-                                     # OpenAPI-based desc format of REST APIIs
-                                     # generate client SDK...
-                                     # Can accept server stubs from Swagger Codegen for any API
+                 api_spec: str,  # In JSON serialized form, might switch to yaml or server_stub later
                  provider_addr: str,
-                 provider_port: int = 8000,
+                 provider_port: int = 10000,
                  *args,
                  **kwargs
-                ):
+                 ):
         """
         Initialize a connection to an RESTful API.
 
         :param address: the address used in the protocols.
         """
+
+        # the following api_spec format checks will be in their own function check_api(api_spec)
         try:
             json.loads(api_spec)
         except json.JSONDecodeError:
@@ -184,9 +171,9 @@ class HTTPConnection(Connection):
         if kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
         super().__init__(*args, **kwargs)
+        self.address = address
         self.channel = HTTPChannel(address, api_spec, provider_addr, provider_port,
                                    excluded_protocols=self.excluded_protocols)  # type: ignore
-        self.address = address
 
     async def connect(self) -> None:
         """
@@ -202,7 +189,7 @@ class HTTPConnection(Connection):
 
     async def disconnect(self) -> None:
         """
-        Disconnect from P2P.
+        Disconnect from HTTP.
 
         :return: None
         """
@@ -248,14 +235,20 @@ class HTTPConnection(Connection):
         cls, address: Address, connection_configuration: ConnectionConfig
     ) -> "Connection":
         """
-        Get the P2P connection from the connection configuration.
+        Get the HTTP connection from the connection configuration.
 
         :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
+            :addr - RESTful API address
+            :port - RESTful API port
+            :api_spec - configuation of setting-up a RESTful-to-envelope messaging with given skill or other core component
         :return: the connection object
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
+        api_spec_package = cast(str, connection_configuration.config.get("api"))
+        api_spec = locate(api_spec_package)
+
         restricted_to_protocols_names = {
             p.name for p in connection_configuration.restricted_to_protocols
         }
@@ -264,6 +257,7 @@ class HTTPConnection(Connection):
         }
         return HTTPConnection(
             address,
+            api_spec,
             addr,
             port,
             connection_id=connection_configuration.public_id,
