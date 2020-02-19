@@ -69,7 +69,11 @@ def run():
     try:
         # create the AEA
         my_aea = AEA(
-            identity, [oef_connection], wallet, ledger_apis, resources  # stub_connection,
+            identity,
+            [oef_connection],
+            wallet,
+            ledger_apis,
+            resources,  # stub_connection,
         )
 
         # Add the default protocol (which is part of the AEA distribution)
