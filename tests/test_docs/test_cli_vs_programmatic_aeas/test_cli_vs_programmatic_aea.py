@@ -20,9 +20,11 @@
 """This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
 import os
+import shutil
 import signal
 import subprocess  # nosec
 import sys
+import tempfile
 import time
 from pathlib import Path
 from threading import Thread
@@ -55,6 +57,9 @@ class TestProgrammaticAEA:
         path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(path)
         cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -71,6 +76,10 @@ class TestProgrammaticAEA:
 
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
+
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
+        shutil.copytree(packages_src, packages_dst)
 
         result = self.runner.invoke(
             cli,
@@ -110,8 +119,6 @@ class TestProgrammaticAEA:
 
         time.sleep(5.0)
         process_one.send_signal(signal.SIGINT)
-
-        process_one.send_signal(signal.SIGINT)
         process_one.wait(timeout=20)
 
         assert process_one.returncode == 0
@@ -129,23 +136,10 @@ class TestProgrammaticAEA:
         client_thread.join()
 
     @classmethod
-    def teardown(cls):
-        path = Path(ROOT_DIR, "weather_station")
-        if os.path.exists(path):
-            path = Path(ROOT_DIR)
-            os.chdir(path)
-            result = cls.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "delete", "weather_station"],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-        path = Path(
-            ROOT_DIR,
-            "tests",
-            "test_docs",
-            "test_cli_vs_programmatic_aeas",
-            "fet_private_key.txt",
-        )
-        if os.path.exists(path):
-            os.remove(path)
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

@@ -87,4 +87,5 @@ class TestProgrammaticAEA:
         fet_path = os.path.join(ROOT_DIR, "fet_private_key.txt")
         paths = [input_path, output_path, fet_path]
         for path in paths:
-            os.remove(path)
+            if os.path.exists(path):
+                os.remove(path)

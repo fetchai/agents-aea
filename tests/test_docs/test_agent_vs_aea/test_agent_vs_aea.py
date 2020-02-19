@@ -85,4 +85,5 @@ class TestProgrammaticAEA:
         output_path = os.path.join(ROOT_DIR, "output.txt")
         paths = [input_path, output_path]
         for path in paths:
-            os.remove(path)
+            if os.path.exists(path):
+                os.remove(path)
