@@ -1,4 +1,4 @@
-site_name: Fetch.AI Developer Documentation
+site_name: AEA Developer Documentation
 site_url: https://docs.fetch.ai/
 site_description: Everything you need to know about Fetch.AI. 
 #repo_url: https://github.com/fetchai/docs // commented out to remove edit option
@@ -16,60 +16,62 @@ theme:
 
 
 nav:
-  - Autonomous Economic Agent Framework:
+  - AEA Framework:
     - Welcome: 'index.md'
     - Getting started:
       - Ways to build an AEA: 'steps.md'
       - AEA quick start: 'quickstart.md'
-      - AEA and Web Frameworks: 'aea-vs-mvc.md'
+      - AEA and web frameworks: 'aea-vs-mvc.md'
       - Build an AEA with the CLI: 'build-aea-step-by-step.md'
       - Build a skill for an AEA: 'skill-guide.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
-      - AEAs vs Agents: 'agent-vs-aea.md'
+      - AEAs vs agents: 'agent-vs-aea.md'
     - The AEA universe:
       - Agent-oriented development: 'agent-oriented-development.md'
       - Vision: 'vision.md'
       - Application areas: 'app-areas.md'
       - Relation to OEF and Ledger: 'oef-ledger.md'
       - Trust issues: 'trust.md'
-      # - "Two-layered machine learning": 'two-layer.md'
     - Demo guides:
-      - "Car park skills": 'car-park-skills.md'
-      - "Gym example": 'gym-example.md'
-      - "Gym skill": 'gym-skill.md'
-      - "ML skills": 'ml-skills.md'
-      - "TAC skills": 'tac-skills.md'
-      - "TAC external app": 'tac.md'
-      - "Weather skills": 'weather-skills.md'
-      - "Thermometer skills": 'thermometer-skills.md'
+      - Car park skills: 'car-park-skills.md'
+      - Gym example: 'gym-example.md'
+      - Gym skill: 'gym-skill.md'
+      - ML skills: 'ml-skills.md'
+      - TAC skills: 'tac-skills.md'
+      - TAC external app: 'tac.md'
+      - Weather skills: 'weather-skills.md'
+      - Thermometer skills: 'thermometer-skills.md'
     - Use cases:
-        - "Generic skills": 'generic-skills.md'
-        - "ORM integration" : 'orm-integration-to-generic.md'
-        - "Frontend intergration": 'connect-a-frontend.md'
-        - "CLI vs programmatic aeas" : 'cli-vs-programmatic-aeas.md'
+        - Generic skills: 'generic-skills.md'
+        - ORM integration: 'orm-integration-to-generic.md'
+        - Frontend intergration: 'connect-a-frontend.md'
+        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
     - Step by step guides:
-        - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
+        - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
     - Architecture:
-      - "Design principles": 'design-principles.md'
-      - "Architectural diagram": 'diagram.md'
-      - "Core components": 'core-components.md'
-      - "File structure": 'file-structure.md'
+      - Design principles: 'design-principles.md'
+      - Architectural diagram: 'diagram.md'
+      - Core components: 'core-components.md'
+      - File structure: 'file-structure.md'
+    - CLI:
+       - Installation: 'cli-how-to.md'
+       - Commands: 'cli-commands.md'
+       - Package structure: 'package-imports.md'
+       - GUI: 'cli-gui.md'
+       - Generating wealth: 'wealth.md'
     - Developer guides:
       - Version: 'version.md'
-      - "Skill": 'skill.md'
-      - "Protocol": 'protocol.md'
-      - "Connection": 'connection.md'
-      - "Scaffolding packages": 'scaffolding.md'
-      - "Generating protocols": 'generator.md'
-      - "Logging": 'logging.md'
-      - CLI:
-         - "CLI tool": 'cli-how-to.md'
-         - "Commands": 'cli-commands.md'
-         - "GUI": 'cli-gui.md'
-         - "Generating wealth": 'wealth.md'
-      - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
-      - "Integrate with third parties": 'integration.md'
+      - Skill: 'skill.md'
+      - Protocol: 'protocol.md'
+      - Connection: 'connection.md'
+      - Scaffolding packages: 'scaffolding.md'
+      - Generating protocols: 'generator.md'
+      - Logging: 'logging.md'
+      - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+      - Using public ledgers: 'integration.md'
       - Use multiplexer stand-alone: 'multiplexer-standalone.md'
+      - 'Create stand-alone transaction': 'standalone-transaction.md'
+      - 'Create decision-maker transaction': 'decision-maker-transaction.md'
     - Q&A: 'questions-and-answers.md'
 
 

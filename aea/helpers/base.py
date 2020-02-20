@@ -26,7 +26,6 @@ import os
 import sys
 import types
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -141,26 +140,3 @@ def add_agent_component_module_to_sys_modules(
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     import_module(dotted_path, module_obj)
-
-
-def generate_fingerprint(
-    author: str, package_name: str, version: str, nonce: Optional[int] = None
-) -> str:
-    """Generate a unique id for the package.
-
-    :param author: The author of the package.
-    :param package_name: The name of the package
-    :param version: The version of the package.
-    :param nonce: Enable the developer to generate two different fingerprints for the same package.
-           (Can be used with different configuration)
-    """
-    import hashlib
-
-    if nonce is not None:
-        string_for_hash = "".join([author, package_name, version, str(nonce)])
-    else:
-        string_for_hash = "".join([author, package_name, version])
-    m_hash = hashlib.sha3_256()
-    m_hash.update(string_for_hash.encode())
-    encoded_str = m_hash.digest().hex()
-    return encoded_str

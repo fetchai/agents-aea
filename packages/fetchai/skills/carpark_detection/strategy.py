@@ -19,7 +19,6 @@
 
 """This module contains the strategy class."""
 
-import logging
 import os
 import time
 from typing import Any, Dict, List, Tuple, cast
@@ -41,8 +40,6 @@ DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
-
-logger = logging.getLogger("aea.carpark_detection_skill")
 
 
 class Strategy(Model):
@@ -108,7 +105,7 @@ class Strategy(Model):
         )
 
         if not os.path.isdir(db_dir):
-            logger.warning("Database directory does not exist!")
+            self.context.logger.warning("Database directory does not exist!")
 
         self.record_balance(balance)
         self.other_carpark_processes_running = False

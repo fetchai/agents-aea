@@ -25,15 +25,11 @@ A `Behaviour` class contains the business logic specific to initial actions init
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
 
 ```python
-import logging
-
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-
-logger = logging.getLogger("aea.my_search_skill")
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -50,7 +46,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: setting up MySearchBehaviour".format(self.context.agent_name)
         )
 
@@ -68,7 +64,7 @@ class MySearchBehaviour(TickerBehaviour):
             id=self.sent_search_count,
             query=search_query_w_empty_model,
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: sending search request to OEF, search_count={}".format(
                 self.context.agent_name, self.sent_search_count
             )
@@ -86,7 +82,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: tearing down MySearchBehaviour".format(self.context.agent_name)
         )
 ```
@@ -102,13 +98,9 @@ So far, we have tasked the AEA with sending search requests to the OEF. However,
 Let us now implement a handler to deal with the incoming search responses.
 
 ```python
-import logging
-
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef.message import OEFMessage
-
-logger = logging.getLogger("aea.my_search_skill")
 
 
 class MySearchHandler(Handler):
@@ -123,7 +115,7 @@ class MySearchHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        logger.info("[{}]: setting up MySearchHandler".format(self.context.agent_name))
+        self.context.logger.info("[{}]: setting up MySearchHandler".format(self.context.agent_name))
 
     def handle(self, message: OEFMessage) -> None:
         """
@@ -137,7 +129,7 @@ class MySearchHandler(Handler):
         if msg_type is OEFMessage.Type.SEARCH_RESULT:
             self.received_search_count += 1
             nb_agents_found = len(message.get("agents"))
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found number of agents={}, received search count={}".format(
                     self.context.agent_name, nb_agents_found, self.received_search_count
                 )
@@ -149,7 +141,7 @@ class MySearchHandler(Handler):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: tearing down MySearchHandler".format(self.context.agent_name)
         )
 ```

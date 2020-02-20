@@ -74,7 +74,7 @@ class TACBehaviour(Behaviour):
         ):
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
-            logger.info(
+            self.context.logger.info(
                 "[{}]: TAC open for registration until: {}".format(
                     self.context.agent_name, parameters.start_time
                 )
@@ -117,7 +117,9 @@ class TACBehaviour(Behaviour):
             {"version": self.context.parameters.version_id},
             data_model=CONTROLLER_DATAMODEL,
         )
-        logger.info("[{}]: Registering TAC data model".format(self.context.agent_name))
+        self.context.logger.info(
+            "[{}]: Registering TAC data model".format(self.context.agent_name)
+        )
         oef_msg = OEFMessage(
             type=OEFMessage.Type.REGISTER_SERVICE,
             id=self._oef_msg_id,
@@ -139,7 +141,7 @@ class TACBehaviour(Behaviour):
         :return: None.
         """
         self._oef_msg_id += 1
-        logger.info(
+        self.context.logger.info(
             "[{}]: Unregistering TAC data model".format(self.context.agent_name)
         )
         oef_msg = OEFMessage(
@@ -160,12 +162,12 @@ class TACBehaviour(Behaviour):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
         game.create()
-        logger.info(
+        self.context.logger.info(
             "[{}]: Started competition:\n{}".format(
                 self.context.agent_name, game.holdings_summary
             )
         )
-        logger.info(
+        self.context.logger.info(
             "[{}]: Computed equilibrium:\n{}".format(
                 self.context.agent_name, game.equilibrium_summary
             )
@@ -183,7 +185,7 @@ class TACBehaviour(Behaviour):
                 good_id_to_name=game.configuration.good_id_to_name,
                 version_id=game.configuration.version_id,
             )
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: sending game data to '{}': {}".format(
                     self.context.agent_name, agent_address, str(tac_msg)
                 )
@@ -198,7 +200,7 @@ class TACBehaviour(Behaviour):
     def _cancel_tac(self):
         """Notify agents that the TAC is cancelled."""
         game = cast(Game, self.context.game)
-        logger.info(
+        self.context.logger.info(
             "[{}]: Notifying agents that TAC is cancelled.".format(
                 self.context.agent_name
             )
@@ -212,12 +214,12 @@ class TACBehaviour(Behaviour):
                 message=TACSerializer().encode(tac_msg),
             )
         if game.phase == Phase.GAME:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Finished competition:\n{}".format(
                     self.context.agent_name, game.holdings_summary
                 )
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Computed equilibrium:\n{}".format(
                     self.context.agent_name, game.equilibrium_summary
                 )
