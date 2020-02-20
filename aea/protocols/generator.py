@@ -67,7 +67,7 @@ def _copyright_header_str(author: str) -> str:
         "# ------------------------------------------------------------------------------\n"
         "#\n"
     )
-    copy_right_str += "#   Copyright {} {} Limited\n".format(date.today().year, author)
+    copy_right_str += "#   Copyright {} {}\n".format(date.today().year, author)
     copy_right_str += (
         "#\n"
         '#   Licensed under the Apache License, Version 2.0 (the "License");\n'
