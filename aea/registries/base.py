@@ -38,7 +38,6 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
@@ -250,6 +249,9 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         )
         serializer = serializer_class()
 
+        # we import the loader here because the minimal install does not support
+        # loading a skill from a skill directory.
+        from aea.configurations.loader import ConfigLoader
         config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
         protocol_config = config_loader.load(
             open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)

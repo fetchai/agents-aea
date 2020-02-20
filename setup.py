@@ -98,8 +98,6 @@ all_extras = get_all_extras()
 
 base_deps = [
    *all_extras.get("crypto", []),
-    "PyYAML",
-    "jsonschema",
     "protobuf",
     "watchdog"
 ]

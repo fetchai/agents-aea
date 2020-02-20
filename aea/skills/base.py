@@ -41,7 +41,6 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
@@ -524,6 +523,9 @@ class Skill:
         :raises Exception: if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
+        # we import the loader here because the minimal install does not support
+        # loading a skill from a skill directory.
+        from aea.configurations.loader import ConfigLoader
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         skill_config = skill_loader.load(
             open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE))
