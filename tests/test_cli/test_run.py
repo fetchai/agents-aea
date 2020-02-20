@@ -76,36 +76,37 @@ def test_run(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_default_connection(pytestconfig):
@@ -126,29 +127,30 @@ def test_run_with_default_connection(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    process = subprocess.Popen(  # nosec
-        [sys.executable, "-m", "aea.cli", "run"],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "aea.cli", "run"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 @pytest.mark.parametrize(
@@ -188,29 +190,30 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     )
     assert result.exit_code == 1
 
-    process = subprocess.Popen(  # nosec
-        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(5.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=5)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(5.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=5)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_unknown_private_key(pytestconfig):
@@ -492,36 +495,38 @@ def test_run_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_fet_ledger_apis(pytestconfig):
@@ -568,36 +573,37 @@ def test_run_fet_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_install_deps(pytestconfig):
@@ -622,36 +628,38 @@ def test_run_with_install_deps(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--install-deps",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.communicate(timeout=20)
-
-    assert process.returncode == 0
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
-    os.chdir(cwd)
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--install-deps",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.communicate(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_install_deps_and_requirement_file(pytestconfig):
@@ -680,36 +688,38 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     assert result.exit_code == 0
     Path(t, agent_name, "requirements.txt").write_text(result.output)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--install-deps",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(10)
-
-    os.chdir(cwd)
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--install-deps",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(10)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 class TestRunFailsWhenExceptionOccursInSkill:
