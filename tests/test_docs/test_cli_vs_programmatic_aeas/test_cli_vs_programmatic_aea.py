@@ -26,7 +26,6 @@ import subprocess  # nosec
 import sys
 import tempfile
 import time
-from pathlib import Path
 from threading import Thread
 
 import pytest
@@ -140,4 +139,3 @@ class TestProgrammaticAEA:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
