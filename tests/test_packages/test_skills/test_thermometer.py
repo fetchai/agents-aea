@@ -106,6 +106,25 @@ class TestWeatherSkillsFetchaiLedger:
         )
         assert result.exit_code == 0
 
+        # Load the agent yaml file and manually insert the things we need
+        yaml_path = os.path.join(
+            "vendor", "fetchai", "skills", "thermometer", "skill.yaml"
+        )
+        file = open(yaml_path, mode="r")
+
+        # read all lines at once
+        whole_file = file.read()
+
+        whole_file = whole_file.replace(
+            "has_sensor: True", "has_sensor: False"
+        )
+
+        # close the file
+        file.close()
+
+        with open(yaml_path, "w") as f:
+            f.write(whole_file)
+
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
         )
