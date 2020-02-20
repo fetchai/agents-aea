@@ -198,7 +198,7 @@ class TestCarPark:
         )
         assert result.exit_code == 0
 
-        # Fire the suppresses and the threads.
+        # Fire the sub-processes and the threads.
         try:
             os.chdir(agent_one_dir_path)
             process_one = subprocess.Popen(  # nosec
