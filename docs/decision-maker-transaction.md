@@ -1,7 +1,7 @@
 This guide can be considered as a part 2 of the <a href="/standalone-transaction/">the stand-alone transaction demo </a> we did in a previous guide. After the completion of the transaction,
 we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-testnet.fetch.ai'>block explorer</a>. The main difference is that now we are going to use the decision-maker to settle the transaction.
 
-Firstly import the libraries and the set the constant values.
+First, import the libraries and the set the constant values.
 
 ``` python
 import logging
