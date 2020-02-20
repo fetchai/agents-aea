@@ -13,7 +13,7 @@ speech_acts:
     tx_digest: pt:str
   data:
     terms: ct:Description
-    data: pt:list[ct:Array]
+    data: ct:Data
 
   # Differences:
   # data -> data was of type Tuple[np.ndarrays, np.ndarrays]. Now Array as a custom type is used instead of np.ndarrays.
