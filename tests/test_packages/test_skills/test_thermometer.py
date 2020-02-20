@@ -115,9 +115,7 @@ class TestWeatherSkillsFetchaiLedger:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace(
-            "has_sensor: True", "has_sensor: False"
-        )
+        whole_file = whole_file.replace("has_sensor: True", "has_sensor: False")
 
         # close the file
         file.close()
