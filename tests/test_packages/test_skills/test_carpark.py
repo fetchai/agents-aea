@@ -88,7 +88,7 @@ class TestCarPark:
         )
         assert result.exit_code == 0
 
-        # add packages for agent one and run it
+        # Setup agent one
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
@@ -133,24 +133,9 @@ class TestCarPark:
         with open(yaml_path, "w") as f:
             f.write(whole_file)
 
-        process_one = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-        # potential problem
-
         os.chdir(self.t)
 
-        # add packages for agent two and run it
+        # Setup Agent two
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
@@ -213,59 +198,76 @@ class TestCarPark:
         )
         assert result.exit_code == 0
 
-        os.chdir(agent_two_dir_path)
-        process_two = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
+        # Fire the suppresses and the threads.
+        try:
+            os.chdir(agent_one_dir_path)
+            process_one = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+            os.chdir(agent_two_dir_path)
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
-        tty_read_thread.start()
+            process_two = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_one,))
-        error_read_thread.start()
+            tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
+            tty_read_thread.start()
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
-        tty_read_thread.start()
+            error_read_thread = threading.Thread(
+                target=_read_error, args=(process_one,)
+            )
+            error_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
-        error_read_thread.start()
+            tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
+            tty_read_thread.start()
 
-        # NOTE: finish processing tty
-        # problem > close threads in finally block
+            error_read_thread = threading.Thread(
+                target=_read_error, args=(process_two,)
+            )
+            error_read_thread.start()
 
-        time.sleep(60)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
+            time.sleep(10)
+            process_one.send_signal(signal.SIGINT)
+            process_two.send_signal(signal.SIGINT)
 
-        process_one.wait(timeout=60)
-        process_two.wait(timeout=60)
+            process_one.wait(timeout=10)
+            process_two.wait(timeout=10)
 
-        # text1, err1 = process_one.communicate()
-        # text2, err2 = process_two.communicate()
+            assert process_one.returncode == 0
+            assert process_two.returncode == 0
+        finally:
+            poll_one = process_one.poll()
+            if poll_one is None:
+                process_one.terminate()
+                process_one.wait(2)
 
-        # problem! try, finally
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+            poll_two = process_two.poll()
+            if poll_two is None:
+                process_two.terminate()
+                process_two.wait(2)
 
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
-
-        poll_two = process_two.poll()
-        if poll_two is None:
-            process_two.terminate()
-            process_two.wait(2)
+            tty_read_thread.join()
+            error_read_thread.join()
 
         os.chdir(self.t)
         result = self.runner.invoke(
