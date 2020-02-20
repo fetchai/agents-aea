@@ -55,6 +55,11 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             )
         )
         sys.exit(1)
+    finally:
+        poll = subp.poll()
+        if poll is None:
+            subp.terminate()
+            subp.wait(2)
 
 
 def _install_from_requirement(file: str):
