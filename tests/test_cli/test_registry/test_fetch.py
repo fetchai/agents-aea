@@ -18,6 +18,9 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
+import os
+import shutil
+import tempfile
 from unittest import TestCase, mock
 
 from click import ClickException
@@ -36,6 +39,13 @@ def _raise_exception():
 @mock.patch("aea.cli.registry.fetch.extract")
 class TestFetchAgent(TestCase):
     """Test case for fetch_package method."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
@@ -89,3 +99,12 @@ class TestFetchAgent(TestCase):
         """Test for fetch_agent method positive result."""
         with self.assertRaises(ClickException):
             fetch_agent(ContextMock(), PublicIdMock())
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
