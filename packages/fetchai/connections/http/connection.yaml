@@ -9,7 +9,7 @@ protocols: ["fetchai/http:0.1.0"]
 restricted_to_protocols: ["fetchai/http:0.1.0"]
 excluded_protocols: []
 config:
-  addr: ${addr:127.0.0.1}
+  host: ${addr:127.0.0.1}
   port: ${port:8000}
   api: '' # put here the dotted path to your API spec YAML path.
 dependencies: {}
