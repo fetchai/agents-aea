@@ -71,6 +71,11 @@ def _install_from_requirement(file: str):
             )
         )
         sys.exit(1)
+    finally:
+        poll = subp.poll()
+        if poll is None:
+            subp.terminate()
+            subp.wait(2)
 
 
 @click.command()
