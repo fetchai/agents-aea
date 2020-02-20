@@ -120,7 +120,7 @@ def run():
         t.start()
 
         # Let it run long enough to interact with the weather station
-        time.sleep(5)
+        time.sleep(20)
     finally:
         # Shut down the AEA
         logger.info("STOPPING AEA NOW!")

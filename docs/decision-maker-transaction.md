@@ -153,7 +153,7 @@ Finally, we are running the agent and we expect the transaction digest to be pri
         t.start()
 
         # Let it run long enough to interact with the weather station
-        time.sleep(5)
+        time.sleep(20)
     finally:
         # Shut down the AEA
         logger.info("STOPPING AEA NOW!")
@@ -308,7 +308,7 @@ def run():
         t.start()
 
         # Let it run long enough to interact with the weather station
-        time.sleep(5)
+        time.sleep(20)
     finally:
         # Shut down the AEA
         logger.info("STOPPING AEA NOW!")
