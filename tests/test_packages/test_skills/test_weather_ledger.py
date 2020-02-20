@@ -72,12 +72,12 @@ class TestWeatherSkillsFetchaiLedger:
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
         packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(os.getcwd(), "packages")
+        packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # Add scripts folder
         scripts_src = os.path.join(self.cwd, "scripts")
-        scripts_dst = os.path.join(os.getcwd(), "scripts")
+        scripts_dst = os.path.join(self.t, "scripts")
         shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
