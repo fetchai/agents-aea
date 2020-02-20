@@ -94,19 +94,6 @@ class TestWeatherSkills:
         )
         assert result.exit_code == 0
 
-        process_one = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-
         os.chdir(self.t)
 
         # add packages for agent two and run it
@@ -132,39 +119,52 @@ class TestWeatherSkills:
         )
         assert result.exit_code == 0
 
-        process_two = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
+        try:
+            os.chdir(agent_one_dir_path)
+            process_one = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+            os.chdir(agent_two_dir_path)
+            process_two = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
 
-        # check the gym run ends
+            time.sleep(10.0)
+            process_one.send_signal(signal.SIGINT)
+            process_one.wait(timeout=10)
+            process_two.send_signal(signal.SIGINT)
+            process_two.wait(timeout=10)
 
-        time.sleep(20.0)
-        process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=20)
-        process_two.send_signal(signal.SIGINT)
-        process_two.wait(timeout=20)
+            assert process_one.returncode == 0
+            assert process_two.returncode == 0
+        finally:
+            poll_one = process_one.poll()
+            if poll_one is None:
+                process_one.terminate()
+                process_one.wait(2)
 
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
-
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
-
-        poll_two = process_two.poll()
-        if poll_two is None:
-            process_two.terminate()
-            process_two.wait(2)
+            poll_two = process_two.poll()
+            if poll_two is None:
+                process_two.terminate()
+                process_two.wait(2)
 
         os.chdir(self.t)
         result = self.runner.invoke(
