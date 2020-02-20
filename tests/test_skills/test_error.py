@@ -70,14 +70,13 @@ class TestSkillError:
             resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))),
             is_programmatic=False,
         )
-        cls.t = Thread(target=cls.my_aea.start)
-        cls.t.start()
-        time.sleep(0.5)
-
         cls.skill_context = SkillContext(cls.my_aea._context)
         cls.my_error_handler = ErrorHandler(
             name="error", skill_context=cls.skill_context
         )
+        cls.t = Thread(target=cls.my_aea.start)
+        cls.t.start()
+        time.sleep(0.5)
 
     def test_error_handler_handle(self):
         """Test the handle function."""

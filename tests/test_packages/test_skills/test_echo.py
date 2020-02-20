@@ -90,30 +90,31 @@ class TestEchoSkill:
         )
         assert result.exit_code == 0
 
-        # run the agent
-        process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run"],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-        time.sleep(2.0)
-
-        # add sending and receiving envelope from input/output files
-        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        expected_envelope = Envelope(
-            to=self.agent_name,
-            sender="sender",
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(message),
-        )
-        encoded_envelope = "{},{},{},{}".format(
-            expected_envelope.to,
-            expected_envelope.sender,
-            expected_envelope.protocol_id,
-            expected_envelope.message.decode("utf-8"),
-        )
-        encoded_envelope = encoded_envelope.encode("utf-8")
         try:
+            # run the agent
+            process = subprocess.Popen(  # nosec
+                [sys.executable, "-m", "aea.cli", "run"],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+            time.sleep(2.0)
+
+            # add sending and receiving envelope from input/output files
+            message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+            expected_envelope = Envelope(
+                to=self.agent_name,
+                sender="sender",
+                protocol_id=DefaultMessage.protocol_id,
+                message=DefaultSerializer().encode(message),
+            )
+            encoded_envelope = "{},{},{},{}".format(
+                expected_envelope.to,
+                expected_envelope.sender,
+                expected_envelope.protocol_id,
+                expected_envelope.message.decode("utf-8"),
+            )
+            encoded_envelope = encoded_envelope.encode("utf-8")
+
             with open(Path(self.t, self.agent_name, "input_file"), "ab+") as f:
                 f.write(encoded_envelope + b"\n")
                 f.flush()

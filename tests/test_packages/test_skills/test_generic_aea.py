@@ -94,7 +94,7 @@ class TestGenericSkills:
         )
         agent_two_config.write_text(agent_two_config_content)
 
-        # add packages for agent one and run it
+        # add packages for agent one
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
@@ -117,45 +117,45 @@ class TestGenericSkills:
         )
         assert result.exit_code == 0
 
-        process_one = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+        # add packages for agent two
+        agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
+        os.chdir(agent_two_dir_path)
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
         )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/generic_buyer:0.1.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         try:
-            os.chdir(self.t)
+            os.chdir(agent_one_dir_path)
+            process_one = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
 
-            # add packages for agent two and run it
-            agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
             os.chdir(agent_two_dir_path)
-
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "add", "skill", "fetchai/generic_buyer:0.1.0"],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-
-            result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-            )
-            assert result.exit_code == 0
-
             process_two = subprocess.Popen(  # nosec
                 [
                     sys.executable,
@@ -169,9 +169,11 @@ class TestGenericSkills:
                 env=os.environ.copy(),
             )
 
-        finally:
-            # check the generic run ends
             time.sleep(10.0)
+
+            # TODO: check the generic run ends
+
+        finally:
             process_one.send_signal(signal.SIGINT)
             process_one.wait(timeout=10)
             process_two.send_signal(signal.SIGINT)
