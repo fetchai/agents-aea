@@ -615,7 +615,9 @@ def test_run_with_install_deps(pytestconfig):
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    packages_src = os.path.join(cwd, "packages")
+    packages_dst = os.path.join(t, "packages")
+    shutil.copytree(packages_src, packages_dst)
 
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
