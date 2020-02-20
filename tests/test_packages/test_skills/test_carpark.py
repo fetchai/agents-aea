@@ -70,12 +70,12 @@ class TestCarPark:
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
         packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(os.getcwd(), "packages")
+        packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # Add scripts folder
         scripts_src = os.path.join(self.cwd, "scripts")
-        scripts_dst = os.path.join(os.getcwd(), "scripts")
+        scripts_dst = os.path.join(self.t, "scripts")
         shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
@@ -146,6 +146,7 @@ class TestCarPark:
             stderr=subprocess.PIPE,
             env=os.environ.copy(),
         )
+        # potential problem
 
         os.chdir(self.t)
 
@@ -239,6 +240,9 @@ class TestCarPark:
         error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
         error_read_thread.start()
 
+        # NOTE: finish processing tty
+        # problem > close threads in finally block
+
         time.sleep(60)
         process_one.send_signal(signal.SIGINT)
         process_two.send_signal(signal.SIGINT)
@@ -249,6 +253,7 @@ class TestCarPark:
         # text1, err1 = process_one.communicate()
         # text2, err2 = process_two.communicate()
 
+        # problem! try, finally
         assert process_one.returncode == 0
         assert process_two.returncode == 0
 
