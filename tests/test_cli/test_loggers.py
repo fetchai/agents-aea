@@ -17,29 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
+"""This test module contains the tests for commands in aea.cli.loggers module."""
 
-import argparse
+from unittest import TestCase, mock
 
-import aea.cli_gui
+from aea.cli.loggers import ColorFormatter
 
-parser = argparse.ArgumentParser(
-    description="Launch the gui through python"
-)  # pragma: no cover
-parser.add_argument(
-    "-p", "--port", help="Port that the web server listens on", type=int, default=8080
-)  # pragma: no cover
 
-parser.add_argument(
-    "-H",
-    "--host",
-    help="host that the web server serves from",
-    type=str,
-    default="127.0.0.1",
-)  # pragma: no cover
+class ColorFormatterTestCase(TestCase):
+    """Test case for ColorFormatter class."""
 
-args, unknown = parser.parse_known_args()  # pragma: no cover
-
-# If we're running in stand alone mode, run the application
-if __name__ == "__main__":  # pragma: no cover
-    aea.cli_gui.run(args.port, args.host)
+    def test_format_positive(self):
+        """Test for format method positive result."""
+        record = mock.Mock()
+        record.exc_info = None
+        record.levelname = "DEBUG"
+        record.getMessage = mock.Mock(return_value="Message")
+        color_formatter = ColorFormatter()
+        color_formatter.format(record)

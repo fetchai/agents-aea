@@ -69,7 +69,7 @@ def run():
 
     # create the AEA
     my_aea = AEA(
-        identity, [oef_connection], wallet, ledger_apis, resources  # stub_connection,
+        identity, [oef_connection], wallet, ledger_apis, resources,  # stub_connection,
     )
 
     # Add the default protocol (which is part of the AEA distribution)
@@ -153,17 +153,18 @@ def run():
         resources.add_skill(skill)
 
     # Set the AEA running in a different thread
-    logger.info("STARTING AEA NOW!")
-    t = Thread(target=my_aea.start)
-    t.start()
+    try:
+        logger.info("STARTING AEA NOW!")
+        t = Thread(target=my_aea.start)
+        t.start()
 
-    # Let it run long enought to interact with the weather station
-    time.sleep(25)
-
-    # Shut down the AEA
-    logger.info("STOPPING AEA NOW!")
-    my_aea.stop()
-    t.join()
+        # Let it run long enough to interact with the weather station
+        time.sleep(25)
+    finally:
+        # Shut down the AEA
+        logger.info("STOPPING AEA NOW!")
+        my_aea.stop()
+        t.join()
 
 
 if __name__ == "__main__":

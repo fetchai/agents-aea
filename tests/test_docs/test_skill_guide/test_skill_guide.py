@@ -94,6 +94,11 @@ class TestBuildSkill:
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
+        # add packages folder
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
+        shutil.copytree(packages_src, packages_dst)
+
         path = Path(
             self.t, self.agent_name, "skills", self.resource_name, "behaviours.py"
         )
