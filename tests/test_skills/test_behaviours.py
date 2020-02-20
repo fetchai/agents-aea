@@ -19,14 +19,17 @@
 
 """This module contains the tests for the behaviours."""
 from collections import Counter
+from unittest import TestCase, mock
 
 import pytest
 
 from aea.skills.behaviours import (
+    CyclicBehaviour,
     FSMBehaviour,
     OneShotBehaviour,
     SequenceBehaviour,
     State,
+    TickerBehaviour,
 )
 
 
@@ -240,3 +243,176 @@ class TestFSMBehaviourCreation:
         with pytest.raises(ValueError, match="Transition already registered."):
             self.fsm_behaviour.register_transition("state_1", "state_2", "an_event")
         self.fsm_behaviour.unregister_transition("state_1", "state_2", "an_event")
+
+
+class CyclicBehaviourTestCase(TestCase):
+    """Test case for CyclicBehaviour class."""
+
+    def setUp(self):
+        """Set the test up."""
+
+        class TestCyclicBehaviour(CyclicBehaviour):
+            """Class for testing CyclicBehaviour abstract class."""
+
+            def setup(self, *args):
+                """Set up."""
+                pass
+
+            def teardown(self, *args):
+                """Tear down."""
+                pass
+
+        self.TestCyclicBehaviour = TestCyclicBehaviour
+
+    def test_init_positive(self):
+        """Test for init positive result."""
+        self.TestCyclicBehaviour(skill_context="skill_context", name="name")
+
+    def test_act_wrapper_positive(self):
+        """Test for act_wrapper positive result."""
+        obj = self.TestCyclicBehaviour(skill_context="skill_context", name="name")
+        obj.act = mock.Mock()
+        obj.act_wrapper()
+        obj.act.assert_called_once()
+
+
+class TickerBehaviourTestCase(TestCase):
+    """Test case for TickerBehaviour class."""
+
+    def setUp(self):
+        """Set the test up."""
+
+        class TestTickerBehaviour(TickerBehaviour):
+            """Class for testing TickerBehaviour abstract class."""
+
+            def setup(self, *args):
+                """Set up."""
+                pass
+
+            def teardown(self, *args):
+                """Tear down."""
+                pass
+
+        self.TestTickerBehaviour = TestTickerBehaviour
+
+    def test_init_positive(self):
+        """Test for init positive result."""
+        self.TestTickerBehaviour(skill_context="skill_context", name="name")
+
+    def test_tick_interval_positive(self):
+        """Test for tick_interval property positive result."""
+        obj = self.TestTickerBehaviour(skill_context="skill_context", name="name")
+        obj.tick_interval
+
+    def test_start_at_positive(self):
+        """Test for start_at property positive result."""
+        obj = self.TestTickerBehaviour(skill_context="skill_context", name="name")
+        obj.start_at
+
+    def test_last_act_time_positive(self):
+        """Test for last_act_time property positive result."""
+        obj = self.TestTickerBehaviour(skill_context="skill_context", name="name")
+        obj.last_act_time
+
+    def test_act_wrapper_positive(self):
+        """Test for act_wrapper positive result."""
+        obj = self.TestTickerBehaviour(skill_context="skill_context", name="name")
+        obj.is_done = mock.Mock(return_value=False)
+        obj.is_time_to_act = mock.Mock(return_value=True)
+        obj.act = mock.Mock()
+        obj.act_wrapper()
+        obj.act.assert_called_once()
+
+    def test_is_time_to_act_positive(self):
+        """Test for is_time_to_act positive result."""
+        obj = self.TestTickerBehaviour(skill_context="skill_context", name="name")
+        obj.is_time_to_act()
+
+
+class FSMBehaviourTestCase(TestCase):
+    """Test case for FSMBehaviour class."""
+
+    def setUp(self):
+        """Set the test up."""
+
+        class TestFSMBehaviour(FSMBehaviour):
+            """Class for testing FSMBehaviour abstract class."""
+
+            def setup(self, *args):
+                """Set up."""
+                pass
+
+            def teardown(self, *args):
+                """Tear down."""
+                pass
+
+        self.TestFSMBehaviour = TestFSMBehaviour
+
+    def test_is_started_positive(self):
+        """Test for is_started property positive result."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj.is_started
+
+    def test_register_final_state_already_exists(self):
+        """Test for register_final_state already exists."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj._name_to_state = ["name"]
+        with self.assertRaises(ValueError):
+            obj.register_final_state("name", "state")
+
+    def test_unregister_state_not_exists(self):
+        """Test for unregister_state not exists."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj._name_to_state = []
+        with self.assertRaises(ValueError):
+            obj.unregister_state("name")
+
+    def test_initial_state_not_state(self):
+        """Test for initial_state not a state."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj._name_to_state = []
+        with self.assertRaises(ValueError):
+            obj.initial_state = "name"
+
+    def test_initial_state_positive(self):
+        """Test for initial_state positive result."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj._name_to_state = ["name"]
+        obj.initial_state = "name"
+
+    def test_act_no_current(self):
+        """Test for act method no current state."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj.current = None
+        obj.act()
+
+    def test_act_no_current_got(self):
+        """Test for act method no current state got."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj.get_state = mock.Mock(return_value=None)
+        obj.current = "current"
+        obj.act()
+        obj.get_state.assert_called_once()
+
+    def test_act_current_in_final_states(self):
+        """Test for act method current in final_states."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        current_state = mock.Mock()
+        current_state.act_wrapper = mock.Mock()
+        current_state.is_done = mock.Mock(return_value=True)
+
+        obj.final_states.add(current_state)
+        obj.get_state = mock.Mock(return_value=current_state)
+        obj.current = "current"
+        obj.act()
+
+        obj.get_state.assert_called_once()
+        current_state.act_wrapper.assert_called_once()
+        current_state.is_done.assert_called_once()
+
+    def test_unregister_transition_value_error(self):
+        """Test for unregister_transition method ValueError raises."""
+        obj = self.TestFSMBehaviour(skill_context="skill_context", name="name")
+        obj.transitions = {}
+        with self.assertRaises(ValueError):
+            obj.unregister_transition("source", "destination")
