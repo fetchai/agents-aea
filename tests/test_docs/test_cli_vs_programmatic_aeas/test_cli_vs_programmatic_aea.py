@@ -26,7 +26,6 @@ import subprocess  # nosec
 import sys
 import tempfile
 import time
-from pathlib import Path
 from threading import Thread
 
 import pytest
@@ -88,7 +87,7 @@ class TestProgrammaticAEA:
         )
         assert result.exit_code == 0
 
-        path = Path(os.getcwd(), "weather_station")
+        path = os.path.join(os.getcwd(), "weather_station")
         os.chdir(path)
         result = self.runner.invoke(
             cli,
@@ -123,11 +122,8 @@ class TestProgrammaticAEA:
 
         assert process_one.returncode == 0
 
-        path = Path(ROOT_DIR, "tests", "test_docs", "test_cli_vs_programmatic_aeas")
-        os.chdir(path)
         client_thread = Thread(target=run)
         client_thread.start()
-
         poll_one = process_one.poll()
         if poll_one is None:
             process_one.terminate()
