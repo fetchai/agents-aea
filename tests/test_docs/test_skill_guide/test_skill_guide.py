@@ -74,19 +74,24 @@ class TestBuildSkill:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
-        os.chdir(cls.agent_name)
-        # scaffold skill
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
-            standalone_mode=False,
-        )
+        if cls.create_result.exit_code == 0:
+            os.chdir(cls.agent_name)
+            # scaffold skill
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+                standalone_mode=False,
+            )
+
+    def test_agent_is_created(self):
+        """Test that the setup was successful."""
+        assert self.create_result.exit_code == 0, "Agent not created, setup incomplete"
 
     def test_read_md_file(self):
+        """Teat that the md file is not empty."""
         assert self.code_blocks != [], "File must not be empty."
 
     def test_update_skill_and_run(self, pytestconfig):
