@@ -553,7 +553,7 @@ class Skill:
                 os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
             )
         else:
-            handlers = {}
+            handlers = {}  # pragma: no cover
 
         behaviours_by_id = dict(skill_config.behaviours.read_all())
         if len(behaviours_by_id) > 0:
