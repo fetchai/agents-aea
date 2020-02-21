@@ -58,7 +58,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - To run tests (ensure no oef docker containers are running):
 
-	  tox -e py37
+	  tox -e py3.7
 
 - To run linters (code style checks):
 
