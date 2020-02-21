@@ -1,61 +1,61 @@
-``` bash 
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-``` 
-``` bash 
+```
+``` bash
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/generic_seller:0.1.0
-``` 
-``` bash 
+```
+``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/generic_buyer:0.1.0
-``` 
-``` bash 
+```
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth fetchai
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth ethereum
-``` 
-``` bash 
+```
+``` bash
 addr: ${OEF_ADDR: 127.0.0.1}
-``` 
-``` bash 
+```
+``` bash
 aea add connection fetchai/oef:0.1.0
 aea install
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   fetchai:
     network: testnet
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -85,8 +85,8 @@ ledger_apis:
 |dependencies                       |dependencies:                     |
 |  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
 |----------------------------------------------------------------------| 
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -105,4 +105,4 @@ ledger_apis:
 |        constraint_type: '=='      |        constraint_type: '=='     |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------| 
-``` 
+```

@@ -1,93 +1,93 @@
-``` bash 
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-``` 
-``` bash 
+```
+``` bash
 aea create my_weather_station
-``` 
-``` bash 
+```
+``` bash
 cd my_weather_station
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 aea create my_weather_client
-``` 
-``` bash 
+```
+``` bash
 cd my_weather_client
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 cd ..
 aea delete my_weather_station
 aea delete my_weather_client
-``` 
-``` bash 
+```
+``` bash
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth fetchai
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth ethereum
-``` 
-``` bash 
+```
+``` bash
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.max_buyer_tx_fee 10000 --type int
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx True --type bool
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 cd ..
 aea delete my_weather_station
 aea delete my_weather_client
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   fetchai:
     network: testnet
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -103,8 +103,8 @@ ledger_apis:
 |      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
 |----------------------------------------------------------------------| 
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -119,4 +119,4 @@ ledger_apis:
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------| 
-``` 
+```

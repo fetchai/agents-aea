@@ -1,6 +1,6 @@
-``` bash 
+``` bash
 pip install numpy gym
-``` 
-``` bash 
+```
+``` bash
 python examples/gym_ex/train.py
-``` 
+```

@@ -1,75 +1,75 @@
-``` bash 
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-``` 
-``` bash 
+```
+``` bash
 aea create car_detector
 cd car_detector
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/carpark_detection:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea fetch fetchai/car_detector:0.1.0
 cd car_detector
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea create car_data_buyer
 cd car_data_buyer
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/carpark_client:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea fetch fetchai/car_data_buyer:0.1.0
 cd car_data_buyer
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth fetchai
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth ethereum
-``` 
-``` bash 
+```
+``` bash
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd False --type bool
-``` 
-``` bash 
+```
+``` bash
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.max_buyer_tx_fee 6000 --type int
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.ledger_id ethereum
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 cd ..
 aea delete car_detector
 aea delete car_data_buyer
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   fetchai:
     network: testnet
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -85,8 +85,8 @@ ledger_apis:
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
 |----------------------------------------------------------------------| 
-``` 
-``` yaml 
+```
+```yaml 
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -105,4 +105,4 @@ ledger_apis:
 |      max_buyer_tx_fee: 6000       |      max_buyer_tx_fee: 6000      |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------| 
-``` 
+```

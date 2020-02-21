@@ -1,56 +1,56 @@
-``` bash 
+``` bash
 sudo nano 99-hidraw-permissions.rules
-``` 
-``` bash 
+```
+``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
-``` 
-``` bash 
+```
+``` bash
 aea create my_aea
 cd my_aea
-``` 
-``` bash 
+```
+``` bash
 aea scaffold skill thermometer
-``` 
-``` bash 
+```
+``` bash
 aea create my_client
 cd my_client
-``` 
-``` bash 
+```
+``` bash
 aea scaffold skill thermometer_client
-``` 
-``` bash 
+```
+``` bash
 addr: ${OEF_ADDR: 127.0.0.1}
-``` 
-``` bash 
+```
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-``` 
-``` bash 
+```
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea generate-wealth fetchai
-``` 
-``` bash 
+```
+``` bash
 aea add connection fetchai/oef:0.1.0
 aea install
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-``` 
-``` bash 
+```
+``` bash
 aea add connection fetchai/oef:0.1.0
 aea install
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 cd ..
 aea delete my_weather_station
 aea delete my_weather_client
-``` 
-``` yaml 
+```
+```yaml 
 name: thermometer
 author: fetchai
 version: 0.1.0
@@ -84,8 +84,8 @@ ledgers: ['fetchai']
 dependencies:
  pyserial: {}
  temper-py: {}
-``` 
-``` yaml 
+```
+```yaml 
 aea_version: 0.2.0
 agent_name: my_aea
 author: author
@@ -109,8 +109,8 @@ skills:
 - author/thermometer:0.1.0
 - fetchai/error:0.1.0
 version: 0.1.0
-``` 
-``` yaml 
+```
+```yaml 
 
 name: thermometer_client
 author: fetchai
@@ -148,8 +148,8 @@ models:
    args: {}
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
 ledgers: ['fetchai']
-``` 
-``` yaml 
+```
+```yaml 
 
 aea_version: 0.2.0
 agent_name: m_client
@@ -173,32 +173,32 @@ skills:
 - author/thermometer_client:0.1.0
 - fetchai/error:0.1.0
 version: 0.1.0
-``` 
-``` yaml 
+```
+```yaml 
 skills:
 - my_authos/thermometer:0.1.0
 - fetchai/error:0.1.0
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   fetchai:
     network: testnet
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
-``` 
-``` yaml 
+```
+```yaml 
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 is_ledger_tx: True
-``` 
-``` yaml 
+```
+```yaml 
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 is_ledger_tx: True
-``` 
+```

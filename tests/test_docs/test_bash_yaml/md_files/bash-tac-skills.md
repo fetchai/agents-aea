@@ -1,60 +1,60 @@
-``` bash 
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-``` 
-``` bash 
+```
+``` bash
 aea create tac_controller
 cd tac_controller
-``` 
-``` bash 
+```
+``` bash
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_control:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea config set agent.default_ledger ethereum
-``` 
-``` bash 
+```
+``` bash
 aea config get skills.tac_control.models.parameters.args.start_time
 aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` bash 
+```
+``` bash
 aea create tac_participant_one
 aea create tac_participant_two
-``` 
-``` bash 
+```
+``` bash
 cd tac_participant_one
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea config set agent.default_ledger ethereum
-``` 
-``` bash 
+```
+``` bash
 cd tac_participant_two
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
-``` 
-``` bash 
+```
+``` bash
 aea config set agent.default_ledger ethereum
-``` 
-``` bash 
+```
+``` bash
 aea run --connections fetchai/oef:0.1.0
-``` 
-``` yaml 
+```
+```yaml 
 ledger_apis:
   ethereum:
     addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 20
-``` 
-``` yaml 
+```
+```yaml 
 name: tac_negotiation
 authors: fetchai
 version: 0.1.0
@@ -101,4 +101,4 @@ models:
     args:
       pending_transaction_timeout: 30
 protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
-``` 
+```
