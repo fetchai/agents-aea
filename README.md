@@ -3,17 +3,21 @@ A framework for autonomous economic agent (AEA) development
 
 ## Get started
 
-- Create and launch a virtual environment with Python 3.7 (any Python `>=` 3.6 works):
+1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
       pipenv --python 3.7 && pipenv shell
 
-- Install the package from [pypi](https://pypi.org/project/aea/):
+2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
 
       pip install aea[all]
 
 
-- Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+
+<p align="center">
+  <img src="https://github.com/fetchai/agents-aea/blob/develop/data/aea.png?raw=true" alt="AEA" width="70%"/>
+</p>
 
 ## Alternatively: Install from Source
 
@@ -52,7 +56,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  pipenv install --dev
 
-- Install package in development mode:
+- Install package in development mode (this step replaces `pip install aea[all]` above):
 
 	  pip install -e .
 
@@ -82,3 +86,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 	* `mkdocs serve` - Start the live-reloading docs server on localhost.
 
 To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
+
+- Fetch submodules:
+
+	  git submodule sync --recursive && git submodule update --init --recursive

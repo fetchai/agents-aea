@@ -44,7 +44,7 @@ class SimpleBehaviour(Behaviour, ABC):
 
     def act(self) -> None:
         """Do the action."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """Tear the behaviour down."""
@@ -234,7 +234,7 @@ class State(SimpleBehaviour, ABC):
     @abstractmethod
     def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def reset(self) -> None:
         """Reset initial conditions."""
