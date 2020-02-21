@@ -893,7 +893,7 @@ The next file we have to update is the aea-config.yaml file. You can locate this
 We are going to modify this file later on before we run the aea but for now make sure it matches the following code : 
 
 ```yaml
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: my_aea
 author: author
 connections:
@@ -1738,7 +1738,7 @@ We are going to modify this file later on before we run the aea but for now, mak
 
 ```yaml
 
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: m_client
 author: author
 connections:

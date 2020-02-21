@@ -1,4 +1,4 @@
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: ml_model_trainer
 author: fetchai
 connections:
