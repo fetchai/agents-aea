@@ -57,19 +57,19 @@ cd ..
 aea delete car_detector
 aea delete car_data_buyer
 ```
-```yaml 
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
-```yaml 
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -86,7 +86,7 @@ ledger_apis:
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
 |----------------------------------------------------------------------| 
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

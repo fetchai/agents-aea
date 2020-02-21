@@ -50,7 +50,7 @@ cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
-```yaml 
+``` yaml
 name: thermometer
 author: fetchai
 version: 0.1.0
@@ -85,7 +85,7 @@ dependencies:
  pyserial: {}
  temper-py: {}
 ```
-```yaml 
+``` yaml
 aea_version: 0.2.0
 agent_name: my_aea
 author: author
@@ -110,7 +110,7 @@ skills:
 - fetchai/error:0.1.0
 version: 0.1.0
 ```
-```yaml 
+``` yaml
 
 name: thermometer_client
 author: fetchai
@@ -149,7 +149,7 @@ models:
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
 ledgers: ['fetchai']
 ```
-```yaml 
+``` yaml
 
 aea_version: 0.2.0
 agent_name: m_client
@@ -174,29 +174,29 @@ skills:
 - fetchai/error:0.1.0
 version: 0.1.0
 ```
-```yaml 
+``` yaml
 skills:
 - my_authos/thermometer:0.1.0
 - fetchai/error:0.1.0
 ```
-```yaml 
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
-```yaml 
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
 ```
-```yaml 
+``` yaml
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 is_ledger_tx: True
 ```
-```yaml 
+``` yaml
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'

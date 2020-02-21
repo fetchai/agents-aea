@@ -48,19 +48,19 @@ cd ..
 aea delete my_thermometer_aea
 aea delete my_thermometer_client
 ```
-```yaml 
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
-```yaml 
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -76,7 +76,7 @@ ledger_apis:
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
 |----------------------------------------------------------------------| 
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -92,6 +92,6 @@ ledger_apis:
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------| 
 ```
-```yaml 
+``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```

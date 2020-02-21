@@ -42,19 +42,19 @@ cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea
 ```
-```yaml 
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
-```yaml 
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -86,7 +86,7 @@ ledger_apis:
 |        city: Cambridge            |        city: Cambridge           |
 |----------------------------------------------------------------------| 
 ```
-```yaml 
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
