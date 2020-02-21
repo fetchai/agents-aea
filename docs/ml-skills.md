@@ -175,7 +175,7 @@ aea generate-wealth ethereum
 
 In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -203,7 +203,7 @@ aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledge
 
 In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

@@ -60,7 +60,7 @@ class TestBuildSkill:
     def setup_class(cls):
         """Setup the test class."""
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.resource_name = "my_search"
