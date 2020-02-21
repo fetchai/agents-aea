@@ -3,18 +3,18 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
 ``` bash
-aea create my_thermometer_aea
-cd my_thermometer_aea
+aea create my_seller_aea
+cd my_seller_aea
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/thermometer:0.1.0
+aea add skill fetchai/generic_seller:0.1.0
 aea install
 ```
 
 ``` bash
-aea create my_thermometer_client
-cd my_thermometer_client
+aea create my_buyer_aea
+cd my_buyer_aea
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/thermometer_client:0.1.0
+aea add skill fetchai/generic_buyer:0.1.0
 aea install
 ```
 
@@ -28,15 +28,7 @@ aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 
-``` bash
-aea generate-wealth fetchai
-```
-
-``` bash
-aea generate-wealth ethereum
-```
-
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -44,21 +36,32 @@ aea generate-wealth ethereum
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
-|      price_per_row: 1             |      price_per_row: 1            |
+|      total_price: 10              |      total_price: 10             |
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
 |      currency_id: 'FET'           |      currency_id: 'ETH'          |
 |      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      has_sensor: True             |      has_sensor: True            |
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
+|      has_data_source: False       |      has_data_source: False      |
+|      data_for_sale:               |      data_for_sale:              |
+|        wind: 10                   |        wind: 10                  |
+|        pressure: 20               |        pressure: 20              |
+|        temperature: 26            |        temperature: 26           |
+|      search_schema:               |      search_schema:              |
+|        attribute_one:             |        attribute_one:            |
+|          name: country            |          name: country           |
+|          type: str                |          type: str               |
+|          is_required: True        |          is_required: True       |
+|        attribute_two:             |        attribute_two:            |
+|          name: city               |          name: city              |
+|          type: str                |          type: str               |
+|          is_required: True        |          is_required: True       |
+|      search_data:                 |      search_data:                |
+|        country: UK                |        country: UK               |
+|        city: Cambridge            |        city: Cambridge           |
 |----------------------------------------------------------------------| 
 ```
 
-``` bash
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
-```
-
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -71,17 +74,23 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id 
 |      currency_id: 'FET'           |      currency_id: 'ETH'          |
 |      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
 |      is_ledger_tx: True           |      is_ledger_tx: True          |
+|      search_query:                |      search_query:               |
+|        search_term: country       |        search_term: country      |
+|        search_value: UK           |        search_value: UK          |
+|        constraint_type: '=='      |        constraint_type: '=='     |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------| 
 ```
 
 ``` bash
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.max_buyer_tx_fee 10000 --type int
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
+aea generate-wealth fetchai
 ```
 
-``` yaml
+``` bash
+aea generate-wealth ethereum
+```
+
+```bash
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
 
@@ -93,6 +102,8 @@ aea run --connections fetchai/oef:0.1.0
 
 ```bash 
 cd ..
-aea delete my_thermometer_aea
-aea delete my_thermometer_client
+aea delete my_seller_aea
+aea delete my_buyer_aea
 ```
+
+
