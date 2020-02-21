@@ -1,13 +1,21 @@
-name: Example workflow for Codecov
-on: [push]
+name: AEA framework sanity checks and tests
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+
 jobs:
   run:
     runs-on: ${{ matrix.os }}
+
     strategy:
-      matrix: 
-#        os: [ubuntu-latest, macos-latest, windows-latest]
+      matrix:
         os: [ubuntu-latest]
         python-version: [3.6, 3.7, 3.8]
+
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
