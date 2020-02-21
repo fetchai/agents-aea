@@ -45,7 +45,7 @@ MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 
 
-class TestProgrammaticAEA:
+class TestCliVsProgrammaticAEA:
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     @classmethod

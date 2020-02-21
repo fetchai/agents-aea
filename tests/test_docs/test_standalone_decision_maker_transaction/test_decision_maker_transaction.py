@@ -43,7 +43,7 @@ PY_FILE = (
 test_logger = logging.getLogger(__name__)
 
 
-class TestProgrammaticAEA:
+class TestDecisionMakerTransaction:
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod

@@ -43,7 +43,7 @@ PY_FILE = "test_docs/test_standalone_transaction/standalone_transaction.py"
 test_logger = logging.getLogger(__name__)
 
 
-class TestProgrammaticAEA:
+class TestStandaloneTransaction:
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod

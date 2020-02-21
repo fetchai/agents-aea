@@ -34,7 +34,7 @@ PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
 logger = logging.getLogger(__name__)
 
 
-class TestProgrammaticAEA:
+class TestAgentVsAEA:
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod

@@ -34,7 +34,7 @@ PY_FILE = "test_docs/test_multiplexer_stand_alone/multiplexer_standalone.py"
 logger = logging.getLogger(__name__)
 
 
-class TestProgrammaticAEA:
+class TestMultiplexerStandAlone:
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     @classmethod
