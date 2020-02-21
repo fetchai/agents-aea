@@ -45,6 +45,7 @@ class TestDemoDocs:
                     assert (
                         blocks in bash_file
                     ), "[{}]: FAILED. Code must be identical".format(file)
+                logger.info("[{}]: PASSED".format(file))
 
                 yaml_code_blocks = extract_code_blocks(filepath=md_path, filter="yaml")
                 for blocks in yaml_code_blocks:
