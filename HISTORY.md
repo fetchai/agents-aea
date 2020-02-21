@@ -1,5 +1,17 @@
 # Release History
 
+## 0.2.1 (2020-02-21)
+
+- Add minimal aea install
+- Updates finite state machine behaviour to use any simple behaviour in states
+- Adds example of programmatic and CLI based AEAs interacting
+- Exposes the logger on the skill context
+- Adds serialization (encoding/decoding) support to protocol generator
+- Adds additional docs and videos
+- Introduces test coverage to all code in docs
+- Increases test coverage for aea package
+- Multiple additional minor fixes and changes
+
 ## 0.2.0 (2020-02-07)
 
 - Skills can now programmatically register behaviours

@@ -269,7 +269,7 @@ It is important to understand the way a negotiation happens between two AEAs. Th
 
 Let us now implement a handler to deal with the incoming responses. Open the handlers.py (my_aea/skills/thermometer/handlers.py) and add the following code:
 
-```python
+``` python
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -351,7 +351,7 @@ We are checking if the dialogue is registered to an existing one or we have to c
 The second part checks what kind of message we received. We are going to implement each case in a different function. 
 Under the teardown function add the following code:
 
-```python
+``` python
 def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
    """
    Handle an unidentified dialogue.
@@ -379,7 +379,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
 The above code handles an unidentified dialogue by responding to the sender with a default message containing the appropriate error information. 
 The next code block handles the CFP message, paste the code under the  _handle_unidentified_dialogue function :
 
-```python
+``` python
 def _handle_cfp(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
     """
     Handle the CFP.
@@ -473,7 +473,7 @@ def _handle_decline(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
 If we receive a decline message from the client we have to close the dialogue and terminate the conversation with the client_aea. 
 The opposite would be to receive an accept message. Inorder to handle this option add the following code under the _handle_decline function:
 
-```python
+``` python
 def _handle_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
     """
     Handle the ACCEPT.
@@ -517,7 +517,7 @@ When the client_aea accepts the proposal we send him, we also have to respond wi
 client about the address we would like to send the funds to. Lastly, when we receive the “inform” message means that the client sends 
 the funds to the specific address. Add the following code :
 
-```python
+``` python
 def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
     """
     Handle the INFORM.
@@ -626,7 +626,7 @@ Otherwise we don’t do anything.
 We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file to `strategy.py`
  and paste the following code: 
 
-```python 
+``` python 
 from random import randrange
 from typing import Any, Dict, Tuple
 
@@ -675,7 +675,7 @@ We initialise the strategy class. We are trying to read the strategy variables f
 possible we specified some default values. The following three functions are related with 
 the oef registration and we assume that the query matches the supply,  add them under the initialization of the class:
 
-```python
+``` python
 def get_next_oef_msg_id(self) -> int:
    """
    Get the next oef msg id.
@@ -685,7 +685,7 @@ def get_next_oef_msg_id(self) -> int:
    self._oef_msg_id += 1
    return self._oef_msg_id
 ```
-```python
+``` python
 def get_service_description(self) -> Description:
    """
    Get the service description.
@@ -695,7 +695,7 @@ def get_service_description(self) -> Description:
    desc = Description(SCHEME, data_model=THERMOMETER_DATAMODEL())
    return desc
 ```
-```python
+``` python
 def is_matching_supply(self, query: Query) -> bool:
    """
    Check if the query matches the supply.
@@ -708,7 +708,7 @@ def is_matching_supply(self, query: Query) -> bool:
 ```
 Lastly, we are going to create the function that  generates the proposal that we will send to the aea_client: 
 
-```python
+``` python
 def generate_proposal_and_data(
    self, query: Query, counterparty: Address
 ) -> Tuple[Description, Dict[str, Any]]:
@@ -772,7 +772,7 @@ is where we read data from our sensor or in case we don’t have a sensor genera
 When we are negotiating with other AEA we would like to keep track on these negotiations for various reasons. 
 So create a new file and name it dialogues.py. Inside this file add the following code: 
 
-```python
+``` python
 from typing import Any, Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
@@ -822,7 +822,7 @@ Also contains the data that we fetch during the proposal phase.
 Each AEA in the oef needs a Description in order to be able to register as a service.The data model will help us create this description.
 Create a new file and call it thermometer_data_model.py  and paste the following code: 
 
-```python
+``` python
 from aea.helpers.search.models import Attribute, DataModel
 
 SCHEME = {"country": "UK", "city": "Cambridge"}
@@ -892,8 +892,9 @@ Lastly,the dependencies are the third party packages we need to install in order
 The next file we have to update is the aea-config.yaml file. You can locate this file under your AEA’s folder. 
 We are going to modify this file later on before we run the aea but for now make sure it matches the following code : 
 
-``` yaml
-aea_version: 0.2.0
+
+```
+aea_version: 0.2.1
 agent_name: my_aea
 author: author
 connections:
@@ -1738,7 +1739,7 @@ We are going to modify this file later on before we run the aea but for now, mak
 
 ``` yaml
 
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: m_client
 author: author
 connections:
