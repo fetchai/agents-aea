@@ -270,7 +270,7 @@ class SkillContextTestCase(TestCase):
 
 
 class SkillComponentTestCase(TestCase):
-    """Test case for SkillContext class."""
+    """Test case for SkillComponent class."""
 
     def setUp(self):
         """Set the test up."""
