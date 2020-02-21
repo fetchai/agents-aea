@@ -23,11 +23,11 @@ Once you setup your raspberry
 
 Open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there 
 (I named mine 99-hidraw-permissions.rules)
-```bash
+``` bash
 sudo nano 99-hidraw-permissions.rules
 ```  
 and add the following inside the file:
-```bash
+``` bash
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 this assigns all devices coming out of the hidraw subsystem in the kernel to the group plugdev and sets the permissions 
@@ -37,12 +37,12 @@ to r/w r/w r (for root [the default owner], plugdev, and everyone else respectiv
 ## Step1: Create the thermometer_AEA
 
 Create a new AEA by typing the following command in the terminal: 
-```bash
+``` bash
 aea create my_aea
 cd my_aea
 ```
 Our newly created AEA is inside the current working directory. Let’s create our new skill that will handle the data type the following command:
-```bash
+``` bash
 aea scaffold skill thermometer
 ```
 
@@ -851,7 +851,7 @@ created scripts and the details that will be used from the strategy.
 
 Firstly, we will update the skill.yaml. Make sure that your skill.yaml matches with the following code 
 
-```yaml
+``` yaml
 name: thermometer
 author: fetchai
 version: 0.1.0
@@ -892,7 +892,7 @@ Lastly,the dependencies are the third party packages we need to install in order
 The next file we have to update is the aea-config.yaml file. You can locate this file under your AEA’s folder. 
 We are going to modify this file later on before we run the aea but for now make sure it matches the following code : 
 
-```yaml
+``` yaml
 aea_version: 0.2.0
 agent_name: my_aea
 author: author
@@ -921,12 +921,12 @@ version: 0.1.0
 ## Step1: Create the Client_AEA
 
 Create a new AEA by typing the following command in the terminal: 
-```bash
+``` bash
 aea create my_client
 cd my_client
 ```
 Our newly created AEA is inside the current working directory. Let’s create our new skill that will handle the data type the following command:
-```bash
+``` bash
 aea scaffold skill thermometer_client
 ```
 
@@ -1692,7 +1692,7 @@ and the details that will be used from the strategy.
 
 Firstly, we will update the skill.yaml. Make sure that your skill.yaml matches with the following code 
 
-```yaml
+``` yaml
 
 name: thermometer_client
 author: fetchai
@@ -1736,7 +1736,7 @@ We must pay attention to the models and the strategy’s variables. Here we can 
 The next file we have to update is the aea-config.yaml file. You can locate this file under your agent’s folder. 
 We are going to modify this file later on before we run the aea but for now, make sure it matches the following code : 
 
-```yaml
+``` yaml
 
 aea_version: 0.2.0
 agent_name: m_client
@@ -1764,7 +1764,7 @@ version: 0.1.0
 Important: Do not modify the aea_version. Also if you modified the author makes sure that you changed it for the skills too. 
 For example, if you modify the author to my_author you will have to modify the skills section to :
 
-```yaml
+``` yaml
 skills:
 - my_authos/thermometer:0.1.0
 - fetchai/error:0.1.0
@@ -1778,13 +1778,13 @@ You can change the end point's address and port by modifying the connection's ya
 
 Under config locate :
 
-```bash
+``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)
 
 In a separate terminal, launch a local OEF node (for search and discovery).
-```bash
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
@@ -1800,7 +1800,7 @@ aea add-key fetchai fet_private_key.txt
 ### Update the AEA configs
 
 Both in `my_aea/aea-config.yaml` and `my_client/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
-```yaml
+``` yaml
 ledger_apis:
   fetchai:
     network: testnet
@@ -1809,13 +1809,13 @@ ledger_apis:
 
 Create some wealth for your weather client on the Fetch.ai testnet. (It takes a while).
 
-```bash 
+``` bash 
 aea generate-wealth fetchai
 ```
 
 Run both AEAs from their respective terminals
 
-```bash 
+``` bash 
 aea add connection fetchai/oef:0.1.0
 aea install
 aea run --connections fetchai/oef:0.1.0
@@ -1829,7 +1829,7 @@ This demo assumes the temperature client trusts our AEA to send the temperature 
 
 Create the private key for the thermometer client AEA.
 
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -1838,7 +1838,7 @@ aea add-key ethereum eth_private_key.txt
 
 Both in `my_aea/aea-config.yaml` and `my_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
 
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -1850,7 +1850,7 @@ ledger_apis:
 
 In the  thermometer skill config (my_aea/skills/thermometer/skill.yaml) under strategy, amend the currency_id and ledger_id as follows.
 
-```yaml
+``` yaml
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 is_ledger_tx: True
@@ -1858,7 +1858,7 @@ is_ledger_tx: True
 
 In the temprature_client skill config (my_client/skills/temprature_client/skill.yaml) under strategy change the currency_id and ledger_id.
 
-```yaml
+``` yaml
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'
@@ -1872,7 +1872,7 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 
 Run both AEAs from their respective terminals.
 
-```bash 
+``` bash 
 aea add connection fetchai/oef:0.1.0
 aea install
 aea run --connections fetchai/oef:0.1.0
@@ -1882,7 +1882,7 @@ You will see that the AEAs negotiate and then transact using the Ethereum testne
 
 ## Delete the AEAs
 When you're done, go up a level and delete the AEAs.
-```bash 
+``` bash 
 cd ..
 aea delete my_weather_station
 aea delete my_weather_client
