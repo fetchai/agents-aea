@@ -29,6 +29,12 @@ jobs:
       run: tox -e bandit-main
     - name: Security Check - Tests
       run: tox -e bandit-tests
+    - name: Safety Check
+      run: tox -e safety
+    - name: License Check
+      run: tox -e liccheck
+    - name: Copyright Check
+      run: tox -e copyright_check
     - name: Code style check
       run: |
         tox -e black-check
@@ -47,4 +53,6 @@ jobs:
         name: codecov-umbrella
         yml: ./codecov.yml
         fail_ci_if_error: true
+    - name: Generate Documentation
+      run: tox -e docs
 
