@@ -2,7 +2,7 @@
 
 The AEA framework provides the tools for creating Autonomous Economic Agents (AEA). AEAs work continuously for your benefit without you having to do anything more than writing them and starting them up.
 
-<iframe width="560" height="315" src="http://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 AEAs act independently of constant user input and autonomously execute actions to achieve their objective. Their goal is to create economic value for you, their owner. AEAs have a wide range of application areas. Check out the <a href="../app-areas">application areas section</a>  and <a href="../car-park-skills">demo guides</a> for some examples.
 

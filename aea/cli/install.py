@@ -58,8 +58,8 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
     finally:
         poll = subp.poll()
         if poll is None:
-            subp.terminate()
-            subp.wait(2)
+            subp.terminate()  # pragma: no cover
+            subp.wait(2)  # pragma: no cover
 
 
 def _install_from_requirement(file: str):
@@ -79,8 +79,8 @@ def _install_from_requirement(file: str):
     finally:
         poll = subp.poll()
         if poll is None:
-            subp.terminate()
-            subp.wait(2)
+            subp.terminate()  # pragma: no cover
+            subp.wait(2)  # pragma: no cover
 
 
 @click.command()
