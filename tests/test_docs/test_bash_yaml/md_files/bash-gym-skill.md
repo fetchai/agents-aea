@@ -1,34 +1,27 @@
-``` bash
+``` bash 
 aea create my_gym_aea
 cd my_gym_aea
-```
-
-``` bash
+``` 
+``` bash 
 aea add skill fetchai/gym:0.1.0
-```
-
-``` bash
+``` 
+``` bash 
 mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
-```
-
-``` bash
+``` 
+``` bash 
 aea add connection fetchai/gym:0.1.0
-```
-
-``` bash
+``` 
+``` bash 
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
-```
-
-``` bash
+``` 
+``` bash 
 aea install
-```
-
-``` bash
+``` 
+``` bash 
 aea run --connections fetchai/gym:0.1.0
-```
-
-``` bash
+``` 
+``` bash 
 cd ..
 aea delete my_gym_aea
-```
+``` 

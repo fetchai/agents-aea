@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the use-cases category."""
+"""This module contains the tests for the code-blocks in the multiplexer-standalone.md file."""
 
 import logging
 import os
@@ -29,20 +29,27 @@ from ...conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 
-class TestUseCasesDocs:
+class TestDemoDocs:
     """This class contains the tests for the bash-blocks in the car-park-skills.md file."""
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
-        path = Path(ROOT_DIR, "tests", "test_docs", "test_use_cases", "md_files")
+        path = Path(ROOT_DIR, "tests", "test_docs", "test_bash_yaml", "md_files")
         logger.info(os.listdir(path))
         for file in os.listdir(path):
             if file.endswith(".md"):
                 bash_file = read_md_file(file=Path(path, file))
                 md_path = os.path.join(ROOT_DIR, "docs", file.replace("bash-", ""))
-                code_blocks = extract_code_blocks(file=md_path, filter="bash")
-                for blocks in code_blocks:
+                bash_code_blocks = extract_code_blocks(file=md_path, filter="bash")
+                for blocks in bash_code_blocks:
                     assert (
                         blocks in bash_file
+                    ), "[{}]: FAILED. Code must be identical".format(file)
+                logger.info("[{}]: PASSED".format(file))
+
+                yaml_code_blocks = extract_code_blocks(file=md_path, filter="yaml")
+                for blocks in yaml_code_blocks:
+                    assert (
+                            blocks in bash_file
                     ), "[{}]: FAILED. Code must be identical".format(file)
                 logger.info("[{}]: PASSED".format(file))
