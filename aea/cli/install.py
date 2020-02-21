@@ -57,7 +57,7 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         sys.exit(1)
     finally:
         poll = subp.poll()
-        if poll is None:
+        if poll is None:  # pragma: no cover
             subp.terminate()
             subp.wait(2)
 
@@ -78,7 +78,7 @@ def _install_from_requirement(file: str):
         sys.exit(1)
     finally:
         poll = subp.poll()
-        if poll is None:
+        if poll is None:  # pragma: no cover
             subp.terminate()
             subp.wait(2)
 
