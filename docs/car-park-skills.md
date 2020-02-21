@@ -116,7 +116,7 @@ aea generate-wealth ethereum
 
 In the carpark detection skill config (`car_detector/vendor/fetchai/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -143,7 +143,7 @@ aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_i
 
 In the carpark data buyer skill config (`car_data_buyer/vendor/fetchai/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

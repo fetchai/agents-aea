@@ -109,7 +109,7 @@ aea generate-wealth ethereum
 
 In the thermometer skill config (`my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -134,7 +134,7 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id 
 
 In the thermometer client skill config (`my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
