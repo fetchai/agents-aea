@@ -36,7 +36,7 @@ aea generate-wealth fetchai
 aea generate-wealth ethereum
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -58,7 +58,7 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_i
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

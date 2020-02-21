@@ -78,7 +78,7 @@ aea generate-wealth fetchai
 aea generate-wealth ethereum
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -102,7 +102,7 @@ aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.curre
 aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id ethereum
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

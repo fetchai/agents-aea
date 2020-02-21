@@ -48,7 +48,7 @@ aea generate-wealth fetchai
 aea generate-wealth ethereum
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -72,7 +72,7 @@ aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.ledg
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd False --type bool
 ```
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
