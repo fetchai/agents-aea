@@ -50,6 +50,14 @@ def generate(ctx: Context):
 
 def _generate_item(ctx: Context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
+    # # check protocol buffer compiler is installed
+    # res = shutil.which("protoc")
+    # if res is None:
+    #     print(
+    #         "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
+    #     )
+    #     sys.exit(1)
+
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
     existing_item_list = [public_id.name for public_id in existing_id_list]

@@ -46,18 +46,18 @@ OUTPUT_FILE = "output.txt"
 ## Create a private key
 We need a private key to populate the AEA's wallet.
 ``` python
-# Create a private key
-_create_default_private_key()
+    # Create a private key
+    _create_fetchai_private_key()
 ```
 
 ## Clearing the input and output files
 We will use the stub connection to pass envelopes in and out of the AEA. Ensure that any input and output text files are removed before we start.
 ``` python
-# Ensure the input and output files do not exist initially
-if os.path.isfile(INPUT_FILE):
-    os.remove(INPUT_FILE)
-if os.path.isfile(OUTPUT_FILE):
-    os.remove(OUTPUT_FILE)
+    # Ensure the input and output files do not exist initially
+    if os.path.isfile(INPUT_FILE):
+        os.remove(INPUT_FILE)
+    if os.path.isfile(OUTPUT_FILE):
+        os.remove(OUTPUT_FILE)
 ```
 
 ## Initialise the AEA
@@ -65,87 +65,92 @@ We use the private key file we created to initialise a wallet, we also create th
 
 Then we pass all of this into the AEA constructor to create our AEA.
 ``` python
-# Set up the wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-stub_connection = StubConnection(
-    input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
-)
-ledger_apis = LedgerApis({}, FETCHAI)
-resources = Resources()
+    # Set up the Wallet, stub connection, ledger and (empty) resources
+    wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+    stub_connection = StubConnection(
+        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+    )
+    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
+    resources = Resources()
+    # Create an identity
+    identity = Identity(
+        name="my_aea",
+        address=wallet.addresses.get(FETCHAI),
+        default_address_key=FETCHAI,
+    )
 
-# Create an identity
-identity = Identity(name="my_aea", address=wallet.addresses.get(FETCHAI), default_address_key=FETCHAI,)
-
-# Create our AEA
-my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
+    # Create our AEA
+    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 ```
 
 Create the default protocol and add it to the AEA.
 ``` python
-# Add the default protocol (which is part of the AEA distribution)
-default_protocol_configuration = ProtocolConfig.from_json(
-    yaml.safe_load(
-        open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
+    # Add the default protocol (which is part of the AEA distribution)
+    default_protocol_configuration = ProtocolConfig.from_json(
+        yaml.safe_load(
+            open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
+        )
     )
-)
-default_protocol = Protocol(
-    PublicId.from_str("fetchai/default:0.1.0"),
-    DefaultSerializer(),
-    default_protocol_configuration,
-)
-resources.protocol_registry.register(
-    PublicId.from_str("fetchai/default:0.1.0"), default_protocol
-)
+    default_protocol = Protocol(
+        PublicId.from_str("fetchai/default:0.1.0"),
+        DefaultSerializer(),
+        default_protocol_configuration,
+    )
+    resources.protocol_registry.register(
+        PublicId.from_str("fetchai/default:0.1.0"), default_protocol
+    )
 ```
 
 Create the error skill (needed by all AEAs) and the echo skill which will bounce our messages back to us, and add them both to the AEA.
 ``` python
-# Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
-echo_skill = Skill.from_dir(
-    os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
-    my_aea.context,
-)
-resources.add_skill(echo_skill)
-error_skill = Skill.from_dir(
-    os.path.join(AEA_DIR, "skills", "error"), my_aea.context
-)
-resources.add_skill(error_skill)
+    # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
+    echo_skill = Skill.from_dir(
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), my_aea.context,
+    )
+    resources.add_skill(echo_skill)
+    error_skill = Skill.from_dir(
+        os.path.join(AEA_DIR, "skills", "error"), my_aea.context
+    )
+    resources.add_skill(error_skill)
 ```
 
 ## Start the AEA
 We run the AEA from a different thread so that we can still use the main thread to pass it messages.
 ``` python
-# Set the AEA running in a different thread
-t = Thread(target=my_aea.start)
-t.start()
+    # Set the AEA running in a different thread
+    try:
+        t = Thread(target=my_aea.start)
+        t.start()
 
-# Wait for everything to start up
-time.sleep(4)
+        # Wait for everything to start up
+        time.sleep(4)
 ```
 
 ## Send and receive an envelope
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
-# Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-with open(INPUT_FILE, "w") as f:
-    f.write(message_text)
-    print("input message: " + message_text)
+        # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        with open(INPUT_FILE, "w") as f:
+            f.write(message_text)
+            print("input message: " + message_text)
 
-# Wait for the envelope to get processed
-time.sleep(4)
+        # Wait for the envelope to get processed
+        time.sleep(4)
 
-# Read the output envelope generated by the echo skill
-with open(OUTPUT_FILE, "r") as f:
-    print("output message: " + f.readline())
+        # Read the output envelope generated by the echo skill
+        with open(OUTPUT_FILE, "r") as f:
+            print("output message: " + f.readline())
 ```
 
 ## Shutdown
 Finally stop our AEA and wait for it to finish
 ``` python
-# Shut down the AEA
-my_aea.stop()
-t.join()
+    finally:
+        # Shut down the AEA
+        my_aea.stop()
+        t.join()
+        t = None
 ```
 
 ## Running the AEA
@@ -197,12 +202,12 @@ def run():
     if os.path.isfile(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
-    # set up the Wallet, stub connection, ledger and (empty) resources
+    # Set up the Wallet, stub connection, ledger and (empty) resources
     wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    ledger_apis = LedgerApis({}, FETCHAI)
+    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
     resources = Resources()
     # Create an identity
     identity = Identity(
@@ -231,8 +236,7 @@ def run():
 
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), 
-        my_aea.context,
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), my_aea.context,
     )
     resources.add_skill(echo_skill)
     error_skill = Skill.from_dir(
@@ -241,29 +245,30 @@ def run():
     resources.add_skill(error_skill)
 
     # Set the AEA running in a different thread
-    t = Thread(target=my_aea.start)
-    t.start()
+    try:
+        t = Thread(target=my_aea.start)
+        t.start()
 
-    # Wait for everything to start up
-    time.sleep(4)
+        # Wait for everything to start up
+        time.sleep(4)
 
-    # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-    message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-    with open(INPUT_FILE, "w") as f:
-        f.write(message_text)
-        print("input message: " + message_text)
+        # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
+        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        with open(INPUT_FILE, "w") as f:
+            f.write(message_text)
+            print("input message: " + message_text)
 
-    # Wait for the envelope to get processed
-    time.sleep(4)
+        # Wait for the envelope to get processed
+        time.sleep(4)
 
-    # Read the output envelope generated by the echo skill
-    with open(OUTPUT_FILE, "r") as f:
-        print("output message: " + f.readline())
-
-    # Shut down the AEA
-    my_aea.stop()
-    t.join()
-    t = None
+        # Read the output envelope generated by the echo skill
+        with open(OUTPUT_FILE, "r") as f:
+            print("output message: " + f.readline())
+    finally:
+        # Shut down the AEA
+        my_aea.stop()
+        t.join()
+        t = None
 
 
 if __name__ == "__main__":

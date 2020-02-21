@@ -119,7 +119,7 @@ def _check_package_public_id(source_path, item_type, item_id) -> None:
         or item_id.version != item_version
     ):
         raise click.ClickException(
-            "Version or author do not match. Expected '{}', found '{}'".format(
+            "Version, name or author does not match. Expected '{}', found '{}'".format(
                 item_id, item_author + "/" + item_name + ":" + item_version
             )
         )

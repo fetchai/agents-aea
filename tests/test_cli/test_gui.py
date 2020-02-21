@@ -21,7 +21,7 @@
 
 import json
 import os
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -56,7 +56,7 @@ class TestGui:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.proc = subprocess.Popen(
+        cls.proc = subprocess.Popen(  # nosec
             [sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"]
         )
         time.sleep(10.0)

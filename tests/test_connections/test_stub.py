@@ -23,8 +23,8 @@ import base64
 import shutil
 import tempfile
 import time
-import unittest.mock
 from pathlib import Path
+from unittest import TestCase, mock
 
 import pytest
 
@@ -42,7 +42,7 @@ class TestStubConnection:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.tmpdir = Path(tempfile.mktemp())
+        cls.tmpdir = Path(tempfile.mkdtemp())
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
@@ -81,11 +81,9 @@ class TestStubConnection:
 
     def test_reception_fails(self):
         """Test the case when an error occurs during the processing of a line."""
-        patch = unittest.mock.patch.object(
-            aea.connections.stub.connection.logger, "error"
-        )
+        patch = mock.patch.object(aea.connections.stub.connection.logger, "error")
         mocked_logger_error = patch.__enter__()
-        with unittest.mock.patch(
+        with mock.patch(
             "aea.connections.stub.connection._decode",
             side_effect=Exception("an error."),
         ):
@@ -157,7 +155,7 @@ class TestStubConnection:
 
 def test_connection_from_config():
     """Test loading a connection from config file."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -175,7 +173,7 @@ def test_connection_from_config():
 @pytest.mark.asyncio
 async def test_disconnection_when_already_disconnected():
     """Test the case when disconnecting a connection already disconnected."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -194,7 +192,7 @@ async def test_disconnection_when_already_disconnected():
 @pytest.mark.asyncio
 async def test_connection_when_already_connected():
     """Test the case when connecting a connection already connected."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -215,7 +213,7 @@ async def test_connection_when_already_connected():
 @pytest.mark.asyncio
 async def test_receiving_returns_none_when_error_occurs():
     """Test that when we try to receive an envelope and an error occurs we return None."""
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -227,6 +225,16 @@ async def test_receiving_returns_none_when_error_occurs():
     )
 
     await stub_con.connect()
-    with unittest.mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
+    with mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
         ret = await stub_con.receive()
         assert ret is None
+
+
+class StubConnectionTestCase(TestCase):
+    """Test case for StubConnection class."""
+
+    @mock.patch("aea.connections.stub.connection.Path.touch")
+    @mock.patch("builtins.open", mock.mock_open())
+    def test_init_no_connection_id(self, *mocks):
+        """Test init no connection ID."""
+        StubConnection("input_file_path", "output_file_path")

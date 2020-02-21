@@ -90,7 +90,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -114,9 +114,9 @@ aea generate-wealth ethereum
 
 ### Update the skill configs
 
-In the thermometer skill config (`car_detector/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
+In the carpark detection skill config (`car_detector/vendor/fetchai/skills/carpark_detection/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id`, and `db_is_rel_to_cwd` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -141,9 +141,9 @@ aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.ledg
 aea config set vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd False --type bool
 ```
 
-In the carpark data buyer skill config (`car_data_buyer/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+In the carpark data buyer skill config (`car_data_buyer/vendor/fetchai/skills/carpark_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -164,7 +164,7 @@ In the carpark data buyer skill config (`car_data_buyer/skills/carpark_client/sk
 |----------------------------------------------------------------------| 
 ```
 
-An other way to update the skill config is via the `aea config get/set` command.
+Another way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.max_buyer_tx_fee 6000 --type int
 aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.currency_id ETH

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -21,7 +20,6 @@
 """This module contains the abstract class defining an agent's strategy for the TAC."""
 
 import copy
-import logging
 import random
 from enum import Enum
 from typing import Dict, Optional, cast
@@ -36,7 +34,6 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
 )
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
-logger = logging.getLogger("aea.tac_negotiation_skill")
 
 ROUNDING_ADJUSTMENT = 1
 
@@ -224,7 +221,7 @@ class Strategy(Model):
         """
         own_service_description = self.get_own_service_description(is_supply=is_seller)
         if not query.check(own_service_description):
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Current holdings do not satisfy CFP query.".format(
                     self.context.agent_name
                 )
@@ -235,7 +232,7 @@ class Strategy(Model):
                 query, is_seller=is_seller
             )
             if proposal_description is None:
-                logger.debug(
+                self.context.logger.debug(
                     "[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(
                         self.context.agent_name
                     )

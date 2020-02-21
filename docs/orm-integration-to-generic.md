@@ -85,7 +85,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -96,7 +96,7 @@ ledger_apis:
 ### Update the seller AEA skill configs
 
 In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -131,7 +131,7 @@ The `search_schema` and the `search_data` are used to register the service in th
 
 In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -247,7 +247,7 @@ aea generate-wealth ethereum
 
 ## Run the AEAs
 
-You can change the end point's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
+You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
 
 Under config locate :
 
@@ -290,7 +290,7 @@ This diagram shows the communication between the various entities as data is suc
         
         Seller_AEA->>Search: register_service
         Buyer_AEA->>Search: search
-        Search-->>Client_AEA: list_of_agents
+        Search-->>Buyer_AEA: list_of_agents
         Buyer_AEA->>Seller_AEA: call_for_proposal
         Seller_AEA->>Buyer_AEA: propose
         Buyer_AEA->>Seller_AEA: accept

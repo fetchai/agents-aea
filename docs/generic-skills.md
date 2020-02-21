@@ -18,6 +18,7 @@ This demo does not utilize a smart contract. We interact with a ledger only to c
 
 Moreover, this example provides a way to customise the skill code and connect a database or sensor. 
 You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file. 
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -93,8 +94,8 @@ ledger_apis:
 
 ### Update the seller AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
-```bash
+In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -128,9 +129,9 @@ In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_fo
 ```
 The `search_schema` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
+In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -167,7 +168,7 @@ aea generate-wealth ethereum
 
 ## Run the AEAs
 
-You can change the end point's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
+You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
 
 Under config locate :
 
@@ -210,7 +211,7 @@ This diagram shows the communication between the various entities as data is suc
         
         Seller_AEA->>Search: register_service
         Buyer_AEA->>Search: search
-        Search-->>Client_AEA: list_of_agents
+        Search-->>Buyer_AEA: list_of_agents
         Buyer_AEA->>Seller_AEA: call_for_proposal
         Seller_AEA->>Buyer_AEA: propose
         Buyer_AEA->>Seller_AEA: accept

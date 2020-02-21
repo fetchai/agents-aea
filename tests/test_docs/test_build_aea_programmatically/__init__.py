@@ -16,34 +16,4 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""This module contains the tasks for the 'echo' skill."""
-
-import logging
-import time
-
-from aea.skills.tasks import Task
-
-logger = logging.getLogger("aea.echo_skill")
-
-
-class EchoTask(Task):
-    """Echo task."""
-
-    def __init__(self, **kwargs):
-        """Initialize the task."""
-        super().__init__(**kwargs)
-        logger.info("EchoTask.__init__: arguments: {}".format(kwargs))
-
-    def setup(self) -> None:
-        """Set up the task."""
-        logger.info("Echo Task: setup method called.")
-
-    def execute(self, *args, **kwargs) -> None:
-        """Execute the task."""
-        logger.info("Echo Task: execute method called.")
-        time.sleep(1.0)
-
-    def teardown(self) -> None:
-        """Teardown the task."""
-        logger.info("Echo Task: teardown method called.")
+"""This module contains the 'build-aea-programmatically' modules."""

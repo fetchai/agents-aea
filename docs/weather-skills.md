@@ -45,12 +45,18 @@ aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
 
+### Update the AEA configs
+
+In the terminal change the configuration:
+``` bash
+aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
+```
+The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
 ``` bash
 aea run --connections fetchai/oef:0.1.0
 ```
-
 
 ### Create the weather client AEA
 In a new terminal window, return to the root directory and create the weather client AEA.
@@ -67,12 +73,19 @@ aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
 
+### Update the AEA configs
+
+In the terminal change the configuration:
+```
+aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx False --type bool
+```
+The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
+
 
 ### Run the weather client AEA
 ``` bash
 aea run --connections fetchai/oef:0.1.0
 ```
-
 
 ### Observe the logs of both AEAs
 
@@ -202,9 +215,9 @@ aea generate-wealth ethereum
 
 ### Update the skill configs
 
-In `my_weather_station/vendor/fetchai/weather_station/skill.yaml`, under strategy amend the `currency_id` and `ledger_id` as follows:
+In `my_weather_station/vendor/fetchai/skills/weather_station/skill.yaml`, under strategy amend the `currency_id` and `ledger_id` as follows:
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -222,9 +235,9 @@ In `my_weather_station/vendor/fetchai/weather_station/skill.yaml`, under strateg
 |----------------------------------------------------------------------| 
 ```
 
-In the weather client skill config (`my_weather_client/skills/weather_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+In the weather client skill config (`my_weather_client/vendor/fetchai/skills/weather_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

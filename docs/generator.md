@@ -57,45 +57,42 @@ Each protocol specification yaml file contains some basic information about the 
 
 Each field is a key/value pair, where both the key and the value are yaml strings. Every field is mandatory. 
 
-Furthermore, the protocol specification must describe the syntax of valid messages according to this protocol.
+In addition to the above basic information, a protocol specification must describe the syntax of valid messages according to this protocol.
 Therefore, there is another mandatory field: `speech-acts`, which defines the set of performatives valid under this protocol, and a set of contents (i.e. parameters) for each performative.  
 
 The format of the `speech-act` is as follows:
-`speech-act` is a dictionary, where each key is a unique **performative** (yaml string), and the value is a **content** dictionary. If a performative `perm` does not have any content, then its content dictionary is empty, e.g. simply denoted as `perm: {}`.
+`speech-act` is a dictionary, where each key is a unique **performative** (yaml string), and the value is a **content** dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above protocol specification.
 
-Each content dictionary is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="../generator/#types">type</a> (yaml string).  
+Each content dictionary is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="../generator/#types">type</a> (yaml string). For example, the `query` performative has one content whose name is `query` and whose type is `ct:DataModel`.  
 
 ### Types
 
 The specific types which could be assigned to contents in a protocol specification are described in the table below.
 
-Types are either user defined (i.e. custom type) or primitive. 
+Types are either user defined (i.e. custom types) or primitive: 
 
-Custom types are prepended with "ct:" and their format is described using regular expression in the table below. 
+* Custom types are prepended with `ct:` and their format is described using regular expression in the table below. 
+* Primitive types are prepended with `pt:`. There are different categories of primitive types, e.g. &lt;PT&gt; such as integers and booleans, &lt;PCT&gt; such as sets and lists, and so on. Primitive types are compositional: 
+    - For example, consider `pt:set` under &lt;PCT&gt;, i.e. an unordered collection of elements without duplicates. A `pt:set` describes the type of its elements (called "sub-type") in square brackets. The sub-type of a `pt:set` could either be a &lt;PT&gt; (e.g. `pt:int`, `pt:bool`) or &lt;CT&gt; (i.e. a custom type). 
+    - In describing the format of types, `/` between two sub-types should be treated as "or". For example, the sub-type of a `pt:set` is either a &lt;PT&gt; or a &lt;CT&gt;.
 
-Primitive types are prepended with "pt:". 
+A multi type denotes an "or" separated set of sub-types, e.g. `pt:union[pt:str, pt:int]` as the type of a content `c` means `c` is either a `pt:int` or a `pt:float`.
 
-There are different categories of primitive types, e.g. &lt;PT&gt; such as int and bool, &lt;PCT&gt; such as sets and lists, and so on. 
-
-Primitive types have a compositional format. For example, consider sets under &lt;PCT&gt;, i.e. unordered, immutable collections with no duplicate elements. Sets must describe the type of their elements in square brackets and these could either be &lt;PT&gt; (e.g. `pt:int`, `pt:bool`) or &lt;CT&gt; (i.e. a custom type). Therefore, when describing the format of types in the table below, `/` between two type categories `T1` and `T2` means "or", i.e. "either a `T1` or a `T2` type".
-
-Multi types are an "or" separated set of sub-types. A multi type `pt:int or pt:float` means the type is either `pt:int` or `pt:float`.
-
-An optional type for a content indicates that the content is optional, but if it is present, its type must match what is described in the square brackets. 
+An optional type for a content denotes that the content's existence is optional, but if it is present, its type must match `pt:optional`'s sub-type. 
                                                                                                                                                                  
-| Type                       | Code        | Format                                                                                                | Example                        | In Python    |
-| ---------------------------| ------------| ------------------------------------------------------------------------------------------------------|--------------------------------|--------------|
-| Custom types               | &lt;CT&gt;  | ct:RegExp(^[A-Z][a-zA-Z0-9_]*[a-zA-Z0-9]$)                                                            | ct:DataModel                   | Custom Class |
-| Primitive types            | &lt;PT&gt;  | pt:bytes                                                                                              | pt:bytes                       | bytes        |
-|                            |             | pt:int                                                                                                | pt:int                         | int          |
-|                            |             | pt:float                                                                                              | pt:float                       | float        |
-|                            |             | pt:bool                                                                                               | pt:bool                        | bool         |
-|                            |             | pt:str                                                                                                | pt:str                         | str          |
-| Primitive collection types | &lt;PCT&gt; | pt:set[&lt;PT&gt;/&lt;CT&gt;]                                                                         | pt:set[pt:int]                 | FrozenSet    |
-|                            |             | pt:list[&lt;PT&gt;/&lt;CT&gt;]                                                                        | pt:list[ct:DataModel]          | Tuple        |
-| Primitive mapping types    | &lt;PMT&gt; | pt:dict[&lt;PT&gt;/&lt;CT&gt;, &lt;PT&gt;/&lt;CT&gt;]                                                 | pt:dict[pt:bool, ct:DataModel] | Dict         |
-| Multi types                | &lt;MT&gt;  | &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt; or ... or &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt; | pt:str or pt:list[ct:Error]    | Union        |
-| Optional types             | &lt;O&gt;   | pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]                                 | pt:optional[pt:list[pt:int]]   | Optional     |
+| Type                       | Code        | Format                                                                                                      | Example                                | In Python    |
+| ---------------------------| ------------| ------------------------------------------------------------------------------------------------------------|----------------------------------------|--------------|
+| Custom types               | &lt;CT&gt;  | ct:RegExp(^[A-Z][a-zA-Z0-9]*$)                                                                              | ct:DataModel                           | Custom Class |
+| Primitive types            | &lt;PT&gt;  | pt:bytes                                                                                                    | pt:bytes                               | bytes        |
+|                            |             | pt:int                                                                                                      | pt:int                                 | int          |
+|                            |             | pt:float                                                                                                    | pt:float                               | float        |
+|                            |             | pt:bool                                                                                                     | pt:bool                                | bool         |
+|                            |             | pt:str                                                                                                      | pt:str                                 | str          |
+| Primitive collection types | &lt;PCT&gt; | pt:set[&lt;PT&gt;/&lt;CT&gt;]                                                                               | pt:set[pt:int]                         | FrozenSet    |
+|                            |             | pt:list[&lt;PT&gt;/&lt;CT&gt;]                                                                              | pt:list[ct:DataModel]                  | Tuple        |
+| Primitive mapping types    | &lt;PMT&gt; | pt:dict[&lt;PT&gt;/&lt;CT&gt;, &lt;PT&gt;/&lt;CT&gt;]                                                       | pt:dict[pt:bool, ct:DataModel]         | Dict         |
+| Multi types                | &lt;MT&gt;  | pt:union[&lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;, ..., &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;] | pt:union[pt:str, pt:list[ct:Error]]    | Union        |
+| Optional types             | &lt;O&gt;   | pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]                                       | pt:optional[pt:list[pt:int]]           | Optional     |
 
 ## Demo instructions
 

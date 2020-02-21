@@ -84,21 +84,27 @@ def test_connect_twice_with_loop():
     thread_loop = Thread(target=running_loop.run_forever)
     thread_loop.start()
 
-    multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)], loop=running_loop,
-    )
+    try:
+        multiplexer = Multiplexer(
+            [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)],
+            loop=running_loop,
+        )
 
-    with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        assert not multiplexer.connection_status.is_connected
-        multiplexer.connect()
-        assert multiplexer.connection_status.is_connected
-        multiplexer.connect()
-        assert multiplexer.connection_status.is_connected
+        with unittest.mock.patch.object(
+            aea.mail.base.logger, "debug"
+        ) as mock_logger_debug:
+            assert not multiplexer.connection_status.is_connected
+            multiplexer.connect()
+            assert multiplexer.connection_status.is_connected
+            multiplexer.connect()
+            assert multiplexer.connection_status.is_connected
 
-        mock_logger_debug.assert_called_with("Multiplexer already connected.")
+            mock_logger_debug.assert_called_with("Multiplexer already connected.")
 
-        multiplexer.disconnect()
-        running_loop.call_soon_threadsafe(running_loop.stop)
+            multiplexer.disconnect()
+            running_loop.call_soon_threadsafe(running_loop.stop)
+    finally:
+        thread_loop.join()
 
 
 @pytest.mark.asyncio
@@ -133,7 +139,7 @@ def test_multiplexer_connect_all_raises_error():
 def test_multiplexer_connect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the connection of one connection."""
     node = LocalNode()
-    tmpdir = Path(tempfile.mktemp())
+    tmpdir = Path(tempfile.mkdtemp())
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
@@ -208,7 +214,7 @@ def test_multiplexer_disconnect_all_raises_error():
 async def test_multiplexer_disconnect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the disconnection of one connection."""
     with LocalNode() as node:
-        tmpdir = Path(tempfile.mktemp())
+        tmpdir = Path(tempfile.mkdtemp())
         d = tmpdir / "test_stub"
         d.mkdir(parents=True)
         input_file_path = d / "input_file.csv"

@@ -8,12 +8,12 @@ pipeline {
     }
 
     options {
-        timeout(time: 2, unit: 'HOURS')
+        timeout(time: 1, unit: 'HOURS')
     }
 
     stages {
 
-        stage('Unit Tests & Code Style Check') {
+        stage('Code Style & Other Checks') {
 
             parallel {
 
@@ -32,6 +32,30 @@ pipeline {
                     }
 
                 } // bandit security check tests
+
+                stage('Safety Check') {
+
+                    steps {
+                        sh 'tox -e safety'
+                    }
+
+                } // safety check
+
+                stage('License Check') {
+
+                    steps {
+                        sh 'tox -e liccheck'
+                    }
+
+                } // license check
+
+                stage('Copyright Check') {
+
+                    steps {
+                        sh 'tox -e copyright_check'
+                    }
+
+                } // copyright check
 
                 stage('Black Reformatting') {
 
@@ -57,21 +81,19 @@ pipeline {
 
                 } // static type check
 
-                // stage('Docs') {
-
-                //     steps {
-                //         sh 'tox -e docs'
-                //     }
-
-                // } // docs
-
-                stage('Unit Tests: Python 3.6') {
+                stage('Docs') {
 
                     steps {
-                        sh 'tox -e py36 -- --no-integration-tests --ci'
+                        sh 'tox -e docs'
                     }
+                } // docs
 
-                }  // unit tests: python 3.6
+            }
+        } // code style and other checks
+
+        stage('Unit Tests: py37') {
+
+            parallel {
 
                 stage('Unit Tests: Python 3.7') {
 
@@ -79,7 +101,23 @@ pipeline {
                         sh 'tox -e py37 -- --no-integration-tests --ci'
                     }
 
-                } // unit tests: python 3.7
+                }  // unit tests: python 3.7
+
+            }
+
+        } // unit tests py37
+
+        stage('Unit Tests: py36, py38') {
+
+            parallel {
+
+                stage('Unit Tests: Python 3.6') {
+
+                    steps {
+                        sh 'tox -e py36 -- --no-integration-tests --ci'
+                    }
+
+                } // unit tests: python 3.6
 
                 stage('Unit Tests: Python 3.8') {
 
@@ -91,7 +129,7 @@ pipeline {
 
             } // parallel
 
-        }  // unit tests & code style check
+        }  // unit tests py36, py38
 
     } // stages
 

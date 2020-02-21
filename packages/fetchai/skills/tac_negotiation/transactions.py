@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -22,7 +21,6 @@
 
 import copy
 import datetime
-import logging
 from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple
 
@@ -39,8 +37,6 @@ from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.helpers import tx_hash_from_values
-
-logger = logging.getLogger("aea.tac_negotiation_skill")
 
 MessageId = int
 
@@ -201,7 +197,7 @@ class Transactions(Model):
 
             # extract dialogue label and message id
             transaction_id = next_item
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Removing transaction from pending list: {}".format(
                     self.context.agent_name, transaction_id
                 )

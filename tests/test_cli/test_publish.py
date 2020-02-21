@@ -21,9 +21,12 @@
 from unittest import TestCase, mock
 
 from click import ClickException
+from click.testing import CliRunner
 
+from aea.cli import cli
 from aea.cli.publish import _check_is_item_in_local_registry, _save_agent_locally
 
+from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import (
     ContextMock,
     PublicIdMock,
@@ -31,6 +34,7 @@ from tests.test_cli.tools_for_testing import (
 )
 
 
+@mock.patch("aea.cli.publish.PublicId", PublicIdMock)
 @mock.patch("aea.cli.publish._check_is_item_in_local_registry")
 @mock.patch("aea.cli.publish.copyfile")
 @mock.patch("aea.cli.publish.os.makedirs")
@@ -52,7 +56,7 @@ class SaveAgentLocallyTestCase(TestCase):
         _check_is_item_in_local_registry_mock,
     ):
         """Test for save_agent_locally positive result."""
-        _save_agent_locally(ContextMock())
+        _save_agent_locally(ContextMock(connections=["author/name:version"]))
         makedirs_mock.assert_called_once_with("target-dir", exist_ok=True)
         copyfile_mock.assert_called_once_with("joined-path", "joined-path")
 
@@ -79,3 +83,23 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
         item_type_plural = "items"
         with self.assertRaises(ClickException):
             _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
+
+
+@mock.patch("aea.cli.publish.try_to_load_agent_config")
+@mock.patch("aea.cli.publish._save_agent_locally")
+@mock.patch("aea.cli.publish.publish_agent")
+class PublishCommandTestCase(TestCase):
+    """Test case for CLI publish command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_publish_positive(self, *mocks):
+        """Test for CLI publish positive result."""
+        self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "publish", "--registry"], standalone_mode=False,
+        )
+        self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+        )

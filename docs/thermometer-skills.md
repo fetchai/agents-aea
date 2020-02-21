@@ -3,13 +3,7 @@ The AEA thermometer skills demonstrate an interaction between two AEAs.
 * The provider of thermometer data (the thermometer).
 * The buyer of thermometer data (the thermometer_client).
 
-## Preparation instructions
- 
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
+### Discussion
 
 The scope of the specific demo is to demonstrate how to create a very simple AEA with the usage of the AEA framework, a Raspberry Pi, and a thermometer sensor. The thermometer AEA
 will read data from the sensor each time a client requests and will deliver to the client upon payment. To keep the demo simple we avoided the usage of a database since this would increase the complexity. As a result, the AEA can provide only one reading from the sensor.
@@ -18,6 +12,12 @@ This demo does not utilise a smart contract. As a result, we interact with a led
 Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
 The AEA must run inside a Raspberry Pi or any other Linux system, and the sensor must be connected to the USB port.
+
+## Preparation instructions
+ 
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -107,9 +107,9 @@ aea generate-wealth ethereum
 
 ### Update the skill configs
 
-In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+In the thermometer skill config (`my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -132,9 +132,9 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_i
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 
-In the thermometer client skill config (`my_thermometer_client/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+In the thermometer client skill config (`my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -166,7 +166,7 @@ You can change the end point's address and port by modifying the connection's ya
 
 Under config locate :
 
-```bash
+``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)

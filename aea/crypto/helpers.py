@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -8,7 +7,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -103,25 +102,29 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
         )  # pragma: no cover
 
 
-def _create_fetchai_private_key() -> None:
+def _create_fetchai_private_key(
+    private_key_file: str = FETCHAI_PRIVATE_KEY_FILE,
+) -> None:
     """
     Create a fetchai private key.
 
     :return: None
     """
     entity = Entity()
-    with open(FETCHAI_PRIVATE_KEY_FILE, "w+") as file:
+    with open(private_key_file, "w+") as file:
         file.write(entity.private_key_hex)
 
 
-def _create_ethereum_private_key() -> None:
+def _create_ethereum_private_key(
+    private_key_file: str = ETHEREUM_PRIVATE_KEY_FILE,
+) -> None:
     """
     Create an ethereum private key.
 
     :return: None
     """
     account = Account.create()
-    with open(ETHEREUM_PRIVATE_KEY_FILE, "w+") as file:
+    with open(private_key_file, "w+") as file:
         file.write(account.key.hex())
 
 

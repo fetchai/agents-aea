@@ -87,6 +87,7 @@ def test_initialise_aea():
     assert (
         my_AEA.context.shared_state is not None
     ), "Shared state must not be None after set"
+    assert my_AEA.context.task_manager is not None
     assert my_AEA.context.identity is not None, "Identity must not be None after set."
     my_AEA.stop()
 
@@ -453,11 +454,11 @@ class TestAddBehaviourDynamically:
         ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
-        input_file = tempfile.mktemp()
-        output_file = tempfile.mktemp()
+        cls.input_file = tempfile.mkstemp()[1]
+        cls.output_file = tempfile.mkstemp()[1]
         cls.agent = AEA(
             identity,
-            [StubConnection(input_file, output_file)],
+            [StubConnection(cls.input_file, cls.output_file)],
             wallet,
             ledger_apis,
             resources,
@@ -489,3 +490,5 @@ class TestAddBehaviourDynamically:
         """Tear the class down."""
         cls.agent.stop()
         cls.t.join()
+        Path(cls.input_file).unlink()
+        Path(cls.output_file).unlink()

@@ -74,13 +74,17 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
             raise click.ClickException(
                 "{} {} not found. Aborting.".format(item_type.title(), item_name)
             )
-        elif item_folder.exists() and not ctx.agent_config.author == item_id.author:
+        elif (
+            item_folder.exists() and not ctx.agent_config.author == item_id.author
+        ):  # pragma: no cover
             raise click.ClickException(
                 "{} {} author is different from {} agent author. "
                 "Please fix the author field.".format(item_name, item_type, agent_name)
             )
         else:
-            logger.debug("Removing local {} {}.".format(item_type, item_name))
+            logger.debug(
+                "Removing local {} {}.".format(item_type, item_name)
+            )  # pragma: no cover
 
     try:
         shutil.rmtree(item_folder)

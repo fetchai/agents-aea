@@ -72,6 +72,7 @@ def test_run_agent():
             ],
         )
         assert agent.name == identity.name
+        assert agent.tick == 0
         assert (
             agent.agent_state == AgentState.INITIATED
         ), "Agent state must be 'initiated'"
