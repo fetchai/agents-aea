@@ -81,7 +81,7 @@ aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.cur
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
 ```
 
-```bash
+``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
 

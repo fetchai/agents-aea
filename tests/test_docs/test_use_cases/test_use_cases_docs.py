@@ -29,7 +29,7 @@ from ...conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 
-class TestCarParkDocs:
+class TestUseCasesDocs:
     """This class contains the tests for the bash-blocks in the car-park-skills.md file."""
 
     def test_code_blocks_exist(self):

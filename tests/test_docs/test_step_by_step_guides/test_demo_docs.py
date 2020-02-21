@@ -29,12 +29,12 @@ from ...conftest import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 
-class TestCarParkDocs:
+class TestStepByStepDocs:
     """This class contains the tests for the bash-blocks in the car-park-skills.md file."""
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
-        path = Path(ROOT_DIR, "tests", "test_docs", "test_use_cases", "md_files")
+        path = Path(ROOT_DIR, "tests", "test_docs", "test_step_by_step_guides", "md_files")
         logger.info(os.listdir(path))
         for file in os.listdir(path):
             if file.endswith(".md"):

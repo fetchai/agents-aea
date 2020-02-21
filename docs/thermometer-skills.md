@@ -166,7 +166,7 @@ You can change the end point's address and port by modifying the connection's ya
 
 Under config locate :
 
-```bash
+``` yaml
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)
