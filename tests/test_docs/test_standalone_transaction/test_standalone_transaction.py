@@ -61,7 +61,7 @@ class TestStandaloneTransaction:
         """Setup the test class."""
         cls._patch_logger()
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(file=cls.path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(path)
 
