@@ -32,7 +32,7 @@ aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
 
-```
+``` bash
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx False --type bool
 ```
 
