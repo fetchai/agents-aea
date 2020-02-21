@@ -19,9 +19,6 @@ cd my_client
 aea scaffold skill thermometer_client
 ```
 ``` bash
-addr: ${OEF_ADDR: 127.0.0.1}
-```
-``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
@@ -86,31 +83,6 @@ dependencies:
  temper-py: {}
 ```
 ``` yaml
-aea_version: 0.2.0
-agent_name: my_aea
-author: author
-connections:
-- fetchai/oef:0.1.0
-- fetchai/stub:0.1.0
-default_connection: fetchai/stub:0.1.0
-default_ledger: fetchai
-description: ''
-fingerprint: ''
-ledger_apis: {}
-license: Apache-2.0
-logging_config:
- disable_existing_loggers: false
- version: 1
-private_key_paths: {}
-protocols:
-- fetchai/default:0.1.0
-registry_path: ../packages
-skills:
-- author/thermometer:0.1.0
-- fetchai/error:0.1.0
-version: 0.1.0
-```
-``` yaml
 
 name: thermometer_client
 author: fetchai
@@ -151,7 +123,7 @@ ledgers: ['fetchai']
 ```
 ``` yaml
 
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: m_client
 author: author
 connections:
@@ -178,6 +150,9 @@ version: 0.1.0
 skills:
 - my_authos/thermometer:0.1.0
 - fetchai/error:0.1.0
+```
+``` yaml
+addr: ${OEF_ADDR: 127.0.0.1}
 ```
 ``` yaml
 ledger_apis:
