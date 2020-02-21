@@ -21,12 +21,10 @@
 
 import logging
 import os
+from pathlib import Path
 
-from ...helper import extract_code_blocks, extract_python_code
-from ....conftest import CUR_PATH, ROOT_DIR
-
-MD_FILE = "docs/multiplexer-standalone.md"
-BASH_FILE = "test_docs/test_demos/test_carpark/car-park-skills-bash.md"
+from ..helper import extract_code_blocks, read_md_file
+from ...conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +32,17 @@ logger = logging.getLogger(__name__)
 class TestCarParkDocs:
     """This class contains the tests for the bash-blocks in the car-park-skills.md file."""
 
-    @classmethod
-    def setup_class(cls):
-        """Setup the test class."""
-        cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(file=cls.path, filter="bash")
-        path = os.path.join(CUR_PATH, BASH_FILE)
-        cls.bash_file = extract_python_code(path)
-
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
-        for blocks in self.code_blocks:
-            assert (
-                blocks in self.bash_file
-            ), "Code-block doesn't exist in the python file."
+        path = Path(ROOT_DIR, "tests", "test_docs", "test_demos", "md_files")
+        logger.info(os.listdir(path))
+        for file in os.listdir(path):
+            if file.endswith(".md"):
+                bash_file = read_md_file(file=Path(path, file))
+                md_path = os.path.join(ROOT_DIR, "docs", file.replace("bash-", ""))
+                code_blocks = extract_code_blocks(file=md_path, filter="bash")
+                for blocks in code_blocks:
+                    assert (
+                        blocks in bash_file
+                    ), "[{}]: FAILED. Code must be identical".format(file)
+                logger.info("[{}]: PASSED".format(file))

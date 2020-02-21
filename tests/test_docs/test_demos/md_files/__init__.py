@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the car-park-skills.md."""
+"""This module contains the tests for the bash code-blocks in the demos."""

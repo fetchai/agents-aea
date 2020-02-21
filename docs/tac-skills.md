@@ -195,7 +195,7 @@ The AEA `tac_negotiation` skill demonstrates how negotiation strategies may be e
 
 The `tac_negotiation` skill `skill.yaml` configuration file looks like this.
 
-```yaml
+``` yaml
 name: tac_negotiation
 authors: fetchai
 version: 0.1.0

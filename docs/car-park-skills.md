@@ -90,7 +90,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe

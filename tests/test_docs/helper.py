@@ -52,3 +52,10 @@ def extract_python_code(file):
         python_str += read_python_file[i]
 
     return python_str
+
+
+def read_md_file(file):
+    """Reads an md file and returns the string."""
+    with open(file, "r") as md_file:
+        md_file_str = md_file.read()
+    return md_file_str
