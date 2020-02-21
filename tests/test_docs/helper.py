@@ -22,10 +22,10 @@
 import re
 
 
-def extract_code_blocks(file, filter=None):
+def extract_code_blocks(filepath, filter=None):
     """Extract code blocks from .md files."""
     code_blocks = []
-    with open(file, "r") as f:
+    with open(filepath, "r") as f:
         while True:
             line = f.readline()
             if not line:
@@ -43,10 +43,10 @@ def extract_code_blocks(file, filter=None):
     return code_blocks
 
 
-def extract_python_code(file):
+def extract_python_code(filepath):
     """Removes the license part from the scripts"""
     python_str = ""
-    with open(file, "r") as python_file:
+    with open(filepath, "r") as python_file:
         read_python_file = python_file.readlines()
     for i in range(21, len(read_python_file)):
         python_str += read_python_file[i]
@@ -54,8 +54,8 @@ def extract_python_code(file):
     return python_str
 
 
-def read_md_file(file):
+def read_md_file(filepath):
     """Reads an md file and returns the string."""
-    with open(file, "r") as md_file:
+    with open(filepath, "r") as md_file:
         md_file_str = md_file.read()
     return md_file_str

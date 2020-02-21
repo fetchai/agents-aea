@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestDemoDocs:
-    """This class contains the tests for the bash-blocks in the car-park-skills.md file."""
+    """This class contains the tests for the bash/yaml-blocks in *.md file."""
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
@@ -38,18 +38,17 @@ class TestDemoDocs:
         logger.info(os.listdir(path))
         for file in os.listdir(path):
             if file.endswith(".md"):
-                bash_file = read_md_file(file=Path(path, file))
+                bash_file = read_md_file(filepath=Path(path, file))
                 md_path = os.path.join(ROOT_DIR, "docs", file.replace("bash-", ""))
-                bash_code_blocks = extract_code_blocks(file=md_path, filter="bash")
+                bash_code_blocks = extract_code_blocks(filepath=md_path, filter="bash")
                 for blocks in bash_code_blocks:
                     assert (
                         blocks in bash_file
                     ), "[{}]: FAILED. Code must be identical".format(file)
-                logger.info("[{}]: PASSED".format(file))
 
-                yaml_code_blocks = extract_code_blocks(file=md_path, filter="yaml")
+                yaml_code_blocks = extract_code_blocks(filepath=md_path, filter="yaml")
                 for blocks in yaml_code_blocks:
                     assert (
-                            blocks in bash_file
+                        blocks in bash_file
                     ), "[{}]: FAILED. Code must be identical".format(file)
                 logger.info("[{}]: PASSED".format(file))
