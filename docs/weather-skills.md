@@ -48,7 +48,7 @@ aea install
 ### Update the AEA configs
 
 In the terminal change the configuration:
-```
+``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
