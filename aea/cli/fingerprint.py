@@ -34,14 +34,14 @@ from aea.cli.common import (
     pass_ctx,
     try_to_load_agent_config,
 )
-from aea.configurations.base import (
-    PublicId,
-    _get_default_configuration_file_name_from_type,
-)
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+)
+from aea.configurations.base import (
+    PublicId,
+    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.ipfs.base import IPFSHashOnly

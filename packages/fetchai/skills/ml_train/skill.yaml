@@ -3,12 +3,12 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  behaviours.py: QmR4HYeRBK3Sry38B6VmiVMJYFx377VFSPtFv1qLCoZzUA
-  tasks.py: QmfKzCpzdtbzMoRYejz6fnDzTBCJZHEBzCoui36jtbMTqN
-  handlers.py: QmPrVsmCtAEdwtHYTBGJbeid5QgKRqoMBtajN9b8GVJbUS
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
-  strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
+  behaviours.py: QmR4HYeRBK3Sry38B6VmiVMJYFx377VFSPtFv1qLCoZzUA
+  handlers.py: QmPrVsmCtAEdwtHYTBGJbeid5QgKRqoMBtajN9b8GVJbUS
   model.py: QmXNnLxf3pAUZrNPEmfDDZSLoqXYmPFksBLQqn6Ddajtwb
+  strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
+  tasks.py: QmfKzCpzdtbzMoRYejz6fnDzTBCJZHEBzCoui36jtbMTqN
 description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
 behaviours:
   search:

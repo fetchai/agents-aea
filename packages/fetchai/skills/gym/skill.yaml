@@ -3,11 +3,11 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  tasks.py: QmbJSjPzfBq5dnnysgHamyJSxTft7tJUnbKGK3b1bYTvWP
-  handlers.py: QmTctchsw8aYhornWXr1Yax33unwDBFT5bY2ksbPGW2s2p
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
+  handlers.py: QmTctchsw8aYhornWXr1Yax33unwDBFT5bY2ksbPGW2s2p
   helpers.py: QmeL2ZP2Z6XmxTYXvh1PraxpsEtNp1cqTiamKYtEdjYNQY
   rl_agent.py: QmSVQVywGv5ZPqmARqQ4tttyGz3iJamFRKBFUG34ZU6Wt6
+  tasks.py: QmbJSjPzfBq5dnnysgHamyJSxTft7tJUnbKGK3b1bYTvWP
 description: "The gym skill wraps an RL agent."
 behaviours: {}
 handlers:

@@ -3,13 +3,13 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
-  behaviours.py: Qmcs6PiKtarCxeo9hsjcL7Y5R1jugb9HNSkA7GrjSA2bP9
-  detection_database.py: QmQ4swF4ZFTLsTPLh5uwDLeFZyYtJZoUCxC5mD1vxVnAGH
-  handlers.py: Qme915Wr7LVDpdDPDmhi8DeKu3Y6PApPH6mjjCcoXQwrd8
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  strategy.py: QmXebzUSEMxqaTSiTDWRyX5FFRoWcvzxhZ75sdABKUtirv
+  behaviours.py: Qmcs6PiKtarCxeo9hsjcL7Y5R1jugb9HNSkA7GrjSA2bP9
+  carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
+  detection_database.py: QmQ4swF4ZFTLsTPLh5uwDLeFZyYtJZoUCxC5mD1vxVnAGH
   dialogues.py: QmW1CB1mHTePURgb7jqnkRzuUf3jWVB3WACnriZEPQiG9U
+  handlers.py: Qme915Wr7LVDpdDPDmhi8DeKu3Y6PApPH6mjjCcoXQwrd8
+  strategy.py: QmXebzUSEMxqaTSiTDWRyX5FFRoWcvzxhZ75sdABKUtirv
 description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
   service_registration:

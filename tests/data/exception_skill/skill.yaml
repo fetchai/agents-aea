@@ -2,7 +2,11 @@ name: exception
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
+  behaviours.py: QmSXH168c4LK8h68eeAbykL6gV7VPsFPhYzJrhtj73SCux
+  handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
+  tasks.py: QmfJznzp11PWpBzpEaftq3h2BYHfXbnoitdMcFQsLCqZnL
 behaviours:
   exception:
     class_name: ExceptionBehaviour

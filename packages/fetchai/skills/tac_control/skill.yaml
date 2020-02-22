@@ -3,12 +3,12 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
+  __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmUUUvm4wmCKwuUSo3hTzvksUG5MwnyceGeMwZrTJS4WKP
   game.py: QmeELPf4HmFRKVsebN6Ew2b5FqXpbx71Eh8i6pQQP1AWxB
   handlers.py: QmZM8gGHyfKT1NgYMK5LW2M8GXvJFRBrBSBht4GCK9JWHH
-  __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
-  parameters.py: QmZ8KvebR1iFJLSQYumJePXDUfqP7mASvksFS4BLFHCG8i
   helpers.py: QmSMkbDm2zeDoq9kqtw8eyXXyoaaw12vDZoZQm8nYsYZQa
+  parameters.py: QmZ8KvebR1iFJLSQYumJePXDUfqP7mASvksFS4BLFHCG8i
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
 behaviours:
   tac:

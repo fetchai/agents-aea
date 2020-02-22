@@ -45,6 +45,12 @@ CORE_PACKAGES = {"connections": "stub", "protocols": "default", "skills": "error
 PACKAGE_PATH = "packages/fetchai"
 PACKAGE_TYPES = ["agents", "connections", "protocols", "skills"]
 PACKAGE_HASHES_PATH = "packages/hashes.csv"
+TEST_PACKAGE_HASHES_PATH = "tests/data/hashes.csv"
+TEST_PATH = "tests/data"
+TEST_PACKAGES = {
+    "connections": ["dummy_connection"],
+    "skills": ["dependencies_skill", "exception_skill", "dummy_skill"],
+}
 
 
 def ipfs_hashing(
@@ -108,7 +114,10 @@ def ipfs_hashing(
 
         if len(fingerprints_dict) > 0:
             replacement = "fingerprint:\n"
-            for file_name, ipfs_hash in fingerprints_dict.items():
+            ordered_fingerprints_dict = collections.OrderedDict(
+                sorted(fingerprints_dict.items())
+            )
+            for file_name, ipfs_hash in ordered_fingerprints_dict.items():
                 replacement += "  " + file_name + ": " + ipfs_hash + "\n"
         else:
             replacement = "fingerprint: {}\n"
@@ -129,11 +138,11 @@ def ipfs_hashing(
             package_hashes[key] = result_dict["Hash"]
 
 
-def to_csv(package_hashes: Dict[str, str]):
+def to_csv(package_hashes: Dict[str, str], path: str):
     """Outputs a dictionary to CSV."""
     try:
         ordered = collections.OrderedDict(sorted(package_hashes.items()))
-        with open(PACKAGE_HASHES_PATH, "w") as csv_file:
+        with open(path, "w") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(ordered.items())
     except IOError:
@@ -155,6 +164,7 @@ if __name__ == "__main__":
     time.sleep(2.0)
 
     package_hashes = {}  # type: Dict[str, str]
+    test_package_hashes = {}  # type: Dict[str, str]
 
     try:
         # connect ipfs client
@@ -185,8 +195,21 @@ if __name__ == "__main__":
                         ipfs_hash_only,
                     )
 
+        # ipfs hash the test packages
+        for package_type, package_names in TEST_PACKAGES.items():
+            for package_name in package_names:
+                target_dir = os.path.join(TEST_PATH, package_name)
+                ipfs_hashing(
+                    test_package_hashes,
+                    target_dir,
+                    package_type,
+                    package_name,
+                    ipfs_hash_only,
+                )
+
         # output the package hashes
-        to_csv(package_hashes)
+        to_csv(package_hashes, PACKAGE_HASHES_PATH)
+        to_csv(test_package_hashes, TEST_PACKAGE_HASHES_PATH)
 
     except Exception as e:
         print(e)

@@ -2,7 +2,12 @@ name: dummy
 author: dummy_author
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: Qmd3mY5TSBA632qYRixRVELXkmBWMZtvnxJyQC1oHDTuEm
+  behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
+  dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
+  handlers.py: QmVe1VGT7TBdjQ5xG8X9djY77f8hebHeUeX3eDrQ6FR3yt
+  tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 behaviours:
   dummy:
     class_name: DummyBehaviour

@@ -3,10 +3,10 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
+  __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmTK6EhSmCHveEbHMSr3aDEcSNQ1e1QXTBa35D7nRU1SSW
   game.py: QmPYzLX6RJzQGW2oqKpBRiaMGWELNr2AyoDnyW3bCPax3X
   handlers.py: QmcuT8yzxraKkmsBpJSxtuwhrbzDX34pq1ZL6Lg1UXcMoC
-  __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
 behaviours:

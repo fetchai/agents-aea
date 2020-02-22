@@ -3,10 +3,10 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  behaviours.py: QmUMf6RVjQXRDLnURUwFhd1LAcZBQbNWgA8huh3fq61wBv
-  tasks.py: QmThEMr2iwFaqNZaudEQjTzd2cHrAqMibyyP5NZFQDjYwU
-  handlers.py: QmP82msRGb7EoPEZYUsBySqLcAUZgLsNmgFnyP6JWysdAJ
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
+  behaviours.py: QmUMf6RVjQXRDLnURUwFhd1LAcZBQbNWgA8huh3fq61wBv
+  handlers.py: QmP82msRGb7EoPEZYUsBySqLcAUZgLsNmgFnyP6JWysdAJ
+  tasks.py: QmThEMr2iwFaqNZaudEQjTzd2cHrAqMibyyP5NZFQDjYwU
 description: "The echo skill implements simple echo functionality."
 behaviours:
   echo:
