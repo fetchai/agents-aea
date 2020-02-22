@@ -157,16 +157,16 @@ if __name__ == "__main__":
         print("Please install IPFS first!")
         sys.exit(1)
 
-    # run the ipfs daemon
-    process = subprocess.Popen(  # nosec
-        ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
-    )
-    time.sleep(2.0)
-
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
 
     try:
+        # run the ipfs daemon
+        process = subprocess.Popen(  # nosec
+            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
+        )
+        time.sleep(4.0)
+
         # connect ipfs client
         client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")
         ipfs_hash_only = IPFSHashOnly()
@@ -216,4 +216,10 @@ if __name__ == "__main__":
 
     finally:
         # terminate the ipfs daemon
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=10)
+
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)

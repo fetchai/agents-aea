@@ -4,9 +4,8 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
-  behaviours.py: QmUMf6RVjQXRDLnURUwFhd1LAcZBQbNWgA8huh3fq61wBv
-  handlers.py: QmP82msRGb7EoPEZYUsBySqLcAUZgLsNmgFnyP6JWysdAJ
-  tasks.py: QmThEMr2iwFaqNZaudEQjTzd2cHrAqMibyyP5NZFQDjYwU
+  behaviours.py: QmRbCupz7fM4rFVYEwQKRKsnXePSvQSFsKwCBVkTzqoPMy
+  handlers.py: Qmey64iSrSt6HEzoR5XFB6HU5mReXNrndZo341siea3bA2
 description: "The echo skill implements simple echo functionality."
 behaviours:
   echo:

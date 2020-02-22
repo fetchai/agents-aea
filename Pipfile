@@ -34,6 +34,7 @@ tox = "==3.7.0"
 tox-pipenv = "==1.9.0"
 safety = "==1.8.5"
 liccheck = "==0.4.0"
+ipfshttpclient = "*"
 
 [packages]
 click = "*"
@@ -51,5 +52,3 @@ python-dotenv = "*"
 pyyaml = ">=4.2b1"
 watchdog = "*"
 web3 = "==5.2.2"
-ipfshttpclient = "*"
-
