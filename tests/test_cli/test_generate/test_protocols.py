@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea generate protocol` sub-command."""
 
+# import filecmp
 import json
 import os
 import shutil
@@ -69,12 +70,13 @@ class TestGenerateProtocol:
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
+        # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
         os.chdir(cls.agent_name)
+
         # generate protocol
         cls.result = cls.runner.invoke(
             cli,
@@ -82,8 +84,17 @@ class TestGenerateProtocol:
             standalone_mode=False,
         )
 
+    # def test_protoc_exists(self):
+    #     """Test that the exit code is equal to 0 when creating the agent."""
+    #     res = shutil.which("protoc")
+    #     assert res is not None
+
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
+
     def test_exit_code_equal_to_0(self):
-        """Test that the exit code is equal to 0."""
+        """Test that the exit code is equal to 0 when generating a protocol."""
         assert self.result.exit_code == 0
 
     # def test_resource_folder_contains_module_message(self):
@@ -163,21 +174,28 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
+        # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
         os.chdir(cls.agent_name)
+
         # create a dummy 'myprotocol' folder
         Path(cls.t, cls.agent_name, "protocols", cls.protocol_name).mkdir(
             exist_ok=False, parents=True
         )
+
+        # generate protocol
         cls.result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
+
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -228,29 +246,38 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
+        # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        # add protocol first time
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        # generate protocol with the same protocol name
-        cls.result = cls.runner.invoke(
+
+        # generate protocol first time
+        cls.generate_result_1 = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
 
-    def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
+        # generate protocol second time
+        cls.generate_result_2 = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
+            standalone_mode=False,
+        )
+
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
+
+    def test_generate_protocol_first_time_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 the first time a protocol is generated."""
+        assert self.generate_result_1.exit_code == 0
+
+    def test_generate_protocol_second_time_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 the second time the protocol is generated (i.e. catchall for general errors)."""
+        assert self.generate_result_2.exit_code == 1
 
     def test_error_message_protocol_already_existing(self):
         """Test that the log error message is fixed.
@@ -297,11 +324,11 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
+        # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
@@ -309,6 +336,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         )
         cls.patch.__enter__()
 
+        # generate protocol
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
@@ -316,8 +344,12 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
             standalone_mode=False,
         )
 
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
+
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        """Test that the exit code is equal to 1 when config file is non-compliant (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     # def test_configuration_file_not_valid(self):
@@ -359,17 +391,19 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
 
+        # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
-        assert result.exit_code == 0
 
+        # create an exception
         cls.patch = unittest.mock.patch(
             "shutil.copytree", side_effect=Exception("unknwon exception")
         )
         cls.patch.__enter__()
 
+        # generate protocol
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
@@ -377,8 +411,12 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
             standalone_mode=False,
         )
 
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
+
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        """Test that the exit code is equal to 1 when an exception is thrown (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_resource_directory_does_not_exists(self):

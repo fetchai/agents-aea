@@ -74,7 +74,9 @@ def _get_default_configuration_file_name_from_type(
     elif item_type == ConfigurationType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
     else:
-        raise ValueError("Item type not valid: {}".format(str(item_type)))
+        raise ValueError(
+            "Item type not valid: {}".format(str(item_type))
+        )  # pragma: no cover
 
 
 class ProtocolSpecificationParseError(Exception):
@@ -783,7 +785,7 @@ class ProtocolSpecification(ProtocolConfig):
                 )
             for content_name, content_type in speech_act_content_config.args.items():
                 if content_name in content_dict.keys():
-                    if content_type != content_dict[content_name]:
+                    if content_type != content_dict[content_name]:  # pragma: no cover
                         raise ProtocolSpecificationParseError(
                             "The content '{}' appears more than once with different types in speech_acts.".format(
                                 content_name

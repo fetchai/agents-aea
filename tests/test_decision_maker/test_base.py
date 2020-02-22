@@ -21,7 +21,7 @@
 import os
 import time
 from queue import Queue
-from unittest import mock
+from unittest import TestCase, mock
 
 import pytest
 
@@ -38,7 +38,7 @@ from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
 from aea.decision_maker.base import LedgerStateProxy
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
@@ -1024,3 +1024,27 @@ class TestLedgerStateProxy:
                 tx_message=tx_message
             )
         assert result
+
+
+class DecisionMakerTestCase(TestCase):
+    """Test case for DecisionMaker class."""
+
+    @mock.patch(
+        "aea.decision_maker.base.DecisionMaker._is_acceptable_for_signing",
+        return_value=True,
+    )
+    @mock.patch("aea.decision_maker.base.DecisionMaker._sign_tx")
+    @mock.patch("aea.decision_maker.base.TransactionMessage.respond_signing")
+    def test__handle_tx_message_for_signing_positive(self, *mocks):
+        """Test for _handle_tx_message_for_signing positive result."""
+        ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        dm = DecisionMaker("agent-name", 1, "OutBox", "Wallet", ledger_apis)
+        dm._handle_tx_message_for_signing("tx_message")
+
+    def test__is_affordable_positive(self, *mocks):
+        """Test for _is_affordable positive result."""
+        ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        dm = DecisionMaker("agent-name", 1, "OutBox", "Wallet", ledger_apis)
+        tx_message = mock.Mock()
+        tx_message.ledger_id = OFF_CHAIN
+        dm._is_affordable(tx_message)

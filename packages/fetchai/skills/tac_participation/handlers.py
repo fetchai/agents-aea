@@ -19,7 +19,6 @@
 
 """This package contains the handlers."""
 
-import logging
 from typing import List, Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -34,8 +33,6 @@ from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
-
-logger = logging.getLogger("aea.tac_participation_skill")
 
 
 class OEFHandler(Handler):
@@ -66,7 +63,7 @@ class OEFHandler(Handler):
         oef_message = cast(OEFMessage, message)
         oef_type = oef_message.type
 
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling OEF message. type={}".format(
                 self.context.agent_name, oef_type
             )
@@ -94,7 +91,7 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        logger.error(
+        self.context.logger.error(
             "[{}]: Received OEF error: answer_id={}, operation={}".format(
                 self.context.agent_name, oef_error.id, oef_error.operation
             )
@@ -108,7 +105,7 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        logger.error(
+        self.context.logger.error(
             "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
                 self.context.agent_name,
                 dialogue_error.id,
@@ -128,7 +125,7 @@ class OEFHandler(Handler):
         search = cast(Search, self.context.search)
         search_id = search_result.id
         agents = search_result.agents
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: on search result: {} {}".format(
                 self.context.agent_name, search_id, agents
             )
@@ -136,7 +133,7 @@ class OEFHandler(Handler):
         if search_id in search.ids_for_tac:
             self._on_controller_search_result(agents)
         else:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Unknown search id: search_id={}".format(
                     self.context.agent_name, search_id
                 )
@@ -152,7 +149,7 @@ class OEFHandler(Handler):
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.PRE_GAME.value:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Ignoring controller search result, the agent is already competing.".format(
                     self.context.agent_name
                 )
@@ -160,23 +157,23 @@ class OEFHandler(Handler):
             return
 
         if len(agent_addresses) == 0:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Couldn't find the TAC controller. Retrying...".format(
                     self.context.agent_name
                 )
             )
         elif len(agent_addresses) > 1:
-            logger.error(
+            self.context.logger.error(
                 "[{}]: Found more than one TAC controller. Retrying...".format(
                     self.context.agent_name
                 )
             )
         # elif self._rejoin:
-        #     logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
+        #     self.context.logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
         #     controller_addr = agent_addresses[0]
         #     self._rejoin_tac(controller_addr)
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Found the TAC controller. Registering...".format(
                     self.context.agent_name
                 )
@@ -245,7 +242,7 @@ class TACHandler(Handler):
         tac_msg = cast(TACMessage, message)
         tac_msg_type = tac_msg.type
         game = cast(Game, self.context.game)
-        logger.debug(
+        self.context.logger.debug(
             "[{}]: Handling controller response. type={}".format(
                 self.context.agent_name, tac_msg_type
             )
@@ -279,7 +276,7 @@ class TACHandler(Handler):
                     "We do not expect a controller agent message in the post game phase."
                 )
         except ValueError as e:
-            logger.warning(str(e))
+            self.context.logger.warning(str(e))
 
     def teardown(self) -> None:
         """
@@ -298,7 +295,7 @@ class TACHandler(Handler):
         :return: None
         """
         error_code = tac_message.error_code
-        logger.error(
+        self.context.logger.error(
             "[{}]: Received error from the controller. error_msg={}".format(
                 self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)
             )
@@ -310,7 +307,7 @@ class TACHandler(Handler):
                 if (info.get("transaction_id") is not None)
                 else "NO_TX_ID"
             )
-            logger.warning(
+            self.context.logger.warning(
                 "[{}]: Received error on transaction id: {}".format(
                     self.context.agent_name, transaction_id[-10:]
                 )
@@ -324,7 +321,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: Received start event from the controller. Starting to compete...".format(
                 self.context.agent_name
             )
@@ -348,7 +345,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: Received cancellation from the controller.".format(
                 self.context.agent_name
             )
@@ -366,7 +363,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: Received transaction confirmation from the controller: transaction_id={}".format(
                 self.context.agent_name, message.tx_id[-10:]
             )
@@ -410,7 +407,7 @@ class TACHandler(Handler):
     #     :param tac_message: the dialogue error message
     #     :return: None
     #     """
-    #     logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
+    #     self.context.logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
     #                                                                                       tac_message.details,
     #                                                                                       tac_message.counterparty))
 
@@ -451,7 +448,7 @@ class TransactionHandler(Handler):
             tx_message.performative
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker, sending to controller.".format(
                     self.context.agent_name
                 )
@@ -487,13 +484,13 @@ class TransactionHandler(Handler):
                     message=TACSerializer().encode(msg),
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: transaction has no counterparty id or signature!".format(
                         self.context.agent_name
                     )
                 )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was not successful.".format(self.context.agent_name)
             )
 

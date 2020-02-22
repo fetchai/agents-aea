@@ -39,13 +39,13 @@ Fetch the weather station AEA with the following command :
 ### Update the AEA configs
 
 In the terminal change the configuration:
-```
+```bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
-``` bash
+```bash
 aea run --connections fetchai/oef:0.1.0
 ```
 
@@ -57,7 +57,7 @@ Create a new python file and name it `weather_client.py` and add the following c
 
 <details><summary>Weather client full code.</summary>
 
-```
+``` python
 import logging
 import os
 import time
@@ -108,7 +108,7 @@ def run():
 
     # create the AEA
     my_aea = AEA(
-        identity, [oef_connection], wallet, ledger_apis, resources  # stub_connection,
+        identity, [oef_connection], wallet, ledger_apis, resources,  # stub_connection,
     )
 
     # Add the default protocol (which is part of the AEA distribution)
@@ -183,7 +183,7 @@ def run():
         my_aea.context,
     )
 
-    strategy = cast(Strategy, weather_skill.models.get('strategy'))
+    strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
     strategy.max_buyer_tx_fee = 100
     strategy.max_row_price = 40
@@ -192,17 +192,18 @@ def run():
         resources.add_skill(skill)
 
     # Set the AEA running in a different thread
-    logger.info("STARTING AEA NOW!")
-    t = Thread(target=my_aea.start)
-    t.start()
+    try:
+        logger.info("STARTING AEA NOW!")
+        t = Thread(target=my_aea.start)
+        t.start()
 
-    # Let it run long enought to interact with the weather station
-    time.sleep(25)
-
-    # Shut down the AEA
-    logger.info("STOPPING AEA NOW!")
-    my_aea.stop()
-    t.join()
+        # Let it run long enough to interact with the weather station
+        time.sleep(25)
+    finally:
+        # Shut down the AEA
+        logger.info("STOPPING AEA NOW!")
+        my_aea.stop()
+        t.join()
 
 
 if __name__ == "__main__":

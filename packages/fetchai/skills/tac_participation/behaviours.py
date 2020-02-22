@@ -19,7 +19,6 @@
 
 """This package contains a tac participation behaviour."""
 
-import logging
 from typing import cast
 
 from aea.skills.base import Behaviour
@@ -28,8 +27,6 @@ from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
-
-logger = logging.getLogger("aea.tac_participation_skill")
 
 
 class TACBehaviour(Behaviour):
@@ -76,7 +73,7 @@ class TACBehaviour(Behaviour):
         query = game.get_game_query()
         search_id = search.get_next_id()
         search.ids_for_tac.add(search_id)
-        logger.info(
+        self.context.logger.info(
             "[{}]: Searching for TAC, search_id={}".format(
                 self.context.agent_name, search_id
             )

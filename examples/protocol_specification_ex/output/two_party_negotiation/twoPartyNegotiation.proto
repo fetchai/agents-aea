@@ -4,8 +4,23 @@ package fetch.aea.TwoPartyNegotiation;
 
 message TwoPartyNegotiationMessage{
 
+    // Custom Types
+    message DataModel{
+        // Implement this
+    }
+
+    message IOTApp7{
+        // Implement this
+    }
+
+    message Unit{
+        // Implement this
+    }
+
+
+    // Performatives and contents
     message Cfp{
-        string query = 1;
+        DataModel query = 1;
     }
 
     message Propose{
@@ -13,13 +28,13 @@ message TwoPartyNegotiationMessage{
         float price = 2;
         string description = 3;
         bool flag = 4;
-        string query = 5;
-        map<string, bytes> proposal = 6;
+        DataModel query = 5;
+        map<string, IOTApp7> proposal = 6;
         repeated int32 rounds = 7;
-        repeated int32 items = 8;
+        repeated Unit items = 8;
         string conditions_type_str = 9;
         map<string, int32> conditions_type_dict_of_str_int = 10;
-        repeated string conditions_type_set_of_str = 11;
+        repeated DataModel conditions_type_set_of_DataModel = 11;
         map<string, float> conditions_type_dict_of_str_float = 12;
     }
 
@@ -29,15 +44,17 @@ message TwoPartyNegotiationMessage{
 
     message Match_Accept{}
 
+
+    // Standard TwoPartyNegotiationMessage fields
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
     string dialogue_responder_reference = 3;
     int32 target = 4;
-    oneof performative {
-        Cfp cfp = 5;
-        Propose propose = 6;
-        Accept accept = 7;
-        Decline decline = 8;
-        Match_Accept match_accept = 9;
+    oneof performative{
+        Accept accept = 5;
+        Cfp cfp = 6;
+        Decline decline = 7;
+        Match_Accept match_accept = 8;
+        Propose propose = 9;
     }
 }

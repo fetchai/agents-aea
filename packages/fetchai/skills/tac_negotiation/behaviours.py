@@ -19,7 +19,6 @@
 
 """This package contains a scaffold of a behaviour."""
 
-import logging
 from typing import cast
 
 from aea.skills.base import Behaviour
@@ -31,8 +30,6 @@ from packages.fetchai.skills.tac_negotiation.registration import Registration
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
-
-logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class GoodsRegisterAndSearchBehaviour(Behaviour):
@@ -130,7 +127,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_registering_as_seller:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Updating service directory as seller with goods supplied.".format(
                     self.context.agent_name
                 )
@@ -155,7 +152,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             )
 
         if strategy.is_registering_as_buyer:
-            logger.debug(
+            self.context.logger.debug(
                 "[{}]: Updating service directory as buyer with goods demanded.".format(
                     self.context.agent_name
                 )
@@ -196,7 +193,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if strategy.is_searching_for_sellers:
             query = strategy.get_own_services_query(is_searching_for_sellers=True)
             if query is None:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(
                         self.context.agent_name
                     )
@@ -204,7 +201,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 return None
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=True)
-                logger.info(
+                self.context.logger.info(
                     "[{}]: Searching for sellers which match the demand of the agent, search_id={}.".format(
                         self.context.agent_name, search_id
                     )
@@ -222,7 +219,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if strategy.is_searching_for_buyers:
             query = strategy.get_own_services_query(is_searching_for_sellers=False)
             if query is None:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(
                         self.context.agent_name
                     )
@@ -230,7 +227,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 return None
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=False)
-                logger.info(
+                self.context.logger.info(
                     "[{}]: Searching for buyers which match the supply of the agent, search_id={}.".format(
                         self.context.agent_name, search_id
                     )

@@ -175,7 +175,7 @@ aea generate-wealth ethereum
 
 In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -194,7 +194,7 @@ In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/
 |----------------------------------------------------------------------| 
 ```
 
-An other way to update the skill config is via the `aea config get/set` command.
+Another way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id ethereum
@@ -203,7 +203,7 @@ aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledge
 
 In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -220,7 +220,7 @@ In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.ya
 |----------------------------------------------------------------------| 
 ```
 
-An other way to update the skill config is via the `aea config get/set` command.
+Another way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.max_buyer_tx_fee 10000 --type int
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id ETH
