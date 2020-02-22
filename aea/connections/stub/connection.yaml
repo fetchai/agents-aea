@@ -2,7 +2,9 @@ name: stub
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {'__init__.py': 'QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC', 'connection.py': 'QmYBKp9zhAmv21u7JJ7XsTgQFtjfY2FMtfhBDJTCJxcSVW'}
+fingerprint:
+  __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
+  connection.py: QmYBKp9zhAmv21u7JJ7XsTgQFtjfY2FMtfhBDJTCJxcSVW
 description: "The stub connection implements a connection stub which reads/writes messages from/to file."
 class_name: StubConnection
 protocols: []

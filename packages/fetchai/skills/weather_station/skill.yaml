@@ -2,7 +2,15 @@ name: weather_station
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {'behaviours.py': 'QmaG1tdLbcyLDVRLZxggdCAwkWSooqUTeHoEfhfvGvbZ9G', 'weather_station_data_model.py': 'QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi', 'dummy_weather_station_data.py': 'QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT', 'handlers.py': 'QmNmXz3gCar7wy3quenLdv3aqKmtJofg6JbnYBUBFM91ZE', '__init__.py': 'QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta', 'strategy.py': 'Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5', 'db_communication.py': 'QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug', 'dialogues.py': 'QmVwpfdM3DBp7SndR4XCKhHUtGAW9RC3mRgVrpv3yPJTjD'}
+fingerprint:
+  behaviours.py: QmaG1tdLbcyLDVRLZxggdCAwkWSooqUTeHoEfhfvGvbZ9G
+  weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
+  dummy_weather_station_data.py: QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT
+  handlers.py: QmNmXz3gCar7wy3quenLdv3aqKmtJofg6JbnYBUBFM91ZE
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
+  db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
+  dialogues.py: QmVwpfdM3DBp7SndR4XCKhHUtGAW9RC3mRgVrpv3yPJTjD
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:

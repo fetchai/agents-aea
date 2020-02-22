@@ -2,7 +2,12 @@ name: generic_buyer
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {'behaviours.py': 'QmW3hP8fMw6Q9i5WZACcJYdC58cb2XkKunjorPv1PuRsui', 'handlers.py': 'Qmb6Ctas4T3oBEyuSvgRG1YLyTshyU1R2Mv77mSebsLGnS', '__init__.py': 'QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG', 'strategy.py': 'QmcXF3gjPpXG45vGugLk6d9AfLSv3q8HcUP7ww3jq99ghV', 'dialogues.py': 'QmecN3nDkwtko9U4ZE83gxGiMXmM26tnHkSEACo8KSRo8F'}
+fingerprint:
+  behaviours.py: QmW3hP8fMw6Q9i5WZACcJYdC58cb2XkKunjorPv1PuRsui
+  handlers.py: Qmb6Ctas4T3oBEyuSvgRG1YLyTshyU1R2Mv77mSebsLGnS
+  __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
+  strategy.py: QmcXF3gjPpXG45vGugLk6d9AfLSv3q8HcUP7ww3jq99ghV
+  dialogues.py: QmecN3nDkwtko9U4ZE83gxGiMXmM26tnHkSEACo8KSRo8F
 description: "The weather client skill implements the skill to purchase weather data."
 behaviours:
   search:

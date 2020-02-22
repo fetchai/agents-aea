@@ -2,7 +2,11 @@ name: error
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {'behaviours.py': 'QmQbFxZAVYbkCvpW2uaJ3Y2jCDFBPjhcczybWjGBHgpQap', 'tasks.py': 'QmWM5yqXoaPry7jfGT7o6aT4xamjPEEYFC8Pjoazs1dTdm', 'handlers.py': 'QmPWYD7GEpfMh3YVuU7jevTePbZRMG1YUNjjnWoMezk22i', '__init__.py': 'QmRznFfmUCKAv4gmXN4Gv73h1xesmoJu35BgeKxDZGyU8U'}
+fingerprint:
+  behaviours.py: QmQbFxZAVYbkCvpW2uaJ3Y2jCDFBPjhcczybWjGBHgpQap
+  tasks.py: QmWM5yqXoaPry7jfGT7o6aT4xamjPEEYFC8Pjoazs1dTdm
+  handlers.py: QmPWYD7GEpfMh3YVuU7jevTePbZRMG1YUNjjnWoMezk22i
+  __init__.py: QmRznFfmUCKAv4gmXN4Gv73h1xesmoJu35BgeKxDZGyU8U
 description: "The error skill implements basic error handling required by all AEAs."
 behaviours: {}
 handlers:

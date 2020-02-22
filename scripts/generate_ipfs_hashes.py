@@ -37,6 +37,8 @@ from typing import Dict
 
 import ipfshttpclient
 
+from aea.helpers.ipfs.base import IPFSHashOnly
+
 AUTHOR = "fetchai"
 CORE_PATH = "aea"
 CORE_PACKAGES = {"connections": "stub", "protocols": "default", "skills": "error"}
@@ -50,17 +52,16 @@ def ipfs_hashing(
     target_dir: str,
     package_type: str,
     package_name: str,
+    ipfs_hash_only: IPFSHashOnly,
 ):
     """Hashes a package and its components."""
     print("Processing package {} of type {}".format(package_name, package_type))
 
-    if package_type == "agents":
-        fingerprints = str({})
-    else:
+    if package_type != "agents":
         # hash inner components (all `.py` files)
         result_list = client.add(target_dir, pattern="*.py")
 
-        fingerprints_dict = {}
+        fingerprints_dict = {}  # Dict[str, str]
         # get hashes of all `.py` files
         for result_dict in result_list:
             if package_name == result_dict["Name"]:
@@ -69,35 +70,56 @@ def ipfs_hashing(
                 continue
             key = result_dict["Name"].replace(package_name + "/", "", 1)
             fingerprints_dict[key] = result_dict["Hash"]
-        fingerprints = str(fingerprints_dict)
 
-    # update fingerprints
-    file_name = (
-        "aea-config.yaml" if package_type == "agents" else package_type[:-1] + ".yaml"
-    )
-    yaml_path = os.path.join(target_dir, file_name)
-    file = open(yaml_path, mode="r")
+        # confirm ipfs only generates same hash:
+        for file_name, ipfs_hash in fingerprints_dict.items():
+            path = os.path.join(target_dir, file_name)
+            ipfsho_hash = ipfs_hash_only.get(path)
+            if ipfsho_hash != ipfs_hash:
+                print("WARNING, hashes don't match for: {}".format(path))
 
-    # read all lines at once
-    whole_file = file.read()
+        # update fingerprints
+        file_name = package_type[:-1] + ".yaml"
+        yaml_path = os.path.join(target_dir, file_name)
+        file = open(yaml_path, mode="r")
 
-    # close the file
-    file.close()
+        # read all lines at once
+        whole_file = file.read()
 
-    file = open(yaml_path, mode="r")
+        # close the file
+        file.close()
 
-    # find and replace
-    for line in file:
-        if line.find("fingerprint:") == 0:
-            whole_file = whole_file.replace(line, "fingerprint: " + fingerprints + "\n")
-            break
+        file = open(yaml_path, mode="r")
 
-    # close the file
-    file.close()
+        # find and replace
+        existing = ""
+        fingerprint_block = False
+        for line in file:
+            if line.find("fingerprint:") == 0:
+                existing += line
+                fingerprint_block = True
+            elif fingerprint_block:
+                if line.find("  ") == 0:
+                    # still inside fingerprint block
+                    existing += line
+                else:
+                    # fingerprint block has ended
+                    break
 
-    # update fingerprints
-    with open(yaml_path, "w") as f:
-        f.write(whole_file)
+        if len(fingerprints_dict) > 0:
+            replacement = "fingerprint:\n"
+            for file_name, ipfs_hash in fingerprints_dict.items():
+                replacement += "  " + file_name + ": " + ipfs_hash + "\n"
+        else:
+            replacement = "fingerprint: {}\n"
+        whole_file = whole_file.replace(existing, replacement)
+
+        # close the file
+        file.close()
+
+        # update fingerprints
+        with open(yaml_path, "w") as f:
+            f.write(whole_file)
 
     # hash again to get outer hash (this time all files):
     result_list = client.add(target_dir)
@@ -137,11 +159,12 @@ if __name__ == "__main__":
     try:
         # connect ipfs client
         client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")
+        ipfs_hash_only = IPFSHashOnly()
 
         # ipfs hash the core packages
         for package_type, package_name in CORE_PACKAGES.items():
             target_dir = os.path.join(CORE_PATH, package_type, package_name)
-            ipfs_hashing(package_hashes, target_dir, package_type, package_name)
+            ipfs_hashing(package_hashes, target_dir, package_type, package_name, ipfs_hash_only)
 
         # ipfs hash the registry packages
         for package_type in PACKAGE_TYPES:
@@ -152,7 +175,7 @@ if __name__ == "__main__":
                     break
                 for dirname in dirnames:
                     target_dir = os.path.join(dirpath, dirname)
-                    ipfs_hashing(package_hashes, target_dir, package_type, dirname)
+                    ipfs_hashing(package_hashes, target_dir, package_type, dirname, ipfs_hash_only)
 
         # output the package hashes
         to_csv(package_hashes)
