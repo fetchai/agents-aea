@@ -19,7 +19,6 @@
 
 """This package contains a scaffold of a handler."""
 
-import logging
 import pprint
 from typing import Dict, List, Optional, cast
 
@@ -37,8 +36,6 @@ from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.skills.carpark_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.carpark_client.strategy import Strategy
-
-logger = logging.getLogger("aea.carpark_client_skill")
 
 STARTING_MESSAGE_ID = 1
 STARTING_TARGET_ID = 0
@@ -110,7 +107,9 @@ class FIPAHandler(Handler):
 
         :param msg: the message.
         """
-        logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
+        self.context.logger.info(
+            "[{}]: unidentified dialogue.".format(self.context.agent_name)
+        )
         default_msg = DefaultMessage(
             type=DefaultMessage.Type.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
@@ -139,7 +138,7 @@ class FIPAHandler(Handler):
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
-            logger.info(
+            self.context.logger.info(
                 "[{}]: received proposal={} from sender={}".format(
                     self.context.agent_name, proposal.values, msg.counterparty[-5:]
                 )
@@ -149,7 +148,7 @@ class FIPAHandler(Handler):
             acceptable = strategy.is_acceptable_proposal(proposal)
             affordable = strategy.is_affordable_proposal(proposal)
             if acceptable and affordable:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: accepting the proposal from sender={}".format(
                         self.context.agent_name, msg.counterparty[-5:]
                     )
@@ -169,7 +168,7 @@ class FIPAHandler(Handler):
                     message=FIPASerializer().encode(accept_msg),
                 )
             else:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: declining the proposal from sender={}".format(
                         self.context.agent_name, msg.counterparty[-5:]
                     )
@@ -196,7 +195,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: received DECLINE from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
@@ -212,7 +211,7 @@ class FIPAHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
@@ -237,7 +236,7 @@ class FIPAHandler(Handler):
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
-            logger.info(
+            self.context.logger.info(
                 "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
                     self.context.agent_name
                 )
@@ -259,7 +258,7 @@ class FIPAHandler(Handler):
                 protocol_id=FIPAMessage.protocol_id,
                 message=FIPASerializer().encode(inform_msg),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: informing counterparty={} of payment.".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
@@ -273,13 +272,13 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info(
+        self.context.logger.info(
             "[{}]: received INFORM from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
         if "message_type" in msg.info and msg.info["message_type"] == "car_park_data":
-            logger.info(
+            self.context.logger.info(
                 "[{}]: received the following carpark data={}".format(
                     self.context.agent_name, pprint.pformat(msg.info)
                 )
@@ -287,7 +286,7 @@ class FIPAHandler(Handler):
             # dialogues = cast(Dialogues, self.context.dialogues)
             # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: received no data from sender={}".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
@@ -339,7 +338,7 @@ class OEFHandler(Handler):
         if len(agents) > 0:
             strategy.on_search_success()
 
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found agents={}, stopping search.".format(
                     self.context.agent_name, list(map(lambda x: x[-5:], agents))
                 )
@@ -352,7 +351,7 @@ class OEFHandler(Handler):
                 opponent_addr, self.context.agent_address, is_seller=False
             )
             query = strategy.get_service_query()
-            logger.info(
+            self.context.logger.info(
                 "[{}]: sending CFP to agent={}".format(
                     self.context.agent_name, opponent_addr[-5:]
                 )
@@ -372,7 +371,7 @@ class OEFHandler(Handler):
                 message=FIPASerializer().encode(cfp_msg),
             )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
                     self.context.agent_name
                 )
@@ -402,7 +401,7 @@ class MyTransactionHandler(Handler):
             and tx_msg_response.performative
             == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
         ):
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was successful.".format(self.context.agent_name)
             )
 
@@ -431,14 +430,14 @@ class MyTransactionHandler(Handler):
                 protocol_id=FIPAMessage.protocol_id,
                 message=FIPASerializer().encode(inform_msg),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(
                     self.context.agent_name, counterparty_id[-5:]
                 )
             )
             self._received_tx_message = True
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was not successful.".format(self.context.agent_name)
             )
 

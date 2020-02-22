@@ -109,6 +109,7 @@ venv.bak/
 */.DS_Store
 
 data/*
+!data/aea.png
 temp_private_key.pem
 .idea/
 

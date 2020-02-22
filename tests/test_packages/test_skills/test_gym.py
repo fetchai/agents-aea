@@ -55,9 +55,10 @@ class TestGymSkill:
         """Run the gym skill sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
+
         # add packages folder
         packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(os.getcwd(), "packages")
+        packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # create agent
@@ -112,36 +113,38 @@ class TestGymSkill:
         skill_config.handlers.read("gym").args["nb_steps"] = 20
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
-        process = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/gym:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
+        try:
+            process = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/gym:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+            time.sleep(10.0)
 
-        # check the gym run ends
+            # TODO: check the run ends properly
 
-        time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=5)
+        finally:
+            process.send_signal(signal.SIGINT)
+            process.wait(timeout=5)
 
-        assert process.returncode == 0
+            if not process.returncode == 0:
+                poll = process.poll()
+                if poll is None:
+                    process.terminate()
+                    process.wait(2)
 
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
-
-        os.chdir(self.t)
-        self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
-        )
+            os.chdir(self.t)
+            result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+            )
+            assert result.exit_code == 0
 
     @classmethod
     def teardown_class(cls):

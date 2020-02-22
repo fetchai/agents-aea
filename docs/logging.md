@@ -13,7 +13,7 @@ cd my_aea
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.2.0
+aea_version: 0.2.1
 agent_name: my_aea
 author: ''
 connections:
@@ -68,7 +68,7 @@ logging_config:
       - logfile
       - console
       level: DEBUG
-      propagate: True
+      propagate: False
 ```
 
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.

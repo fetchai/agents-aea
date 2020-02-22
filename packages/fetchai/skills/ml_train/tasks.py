@@ -28,7 +28,7 @@ from tensorflow import keras
 
 from aea.skills.tasks import Task
 
-logger = logging.getLogger("aea.gym_skill")
+logger = logging.getLogger("aea.ml_train_skill")
 
 
 class MLTrainTask(Task):

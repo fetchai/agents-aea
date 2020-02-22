@@ -26,6 +26,7 @@ import os
 import queue
 import re
 from abc import ABC, abstractmethod
+from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -72,6 +73,7 @@ class SkillContext:
 
         self._is_active = True  # type: bool
         self._new_behaviours_queue = queue.Queue()  # type: Queue
+        self._logger = None  # type: Optional[Logger]
 
     @property
     def shared_state(self) -> Dict[str, Any]:
@@ -182,6 +184,12 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
+
+    @property
+    def logger(self) -> Logger:
+        """Get the logger."""
+        assert self._logger is not None, "Logger not set."
+        return self._logger
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
@@ -533,6 +541,11 @@ class Skill:
         )
 
         skill_context = SkillContext(agent_context)
+        # set the logger of the skill context.
+        logger_name = "aea.{}.skills.{}.{}".format(
+            agent_context.agent_name, skill_config.author, skill_config.name
+        )
+        skill_context._logger = logging.getLogger(logger_name)
 
         handlers_by_id = dict(skill_config.handlers.read_all())
         if len(handlers_by_id) > 0:
@@ -540,7 +553,7 @@ class Skill:
                 os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
             )
         else:
-            handlers = {}
+            handlers = {}  # pragma: no cover
 
         behaviours_by_id = dict(skill_config.behaviours.read_all())
         if len(behaviours_by_id) > 0:

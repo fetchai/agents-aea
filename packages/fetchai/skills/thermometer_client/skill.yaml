@@ -24,7 +24,6 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks: {}
 models:
   strategy:
     class_name: Strategy

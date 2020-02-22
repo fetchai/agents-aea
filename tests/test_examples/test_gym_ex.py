@@ -37,24 +37,25 @@ def test_gym_ex(pytestconfig):
         pytest.skip("Skipping the test since it doesn't work in CI.")
 
     # run the example
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),
-            "--nb-steps",
-            "50",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
+    try:
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),
+                "--nb-steps",
+                "50",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
 
-    time.sleep(5.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=10)
+        time.sleep(5.0)
+    finally:
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=10)
 
-    assert process.returncode == 0
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
+        if not process.returncode == 0:
+            poll = process.poll()
+            if poll is None:
+                process.terminate()
+                process.wait(2)

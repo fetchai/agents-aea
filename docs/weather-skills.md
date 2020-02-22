@@ -48,7 +48,7 @@ aea install
 ### Update the AEA configs
 
 In the terminal change the configuration:
-```
+``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
@@ -217,7 +217,7 @@ aea generate-wealth ethereum
 
 In `my_weather_station/vendor/fetchai/skills/weather_station/skill.yaml`, under strategy amend the `currency_id` and `ledger_id` as follows:
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -237,7 +237,7 @@ In `my_weather_station/vendor/fetchai/skills/weather_station/skill.yaml`, under 
 
 In the weather client skill config (`my_weather_client/vendor/fetchai/skills/weather_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|

@@ -24,7 +24,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 
-class MyScaffoldSerializer(Serializer):
+class MyScaffoldSerializer(Serializer):  # pragma: no cover
     """Serialization for the scaffold protocol."""
 
     def encode(self, msg: Message) -> bytes:

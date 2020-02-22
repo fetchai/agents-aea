@@ -5,16 +5,16 @@ There are two types of AEAs:
 * The tac controller which coordinates the game.
 * The participant AEAs which compete in the game.
 
+### Discussion
+
+The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC.
+An other AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid.
+
 ## Preparation instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
-
-The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC.
-An other AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -195,7 +195,7 @@ The AEA `tac_negotiation` skill demonstrates how negotiation strategies may be e
 
 The `tac_negotiation` skill `skill.yaml` configuration file looks like this.
 
-```yaml
+``` yaml
 name: tac_negotiation
 authors: fetchai
 version: 0.1.0

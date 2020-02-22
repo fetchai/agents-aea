@@ -19,11 +19,7 @@
 
 """This module contains the behaviours for the 'echo' skill."""
 
-import logging
-
 from aea.skills.behaviours import TickerBehaviour
-
-logger = logging.getLogger("aea.echo_skill")
 
 
 class EchoBehaviour(TickerBehaviour):
@@ -32,16 +28,16 @@ class EchoBehaviour(TickerBehaviour):
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
         super().__init__(**kwargs)
-        logger.info("EchoBehaviour.__init__: arguments: {}".format(kwargs))
+        self.context.logger.info("EchoBehaviour.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:
         """Set up the behaviour."""
-        logger.info("Echo Behaviour: setup method called.")
+        self.context.logger.info("Echo Behaviour: setup method called.")
 
     def act(self) -> None:
         """Act according to the behaviour."""
-        logger.info("Echo Behaviour: act method called.")
+        self.context.logger.info("Echo Behaviour: act method called.")
 
     def teardown(self) -> None:
         """Teardown the behaviour."""
-        logger.info("Echo Behaviour: teardown method called.")
+        self.context.logger.info("Echo Behaviour: teardown method called.")

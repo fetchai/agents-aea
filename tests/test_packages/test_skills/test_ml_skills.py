@@ -72,14 +72,15 @@ class TestMLSkills:
         """Run the ml skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
+
         # add packages folder
         packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(os.getcwd(), "packages")
+        packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # Add scripts folder
         scripts_src = os.path.join(self.cwd, "scripts")
-        scripts_dst = os.path.join(os.getcwd(), "scripts")
+        scripts_dst = os.path.join(self.t, "scripts")
         shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
@@ -92,7 +93,7 @@ class TestMLSkills:
         )
         assert result.exit_code == 0
 
-        # add packages for agent one and run it
+        # add packages for agent one
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
@@ -114,22 +115,6 @@ class TestMLSkills:
             cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
         )
         assert result.exit_code == 0
-
-        process_one = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-
-        os.chdir(self.t)
 
         # add packages for agent two and run it
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
@@ -154,93 +139,88 @@ class TestMLSkills:
         )
         assert result.exit_code == 0
 
-        # # Load the agent yaml file and manually insert the things we need
-        # file = open("aea-config.yaml", mode='r')
+        try:
+            os.chdir(agent_one_dir_path)
+            process_one = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
 
-        # # read all lines at once
-        # whole_file = file.read()
+            os.chdir(agent_two_dir_path)
+            process_two = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
 
-        # # add in the ledger address
-        # find_text = "ledger_apis: []"
-        # replace_text = """ledger_apis:
-        #     - ledger_api:
-        #         addr: alpha.fetch-ai.com
-        #         ledger: fetchai
-        #         port: 80"""
+            tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
+            tty_read_thread.start()
 
-        # whole_file = whole_file.replace(find_text, replace_text)
+            error_read_thread = threading.Thread(
+                target=_read_error, args=(process_one,)
+            )
+            error_read_thread.start()
 
-        # # close the file
-        # file.close()
+            tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
+            tty_read_thread.start()
 
-        # with open("aea-config.yaml", 'w') as f:
-        #     f.write(whole_file)
+            error_read_thread = threading.Thread(
+                target=_read_error, args=(process_two,)
+            )
+            error_read_thread.start()
 
-        # # Generate the private keys
-        # result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False)
-        # assert result.exit_code == 0
+            time.sleep(60)
 
-        # # Add some funds to the weather station
-        # os.chdir(os.path.join(scripts_dst, "../"))
-        # result = subprocess.call(["python", "./scripts/fetchai_wealth_generation.py", "--private-key", os.path.join("./", self.agent_name_two, "fet_private_key.txt"), "--amount", "10000000", "--addr", "alpha.fetch-ai.com", "--port", "80"])
-        # assert result == 0
+            # TODO: check the run ends properly
 
-        os.chdir(agent_two_dir_path)
-        process_two = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
+        finally:
+            process_one.send_signal(signal.SIGINT)
+            process_two.send_signal(signal.SIGINT)
+            process_one.wait(timeout=60)
+            process_two.wait(timeout=60)
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
-        tty_read_thread.start()
+            if not process_one.returncode == 0:
+                poll_one = process_one.poll()
+                if poll_one is None:
+                    process_one.terminate()
+                    process_one.wait(2)
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_one,))
-        error_read_thread.start()
+            if not process_two.returncode == 0:
+                poll_two = process_two.poll()
+                if poll_two is None:
+                    process_two.terminate()
+                    process_two.wait(2)
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
-        tty_read_thread.start()
-
-        error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
-        error_read_thread.start()
-
-        time.sleep(60)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
-
-        process_one.wait(timeout=60)
-        process_two.wait(timeout=60)
-
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
-
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
-
-        poll_two = process_two.poll()
-        if poll_two is None:
-            process_two.terminate()
-            process_two.wait(2)
-
-        os.chdir(self.t)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
-        )
-        assert result.exit_code == 0
+            os.chdir(self.t)
+            result = self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "delete", self.agent_name_one],
+                standalone_mode=False,
+            )
+            assert result.exit_code == 0
+            result = self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "delete", self.agent_name_two],
+                standalone_mode=False,
+            )
+            assert result.exit_code == 0
 
     @classmethod
     def teardown_class(cls):

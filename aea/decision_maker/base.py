@@ -514,7 +514,7 @@ class DecisionMaker:
     def start(self):
         """Start the decision maker."""
         with self._lock:
-            if not self._stopped:
+            if not self._stopped:  # pragma: no cover
                 logger.debug("Decision maker already started.")
                 return
 
@@ -606,7 +606,7 @@ class DecisionMaker:
                 "[{}]: Unexpected transaction message performative".format(
                     self._agent_name
                 )
-            )
+            )  # pragma: no cover
 
     def _handle_tx_message_for_settlement(self, tx_message) -> None:
         """
