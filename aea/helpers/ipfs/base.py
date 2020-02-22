@@ -27,11 +27,11 @@ import base58
 from aea.helpers.ipfs.pb import merkledag_pb2
 from aea.helpers.ipfs.pb import unixfs_pb2
 
-precious_data = b'I am a good unicorn.\n'
+precious_data = b"I am a good unicorn.\n"
 
 # https://github.com/multiformats/multicodec/blob/master/table.csv
-SHA256_ID = '12'  # 0x12
-LEN_SHA256 = '20'  # 0x20
+SHA256_ID = "12"  # 0x12
+LEN_SHA256 = "20"  # 0x20
 
 
 class IPFSHashOnly:
@@ -45,7 +45,7 @@ class IPFSHashOnly:
 
         :param file_path: the file path
         """
-        with open(file_path, 'rb') as file:
+        with open(file_path, "rb") as file:
             file_b = file.read()
         file_pb = self._pb_serialize_file(file_b)
         ipfs_hash = self._generate_multihash(file_pb)
@@ -81,6 +81,6 @@ class IPFSHashOnly:
         """
         sha256_hash = hashlib.sha256(pb_data).hexdigest()
         multihash_hex = SHA256_ID + LEN_SHA256 + sha256_hash
-        multihash_bytes = codecs.decode(str.encode(multihash_hex), 'hex')
+        multihash_bytes = codecs.decode(str.encode(multihash_hex), "hex")
         ipfs_hash = base58.b58encode(multihash_bytes)
-        return str(ipfs_hash, 'utf-8')
+        return str(ipfs_hash, "utf-8")

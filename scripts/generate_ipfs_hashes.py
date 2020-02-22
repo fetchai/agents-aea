@@ -164,7 +164,9 @@ if __name__ == "__main__":
         # ipfs hash the core packages
         for package_type, package_name in CORE_PACKAGES.items():
             target_dir = os.path.join(CORE_PATH, package_type, package_name)
-            ipfs_hashing(package_hashes, target_dir, package_type, package_name, ipfs_hash_only)
+            ipfs_hashing(
+                package_hashes, target_dir, package_type, package_name, ipfs_hash_only
+            )
 
         # ipfs hash the registry packages
         for package_type in PACKAGE_TYPES:
@@ -175,7 +177,13 @@ if __name__ == "__main__":
                     break
                 for dirname in dirnames:
                     target_dir = os.path.join(dirpath, dirname)
-                    ipfs_hashing(package_hashes, target_dir, package_type, dirname, ipfs_hash_only)
+                    ipfs_hashing(
+                        package_hashes,
+                        target_dir,
+                        package_type,
+                        dirname,
+                        ipfs_hash_only,
+                    )
 
         # output the package hashes
         to_csv(package_hashes)

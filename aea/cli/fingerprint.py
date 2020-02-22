@@ -68,9 +68,7 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
     ipfs_hash_only = IPFSHashOnly()
 
     click.echo(
-        "Fingerprinting {} components of '{}' ...".format(
-            item_type, item_public_id
-        )
+        "Fingerprinting {} components of '{}' ...".format(item_type, item_public_id)
     )
 
     # create fingerprints
@@ -78,11 +76,7 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
     package_dir = Path(ctx.cwd, item_type_plural, item_public_id.name)
     if not package_dir.exists():
         # we only permit non-vendorized packages to be fingerprinted
-        logger.error(
-            "Package not found at path {}".format(
-                package_dir
-            )
-        )
+        logger.error("Package not found at path {}".format(package_dir))
         sys.exit(1)
 
     for file in os.listdir(package_dir):
