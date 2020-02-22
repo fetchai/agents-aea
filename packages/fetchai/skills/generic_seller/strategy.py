@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from aea.helpers.search.models import Description, Query
@@ -35,8 +34,6 @@ DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
-
-logger = logging.getLogger(__name__)
 
 
 class Strategy(Model):

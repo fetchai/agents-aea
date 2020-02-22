@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_train' skill."""
-import logging
 from typing import List, Optional, cast
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -32,7 +31,6 @@ from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
-logger = logging.getLogger("aea.ml_train_skill")
 
 DUMMY_DIGEST = "dummy_digest"
 
@@ -52,7 +50,7 @@ class TrainHandler(Handler):
 
         :return: None
         """
-        logger.debug("Train handler: setup method called.")
+        self.context.logger.debug("Train handler: setup method called.")
 
     def handle(self, message: Message) -> None:
         """
@@ -75,7 +73,7 @@ class TrainHandler(Handler):
         :return: None
         """
         terms = ml_trade_msg.terms
-        logger.info(
+        self.context.logger.info(
             "Received terms message from {}: terms={}".format(
                 ml_trade_msg.counterparty[-5:], terms.values
             )
@@ -85,7 +83,7 @@ class TrainHandler(Handler):
         acceptable = strategy.is_acceptable_terms(terms)
         affordable = strategy.is_affordable_terms(terms)
         if not acceptable and affordable:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: rejecting, terms are not acceptable and/or affordable".format(
                     self.context.agent_name
                 )
@@ -110,7 +108,7 @@ class TrainHandler(Handler):
                 info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty},
             )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
-            logger.info(
+            self.context.logger.info(
                 "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
                     self.context.agent_name
                 )
@@ -128,7 +126,7 @@ class TrainHandler(Handler):
                 protocol_id=MLTradeMessage.protocol_id,
                 message=MLTradeSerializer().encode(ml_accept),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: sending dummy transaction digest ...".format(
                     self.context.agent_name
                 )
@@ -144,13 +142,13 @@ class TrainHandler(Handler):
         terms = ml_trade_msg.terms
         data = ml_trade_msg.data
         if data is None:
-            logger.info(
+            self.context.logger.info(
                 "Received data message with no data from {}".format(
                     ml_trade_msg.counterparty[-5:]
                 )
             )
         else:
-            logger.info(
+            self.context.logger.info(
                 "Received data message from {}: data shape={}, terms={}".format(
                     ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
                 )
@@ -166,7 +164,7 @@ class TrainHandler(Handler):
 
         :return: None
         """
-        logger.debug("Train handler: teardown method called.")
+        self.context.logger.debug("Train handler: teardown method called.")
 
 
 class OEFHandler(Handler):
@@ -208,14 +206,14 @@ class OEFHandler(Handler):
         :return: None
         """
         if len(agents) == 0:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
                     self.context.agent_name
                 )
             )
             return
 
-        logger.info(
+        self.context.logger.info(
             "[{}]: found agents={}, stopping search.".format(
                 self.context.agent_name, list(map(lambda x: x[-5:], agents))
             )
@@ -224,7 +222,7 @@ class OEFHandler(Handler):
         strategy.is_searching = False
         query = strategy.get_service_query()
         for opponent_address in agents:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: sending CFT to agent={}".format(
                     self.context.agent_name, opponent_address[-5:]
                 )
@@ -261,7 +259,7 @@ class MyTransactionHandler(Handler):
             tx_msg_response.performative
             == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
         ):
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was successful.".format(self.context.agent_name)
             )
             info = tx_msg_response.info
@@ -277,7 +275,7 @@ class MyTransactionHandler(Handler):
                 protocol_id=MLTradeMessage.protocol_id,
                 message=MLTradeSerializer().encode(ml_accept),
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(
                     self.context.agent_name,
                     tx_msg_response.tx_counterparty_addr[-5:],
@@ -286,7 +284,7 @@ class MyTransactionHandler(Handler):
                 )
             )
         else:
-            logger.info(
+            self.context.logger.info(
                 "[{}]: transaction was not successful.".format(self.context.agent_name)
             )
 

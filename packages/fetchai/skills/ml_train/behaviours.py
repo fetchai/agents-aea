@@ -19,7 +19,6 @@
 
 """This package contains a the behaviours."""
 
-import logging
 from typing import cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -29,8 +28,6 @@ from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.ml_train.strategy import Strategy
-
-logger = logging.getLogger("aea.ml_train_skill")
 
 SERVICE_ID = ""
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -55,13 +52,13 @@ class MySearchBehaviour(TickerBehaviour):
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
             if fet_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on fetchai ledger={}.".format(
                         self.context.agent_name, fet_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on fetchai ledger!".format(
                         self.context.agent_name
                     )
@@ -72,13 +69,13 @@ class MySearchBehaviour(TickerBehaviour):
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
             if eth_balance > 0:
-                logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on ethereum ledger={}.".format(
                         self.context.agent_name, eth_balance
                     )
                 )
             else:
-                logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on ethereum ledger!".format(
                         self.context.agent_name
                     )
@@ -114,7 +111,7 @@ class MySearchBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on fetchai ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -124,7 +121,7 @@ class MySearchBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
-            logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on ethereum ledger={}.".format(
                     self.context.agent_name, balance
                 )

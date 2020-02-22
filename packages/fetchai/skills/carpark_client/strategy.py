@@ -19,7 +19,6 @@
 
 """This module contains the strategy class."""
 
-import logging
 import time
 from typing import cast
 
@@ -36,7 +35,6 @@ DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 
-logger = logging.getLogger(__name__)
 DEFAULT_MAX_TX_FEE = 2
 
 
@@ -130,6 +128,6 @@ class Strategy(Model):
             balance = self.context.ledger_apis.token_balance(ledger_id, address)
             result = balance >= payable
         else:
-            logger.debug("Assuming it is affordable")
+            self.context.logger.debug("Assuming it is affordable")
             result = True
         return result

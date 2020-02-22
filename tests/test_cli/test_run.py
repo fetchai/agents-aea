@@ -26,8 +26,8 @@ import subprocess  # nosec
 import sys
 import tempfile
 import time
-import unittest.mock
 from pathlib import Path
+from unittest import TestCase, mock
 
 import pytest
 
@@ -35,12 +35,20 @@ import yaml
 
 import aea.cli.common
 from aea.cli import cli
+from aea.cli.run import _setup_connection, _verify_ledger_apis_access
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 
+from .tools_for_testing import (
+    ConfigLoaderMock,
+    ContextMock,
+    PublicIdMock,
+    StopTest,
+    raise_stoptest,
+)
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -68,36 +76,37 @@ def test_run(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_default_connection(pytestconfig):
@@ -118,29 +127,30 @@ def test_run_with_default_connection(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    process = subprocess.Popen(  # nosec
-        [sys.executable, "-m", "aea.cli", "run"],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "aea.cli", "run"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 @pytest.mark.parametrize(
@@ -180,29 +190,30 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     )
     assert result.exit_code == 1
 
-    process = subprocess.Popen(  # nosec
-        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(5.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=5)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(5.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=5)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_unknown_private_key(pytestconfig):
@@ -484,36 +495,38 @@ def test_run_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_fet_ledger_apis(pytestconfig):
@@ -560,36 +573,37 @@ def test_run_fet_ledger_apis(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    os.chdir(cwd)
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_install_deps(pytestconfig):
@@ -601,7 +615,9 @@ def test_run_with_install_deps(pytestconfig):
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    packages_src = os.path.join(cwd, "packages")
+    packages_dst = os.path.join(t, "packages")
+    shutil.copytree(packages_src, packages_dst)
 
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
@@ -614,36 +630,38 @@ def test_run_with_install_deps(pytestconfig):
     )
     assert result.exit_code == 0
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--install-deps",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.communicate(timeout=20)
-
-    assert process.returncode == 0
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(2)
-
-    os.chdir(cwd)
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--install-deps",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.communicate(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 def test_run_with_install_deps_and_requirement_file(pytestconfig):
@@ -672,36 +690,38 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     assert result.exit_code == 0
     Path(t, agent_name, "requirements.txt").write_text(result.output)
 
-    process = subprocess.Popen(  # nosec
-        [
-            sys.executable,
-            "-m",
-            "aea.cli",
-            "run",
-            "--install-deps",
-            "--connections",
-            "fetchai/local:0.1.0",
-        ],
-        stdout=subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    time.sleep(10.0)
-    process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
-
-    assert process.returncode == 0
-
-    poll = process.poll()
-    if poll is None:
-        process.terminate()
-        process.wait(10)
-
-    os.chdir(cwd)
     try:
-        shutil.rmtree(t)
-    except (OSError, IOError):
-        pass
+        process = subprocess.Popen(  # nosec
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--install-deps",
+                "--connections",
+                "fetchai/local:0.1.0",
+            ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        time.sleep(10.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+
+        assert process.returncode == 0
+
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(10)
+
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):
+            pass
 
 
 class TestRunFailsWhenExceptionOccursInSkill:
@@ -768,7 +788,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -819,7 +839,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -873,7 +893,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.agent_name = "myagent"
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -926,7 +946,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_name = cls.connection_id.name
         cls.connection_author = cls.connection_id.author
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -991,7 +1011,7 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1055,7 +1075,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1119,7 +1139,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1178,7 +1198,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1227,3 +1247,28 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+@mock.patch("aea.cli.run._try_to_instantiate_fetchai_ledger_api")
+@mock.patch("aea.cli.run.ConfigLoader", ConfigLoaderMock)
+@mock.patch("aea.cli.run.Path.open")
+class VerifyLedgerApiAccessTestCase(TestCase):
+    """Test case for _verify_ledger_apis_access method."""
+
+    def test__verify_ledger_apis_access_with_host(self, *mocks):
+        """Test for _verify_ledger_apis_access method with host."""
+        _verify_ledger_apis_access()
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class SetupConnectionTestCase(TestCase):
+    """Test case for _setup_connection method."""
+
+    @mock.patch("aea.cli.run.Path.exists", return_value=False)
+    @mock.patch("aea.cli.run.load_agent_component_package", raise_stoptest)
+    def test__setup_connection_no_dir(self, *mocks):
+        """Test for _setup_connection no connection dir."""
+        public_id = PublicIdMock.from_str("author/name:version")
+        ctx = ContextMock(connections=[public_id])
+        with self.assertRaises(StopTest):
+            _setup_connection(public_id, "address", ctx)

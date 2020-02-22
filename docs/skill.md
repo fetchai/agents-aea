@@ -1,6 +1,6 @@
 An AEA developer writes skills that the framework can call.
 
-When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
+When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour`, `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
 
 ## Context

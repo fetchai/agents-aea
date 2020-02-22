@@ -18,6 +18,7 @@ This demo does not utilize a smart contract. We interact with a ledger only to c
 
 Moreover, this example provides a way to customise the skill code and connect a database or sensor. 
 You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file. 
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -94,7 +95,7 @@ ledger_apis:
 ### Update the seller AEA skill configs
 
 In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -130,7 +131,7 @@ The `search_schema` and the `search_data` are used to register the service in th
 
 In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
-```bash
+``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
@@ -167,7 +168,7 @@ aea generate-wealth ethereum
 
 ## Run the AEAs
 
-You can change the end point's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
+You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
 
 Under config locate :
 

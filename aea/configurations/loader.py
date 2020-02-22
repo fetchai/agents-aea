@@ -114,14 +114,14 @@ class ConfigLoader(Generic[T]):
             return ConfigLoader("skill-config_schema.json", SkillConfig)
         elif configuration_type == ConfigurationType.CONTRACT:
             return ConfigLoader("contract-config_schema.json", ContractConfig)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Invalid configuration type.")
 
 
 def _config_loader():
     envvar_matcher = re.compile(r"\${([^}^{]+)\}")
 
-    def envvar_constructor(loader, node):
+    def envvar_constructor(loader, node):  # pragma: no cover
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = envvar_matcher.match(node_value)

@@ -1,6 +1,8 @@
 If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
 you can use the Fetch.ai AEA framework. 
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 This example will take you through the simplest AEA in order to make you familiar with the framework.
 
 ## Preliminaries
@@ -118,18 +120,15 @@ or
 aea run --connections fetchai/stub:0.1.0
 ```
 
-You will see the echo task running in the terminal window.
+You will see the echo skill running in the terminal window.
 
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
-info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
-info: Echo Task: execute method called.
 ```
 
-The framework first calls the `setup` method on the `Handler`, `Behaviour`, and `Task` code in that order; after which it repeatedly calls the `Behaviour` and `Task` methods, `act` and `execute`. This is the main agent loop in action.
+The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method act. This is the main agent loop in action.
 
 Let's look at the `Handler` in more depth.
 
@@ -144,14 +143,10 @@ echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content":
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
 
 ``` bash
-info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
 info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_aea
-info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
-info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
-info: Echo Task: execute method called.
 ```
 
 ## Stop the AEA
@@ -194,5 +189,5 @@ Second, add the echo skill to the project.
 ```bash
 aea add skill fetchai/echo:0.1.0		
 ```		
-This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
+This copies the `echo` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
 </details>
