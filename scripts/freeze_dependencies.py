@@ -21,7 +21,6 @@
 """
 This CLI tool freezes the dependencies
 """
-import json
 import subprocess
 from subprocess import Popen
 

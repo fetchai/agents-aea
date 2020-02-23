@@ -21,7 +21,6 @@ flake8-import-order = "==0.18.1"
 gym = "==0.15.6"
 mkdocs = "==1.0.4"
 mkdocs-material = "==4.6.0"
-mkdocs-mermaid-plugin = "==0.1.1"
 mypy = "==0.761"
 numpy = "==1.18.1"
 oef = "==0.8.1"
@@ -35,6 +34,7 @@ tox = "==3.14.5"
 safety = "==1.8.5"
 liccheck = "==0.4.0"
 docker = "*"
+mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
