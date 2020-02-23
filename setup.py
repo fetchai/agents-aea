@@ -99,7 +99,7 @@ all_extras = get_all_extras()
 
 base_deps = [
    *all_extras.get("crypto", []),
-    "pyyamlL>=4.2b1",
+    "pyyaml>=4.2b1",
     "jsonschema>=3.0.0",
     "protobuf",
     "watchdog"
