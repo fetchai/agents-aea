@@ -34,6 +34,7 @@ pytest-cov = "==2.8.1"
 tox = "==3.14.5"
 safety = "==1.8.5"
 liccheck = "==0.4.0"
+docker = "*"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
