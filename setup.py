@@ -68,15 +68,16 @@ def get_all_extras() -> Dict:
 
     cli_deps = [
         "click",
-        "PyYAML",
-        "jsonschema",
+        "pyyaml>=4.2b1",
+        "jsonschema>=3.0.0",
         "python-dotenv",
         *crypto_deps
     ]
 
     cli_gui = [
         "flask",
-        "connexion[swagger-ui]",
+        "connexion[swagger-ui]>=2.4.0",
+        "docker",
         *cli_deps
     ]
 
@@ -98,8 +99,8 @@ all_extras = get_all_extras()
 
 base_deps = [
    *all_extras.get("crypto", []),
-    "PyYAML",
-    "jsonschema",
+    "pyyamlL>=4.2b1",
+    "jsonschema>=3.0.0",
     "protobuf",
     "watchdog"
 ]
