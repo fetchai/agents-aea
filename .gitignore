@@ -104,6 +104,7 @@ venv.bak/
 .mypy_cache/
 
 *.sqlite3
+pip-wheel-metadata/
 
 .DS_Store
 */.DS_Store
