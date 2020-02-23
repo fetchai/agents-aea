@@ -37,9 +37,9 @@ def parse_args():
 if __name__ == "__main__":
     arguments = parse_args()
 
-    pip_freeze_call = subprocess.Popen(
+    pip_freeze_call = subprocess.Popen(  # nosec
         ["pip", "freeze"], stdout=subprocess.PIPE
-    )  # nosec
+    )
     (stdout, stderr) = pip_freeze_call.communicate()
     requirements = stdout.decode("utf-8")
 
