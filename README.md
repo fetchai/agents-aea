@@ -52,9 +52,9 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
 
-- Install development dependencies:
+- Install development dependencies (skipping Lockfile creation):
 
-	  pipenv install --dev
+	  pipenv install --dev --skip-lock
 
 - Install package in development mode (this step replaces `pip install aea[all]` above):
 
