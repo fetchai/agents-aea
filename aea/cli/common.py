@@ -22,6 +22,7 @@
 import logging
 import logging.config
 import os
+import re
 import shutil
 import sys
 from collections import OrderedDict
@@ -343,6 +344,19 @@ class PublicIdParameter(click.ParamType):
             return PublicId.from_str(value)
         except ValueError:
             raise click.BadParameter(value)
+
+
+def validate_package_name(package_name: str):
+    """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
+
+    >>> validate_package_name("this_is_a_good_package_name")
+    >>> validate_package_name("this-is-not")
+    Traceback (most recent call last):
+    ...
+    click.exceptions.BadParameter: this-is-not is not a valid package name.
+    """
+    if re.fullmatch(PublicId.PACKAGE_NAME_REGEX, package_name) is None:
+        raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
 def try_get_item_source_path(
