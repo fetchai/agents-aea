@@ -21,8 +21,8 @@
 """
 This CLI tool freezes the dependencies
 """
-import subprocess
-from subprocess import Popen
+import re
+import subprocess  # nosec
 
 
 def parse_args():
@@ -37,9 +37,14 @@ def parse_args():
 if __name__ == "__main__":
     arguments = parse_args()
 
-    pip_freeze_call = Popen(["pip", "freeze"], stdout=subprocess.PIPE)
+    pip_freeze_call = subprocess.Popen(
+        ["pip", "freeze"], stdout=subprocess.PIPE
+    )  # nosec
     (stdout, stderr) = pip_freeze_call.communicate()
     requirements = stdout.decode("utf-8")
+
+    # remove 'aea' itself
+    requirements = re.sub("aea==.*", "", requirements)
     if arguments.output is None:
         print(requirements)
     else:
