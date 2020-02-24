@@ -33,9 +33,11 @@ import pytest
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p_client.connection import PeerToPeerConnection
+from packages.fetchai.connections.p2p_client.connection import (
+    PeerToPeerClientConnection,
+)
 
-from ...conftest import P2P_CONNECTION_PUBLIC_ID, UNKNOWN_PROTOCOL_PUBLIC_ID
+from ...conftest import P2P_CLIENT_CONNECTION_PUBLIC_ID, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +53,11 @@ class TestP2p:
         cls.port = 8000
         m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
         cls.ent = entity.Entity.from_hex(m_fet_key)
-        cls.p2p_client_connection = PeerToPeerConnection(
+        cls.p2p_client_connection = PeerToPeerClientConnection(
             address=cls.ent.public_key_hex,
             provider_addr=cls.address,
             provider_port=cls.port,
-            connection_id=P2P_CONNECTION_PUBLIC_ID,
+            connection_id=P2P_CLIENT_CONNECTION_PUBLIC_ID,
         )
         cls.p2p_client_connection.loop = asyncio.get_event_loop()
 
@@ -113,11 +115,11 @@ async def test_p2p_receive():
     port = 8000
     m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
     ent = entity.Entity.from_hex(m_fet_key)
-    p2p_connection = PeerToPeerConnection(
+    p2p_connection = PeerToPeerClientConnection(
         address=ent.public_key_hex,
         provider_addr=address,
         provider_port=port,
-        connection_id=P2P_CONNECTION_PUBLIC_ID,
+        connection_id=P2P_CLIENT_CONNECTION_PUBLIC_ID,
     )
     p2p_connection.loop = asyncio.get_event_loop()
 
@@ -161,7 +163,7 @@ async def test_p2p_receive():
 
 def test_p2p_from_config():
     """Test the Connection from config File."""
-    con = PeerToPeerConnection.from_config(
+    con = PeerToPeerClientConnection.from_config(
         address="pk", connection_configuration=ConnectionConfig()
     )
     assert not con.connection_status.is_connected, "We are connected..."
