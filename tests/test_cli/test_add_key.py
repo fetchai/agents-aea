@@ -29,19 +29,18 @@ import yaml
 import aea
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 from aea.crypto.helpers import (
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
 )
-
 from ..common.click_testing import CliRunner
-from ..conftest import CLI_LOG_OPTION
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
-class TestAddKey:
-    """Test that the command 'aea add-key' works as expected."""
+class TestAddFetchKey:
+    """Test that the command 'aea add-key' works as expected for a 'fetchai' key."""
 
     @classmethod
     def setup_class(cls):
@@ -57,37 +56,102 @@ class TestAddKey:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-    def test_fetchai(self):
-        """Test that the fetch private key is created correctly."""
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", FETCHAI])
-        assert result.exit_code == 0
-        assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
+        shutil.copy(Path(CUR_PATH, "data", "fet_private_key.txt"), cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE)
 
-        # this line tests that the content of the file is correct.
-        FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
-
-        result = self.runner.invoke(
+        cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE]
         )
-        assert result.exit_code == 0
 
+    def test_return_code(self):
+        """Test return code equal to zero."""
+        assert self.result.exit_code == 0
+
+    def test_key_added(self):
+        """Test that the fetch private key has been added correctly."""
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
         private_key_path = config.private_key_paths.read(FETCHAI)
         assert private_key_path == FETCHAI_PRIVATE_KEY_FILE
-
         assert len(config.private_key_paths.read_all()) == 1
 
-    def test_ethereum(self):
-        """Test that the ethereum private key is created correctly."""
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", ETHEREUM])
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        shutil.rmtree(cls.t)
+
+
+class TestAddEthereumhKey:
+    """Test that the command 'aea add-key' works as expected for an 'ethereum' key."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = Path(cls.t, cls.agent_name)
+        os.chdir(cls.t)
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
-        assert Path(ETHEREUM_PRIVATE_KEY_FILE).exists()
+        os.chdir(Path(cls.t, cls.agent_name))
 
-        # this line tests that the content of the file is correct.
-        FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
+        shutil.copy(Path(CUR_PATH, "data", "eth_private_key.txt"), cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE)
 
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE]
+        )
+
+    def test_return_code(self):
+        """Test return code equal to zero."""
+        assert self.result.exit_code == 0
+
+    def test_key_added(self):
+        """Test that the fetch private key has been added correctly."""
+        f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
+        expected_json = yaml.safe_load(f)
+        config = AgentConfig.from_json(expected_json)
+        private_key_path = config.private_key_paths.read(ETHEREUM)
+        assert private_key_path == ETHEREUM_PRIVATE_KEY_FILE
+        assert len(config.private_key_paths.read_all()) == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        shutil.rmtree(cls.t)
+
+
+class TestAddManyKeys:
+    """Test that the command 'aea add-key' works as expected when adding many keys."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = Path(cls.t, cls.agent_name)
+        os.chdir(cls.t)
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        assert result.exit_code == 0
+        os.chdir(Path(cls.t, cls.agent_name))
+
+        shutil.copy(Path(CUR_PATH, "data", "fet_private_key.txt"), cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE)
+        shutil.copy(Path(CUR_PATH, "data", "eth_private_key.txt"), cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE)
+
+    def test_add_many_keys(self):
+        """Test that the keys are added correctly."""
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE]
+        )
+        assert result.exit_code == 0
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE]
         )
@@ -96,9 +160,10 @@ class TestAddKey:
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_path = config.private_key_paths.read(ETHEREUM)
-        assert private_key_path == ETHEREUM_PRIVATE_KEY_FILE
-
+        private_key_path_ethereum = config.private_key_paths.read(FETCHAI)
+        assert private_key_path_ethereum == FETCHAI_PRIVATE_KEY_FILE
+        private_key_path_ethereum = config.private_key_paths.read(ETHEREUM)
+        assert private_key_path_ethereum == ETHEREUM_PRIVATE_KEY_FILE
         assert len(config.private_key_paths.read_all()) == 2
 
     @classmethod
