@@ -200,7 +200,7 @@ def _get_address(ctx, type_):
         address = wallet.addresses[type_]
         return address
     except ValueError as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+        logger.error(str(e))
 
 
 @cli.command()
