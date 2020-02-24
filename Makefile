@@ -30,7 +30,20 @@ clean-test:
 	find . -name 'log.*.txt' -exec rm -fr {} +
 
 lint:
-	flake8 aea tests
+	black aea examples packages scripts tests
+	flake8 aea examples packages scripts tests
+
+security:
+	bandit -s B101 -r aea packages scripts
+	bandit -s B101 -r tests
+	safety check
+
+static:
+	mypy aea packages tests scripts
+
+test:
+	pytest --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections tests/ --cov-report=html --cov-report=xml --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections
+	rm -fr .coverage*
 
 test-all:
 	tox
