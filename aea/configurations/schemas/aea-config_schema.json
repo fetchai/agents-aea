@@ -30,10 +30,10 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "registry_path": {
       "type": "string"
@@ -94,7 +94,7 @@
       "type": "object"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   }
 }

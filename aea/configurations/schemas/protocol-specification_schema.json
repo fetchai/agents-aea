@@ -21,7 +21,7 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "speech_acts": {
       "type": "object",
@@ -37,7 +37,7 @@
       "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   },
   "definitions": {

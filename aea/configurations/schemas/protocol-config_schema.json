@@ -20,16 +20,16 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   }
 }

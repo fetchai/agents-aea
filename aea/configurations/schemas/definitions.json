@@ -39,6 +39,15 @@
     "private_key_path": {
       "type": "string"
     },
+    "license": {
+      "type": "string"
+    },
+    "fingerprint": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
     "ledger_api": {
       "type": "object"
     },

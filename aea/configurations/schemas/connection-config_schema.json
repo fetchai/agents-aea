@@ -23,10 +23,10 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "class_name": {
       "type": "string"
@@ -60,7 +60,7 @@
       "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   }
 }
