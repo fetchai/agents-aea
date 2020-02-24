@@ -258,7 +258,7 @@ def get_wealth(ctx: Context, type_):
     """Get the wealth associated with the private key."""
     try_to_load_agent_config(ctx)
     _verify_or_create_private_keys(ctx)
-    wealth = _get_wealth(ctx)
+    wealth = _get_wealth(ctx, type_)
     click.echo(wealth)
 
 
