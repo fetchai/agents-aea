@@ -31,8 +31,8 @@ from aea.cli.core import (
 )
 from aea.crypto.fetchai import FETCHAI
 
-from tests.conftest import CLI_LOG_OPTION
 from tests.common.click_testing import CliRunner
+from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock
 
 
