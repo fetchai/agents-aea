@@ -2,7 +2,9 @@ name: p2p
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmdwnPo8iC2uqf9CmB4ocbh6HP2jcgCtuFdS4djuajp6Li
+  connection.py: QmaFGuYWQU54DPanmNSuh5C65JZrxFfSPhXcSt4gmNjFMQ
 description: "The p2p connection provides a connection with the fetch.ai mail provider."
 class_name: PeerToPeerConnection
 protocols: []

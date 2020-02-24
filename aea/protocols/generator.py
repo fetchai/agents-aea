@@ -1516,7 +1516,7 @@ class ProtocolGenerator:
         protocol_yaml_str += "license: '{}'\n".format(
             self.protocol_specification.license
         )
-        protocol_yaml_str += "fingerprint: ''\n"
+        protocol_yaml_str += "fingerprint: {}\n"
         protocol_yaml_str += "dependencies: \n"
         protocol_yaml_str += "    protobuf: {} \n"
         protocol_yaml_str += "description: '{}'\n".format(

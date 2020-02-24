@@ -2,7 +2,8 @@ name: dummy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
 behaviours: {}
 handlers: {}
 models: {}

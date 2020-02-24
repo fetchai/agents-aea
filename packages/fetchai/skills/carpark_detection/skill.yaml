@@ -2,7 +2,14 @@ name: carpark_detection
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
+  behaviours.py: QmYN3W6myYNmrMViKwAuMRp9Nsp1Fn2VRHDCjThPbMiRfd
+  carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
+  detection_database.py: QmQ4swF4ZFTLsTPLh5uwDLeFZyYtJZoUCxC5mD1vxVnAGH
+  dialogues.py: QmW1CB1mHTePURgb7jqnkRzuUf3jWVB3WACnriZEPQiG9U
+  handlers.py: Qme3HhEDx4HPWzn12gMKJwRqMNZcbqbdwNsoQQu5SJWzUV
+  strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
 description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
   service_registration:
