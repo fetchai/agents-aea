@@ -26,7 +26,7 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "class_name": {
       "type": "string"

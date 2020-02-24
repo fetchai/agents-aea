@@ -61,6 +61,7 @@ Commands:
   create           Create an agent.
   delete           Delete an agent.
   fetch            Fetch Agent from Registry.
+  fingerprint      Fingerprint a resource.
   freeze           Get the dependencies.
   generate         Generate a resource for the agent.
   generate-key     Generate private keys.

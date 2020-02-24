@@ -104,7 +104,6 @@ def create(click_context, agent_name):
             author=DEFAULT_AUTHOR,
             version=DEFAULT_VERSION,
             license=DEFAULT_LICENSE,
-            fingerprint="",
             registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
             description="",
         )

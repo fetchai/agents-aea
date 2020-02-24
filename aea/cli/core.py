@@ -35,6 +35,7 @@ from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
+from aea.cli.fingerprint import fingerprint
 from aea.cli.generate import generate
 from aea.cli.install import install
 from aea.cli.list import list as _list
@@ -303,6 +304,7 @@ cli.add_command(add)
 cli.add_command(create)
 cli.add_command(config)
 cli.add_command(fetch)
+cli.add_command(fingerprint)
 cli.add_command(generate)
 cli.add_command(install)
 cli.add_command(login)

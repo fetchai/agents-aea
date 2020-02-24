@@ -2,5 +2,5 @@ name: 'scaffold'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {}
 description: "The scaffold protocol scaffolds a protocol to be implemented by the developer."

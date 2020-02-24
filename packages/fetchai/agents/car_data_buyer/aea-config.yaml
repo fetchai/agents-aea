@@ -7,7 +7,7 @@ connections:
 default_connection: fetchai/stub:0.1.0
 default_ledger: fetchai
 description: 'An agent which searches for an instance of a `car_detector` agent and attempts to purchase car park data from it.'
-fingerprint: ''
+fingerprint: {}
 ledger_apis:
   fetchai:
     network: testnet
