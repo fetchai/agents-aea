@@ -147,4 +147,10 @@ setup(
         ),
     ],
     license=about['__license__'],
+    python_requires=">=3.6",
+    keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
+    project_urls={
+        'Bug Reports': 'https://github.com/fetchai/agents-aea/issues',
+        'Source': 'https://github.com/fetchai/agents-aea',
+    },
 )
