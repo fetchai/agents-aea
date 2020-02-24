@@ -66,7 +66,7 @@ class TestContractRegistry:
         cls.fake_contract_id = PublicId.from_str("fake_author/fake:0.1.0")
         agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
         agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("contract").append(str(cls.fake_contract_id))
+        agent_config.get("contracts").append(str(cls.fake_contract_id))
         yaml.safe_dump(agent_config, open(agent_config_path, "w"))
         Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
 
@@ -76,10 +76,10 @@ class TestContractRegistry:
             PublicId("fetchai", "erc1155", "0.1.0"),
         }
 
-    def test_not_able_to_add_bad_formatted_protocol_message(self):
-        """Test that the protocol registry has not been able to add the protocol 'fake'."""
+    def test_not_able_to_add_bad_formatted_contract(self):
+        """Test that the contract registry has not been able to add the contract 'fake'."""
         self.mocked_logger.assert_called_with(
-            "Not able to add protocol '{}'.".format("fake")
+            "Not able to add contract '{}'.".format("fake")
         )
 
     def test_fetch_all(self):
@@ -105,7 +105,7 @@ class TestContractRegistry:
 
         assert set(c.id for c in self.registry.fetch_all()) == expected_contract_ids
 
-        # restore the protocol
+        # restore the contract
         self.registry.register(contract_id_removed, contract_removed)
 
     @classmethod

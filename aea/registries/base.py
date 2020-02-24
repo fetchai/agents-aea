@@ -32,7 +32,9 @@ from queue import Queue
 from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 from aea.configurations.base import (
+    ContractConfig,
     ContractId,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
@@ -210,7 +212,7 @@ class ContractRegistry(Registry[PublicId, Contract]):
                 self._add_contract(contract_package_path)
             except Exception:
                 logger.exception(
-                    "Not able to add protocol '{}'.".format(contract_package_path.name)
+                    "Not able to add contract '{}'.".format(contract_package_path.name)
                 )
 
     def setup(self) -> None:
@@ -236,8 +238,17 @@ class ContractRegistry(Registry[PublicId, Contract]):
         :param contract_directory: the directory of the contract to be added.
         :return: None
         """
-        raise NotImplementedError
-        # self.register(contract_public_id, contract)
+        config_loader = ConfigLoader("contract-config_schema.json", ContractConfig)
+        contract_config = config_loader.load(
+            open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
+        )
+
+        # instantiate the protocol manager.
+        contract = Contract(contract_config.public_id, contract_config)
+        contract_public_id = PublicId(
+            contract_config.author, contract_config.name, contract_config.version
+        )
+        self.register(contract_public_id, contract)
 
 
 class ProtocolRegistry(Registry[PublicId, Protocol]):

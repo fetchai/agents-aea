@@ -66,6 +66,13 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
+    "contracts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
     "default_connection": {
       "type": "string"
     },
