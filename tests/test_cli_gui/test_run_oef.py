@@ -23,11 +23,16 @@ import sys
 import time
 import unittest.mock
 
+import pytest
+
 from .test_base import DummyPID, create_app
 
 
-def test_create_and_run_oef():
+def test_create_and_run_oef(pytestconfig):
     """Test for running oef, reading TTY and errors."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
     app = create_app()
 
     pid = DummyPID(None, "A thing of beauty is a joy forever\n", "Testing Error\n")
@@ -100,8 +105,11 @@ def test_create_and_run_oef():
     assert "NOT_STARTED" in data["status"]
 
 
-def test_create_and_run_oef_fail():
+def test_create_and_run_oef_fail(pytestconfig):
     """Test for running oef, reading TTY and errors."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
     app = create_app()
 
     def _dummy_call_aea_async(param_list, dir_arg):

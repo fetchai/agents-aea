@@ -9,9 +9,7 @@ A framework for autonomous economic agent (AEA) development
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-
         pip install aea[all]
-
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -52,9 +50,9 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
 
-- Install development dependencies:
+- Install development dependencies (optionally skipping Lockfile creation):
 
-	  pipenv install --dev
+	  pipenv install --dev --skip-lock
 
 - Install package in development mode (this step replaces `pip install aea[all]` above):
 

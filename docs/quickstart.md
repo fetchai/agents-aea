@@ -54,7 +54,7 @@ pip install aea[all]
 ```
 
 If you are using `zsh` rather than `bash` type 
-```zsh
+``` zsh
 pip install 'aea[all]'
 ```
 
@@ -65,7 +65,7 @@ If the installation steps fail, it might be a dependency issue.
 The following hints can help:
 
 - Ubuntu/Debian systems only: install Python 3.7 headers.
-```bash
+``` bash
 sudo apt-get install python3.7-dev
 ``` 
 
@@ -102,7 +102,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
          		
 For example:		
 		
-```bash		
+``` bash		
 recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
 ```
 

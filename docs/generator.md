@@ -29,7 +29,7 @@ A protocol can be described in a yaml file.
 As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">yaml format</a>. 
 The following is an example protocol specification:
 
-```yaml
+``` yaml
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
