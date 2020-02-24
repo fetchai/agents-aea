@@ -365,6 +365,7 @@ class TestDecisionMaker:
             ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
+                self.decision_maker.message_out_queue.get()
 
     def test_decision_maker_handle_unknown_tx_message(self):
         """Test the handle tx message method."""
@@ -424,6 +425,7 @@ class TestDecisionMaker:
                     mocked_status.READY.value = False
                     self.decision_maker.handle(tx_message)
                     assert not self.decision_maker.goal_pursuit_readiness.is_ready
+                    self.decision_maker.message_out_queue.get()
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
@@ -441,6 +443,7 @@ class TestDecisionMaker:
         )
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
+        self.decision_maker.message_out_queue.get()
 
     def test_decision_maker_hand_tx_ready_for_signing(self):
         """Test that the decision maker can handle a message that is ready for signing."""
@@ -460,6 +463,7 @@ class TestDecisionMaker:
         )
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
+        self.decision_maker.message_out_queue.get()
 
     def test_decision_maker_handle_tx_message_acceptable_for_settlement(self):
         """Test that a tx_message is acceptable for settlement."""
@@ -485,6 +489,7 @@ class TestDecisionMaker:
             ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
+                self.decision_maker.message_out_queue.get()
 
     def test_decision_maker_tx_message_is_not_acceptable_for_settlement(self):
         """Test that a tx_message is not acceptable for settlement."""
@@ -511,6 +516,7 @@ class TestDecisionMaker:
             ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
+                self.decision_maker.message_out_queue.get()
 
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""
