@@ -21,12 +21,20 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },
     "protocols": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
+    "contracts": {
       "type": "array",
       "additionalProperties": false,
       "uniqueItems": true,
@@ -73,7 +81,7 @@
       "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   },
   "definitions": {

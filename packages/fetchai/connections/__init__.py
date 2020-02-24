@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the connection registry for the AEA framework."""
+"""This module contains the connection packages authored by Fetch.ai"""

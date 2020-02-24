@@ -1,16 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Schema for the connection configuration file.",
+  "description": "Schema for the contract configuration file.",
   "additionalProperties": false,
   "type": "object",
   "required": [
     "name",
     "author",
     "version",
-    "license",
-    "class_name",
-    "config",
-    "protocols"
+    "license"
   ],
   "properties": {
     "name": {
@@ -27,34 +24,6 @@
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
-    },
-    "class_name": {
-      "type": "string"
-    },
-    "protocols": {
-      "type": "array",
-      "additionalProperties": false,
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
-    "restricted_to_protocols": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
-    "excluded_protocols": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "$ref": "definitions.json#/definitions/public_id"
-      }
-    },
-    "config": {
-      "type": "object"
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"

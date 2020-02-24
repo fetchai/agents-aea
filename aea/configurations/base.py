@@ -26,6 +26,7 @@ from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, ca
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
+DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
 T = TypeVar("T")
@@ -57,6 +58,7 @@ class ConfigurationType(Enum):
     AGENT = "agent"
     PROTOCOL = "protocol"
     CONNECTION = "connection"
+    CONTRACT = "contract"
     SKILL = "skill"
 
 
@@ -73,6 +75,8 @@ def _get_default_configuration_file_name_from_type(
         return DEFAULT_CONNECTION_CONFIG_FILE
     elif item_type == ConfigurationType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
+    elif item_type == ConfigurationType.CONTRACT:
+        return DEFAULT_CONTRACT_CONFIG_FILE
     else:
         raise ValueError(
             "Item type not valid: {}".format(str(item_type))
@@ -263,6 +267,7 @@ class PublicId(JSONSerializable):
 
 ProtocolId = PublicId
 SkillId = PublicId
+ContractId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):
@@ -473,6 +478,7 @@ class SkillConfig(PackageConfiguration):
         version: str = "",
         license: str = "",
         protocols: List[PublicId] = None,
+        contracts: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
@@ -482,6 +488,9 @@ class SkillConfig(PackageConfiguration):
         self.fingerprint = {}  # type: Dict[str, str]
         self.protocols = (
             protocols if protocols is not None else []
+        )  # type: List[PublicId]
+        self.contracts = (
+            contracts if contracts is not None else []
         )  # type: List[PublicId]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -499,6 +508,7 @@ class SkillConfig(PackageConfiguration):
             "license": self.license,
             "fingerprint": self.fingerprint,
             "protocols": sorted(map(str, self.protocols)),
+            "contracts": sorted(map(str, self.contracts)),
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
@@ -517,6 +527,10 @@ class SkillConfig(PackageConfiguration):
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
         )
+        contracts = cast(
+            List[PublicId],
+            [PublicId.from_str(id_) for id_ in obj.get("contracts", [])],
+        )
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -525,6 +539,7 @@ class SkillConfig(PackageConfiguration):
             version=version,
             license=license,
             protocols=protocols,
+            contracts=contracts,
             dependencies=dependencies,
             description=description,
         )
@@ -792,3 +807,49 @@ class ProtocolSpecification(ProtocolConfig):
                             )
                         )
                 content_dict[content_name] = content_type
+
+
+class ContractConfig(PackageConfiguration):
+    """Handle contract configuration."""
+
+    def __init__(
+        self,
+        name: str = "",
+        author: str = "",
+        version: str = "",
+        license: str = "",
+        dependencies: Optional[Dependencies] = None,
+        description: str = "",
+    ):
+        """Initialize a protocol configuration object."""
+        super().__init__(name, author, version)
+        self.license = license
+        self.fingerprint = ""
+        self.dependencies = dependencies if dependencies is not None else {}
+        self.description = description
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "author": self.author,
+            "version": self.version,
+            "license": self.license,
+            "fingerprint": self.fingerprint,
+            "dependencies": self.dependencies,
+            "description": self.description,
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        return ContractConfig(
+            name=cast(str, obj.get("name")),
+            author=cast(str, obj.get("author")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            dependencies=dependencies,
+            description=cast(str, obj.get("description", "")),
+        )

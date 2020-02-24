@@ -30,7 +30,7 @@
       "$ref": "definitions.json#/definitions/version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
@@ -66,6 +66,13 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
+    "contracts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
+    },
     "default_connection": {
       "type": "string"
     },
@@ -87,7 +94,7 @@
       "type": "object"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   }
 }

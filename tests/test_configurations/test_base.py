@@ -28,6 +28,7 @@ from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -40,6 +41,7 @@ from aea.configurations.base import (
 from ..conftest import (
     agent_config_files,
     connection_config_files,
+    contract_config_files,
     protocol_config_files,
     skill_config_files,
 )
@@ -95,6 +97,23 @@ class TestCRUDCollection:
 
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
+
+
+class TestContractConfig:
+    """Test the contract configuration class."""
+
+    @pytest.mark.parametrize("contract_path", contract_config_files)
+    def test_from_json_and_to_json(self, contract_path):
+        """Test the 'from_json' method and 'to_json' work correctly."""
+        f = open(contract_path)
+        original_json = yaml.safe_load(f)
+
+        expected_config = ContractConfig.from_json(original_json)
+        assert isinstance(expected_config, ContractConfig)
+        expected_json = expected_config.json
+        actual_config = ContractConfig.from_json(expected_json)
+        actual_json = actual_config.json
+        assert expected_json == actual_json
 
 
 class TestConnectionConfig:
@@ -178,6 +197,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
         _get_default_configuration_file_name_from_type("connection")
         _get_default_configuration_file_name_from_type("protocol")
         _get_default_configuration_file_name_from_type("skill")
+        _get_default_configuration_file_name_from_type("contract")
 
 
 class PublicIdTestCase(TestCase):

@@ -32,6 +32,9 @@ from queue import Queue
 from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 from aea.configurations.base import (
+    ContractConfig,
+    ContractId,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
@@ -39,6 +42,7 @@ from aea.configurations.base import (
     SkillId,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts.base import Contract
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
@@ -115,6 +119,136 @@ class Registry(Generic[ItemId, Item], ABC):
 
         :return: None
         """
+
+
+class ContractRegistry(Registry[PublicId, Contract]):
+    """This class implements the contracts registry."""
+
+    def __init__(self) -> None:
+        """
+        Instantiate the registry.
+
+        :return: None
+        """
+        self._contracts = {}  # type: Dict[ContractId, Contract]
+
+    def register(self, contract_id: ContractId, contract: Contract) -> None:
+        """
+        Register a contract.
+
+        :param contract_id: the public id of the contract.
+        :param contract: the contract object.
+        """
+        if contract_id in self._contracts.keys():
+            raise ValueError(
+                "Contract already registered with contract id '{}'".format(contract_id)
+            )
+        if contract.id != contract_id:
+            raise ValueError(
+                "Contract id '{}' is different to the id '{}' specified.".format(
+                    contract.id, contract_id
+                )
+            )
+        self._contracts[contract_id] = contract
+
+    def unregister(self, contract_id: ContractId) -> None:
+        """
+        Unregister a contract.
+
+        :param contract_id: the contract id
+        """
+        if contract_id not in self._contracts.keys():
+            raise ValueError(
+                "No contract registered with contract id '{}'".format(contract_id)
+            )
+        removed_contract = self._contracts.pop(contract_id)
+        logger.debug("Contract '{}' has been removed.".format(removed_contract.id))
+
+    def fetch(self, contract_id: ContractId) -> Optional[Contract]:
+        """
+        Fetch the contract by id.
+
+        :param contract_id: the contract id
+        :return: the contract or None if the contract is not registered
+        """
+        return self._contracts.get(contract_id, None)
+
+    def fetch_all(self) -> List[Contract]:
+        """Fetch all the contracts."""
+        return list(self._contracts.values())
+
+    def populate(self, directory: str) -> None:
+        """
+        Load the contract from the directory
+
+        :param directory: the filepath to the agent's resource directory.
+        :return: None
+        """
+        contract_directory_paths = set()  # type: ignore
+
+        # find all contract directories from vendor/*/contracts
+        contract_directory_paths.update(
+            Path(directory, "vendor").glob("./*/contracts/*/")
+        )
+        # find all contract directories from contracts/
+        contract_directory_paths.update(Path(directory, "contracts").glob("./*/"))
+
+        contract_packages_paths = list(
+            filter(
+                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
+                contract_directory_paths,
+            )
+        )  # type: ignore
+        logger.debug(
+            "Found the following contract packages: {}".format(
+                pprint.pformat(map(str, contract_directory_paths))
+            )
+        )
+        for contract_package_path in contract_packages_paths:
+            try:
+                logger.debug(
+                    "Processing the contract package '{}'".format(contract_package_path)
+                )
+                self._add_contract(contract_package_path)
+            except Exception:
+                logger.exception(
+                    "Not able to add contract '{}'.".format(contract_package_path.name)
+                )
+
+    def setup(self) -> None:
+        """
+        Set up the registry.
+
+        :return: None
+        """
+        pass
+
+    def teardown(self) -> None:
+        """
+        Teardown the registry.
+
+        :return: None
+        """
+        self._contracts = {}
+
+    def _add_contract(self, contract_directory: Path):
+        """
+        Add a contract.
+
+        :param contract_directory: the directory of the contract to be added.
+        :return: None
+        """
+        config_loader = ConfigLoader("contract-config_schema.json", ContractConfig)
+        contract_config = config_loader.load(
+            open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
+        )
+
+        # instantiate the protocol manager.
+        contract = Contract(contract_config.public_id, contract_config)
+        contract_public_id = PublicId(
+            contract_config.author, contract_config.name, contract_config.version
+        )
+        self.register(contract_public_id, contract)
 
 
 class ProtocolRegistry(Registry[PublicId, Protocol]):
@@ -516,12 +650,14 @@ class Resources(object):
             if directory is not None
             else str(Path(".").absolute())
         )
+        self.contract_registry = ContractRegistry()
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = ComponentRegistry[Behaviour]()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
+            self.contract_registry,
             self.protocol_registry,
             self.handler_registry,
             self.behaviour_registry,
@@ -534,6 +670,7 @@ class Resources(object):
 
     def load(self, agent_context: AgentContext) -> None:
         """Load all the resources."""
+        self.contract_registry.populate(self.directory)
         self.protocol_registry.populate(self.directory)
         self.populate_skills(self.directory, agent_context)
 
@@ -571,6 +708,7 @@ class Resources(object):
                 skill = Skill.from_dir(str(skill_directory), agent_context)
                 assert skill is not None
                 self.add_skill(skill)
+                self.inject_contracts(skill)
             except Exception as e:
                 logger.warning(
                     "A problem occurred while parsing the skill directory {}. Exception: {}".format(
@@ -578,7 +716,7 @@ class Resources(object):
                     )
                 )
 
-    def add_skill(self, skill: Skill):
+    def add_skill(self, skill: Skill) -> None:
         """Add a skill to the set of resources."""
         skill_id = skill.config.public_id
         self._skills[skill_id] = skill
@@ -588,6 +726,19 @@ class Resources(object):
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
                 self.behaviour_registry.register((skill_id, behaviour.name), behaviour)
+
+    def inject_contracts(self, skill: Skill) -> None:
+        if skill.config.contracts is not None:
+            # check all contracts are present
+            contracts = {}  # type: Dict[str, Contract]
+            for contract_id in skill.config.contracts:
+                contract = self.contract_registry.fetch(contract_id)
+                if contract is None:
+                    raise ValueError(
+                        "Missing contract for contract id {}".format(contract_id)
+                    )
+                contracts[contract_id.name] = contract
+            skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""

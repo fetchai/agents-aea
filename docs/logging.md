@@ -45,7 +45,7 @@ you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.
 
-```yaml
+``` yaml
 logging_config:
   version: 1
   disable_existing_loggers: False

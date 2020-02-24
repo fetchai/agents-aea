@@ -33,6 +33,7 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -40,9 +41,79 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import ProtocolRegistry, Resources
+from aea.registries.base import ContractRegistry, ProtocolRegistry, Resources
 
 from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
+
+
+class TestContractRegistry:
+    """Test the contract registry."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
+        cls.mocked_logger = cls.patch.__enter__()
+
+        cls.oldcwd = os.getcwd()
+        cls.agent_name = "agent_dir_test"
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = os.path.join(cls.t, cls.agent_name)
+        shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
+
+        # make fake contract
+        cls.fake_contract_id = PublicId.from_str("fake_author/fake:0.1.0")
+        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
+        agent_config = yaml.safe_load(agent_config_path.read_text())
+        agent_config.get("contracts").append(str(cls.fake_contract_id))
+        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
+        Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
+
+        cls.registry = ContractRegistry()
+        cls.registry.populate(cls.agent_folder)
+        cls.expected_contract_ids = {
+            PublicId("fetchai", "erc1155", "0.1.0"),
+        }
+
+    def test_not_able_to_add_bad_formatted_contract(self):
+        """Test that the contract registry has not been able to add the contract 'fake'."""
+        self.mocked_logger.assert_called_with(
+            "Not able to add contract '{}'.".format("fake")
+        )
+
+    def test_fetch_all(self):
+        """Test that the 'fetch_all' method works as expected."""
+        contracts = self.registry.fetch_all()
+        assert all(isinstance(c, Contract) for c in contracts)
+        assert set(c.id for c in contracts) == self.expected_contract_ids
+
+    def test_fetch(self):
+        """ Test that the `fetch` method works as expected."""
+        contract_id = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract = self.registry.fetch(contract_id)
+        assert isinstance(contract, Contract)
+        assert contract.id == contract_id
+
+    def test_unregister(self):
+        """Test that the 'unregister' method works as expected."""
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract_removed = self.registry.fetch(contract_id_removed)
+        self.registry.unregister(contract_id_removed)
+        expected_contract_ids = set(self.expected_contract_ids)
+        expected_contract_ids.remove(contract_id_removed)
+
+        assert set(c.id for c in self.registry.fetch_all()) == expected_contract_ids
+
+        # restore the contract
+        self.registry.register(contract_id_removed, contract_removed)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the tests."""
+        cls.mocked_logger.__exit__()
+        shutil.rmtree(cls.t, ignore_errors=True)
+        os.chdir(cls.oldcwd)
 
 
 class TestProtocolRegistry:

@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol packages authored by Fetch.ai."""
+"""This module contains the support resources for the scaffold contract."""

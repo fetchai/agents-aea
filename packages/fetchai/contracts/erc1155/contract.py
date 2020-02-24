@@ -17,4 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol packages authored by Fetch.ai."""
+"""This module contains the scaffold contract definition."""
+
+from aea.configurations.base import PublicId
+from aea.contracts.base import Contract
+
+
+class MyScaffoldContract(Contract):
+    """The scaffold contract class."""
+
+    contract_id = PublicId("fetchai", "scaffold", "0.1.0")
+
+    def __init__(self, **kwargs):
+        """
+        Initialize.
+
+        :param performative: the type of message.
+        """
+        super().__init__(**kwargs)
