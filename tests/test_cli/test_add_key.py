@@ -29,12 +29,13 @@ import yaml
 import aea
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
 )
+
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -56,7 +57,10 @@ class TestAddFetchKey:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        shutil.copy(Path(CUR_PATH, "data", "fet_private_key.txt"), cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE)
+        shutil.copy(
+            Path(CUR_PATH, "data", "fet_private_key.txt"),
+            cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE,
+        )
 
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE]
@@ -99,7 +103,10 @@ class TestAddEthereumhKey:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        shutil.copy(Path(CUR_PATH, "data", "eth_private_key.txt"), cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE)
+        shutil.copy(
+            Path(CUR_PATH, "data", "eth_private_key.txt"),
+            cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE,
+        )
 
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE]
@@ -142,8 +149,14 @@ class TestAddManyKeys:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        shutil.copy(Path(CUR_PATH, "data", "fet_private_key.txt"), cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE)
-        shutil.copy(Path(CUR_PATH, "data", "eth_private_key.txt"), cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE)
+        shutil.copy(
+            Path(CUR_PATH, "data", "fet_private_key.txt"),
+            cls.agent_folder / FETCHAI_PRIVATE_KEY_FILE,
+        )
+        shutil.copy(
+            Path(CUR_PATH, "data", "eth_private_key.txt"),
+            cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE,
+        )
 
     def test_add_many_keys(self):
         """Test that the keys are added correctly."""
