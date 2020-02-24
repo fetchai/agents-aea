@@ -697,6 +697,7 @@ class Resources(object):
                 skill = Skill.from_dir(str(skill_directory), agent_context)
                 assert skill is not None
                 self.add_skill(skill)
+                self.inject_contracts(skill)
             except Exception as e:
                 logger.warning(
                     "A problem occurred while parsing the skill directory {}. Exception: {}".format(
@@ -704,7 +705,7 @@ class Resources(object):
                     )
                 )
 
-    def add_skill(self, skill: Skill):
+    def add_skill(self, skill: Skill) -> None:
         """Add a skill to the set of resources."""
         skill_id = skill.config.public_id
         self._skills[skill_id] = skill
@@ -714,9 +715,19 @@ class Resources(object):
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
                 self.behaviour_registry.register((skill_id, behaviour.name), behaviour)
+
+    def inject_contracts(self, skill: Skill) -> None:
         if skill.config.contracts is not None:
-            for contract in skill.config.contracts:
-                self.contract_registry.fetch(contract)
+            # check all contracts are present
+            contracts = {}  # type: Dict[str, Contract]
+            for contract_id in skill.config.contracts:
+                contract = self.contract_registry.fetch(contract_id)
+                if contract is None:
+                    raise ValueError(
+                        "Missing contract for contract id {}".format(contract_id)
+                    )
+                contracts[contract_id.name] = contract
+            skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""

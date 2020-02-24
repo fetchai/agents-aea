@@ -28,7 +28,7 @@ from aea.protocols.base import Message
 class MyScaffoldMessage(Message):
     """The scaffold message class."""
 
-    protocol_id = PublicId("my_author_name", "my_scaffold_protocol", "0.1.0")
+    protocol_id = PublicId("fetchai", "scaffold", "0.1.0")
 
     class Performative(Enum):
         """Scaffold Message types."""

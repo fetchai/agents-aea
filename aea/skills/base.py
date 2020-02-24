@@ -198,7 +198,6 @@ class SkillContext:
         assert self._logger is not None, "Logger not set."
         return self._logger
 
-
     def __getattr__(self, item) -> Any:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
@@ -520,7 +519,16 @@ class Skill:
         self.handlers = handlers if handlers is not None else {}
         self.behaviours = behaviours if behaviours is not None else {}
         self.models = models if models is not None else {}
-        self.contracts = {}  # type: Dict[str, Contract]
+        self._contracts = {}  # type: Dict[str, Contract]
+
+    @property
+    def contracts(self) -> Dict[str, Contract]:
+        """Get the contracts associated with the skill."""
+        return self._contracts
+
+    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
+        """Add the contracts to the skill."""
+        self._contracts = contracts
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":

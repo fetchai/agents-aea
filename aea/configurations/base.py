@@ -27,6 +27,7 @@ from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, ca
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
+DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
 T = TypeVar("T")
@@ -75,6 +76,8 @@ def _get_default_configuration_file_name_from_type(
         return DEFAULT_CONNECTION_CONFIG_FILE
     elif item_type == ConfigurationType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
+    elif item_type == ConfigurationType.CONTRACT:
+        return DEFAULT_CONTRACT_CONFIG_FILE
     else:
         raise ValueError(
             "Item type not valid: {}".format(str(item_type))
@@ -842,7 +845,7 @@ class ContractConfig(PackageConfiguration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
-        return ProtocolConfig(
+        return ContractConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
