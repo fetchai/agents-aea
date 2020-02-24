@@ -42,7 +42,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
-from aea.skills.base import AgentContext, Behaviour, Handler, Skill, Model
+from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ DECISION_MAKER = "decision_maker"
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
 ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task)
+SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Registry(Generic[ItemId, Item], ABC):
@@ -526,7 +526,7 @@ class Resources(object):
             self.protocol_registry,
             self.handler_registry,
             self.behaviour_registry,
-            self.model_registry
+            self.model_registry,
         ]
 
     @property
