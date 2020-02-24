@@ -33,7 +33,7 @@ import pytest
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p.connection import PeerToPeerConnection
+from packages.fetchai.connections.p2p_client.connection import PeerToPeerConnection
 
 from ...conftest import P2P_CONNECTION_PUBLIC_ID, UNKNOWN_PROTOCOL_PUBLIC_ID
 
@@ -51,17 +51,17 @@ class TestP2p:
         cls.port = 8000
         m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
         cls.ent = entity.Entity.from_hex(m_fet_key)
-        cls.p2p_connection = PeerToPeerConnection(
+        cls.p2p_client_connection = PeerToPeerConnection(
             address=cls.ent.public_key_hex,
             provider_addr=cls.address,
             provider_port=cls.port,
             connection_id=P2P_CONNECTION_PUBLIC_ID,
         )
-        cls.p2p_connection.loop = asyncio.get_event_loop()
+        cls.p2p_client_connection.loop = asyncio.get_event_loop()
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
-        assert self.p2p_connection.address == self.ent.public_key_hex
+        assert self.p2p_client_connection.address == self.ent.public_key_hex
 
     async def test_connection(self):
         """Test the connection and disconnection from the p2p connection."""
@@ -73,7 +73,7 @@ class TestP2p:
                 "register",
                 return_value={"status": "OK"},
             ):
-                await self.p2p_connection.connect()
+                await self.p2p_client_connection.connect()
 
     async def test_send(self):
         """Test the send functionality of the p2p connection."""
@@ -91,7 +91,7 @@ class TestP2p:
                 "send_message",
                 return_value={"status": "OK"},
             ):
-                await self.p2p_connection.send(envelope=envelope)
+                await self.p2p_client_connection.send(envelope=envelope)
                 # TODO: Consider returning the response from the server in order to be able to assert that the message send!
                 assert True
 
@@ -102,8 +102,8 @@ class TestP2p:
             "unregister",
             return_value={"status": "OK"},
         ):
-            await self.p2p_connection.disconnect()
-            assert self.p2p_connection.connection_status.is_connected is False
+            await self.p2p_client_connection.disconnect()
+            assert self.p2p_client_connection.connection_status.is_connected is False
 
 
 @pytest.mark.asyncio
