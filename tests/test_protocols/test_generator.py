@@ -28,7 +28,18 @@ import tempfile
 import time
 import yaml
 from pathlib import Path
+from threading import Thread
 
+from aea.aea import AEA
+from aea.configurations.base import ProtocolConfig, PublicId
+from aea.connections.stub.connection import StubConnection
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
+from aea.protocols.base import Protocol
+from aea.registries.base import Resources
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.mail.base import Envelope
@@ -55,7 +66,92 @@ class TestGenerateProtocol:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_generated_protocol(self):
+    def test_generated_protocol_via_message(self):
+        """Test that a generated protocol could be used in exchanging messages between two agents."""
+        # create a message
+        message = TwoPartyNegotiationMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+        )
+
+        # serialise the message
+        encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+
+        # deserialise the message
+        decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
+
+        # Compare the original message with the serialised+deserialised message
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+
+    def test_generated_protocol_programmatic(self):
+        """Test that a generated protocol could be used in exchanging messages between two agents."""
+        wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+        # stub_connection = StubConnection(
+        #     input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+        # )
+        ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
+        resources = Resources()
+        identity = Identity(
+            name="my_aea",
+            address=wallet.addresses.get(FETCHAI),
+            default_address_key=FETCHAI,
+        )
+
+        input_file = tempfile.mkstemp()[1]
+        output_file = tempfile.mkstemp()[1]
+
+        # Create our AEA
+        aea = AEA(identity, [StubConnection(input_file, output_file)], wallet, ledger_apis, resources)
+
+        # Add the generated protocol
+        generated_protocol_configuration = ProtocolConfig.from_json(
+            yaml.safe_load(
+                open(os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation", "protocol.yaml"))
+            )
+        )
+        generated_protocol = Protocol(
+            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+            TwoPartyNegotiationSerializer(),
+            generated_protocol_configuration,
+        )
+        resources.protocol_registry.register(
+            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"), generated_protocol
+        )
+
+        # create message
+        message = TwoPartyNegotiationMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+        )
+        message.counterparty = identity.address
+        encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+        envelope = Envelope(
+            to=identity.address,
+            sender=identity.address,
+            protocol_id=TwoPartyNegotiationMessage.protocol_id,
+            message=encoded_message_in_bytes,
+        )
+
+        t = Thread(target=aea.start)
+        try:
+            t.start()
+            time.sleep(1.0)
+            aea.outbox.put(envelope)
+
+        finally:
+            aea.stop()
+            t.join()
+
+    def test_generated_protocol_1_agent(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
         # create agent
         result = self.runner.invoke(
@@ -126,7 +222,7 @@ class TestGenerateProtocol:
             )
             assert result.exit_code == 0
 
-    def test_generated_protocol_2(self):
+    def test_generated_protocol_2_agents(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
         # add packages folder
         packages_src = os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation")
