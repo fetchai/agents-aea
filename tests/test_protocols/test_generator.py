@@ -21,31 +21,37 @@
 import inspect
 import logging
 import os
-import pytest
 import shutil
 import tempfile
 import time
-import yaml
 from threading import Thread
 from typing import Optional
 
+import pytest
+
+import yaml
+
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig, PublicId, ProtocolId
+from aea.configurations.base import ProtocolConfig, ProtocolId, PublicId
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Protocol, Message
+from aea.protocols.base import Message, Protocol
 from aea.registries.base import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from tests.data.generator.two_party_negotiation.message import TwoPartyNegotiationMessage
-from tests.data.generator.two_party_negotiation.serialization import TwoPartyNegotiationSerializer
+from tests.data.generator.two_party_negotiation.message import (
+    TwoPartyNegotiationMessage,
+)
+from tests.data.generator.two_party_negotiation.serialization import (
+    TwoPartyNegotiationSerializer,
+)
 
 from ..common.click_testing import CliRunner
 
@@ -87,7 +93,9 @@ class TestGenerateProtocol:
         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
+        decoded_message = TwoPartyNegotiationSerializer().decode(
+            encoded_message_in_bytes
+        )
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -129,7 +137,16 @@ class TestGenerateProtocol:
         # add generated protocols to resources
         generated_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(
-                open(os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation", "protocol.yaml"))
+                open(
+                    os.path.join(
+                        self.cwd,
+                        "tests",
+                        "data",
+                        "generator",
+                        "two_party_negotiation",
+                        "protocol.yaml",
+                    )
+                )
             )
         )
         generated_protocol = Protocol(
@@ -172,7 +189,9 @@ class TestGenerateProtocol:
         encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(message_2)
 
         # add handlers to AEA resources
-        agent_1_handler = Agent1Handler(skill_context=SkillContext(aea_1.context), name="fake_skill")
+        agent_1_handler = Agent1Handler(
+            skill_context=SkillContext(aea_1.context), name="fake_skill"
+        )
         resources_1.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
@@ -180,7 +199,11 @@ class TestGenerateProtocol:
             ),
             agent_1_handler,
         )
-        agent_2_handler = Agent2Handler(encoded_messsage=encoded_message_2_in_bytes, skill_context=SkillContext(aea_2.context), name="fake_skill")
+        agent_2_handler = Agent2Handler(
+            encoded_messsage=encoded_message_2_in_bytes,
+            skill_context=SkillContext(aea_2.context),
+            name="fake_skill",
+        )
         resources_2.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
@@ -209,19 +232,49 @@ class TestGenerateProtocol:
             time.sleep(1.0)
             aea_1.outbox.put(envelope)
             time.sleep(5.0)
-            assert agent_2_handler.handled_message.message_id == message.message_id, "Message from Agent 1 to 2: message ids do not match"
-            assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference, "Message from Agent 1 to 2: dialogue references do not match"
-            assert agent_2_handler.handled_message.dialogue_reference[0] == message.dialogue_reference[0], "Message from Agent 1 to 2: dialogue reference[0]s do not match"
-            assert agent_2_handler.handled_message.dialogue_reference[1] == message.dialogue_reference[1], "Message from Agent 1 to 2: dialogue reference[1]s do not match"
-            assert agent_2_handler.handled_message.target == message.target, "Message from Agent 1 to 2: targets do not match"
-            assert agent_2_handler.handled_message.performative == message.performative, "Message from Agent 1 to 2: performatives do not match"
+            assert (
+                agent_2_handler.handled_message.message_id == message.message_id
+            ), "Message from Agent 1 to 2: message ids do not match"
+            assert (
+                agent_2_handler.handled_message.dialogue_reference
+                == message.dialogue_reference
+            ), "Message from Agent 1 to 2: dialogue references do not match"
+            assert (
+                agent_2_handler.handled_message.dialogue_reference[0]
+                == message.dialogue_reference[0]
+            ), "Message from Agent 1 to 2: dialogue reference[0]s do not match"
+            assert (
+                agent_2_handler.handled_message.dialogue_reference[1]
+                == message.dialogue_reference[1]
+            ), "Message from Agent 1 to 2: dialogue reference[1]s do not match"
+            assert (
+                agent_2_handler.handled_message.target == message.target
+            ), "Message from Agent 1 to 2: targets do not match"
+            assert (
+                agent_2_handler.handled_message.performative == message.performative
+            ), "Message from Agent 1 to 2: performatives do not match"
 
-            assert agent_1_handler.handled_message.message_id == message_2.message_id, "Message from Agent 1 to 2: dialogue references do not match"
-            assert agent_1_handler.handled_message.dialogue_reference == message_2.dialogue_reference, "Message from Agent 2 to 1: dialogue references do not match"
-            assert agent_1_handler.handled_message.dialogue_reference[0] == message_2.dialogue_reference[0], "Message from Agent 2 to 1: dialogue reference[0]s do not match"
-            assert agent_1_handler.handled_message.dialogue_reference[1] == message_2.dialogue_reference[1], "Message from Agent 2 to 1: dialogue reference[1]s do not match"
-            assert agent_1_handler.handled_message.target == message_2.target, "Message from Agent 2 to 1: targets do not match"
-            assert agent_1_handler.handled_message.performative == message_2.performative, "Message from Agent 2 to 1: performatives do not match"
+            assert (
+                agent_1_handler.handled_message.message_id == message_2.message_id
+            ), "Message from Agent 1 to 2: dialogue references do not match"
+            assert (
+                agent_1_handler.handled_message.dialogue_reference
+                == message_2.dialogue_reference
+            ), "Message from Agent 2 to 1: dialogue references do not match"
+            assert (
+                agent_1_handler.handled_message.dialogue_reference[0]
+                == message_2.dialogue_reference[0]
+            ), "Message from Agent 2 to 1: dialogue reference[0]s do not match"
+            assert (
+                agent_1_handler.handled_message.dialogue_reference[1]
+                == message_2.dialogue_reference[1]
+            ), "Message from Agent 2 to 1: dialogue reference[1]s do not match"
+            assert (
+                agent_1_handler.handled_message.target == message_2.target
+            ), "Message from Agent 2 to 1: targets do not match"
+            assert (
+                agent_1_handler.handled_message.performative == message_2.performative
+            ), "Message from Agent 2 to 1: performatives do not match"
             time.sleep(2.0)
         finally:
             aea_1.stop()
@@ -386,7 +439,9 @@ class TestGenerateProtocol:
 class Agent1Handler(Handler):
     """The handler for agent 1."""
 
-    SUPPORTED_PROTOCOL = TwoPartyNegotiationMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = (
+        TwoPartyNegotiationMessage.protocol_id
+    )  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -418,7 +473,9 @@ class Agent1Handler(Handler):
 class Agent2Handler(Handler):
     """The handler for agent 2."""
 
-    SUPPORTED_PROTOCOL = TwoPartyNegotiationMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = (
+        TwoPartyNegotiationMessage.protocol_id
+    )  # type: Optional[ProtocolId]
 
     def __init__(self, encoded_messsage, **kwargs):
         """Initialize the handler."""
