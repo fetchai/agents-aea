@@ -82,7 +82,7 @@ class HTTPChannel:
 
         for path_name, path_value in paths.items():
             try:
-                envelope = _decode_path(path_name, path_value)
+                envelope = self._decode_path(path_name, path_value)
                 assert self.in_queue is not None, "Input queue not initialized."
                 assert self._loop is not None, "Loop not initialized."
                 # Ok to put these Envelopes in_queue during HTTPChannel initialization?
@@ -104,7 +104,7 @@ class HTTPChannel:
         sender = 'TBD'  # hardcoded for now
         protocol_id = PublicId.from_str('fetchai/http:0.1.0')  # hardcoded for now
         uri = URI(f"http://{self.host}:{self.port}{path_name}")
-        context = EnvelopeContext(connection_id=self._connection_id, uri=uri)
+        context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         # Msg consists of all of the responses for each REST req in JSON format.
         responses = {}
         for req_type, req_value in path_value.items():
@@ -114,7 +114,7 @@ class HTTPChannel:
         return Envelope(to=to, sender=sender, protocol_id=protocol_id,
                         message=message, context=context)
 
-    def _process_req(self, http_method: str, url: str, param: dict):
+    def _process_req(self, http_method: str, url: str, param: dict, body: dict = {}):
         """Process incoming API request by packaging into Envelope and sending it in-queue.
 
         """
@@ -122,11 +122,17 @@ class HTTPChannel:
         protocol_id = PublicId.from_str('fetchai/http:0.1.0')
         uri = URI(f"http://{self.host}:{self.port}{url}")
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
-        msg_bytes = json.dumps(param).encode()
+        msg = {
+            'performative': http_method,
+            'payload': body,
+            'params': param,
+            'path': url
+        }
+        msg_bytes = json.dumps(msg).encode()
 
         envelope = Envelope(
             to=self.address,
-            sender= self._client_id,
+            sender=self._client_id,
             protocol_id=protocol_id,
             context=context,
             message=msg_bytes,
@@ -152,7 +158,7 @@ class HTTPChannel:
                     # handler.set_channel(self)
                     self.httpd = HTTPServer((self.host, self.port), HTTPHandlerFactory(self))
                     # self.httpd = HTTPServer((self.host, self.port), handler)
-                    logger.debug(f"HTTP Server has connected to port {self.port}.")                                                                              
+                    logger.debug(f"HTTP Server has connected to port {self.port}.")
                     self.httpd.serve_forever()
                 except OSError:
                     logger.error(f"{host}:{port} is already in use, please try another Socket.")
@@ -190,16 +196,31 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
+
             parsed_path = urlparse(self.path)
             url = parsed_path.path
             # url = parsed_path.geturl()
             param = parse_qs(parsed_path.query)
             # self.wfile.write(self.path.encode())
+
             self._channel._process_req('GET', url, param)
 
-        def do_POST(s):
+        def do_POST(self):
             """Respond to a POST request."""
-            pass
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            parsed_path = urlparse(self.path)
+            url = parsed_path.path
+            # url = parsed_path.geturl()
+            param = parse_qs(parsed_path.query)
+            # self.wfile.write(self.path.encode())
+
+            content_length = int(self.headers['Content-Length'])
+            body = self.rfile.read(content_length).decode()
+
+            self._channel._process_req('POST', url, param, body)
 
     return HTTPHandler
 
@@ -239,7 +260,7 @@ class HTTPConnection(Connection):
 
         if kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
-        
+
         super().__init__(*args, **kwargs)
         self.address = address
         self.channel = HTTPChannel(address, host, port, api_spec,
