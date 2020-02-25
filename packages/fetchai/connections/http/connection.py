@@ -114,7 +114,7 @@ class HTTPChannel:
         return Envelope(to=to, sender=sender, protocol_id=protocol_id,
                         message=message, context=context)
 
-    def _process_req(self, http_method: str, url: str, param: dict, body: dict = {}):
+    def _process_request(self, http_method: str, url: str, param: str, body: str = '{}'):
         """Process incoming API request by packaging into Envelope and sending it in-queue.
 
         """
@@ -122,14 +122,15 @@ class HTTPChannel:
         protocol_id = PublicId.from_str('fetchai/http:0.1.0')
         uri = URI(f"http://{self.host}:{self.port}{url}")
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
+        # Prepare the Envelope's message body and encode it into bytes.
         msg = {
             'performative': http_method,
-            'payload': body,
+            'path': url,
             'params': param,
-            'path': url
+            'payload': body,
         }
         msg_bytes = json.dumps(msg).encode()
-
+        # Prepare the Envelope itself using the provided variables.
         envelope = Envelope(
             to=self.address,
             sender=self._client_id,
@@ -137,8 +138,16 @@ class HTTPChannel:
             context=context,
             message=msg_bytes,
         )
-
+        # Send the Envelope to the Agent's InBox.
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
+
+    def _send_response():
+        """Pass the response from out-bounded Envelope back to the front-end client.
+
+        Currently, the response will be written back in the cmd terminal.
+        """
+        # self.wfile.write(self.path.encode())
+        pass
 
     def connect(self):
         """
@@ -201,9 +210,9 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             url = parsed_path.path
             # url = parsed_path.geturl()
             param = parse_qs(parsed_path.query)
-            # self.wfile.write(self.path.encode())
+            param = json.dumps(param)
 
-            self._channel._process_req('GET', url, param)
+            self._channel._process_request('GET', url, param)
 
         def do_POST(self):
             """Respond to a POST request."""
@@ -215,12 +224,12 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             url = parsed_path.path
             # url = parsed_path.geturl()
             param = parse_qs(parsed_path.query)
-            # self.wfile.write(self.path.encode())
+            param = json.dumps(param)
 
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length).decode()
 
-            self._channel._process_req('POST', url, param, body)
+            self._channel._process_request('POST', url, param, body)
 
     return HTTPHandler
 
