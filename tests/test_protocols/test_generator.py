@@ -23,21 +23,15 @@ import logging
 import os
 import pytest
 import shutil
-import signal
-import subprocess  # nosec
-import sys
 import tempfile
 import time
 import yaml
-from pathlib import Path
 from threading import Thread
-from typing import cast, Optional
+from typing import Optional
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.cli import cli
-from aea.configurations.base import ProtocolConfig, PublicId, AgentConfig, DEFAULT_AEA_CONFIG_FILE, ProtocolId
-from aea.connections.stub.connection import StubConnection
+from aea.configurations.base import ProtocolConfig, PublicId, ProtocolId
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.crypto.ledger_apis import LedgerApis
@@ -53,7 +47,6 @@ from packages.fetchai.connections.oef.connection import OEFConnection
 from tests.data.generator.two_party_negotiation.message import TwoPartyNegotiationMessage
 from tests.data.generator.two_party_negotiation.serialization import TwoPartyNegotiationSerializer
 
-from ..conftest import CLI_LOG_OPTION
 from ..common.click_testing import CliRunner
 
 logger = logging.getLogger("aea")
@@ -80,8 +73,8 @@ class TestGenerateProtocol:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_generated_protocol_via_message(self):
-        """Test that a generated protocol could be used in exchanging messages between two agents."""
+    def test_generated_protocol_serialisation(self):
+        """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message
         message = TwoPartyNegotiationMessage(
             message_id=1,
@@ -104,11 +97,13 @@ class TestGenerateProtocol:
         assert decoded_message.target == message.target
         assert decoded_message.performative == message.performative
 
-    def test_generated_protocol_programmatic(self):
+    def test_generated_protocol_end_to_end(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
+        # AEA components
+        ledger_apis = LedgerApis({}, FETCHAI)
+
         wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
         wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-        ledger_apis = LedgerApis({}, FETCHAI)
 
         identity_1 = Identity(
             name="my_aea_1",
@@ -131,7 +126,7 @@ class TestGenerateProtocol:
         resources_1 = Resources()
         resources_2 = Resources()
 
-        # Add generated protocols to AEAs
+        # add generated protocols to resources
         generated_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(
                 open(os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation", "protocol.yaml"))
@@ -149,38 +144,9 @@ class TestGenerateProtocol:
             TwoPartyNegotiationMessage.protocol_id, generated_protocol
         )
 
-        # Create 2 AEAs
+        # create AEAs
         aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
         aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
-
-        # Adding handlers to the resources
-        agent_1_handler = Agent1Handler(skill_context=SkillContext(aea_1.context), name="fake_skill")
-        resources_1.handler_registry.register(
-            (
-                PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
-            ),
-            agent_1_handler,
-        )
-        agent_2_handler = Agent2Handler(skill_context=SkillContext(aea_2.context), name="fake_skill")
-        resources_2.handler_registry.register(
-            (
-                PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
-            ),
-            agent_2_handler,
-        )
-
-        # add error skill to both agents
-        error_skill_1 = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea_1.context
-        )
-        resources_1.add_skill(error_skill_1)
-
-        error_skill_2 = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea_2.context
-        )
-        resources_2.add_skill(error_skill_2)
 
         # message 1
         message = TwoPartyNegotiationMessage(
@@ -196,24 +162,66 @@ class TestGenerateProtocol:
             protocol_id=TwoPartyNegotiationMessage.protocol_id,
             message=encoded_message_in_bytes,
         )
+        # message 2
+        message_2 = TwoPartyNegotiationMessage(
+            message_id=2,
+            dialogue_reference=(str(0), ""),
+            target=1,
+            performative=TwoPartyNegotiationMessage.Performative.DECLINE,
+        )
+        encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(message_2)
 
+        # add handlers to AEA resources
+        agent_1_handler = Agent1Handler(skill_context=SkillContext(aea_1.context), name="fake_skill")
+        resources_1.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
+            ),
+            agent_1_handler,
+        )
+        agent_2_handler = Agent2Handler(encoded_messsage=encoded_message_2_in_bytes, skill_context=SkillContext(aea_2.context), name="fake_skill")
+        resources_2.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
+            ),
+            agent_2_handler,
+        )
+
+        # add error skill to AEAs
+        error_skill_1 = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), aea_1.context
+        )
+        resources_1.add_skill(error_skill_1)
+
+        error_skill_2 = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), aea_2.context
+        )
+        resources_2.add_skill(error_skill_2)
+
+        # Start threads
         t_1 = Thread(target=aea_1.start)
         t_2 = Thread(target=aea_2.start)
-        # import pdb; pdb.set_trace()
         try:
             t_1.start()
             t_2.start()
             time.sleep(1.0)
             aea_1.outbox.put(envelope)
             time.sleep(5.0)
-            logger.info("THE MESSAGE ID IS {}".format(agent_2_handler.handled_message.message_id))
-            assert agent_2_handler.handled_message is not None
-            # assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference
-            # assert agent_2_handler.handled_message.dialogue_reference[0] == message.dialogue_reference[0]
-            # assert agent_2_handler.handled_message.dialogue_reference[1] == message.dialogue_reference[1]
-            # assert agent_2_handler.handled_message.target == message.target
-            # assert agent_2_handler.handled_message.performative == message.performative
-            # assert len(agent_2_handler.handled_messages) == 1
+            assert agent_2_handler.handled_message.message_id == message.message_id, "Message from Agent 1 to 2: message ids do not match"
+            assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference, "Message from Agent 1 to 2: dialogue references do not match"
+            assert agent_2_handler.handled_message.dialogue_reference[0] == message.dialogue_reference[0], "Message from Agent 1 to 2: dialogue reference[0]s do not match"
+            assert agent_2_handler.handled_message.dialogue_reference[1] == message.dialogue_reference[1], "Message from Agent 1 to 2: dialogue reference[1]s do not match"
+            assert agent_2_handler.handled_message.target == message.target, "Message from Agent 1 to 2: targets do not match"
+            assert agent_2_handler.handled_message.performative == message.performative, "Message from Agent 1 to 2: performatives do not match"
+
+            assert agent_1_handler.handled_message.message_id == message_2.message_id, "Message from Agent 1 to 2: dialogue references do not match"
+            assert agent_1_handler.handled_message.dialogue_reference == message_2.dialogue_reference, "Message from Agent 2 to 1: dialogue references do not match"
+            assert agent_1_handler.handled_message.dialogue_reference[0] == message_2.dialogue_reference[0], "Message from Agent 2 to 1: dialogue reference[0]s do not match"
+            assert agent_1_handler.handled_message.dialogue_reference[1] == message_2.dialogue_reference[1], "Message from Agent 2 to 1: dialogue reference[1]s do not match"
+            assert agent_1_handler.handled_message.target == message_2.target, "Message from Agent 2 to 1: targets do not match"
+            assert agent_1_handler.handled_message.performative == message_2.performative, "Message from Agent 2 to 1: performatives do not match"
             time.sleep(2.0)
         finally:
             aea_1.stop()
@@ -370,8 +378,7 @@ class TestGenerateProtocol:
         os.chdir(cls.cwd)
         try:
             pass
-            # shutil.rmtree(cls.t)
-            # os.remove(os.path.join(cls.t, cls.protocol_name))
+            shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
 
@@ -385,8 +392,7 @@ class Agent1Handler(Handler):
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_messages = []
-        self.nb_teardown_called = 0
+        self.handled_message = None
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -399,7 +405,7 @@ class Agent1Handler(Handler):
         :param message: the message
         :return: None
         """
-        self.handled_messages.append(message)
+        self.handled_message = message
 
     def teardown(self) -> None:
         """
@@ -407,7 +413,6 @@ class Agent1Handler(Handler):
 
         :return: None
         """
-        self.nb_teardown_called += 1
 
 
 class Agent2Handler(Handler):
@@ -415,20 +420,13 @@ class Agent2Handler(Handler):
 
     SUPPORTED_PROTOCOL = TwoPartyNegotiationMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, **kwargs):
+    def __init__(self, encoded_messsage, **kwargs):
         """Initialize the handler."""
         print("inside handler's initialisation method for agent 2")
         super().__init__(**kwargs)
         self.kwargs = kwargs
         self.handled_message = None
-        self.reply = TwoPartyNegotiationMessage(
-            message_id=2,
-            dialogue_reference=(str(0), ""),
-            target=1,
-            performative=TwoPartyNegotiationMessage.Performative.DECLINE,
-        )
-        self.encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(self.reply)
-        self.nb_teardown_called = 0
+        self.encoded_message_2_in_bytes = encoded_messsage
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -441,16 +439,14 @@ class Agent2Handler(Handler):
         :param message: the message
         :return: None
         """
-        # print("inside handler's handle method for agent 2")
         self.handled_message = message
-        logger.info("We received a message.")
-        # envelope = Envelope(
-        #     to=message.counterparty,
-        #     sender=self.context.agent_address,
-        #     protocol_id=TwoPartyNegotiationMessage.protocol_id,
-        #     message=self.encoded_message_2_in_bytes,
-        # )
-        # self.context.outbox.put(envelope)
+        envelope = Envelope(
+            to=message.counterparty,
+            sender=self.context.agent_address,
+            protocol_id=TwoPartyNegotiationMessage.protocol_id,
+            message=self.encoded_message_2_in_bytes,
+        )
+        self.context.outbox.put(envelope)
 
     def teardown(self) -> None:
         """
@@ -458,109 +454,3 @@ class Agent2Handler(Handler):
 
         :return: None
         """
-        self.nb_teardown_called += 1
-
-
-# class TestCases(TestCase):
-#     """Test class for the light protocol generator."""
-#
-#     def test_all_custom_data_types(self):
-#         """Test all custom data types."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "all_custom.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#         test_protocol_template.load()
-#         test_protocol_generator = ProtocolGenerator(test_protocol_template, 'tests')
-#         test_protocol_generator.generate()
-#
-#         from two_party_negotiation_protocol.message import TwoPartyNegotiationMessage
-#         from two_party_negotiation_protocol.serialization import TwoPartyNegotiationSerializer
-#         from two_party_negotiation_protocol.message import DataModel
-#         from two_party_negotiation_protocol.message import Signature
-#
-#         data_model = DataModel()
-#         signature = Signature()
-#         content_list = [data_model, signature]
-#
-#         message = TwoPartyNegotiationMessage(message_id=5, target=4, performative="propose", contents=content_list)
-#         print(str.format("message is {}", message))
-#         message.check_consistency()
-#         serialized_message = TwoPartyNegotiationSerializer().encode(msg=message)
-#         print(str.format("serialized message is {}", serialized_message))
-#         deserialised_message = TwoPartyNegotiationSerializer().decode(obj=serialized_message)
-#         print(str.format("deserialized message is {}", deserialised_message))
-#
-#         assert message == deserialised_message, "Failure"
-#
-#     def test_correct_functionality(self):
-#         """End to end test of functionality."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "correct_spec.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#         test_protocol_template.load()
-#         test_protocol_generator = ProtocolGenerator(test_protocol_template, 'tests')
-#         test_protocol_generator.generate()
-#
-#         from two_party_negotiation_protocol.message import TwoPartyNegotiationMessage
-#         from two_party_negotiation_protocol.serialization import TwoPartyNegotiationSerializer
-#         from two_party_negotiation_protocol.message import DataModel
-#
-#         data_model = DataModel()
-#         content_list = [data_model, 10.5]
-#
-#         message = TwoPartyNegotiationMessage(message_id=5, target=4, performative="propose", contents=content_list)
-#         print(str.format("message is {}", message))
-#         message.check_consistency()
-#         serialized_message = TwoPartyNegotiationSerializer().encode(msg=message)
-#         print(str.format("serialized message is {}", serialized_message))
-#         deserialised_message = TwoPartyNegotiationSerializer().decode(obj=serialized_message)
-#         print(str.format("deserialized message is {}", deserialised_message))
-#
-#         assert message == deserialised_message, "Failure"
-#
-#     def test_missing_name(self):
-#         """Test missing name handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "missing_name.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         self.assertRaises(ProtocolSpecificationParseError, test_protocol_template.load)
-#
-#     def test_missing_description(self):
-#         """Test missing description handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "missing_description.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         assert test_protocol_template.load(), "Failure"
-#
-#     def test_missing_speech_acts(self):
-#         """Test missing speech acts handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "missing_speech_acts.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         self.assertRaises(ProtocolSpecificationParseError, test_protocol_template.load)
-#
-#     def test_extra_fields(self):
-#         """Test extra fields handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "extra_fields.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         assert test_protocol_template.load(), "Failure"
-#
-#     def test_one_document(self):
-#         """Test one document handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "one_document.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         self.assertRaises(ProtocolSpecificationParseError, test_protocol_template.load)
-#
-#     def test_wrong_speech_act_type_sequence_performatives(self):
-#         """Test wrong speech act handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "wrong_speech_act_type_sequence_performatives.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         self.assertRaises(ProtocolSpecificationParseError, test_protocol_template.load)
-#
-#     def test_wrong_speech_act_type_dictionary_contents(self):
-#         """Test wrong speech act dictionary contents handling."""
-#         test_protocol_specification_path = os.path.join(CUR_PATH, "data", "wrong_speech_act_type_dictionary_contents.yaml")
-#         test_protocol_template = ProtocolTemplate(test_protocol_specification_path)
-#
-#         self.assertRaises(ProtocolSpecificationParseError, test_protocol_template.load)

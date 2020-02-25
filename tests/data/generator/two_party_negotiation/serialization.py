@@ -31,14 +31,13 @@ from tests.data.generator.two_party_negotiation.message import TwoPartyNegotiati
 class TwoPartyNegotiationSerializer(Serializer):
     """Serialization for the 'two_party_negotiation' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    def encode(self, msg: TwoPartyNegotiationMessage) -> bytes:
         """
         Encode a 'TwoPartyNegotiation' message into bytes.
 
         :param msg: the message object.
         :return: the bytes.
         """
-        msg = cast(TwoPartyNegotiationMessage, msg)
         two_party_negotiation_msg = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage()
         two_party_negotiation_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
@@ -110,7 +109,7 @@ class TwoPartyNegotiationSerializer(Serializer):
         two_party_negotiation_bytes = two_party_negotiation_msg.SerializeToString()
         return two_party_negotiation_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    def decode(self, obj: bytes) -> TwoPartyNegotiationMessage:
         """
         Decode bytes into a 'TwoPartyNegotiation' message.
 
