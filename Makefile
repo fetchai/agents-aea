@@ -4,6 +4,7 @@ clean-build:
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/
+	rm -fr pip-wheel-metadata
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
 
@@ -20,6 +21,7 @@ clean-test:
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr .coverage*
+	rm -fr coverage.xml
 	rm -fr htmlcov/
 	rm -fr .hypothesis
 	rm -fr .pytest_cache
