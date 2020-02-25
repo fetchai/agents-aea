@@ -46,7 +46,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol, Message
 from aea.registries.base import Resources
-from aea.skills.base import Handler, Skill
+from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
@@ -106,17 +106,18 @@ class TestGenerateProtocol:
 
     def test_generated_protocol_programmatic(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
-        wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+        wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+        wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
         ledger_apis = LedgerApis({}, FETCHAI)
 
         identity_1 = Identity(
             name="my_aea_1",
-            address=wallet.addresses.get(FETCHAI),
+            address=wallet_1.addresses.get(FETCHAI),
             default_address_key=FETCHAI,
         )
         identity_2 = Identity(
             name="my_aea_2",
-            address=wallet.addresses.get(FETCHAI),
+            address=wallet_2.addresses.get(FETCHAI),
             default_address_key=FETCHAI,
         )
 
@@ -129,24 +130,6 @@ class TestGenerateProtocol:
 
         resources_1 = Resources()
         resources_2 = Resources()
-
-        # Adding handlers to the resources
-        agent_1_handler = Agent1Handler(skill_context="skill_context", name="fake_skill")
-        resources_1.handler_registry.register(
-            (
-                PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
-            ),
-            agent_1_handler,
-        )
-        agent_2_handler = Agent2Handler(skill_context="skill_context", name="fake_skill")
-        resources_2.handler_registry.register(
-            (
-                PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
-            ),
-            agent_2_handler,
-        )
 
         # Add generated protocols to AEAs
         generated_protocol_configuration = ProtocolConfig.from_json(
@@ -167,8 +150,26 @@ class TestGenerateProtocol:
         )
 
         # Create 2 AEAs
-        aea_1 = AEA(identity_1, [oef_connection_1], wallet, ledger_apis, resources_1)
-        aea_2 = AEA(identity_2, [oef_connection_2], wallet, ledger_apis, resources_2)
+        aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
+        aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
+
+        # Adding handlers to the resources
+        agent_1_handler = Agent1Handler(skill_context=SkillContext(aea_1.context), name="fake_skill")
+        resources_1.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
+            ),
+            agent_1_handler,
+        )
+        agent_2_handler = Agent2Handler(skill_context=SkillContext(aea_2.context), name="fake_skill")
+        resources_2.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
+            ),
+            agent_2_handler,
+        )
 
         # add error skill to both agents
         error_skill_1 = Skill.from_dir(
@@ -204,7 +205,7 @@ class TestGenerateProtocol:
             t_2.start()
             time.sleep(1.0)
             aea_1.outbox.put(envelope)
-            time.sleep(120.0)
+            time.sleep(5.0)
             logger.info("THE MESSAGE ID IS {}".format(agent_2_handler.handled_message.message_id))
             assert agent_2_handler.handled_message is not None
             # assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference
