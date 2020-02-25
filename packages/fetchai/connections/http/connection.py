@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,8 +25,9 @@ import threading
 import time
 import yaml
 import json
+from uuid import uuid4
 from asyncio import CancelledError
-from threading import Thread
+# from threading import Thread
 from typing import Any, Dict, List, Optional, Set, cast
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -40,27 +41,31 @@ logger = logging.getLogger(__name__)
 
 class HTTPHandler(BaseHTTPRequestHandler):
 
-    def do_HEAD(s):
-        # Placeholder functions
-        s.send_response(200)
-        s.send_header("Content-type", "text/html")
-        s.end_headers()
+    # def __init__(self, channel, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        # self._channel = channel
+        super().__init__(*args, **kwargs)
 
-    def do_GET(s):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+
+    def do_GET(self):
         """Respond to a GET request."""
-        # Placeholder functions
-        s.send_response(200)
-        s.send_header("Content-type", "text/html")
-        s.end_headers()
-        s.wfile.write("<html><head><title>Title goes here.</title></head>")
-        s.wfile.write("<body><p>This is a test.</p>")
-        # If someone went to "http://something.somewhere.net/foo/bar/",
-        # then s.path equals "/foo/bar/".
-        s.wfile.write("<p>You accessed path: %s</p>" % s.path)
-        s.wfile.write("</body></html>")
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+
+        # parsed_path = urlparse(self.path)
+        # url = parsed_path.path
+        # url = parsed_path.geturl()
+        # param = parse_qs(parsed_path.query)
+        self.wfile.write(self.path.encode())
+        # self._channel._process_req('GET', url, param)
 
     def do_POST(s):
-        """Respond to a GET request."""
+        """Respond to a POST request."""
         pass
 
 
@@ -68,10 +73,10 @@ class HTTPChannel:
     """A wrapper for an RESTful API with an internal HTTPServer."""
 
     def __init__(self,
-                 # address: Address,
-                 api_spec: str,
+                 address: Address,
                  host: str,
                  port: int,
+                 api_spec: str,
                  excluded_protocols: Optional[Set[PublicId]] = None,
                  ):
         """
@@ -79,24 +84,24 @@ class HTTPChannel:
 
         :param address: the address
         """
-        # self.address = address
+        self.address = address
         self.host = host
         self.port = port
-        # self.uri_base = f"http://{host}:{port}"
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self.excluded_protocols = excluded_protocols
-        self.thread = Thread(target=self.receiving_loop)
+        # self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
         # Initializing the internal HTTP server
-        try:
-            self.server = HTTPServer((self.host, self.port), HTTPHandler)
-        except OSError:
-            logger.error(f"{host}:{port} is already in use, please try another Socket.")
+        # try:
+        #     self.httpd = HTTPServer((self.host, self.port), HTTPHandler)
+        # except OSError:
+        #     logger.error(f"{host}:{port} is already in use, please try another Socket.")
         # Process API specifications into Envelopes to be sent to InBox
-        self._process_api(api_spec)
-        logger.info("Initialized the HTTP Server.")
+        if api_spec is not None:
+            self._process_api(api_spec)
+        logger.info(f"Initialized the HTTP Server on HOST: {host} and PORT: {port}")
 
     def _process_api(self, api_spec):
         """Process the api_spec.
@@ -142,6 +147,26 @@ class HTTPChannel:
         return Envelope(to=to, sender=sender, protocol_id=protocol_id,
                         message=message, context=context)
 
+    def _process_req(type, http_method: str, url: str, param: dict):
+        """Process incoming API request by packaging into Envelope and sending it in-queue.
+
+        """
+        self._client_id = uuid4().hex
+        protocol_id = PublicId.from_str('fetchai/http:0.1.0')
+        uri = URI(f"http://{self.host}:{self.port}{url}")
+        context = EnvelopeContext(connection_id=self._connection_id, uri=uri)
+        msg_bytes = json.dumps(param).encode()
+
+        envelope = Envelope(
+            to=self.address,
+            sender= self._client_id,
+            protocol_id=protocol_id,
+            context=context,
+            message=msg_bytes,
+        )
+
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
+
     def connect(self):
         """
         Connect.
@@ -151,84 +176,28 @@ class HTTPChannel:
         with self.lock:
             if self.stopped:
                 self.stopped = False
-                self.thread.start()
-                self.server.serve_forever()
-                logger.debug("HTTP Server has started..")
-                # self._httpCall = HTTPCalls(
-                #     server_address=self.provider_addr, port=self.provider_port
-                # )
-                # self.stopped = False
                 # self.thread.start()
-                # logger.debug("HTTP Channel is connected.")
-                # self.try_register()
-
-    def send(self, envelope: Envelope) -> None:
-        """
-        Process the envelopes.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        # TO-DO: Replace httpCall with HTTPHandler
-        pass
-        # assert self._httpCall is not None
-
-        # if self.excluded_protocols is not None:
-        #     if envelope.protocol_id in self.excluded_protocols:
-        #         logger.error(
-        #             "This envelope cannot be sent with the oef connection: protocol_id={}".format(
-        #                 envelope.protocol_id
-        #             )
-        #         )
-        #         raise ValueError("Cannot send message.")
-
-        # self._httpCall.send_message(
-        #     sender_address=envelope.sender,
-        #     receiver_address=envelope.to,
-        #     protocol=str(envelope.protocol_id),
-        #     context=b"None",
-        #     payload=envelope.message,
-        # )
-
-    def receiving_loop(self) -> None:
-        """Receive the messages from the provider."""
-        # TO-DO: Replace httpCall with HTTPHandler
-        pass
-        # assert self._httpCall is not None
-        # assert self.in_queue is not None
-        # assert self.loop is not None
-        # while not self.stopped:
-        #     messages = self._httpCall.get_messages(
-        #         sender_address=self.address
-        #     )  # type: List[Dict[str, Any]]
-        #     for message in messages:
-        #         logger.debug("Received message: {}".format(message))
-        #         envelope = Envelope(
-        #             to=message["TO"]["RECEIVER_ADDRESS"],
-        #             sender=message["FROM"]["SENDER_ADDRESS"],
-        #             protocol_id=PublicId.from_str(message["PROTOCOL"]),
-        #             message=message["PAYLOAD"],
-        #         )
-        #         self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
-        #     time.sleep(0.5)
-        # logger.debug("Receiving loop stopped.")
+                # Initializing the internal HTTP server
+                try:
+                    # self.httpd = HTTPServer((self.host, self.port), HTTPHandler(self))
+                    self.httpd = HTTPServer((self.host, self.port), HTTPHandler)
+                    logger.debug(f"HTTP Server has connected to port {self.port}.")                                                                              
+                    self.httpd.serve_forever()
+                except OSError:
+                    logger.error(f"{host}:{port} is already in use, please try another Socket.")
 
     def disconnect(self) -> None:
         """
         Disconnect.
 
-        Shut-off the HTTP Server and then HTTP Channel thread.
+        Shut-off the HTTP Server and then HTTP Channel.
         """
-        assert self._httpCall is not None
         with self.lock:
             if not self.stopped:
-                self.server.server_close()
-                self.server.shutdown()  # Need to double-check that this is the right approach to shutdown server.
+                self.httpd.server_close()
+                print(f"Server shutdown from port {PORT}.")
+                self.httpd.shutdown()
                 self.stopped = True
-                self.thread.join()
-                # self._httpCall.unregister(self.address)
-                # self._httpCall.disconnect()
-                # self.stopped = True
                 # self.thread.join()
 
 
@@ -236,17 +205,16 @@ class HTTPConnection(Connection):
     """Proxy to the functionality of the web RESTful API."""
 
     def __init__(self,
-                 # address: Address,
-                 api_path: str,  # Directory path of the API YAML file.
-                 host: str,
+                 address: Address,
+                 host: str = '',
                  port: int = 10000,
+                 api_path: str = None,  # Directory path of the API YAML file.
                  *args,
                  **kwargs
                  ):
         """
         Initialize a connection to an RESTful API.
 
-        :param address: the address used in the protocols.
         :param api_spec_path: the directory path of the API specification YAML source file.
         :param provider_addr: the provider IP address.
         :param provider_port: the provider port.
@@ -256,19 +224,22 @@ class HTTPConnection(Connection):
         """
 
         # the following api_spec format checks will be in their own function check_api(api_spec)
-        try:
-            with open(api_path, 'r') as f:
-                api_spec = yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error("API specification YAML source file not found. Please double-check filename and path.")
-            return
+        if api_path is not None:
+            try:
+                with open(api_path, 'r') as f:
+                    api_spec = yaml.safe_load(f)
+            except FileNotFoundError:
+                logger.error("API specification YAML source file not found. Please double-check filename and path.")
+                return
+        else:
+            api_spec = api_path
 
         if kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
+        
         super().__init__(*args, **kwargs)
-        # self.address = address
-        self.channel = HTTPChannel(api_spec, host, port, excluded_protocols=self.excluded_protocols)  # type: ignore
-
+        self.address = address
+        self.channel = HTTPChannel(address, host, port, api_spec, excluded_protocols=self.excluded_protocols)
 
     async def connect(self) -> None:
         """
@@ -327,20 +298,21 @@ class HTTPConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, connection_configuration: ConnectionConfig
+        cls, address: Address, connection_configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the HTTP connection from the connection configuration.
 
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
             :host - RESTful API hostname / IP address
             :port - RESTful API port number
-            :api - Directory path and filename of the API spec YAML source file.
+            :api - Directory API path and filename of the API spec YAML source file.
         :return: the connection object
         """
-        addr = cast(str, connection_configuration.config.get("host"))
+        host = cast(str, connection_configuration.config.get("host"))
         port = cast(int, connection_configuration.config.get("port"))
-        api_path = cast(str, connection_configuration.config.get("api"))
+        api = cast(str, connection_configuration.config.get("api")) if not '' else None
 
         restricted_to_protocols_names = {
             p.name for p in connection_configuration.restricted_to_protocols
@@ -349,10 +321,10 @@ class HTTPConnection(Connection):
             p.name for p in connection_configuration.excluded_protocols
         }
         return HTTPConnection(
-            # address,
-            api_path,
+            address,
             host,
             port,
+            api,
             connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
