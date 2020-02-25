@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""HTTP connection, channel, and server"""
+"""HTTP connection, channel, server, and handler"""
 
 import asyncio
 import logging
@@ -28,6 +28,7 @@ import json
 from uuid import uuid4
 from asyncio import CancelledError
 # from threading import Thread
+from urllib.parse import urlparse, parse_qs
 from typing import Any, Dict, List, Optional, Set, cast
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -35,38 +36,7 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
-
 logger = logging.getLogger(__name__)
-
-
-class HTTPHandler(BaseHTTPRequestHandler):
-
-    # def __init__(self, channel, *args, **kwargs):
-    def __init__(self, *args, **kwargs):
-        # self._channel = channel
-        super().__init__(*args, **kwargs)
-
-    def do_HEAD(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-
-    def do_GET(self):
-        """Respond to a GET request."""
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-
-        # parsed_path = urlparse(self.path)
-        # url = parsed_path.path
-        # url = parsed_path.geturl()
-        # param = parse_qs(parsed_path.query)
-        self.wfile.write(self.path.encode())
-        # self._channel._process_req('GET', url, param)
-
-    def do_POST(s):
-        """Respond to a POST request."""
-        pass
 
 
 class HTTPChannel:
@@ -77,6 +47,7 @@ class HTTPChannel:
                  host: str,
                  port: int,
                  api_spec: str,
+                 connection_id: PublicId,
                  excluded_protocols: Optional[Set[PublicId]] = None,
                  ):
         """
@@ -87,18 +58,14 @@ class HTTPChannel:
         self.address = address
         self.host = host
         self.port = port
+        self.connection_id = connection_id
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self.excluded_protocols = excluded_protocols
         # self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
-        # Initializing the internal HTTP server
-        # try:
-        #     self.httpd = HTTPServer((self.host, self.port), HTTPHandler)
-        # except OSError:
-        #     logger.error(f"{host}:{port} is already in use, please try another Socket.")
-        # Process API specifications into Envelopes to be sent to InBox
+
         if api_spec is not None:
             self._process_api(api_spec)
         logger.info(f"Initialized the HTTP Server on HOST: {host} and PORT: {port}")
@@ -119,7 +86,7 @@ class HTTPChannel:
                 assert self.in_queue is not None, "Input queue not initialized."
                 assert self._loop is not None, "Loop not initialized."
                 # Ok to put these Envelopes in_queue during HTTPChannel initialization?
-                asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
+                asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
             except ValueError:
                 logger.error(f"Bad formatted path: {path_name}")
             except Exception as e:
@@ -147,14 +114,14 @@ class HTTPChannel:
         return Envelope(to=to, sender=sender, protocol_id=protocol_id,
                         message=message, context=context)
 
-    def _process_req(type, http_method: str, url: str, param: dict):
+    def _process_req(self, http_method: str, url: str, param: dict):
         """Process incoming API request by packaging into Envelope and sending it in-queue.
 
         """
         self._client_id = uuid4().hex
         protocol_id = PublicId.from_str('fetchai/http:0.1.0')
         uri = URI(f"http://{self.host}:{self.port}{url}")
-        context = EnvelopeContext(connection_id=self._connection_id, uri=uri)
+        context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         msg_bytes = json.dumps(param).encode()
 
         envelope = Envelope(
@@ -165,7 +132,7 @@ class HTTPChannel:
             message=msg_bytes,
         )
 
-        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def connect(self):
         """
@@ -180,7 +147,11 @@ class HTTPChannel:
                 # Initializing the internal HTTP server
                 try:
                     # self.httpd = HTTPServer((self.host, self.port), HTTPHandler(self))
-                    self.httpd = HTTPServer((self.host, self.port), HTTPHandler)
+                    # handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+                    # handler = HTTPHandler.set_channel(self)
+                    # handler.set_channel(self)
+                    self.httpd = HTTPServer((self.host, self.port), HTTPHandlerFactory(self))
+                    # self.httpd = HTTPServer((self.host, self.port), handler)
                     logger.debug(f"HTTP Server has connected to port {self.port}.")                                                                              
                     self.httpd.serve_forever()
                 except OSError:
@@ -199,6 +170,38 @@ class HTTPChannel:
                 self.httpd.shutdown()
                 self.stopped = True
                 # self.thread.join()
+
+
+def HTTPHandlerFactory(channel: HTTPChannel):
+
+    class HTTPHandler(BaseHTTPRequestHandler):
+
+        def __init__(self, *args, **kwargs):
+            self._channel = channel
+            super(HTTPHandler, self).__init__(*args, **kwargs)
+
+        def do_HEAD(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+        def do_GET(self):
+            """Respond to a GET request."""
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            parsed_path = urlparse(self.path)
+            url = parsed_path.path
+            # url = parsed_path.geturl()
+            param = parse_qs(parsed_path.query)
+            # self.wfile.write(self.path.encode())
+            self._channel._process_req('GET', url, param)
+
+        def do_POST(s):
+            """Respond to a POST request."""
+            pass
+
+    return HTTPHandler
 
 
 class HTTPConnection(Connection):
@@ -239,7 +242,10 @@ class HTTPConnection(Connection):
         
         super().__init__(*args, **kwargs)
         self.address = address
-        self.channel = HTTPChannel(address, host, port, api_spec, excluded_protocols=self.excluded_protocols)
+        self.channel = HTTPChannel(address, host, port, api_spec,
+                                   connection_id=self.connection_id,
+                                   excluded_protocols=self.excluded_protocols
+                                   )
 
     async def connect(self) -> None:
         """
