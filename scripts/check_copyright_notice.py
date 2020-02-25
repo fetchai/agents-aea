@@ -28,26 +28,27 @@ It is assumed the script is run from the repository root.
 """
 
 import itertools
+import re
 import sys
 from pathlib import Path
 
-SHEBANG = "#!/usr/bin/env python3"
-ENCODING_HEADER = "# -*- coding: utf-8 -*-"
-COPYRIGHT_NOTICE = """# ------------------------------------------------------------------------------
+HEADER_REGEX = r"""(#!/usr/bin/env python3
+)?# -\*- coding: utf-8 -\*-
+# ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   (Copyright 2018-(2019|2020) Fetch.AI Limited|Copyright [0-9]{4}-[0-9]{4} [a-zA-Z_]+)
 #
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
+#   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
+#   you may not use this file except in compliance with the License\.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#       http://www\.apache\.org/licenses/LICENSE-2\.0
 #
 #   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   distributed under the License is distributed on an \"AS IS\" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.
 #   See the License for the specific language governing permissions and
-#   limitations under the License.
+#   limitations under the License\.
 #
 # ------------------------------------------------------------------------------
 """
@@ -64,9 +65,8 @@ def check_copyright(file: Path) -> bool:
     :return True if the file is compliant with the checks, False otherwise.
     """
     content = file.read_text()
-    no_shebang = ENCODING_HEADER + "\n" + COPYRIGHT_NOTICE
-    with_shebang = SHEBANG + "\n" + no_shebang
-    return content.startswith(with_shebang) or content.startswith(no_shebang)
+    header_regex = re.compile(HEADER_REGEX, re.MULTILINE)
+    return re.match(header_regex, content) is not None
 
 
 def parse_args():
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     if len(bad_files) > 0:
         print("The following files are not well formatted:")
         print("\n".join(map(str, bad_files)))
-        sys.exit(-1)
+        sys.exit(1)
     else:
         print("OK")
         sys.exit(0)
