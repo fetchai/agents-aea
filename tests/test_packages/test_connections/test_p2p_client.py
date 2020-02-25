@@ -77,26 +77,6 @@ class TestP2p:
             ):
                 await self.p2p_client_connection.connect()
 
-    async def test_send(self):
-        """Test the send functionality of the p2p connection."""
-        envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=b"Hello",
-        )
-        with mock.patch.object(
-            fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]
-        ):
-            with mock.patch.object(
-                fetch.p2p.api.http_calls.HTTPCalls,
-                "send_message",
-                return_value={"status": "OK"},
-            ):
-                await self.p2p_client_connection.send(envelope=envelope)
-                # TODO: Consider returning the response from the server in order to be able to assert that the message send!
-                assert True
-
     async def test_disconnect(self):
         """Test the connection and disconnection from the p2p connection."""
         with mock.patch.object(
@@ -159,6 +139,57 @@ async def test_p2p_receive():
         p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
         await p2p_connection.disconnect()
         assert p2p_connection.connection_status.is_connected is False
+
+
+@pytest.mark.asyncio
+async def test_p2p_send():
+    """Test the send functionality of the p2p connection."""
+    address = "127.0.0.1"
+    port = 8000
+    m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
+    ent = entity.Entity.from_hex(m_fet_key)
+    p2p_client_connection = PeerToPeerClientConnection(
+        address=ent.public_key_hex,
+        provider_addr=address,
+        provider_port=port,
+        connection_id=P2P_CLIENT_CONNECTION_PUBLIC_ID,
+    )
+    p2p_client_connection.loop = asyncio.get_event_loop()
+    envelope = Envelope(
+        to="receiver",
+        sender="sender",
+        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+        message=b"Hello",
+    )
+
+    with mock.patch.object(
+        fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]
+    ):
+        with mock.patch.object(
+            fetch.p2p.api.http_calls.HTTPCalls,
+            "register",
+            return_value={"status": "OK"},
+        ):
+            await p2p_client_connection.connect()
+            assert p2p_client_connection.connection_status.is_connected is True
+
+    with mock.patch.object(
+        fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]
+    ):
+        with mock.patch.object(
+            fetch.p2p.api.http_calls.HTTPCalls,
+            "send_message",
+            return_value={"status": "OK"},
+        ):
+            await p2p_client_connection.send(envelope=envelope)
+            # TODO: Consider returning the response from the server in order to be able to assert that the message send!
+            assert True
+
+    with mock.patch.object(
+        fetch.p2p.api.http_calls.HTTPCalls, "unregister", return_value={"status": "OK"},
+    ):
+        await p2p_client_connection.disconnect()
+        assert p2p_client_connection.connection_status.is_connected is False
 
 
 def test_p2p_from_config():
