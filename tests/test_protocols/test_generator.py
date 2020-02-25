@@ -31,11 +31,12 @@ import time
 import yaml
 from pathlib import Path
 from threading import Thread
-from typing import cast
+from typing import cast, Optional
 
+from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli import cli
-from aea.configurations.base import ProtocolConfig, PublicId, AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import ProtocolConfig, PublicId, AgentConfig, DEFAULT_AEA_CONFIG_FILE, ProtocolId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
@@ -45,7 +46,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol, Message
 from aea.registries.base import Resources
-from aea.skills.base import Handler
+from aea.skills.base import Handler, Skill
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
@@ -134,7 +135,7 @@ class TestGenerateProtocol:
         resources_1.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
             ),
             agent_1_handler,
         )
@@ -142,7 +143,7 @@ class TestGenerateProtocol:
         resources_2.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+                TwoPartyNegotiationMessage.protocol_id,
             ),
             agent_2_handler,
         )
@@ -154,20 +155,31 @@ class TestGenerateProtocol:
             )
         )
         generated_protocol = Protocol(
-            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+            TwoPartyNegotiationMessage.protocol_id,
             TwoPartyNegotiationSerializer(),
             generated_protocol_configuration,
         )
         resources_1.protocol_registry.register(
-            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"), generated_protocol
+            TwoPartyNegotiationMessage.protocol_id, generated_protocol
         )
         resources_2.protocol_registry.register(
-            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"), generated_protocol
+            TwoPartyNegotiationMessage.protocol_id, generated_protocol
         )
 
         # Create 2 AEAs
         aea_1 = AEA(identity_1, [oef_connection_1], wallet, ledger_apis, resources_1)
         aea_2 = AEA(identity_2, [oef_connection_2], wallet, ledger_apis, resources_2)
+
+        # add error skill to both agents
+        error_skill_1 = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), aea_1.context
+        )
+        resources_1.add_skill(error_skill_1)
+
+        error_skill_2 = Skill.from_dir(
+            os.path.join(AEA_DIR, "skills", "error"), aea_2.context
+        )
+        resources_2.add_skill(error_skill_2)
 
         # message 1
         message = TwoPartyNegotiationMessage(
@@ -192,7 +204,7 @@ class TestGenerateProtocol:
             t_2.start()
             time.sleep(1.0)
             aea_1.outbox.put(envelope)
-            time.sleep(30.0)
+            time.sleep(120.0)
             logger.info("THE MESSAGE ID IS {}".format(agent_2_handler.handled_message.message_id))
             assert agent_2_handler.handled_message is not None
             # assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference
