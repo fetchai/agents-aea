@@ -24,8 +24,8 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from ..two_party_negotiation import TwoPartyNegotiation_pb2
-from ..two_party_negotiation.message import TwoPartyNegotiationMessage
+from tests.data.generator.two_party_negotiation import TwoPartyNegotiation_pb2
+from tests.data.generator.two_party_negotiation.message import TwoPartyNegotiationMessage
 
 
 class TwoPartyNegotiationSerializer(Serializer):

@@ -19,7 +19,9 @@
 """This module contains the tests for the protocol generator."""
 
 import inspect
+import logging
 import os
+import pytest
 import shutil
 import signal
 import subprocess  # nosec
@@ -29,20 +31,23 @@ import time
 import yaml
 from pathlib import Path
 from threading import Thread
+from typing import cast
 
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig, PublicId
+from aea.cli import cli
+from aea.configurations.base import ProtocolConfig, PublicId, AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.protocols.base import Protocol
-from aea.registries.base import Resources
-from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.mail.base import Envelope
+from aea.protocols.base import Protocol, Message
+from aea.registries.base import Resources
+from aea.skills.base import Handler
+
+from packages.fetchai.connections.oef.connection import OEFConnection
 
 from tests.data.generator.two_party_negotiation.message import TwoPartyNegotiationMessage
 from tests.data.generator.two_party_negotiation.serialization import TwoPartyNegotiationSerializer
@@ -50,12 +55,20 @@ from tests.data.generator.two_party_negotiation.serialization import TwoPartyNeg
 from ..conftest import CLI_LOG_OPTION
 from ..common.click_testing import CliRunner
 
+logger = logging.getLogger("aea")
+logging.basicConfig(level=logging.INFO)
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+HOST = "127.0.0.1"
+PORT = 10000
 
 
 class TestGenerateProtocol:
     """Test that the generating a protocol works correctly in correct preconditions."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
 
     @classmethod
     def setup_class(cls):
@@ -93,24 +106,48 @@ class TestGenerateProtocol:
     def test_generated_protocol_programmatic(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
         wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-        # stub_connection = StubConnection(
-        #     input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
-        # )
-        ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
-        resources = Resources()
-        identity = Identity(
-            name="my_aea",
+        ledger_apis = LedgerApis({}, FETCHAI)
+
+        identity_1 = Identity(
+            name="my_aea_1",
+            address=wallet.addresses.get(FETCHAI),
+            default_address_key=FETCHAI,
+        )
+        identity_2 = Identity(
+            name="my_aea_2",
             address=wallet.addresses.get(FETCHAI),
             default_address_key=FETCHAI,
         )
 
-        input_file = tempfile.mkstemp()[1]
-        output_file = tempfile.mkstemp()[1]
+        oef_connection_1 = OEFConnection(
+            address=identity_1.address, oef_addr=HOST, oef_port=PORT
+        )
+        oef_connection_2 = OEFConnection(
+            address=identity_2.address, oef_addr=HOST, oef_port=PORT
+        )
 
-        # Create our AEA
-        aea = AEA(identity, [StubConnection(input_file, output_file)], wallet, ledger_apis, resources)
+        resources_1 = Resources()
+        resources_2 = Resources()
 
-        # Add the generated protocol
+        # Adding handlers to the resources
+        agent_1_handler = Agent1Handler(skill_context="skill_context", name="fake_skill")
+        resources_1.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+            ),
+            agent_1_handler,
+        )
+        agent_2_handler = Agent2Handler(skill_context="skill_context", name="fake_skill")
+        resources_2.handler_registry.register(
+            (
+                PublicId.from_str("fetchai/fake_skill:0.1.0"),
+                PublicId.from_str("fetchai/two_party_negotiation:0.1.0"),
+            ),
+            agent_2_handler,
+        )
+
+        # Add generated protocols to AEAs
         generated_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(
                 open(os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation", "protocol.yaml"))
@@ -121,178 +158,198 @@ class TestGenerateProtocol:
             TwoPartyNegotiationSerializer(),
             generated_protocol_configuration,
         )
-        resources.protocol_registry.register(
+        resources_1.protocol_registry.register(
+            PublicId.from_str("fetchai/two_party_negotiation:0.1.0"), generated_protocol
+        )
+        resources_2.protocol_registry.register(
             PublicId.from_str("fetchai/two_party_negotiation:0.1.0"), generated_protocol
         )
 
-        # create message
+        # Create 2 AEAs
+        aea_1 = AEA(identity_1, [oef_connection_1], wallet, ledger_apis, resources_1)
+        aea_2 = AEA(identity_2, [oef_connection_2], wallet, ledger_apis, resources_2)
+
+        # message 1
         message = TwoPartyNegotiationMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
         )
-        message.counterparty = identity.address
         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
         envelope = Envelope(
-            to=identity.address,
-            sender=identity.address,
+            to=identity_2.address,
+            sender=identity_1.address,
             protocol_id=TwoPartyNegotiationMessage.protocol_id,
             message=encoded_message_in_bytes,
         )
 
-        t = Thread(target=aea.start)
-        try:
-            t.start()
-            time.sleep(1.0)
-            aea.outbox.put(envelope)
-
-        finally:
-            aea.stop()
-            t.join()
-
-    def test_generated_protocol_1_agent(self):
-        """Test that a generated protocol could be used in exchanging messages between two agents."""
-        # create agent
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        agent_dir_path = os.path.join(self.t, self.agent_name)
-        os.chdir(agent_dir_path)
-
-        # copy protocol to the agent
-        packages_src = os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation")
-        packages_dst = os.path.join(agent_dir_path, "protocols", "two_party_negotiation")
-        shutil.copytree(packages_src, packages_dst)
-
-        # add protocol to the agent's config
-        aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
-        aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
-        aea_config.protocols = [
-            "fetchai/default:0.1.0",
-            "fetchai/two_party_negotiation:0.1.0",
-        ]
-        yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
-
-        try:
-            # run the agent
-            process = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-            time.sleep(2.0)
-
-            # create a message
-            message = TwoPartyNegotiationMessage(
-                message_id=1,
-                dialogue_reference=(str(0), ""),
-                target=0,
-                performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
-            )
-
-            # serialise the message
-            encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
-
-            # deserialise the message
-            decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
-
-            # Compare the original message with the serialised+deserialised message
-            assert decoded_message.message_id == message.message_id
-            assert decoded_message.dialogue_reference == message.dialogue_reference
-            assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
-            assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
-            assert decoded_message.target == message.target
-            assert decoded_message.performative == message.performative
-
-            time.sleep(2.0)
-        finally:
-            process.send_signal(signal.SIGINT)
-            process.wait(timeout=20)
-            if not process.returncode == 0:
-                poll = process.poll()
-                if poll is None:
-                    process.terminate()
-                    process.wait(2)
-
-            os.chdir(self.t)
-            result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
-            )
-            assert result.exit_code == 0
-
-    def test_generated_protocol_2_agents(self):
-        """Test that a generated protocol could be used in exchanging messages between two agents."""
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation")
-        packages_dst = os.path.join(self.t, "packages", "fetchai", "protocols", "two_party_negotiation")
-        shutil.copytree(packages_src, packages_dst)
-
-        # create agent
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        agent_dir_path = os.path.join(self.t, self.agent_name)
-        os.chdir(agent_dir_path)
-
-        # add protocol
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "protocol", "fetchai/two_party_negotiation:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
+        t_1 = Thread(target=aea_1.start)
+        t_2 = Thread(target=aea_2.start)
         # import pdb; pdb.set_trace()
-
         try:
-            # run the agent
-            process = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-            time.sleep(2.0)
-
-            # create a message
-            message = TwoPartyNegotiationMessage(
-                message_id=1,
-                dialogue_reference=(str(0), ""),
-                target=0,
-                performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
-            )
-
-            # serialise the message
-            encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
-
-            # deserialise the message
-            decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
-
-            # Compare the original message with the serialised+deserialised message
-            assert decoded_message.message_id == message.message_id
-            assert decoded_message.dialogue_reference == message.dialogue_reference
-            assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
-            assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
-            assert decoded_message.target == message.target
-            assert decoded_message.performative == message.performative
-
+            t_1.start()
+            t_2.start()
+            time.sleep(1.0)
+            aea_1.outbox.put(envelope)
+            time.sleep(30.0)
+            logger.info("THE MESSAGE ID IS {}".format(agent_2_handler.handled_message.message_id))
+            assert agent_2_handler.handled_message is not None
+            # assert agent_2_handler.handled_message.dialogue_reference == message.dialogue_reference
+            # assert agent_2_handler.handled_message.dialogue_reference[0] == message.dialogue_reference[0]
+            # assert agent_2_handler.handled_message.dialogue_reference[1] == message.dialogue_reference[1]
+            # assert agent_2_handler.handled_message.target == message.target
+            # assert agent_2_handler.handled_message.performative == message.performative
+            # assert len(agent_2_handler.handled_messages) == 1
             time.sleep(2.0)
         finally:
-            process.send_signal(signal.SIGINT)
-            process.wait(timeout=20)
-            if not process.returncode == 0:
-                poll = process.poll()
-                if poll is None:
-                    process.terminate()
-                    process.wait(2)
+            aea_1.stop()
+            aea_2.stop()
+            t_1.join()
+            t_2.join()
 
-            os.chdir(self.t)
-            result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
-            )
-            assert result.exit_code == 0
+    # def test_generated_protocol_1_agent(self):
+    #     """Test that a generated protocol could be used in exchanging messages between two agents."""
+    #     # create agent
+    #     result = self.runner.invoke(
+    #         cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
+    #     )
+    #     assert result.exit_code == 0
+    #     agent_dir_path = os.path.join(self.t, self.agent_name)
+    #     os.chdir(agent_dir_path)
+    #
+    #     # copy protocol to the agent
+    #     packages_src = os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation")
+    #     packages_dst = os.path.join(agent_dir_path, "protocols", "two_party_negotiation")
+    #     shutil.copytree(packages_src, packages_dst)
+    #
+    #     # add protocol to the agent's config
+    #     aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
+    #     aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
+    #     aea_config.protocols = [
+    #         "fetchai/default:0.1.0",
+    #         "fetchai/two_party_negotiation:0.1.0",
+    #     ]
+    #     yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
+    #
+    #     try:
+    #         # run the agent
+    #         process = subprocess.Popen(  # nosec
+    #             [sys.executable, "-m", "aea.cli", "run"],
+    #             stdout=subprocess.PIPE,
+    #             env=os.environ.copy(),
+    #         )
+    #         time.sleep(2.0)
+    #
+    #         # create a message
+    #         message = TwoPartyNegotiationMessage(
+    #             message_id=1,
+    #             dialogue_reference=(str(0), ""),
+    #             target=0,
+    #             performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+    #         )
+    #
+    #         # serialise the message
+    #         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+    #
+    #         # deserialise the message
+    #         decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
+    #
+    #         # Compare the original message with the serialised+deserialised message
+    #         assert decoded_message.message_id == message.message_id
+    #         assert decoded_message.dialogue_reference == message.dialogue_reference
+    #         assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+    #         assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+    #         assert decoded_message.target == message.target
+    #         assert decoded_message.performative == message.performative
+    #
+    #         time.sleep(2.0)
+    #     finally:
+    #         process.send_signal(signal.SIGINT)
+    #         process.wait(timeout=20)
+    #         if not process.returncode == 0:
+    #             poll = process.poll()
+    #             if poll is None:
+    #                 process.terminate()
+    #                 process.wait(2)
+    #
+    #         os.chdir(self.t)
+    #         result = self.runner.invoke(
+    #             cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+    #         )
+    #         assert result.exit_code == 0
+    #
+    # def test_generated_protocol_2_agents(self):
+    #     """Test that a generated protocol could be used in exchanging messages between two agents."""
+    #     # add packages folder
+    #     packages_src = os.path.join(self.cwd, "tests", "data", "generator", "two_party_negotiation")
+    #     packages_dst = os.path.join(self.t, "packages", "fetchai", "protocols", "two_party_negotiation")
+    #     shutil.copytree(packages_src, packages_dst)
+    #
+    #     # create agent
+    #     result = self.runner.invoke(
+    #         cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
+    #     )
+    #     assert result.exit_code == 0
+    #     agent_dir_path = os.path.join(self.t, self.agent_name)
+    #     os.chdir(agent_dir_path)
+    #
+    #     # add protocol
+    #     result = self.runner.invoke(
+    #         cli,
+    #         [*CLI_LOG_OPTION, "add", "protocol", "fetchai/two_party_negotiation:0.1.0"],
+    #         standalone_mode=False,
+    #     )
+    #     assert result.exit_code == 0
+    #
+    #     # import pdb; pdb.set_trace()
+    #
+    #     try:
+    #         # run the agent
+    #         process = subprocess.Popen(  # nosec
+    #             [sys.executable, "-m", "aea.cli", "run"],
+    #             stdout=subprocess.PIPE,
+    #             env=os.environ.copy(),
+    #         )
+    #         time.sleep(2.0)
+    #
+    #         # create a message
+    #         message = TwoPartyNegotiationMessage(
+    #             message_id=1,
+    #             dialogue_reference=(str(0), ""),
+    #             target=0,
+    #             performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+    #         )
+    #
+    #         # serialise the message
+    #         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+    #
+    #         # deserialise the message
+    #         decoded_message = TwoPartyNegotiationSerializer().decode(encoded_message_in_bytes)
+    #
+    #         # Compare the original message with the serialised+deserialised message
+    #         assert decoded_message.message_id == message.message_id
+    #         assert decoded_message.dialogue_reference == message.dialogue_reference
+    #         assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+    #         assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+    #         assert decoded_message.target == message.target
+    #         assert decoded_message.performative == message.performative
+    #
+    #         time.sleep(2.0)
+    #     finally:
+    #         process.send_signal(signal.SIGINT)
+    #         process.wait(timeout=20)
+    #         if not process.returncode == 0:
+    #             poll = process.poll()
+    #             if poll is None:
+    #                 process.terminate()
+    #                 process.wait(2)
+    #
+    #         os.chdir(self.t)
+    #         result = self.runner.invoke(
+    #             cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+    #         )
+    #         assert result.exit_code == 0
 
     @classmethod
     def teardown_class(cls):
@@ -304,6 +361,91 @@ class TestGenerateProtocol:
             # os.remove(os.path.join(cls.t, cls.protocol_name))
         except (OSError, IOError):
             pass
+
+
+class Agent1Handler(Handler):
+    """The handler for agent 1."""
+
+    SUPPORTED_PROTOCOL = TwoPartyNegotiationMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.handled_messages = []
+        self.nb_teardown_called = 0
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        self.handled_messages.append(message)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        self.nb_teardown_called += 1
+
+
+class Agent2Handler(Handler):
+    """The handler for agent 2."""
+
+    SUPPORTED_PROTOCOL = TwoPartyNegotiationMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        print("inside handler's initialisation method for agent 2")
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.handled_message = None
+        self.reply = TwoPartyNegotiationMessage(
+            message_id=2,
+            dialogue_reference=(str(0), ""),
+            target=1,
+            performative=TwoPartyNegotiationMessage.Performative.DECLINE,
+        )
+        self.encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(self.reply)
+        self.nb_teardown_called = 0
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :return: None
+        """
+        # print("inside handler's handle method for agent 2")
+        self.handled_message = message
+        logger.info("We received a message.")
+        # envelope = Envelope(
+        #     to=message.counterparty,
+        #     sender=self.context.agent_address,
+        #     protocol_id=TwoPartyNegotiationMessage.protocol_id,
+        #     message=self.encoded_message_2_in_bytes,
+        # )
+        # self.context.outbox.put(envelope)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        self.nb_teardown_called += 1
 
 
 # class TestCases(TestCase):
