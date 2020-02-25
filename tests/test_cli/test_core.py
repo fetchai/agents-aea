@@ -22,11 +22,11 @@ from unittest import TestCase, mock
 
 from aea.cli import cli
 from aea.cli.core import (
-    _add_key,
-    _generate_wealth,
-    _get_address,
-    _get_wealth,
+    _try_add_key,
+    _try_generate_wealth,
+    _try_get_address,
     _try_get_balance,
+    _try_get_wealth,
     _wait_funds_release,
 )
 from aea.crypto.fetchai import FETCHAI
@@ -77,7 +77,7 @@ class GenerateWealthTestCase(TestCase):
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
-        _generate_wealth(ctx, "type", True)
+        _try_generate_wealth(ctx, "type", True)
 
 
 class GetWealthTestCase(TestCase):
@@ -89,7 +89,7 @@ class GetWealthTestCase(TestCase):
     def test__get_wealth_positive(self, *mocks):
         """Test for _get_wealth method positive result."""
         ctx = ContextMock()
-        _get_wealth(ctx, "type")
+        _try_get_wealth(ctx, "type")
 
 
 class GetAddressTestCase(TestCase):
@@ -99,7 +99,7 @@ class GetAddressTestCase(TestCase):
     def test__get_address_positive(self, *mocks):
         """Test for _get_address method positive result."""
         ctx = ContextMock()
-        _get_address(ctx, "type")
+        _try_get_address(ctx, "type")
 
 
 @mock.patch("builtins.open", mock.mock_open())
@@ -109,12 +109,12 @@ class AddKeyTestCase(TestCase):
     def test__add_key_positive(self, *mocks):
         """Test for _add_key method positive result."""
         ctx = ContextMock()
-        _add_key(ctx, "type", "filepath")
+        _try_add_key(ctx, "type", "filepath")
 
 
 @mock.patch("aea.cli.core.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
-@mock.patch("aea.cli.core._generate_wealth")
+@mock.patch("aea.cli.core._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
 
@@ -134,7 +134,7 @@ class GenerateWealthCommandTestCase(TestCase):
 
 @mock.patch("aea.cli.core.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
-@mock.patch("aea.cli.core._get_wealth")
+@mock.patch("aea.cli.core._try_get_wealth")
 @mock.patch("aea.cli.core.click.echo")
 class GetWealthCommandTestCase(TestCase):
     """Test case for CLI get_wealth command."""
@@ -153,7 +153,7 @@ class GetWealthCommandTestCase(TestCase):
 
 @mock.patch("aea.cli.core.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
-@mock.patch("aea.cli.core._get_address")
+@mock.patch("aea.cli.core._try_get_address")
 @mock.patch("aea.cli.core.click.echo")
 class GetAddressCommandTestCase(TestCase):
     """Test case for CLI get_address command."""
@@ -172,7 +172,7 @@ class GetAddressCommandTestCase(TestCase):
 
 @mock.patch("aea.cli.core.try_to_load_agent_config")
 @mock.patch("aea.cli.core._validate_private_key_path")
-@mock.patch("aea.cli.core._add_key")
+@mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):
     """Test case for CLI add_key command."""
 
