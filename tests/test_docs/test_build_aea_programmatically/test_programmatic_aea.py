@@ -21,6 +21,9 @@
 
 import logging
 import os
+import shutil
+import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -44,6 +47,13 @@ class TestProgrammaticAEA:
         cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = cls.python_file = extract_python_code(path)
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # add packages folder
+        packages_src = os.path.join(cls.cwd, "packages")
+        packages_dst = os.path.join(cls.t, "packages")
+        shutil.copytree(packages_src, packages_dst)
+        os.chdir(cls.t)
 
     def test_read_md_file(self):
         """Read the code blocks. Last block should be the whole code."""
@@ -58,18 +68,18 @@ class TestProgrammaticAEA:
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
         run()
-        assert os.path.exists("input.txt")
-        assert os.path.exists("output.txt")
-        assert os.path.exists("fet_private_key.txt")
+        assert os.path.exists(Path(self.t, "input.txt"))
+        assert os.path.exists(Path(self.t, "output.txt"))
+        assert os.path.exists(Path(self.t, "fet_private_key.txt"))
 
         message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-        path = os.path.join(ROOT_DIR, "input.txt")
+        path = os.path.join(self.t, "input.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
 
         message_text = 'other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
-        path = os.path.join(ROOT_DIR, "output.txt")
+        path = os.path.join(self.t, "output.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
@@ -84,10 +94,8 @@ class TestProgrammaticAEA:
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
-        input_path = os.path.join(ROOT_DIR, "input.txt")
-        output_path = os.path.join(ROOT_DIR, "output.txt")
-        fet_path = os.path.join(ROOT_DIR, "fet_private_key.txt")
-        paths = [input_path, output_path, fet_path]
-        for path in paths:
-            if os.path.exists(path):
-                os.remove(path)
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

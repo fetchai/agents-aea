@@ -21,6 +21,8 @@
 
 import json
 import os
+import shutil
+import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -51,11 +53,12 @@ class TestListProtocols:
             "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
             "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
@@ -77,6 +80,10 @@ class TestListProtocols:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestListConnections:
@@ -90,11 +97,12 @@ class TestListConnections:
             "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
             "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
@@ -116,6 +124,10 @@ class TestListConnections:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestListSkills:
@@ -129,11 +141,12 @@ class TestListSkills:
             "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
             "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
@@ -155,3 +168,7 @@ class TestListSkills:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

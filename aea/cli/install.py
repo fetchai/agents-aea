@@ -22,7 +22,7 @@
 import pprint
 import subprocess  # nosec
 import sys
-from typing import Optional
+from typing import List, Optional
 
 import click
 
@@ -45,9 +45,11 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             command += ["-i", index] if index is not None else []
             command += [dependency_name + version_constraint]
         logger.debug("Calling '{}'".format(" ".join(command)))
-        subp = subprocess.Popen(command)  # nosec
-        subp.wait(30.0)
-        assert subp.returncode == 0
+        return_code = _try_install(command)
+        if return_code == 1:
+            # try a second time
+            return_code = _try_install(command)
+        assert return_code == 0
     except Exception as e:
         logger.error(
             "An error occurred while installing {}, {}: {}".format(
@@ -55,11 +57,24 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             )
         )
         sys.exit(1)
+
+
+def _try_install(install_command: List[str]) -> int:
+    """
+    Try executing install command.
+
+    :param return_code: the return code of the subprocess
+    """
+    try:
+        subp = subprocess.Popen(install_command)  # nosec
+        subp.wait(30.0)
+        return_code = subp.returncode
     finally:
         poll = subp.poll()
         if poll is None:  # pragma: no cover
             subp.terminate()
             subp.wait(2)
+    return return_code
 
 
 def _install_from_requirement(file: str):
