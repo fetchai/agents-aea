@@ -49,14 +49,16 @@ def launch(click_context, agents: List[str]):
     ]
 
     failed = 0
-    for agent_directory, agent_process in zip(agents_directories, agent_processes):
-        agent_process.start()
-        logger.info("Agent {} started...".format(agent_directory.name))
     try:
-        for process in agent_processes:
-            process.join()
-            failed |= process.exitcode if process.exitcode is not None else 1
+        for agent_directory, agent_process in zip(agents_directories, agent_processes):
+            agent_process.start()
+            logger.info("Agent {} started...".format(agent_directory.name))
+        for agent_process in agent_processes:
+            agent_process.join()
+            failed |= agent_process.exitcode if agent_process.exitcode is not None else 1
     except KeyboardInterrupt:
+        # at this point, the keyboard interrupt has been propagated
+        # to all the child process, hence we just need to 'join' the processes.
         for agent_directory, agent_process in zip(agents_directories, agent_processes):
             logger.info(
                 "Waiting for agent {} to shut down...".format(agent_directory.name)
