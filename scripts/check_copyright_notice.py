@@ -36,7 +36,7 @@ HEADER_REGEX = r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   (Copyright 2018-(2019|2020) Fetch.AI Limited|Copyright [0-9]{4}-[0-9]{4} [a-zA-Z_]+)
+#   (Copyright 2018-(2019|2020) Fetch.AI Limited|Copyright [0-9]{4}(-[0-9]{4})? [a-zA-Z_]+)
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.

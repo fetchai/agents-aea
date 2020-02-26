@@ -505,29 +505,30 @@ class ProtocolGenerator:
             content_type = _get_sub_types_of_compositional_types(content_type)[0]
         if content_type.startswith("Union["):
             element_types = _get_sub_types_of_compositional_types(content_type)
-            unique_standard_types = set()
+            unique_standard_types_set = set()
             for typing_content_type in element_types:
                 if typing_content_type.startswith("FrozenSet"):
-                    unique_standard_types.add("frozenset")
+                    unique_standard_types_set.add("frozenset")
                 elif typing_content_type.startswith("Tuple"):
-                    unique_standard_types.add("tuple")
+                    unique_standard_types_set.add("tuple")
                 elif typing_content_type.startswith("Dict"):
-                    unique_standard_types.add("dict")
+                    unique_standard_types_set.add("dict")
                 else:
-                    unique_standard_types.add(typing_content_type)
+                    unique_standard_types_set.add(typing_content_type)
+            unique_standard_types_list = sorted(unique_standard_types_set)
             check_str += indents
             check_str += "assert "
-            for unique_type in unique_standard_types:
+            for unique_type in unique_standard_types_list:
                 check_str += "type(self.{}) == {} or ".format(content_name, unique_type)
             check_str = check_str[:-4]
             check_str += ", \"Content '{}' should be either of the following types: {}.\"\n".format(
                 content_name,
                 [
                     unique_standard_type
-                    for unique_standard_type in unique_standard_types
+                    for unique_standard_type in unique_standard_types_list
                 ],
             )
-            if "frozenset" in unique_standard_types:
+            if "frozenset" in unique_standard_types_list:
                 check_str += indents + "if type(self.{}) == frozenset:\n".format(
                     content_name
                 )
@@ -568,7 +569,7 @@ class ProtocolGenerator:
                         check_str += "'{}' or ".format(frozen_set_element_type)
                     check_str = check_str[:-4]
                     check_str += '."\n'
-            if "tuple" in unique_standard_types:
+            if "tuple" in unique_standard_types_list:
                 check_str += indents + "if type(self.{}) == tuple:\n".format(
                     content_name
                 )
@@ -609,7 +610,7 @@ class ProtocolGenerator:
                         check_str += "'{}' or ".format(tuple_element_type)
                     check_str = check_str[:-4]
                     check_str += '."\n'
-            if "dict" in unique_standard_types:
+            if "dict" in unique_standard_types_list:
                 check_str += indents + "if type(self.{}) == dict:\n".format(
                     content_name
                 )
@@ -901,7 +902,7 @@ class ProtocolGenerator:
             '            assert type(self.target) == int, "target is not int"\n\n'
         )
 
-        cls_str += "            # Light Protocol 2\n"
+        cls_str += "            # Light Protocol Rule 2\n"
         cls_str += "            # # Check correct performative\n"
         cls_str += "            assert (\n"
         cls_str += "                type(self.performative) == {}Message.Performative\n".format(
@@ -939,7 +940,7 @@ class ProtocolGenerator:
         cls_str += "                expected_nb_of_contents, actual_nb_of_contents\n"
         cls_str += "            )\n\n"
 
-        cls_str += "            # Light Protocol 3\n"
+        cls_str += "            # Light Protocol Rule 3\n"
         cls_str += "            if self.message_id == 1:\n"
         cls_str += "                assert (\n"
         cls_str += "                    self.target == 0\n"
