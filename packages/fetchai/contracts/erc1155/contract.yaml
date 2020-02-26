@@ -6,3 +6,5 @@ fingerprint:
   __init__.py: QmaJqZLGPNaAKtuUGpDf285eBrewqCToYxDus1UdPkJgya
   contract.py: QmYJn8U8tx6xPhpoUYQjhmN3vxwesWofGyGfyrWCbTftUj
 description: "The erc1155 contract implements an ERC1155 contract package."
+dependencies:
+  vyper: { version: "==0.1.0b12"}

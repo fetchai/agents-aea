@@ -143,10 +143,10 @@ class ContractRegistry(Registry[PublicId, Contract]):
             raise ValueError(
                 "Contract already registered with contract id '{}'".format(contract_id)
             )
-        if contract.id != contract_id:
+        if contract.contract_id != contract_id:
             raise ValueError(
                 "Contract id '{}' is different to the id '{}' specified.".format(
-                    contract.id, contract_id
+                    contract.contract_id, contract_id
                 )
             )
         self._contracts[contract_id] = contract
@@ -162,7 +162,7 @@ class ContractRegistry(Registry[PublicId, Contract]):
                 "No contract registered with contract id '{}'".format(contract_id)
             )
         removed_contract = self._contracts.pop(contract_id)
-        logger.debug("Contract '{}' has been removed.".format(removed_contract.id))
+        logger.debug("Contract '{}' has been removed.".format(removed_contract.contract_id))
 
     def fetch(self, contract_id: ContractId) -> Optional[Contract]:
         """
@@ -243,8 +243,18 @@ class ContractRegistry(Registry[PublicId, Contract]):
             open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
         )
 
-        # instantiate the protocol manager.
-        contract = Contract(contract_config.public_id, contract_config)
+        contract_spec = importlib.util.spec_from_file_location(
+            "contracts", contract_directory / "contract.py"
+        )
+
+        contract_module = importlib.util.module_from_spec(contract_spec)
+        contract_spec.loader.exec_module(contract_module)  # type: ignore
+        classes = inspect.getmembers(contract_module, inspect.isclass)
+        contract_classes = list(
+            filter(lambda x: re.match("\\w+Contract", x[0]), classes)
+        )
+        contract_class = contract_classes[0][1]
+        contract = contract_class()
         contract_public_id = PublicId(
             contract_config.author, contract_config.name, contract_config.version
         )
