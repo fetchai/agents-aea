@@ -58,7 +58,6 @@ from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
-from ....conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
