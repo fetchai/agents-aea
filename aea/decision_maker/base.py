@@ -91,6 +91,7 @@ class OwnershipState:
     ):
         """
         Instantiate an ownership state object.
+
         :param amount_by_currency_id: the currency endowment of the agent in this state.
         :param quantities_by_good_id: the good endowment of the agent in this state.
         :param agent_name: the agent name
@@ -124,6 +125,7 @@ class OwnershipState:
     def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable (and consistent).
+
         E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         Note, the agent is the sender of the transaction message by design.
         :return: True if the transaction is legal wrt the current state, false otherwise.
@@ -156,6 +158,7 @@ class OwnershipState:
     def _update(self, tx_message: TransactionMessage) -> None:
         """
         Update the agent state from a transaction.
+
         :param tx_message:
         :return: None
         """
@@ -171,6 +174,7 @@ class OwnershipState:
     ) -> "OwnershipState":
         """
         Apply a list of transactions to (a copy of) the current state.
+
         :param transactions: the sequence of transaction messages.
         :return: the final state.
         """
@@ -187,6 +191,7 @@ class OwnershipState:
     ) -> "OwnershipState":
         """
         Apply a state update to the current state.
+
         :param amount_by_currency_id: the delta in the currency amounts
         :param quantities_by_good_id: the delta in the quantities by good
         :return: the final state.
@@ -233,6 +238,7 @@ class LedgerStateProxy:
     def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable on the ledger.
+
         :param tx_message: the transaction message
         :return: whether the transaction is affordable on the ledger
         """
@@ -268,6 +274,7 @@ class Preferences:
     ):
         """
         Instantiate an agent preference object.
+
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
         :param agent_name: the agent name
@@ -311,6 +318,7 @@ class Preferences:
     def logarithmic_utility(self, quantities_by_good_id: GoodHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a good bundle.
+
         :param quantities_by_good_id: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
@@ -322,6 +330,7 @@ class Preferences:
     def linear_utility(self, amount_by_currency_id: CurrencyHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a currency bundle.
+
         :param amount_by_currency_id: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
@@ -337,6 +346,7 @@ class Preferences:
     ) -> float:
         """
         Compute the score given the good and currency holdings.
+
         :param quantities_by_good_id: the good holdings
         :param amount_by_currency_id: the currency holdings
         :return: the score.
@@ -354,6 +364,7 @@ class Preferences:
     ) -> float:
         """
         Compute the marginal utility.
+
         :param ownership_state: the current ownership state
         :param delta_quantities_by_good_id: the change in good holdings
         :param delta_amount_by_currency_id: the change in money holdings
@@ -391,6 +402,7 @@ class Preferences:
     ) -> float:
         """
         Simulate a transaction and get the resulting score (taking into account the fee).
+
         :param tx_message: a transaction object.
         :return: the score.
         """
@@ -408,6 +420,7 @@ class Preferences:
     def _split_tx_fees(self, tx_fee: int) -> Dict[str, int]:
         """
         Split the transaction fee.
+
         :param tx_fee: the tx fee
         :return: the split into buyer and seller part
         """
@@ -431,6 +444,7 @@ class DecisionMaker:
     ):
         """
         Initialize the decision maker.
+
         :param agent_name: the name of the agent
         :param max_reactions: the processing rate of messages per iteration.
         :param outbox: the outbox
@@ -519,6 +533,7 @@ class DecisionMaker:
     def execute(self) -> None:
         """
         Execute the decision maker.
+
         :return: None
         """
         while not self._stopped:
@@ -544,6 +559,7 @@ class DecisionMaker:
     def handle(self, message: InternalMessage) -> None:
         """
         Handle a message.
+
         :param message: the message
         :return: None
         """
@@ -555,6 +571,7 @@ class DecisionMaker:
     def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
         """
         Handle a transaction message.
+
         :param tx_message: the transaction message
         :return: None
         """
@@ -584,6 +601,12 @@ class DecisionMaker:
             == TransactionMessage.Performative.PROPOSE_FOR_SIGNING
         ):
             self._handle_tx_message_for_signing(tx_message)
+
+        elif(
+            tx_message.performative
+            == TransactionMessage.Performative.PROPOSE_FOR_CONTRACT
+        ):
+            self._handle_tx_message_for_deployment(tx_message)
         else:
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
@@ -594,6 +617,7 @@ class DecisionMaker:
     def _handle_tx_message_for_settlement(self, tx_message) -> None:
         """
         Handle a transaction message for settlement.
+
         :param tx_message: the transaction message
         :return: None
         """
@@ -620,6 +644,7 @@ class DecisionMaker:
     def _is_acceptable_for_settlement(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx is acceptable.
+
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
@@ -633,6 +658,7 @@ class DecisionMaker:
     def _is_valid_tx_amount(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction amount is negative (agent is buyer).
+
         If the transaction amount is positive, then the agent is the seller, so abort.
         """
         result = tx_message.sender_amount <= 0
@@ -641,6 +667,7 @@ class DecisionMaker:
     def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx is utility enhancing.
+
         :param tx_message: the transaction message
         :return: whether the transaction is utility enhancing or not
         """
@@ -663,6 +690,7 @@ class DecisionMaker:
     def _is_affordable(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx is affordable.
+
         :param tx_message: the transaction message
         :return: whether the transaction is affordable or not
         """
@@ -699,6 +727,7 @@ class DecisionMaker:
     def _settle_tx(self, tx_message: TransactionMessage) -> Optional[str]:
         """
         Settle the tx.
+
         :param tx_message: the transaction message
         :return: the transaction digest
         """
@@ -725,6 +754,7 @@ class DecisionMaker:
     def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:
         """
         Handle a transaction message for signing.
+
         :param tx_message: the transaction message
         :return: None
         """
@@ -745,6 +775,7 @@ class DecisionMaker:
     def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx is acceptable.
+
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
@@ -758,6 +789,7 @@ class DecisionMaker:
     def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx hash is present and matches the terms.
+
         :param tx_message: the transaction message
         :return: whether the transaction hash is valid
         """
@@ -769,6 +801,7 @@ class DecisionMaker:
     def _sign_tx(self, tx_message: TransactionMessage) -> str:
         """
         Sign the tx.
+
         :param tx_message: the transaction message
         :return: the signature of the signing payload
         """
@@ -786,6 +819,7 @@ class DecisionMaker:
     ) -> None:
         """
         Handle a state update message.
+
         :param state_update_message: the state update message
         :return: None
         """
@@ -813,3 +847,35 @@ class DecisionMaker:
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
             )
             self._ownership_state = new_ownership_state
+
+    def _handle_tx_message_for_deployment(self, tx_message) -> None:
+        """
+        Handle a transaction message for deployment.
+
+        :param tx_message: the transaction message
+        :return: None
+        """
+        logger.info(self._is_valid_tx_amount(tx_message))
+        if self._is_acceptable_for_deployment(tx_message):
+            if tx_message.ledger_id == OFF_CHAIN:
+                crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
+                # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
+            else:
+                crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
+            # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
+            signature = crypto_object.sign_transaction(tx_message.signing_payload)
+            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(tx_signed=signature,
+                                                                                 tx_type=tx_message.tx_id)
+
+    def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
+        """
+                Check if the tx is acceptable.
+
+                :param tx_message: the transaction message
+                :return: whether the transaction is acceptable or not
+                """
+        result = (
+                self._is_valid_tx_amount(tx_message)
+                and self._is_affordable(tx_message)
+        )
+        return result

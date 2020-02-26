@@ -46,6 +46,7 @@ class TransactionMessage(InternalMessage):
         PROPOSE_FOR_SIGNING = "propose_for_signing"
         SUCCESSFUL_SIGNING = "successful_signing"
         REJECTED_SIGNING = "rejected_signing"
+        PROPOSE_FOR_CONTRACT = "propose_for_contract"
 
     def __init__(
         self,
@@ -240,7 +241,7 @@ class TransactionMessage(InternalMessage):
                 for key, value in self.tx_amount_by_currency_id.items()
             ), "Tx_amount_by_currency_id must be of type Dict[str, int]."
             assert (
-                len(self.tx_amount_by_currency_id) == 1
+                len(self.tx_amount_by_currency_id) <= 1
             ), "Cannot reference more than one currency."
             assert isinstance(
                 self.tx_sender_fee, int
@@ -291,6 +292,7 @@ class TransactionMessage(InternalMessage):
             elif self.performative in {
                 self.Performative.PROPOSE_FOR_SIGNING,
                 self.Performative.REJECTED_SIGNING,
+                self.performative.PROPOSE_FOR_CONTRACT
             }:
                 assert isinstance(self.signing_payload, dict) and all(
                     isinstance(key, str) for key in self.signing_payload.keys()
