@@ -55,7 +55,9 @@ def launch(click_context, agents: List[str]):
             logger.info("Agent {} started...".format(agent_directory.name))
         for agent_process in agent_processes:
             agent_process.join()
-            failed |= agent_process.exitcode if agent_process.exitcode is not None else 1
+            failed |= (
+                agent_process.exitcode if agent_process.exitcode is not None else 1
+            )
     except KeyboardInterrupt:
         # at this point, the keyboard interrupt has been propagated
         # to all the child process, hence we just need to 'join' the processes.
