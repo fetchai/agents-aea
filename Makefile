@@ -7,6 +7,7 @@ clean-build:
 	rm -fr pip-wheel-metadata
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
+	rm -fr Pipfile.lock
 
 clean-docs:
 	rm -fr site/
