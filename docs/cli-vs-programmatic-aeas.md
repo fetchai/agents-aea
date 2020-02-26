@@ -11,7 +11,7 @@ The buyer of weather data (managed programmatically).
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-##Discussion
+## Discussion
 
 The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
 to achieve this we are going to use the weather station skills. 
@@ -26,7 +26,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for the entire demo.
 
-## Demo instructions:
+## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>
 
