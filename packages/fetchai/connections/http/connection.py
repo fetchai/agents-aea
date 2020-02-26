@@ -20,18 +20,16 @@
 """HTTP connection, channel, server, and handler"""
 
 import asyncio
+import json
 import logging
 import threading
-import time
-import yaml
-import json
-from uuid import uuid4
 from asyncio import CancelledError
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Optional, Set, cast
+from urllib.parse import parse_qs, urlparse
+from uuid import uuid4
 
-# from threading import Thread
-from urllib.parse import urlparse, parse_qs
-from typing import Any, Dict, List, Optional, Set, cast
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import yaml
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
@@ -111,7 +109,7 @@ class HTTPChannel:
         responses = {}
         for req_type, req_value in path_value.items():
             responses[req_type] = req_value["responses"]
-        message = json.dumps(responses).decode("utf-8").strip()
+        message = json.dumps(responses)
 
         return Envelope(
             to=to,
@@ -150,7 +148,7 @@ class HTTPChannel:
         # Send the Envelope to the Agent's InBox.
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
-    def _send_response():
+    def _send_response(self):
         """Pass the response from out-bounded Envelope back to the front-end client.
 
         Currently, the response will be written back in the cmd terminal.
@@ -178,11 +176,11 @@ class HTTPChannel:
                         (self.host, self.port), HTTPHandlerFactory(self)
                     )
                     # self.httpd = HTTPServer((self.host, self.port), handler)
-                    logger.debug(f"HTTP Server has connected to port {self.port}.")
+                    logger.info(f"HTTP Server has connected to port {self.port}.")
                     self.httpd.serve_forever()
                 except OSError:
                     logger.error(
-                        f"{host}:{port} is already in use, please try another Socket."
+                        f"{self.host}:{self.port} is already in use, please try another Socket."
                     )
 
     def disconnect(self) -> None:
@@ -193,9 +191,8 @@ class HTTPChannel:
         """
         with self.lock:
             if not self.stopped:
-                self.httpd.server_close()
-                print(f"Server shutdown from port {PORT}.")
                 self.httpd.shutdown()
+                logger.info(f"HTTP Server has shutdown on port {self.port}.")
                 self.stopped = True
                 # self.thread.join()
 
@@ -328,7 +325,7 @@ class HTTPConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-        self.channel.send(envelope)
+        # self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
