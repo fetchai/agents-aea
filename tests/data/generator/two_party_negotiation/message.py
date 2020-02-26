@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ class TwoPartyNegotiationMessage(Message):
             assert type(self.message_id) == int, "message_id is not int"
             assert type(self.target) == int, "target is not int"
 
-            # Light Protocol 2
+            # Light Protocol Rule 2
             # # Check correct performative
             assert (
                 type(self.performative) == TwoPartyNegotiationMessage.Performative
@@ -258,10 +258,10 @@ class TwoPartyNegotiationMessage(Message):
                 ), "Elements of the content 'items' are not of type 'Unit'."
                 if self.is_set("conditions"):
                     assert (
-                        type(self.conditions) == frozenset
-                        or type(self.conditions) == dict
+                        type(self.conditions) == dict
+                        or type(self.conditions) == frozenset
                         or type(self.conditions) == str
-                    ), "Content 'conditions' should be either of the following types: ['frozenset', 'dict', 'str']."
+                    ), "Content 'conditions' should be either of the following types: ['dict', 'frozenset', 'str']."
                     if type(self.conditions) == frozenset:
                         assert all(
                             type(element) == DataModel for element in self.conditions
@@ -288,7 +288,7 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents, actual_nb_of_contents
             )
 
-            # Light Protocol 3
+            # Light Protocol Rule 3
             if self.message_id == 1:
                 assert (
                     self.target == 0

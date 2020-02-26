@@ -901,7 +901,7 @@ class ProtocolGenerator:
             '            assert type(self.target) == int, "target is not int"\n\n'
         )
 
-        cls_str += "            # Light Protocol 2\n"
+        cls_str += "            # Light Protocol Rule 2\n"
         cls_str += "            # # Check correct performative\n"
         cls_str += "            assert (\n"
         cls_str += "                type(self.performative) == {}Message.Performative\n".format(
@@ -939,7 +939,7 @@ class ProtocolGenerator:
         cls_str += "                expected_nb_of_contents, actual_nb_of_contents\n"
         cls_str += "            )\n\n"
 
-        cls_str += "            # Light Protocol 3\n"
+        cls_str += "            # Light Protocol Rule 3\n"
         cls_str += "            if self.message_id == 1:\n"
         cls_str += "                assert (\n"
         cls_str += "                    self.target == 0\n"
