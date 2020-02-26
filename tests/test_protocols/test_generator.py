@@ -46,10 +46,10 @@ from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from tests.data.generator.two_party_negotiation.message import (
+from tests.data.generator.two_party_negotiation.message import (  # type: ignore
     TwoPartyNegotiationMessage,
 )
-from tests.data.generator.two_party_negotiation.serialization import (
+from tests.data.generator.two_party_negotiation.serialization import (  # type: ignore
     TwoPartyNegotiationSerializer,
 )
 
