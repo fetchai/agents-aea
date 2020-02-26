@@ -84,7 +84,7 @@ class HTTPChannel:
             try:
                 envelope = self._decode_path(path_name, path_value)
                 assert self.in_queue is not None, "Input queue not initialized."
-                assert self._loop is not None, "Loop not initialized."
+                assert self.loop is not None, "Loop not initialized."
                 # Ok to put these Envelopes in_queue during HTTPChannel initialization?
                 asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
             except ValueError:
@@ -109,13 +109,13 @@ class HTTPChannel:
         responses = {}
         for req_type, req_value in path_value.items():
             responses[req_type] = req_value["responses"]
-        message = json.dumps(responses)
+        msg_bytes = json.dumps(responses).encode()
 
         return Envelope(
             to=to,
             sender=sender,
             protocol_id=protocol_id,
-            message=message,
+            message=msg_bytes,
             context=context,
         )
 
@@ -146,6 +146,8 @@ class HTTPChannel:
             message=msg_bytes,
         )
         # Send the Envelope to the Agent's InBox.
+        assert self.in_queue is not None, "Input queue not initialized."
+        assert self.loop is not None, "Loop not initialized."
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def _send_response(self):
