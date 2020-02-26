@@ -27,6 +27,7 @@ import yaml
 import json
 from uuid import uuid4
 from asyncio import CancelledError
+
 # from threading import Thread
 from urllib.parse import urlparse, parse_qs
 from typing import Any, Dict, List, Optional, Set, cast
@@ -42,14 +43,15 @@ logger = logging.getLogger(__name__)
 class HTTPChannel:
     """A wrapper for an RESTful API with an internal HTTPServer."""
 
-    def __init__(self,
-                 address: Address,
-                 host: str,
-                 port: int,
-                 api_spec: str,
-                 connection_id: PublicId,
-                 excluded_protocols: Optional[Set[PublicId]] = None,
-                 ):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        api_spec: str,
+        connection_id: PublicId,
+        excluded_protocols: Optional[Set[PublicId]] = None,
+    ):
         """
         Initialize a channel.
 
@@ -76,7 +78,7 @@ class HTTPChannel:
         Decode all paths to get envelops each, and put it in the agent's inbox.
         """
         try:
-            paths = api_spec['paths']
+            paths = api_spec["paths"]
         except KeyError:
             logger.error("Key 'paths' not found in API spec.")
 
@@ -92,7 +94,7 @@ class HTTPChannel:
             except Exception as e:
                 logger.error(f"Error when processing a path. Message: {str(e)}")
 
-    def _decode_path(self, path_name: str, path_value: dict, separator: str = '/'):
+    def _decode_path(self, path_name: str, path_value: dict, separator: str = "/"):
         """Path --> Envelope
 
         Convert specified API path name and value into in_queue'd Envelope.
@@ -101,33 +103,40 @@ class HTTPChannel:
         path_split = path_name.split(separator)
 
         to = path_split[1].strip()  # to: name of Skill (petstoresim)?
-        sender = 'TBD'  # hardcoded for now
-        protocol_id = PublicId.from_str('fetchai/http:0.1.0')  # hardcoded for now
+        sender = "TBD"  # hardcoded for now
+        protocol_id = PublicId.from_str("fetchai/http:0.1.0")  # hardcoded for now
         uri = URI(f"http://{self.host}:{self.port}{path_name}")
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         # Msg consists of all of the responses for each REST req in JSON format.
         responses = {}
         for req_type, req_value in path_value.items():
-            responses[req_type] = req_value['responses']
+            responses[req_type] = req_value["responses"]
         message = json.dumps(responses).decode("utf-8").strip()
 
-        return Envelope(to=to, sender=sender, protocol_id=protocol_id,
-                        message=message, context=context)
+        return Envelope(
+            to=to,
+            sender=sender,
+            protocol_id=protocol_id,
+            message=message,
+            context=context,
+        )
 
-    def _process_request(self, http_method: str, url: str, param: str, body: str = '{}'):
+    def _process_request(
+        self, http_method: str, url: str, param: str, body: str = "{}"
+    ):
         """Process incoming API request by packaging into Envelope and sending it in-queue.
 
         """
         self._client_id = uuid4().hex
-        protocol_id = PublicId.from_str('fetchai/http:0.1.0')
+        protocol_id = PublicId.from_str("fetchai/http:0.1.0")
         uri = URI(f"http://{self.host}:{self.port}{url}")
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         # Prepare the Envelope's message body and encode it into bytes.
         msg = {
-            'performative': http_method,
-            'path': url,
-            'params': param,
-            'payload': body,
+            "performative": http_method,
+            "path": url,
+            "params": param,
+            "payload": body,
         }
         msg_bytes = json.dumps(msg).encode()
         # Prepare the Envelope itself using the provided variables.
@@ -165,12 +174,16 @@ class HTTPChannel:
                     # handler = SimpleHTTPServer.SimpleHTTPRequestHandler
                     # handler = HTTPHandler.set_channel(self)
                     # handler.set_channel(self)
-                    self.httpd = HTTPServer((self.host, self.port), HTTPHandlerFactory(self))
+                    self.httpd = HTTPServer(
+                        (self.host, self.port), HTTPHandlerFactory(self)
+                    )
                     # self.httpd = HTTPServer((self.host, self.port), handler)
                     logger.debug(f"HTTP Server has connected to port {self.port}.")
                     self.httpd.serve_forever()
                 except OSError:
-                    logger.error(f"{host}:{port} is already in use, please try another Socket.")
+                    logger.error(
+                        f"{host}:{port} is already in use, please try another Socket."
+                    )
 
     def disconnect(self) -> None:
         """
@@ -188,9 +201,7 @@ class HTTPChannel:
 
 
 def HTTPHandlerFactory(channel: HTTPChannel):
-
     class HTTPHandler(BaseHTTPRequestHandler):
-
         def __init__(self, *args, **kwargs):
             self._channel = channel
             super(HTTPHandler, self).__init__(*args, **kwargs)
@@ -212,7 +223,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
 
-            self._channel._process_request('GET', url, param)
+            self._channel._process_request("GET", url, param)
 
         def do_POST(self):
             """Respond to a POST request."""
@@ -226,10 +237,10 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
 
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers["Content-Length"])
             body = self.rfile.read(content_length).decode()
 
-            self._channel._process_request('POST', url, param, body)
+            self._channel._process_request("POST", url, param, body)
 
     return HTTPHandler
 
@@ -237,14 +248,15 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 class HTTPConnection(Connection):
     """Proxy to the functionality of the web RESTful API."""
 
-    def __init__(self,
-                 address: Address,
-                 host: str = '',
-                 port: int = 10000,
-                 api_path: str = None,  # Directory path of the API YAML file.
-                 *args,
-                 **kwargs
-                 ):
+    def __init__(
+        self,
+        address: Address,
+        host: str = "",
+        port: int = 10000,
+        api_path: str = None,  # Directory path of the API YAML file.
+        *args,
+        **kwargs,
+    ):
         """
         Initialize a connection to an RESTful API.
 
@@ -259,10 +271,12 @@ class HTTPConnection(Connection):
         # the following api_spec format checks will be in their own function check_api(api_spec)
         if api_path is not None:
             try:
-                with open(api_path, 'r') as f:
+                with open(api_path, "r") as f:
                     api_spec = yaml.safe_load(f)
             except FileNotFoundError:
-                logger.error("API specification YAML source file not found. Please double-check filename and path.")
+                logger.error(
+                    "API specification YAML source file not found. Please double-check filename and path."
+                )
                 return
         else:
             api_spec = api_path
@@ -272,10 +286,14 @@ class HTTPConnection(Connection):
 
         super().__init__(*args, **kwargs)
         self.address = address
-        self.channel = HTTPChannel(address, host, port, api_spec,
-                                   connection_id=self.connection_id,
-                                   excluded_protocols=self.excluded_protocols
-                                   )
+        self.channel = HTTPChannel(
+            address,
+            host,
+            port,
+            api_spec,
+            connection_id=self.connection_id,
+            excluded_protocols=self.excluded_protocols,
+        )
 
     async def connect(self) -> None:
         """
@@ -348,7 +366,7 @@ class HTTPConnection(Connection):
         """
         host = cast(str, connection_configuration.config.get("host"))
         port = cast(int, connection_configuration.config.get("port"))
-        api = cast(str, connection_configuration.config.get("api")) if not '' else None
+        api = cast(str, connection_configuration.config.get("api")) if not "" else None
 
         restricted_to_protocols_names = {
             p.name for p in connection_configuration.restricted_to_protocols
