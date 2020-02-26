@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
-description: "The HTTP connection that wraps a RESTful API specification."
+description: "The HTTP connection that wraps a web-based, RESTful API specification."
 class_name: HTTPConnection
 protocols: ["fetchai/http:0.1.0"]
 restricted_to_protocols: ["fetchai/http:0.1.0"]
