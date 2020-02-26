@@ -31,17 +31,17 @@ from typing import Any, Dict, List
 from vyper.utils import keccak256
 
 import web3.exceptions
-from web3 import Web3, eth
+from web3 import Web3
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ContractId
 from aea.contracts.base import Contract
+from aea.crypto.base import Crypto, LedgerApi
+from aea.decision_maker.messages.contract_transaction import ContractTransactionMessage
 from aea.mail.base import Address
 
 CHAIN_ID = 3
 PROVIDER = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
-PRIVATE_KEY_1 = "6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
-PRIVATE_KEY_2 = "44AE85D1046EB947AC5776881D0CC487036F88C3B1CDC1CB18E1265204B40E85"
-PRIVATE_KEY_3 = "80080D7FF9A46AEF5CC9468252163EEEDF512BB2BE7D567C7B23EB464AB25B92"
+
 NFT = 1
 FT = 2
 
@@ -51,28 +51,22 @@ logger = logging.getLogger(__name__)
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
 
-    contract_id = PublicId("fetchai", "erc1155", "0.1.0")
+    contract_id = ContractId("fetchai", "erc1155", "0.1.0")
 
     def __init__(self, **kwargs):
-        """
-        Initialize.
-
-        :param performative: the type of message.
-        """
+        """Initialize."""
         super().__init__(**kwargs)
-        self.w3 = Web3(Web3.HTTPProvider(PROVIDER))
-        self.address = None
         self.deployed = False
         self.abi = None
         self.bytecode = None
         self.instance = None
+        # We can consider of passing the list of ids rather than creating them here.
         batch_token_ids = []
         for j in range(10):
             batch_token_ids.append(Helpers().generate_id(FT, j))
         self.item_ids = batch_token_ids
-        self._account = eth.Account.from_key(PRIVATE_KEY_1)
 
-    def load_from_json(self):
+    def load_from_json(self, ledger_api: LedgerApi) -> None:
         """Load ABI and BYTECODE from json file."""
         path = Path(
             os.getcwd(),
@@ -88,23 +82,41 @@ class ERC1155Contract(Contract):
 
         self.abi = contract_interface["abi"]
         self.bytecode = contract_interface["bytecode"]
-        self.instance = self.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+        self.instance = ledger_api.eth.contract(abi=self.abi, bytecode=self.bytecode)
 
     #  This should go to the Decision Maker.
-    def _sign_transaction(self, tx):
+    def _sign_transaction(self, tx, account: Crypto):
         tx_signed = self.w3.eth.account.signTransaction(
-            transaction_dict=tx, private_key=self._account.key
+            transaction_dict=tx, private_key=account.entity.key
         )
         return tx_signed
 
-    def deploy_contract(self):
-        #  Request to deploy the contract from the decision maker and then ask ledger_apis ?
-        tx = self._get_deploy_tx(deployer_address=self._account.address)
-        tx_signed = self._sign_transaction(tx=tx)
-        self.send_tx(tx_signed=tx_signed, tx_type="contract_deployment")
-        logger.info("We just deployed the contract!")
+    def deploy_contract(self, deployer_address: Address, ledger_api: LedgerApi) -> ContractTransactionMessage:
+        """
+        Deploy a smart contract.
 
-    def _get_deploy_tx(self, deployer_address: Address) -> Dict[str, Any]:
+        :params deployer_address: The address that deploys the smart-contract
+        """
+        #  Request to deploy the contract from the decision maker and then ask ledger_apis ?
+        tx = self._create_deploy_transaction(deployer_address=deployer_address, ledger_api=ledger_api)
+
+        #  Create the transaction message for the Decision maker
+        contract_deploy_message = ContractTransactionMessage(
+            performative=ContractTransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[ContractId("fetchai", "erc1155", "0.1.0")],
+            tx_type='contract_deployment',
+            tx_sender_addr= deployer_address,
+            tx_sender_fee=0,
+            ledger_id=ledger_api.identifier,
+            info=Dict[str, Any],
+            payload=tx,
+        )
+
+        return contract_deploy_message
+        # tx_signed = self._sign_transaction(tx=tx)
+        # self.send_tx(tx_signed=tx_signed, tx_type="contract_deployment")
+
+    def _create_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> Dict[str, Any]:
         """
         Get the deployment transaction.
 
@@ -118,13 +130,13 @@ class ERC1155Contract(Contract):
             "from": deployer_address,  # Only 'from' address, don't insert 'to' address
             "value": 0,  # Add how many ethers you'll transfer during the deploy
             "gas": 0,  # Trying to make it dynamic ..
-            "gasPrice": self.w3.toWei("50", "gwei"),  # Get Gas Price
-            "nonce": self.w3.eth.getTransactionCount(deployer_address),  # Get Nonce
+            "gasPrice": ledger_api.api.toWei("50", "gwei"),  # Get Gas Price
+            "nonce": ledger_api.api.eth.getTransactionCount(deployer_address),  # Get Nonce
             "data": tx_data,  # Here is the data sent through the network
         }
 
         # estimate the gas and update the transaction dict
-        gas_estimate = self.w3.eth.estimateGas(transaction=tx)
+        gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
         logger.info("gas estimate deploy: {}".format(gas_estimate))
         tx["gas"] = gas_estimate
         return tx
@@ -157,7 +169,7 @@ class ERC1155Contract(Contract):
         ).call()
         assert actual_balances == mint_quantities
 
-    def _get_create_batch_tx(self, deployer_address):
+    def _get_create_batch_tx(self, deployer_address: Address) -> str:
         """Create a batch of items."""
         # create the items
         nonce = self.w3.eth.getTransactionCount(deployer_address)
@@ -175,7 +187,7 @@ class ERC1155Contract(Contract):
         # logger.info("gas estimate create_batch: {}".format(gas_estimate))
         return tx
 
-    def _get_trade_tx(self, terms, signature):
+    def _get_trade_tx(self, terms, signature) -> str:
         """
         Create a trade tx.
 
@@ -204,11 +216,10 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-        # gas_estimate = self.w3.eth.estimateGas(transaction=tx)
-        # logger.info("gas estimate trade: {}".format(gas_estimate))
+
         return tx
 
-    def _get_trade_batch_tx(self, terms, signature):
+    def _get_trade_batch_tx(self, terms, signature) -> str:
         """
         Create a batch trade tx.
 
@@ -243,7 +254,7 @@ class ERC1155Contract(Contract):
 
     def _get_mint_batch_tx(
         self, deployer_address, recipient_address, batch_mint_quantities
-    ):
+    ) -> str:
         """Mint a batch of items."""
         # mint batch
         nonce = self.w3.eth.getTransactionCount(deployer_address)
@@ -261,7 +272,7 @@ class ERC1155Contract(Contract):
         # logger.info("gas estimate mint_batch: {}".format(gas_estimate))
         return tx
 
-    def atomic_swap_single(self, contract, terms, signature):
+    def atomic_swap_single(self, contract, terms, signature) -> None:
         """Make a trustless trade between to agents for a single token."""
         assert self.address == terms.from_address, "Wrong from address"
         before_token_balance = contract.instance.functions.balanceOf(
@@ -285,7 +296,7 @@ class ERC1155Contract(Contract):
             before_eth_balance - terms.value_eth_wei > after_eth_balance
         ), "Eth balances don't match"  # note, gas fee also is paid by this account
 
-    def atomic_swap_batch(self, contract, terms, signature):
+    def atomic_swap_batch(self, contract, terms, signature) -> None:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert self.address == terms.from_address, "Wrong 'from' address"
         before_trade_balance_agent1 = contract.instance.functions.balanceOfBatch(
@@ -313,35 +324,7 @@ class ERC1155Contract(Contract):
             map(add, before_trade_balance_agent2, terms.from_supplies)
         ), "Balances don't match"
 
-    def send_tx(self, tx_signed, tx_type):
-        """Send a signed transaction and wait for confirmation."""
-        # send the transaction to the ropsten test network
-        tx_hash = self.w3.eth.sendRawTransaction(tx_signed.rawTransaction)
-
-        # check for the transaction to go through
-        not_found = True
-        logger.info("sending {} transaction".format(tx_type))
-        while not_found:
-            try:
-                tx_receipt = self.w3.eth.waitForTransactionReceipt(tx_hash)
-                if not tx_receipt.get("status") == 1:
-                    logger.info("transaction {} was un-successful".format(tx_type))
-                    logger.info("tx_receipt: {}".format(tx_receipt))
-                    sys.exit()
-                else:
-                    logger.info("{} transaction validated!".format(tx_type))
-                    # processed_receipt = self.instance.events.TransferBatch().processReceipt(tx_receipt)
-                    # logger.debug(msg=processed_receipt)
-                not_found = False
-            except web3.exceptions.TransactionNotFound:
-                logger.info(
-                    "{} transaction not found - sleeping for 3.0 seconds!".format(
-                        tx_type
-                    )
-                )
-                time.sleep(3.0)
-
-    def sign_single_transaction(self, terms):
+    def sign_single_transaction(self, terms, account: Crypto) -> bytes:
         """Sign the transaction before send them to agent1."""
         assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
@@ -369,15 +352,17 @@ class ERC1155Contract(Contract):
                 terms.trade_nonce,
             ).call()
         )
-        signature_dict = self._account.signHash(tx_hash)
+        signature_dict = account.entity.signHash(tx_hash)
         signature = bytes(signature_dict["signature"])
-        assert (
-            self.w3.eth.account.recoverHash(tx_hash, signature=signature)
-            == self.address
-        )
+
+        # This is more of a sanity check. I ll add the check in the ledger_api.
+        # assert (
+        #     self.w3.eth.account.recoverHash(tx_hash, signature=signature)
+        #     == self.address
+        # )
         return signature
 
-    def sign_batch_transaction(self, terms):
+    def sign_batch_transaction(self, terms, account: Crypto):
         """Sign the transaction before send them to agent1."""
         assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
@@ -405,7 +390,7 @@ class ERC1155Contract(Contract):
                 terms.trade_nonce,
             ).call()
         )
-        signature_dict = self._account.signHash(tx_hash)
+        signature_dict = account.entity.signHash(tx_hash)
         signature = bytes(signature_dict["signature"])
         assert (
             self.w3.eth.account.recoverHash(tx_hash, signature=signature)

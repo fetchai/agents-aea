@@ -21,13 +21,13 @@
 
 from abc import ABC
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ContractId
 
 
 class Contract(ABC):
     """Abstract definition of a contract."""
 
-    contract_id = None  # type: PublicId
+    contract_id = None  # type: ContractId
 
     def __init__(self, **kwargs):
         """

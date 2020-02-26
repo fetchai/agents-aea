@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional
+from typing import BinaryIO, Optional, Dict, Any
 
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -231,6 +231,25 @@ class EthereumApi(LedgerApi):
 
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
 
+        logger.info("TX Hash: {}".format(str(hex_value.hex())))
+        while True:
+            try:
+                self._api.eth.getTransactionReceipt(hex_value)
+                logger.info("transaction validated - exiting")
+                tx_digest = hex_value.hex()
+                break
+            except web3.exceptions.TransactionNotFound:  # pragma: no cover
+                logger.info("transaction not found - sleeping for 3.0 seconds")
+                time.sleep(3.0)
+        return tx_digest
+
+    def send_raw_transaction(self, tx_signed, tx_type) -> Optional[str]:
+        """Send a signed transaction and wait for confirmation."""
+        # send the transaction to the ropsten test network
+
+        hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
+
+        logger.info("sending {} transaction".format(tx_type))
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:
             try:
