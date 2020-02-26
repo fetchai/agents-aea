@@ -172,27 +172,20 @@ class TestSkillFromDir:
         )
         cls.agent_context = cls.my_aea.context
 
-    def test_missing_handler(self):
-        """Test that when parsing a skill and an handler is missing, we behave correctly."""
+    def test_missing_components(self):
+        """Test log message for missing components."""
         Path(self.skill_directory, "handlers.py").write_text("")
+        Path(self.skill_directory, "behaviours.py").write_text("")
+        Path(self.skill_directory, "dummy.py").write_text("")
+
         Skill.from_dir(self.skill_directory, self.agent_context)
-        self.mocked_logger_warning.assert_called_with(
+        self.mocked_logger_warning.assert_any_call(
             "Handler 'DummyInternalHandler' cannot be found."
         )
-
-    def test_missing_behaviour(self):
-        """Test that when parsing a skill and a behaviour is missing, we behave correctly."""
-        Path(self.skill_directory, "behaviours.py").write_text("")
-        Skill.from_dir(self.skill_directory, self.agent_context)
-        self.mocked_logger_warning.assert_called_with(
+        self.mocked_logger_warning.assert_any_call(
             "Behaviour 'DummyBehaviour' cannot be found."
         )
-
-    def test_missing_model(self):
-        """Test that when parsing a skill and a model is missing, we behave correctly."""
-        Path(self.skill_directory, "dummy.py").write_text("")
-        Skill.from_dir(self.skill_directory, self.agent_context)
-        self.mocked_logger_warning.assert_called_with(
+        self.mocked_logger_warning.assert_any_call(
             "Model 'DummyModel' cannot be found."
         )
 

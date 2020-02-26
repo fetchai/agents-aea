@@ -81,10 +81,6 @@ class TestBaseSerializations:
         actual_msg = self.message
         assert expected_msg == actual_msg
 
-    def test_str(self):
-        """Test the __str__ of the message."""
-        assert "hello" in str(self.message2)
-
     def test_set(self):
         """Test that the set method works."""
         key, value = "temporary_key", "temporary_value"

@@ -159,6 +159,17 @@ def generate_key(ctx: Context, type_):
             EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
 
+def _try_add_key(ctx, type_, filepath):
+    try:
+        ctx.agent_config.private_key_paths.create(type_, filepath)
+    except ValueError as e:  # pragma: no cover
+        logger.error(str(e))
+        sys.exit(1)
+    ctx.agent_loader.dump(
+        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+    )
+
+
 @cli.command()
 @click.argument(
     "type_",
@@ -177,13 +188,21 @@ def add_key(ctx: Context, type_, file):
     """Add a private key to the wallet."""
     try_to_load_agent_config(ctx)
     _validate_private_key_path(file, type_)
+    _try_add_key(ctx, type_, file)
+
+
+def _try_get_address(ctx, type_):
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     try:
-        ctx.agent_config.private_key_paths.create(type_, file)
+        wallet = Wallet(private_key_paths)
+        address = wallet.addresses[type_]
+        return address
     except ValueError as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
+        logger.error(str(e))
+        sys.exit(1)
 
 
 @cli.command()
@@ -197,18 +216,9 @@ def add_key(ctx: Context, type_, file):
 def get_address(ctx: Context, type_):
     """Get the address associated with the private key."""
     try_to_load_agent_config(ctx)
-
     _verify_or_create_private_keys(ctx)
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    try:
-        wallet = Wallet(private_key_paths)
-        address = wallet.addresses[type_]
-        print(address)
-    except ValueError as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+    address = _try_get_address(ctx, type_)
+    click.echo(address)
 
 
 def _try_get_balance(agent_config, wallet, type_):
@@ -225,8 +235,17 @@ def _try_get_balance(agent_config, wallet, type_):
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+        logger.error(str(e))
         sys.exit(1)
+
+
+def _try_get_wealth(ctx, type_):
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
+    wallet = Wallet(private_key_paths)
+    return _try_get_balance(ctx.agent_config, wallet, type_)
 
 
 @cli.command()
@@ -240,15 +259,9 @@ def _try_get_balance(agent_config, wallet, type_):
 def get_wealth(ctx: Context, type_):
     """Get the wealth associated with the private key."""
     try_to_load_agent_config(ctx)
-
     _verify_or_create_private_keys(ctx)
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    balance = _try_get_balance(ctx.agent_config, wallet, type_)
-    click.echo(balance)
+    wealth = _try_get_wealth(ctx, type_)
+    click.echo(wealth)
 
 
 def _wait_funds_release(agent_config, wallet, type_):
@@ -261,22 +274,7 @@ def _wait_funds_release(agent_config, wallet, type_):
             time.sleep(1)
 
 
-@cli.command()
-@click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
-    required=True,
-)
-@click.option(
-    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
-)
-@pass_ctx
-def generate_wealth(ctx: Context, sync, type_):
-    """Generate wealth for address on test network."""
-    try_to_load_agent_config(ctx)
-
-    _verify_or_create_private_keys(ctx)
+def _try_generate_wealth(ctx, type_, sync):
     private_key_paths = {
         config_pair[0]: config_pair[1]
         for config_pair in ctx.agent_config.private_key_paths.read_all()
@@ -295,7 +293,26 @@ def generate_wealth(ctx: Context, sync, type_):
             _wait_funds_release(ctx.agent_config, wallet, type_)
 
     except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+        logger.error(str(e))
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    required=True,
+)
+@click.option(
+    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
+)
+@pass_ctx
+def generate_wealth(ctx: Context, sync, type_):
+    """Generate wealth for address on test network."""
+    try_to_load_agent_config(ctx)
+    _verify_or_create_private_keys(ctx)
+    _try_generate_wealth(ctx, type_, sync)
 
 
 cli.add_command(_list)
