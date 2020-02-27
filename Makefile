@@ -7,6 +7,7 @@ clean-build:
 	rm -fr pip-wheel-metadata
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
+	rm -fr Pipfile.lock
 
 clean-docs:
 	rm -fr site/
@@ -57,3 +58,27 @@ dist: clean
 
 install: clean
 	python3 setup.py install
+
+h := $(shell git rev-parse --abbrev-ref HEAD)
+
+release: dist
+	if [ "$h" = "develop" ];\
+	then\
+        echo "Please ensure everything is merged into master & tagged there";\
+        pip install twine;\
+		twine upload dist/*;\
+	else\
+		echo "Please change to master branch for release.";\
+	fi
+
+new_env: clean
+	pipenv --python 3.7
+	pipenv shell
+
+install_env:
+	pipenv install --dev
+	pip install -e .[all]	
+
+remove_env: clean
+	deactivate
+	pipenv --rm

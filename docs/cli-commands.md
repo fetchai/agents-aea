@@ -16,6 +16,7 @@
 | `get-address fetchai/ethereum`              | Get the address associated with the private key.                             |
 | `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
+| `launch [path_to_agent_project]...`         | Launch many agents.                                                          |
 | `list protocols/connections/skills`         | List the installed resources.                                                |
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --registry` to publish to remote registry. |

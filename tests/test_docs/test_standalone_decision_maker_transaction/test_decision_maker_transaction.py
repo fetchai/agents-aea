@@ -21,14 +21,13 @@
 
 import logging
 import os
-import unittest
-from pathlib import Path
+import shutil
+import tempfile
+from unittest.mock import patch
 
 import pytest
 
 from .decision_maker_transaction import (
-    FETCHAI_PRIVATE_KEY_FILE_1,
-    FETCHAI_PRIVATE_KEY_FILE_2,
     logger,
     run,
 )
@@ -48,7 +47,7 @@ class TestDecisionMakerTransaction:
 
     @classmethod
     def _patch_logger(cls):
-        cls.patch_logger_info = unittest.mock.patch.object(logger, "info")
+        cls.patch_logger_info = patch.object(logger, "info")
         cls.mocked_logger_info = cls.patch_logger_info.__enter__()
 
     @classmethod
@@ -63,6 +62,9 @@ class TestDecisionMakerTransaction:
         cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(path)
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""
@@ -92,15 +94,8 @@ class TestDecisionMakerTransaction:
     @classmethod
     def teardown(cls):
         cls._unpatch_logger()
-        path = Path(ROOT_DIR, FETCHAI_PRIVATE_KEY_FILE_1)
-        if os.path.exists(path):
-            os.remove(path)
-        path = Path(ROOT_DIR, FETCHAI_PRIVATE_KEY_FILE_2)
-        if os.path.exists(path):
-            os.remove(path)
-        path = Path(ROOT_DIR, "input.txt")
-        if os.path.exists(path):
-            os.remove(path)
-        path = Path(ROOT_DIR, "output.txt")
-        if os.path.exists(path):
-            os.remove(path)
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

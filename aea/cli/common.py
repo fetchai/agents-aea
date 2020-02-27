@@ -343,7 +343,39 @@ class PublicIdParameter(click.ParamType):
         try:
             return PublicId.from_str(value)
         except ValueError:
-            raise click.BadParameter(value)
+            self.fail(value, param, ctx)
+
+
+class AgentDirectory(click.Path):
+    """A click.Path, but with further checks  applications."""
+
+    def __init__(self):
+        """Initialize the agent directory parameter."""
+        super().__init__(
+            exists=True, file_okay=False, dir_okay=True, readable=True, writable=False
+        )
+
+    def get_metavar(self, param):
+        """Return the metavar default for this param if it provides one."""
+        return "AGENT_DIRECTORY"
+
+    def convert(self, value, param, ctx):
+        """Convert the value. This is not invoked for values that are `None` (the missing value)."""
+        cwd = os.getcwd()
+        path = Path(value)
+        try:
+            # check that the target folder is an AEA project.
+            os.chdir(path)
+            fp = open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8")
+            ctx.obj.agent_config = ctx.obj.agent_loader.load(fp)
+            try_to_load_agent_config(ctx.obj)
+            # everything ok - return the parameter to the command
+            return value
+        except Exception:
+            logger.error("The name provided is not a path to an AEA project.")
+            self.fail(value, param, ctx)
+        finally:
+            os.chdir(cwd)
 
 
 def validate_package_name(package_name: str):
