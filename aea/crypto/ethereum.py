@@ -115,7 +115,7 @@ class EthereumCrypto(Crypto):
         return signature["signature"]
 
     def sign_transaction(self, transaction):
-        signature = Account.sign_transaction(transaction_dict=transaction,
+        signature = self.entity.sign_transaction(transaction_dict=transaction,
                                              private_key=self.entity.key)
 
         return signature
