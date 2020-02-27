@@ -343,7 +343,10 @@ class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
-        self, protocol_specification: ProtocolSpecification, protobuf_part: Dict, output_path: str = "."
+        self,
+        protocol_specification: ProtocolSpecification,
+        protobuf_part: Dict,
+        output_path: str = ".",
     ) -> None:
         """
         Instantiate a protocol generator.
@@ -415,7 +418,6 @@ class ProtocolGenerator:
         #     python_custom_type = specification_custom_type[2:]
         #     self.protobuf_part[python_custom_type] = self.protobuf_part[specification_custom_type]
         #     self.protobuf_part.pop(specification_custom_type)
-
 
     def _import_from_typing_str(self) -> str:
         """
@@ -1472,7 +1474,9 @@ class ProtocolGenerator:
                 proto_part = self.protobuf_part[specification_custom_type]
                 number_of_new_lines = proto_part.count("\n")
                 if number_of_new_lines != 0:
-                    formatted_proto_part = proto_part.replace("\n", "\n" + indents,number_of_new_lines-1)
+                    formatted_proto_part = proto_part.replace(
+                        "\n", "\n" + indents, number_of_new_lines - 1
+                    )
                 else:
                     formatted_proto_part = proto_part
                 proto_buff_schema_str += indents + formatted_proto_part
