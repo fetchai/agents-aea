@@ -25,31 +25,13 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from tests.data.generator.two_party_negotiation.models import (
+    DataModel,
+    IOTApp7,
+    Unit,
+)
+
 DEFAULT_BODY_SIZE = 4
-
-
-class DataModel:
-    """This class represents an instance of DataModel."""
-
-    def __init__(self):
-        """Initialise an instance of DataModel."""
-        raise NotImplementedError
-
-
-class IOTApp7:
-    """This class represents an instance of IOTApp7."""
-
-    def __init__(self):
-        """Initialise an instance of IOTApp7."""
-        raise NotImplementedError
-
-
-class Unit:
-    """This class represents an instance of Unit."""
-
-    def __init__(self):
-        """Initialise an instance of Unit."""
-        raise NotImplementedError
 
 
 class TwoPartyNegotiationMessage(Message):

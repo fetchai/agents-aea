@@ -28,6 +28,11 @@ from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
+# from packages.fetchai.protocols.two_party_negotiation.models import (
+#     DataModel,
+#     IOTApp7,
+#     Unit,
+# )
 
 
 class TwoPartyNegotiationSerializer(Serializer):

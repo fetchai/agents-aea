@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n9protocols/two_party_negotiation/TwoPartyNegotiation.proto\x12\x1d\x66\x65tch.aea.TwoPartyNegotiation"\xf2\r\n\x1aTwoPartyNegotiationMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12R\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32@.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.AcceptH\x00\x12L\n\x03\x63\x66p\x18\x06 \x01(\x0b\x32=.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.CfpH\x00\x12T\n\x07\x64\x65\x63line\x18\x07 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DeclineH\x00\x12^\n\x0cmatch_accept\x18\x08 \x01(\x0b\x32\x46.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Match_AcceptH\x00\x12T\n\x07propose\x18\t \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.ProposeH\x00\x1a\x0b\n\tDataModel\x1a\t\n\x07IOTApp7\x1a\x06\n\x04Unit\x1aY\n\x03\x43\x66p\x12R\n\x05query\x18\x01 \x01(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x1a\x87\x08\n\x07Propose\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12\r\n\x05price\x18\x02 \x01(\x02\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x08\x12R\n\x05query\x18\x05 \x01(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x12\x61\n\x08proposal\x18\x06 \x03(\x0b\x32O.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ProposalEntry\x12\x0e\n\x06rounds\x18\x07 \x03(\x05\x12M\n\x05items\x18\x08 \x03(\x0b\x32>.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Unit\x12\x1b\n\x13\x63onditions_type_str\x18\t \x01(\t\x12\x8a\x01\n\x1f\x63onditions_type_dict_of_str_int\x18\n \x03(\x0b\x32\x61.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry\x12m\n conditions_type_set_of_DataModel\x18\x0b \x03(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x12\x8e\x01\n!conditions_type_dict_of_str_float\x18\x0c \x03(\x0b\x32\x63.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry\x1ar\n\rProposalEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12P\n\x05value\x18\x02 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.IOTApp7:\x02\x38\x01\x1a\x41\n\x1f\x43onditionsTypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x43\n!ConditionsTypeDictOfStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\t\n\x07\x44\x65\x63line\x1a\x0e\n\x0cMatch_AcceptB\x0e\n\x0cperformativeb\x06proto3'
+        '\n9protocols/two_party_negotiation/TwoPartyNegotiation.proto\x12\x1d\x66\x65tch.aea.TwoPartyNegotiation"\xa7\x0e\n\x1aTwoPartyNegotiationMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12R\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32@.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.AcceptH\x00\x12L\n\x03\x63\x66p\x18\x06 \x01(\x0b\x32=.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.CfpH\x00\x12T\n\x07\x64\x65\x63line\x18\x07 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DeclineH\x00\x12^\n\x0cmatch_accept\x18\x08 \x01(\x0b\x32\x46.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Match_AcceptH\x00\x12T\n\x07propose\x18\t \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.ProposeH\x00\x1a\x1f\n\tDataModel\x12\x12\n\ndata_model\x18\x01 \x01(\x0c\x1a\x1c\n\x07IOTApp7\x12\x11\n\tiot_app_7\x18\x01 \x01(\x0c\x1a\x14\n\x04Unit\x12\x0c\n\x04unit\x18\x01 \x01(\x0c\x1aY\n\x03\x43\x66p\x12R\n\x05query\x18\x01 \x01(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x1a\x87\x08\n\x07Propose\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12\r\n\x05price\x18\x02 \x01(\x02\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x08\x12R\n\x05query\x18\x05 \x01(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x12\x61\n\x08proposal\x18\x06 \x03(\x0b\x32O.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ProposalEntry\x12\x0e\n\x06rounds\x18\x07 \x03(\x05\x12M\n\x05items\x18\x08 \x03(\x0b\x32>.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Unit\x12\x1b\n\x13\x63onditions_type_str\x18\t \x01(\t\x12\x8a\x01\n\x1f\x63onditions_type_dict_of_str_int\x18\n \x03(\x0b\x32\x61.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrIntEntry\x12m\n conditions_type_set_of_DataModel\x18\x0b \x03(\x0b\x32\x43.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel\x12\x8e\x01\n!conditions_type_dict_of_str_float\x18\x0c \x03(\x0b\x32\x63.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Propose.ConditionsTypeDictOfStrFloatEntry\x1ar\n\rProposalEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12P\n\x05value\x18\x02 \x01(\x0b\x32\x41.fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.IOTApp7:\x02\x38\x01\x1a\x41\n\x1f\x43onditionsTypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x43\n!ConditionsTypeDictOfStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\t\n\x07\x44\x65\x63line\x1a\x0e\n\x0cMatch_AcceptB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
@@ -32,7 +32,26 @@ _TWOPARTYNEGOTIATIONMESSAGE_DATAMODEL = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
-    fields=[],
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="data_model",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.DataModel.data_model",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
     extensions=[],
     nested_types=[],
     enum_types=[],
@@ -42,7 +61,7 @@ _TWOPARTYNEGOTIATIONMESSAGE_DATAMODEL = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=663,
-    serialized_end=674,
+    serialized_end=694,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_IOTAPP7 = _descriptor.Descriptor(
@@ -51,7 +70,26 @@ _TWOPARTYNEGOTIATIONMESSAGE_IOTAPP7 = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
-    fields=[],
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="iot_app_7",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.IOTApp7.iot_app_7",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
     extensions=[],
     nested_types=[],
     enum_types=[],
@@ -60,8 +98,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_IOTAPP7 = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=676,
-    serialized_end=685,
+    serialized_start=696,
+    serialized_end=724,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_UNIT = _descriptor.Descriptor(
@@ -70,7 +108,26 @@ _TWOPARTYNEGOTIATIONMESSAGE_UNIT = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
-    fields=[],
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="unit",
+            full_name="fetch.aea.TwoPartyNegotiation.TwoPartyNegotiationMessage.Unit.unit",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=_b(""),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+    ],
     extensions=[],
     nested_types=[],
     enum_types=[],
@@ -79,8 +136,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_UNIT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=687,
-    serialized_end=693,
+    serialized_start=726,
+    serialized_end=746,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_CFP = _descriptor.Descriptor(
@@ -117,8 +174,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_CFP = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=695,
-    serialized_end=784,
+    serialized_start=748,
+    serialized_end=837,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY = _descriptor.Descriptor(
@@ -173,8 +230,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_PROPOSALENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1568,
-    serialized_end=1682,
+    serialized_start=1621,
+    serialized_end=1735,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY = _descriptor.Descriptor(
@@ -229,8 +286,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRINTENTRY = _descripto
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1684,
-    serialized_end=1749,
+    serialized_start=1737,
+    serialized_end=1802,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY = _descriptor.Descriptor(
@@ -285,8 +342,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE_CONDITIONSTYPEDICTOFSTRFLOATENTRY = _descrip
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1751,
-    serialized_end=1818,
+    serialized_start=1804,
+    serialized_end=1871,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
@@ -525,8 +582,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_PROPOSE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=787,
-    serialized_end=1818,
+    serialized_start=840,
+    serialized_end=1871,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_ACCEPT = _descriptor.Descriptor(
@@ -544,8 +601,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_ACCEPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1820,
-    serialized_end=1828,
+    serialized_start=1873,
+    serialized_end=1881,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_DECLINE = _descriptor.Descriptor(
@@ -563,8 +620,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_DECLINE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1830,
-    serialized_end=1839,
+    serialized_start=1883,
+    serialized_end=1892,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_MATCH_ACCEPT = _descriptor.Descriptor(
@@ -582,8 +639,8 @@ _TWOPARTYNEGOTIATIONMESSAGE_MATCH_ACCEPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1841,
-    serialized_end=1855,
+    serialized_start=1894,
+    serialized_end=1908,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE = _descriptor.Descriptor(
@@ -782,7 +839,7 @@ _TWOPARTYNEGOTIATIONMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=93,
-    serialized_end=1871,
+    serialized_end=1924,
 )
 
 _TWOPARTYNEGOTIATIONMESSAGE_DATAMODEL.containing_type = _TWOPARTYNEGOTIATIONMESSAGE

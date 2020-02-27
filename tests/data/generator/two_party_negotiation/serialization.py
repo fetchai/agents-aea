@@ -28,6 +28,11 @@ from tests.data.generator.two_party_negotiation import TwoPartyNegotiation_pb2
 from tests.data.generator.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
+# from tests.data.generator.two_party_negotiation.models import (
+#     DataModel,
+#     IOTApp7,
+#     Unit,
+# )
 
 
 class TwoPartyNegotiationSerializer(Serializer):

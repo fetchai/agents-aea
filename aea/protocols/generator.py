@@ -444,11 +444,15 @@ class ProtocolGenerator:
         :return: import statement for the models module
         """
         if len(self._all_custom_types) == 0:
-            import_str = ''
+            import_str = ""
         else:
-            import_str = 'from {}.{}.protocols.{}.models import '.format(PATH_TO_PACKAGES, self.protocol_specification.author, self.protocol_specification.name)
+            import_str = "from {}.{}.protocols.{}.models import ".format(
+                PATH_TO_PACKAGES,
+                self.protocol_specification.author,
+                self.protocol_specification.name,
+            )
             for custom_class in self._all_custom_types:
-                import_str += '{}, '.format(custom_class)
+                import_str += "{}, ".format(custom_class)
             import_str = import_str[:-2]
         return import_str
 
@@ -800,7 +804,8 @@ class ProtocolGenerator:
 
         # Class Header
         cls_str += str.format(
-            "\n\nclass {}Message(Message):\n", self.protocol_specification_in_camel_case,
+            "\n\nclass {}Message(Message):\n",
+            self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
             '    """{}"""\n\n', self.protocol_specification.description
@@ -1247,7 +1252,7 @@ class ProtocolGenerator:
             cls_str += "{}\n".format(self._import_models())
 
         # Class Header
-        cls_str += '\n\nclass {}Serializer(Serializer):\n'.format(
+        cls_str += "\n\nclass {}Serializer(Serializer):\n".format(
             self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
@@ -1625,9 +1630,7 @@ class ProtocolGenerator:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
                 self._all_custom_types
             )
-            incomplete_generation_warning_msg += "Update ['models.py', 'serialisation.py'] generated files so they cover these custom types.".format(
-                self.protocol_specification_in_camel_case
-            )
+            incomplete_generation_warning_msg += 'Update [\'models.py\', \'serialisation.py\'] generated files so they cover these custom types.'
             print(incomplete_generation_warning_msg)
 
         # Compile protobuf schema
