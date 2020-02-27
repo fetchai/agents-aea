@@ -36,6 +36,7 @@ PATH_TO_PACKAGES = "packages"
 INIT_FILE_NAME = "__init__.py"
 PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
 MESSAGEPY_FILE_NAME = "message.py"
+MODELSPY_FILE_NAME = "models.py"
 SERIALIZATIONPY_FILE_NAME = "serialization.py"
 
 CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
@@ -414,11 +415,6 @@ class ProtocolGenerator:
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
 
-        # for specification_custom_type, protobuf_implementation in self.protobuf_part.items():
-        #     python_custom_type = specification_custom_type[2:]
-        #     self.protobuf_part[python_custom_type] = self.protobuf_part[specification_custom_type]
-        #     self.protobuf_part.pop(specification_custom_type)
-
     def _import_from_typing_str(self) -> str:
         """
         Manage import statement for the typing package.
@@ -441,6 +437,21 @@ class ProtocolGenerator:
         import_str = import_str[:-2]
         return import_str
 
+    def _import_models(self) -> str:
+        """
+        Manage import statement from models module
+
+        :return: import statement for the models module
+        """
+        if len(self._all_custom_types) == 0:
+            import_str = ''
+        else:
+            import_str = 'from {}.{}.protocols.{}.models import '.format(PATH_TO_PACKAGES, self.protocol_specification.author, self.protocol_specification.name)
+            for custom_class in self._all_custom_types:
+                import_str += '{}, '.format(custom_class)
+            import_str = import_str[:-2]
+        return import_str
+
     def _performatives_str(self) -> str:
         """
         Generate the performatives instance property string, a set containing all valid performatives of this protocol.
@@ -454,13 +465,19 @@ class ProtocolGenerator:
         performatives_str += "}"
         return performatives_str
 
-    def _custom_types_classes_str(self) -> str:
+    def _models_module_str(self) -> str:
         """
-        Generate classes for every custom type.
+        Produces the contents of the models module, containing classes corresponding to every custom type in the protocol specification.
 
-        :return: the string containing class stubs for every custom type
+        :return: the models.py file content
         """
-        cls_str = ""
+        # Header
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
+
+        # Module docstring
+        cls_str += str.format(
+            '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n\n\n'
+        )
 
         if len(self._all_custom_types) == 0:
             return cls_str
@@ -476,6 +493,7 @@ class ProtocolGenerator:
                 '        """Initialise an instance of {}."""\n', custom_type
             )
             cls_str += "        raise NotImplementedError\n\n\n"
+        cls_str = cls_str[:-2]
         return cls_str
 
     def _performatives_enum_str(self) -> str:
@@ -773,15 +791,16 @@ class ProtocolGenerator:
         cls_str += "from enum import Enum\n"
         cls_str += "{}\n\n".format(self._import_from_typing_str())
         cls_str += "from aea.configurations.base import ProtocolId\n"
-        cls_str += MESSAGE_IMPORT
-        cls_str += "\n\nDEFAULT_BODY_SIZE = 4\n\n\n"
-
-        # Custom classes
-        cls_str += self._custom_types_classes_str()
+        cls_str += "{}\n".format(MESSAGE_IMPORT)
+        if self._import_models() == "":
+            cls_str += self._import_models()
+        else:
+            cls_str += "\n{}\n".format(self._import_models())
+        cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
         cls_str += str.format(
-            "class {}Message(Message):\n", self.protocol_specification_in_camel_case,
+            "\n\nclass {}Message(Message):\n", self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
             '    """{}"""\n\n', self.protocol_specification.description
@@ -1215,17 +1234,20 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
-            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n\n\n",
+            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
             PATH_TO_PACKAGES,
             self.protocol_specification.author,
             "protocols",
             self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
+        if self._import_models() == "":
+            cls_str += self._import_models()
+        else:
+            cls_str += "{}\n".format(self._import_models())
 
         # Class Header
-        cls_str += str.format(
-            "class {}Serializer(Serializer):\n",
+        cls_str += '\n\nclass {}Serializer(Serializer):\n'.format(
             self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
@@ -1590,6 +1612,8 @@ class ProtocolGenerator:
         self._generate_file(INIT_FILE_NAME, self._init_str())
         self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
         self._generate_file(MESSAGEPY_FILE_NAME, self._message_class_str())
+        if len(self._all_custom_types) > 0:
+            self._generate_file(MODELSPY_FILE_NAME, self._models_module_str())
         self._generate_file(SERIALIZATIONPY_FILE_NAME, self._serialization_class_str())
         self._generate_file(
             "{}.proto".format(self.protocol_specification_in_camel_case),
@@ -1601,12 +1625,8 @@ class ProtocolGenerator:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
                 self._all_custom_types
             )
-            incomplete_generation_warning_msg += "Update ['message.py', '{}.proto', 'serialisation.py'] generated files so they cover these custom types.\n".format(
+            incomplete_generation_warning_msg += "Update ['models.py', 'serialisation.py'] generated files so they cover these custom types.".format(
                 self.protocol_specification_in_camel_case
-            )
-            incomplete_generation_warning_msg += "Once you update '{}.proto' you must compile it so it generates a correct {}_pb2.py file.".format(
-                self.protocol_specification_in_camel_case,
-                self.protocol_specification_in_camel_case,
             )
             print(incomplete_generation_warning_msg)
 

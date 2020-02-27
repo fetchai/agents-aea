@@ -75,7 +75,6 @@ def _generate_item(ctx: Context, item_type, specification_path):
         protobuf_part = config_loader.load_protobuf_part_of_protocol_specification(
             open(specification_path)
         )
-        logger.info(protobuf_part)
     except Exception as e:
         logger.exception(e)
         sys.exit(1)

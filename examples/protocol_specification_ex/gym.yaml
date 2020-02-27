@@ -15,3 +15,10 @@ speech_acts:
     info: pt:dict[pt:str, ct:PerceptInfo]
   reset: {}
   close: {}
+---
+ct:Action: |
+  bytes action = 1;
+ct:Observation: |
+  bytes observation = 1;
+ct:PerceptInfo: |
+  bytes perceptInfo = 1;

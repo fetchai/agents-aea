@@ -10,3 +10,15 @@ speech_acts:
     error_code: ct:ErrorCode
     error_msg: pt:str
     error_data: pt:dict[pt:str, ct:ErrorData]
+---
+ct:ErrorCode: |
+  enum ErrorCodeEnum {
+      UNSUPPORTED_PROTOCOL = -10001;
+      DECODING_ERROR = -10002;
+      INVALID_MESSAGE = -10003;
+      UNSUPPORTED_SKILL = -10004;
+      INVALID_DIALOGUE = -10005;
+    }
+  ErrorCodeEnum error_code = 1;
+ct:ErrorData: |
+  bytes error_data = 1;

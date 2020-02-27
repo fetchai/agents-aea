@@ -82,8 +82,10 @@ class ConfigLoader(Generic[T]):
         yaml_documents = []
         for document in yaml_data:
             yaml_documents.append(document)
-        assert yaml_documents[1] is not None, "The second yaml document does not exist"
-        return yaml_documents[1]
+        if len(yaml_documents) >= 2:
+            return yaml_documents[1]
+        else:
+            return dict()
 
     def load_protocol_specification(self, fp: TextIO) -> T:
         """

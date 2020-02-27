@@ -14,3 +14,16 @@ speech_acts:
   data:
     terms: ct:Description
     data: ct:Data
+---
+ct:Query: |
+  message Nothing {
+  }
+  oneof query{
+      bytes bytes = 1;
+      Nothing nothing = 2;
+      bytes query_bytes = 3;
+  }
+ct:Description: |
+  bytes bytes = 1;
+ct:Data: |
+  repeated bytes bytes = 1;
