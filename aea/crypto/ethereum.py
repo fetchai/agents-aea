@@ -182,17 +182,11 @@ class EthereumApi(LedgerApi):
         """
         self._api = Web3(HTTPProvider(endpoint_uri=address))
         self._gas_price = gas_price
-        self._contract_address = None
 
     @property
     def api(self) -> Web3:
         """Get the underlying API object."""
         return self._api
-
-    @property
-    def contract_address(self) -> Address:
-        """Get the contract_address."""
-        return  self._contract_address
 
     def get_balance(self, address: AddressLike) -> int:
         """Get the balance of a given account."""
@@ -268,7 +262,7 @@ class EthereumApi(LedgerApi):
                 result = self._api.eth.getTransactionReceipt(hex_value)
                 logger.info("transaction validated - exiting")
                 if result.contractAddress is not None:
-                    self._contract_address = result.contractAddress
+                    logger.info(result.contractAddress)
                 tx_digest = hex_value.hex()
                 break
             except web3.exceptions.TransactionNotFound:  # pragma: no cover

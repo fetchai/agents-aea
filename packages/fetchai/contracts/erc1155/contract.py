@@ -39,9 +39,6 @@ from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
-CHAIN_ID = 3
-PROVIDER = "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe"
-
 NFT = 1
 FT = 2
 
@@ -60,6 +57,7 @@ class ERC1155Contract(Contract):
         self.abi = None
         self.bytecode = None
         self.instance = None
+        self.address = None
         # We can consider of passing the list of ids rather than creating them here.
         batch_token_ids = []
         for j in range(10):
@@ -94,7 +92,7 @@ class ERC1155Contract(Contract):
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_CONTRACT,
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=deployer_address,
@@ -138,7 +136,8 @@ class ERC1155Contract(Contract):
     def update_contract_instance(self, contract_address: Address, ledger_api: LedgerApi):
         """Update the local instance of the smart contract with the deployed one."""
         logger.info("Updating the local instance of the contract...")
-        self.instance = ledger_api.api.eth.contract(address=contract_address, abi=self.abi)
+        self.address = contract_address
+        self.instance = ledger_api.api.eth.contract(address=self.address, abi=self.abi)
 
     def create_batch(self, deployer_address: Address, ledger_api: LedgerApi) -> TransactionMessage:
         """
@@ -153,7 +152,7 @@ class ERC1155Contract(Contract):
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_CONTRACT,
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=deployer_address,
@@ -182,28 +181,30 @@ class ERC1155Contract(Contract):
             deployer_address, self.item_ids
         ).buildTransaction(
             {
-                "chainId": CHAIN_ID,
+                "chainId": 3,
                 "gas": 300000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
         )
         logger.info(tx)
+        logger.info(ledger_api.api.provider)
         # gas_estimate = self.w3.eth.estimateGas(transaction=tx)
         # logger.info("gas estimate create_batch: {}".format(gas_estimate))
         return tx
 
-    def mint_batch(self, deployer_address: Address, recipient_address: Address, mint_quantities: List[int]):
+    def mint_batch(self, deployer_address: Address, recipient_address: Address, mint_quantities: List[int], ledger_api: LedgerApi):
 
         assert len(mint_quantities) == len(self.item_ids)
         tx = self._get_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
             batch_mint_quantities=mint_quantities,
+            ledger_api=ledger_api,
         )
 
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_CONTRACT,
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=deployer_address,
@@ -218,231 +219,199 @@ class ERC1155Contract(Contract):
         )
 
         return tx_message
-        # Create the transaction mesasge for the decision_maker.
-
-        # tx_signed = self._sign_transaction(tx=tx)
-        # self.send_tx(tx_signed=tx_signed, tx_type="mint_batch_agent_1")
-
-        # assert balances match
-        # actual_balances = self.instance.functions.balanceOfBatch(
-        #     [recipient_address] * 10, self.item_ids
-        # ).call()
-        # assert actual_balances == mint_quantities
 
     def _get_mint_batch_tx(
-        self, deployer_address, recipient_address, batch_mint_quantities
+        self, deployer_address, recipient_address, batch_mint_quantities, ledger_api,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
-        nonce = self.w3.eth.getTransactionCount(deployer_address)
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.mintBatch(
             recipient_address, self.item_ids, batch_mint_quantities
         ).buildTransaction(
             {
-                "chainId": CHAIN_ID,
+                "chainId": 3,
                 "gas": 300000,
-                "gasPrice": self.w3.toWei("50", "gwei"),
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
         )
-        # gas_estimate = self.w3.eth.estimateGas(transaction=tx)
-        # logger.info("gas estimate mint_batch: {}".format(gas_estimate))
-        return tx
-#
-#     def _get_trade_tx(self, terms, signature) -> str:
-#         """
-#         Create a trade tx.
-#
-#         :params terms: The class (can be Dict[str, Any]) that contains the details for the transaction.
-#         :params signature: The signed terms from the counterparty.
-#         """
-#         data = b"hello"
-#         nonce = self.w3.eth.getTransactionCount(terms.from_address)
-#         tx = self.instance.functions.trade(
-#             terms.from_address,
-#             terms.to_address,
-#             terms.item_id,
-#             terms.from_supply,
-#             terms.to_supply,
-#             terms.value_eth_wei,
-#             terms.trade_nonce,
-#             signature,
-#             data,
-#         ).buildTransaction(
-#             {
-#                 "chainId": CHAIN_ID,
-#                 "gas": 2818111,
-#                 "from": terms.from_address,
-#                 "value": terms.value_eth_wei,
-#                 "gasPrice": self.w3.toWei("50", "gwei"),
-#                 "nonce": nonce,
-#             }
-#         )
-#
-#         return tx
-#
-#     def _get_trade_batch_tx(self, terms, signature) -> str:
-#         """
-#         Create a batch trade tx.
-#
-#         :params terms: The class (can be Dict[str, Any]) that contains the details for the transaction.
-#         :params signature: The signed terms from the counterparty.
-#         """
-#         data = b"hello"
-#         nonce = self.w3.eth.getTransactionCount(terms.from_address)
-#         tx = self.instance.functions.tradeBatch(
-#             terms.from_address,
-#             terms.to_address,
-#             terms.item_ids,
-#             terms.from_supplies,
-#             terms.to_supplies,
-#             terms.value_eth_wei,
-#             terms.trade_nonce,
-#             signature,
-#             data,
-#         ).buildTransaction(
-#             {
-#                 "chainId": CHAIN_ID,
-#                 "gas": 2818111,
-#                 "from": terms.from_address,
-#                 "value": terms.value_eth_wei,
-#                 "gasPrice": self.w3.toWei("50", "gwei"),
-#                 "nonce": nonce,
-#             }
-#         )
-#         # gas_estimate = self.w3.eth.estimateGas(transaction=tx)
-#         # logger.info("gas estimate trade_batch: {}".format(gas_estimate))
-#         return tx
-#
 
-#
-#     def atomic_swap_single(self, contract, terms, signature) -> None:
-#         """Make a trustless trade between to agents for a single token."""
-#         assert self.address == terms.from_address, "Wrong from address"
-#         before_token_balance = contract.instance.functions.balanceOf(
-#             terms.from_address, terms.item_id
-#         ).call()
-#         before_eth_balance = self.w3.eth.getBalance(terms.from_address)
-#
-#         tx = contract.get_trade_tx(terms=terms, signature=signature)
-#         tx_signed = self._sign_transaction(tx=tx)
-#         contract.send_tx(tx_signed=tx_signed, tx_type="single_trade")
-#
-#         after_token_balance = contract.instance.functions.balanceOf(
-#             terms.from_address, terms.item_id
-#         ).call()
-#         after_eth_balance = self.w3.eth.getBalance(terms.from_address)
-#         assert (
-#             before_token_balance - terms.from_supply + terms.to_supply
-#             == after_token_balance
-#         ), "Token balances don't match"
-#         assert (
-#             before_eth_balance - terms.value_eth_wei > after_eth_balance
-#         ), "Eth balances don't match"  # note, gas fee also is paid by this account
-#
-#     def atomic_swap_batch(self, contract, terms, signature) -> None:
-#         """Make a trust-less trade for a batch of items between 2 agents."""
-#         assert self.address == terms.from_address, "Wrong 'from' address"
-#         before_trade_balance_agent1 = contract.instance.functions.balanceOfBatch(
-#             [self.address] * 10, terms.item_ids
-#         ).call()
-#         before_trade_balance_agent2 = contract.instance.functions.balanceOfBatch(
-#             [terms.to_address] * 10, terms.item_ids
-#         ).call()
-#
-#         tx = contract.get_trade_batch_tx(terms=terms, signature=signature)
-#         tx_signed = self._sign_transaction(tx=tx)
-#         contract.send_tx(tx_signed=tx_signed, tx_type="batch_trade")
-#
-#         after_trade_balance_agent1 = contract.instance.functions.balanceOfBatch(
-#             [self.address] * 10, terms.item_ids
-#         ).call()
-#         after_trade_balance_agent2 = contract.instance.functions.balanceOfBatch(
-#             [terms.to_address] * 10, terms.item_ids
-#         ).call()
-#
-#         assert list(map(add, after_trade_balance_agent1, terms.from_supplies)) == list(
-#             map(add, before_trade_balance_agent1, terms.to_supplies)
-#         ), "Balances don't match"
-#         assert list(map(add, after_trade_balance_agent2, terms.to_supplies)) == list(
-#             map(add, before_trade_balance_agent2, terms.from_supplies)
-#         ), "Balances don't match"
-#
-#     def sign_single_transaction(self, terms, account: Crypto) -> bytes:
-#         """Sign the transaction before send them to agent1."""
-#         assert self.address == terms.to_address
-#         from_address_hash = self.instance.functions.getAddress(
-#             terms.from_address
-#         ).call()
-#         to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
-#         tx_hash = Helpers().get_single_hash(
-#             _from=from_address_hash,
-#             _to=to_address_hash,
-#             _id=terms.item_id,
-#             _from_value=terms.from_supply,
-#             _to_value=terms.to_supply,
-#             _value_eth=terms.value_eth_wei,
-#             _nonce=terms.trade_nonce,
-#         )
-#         assert (
-#             tx_hash
-#             == self.instance.functions.getSingleHash(
-#                 terms.from_address,
-#                 terms.to_address,
-#                 terms.item_id,
-#                 terms.from_supply,
-#                 terms.to_supply,
-#                 terms.value_eth_wei,
-#                 terms.trade_nonce,
-#             ).call()
-#         )
-#         signature_dict = account.entity.signHash(tx_hash)
-#         signature = bytes(signature_dict["signature"])
-#
-#         # This is more of a sanity check. I ll add the check in the ledger_api.
-#         # assert (
-#         #     self.w3.eth.account.recoverHash(tx_hash, signature=signature)
-#         #     == self.address
-#         # )
-#         return signature
-#
-#     def sign_batch_transaction(self, terms, account: Crypto):
-#         """Sign the transaction before send them to agent1."""
-#         assert self.address == terms.to_address
-#         from_address_hash = self.instance.functions.getAddress(
-#             terms.from_address
-#         ).call()
-#         to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
-#         tx_hash = Helpers().get_hash(
-#             _from=from_address_hash,
-#             _to=to_address_hash,
-#             _ids=terms.item_ids,
-#             _from_values=terms.from_supplies,
-#             _to_values=terms.to_supplies,
-#             _value_eth=terms.value_eth_wei,
-#             _nonce=terms.trade_nonce,
-#         )
-#         assert (
-#             tx_hash
-#             == self.instance.functions.getHash(
-#                 terms.from_address,
-#                 terms.to_address,
-#                 terms.item_ids,
-#                 terms.from_supplies,
-#                 terms.to_supplies,
-#                 terms.value_eth_wei,
-#                 terms.trade_nonce,
-#             ).call()
-#         )
-#         signature_dict = account.entity.signHash(tx_hash)
-#         signature = bytes(signature_dict["signature"])
-#         assert (
-#             self.w3.eth.account.recoverHash(tx_hash, signature=signature)
-#             == self.address
-#         )
-#         return signature
-#
-#
+        return tx
+
+    def _get_trade_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+        """
+        Create a trade tx.
+
+        :params terms: The class (can be Dict[str, Any]) that contains the details for the transaction.
+        :params signature: The signed terms from the counterparty.
+        """
+        data = b"hello"
+        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
+        tx = self.instance.functions.trade(
+            terms.from_address,
+            terms.to_address,
+            terms.item_id,
+            terms.from_supply,
+            terms.to_supply,
+            terms.value_eth_wei,
+            terms.trade_nonce,
+            signature,
+            data,
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 2818111,
+                "from": terms.from_address,
+                "value": terms.value_eth_wei,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+
+        return tx
+
+    def _get_trade_batch_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+        """
+        Create a batch trade tx.
+
+        :params terms: The class (can be Dict[str, Any]) that contains the details for the transaction.
+        :params signature: The signed terms from the counterparty.
+        """
+        data = b"hello"
+        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
+        tx = self.instance.functions.tradeBatch(
+            terms.from_address,
+            terms.to_address,
+            terms.item_ids,
+            terms.from_supplies,
+            terms.to_supplies,
+            terms.value_eth_wei,
+            terms.trade_nonce,
+            signature,
+            data,
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 2818111,
+                "from": terms.from_address,
+                "value": terms.value_eth_wei,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+        return tx
+
+    def _get_balance(self, contract, from_address: Address, item_id: int):
+        """Get the balance for the specific id."""
+        return contract.instance.functions.balanceOf(
+            from_address, item_id
+        ).call()
+
+    def atomic_swap_single(self, contract, terms, signature) -> TransactionMessage:
+        """Make a trustless trade between to agents for a single token."""
+        assert self.address == terms.from_address, "Wrong from address"
+
+        tx = contract.get_trade_tx(terms=terms, signature=signature)
+
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            tx_id="contract_deployment",
+            tx_sender_addr=terms.from_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload=tx
+        )
+
+        return tx_message
+
+    def _get_balance_of_batch(self, contract, address, item_ids):
+        """Get the balance for a batch of items"""
+        return contract.instance.functions.balanceOfBatch(
+            [address] * 10, item_ids
+        ).call()
+
+    def atomic_swap_batch(self, deployer_address, contract, terms, signature) -> TransactionMessage:
+        """Make a trust-less trade for a batch of items between 2 agents."""
+        assert deployer_address == terms.from_address, "Wrong 'from' address"
+        tx = contract.get_trade_batch_tx(terms=terms, signature=signature)
+
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            tx_id="contract_deployment",
+            tx_sender_addr=terms.from_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload=tx
+        )
+
+        return tx_message
+
+    def sign_single_transaction(self, terms) -> TransactionMessage:
+        """Sign the transaction before send them to agent1."""
+        assert self.address == terms.to_address
+        from_address_hash = self.instance.functions.getAddress(
+            terms.from_address
+        ).call()
+        to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
+        tx_hash = Helpers().get_single_hash(
+            _from=from_address_hash,
+            _to=to_address_hash,
+            _id=terms.item_id,
+            _from_value=terms.from_supply,
+            _to_value=terms.to_supply,
+            _value_eth=terms.value_eth_wei,
+            _nonce=terms.trade_nonce,
+        )
+
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            tx_id="contract_deployment",
+            tx_sender_addr=terms.from_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload=tx_hash
+        )
+
+        return tx_message
+
+    def sign_batch_transaction(self, terms):
+        """Sign the transaction before send them to agent1."""
+        assert self.address == terms.to_address
+        from_address_hash = self.instance.functions.getAddress(
+            terms.from_address
+        ).call()
+        to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
+        tx_hash = Helpers().get_hash(
+            _from=from_address_hash,
+            _to=to_address_hash,
+            _ids=terms.item_ids,
+            _from_values=terms.from_supplies,
+            _to_values=terms.to_supplies,
+            _value_eth=terms.value_eth_wei,
+            _nonce=terms.trade_nonce,
+        )
+
+        return tx_hash
+
 class Helpers:
     """Helper functions for hashing."""
 
