@@ -1015,35 +1015,31 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            if not self._includes_custom_type(content_type):
-                encoding_str += indents + "{} = msg.{}\n".format(
-                    content_name, content_name
-                )
-                encoding_str += indents + "performative.{}.extend({})\n".format(
-                    content_name, content_name
-                )
-            else:
-                encoding_str += (
-                    indents
-                    + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-                        content_name, content_type
-                    )
-                )
+            # if not self._includes_custom_type(content_type):
+            encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{}.extend({})\n".format(
+                content_name, content_name
+            )
+            # else:
+            #     encoding_str += (
+            #         indents
+            #         + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+            #             content_name, content_type
+            #         )
+            #     )
         elif content_type.startswith("Dict"):
-            if not self._includes_custom_type(content_type):
-                encoding_str += indents + "{} = msg.{}\n".format(
-                    content_name, content_name
-                )
-                encoding_str += indents + "performative.{}.update({})\n".format(
-                    content_name, content_name
-                )
-            else:
-                encoding_str += (
-                    indents
-                    + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-                        content_name, content_type
-                    )
-                )
+            # if not self._includes_custom_type(content_type):
+            encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{}.update({})\n".format(
+                content_name, content_name
+            )
+            # else:
+            #     encoding_str += (
+            #         indents
+            #         + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+            #             content_name, content_type
+            #         )
+            #     )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1065,11 +1061,15 @@ class ProtocolGenerator:
                 content_name, sub_type, no_indents
             )
         else:
-            encoding_str += (
-                indents
-                + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-                    content_name, content_type
-                )
+            # encoding_str += (
+            #     indents
+            #     + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
+            #         content_name, content_type
+            #     )
+            # )
+            encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
+            encoding_str += indents + "performative.{} = {}\n".format(
+                content_name, content_name
             )
         return encoding_str
 
@@ -1108,41 +1108,41 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            if not self._includes_custom_type(content_type):
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    content_name,
-                )
-                decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
-                    content_name, content_name
-                )
-            else:
-                decoding_str += (
-                    indents
-                    + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-                        content_name, content_type
-                    )
-                )
+            # if not self._includes_custom_type(content_type):
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+                content_name, content_name
+            )
+        # else:
+        #     decoding_str += (
+        #         indents
+        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+        #             content_name, content_type
+        #         )
+        #     )
         elif content_type.startswith("Dict"):
-            if not self._includes_custom_type(content_type):
-                decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
-                    performative,
-                    content_name,
-                )
-                decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
-                    content_name, content_name
-                )
-            else:
-                decoding_str += (
-                    indents
-                    + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-                        content_name, content_type
-                    )
-                )
+            # if not self._includes_custom_type(content_type):
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+                content_name, content_name
+            )
+        # else:
+        #     decoding_str += (
+        #         indents
+        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+        #             content_name, content_type
+        #         )
+        #     )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1172,11 +1172,20 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-            decoding_str += (
-                indents
-                + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-                    content_name, content_type
-                )
+            # decoding_str += (
+            #     indents
+            #     + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+            #         content_name, content_type
+            #     )
+            # )
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                variable_name,
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+                content_name, content_name
             )
 
         return decoding_str
@@ -1246,10 +1255,6 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
-        if self._import_models() == "":
-            cls_str += self._import_models()
-        else:
-            cls_str += "{}\n".format(self._import_models())
 
         # Class Header
         cls_str += "\n\nclass {}Serializer(Serializer):\n".format(
@@ -1630,7 +1635,7 @@ class ProtocolGenerator:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
                 self._all_custom_types
             )
-            incomplete_generation_warning_msg += 'Update [\'models.py\', \'serialisation.py\'] generated files so they cover these custom types.'
+            incomplete_generation_warning_msg += "Update the generated 'models.py' file with the implementations of these custom types."
             print(incomplete_generation_warning_msg)
 
         # Compile protobuf schema

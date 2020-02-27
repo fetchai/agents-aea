@@ -28,11 +28,6 @@ from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
-# from packages.fetchai.protocols.two_party_negotiation.models import (
-#     DataModel,
-#     IOTApp7,
-#     Unit,
-# )
 
 
 class TwoPartyNegotiationSerializer(Serializer):
@@ -56,9 +51,8 @@ class TwoPartyNegotiationSerializer(Serializer):
         performative_id = msg.performative
         if performative_id == TwoPartyNegotiationMessage.Performative.CFP:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Cfp()  # type: ignore
-            raise NotImplementedError(
-                "The encoding of content 'query' of type 'DataModel' is missing."
-            )
+            query = msg.query
+            performative.query = query
             two_party_negotiation_msg.cfp.CopyFrom(performative)
         elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Propose()  # type: ignore
@@ -70,18 +64,15 @@ class TwoPartyNegotiationSerializer(Serializer):
             performative.description = description
             flag = msg.flag
             performative.flag = flag
-            raise NotImplementedError(
-                "The encoding of content 'query' of type 'DataModel' is missing."
-            )
+            query = msg.query
+            performative.query = query
             if msg.is_set("proposal"):
-                raise NotImplementedError(
-                    "The encoding of content 'proposal' of type 'Dict[str, IOTApp7]' is missing."
-                )
+                proposal = msg.proposal
+                performative.proposal.update(proposal)
             rounds = msg.rounds
             performative.rounds.extend(rounds)
-            raise NotImplementedError(
-                "The encoding of content 'items' of type 'Tuple[Unit, ...]' is missing."
-            )
+            items = msg.items
+            performative.items.extend(items)
             if msg.is_set("conditions_type_str"):
                 conditions_type_str = msg.conditions_type_str
                 performative.conditions_type_str = conditions_type_str
@@ -91,8 +82,9 @@ class TwoPartyNegotiationSerializer(Serializer):
                     conditions_type_dict_of_str_int
                 )
             if msg.is_set("conditions_type_set_of_DataModel"):
-                raise NotImplementedError(
-                    "The encoding of content 'conditions_type_set_of_DataModel' of type 'FrozenSet[DataModel]' is missing."
+                conditions_type_set_of_DataModel = msg.conditions_type_set_of_DataModel
+                performative.conditions_type_set_of_DataModel.extend(
+                    conditions_type_set_of_DataModel
                 )
             if msg.is_set("conditions_type_dict_of_str_float"):
                 conditions_type_dict_of_str_float = (
@@ -137,9 +129,8 @@ class TwoPartyNegotiationSerializer(Serializer):
         performative_id = TwoPartyNegotiationMessage.Performative(str(performative))
         performative_content = dict()
         if performative_id == TwoPartyNegotiationMessage.Performative.CFP:
-            raise NotImplementedError(
-                "The decoding of content 'query' of type 'DataModel' is missing."
-            )
+            query = two_party_negotiation_pb.cfp.query
+            performative_content["query"] = query
         elif performative_id == TwoPartyNegotiationMessage.Performative.PROPOSE:
             number = two_party_negotiation_pb.propose.number
             performative_content["number"] = number
@@ -149,18 +140,15 @@ class TwoPartyNegotiationSerializer(Serializer):
             performative_content["description"] = description
             flag = two_party_negotiation_pb.propose.flag
             performative_content["flag"] = flag
-            raise NotImplementedError(
-                "The decoding of content 'query' of type 'DataModel' is missing."
-            )
+            query = two_party_negotiation_pb.propose.query
+            performative_content["query"] = query
             if two_party_negotiation_pb.propose.HasField("proposal"):
-                raise NotImplementedError(
-                    "The decoding of content 'proposal' of type 'Dict[str, IOTApp7]' is missing."
-                )
+                proposal = two_party_negotiation_pb.propose.proposal
+                performative_content["proposal"] = proposal
             rounds = two_party_negotiation_pb.propose.rounds
             performative_content["rounds"] = rounds
-            raise NotImplementedError(
-                "The decoding of content 'items' of type 'Tuple[Unit, ...]' is missing."
-            )
+            items = two_party_negotiation_pb.propose.items
+            performative_content["items"] = items
             if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
                 conditions = two_party_negotiation_pb.propose.conditions_type_str
                 performative_content["conditions"] = conditions
@@ -172,9 +160,8 @@ class TwoPartyNegotiationSerializer(Serializer):
             if two_party_negotiation_pb.propose.HasField(
                 "conditions_type_set_of_DataModel"
             ):
-                raise NotImplementedError(
-                    "The decoding of content 'conditions' of type 'FrozenSet[DataModel]' is missing."
-                )
+                conditions = two_party_negotiation_pb.propose.conditions
+                performative_content["conditions"] = conditions
             if two_party_negotiation_pb.propose.HasField(
                 "conditions_type_dict_of_str_float"
             ):
