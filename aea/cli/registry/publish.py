@@ -66,7 +66,7 @@ def publish_agent(ctx: Context):
         "description": agent_config["description"],
         "version": agent_config["version"],
     }
-    for key in ("connections", "protocols", "skills"):
+    for key in ("connections", "contracts", "protocols", "skills"):
         data[key] = agent_config[key]
 
     path = "/agents/create"

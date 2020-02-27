@@ -42,6 +42,7 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     ConnectionConfig,
+    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     Dependencies,
@@ -86,6 +87,9 @@ class Context(object):
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         self.connection_loader = ConfigLoader(
             "connection-config_schema.json", ConnectionConfig
+        )
+        self.contract_loader = ConfigLoader(
+            "contract-config_schema.json", ContractConfig
         )
         self.protocol_loader = ConfigLoader(
             "protocol-config_schema.json", ProtocolConfig

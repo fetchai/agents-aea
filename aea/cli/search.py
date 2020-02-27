@@ -41,6 +41,7 @@ from aea.cli.registry.utils import request_api
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
@@ -136,6 +137,38 @@ def connections(ctx: Context, query):
     )
 
     print("Available connections:")
+    print(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@search.command()
+@click.option("--query", default="", help="Query string to search Contracts by name.")
+@pass_ctx
+def contracts(ctx: Context, query):
+    """Search for Contracts."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api("GET", "/contracts", params={"search": query})
+        if not len(resp):
+            click.echo("No contracts found.")  # pragma: no cover
+        else:
+            click.echo("Contracts found:\n")
+            click.echo(format_items(resp))
+        return
+
+    registry = cast(str, ctx.config.get("registry_directory"))
+    result = []  # type: List[Dict]
+    _get_details_from_dir(
+        ctx.contract_loader, AEA_DIR, "contracts", DEFAULT_CONTRACT_CONFIG_FILE, result
+    )
+    _get_details_from_dir(
+        ctx.contract_loader,
+        registry,
+        "*/contracts",
+        DEFAULT_CONTRACT_CONFIG_FILE,
+        result,
+    )
+
+    print("Available contracts:")
     print(format_items(sorted(result, key=lambda k: k["name"])))
 
 

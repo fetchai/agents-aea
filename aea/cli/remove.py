@@ -112,6 +112,18 @@ def connection(ctx: Context, connection_id):
 
 
 @remove.command()
+@click.argument("contract_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_id):
+    """
+    Remove a contract from the agent.
+
+    It expects the public id of the contract to remove from the local registry.
+    """
+    _remove_item(ctx, "contract", contract_id)
+
+
+@remove.command()
 @click.argument("protocol_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
