@@ -19,6 +19,7 @@
 """This module contains the protocol generator."""
 
 import itertools
+import logging
 import os
 import re
 from datetime import date
@@ -53,6 +54,8 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
+
+logger = logging.getLogger(__name__)
 
 
 def _copyright_header_str(author: str) -> str:
@@ -340,7 +343,7 @@ class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
-        self, protocol_specification: ProtocolSpecification, output_path: str = "."
+        self, protocol_specification: ProtocolSpecification, protobuf_part: Dict, output_path: str = "."
     ) -> None:
         """
         Instantiate a protocol generator.
@@ -354,6 +357,7 @@ class ProtocolGenerator:
             self.protocol_specification.name
         )
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
+        self.protobuf_part = protobuf_part
 
         self._imports = {
             "Set": True,
@@ -406,6 +410,12 @@ class ProtocolGenerator:
                 self._speech_acts[performative][content_name] = pythonic_content_type
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
+
+        # for specification_custom_type, protobuf_implementation in self.protobuf_part.items():
+        #     python_custom_type = specification_custom_type[2:]
+        #     self.protobuf_part[python_custom_type] = self.protobuf_part[specification_custom_type]
+        #     self.protobuf_part.pop(specification_custom_type)
+
 
     def _import_from_typing_str(self) -> str:
         """
@@ -1453,10 +1463,20 @@ class ProtocolGenerator:
         indents = get_indent_str(1)
         if len(self._all_custom_types) != 0:
             proto_buff_schema_str += indents + "// Custom Types\n"
-            for content_type in self._all_custom_types:
-                proto_buff_schema_str += indents + "message {}{{\n".format(content_type)
+            for custom_type in self._all_custom_types:
+                proto_buff_schema_str += indents + "message {}{{\n".format(custom_type)
                 indents = get_indent_str(2)
-                proto_buff_schema_str += indents + "// Implement this\n"
+
+                # formatting and adding the custom type protobuf entry
+                specification_custom_type = "ct:" + custom_type
+                proto_part = self.protobuf_part[specification_custom_type]
+                number_of_new_lines = proto_part.count("\n")
+                if number_of_new_lines != 0:
+                    formatted_proto_part = proto_part.replace("\n", "\n" + indents,number_of_new_lines-1)
+                else:
+                    formatted_proto_part = proto_part
+                proto_buff_schema_str += indents + formatted_proto_part
+
                 indents = get_indent_str(1)
                 proto_buff_schema_str += indents + "}\n\n"
             proto_buff_schema_str += "\n"

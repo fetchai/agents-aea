@@ -69,7 +69,9 @@ def _generate_item(ctx: Context, item_type, specification_path):
         config_loader = ConfigLoader(
             "protocol-specification_schema.json", ProtocolSpecification
         )
-        protocol_spec = config_loader.load(open(specification_path))
+        protocol_spec = config_loader.load_protocol_specification(open(specification_path))
+        protobuf_part = config_loader.load_protobuf_part_of_protocol_specification(open(specification_path))
+        logger.info(protobuf_part)
     except Exception as e:
         logger.exception(e)
         sys.exit(1)
@@ -109,7 +111,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
         )
 
         output_path = os.path.join(ctx.cwd, item_type_plural)
-        protocol_generator = ProtocolGenerator(protocol_spec, output_path)
+        protocol_generator = ProtocolGenerator(protocol_spec, protobuf_part, output_path)
         protocol_generator.generate()
 
         # Add the item to the configurations

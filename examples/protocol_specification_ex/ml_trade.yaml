@@ -14,8 +14,3 @@ speech_acts:
   data:
     terms: ct:Description
     data: ct:Data
-
-  # Differences:
-  # data -> data was of type Tuple[np.ndarrays, np.ndarrays]. Now Array as a custom type is used instead of np.ndarrays.
-  # Constraint on data -> data: Tuple were defined (the shape of the two elements must match). These constraints are not captured here yet.
-

@@ -36,12 +36,3 @@ speech_acts:
   tac_error:
     error_code: ct:ErrorCode
     info: pt:dict[pt:str, ct:ErrorInfo]
-
-  # Problems:
-  # info is of type dict[str, Any]. Any is problematic.
-  #
-  # Differences:
-  # Checks are in place in the current implementation (e.g. line 225) to verify keys in dictionaries are unique. This is not necessary given dictionary does not permit duplicate keys.
-  # Certain custom constraints were defined on types. e.g. tx_sender_fee>=0, tx_counterparty_fee>=0, amount_by_currency_id.keys() == exchange_params_by_currency_id.keys(), and quantities_by_good_id.keys == utility_params_by_good_id.keys
-  # game_data -> agent_addr_to_name and and good_id_to_name were defined as a Union[dict or defaultdict].
-  # tac_error -> info was defined as an optional content.

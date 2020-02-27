@@ -10,6 +10,3 @@ speech_acts:
     error_code: ct:ErrorCode
     error_msg: pt:str
     error_data: pt:dict[pt:str, ct:ErrorData]
-
-  # Problems:
-  # error -> error_data is of type dict[str, Any]. Any is problematic.
