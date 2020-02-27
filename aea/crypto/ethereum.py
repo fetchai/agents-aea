@@ -262,6 +262,7 @@ class EthereumApi(LedgerApi):
                 result = self._api.eth.getTransactionReceipt(hex_value)
                 logger.info("transaction validated - exiting")
                 if result.contractAddress is not None:
+                    # Checking the address so I can pass it manually for now.
                     logger.info(result.contractAddress)
                 tx_digest = hex_value.hex()
                 break
