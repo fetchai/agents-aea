@@ -71,6 +71,42 @@ class TestSearchProtocols:
         os.chdir(cls.cwd)
 
 
+class TestSearchContracts(TestCase):
+    """Test that the command 'aea search contracts' works as expected."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search._search_items", return_value=["item1"])
+    def test_search_contracts_positive(self, *mocks):
+        """Test search contracts command positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "search", "contracts"], standalone_mode=False
+        )
+        assert result.output == (
+            'Searching for ""...\n'
+            "Contracts found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.request_api", return_value=["item1"])
+    def test_search_contracts_registry_positive(self, *mocks):
+        """Test search contracts in registry command positive result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "search", "--registry", "contracts"],
+            standalone_mode=False,
+        )
+        assert result.output == (
+            'Searching for ""...\n'
+            "Contracts found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+
+
 class TestSearchConnections:
     """Test that the command 'aea search connections' works as expected."""
 
