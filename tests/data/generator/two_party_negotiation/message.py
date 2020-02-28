@@ -186,14 +186,14 @@ class TwoPartyNegotiationMessage(Message):
             assert type(self.target) == int, "target is not int"
 
             # Light Protocol Rule 2
-            # # Check correct performative
+            # Check correct performative
             assert (
                 type(self.performative) == TwoPartyNegotiationMessage.Performative
             ), "'{}' is not in the list of valid performatives: {}".format(
                 self.performative, self.valid_performatives
             )
 
-            # # Check correct contents
+            # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             if self.performative == TwoPartyNegotiationMessage.Performative.CFP:
                 expected_nb_of_contents = 1
@@ -263,7 +263,7 @@ class TwoPartyNegotiationMessage(Message):
             ):
                 expected_nb_of_contents = 0
 
-            # # Check correct content count
+            # Check correct content count
             assert (
                 expected_nb_of_contents == actual_nb_of_contents
             ), "Incorrect number of contents. Expected {} contents. Found {}".format(

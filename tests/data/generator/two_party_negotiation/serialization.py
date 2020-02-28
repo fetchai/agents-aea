@@ -41,7 +41,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         :return: the bytes.
         """
         msg = cast(TwoPartyNegotiationMessage, msg)
-        two_party_negotiation_msg = two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        two_party_negotiation_msg = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        )
         two_party_negotiation_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
         two_party_negotiation_msg.dialogue_starter_reference = dialogue_reference[0]
@@ -116,7 +118,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'TwoPartyNegotiation' message.
         """
-        two_party_negotiation_pb = two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        two_party_negotiation_pb = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        )
         two_party_negotiation_pb.ParseFromString(obj)
         message_id = two_party_negotiation_pb.message_id
         dialogue_reference = (
