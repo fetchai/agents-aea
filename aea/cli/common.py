@@ -252,29 +252,6 @@ def format_items(items):
     return list_str
 
 
-def format_skills(items):
-    """Format list of skills to a string for CLI output."""
-    list_str = ""
-    for item in items:
-        list_str += (
-            "{line}\n"
-            "Public ID: {public_id}\n"
-            "Name: {name}\n"
-            "Description: {description}\n"
-            "Protocols: {protocols}\n"
-            "Version: {version}\n"
-            "{line}\n".format(
-                name=item["name"],
-                public_id=item["public_id"],
-                description=item["description"],
-                version=item["version"],
-                protocols="".join(name + " | " for name in item["protocol_names"]),
-                line="-" * 30,
-            )
-        )
-    return list_str
-
-
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
