@@ -11,5 +11,5 @@ excluded_protocols: []
 config:
   host: ${addr:127.0.0.1}
   port: ${port:8000}
-  api: '' # put here the dotted path to your API spec YAML path.
+  api_spec_path: ''  # put here the dotted path to your API spec YAML path.
 dependencies: {}

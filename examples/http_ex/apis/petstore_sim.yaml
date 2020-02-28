@@ -1,9 +1,9 @@
 ---
 paths:
-  "/petstoresim/pet":
+  "/pet":
     put:
       tags:
-      - petstoresim
+      - pet
       summary: Update an existing pet
       description: Update an existing pet by Id
       operationId: updatePet
@@ -42,7 +42,7 @@ paths:
         - read:pets
     post:
       tags:
-      - petstoresim
+      - pet
       summary: Add a new pet to the store
       description: Add a new pet to the store
       operationId: addPet
@@ -75,10 +75,10 @@ paths:
       - petstore_auth:
         - write:pets
         - read:pets
-  "/petstoresim/pet/{petId}":
+  "/pet/{petId}":
     get:
       tags:
-      - petstoresim
+      - pet
       summary: Find pet by ID
       description: Returns a single pet
       operationId: getPetById
@@ -111,7 +111,7 @@ paths:
         - read:pets
     post:
       tags:
-      - petstoresim
+      - pet
       summary: Updates a pet in the store with form data
       description: ''
       operationId: updatePetWithForm
@@ -142,7 +142,7 @@ paths:
         - read:pets
     delete:
       tags:
-      - petstoresim
+      - pet
       summary: Deletes a pet
       description: ''
       operationId: deletePet

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import logging
 import threading
 from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Optional, Set, cast
+from typing import Optional, cast
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
@@ -46,87 +46,85 @@ class HTTPChannel:
         address: Address,
         host: str,
         port: int,
-        api_spec: str,
+        api_spec_path: Optional[str],
         connection_id: PublicId,
-        excluded_protocols: Optional[Set[PublicId]] = None,
     ):
         """
-        Initialize a channel.
+        Initialize a channel and process the initial API specification from the file path (if given).
 
         :param address: the address
+
+        Note: In this current iteration, the HTTPChannel will package API specification into an envelope
+              to initialize a local helper object called APIVerificationHelper. It emulates the function of
+              an "echo" Skill handler. In future iterations, this envelope will be sent in-queue to be picked
+              up by the Multiplexer itself to be carried downstream to its intended destination.
         """
         self.address = address
         self.host = host
         self.port = port
         self.connection_id = connection_id
+        self.protocol_id = PublicId.from_str("fetchai/http:0.1.0")
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
-        self.excluded_protocols = excluded_protocols
         # self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
+        # It is possible that env need to be stored as self.api_spec_envelope so that it can be sent
+        #    upon connection and self.loop has been initialized.
+        api_spec_envelope = (
+            self._process_initial_api(api_spec_path)
+            if api_spec_path is not None
+            else None
+        )
+        self._helper = APIVerificationHelper(api_spec_envelope)
+        # assert self.in_queue is not None, "Input queue not initialized."
+        # assert self.loop is not None, "Loop not initialized."
+        # self.send(api_spec_envelope)
 
-        if api_spec is not None:
-            self._process_api(api_spec)
-        logger.info(f"Initialized the HTTP Server on HOST: {host} and PORT: {port}")
+    def _process_initial_api(self, api_spec_path) -> Envelope:
+        """Process the initial API specification from a file path and package it into an Envelope.
 
-    def _process_api(self, api_spec):
-        """Process the api_spec.
-
-        Decode all paths to get envelops each, and put it in the agent's inbox.
+        The API paths are placed into the Envelope's message body, and each path as a key and its content as value.
         """
+        # the following api_spec format checks will be in their own function check_api (api_spec)
+        try:
+            with open(api_spec_path, "r") as f:
+                api_spec = yaml.safe_load(f)
+        except FileNotFoundError:
+            logger.error(
+                "API specification YAML source file not found. Please double-check filename and path."
+            )
         try:
             paths = api_spec["paths"]
         except KeyError:
             logger.error("Key 'paths' not found in API spec.")
 
-        for path_name, path_value in paths.items():
-            try:
-                envelope = self._decode_path(path_name, path_value)
-                assert self.in_queue is not None, "Input queue not initialized."
-                assert self.loop is not None, "Loop not initialized."
-                # Ok to put these Envelopes in_queue during HTTPChannel initialization?
-                asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
-            except ValueError:
-                logger.error(f"Bad formatted path: {path_name}")
-            except Exception as e:
-                logger.error(f"Error when processing a path. Message: {str(e)}")
-
-    def _decode_path(self, path_name: str, path_value: dict, separator: str = "/"):
-        """Path --> Envelope
-
-        Convert specified API path name and value into in_queue'd Envelope.
-        Envelope's msg consists of the response options for each REST req in path.
-        """
-        path_split = path_name.split(separator)
-
-        to = path_split[1].strip()  # to: name of Skill (petstoresim)?
-        sender = "TBD"  # hardcoded for now
-        protocol_id = PublicId.from_str("fetchai/http:0.1.0")  # hardcoded for now
-        uri = URI(f"http://{self.host}:{self.port}{path_name}")
-        context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
-        # Msg consists of all of the responses for each REST req in JSON format.
-        responses = {}
-        for req_type, req_value in path_value.items():
-            responses[req_type] = req_value["responses"]
-        msg_bytes = json.dumps(responses).encode()
-
-        return Envelope(
-            to=to,
-            sender=sender,
-            protocol_id=protocol_id,
-            message=msg_bytes,
+        # Prepare the individual contents of the Envelope.
+        # Spec_id the is the sender address of the initial API specificaion.
+        self._spec_id = uuid4().hex
+        # uri = URI(f"http://{self.host}:{self.port}{url}")
+        context = EnvelopeContext(connection_id=self.connection_id)
+        # Put the 'paths' into the Envelope's message body and encode it into bytes.
+        msg_bytes = json.dumps(paths).encode()
+        # Prepare the Envelope itself using the individual contents.
+        envelope = Envelope(
+            to=self.address,
+            sender=self._spec_id,
+            protocol_id=self.protocol_id,
             context=context,
+            message=msg_bytes,
         )
+        return envelope
 
-    def _process_request(
+    def _process_incoming_request(
         self, http_method: str, url: str, param: str, body: str = "{}"
-    ):
+    ) -> Envelope:
         """Process incoming API request by packaging into Envelope and sending it in-queue.
 
+        The Envelope's message body contains the "performative", "path", "params", and "payload".
         """
+        # Prepare the invididual contents of the Envelope.
         self._client_id = uuid4().hex
-        protocol_id = PublicId.from_str("fetchai/http:0.1.0")
         uri = URI(f"http://{self.host}:{self.port}{url}")
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         # Prepare the Envelope's message body and encode it into bytes.
@@ -137,15 +135,23 @@ class HTTPChannel:
             "payload": body,
         }
         msg_bytes = json.dumps(msg).encode()
-        # Prepare the Envelope itself using the provided variables.
+        # Prepare the Envelope itself using the individual contents.
         envelope = Envelope(
             to=self.address,
             sender=self._client_id,
-            protocol_id=protocol_id,
+            protocol_id=self.protocol_id,
             context=context,
             message=msg_bytes,
         )
-        # Send the Envelope to the Agent's InBox.
+        return envelope
+
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send the envelope in_queue.
+
+        :param envelope: the envelope
+        :return: None
+        """
         assert self.in_queue is not None, "Input queue not initialized."
         assert self.loop is not None, "Loop not initialized."
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
@@ -170,10 +176,6 @@ class HTTPChannel:
                 # self.thread.start()
                 # Initializing the internal HTTP server
                 try:
-                    # self.httpd = HTTPServer((self.host, self.port), HTTPHandler(self))
-                    # handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-                    # handler = HTTPHandler.set_channel(self)
-                    # handler.set_channel(self)
                     self.httpd = HTTPServer(
                         (self.host, self.port), HTTPHandlerFactory(self)
                     )
@@ -222,7 +224,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
 
-            self._channel._process_request("GET", url, param)
+            self._send("GET", url, param)
 
         def do_POST(self):
             """Respond to a POST request."""
@@ -239,9 +241,57 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             content_length = int(self.headers["Content-Length"])
             body = self.rfile.read(content_length).decode()
 
-            self._channel._process_request("POST", url, param, body)
+            self._send("POST", url, param, body)
+
+        def _send(
+            self, http_method: str, url: str, param: str, body: Optional[str] = r"{}"
+        ):
+            api_req_envelope = self._channel._process_incoming_request(
+                http_method, url, param, body
+            )
+            response = self._channel._helper._verify(api_req_envelope)
+            # Write the API response back to console
+            console_response = f"\n{response}\n\n"
+            self.wfile.write(console_response.encode())
+            # Send the Envelope to the Agent's InBox.
+            # assert self._channel.in_queue is not None, "Input queue not initialized."
+            # assert self._channel.loop is not None, "Loop not initialized."
+            # self._channel.send(api_req_envelope)
 
     return HTTPHandler
+
+
+class APIVerificationHelper:
+    def __init__(self, e: Optional[Envelope]):
+        self.valid_paths = {}
+        if e is not None:
+            self.valid_paths = json.loads(e.message.decode())
+
+    def _verify(self, e: Envelope) -> str:
+
+        msg = json.loads(e.message.decode())
+        path_key = msg["path"]
+        params = json.loads(msg["params"])
+        if bool(params):  # Check param dict is not empty
+            param_key, param_value = list(params.items())[0]
+            param_value = param_value[0]
+            path_key += r"/{" + param_key + r"}"
+        method_key = msg["performative"].lower()
+
+        try:
+            status_code = "200"
+            response_desc = self.valid_paths[path_key][method_key]["responses"][
+                status_code
+            ]["description"]
+            response = (
+                f"Status Code: '{status_code}', Found path: '{path_key}', HTTP method: '{msg['performative']}', "
+                + f"Response: '{response_desc}'."
+            )
+        except KeyError:
+            status_code = "404"
+            response = f"Status Code: '{status_code}', Response: The HTTPServer AEA is unable to verify this request."
+
+        return response
 
 
 class HTTPConnection(Connection):
@@ -250,9 +300,9 @@ class HTTPConnection(Connection):
     def __init__(
         self,
         address: Address,
-        host: str = "",
-        port: int = 10000,
-        api_path: str = None,  # Directory path of the API YAML file.
+        host: str,
+        port: int,
+        api_spec_path: Optional[str] = None,  # Directory path of the API YAML file.
         *args,
         **kwargs,
     ):
@@ -267,31 +317,13 @@ class HTTPConnection(Connection):
         :param excluded_protocols: the excluded protocols for this connection.
         """
 
-        # the following api_spec format checks will be in their own function check_api(api_spec)
-        if api_path is not None:
-            try:
-                with open(api_path, "r") as f:
-                    api_spec = yaml.safe_load(f)
-            except FileNotFoundError:
-                logger.error(
-                    "API specification YAML source file not found. Please double-check filename and path."
-                )
-                return
-        else:
-            api_spec = api_path
-
         if kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
 
         super().__init__(*args, **kwargs)
         self.address = address
         self.channel = HTTPChannel(
-            address,
-            host,
-            port,
-            api_spec,
-            connection_id=self.connection_id,
-            excluded_protocols=self.excluded_protocols,
+            address, host, port, api_spec_path, connection_id=self.connection_id,
         )
 
     async def connect(self) -> None:
@@ -327,7 +359,7 @@ class HTTPConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-        # self.channel.send(envelope)
+        self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -360,12 +392,12 @@ class HTTPConnection(Connection):
         :param connection_configuration: the connection configuration object.
             :host - RESTful API hostname / IP address
             :port - RESTful API port number
-            :api - Directory API path and filename of the API spec YAML source file.
+            :api_spec_path - Directory API path and filename of the API spec YAML source file.
         :return: the connection object
         """
         host = cast(str, connection_configuration.config.get("host"))
         port = cast(int, connection_configuration.config.get("port"))
-        api = cast(str, connection_configuration.config.get("api")) if not "" else None
+        api_spec_path = cast(str, connection_configuration.config.get("api_spec_path"))
 
         restricted_to_protocols_names = {
             p.name for p in connection_configuration.restricted_to_protocols
@@ -377,7 +409,7 @@ class HTTPConnection(Connection):
             address,
             host,
             port,
-            api,
+            api_spec_path,
             connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
