@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional, cast
+from typing import BinaryIO, Dict, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxContents, TxStatus
@@ -193,6 +193,9 @@ class FetchAIApi(LedgerApi):
         )
         self._api.sync(tx_digest)
         return tx_digest
+
+    def send_raw_transaction(self, tx_signed) -> Optional[Dict]:
+        """Send a signed transaction and wait for confirmation."""
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""

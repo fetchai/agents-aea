@@ -28,6 +28,7 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
+from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
@@ -864,9 +865,10 @@ class DecisionMaker:
                 crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
             # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
             signature = crypto_object.sign_transaction(tx_message.signing_payload)
-            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(
-                tx_signed=signature
+            ledger_api = cast(
+                LedgerApi, self.ledger_apis.apis.get(tx_message.ledger_id)
             )
+            ledger_api.send_raw_transaction(tx_signed=signature)
 
     def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
         """

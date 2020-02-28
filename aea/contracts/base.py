@@ -21,7 +21,7 @@
 
 from abc import ABC
 
-from aea.configurations.base import ContractId, ContractConfig
+from aea.configurations.base import ContractConfig, ContractId
 
 
 class Contract(ABC):

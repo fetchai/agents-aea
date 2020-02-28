@@ -20,7 +20,9 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Optional, Union
+from typing import Any, BinaryIO, Dict, Optional, Union
+
+from eth_account.datastructures import AttributeDict
 
 from aea.mail.base import Address
 
@@ -157,6 +159,10 @@ class LedgerApi(ABC):
         :param tx_fee: the transaction fee.
         :return: tx digest if successful, otherwise None
         """
+
+    @abstractmethod
+    def send_raw_transaction(self, tx_signed) -> Optional[Union[AttributeDict, Dict]]:
+        """Send a signed transaction and wait for confirmation."""
 
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:

@@ -22,9 +22,10 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional, Dict, Any
+from typing import BinaryIO, Optional, cast
 
 from eth_account import Account
+from eth_account.datastructures import AttributeDict
 from eth_account.messages import encode_defunct
 
 from eth_keys import keys
@@ -233,11 +234,11 @@ class EthereumApi(LedgerApi):
         )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
 
-        result = self.send_raw_transaction(tx_signed=signed)
+        result = cast(AttributeDict, self.send_raw_transaction(tx_signed=signed))
 
         return result.transactionHash.hex()
 
-    def send_raw_transaction(self, tx_signed) -> Optional[Dict]:
+    def send_raw_transaction(self, tx_signed) -> Optional[AttributeDict]:
         """Send a signed transaction and wait for confirmation."""
         # send the transaction to the ropsten test network
 

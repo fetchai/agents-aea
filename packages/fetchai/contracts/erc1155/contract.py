@@ -149,7 +149,7 @@ class ERC1155Contract(Contract):
         self.address = contract_address
         self.instance = ledger_api.api.eth.contract(address=self.address, abi=self.abi)
 
-    def create_batch(
+    def get_create_batch_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi
     ) -> TransactionMessage:
         """
@@ -182,11 +182,6 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-        # Create a decision_maker transaction message for the contract and return it.
-
-        # tx_signed = self._sign_transaction(tx=tx)
-        # self.send_tx(tx_signed=tx_signed, tx_type="create_batch")
-
     def _get_create_batch_tx(
         self, deployer_address: Address, ledger_api: LedgerApi
     ) -> str:
@@ -205,7 +200,7 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def mint_batch(
+    def get_mint_batch_transaction(
         self,
         deployer_address: Address,
         recipient_address: Address,
@@ -214,7 +209,7 @@ class ERC1155Contract(Contract):
     ):
 
         assert len(mint_quantities) == len(self.item_ids)
-        tx = self._get_mint_batch_tx(
+        tx = self._create_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
             batch_mint_quantities=mint_quantities,
@@ -238,7 +233,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def _get_mint_batch_tx(
+    def _create_mint_batch_tx(
         self, deployer_address, recipient_address, batch_mint_quantities, ledger_api,
     ) -> str:
         """Mint a batch of items."""
@@ -257,7 +252,7 @@ class ERC1155Contract(Contract):
 
         return tx
 
-    def _get_trade_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+    def _create_trade_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
         """
         Create a trade tx.
 
@@ -289,7 +284,7 @@ class ERC1155Contract(Contract):
 
         return tx
 
-    def _get_trade_batch_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+    def _create_trade_batch_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
         """
         Create a batch trade tx.
 
@@ -320,7 +315,7 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def _get_balance(self, contract, from_address: Address, item_id: int):
+    def get_balance(self, contract, from_address: Address, item_id: int):
         """Get the balance for the specific id."""
         return contract.instance.functions.balanceOf(from_address, item_id).call()
 
@@ -349,7 +344,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def _get_balance_of_batch(self, contract, address, item_ids):
+    def get_balance_of_batch(self, contract, address, item_ids):
         """Get the balance for a batch of items"""
         return contract.instance.functions.balanceOfBatch(
             [address] * 10, item_ids
@@ -379,7 +374,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def sign_single_transaction(self, terms) -> TransactionMessage:
+    def get_hash_single_transaction(self, terms) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
@@ -413,7 +408,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def sign_batch_transaction(self, terms):
+    def get_hash_batch_transaction(self, terms):
         """Sign the transaction before send them to agent1."""
         assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
