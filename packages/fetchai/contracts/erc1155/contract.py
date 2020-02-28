@@ -51,12 +51,13 @@ class ERC1155Contract(Contract):
         self.abi = None
         self.bytecode = None
         self.instance = None
-        self.address = None
-        # We can consider of passing the list of ids rather than creating them here.
-        batch_token_ids = []
-        for j in range(10):
-            batch_token_ids.append(Helpers().generate_id(FT, j))
-        self.item_ids = batch_token_ids
+        self.item_ids = []
+
+    def create_item_ids(self, token_ids: List[int]) -> None:
+        """Populate the item_ids list."""
+        assert len(token_ids) == 10, "The length of the list must be equal to ten."
+        for token_id in token_ids:
+            self.item_ids.append(Helpers().generate_id(FT, token_id))
 
     def load_from_json(self, ledger_api: LedgerApi) -> None:
         """Load ABI and BYTECODE from json file."""
@@ -144,10 +145,9 @@ class ERC1155Contract(Contract):
         """Update the local instance of the smart contract with the deployed one."""
         logger.info("Updating the local instance of the contract...")
         assert (
-            self.address is None and self.instance.address is None
+            self.instance.address is None
         ), "Contract is already deployed with a known address."
-        self.address = contract_address
-        self.instance = ledger_api.api.eth.contract(address=self.address, abi=self.abi)
+        self.instance = ledger_api.api.eth.contract(address=contract_address, abi=self.abi)
 
     def get_create_batch_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi

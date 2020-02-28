@@ -379,11 +379,15 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         """
         # get the serializer
         protocol_name = protocol_directory.name
-        serialization_spec = importlib.util.spec_from_file_location(
-            "serialization", protocol_directory / "serialization.py"
-        )
-        serialization_module = importlib.util.module_from_spec(serialization_spec)
-        serialization_spec.loader.exec_module(serialization_module)  # type: ignore
+        try:
+            serialization_spec = importlib.util.spec_from_file_location(
+                "serialization", protocol_directory / "serialization.py"
+            )
+            serialization_module = importlib.util.module_from_spec(serialization_spec)
+            serialization_spec.loader.exec_module(serialization_module)  # type: ignore
+        except FileNotFoundError:
+            logger.warning("File not found.")
+            sys.exit(1)
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
