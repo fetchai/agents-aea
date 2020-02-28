@@ -163,7 +163,9 @@ class ContractRegistry(Registry[PublicId, Contract]):
                 "No contract registered with contract id '{}'".format(contract_id)
             )
         removed_contract = self._contracts.pop(contract_id)
-        logger.debug("Contract '{}' has been removed.".format(removed_contract.contract_id))
+        logger.debug(
+            "Contract '{}' has been removed.".format(removed_contract.contract_id)
+        )
 
     def fetch(self, contract_id: ContractId) -> Optional[Contract]:
         """

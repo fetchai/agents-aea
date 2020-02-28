@@ -602,7 +602,7 @@ class DecisionMaker:
         ):
             self._handle_tx_message_for_signing(tx_message)
 
-        elif(
+        elif (
             tx_message.performative
             == TransactionMessage.Performative.PROPOSE_FOR_CONTRACT
         ):
@@ -864,7 +864,9 @@ class DecisionMaker:
                 crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
             # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
             signature = crypto_object.sign_transaction(tx_message.signing_payload)
-            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(tx_signed=signature)
+            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(
+                tx_signed=signature
+            )
 
     def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
         """
@@ -873,8 +875,7 @@ class DecisionMaker:
                 :param tx_message: the transaction message
                 :return: whether the transaction is acceptable or not
                 """
-        result = (
-                self._is_valid_tx_amount(tx_message)
-                and self._is_affordable(tx_message)
+        result = self._is_valid_tx_amount(tx_message) and self._is_affordable(
+            tx_message
         )
         return result

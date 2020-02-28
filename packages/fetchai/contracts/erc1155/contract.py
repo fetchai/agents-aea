@@ -74,16 +74,22 @@ class ERC1155Contract(Contract):
 
         self.abi = contract_interface["abi"]
         self.bytecode = contract_interface["bytecode"]
-        self.instance = ledger_api.api.eth.contract(abi=self.abi, bytecode=self.bytecode)
+        self.instance = ledger_api.api.eth.contract(
+            abi=self.abi, bytecode=self.bytecode
+        )
 
-    def get_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> TransactionMessage:
+    def get_deploy_transaction(
+        self, deployer_address: Address, ledger_api: LedgerApi
+    ) -> TransactionMessage:
         """
         Deploy a smart contract.
 
         :params deployer_address: The address that deploys the smart-contract
         """
         assert self.instance.address is None, "The contract is already deployed"
-        tx = self._create_deploy_transaction(deployer_address=deployer_address, ledger_api=ledger_api)
+        tx = self._create_deploy_transaction(
+            deployer_address=deployer_address, ledger_api=ledger_api
+        )
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
@@ -98,12 +104,14 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx
+            signing_payload=tx,
         )
 
         return tx_message
 
-    def _create_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> Dict[str, Any]:
+    def _create_deploy_transaction(
+        self, deployer_address: Address, ledger_api: LedgerApi
+    ) -> Dict[str, Any]:
         """
         Get the deployment transaction.
 
@@ -118,7 +126,9 @@ class ERC1155Contract(Contract):
             "value": 0,  # Add how many ethers you'll transfer during the deploy
             "gas": 0,  # Trying to make it dynamic ..
             "gasPrice": ledger_api.api.toWei("50", "gwei"),  # Get Gas Price
-            "nonce": ledger_api.api.eth.getTransactionCount(deployer_address),  # Get Nonce
+            "nonce": ledger_api.api.eth.getTransactionCount(
+                deployer_address
+            ),  # Get Nonce
             "data": tx_data,  # Here is the data sent through the network
         }
 
@@ -128,15 +138,20 @@ class ERC1155Contract(Contract):
         tx["gas"] = gas_estimate
         return tx
 
-    def update_contract_instance(self, contract_address: Address, ledger_api: LedgerApi):
+    def update_contract_instance(
+        self, contract_address: Address, ledger_api: LedgerApi
+    ):
         """Update the local instance of the smart contract with the deployed one."""
         logger.info("Updating the local instance of the contract...")
-        assert self.address is None and\
-            self.instance.address is None, "Contract is already deployed with a known address."
+        assert (
+            self.address is None and self.instance.address is None
+        ), "Contract is already deployed with a known address."
         self.address = contract_address
         self.instance = ledger_api.api.eth.contract(address=self.address, abi=self.abi)
 
-    def create_batch(self, deployer_address: Address, ledger_api: LedgerApi) -> TransactionMessage:
+    def create_batch(
+        self, deployer_address: Address, ledger_api: LedgerApi
+    ) -> TransactionMessage:
         """
         Create an mint a batch of items.
 
@@ -145,7 +160,9 @@ class ERC1155Contract(Contract):
         """
         # create the items
 
-        tx = self._get_create_batch_tx(deployer_address=deployer_address, ledger_api=ledger_api)
+        tx = self._get_create_batch_tx(
+            deployer_address=deployer_address, ledger_api=ledger_api
+        )
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
@@ -160,7 +177,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx
+            signing_payload=tx,
         )
 
         return tx_message
@@ -170,7 +187,9 @@ class ERC1155Contract(Contract):
         # tx_signed = self._sign_transaction(tx=tx)
         # self.send_tx(tx_signed=tx_signed, tx_type="create_batch")
 
-    def _get_create_batch_tx(self, deployer_address: Address, ledger_api: LedgerApi) -> str:
+    def _get_create_batch_tx(
+        self, deployer_address: Address, ledger_api: LedgerApi
+    ) -> str:
         """Create a batch of items."""
         # create the items
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
@@ -186,7 +205,13 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def mint_batch(self, deployer_address: Address, recipient_address: Address, mint_quantities: List[int], ledger_api: LedgerApi):
+    def mint_batch(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        mint_quantities: List[int],
+        ledger_api: LedgerApi,
+    ):
 
         assert len(mint_quantities) == len(self.item_ids)
         tx = self._get_mint_batch_tx(
@@ -208,7 +233,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx
+            signing_payload=tx,
         )
 
         return tx_message
@@ -297,11 +322,11 @@ class ERC1155Contract(Contract):
 
     def _get_balance(self, contract, from_address: Address, item_id: int):
         """Get the balance for the specific id."""
-        return contract.instance.functions.balanceOf(
-            from_address, item_id
-        ).call()
+        return contract.instance.functions.balanceOf(from_address, item_id).call()
 
-    def get_atomic_swap_single_proposal(self, contract, terms, signature) -> TransactionMessage:
+    def get_atomic_swap_single_proposal(
+        self, contract, terms, signature
+    ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         assert self.address == terms.from_address, "Wrong from address"
 
@@ -319,7 +344,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx
+            signing_payload=tx,
         )
 
         return tx_message
@@ -330,7 +355,9 @@ class ERC1155Contract(Contract):
             [address] * 10, item_ids
         ).call()
 
-    def get_atomic_swap_batch_transaction_proposal(self, deployer_address, contract, terms, signature) -> TransactionMessage:
+    def get_atomic_swap_batch_transaction_proposal(
+        self, deployer_address, contract, terms, signature
+    ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == terms.from_address, "Wrong 'from' address"
         tx = contract.get_trade_batch_tx(terms=terms, signature=signature)
@@ -347,7 +374,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx
+            signing_payload=tx,
         )
 
         return tx_message
@@ -381,7 +408,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx_hash
+            signing_payload=tx_hash,
         )
 
         return tx_message
@@ -404,6 +431,7 @@ class ERC1155Contract(Contract):
         )
 
         return tx_hash
+
 
 class Helpers:
     """Helper functions for hashing."""
@@ -465,6 +493,7 @@ class Helpers:
         index = item_id
         final_id_int = (token_id << 128) + index
         return final_id_int
+
     #
     # def generate_trade_nonce(self, contract, address):
     #     """Generate a valid trade nonce."""

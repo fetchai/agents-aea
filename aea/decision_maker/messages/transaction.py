@@ -292,7 +292,7 @@ class TransactionMessage(InternalMessage):
             elif self.performative in {
                 self.Performative.PROPOSE_FOR_SIGNING,
                 self.Performative.REJECTED_SIGNING,
-                self.performative.PROPOSE_FOR_CONTRACT
+                self.performative.PROPOSE_FOR_CONTRACT,
             }:
                 assert isinstance(self.signing_payload, dict) and all(
                     isinstance(key, str) for key in self.signing_payload.keys()
