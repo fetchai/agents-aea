@@ -864,8 +864,7 @@ class DecisionMaker:
                 crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
             # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
             signature = crypto_object.sign_transaction(tx_message.signing_payload)
-            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(tx_signed=signature,
-                                                                                 tx_type=tx_message.tx_id)
+            self.ledger_apis.apis.get(tx_message.ledger_id).send_raw_transaction(tx_signed=signature)
 
     def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
         """

@@ -115,9 +115,7 @@ class EthereumCrypto(Crypto):
         return signature["signature"]
 
     def sign_transaction(self, transaction):
-        signature = self.entity.sign_transaction(transaction_dict=transaction,
-                                             private_key=self.entity.key)
-
+        signature = self.entity.sign_transaction(transaction_dict=transaction)
         return signature
 
     def recover_message(self, message: bytes, signature: bytes) -> Address:
@@ -235,41 +233,26 @@ class EthereumApi(LedgerApi):
         )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
 
-        hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+        result = self.send_raw_transaction(tx_signed=signed)
 
-        logger.info("TX Hash: {}".format(str(hex_value.hex())))
-        while True:
-            try:
-                self._api.eth.getTransactionReceipt(hex_value)
-                logger.info("transaction validated - exiting")
-                tx_digest = hex_value.hex()
-                break
-            except web3.exceptions.TransactionNotFound:  # pragma: no cover
-                logger.info("transaction not found - sleeping for 3.0 seconds")
-                time.sleep(3.0)
-        return tx_digest
+        return result.transactionHash.hex()
 
-    def send_raw_transaction(self, tx_signed, tx_type) -> Optional[str]:
+    def send_raw_transaction(self, tx_signed) -> Optional[Dict]:
         """Send a signed transaction and wait for confirmation."""
         # send the transaction to the ropsten test network
 
         hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
 
-        logger.info("sending {} transaction".format(tx_type))
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:
             try:
                 result = self._api.eth.getTransactionReceipt(hex_value)
                 logger.info("transaction validated - exiting")
-                if result.contractAddress is not None:
-                    # Checking the address so I can pass it manually for now.
-                    logger.info(result.contractAddress)
-                tx_digest = hex_value.hex()
                 break
             except web3.exceptions.TransactionNotFound:  # pragma: no cover
                 logger.info("transaction not found - sleeping for 3.0 seconds")
                 time.sleep(3.0)
-        return tx_digest
+        return result
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""

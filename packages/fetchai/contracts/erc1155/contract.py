@@ -83,17 +83,18 @@ class ERC1155Contract(Contract):
         self.bytecode = contract_interface["bytecode"]
         self.instance = ledger_api.api.eth.contract(abi=self.abi, bytecode=self.bytecode)
 
-    def deploy_contract(self, deployer_address: Address, ledger_api: LedgerApi) -> TransactionMessage:
+    def get_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> TransactionMessage:
         """
         Deploy a smart contract.
 
         :params deployer_address: The address that deploys the smart-contract
         """
-        tx = self._get_deploy_transaction(deployer_address=deployer_address, ledger_api=ledger_api)
+        assert self.instance.address is None, "The contract is already deployed"
+        tx = self._create_deploy_transaction(deployer_address=deployer_address, ledger_api=ledger_api)
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            performative=TransactionMessage.Performative.PROPOSE_FOR_CONTRACT,
             skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=deployer_address,
@@ -109,7 +110,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def _get_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> Dict[str, Any]:
+    def _create_deploy_transaction(self, deployer_address: Address, ledger_api: LedgerApi) -> Dict[str, Any]:
         """
         Get the deployment transaction.
 
@@ -137,6 +138,8 @@ class ERC1155Contract(Contract):
     def update_contract_instance(self, contract_address: Address, ledger_api: LedgerApi):
         """Update the local instance of the smart contract with the deployed one."""
         logger.info("Updating the local instance of the contract...")
+        assert self.address is None and\
+            self.instance.address is None, "Contract is already deployed with a known address."
         self.address = contract_address
         self.instance = ledger_api.api.eth.contract(address=self.address, abi=self.abi)
 
@@ -309,7 +312,7 @@ class ERC1155Contract(Contract):
             from_address, item_id
         ).call()
 
-    def atomic_swap_single(self, contract, terms, signature) -> TransactionMessage:
+    def get_atomic_swap_single_proposal(self, contract, terms, signature) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         assert self.address == terms.from_address, "Wrong from address"
 
@@ -338,7 +341,7 @@ class ERC1155Contract(Contract):
             [address] * 10, item_ids
         ).call()
 
-    def atomic_swap_batch(self, deployer_address, contract, terms, signature) -> TransactionMessage:
+    def get_atomic_swap_batch_transaction_proposal(self, deployer_address, contract, terms, signature) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == terms.from_address, "Wrong 'from' address"
         tx = contract.get_trade_batch_tx(terms=terms, signature=signature)
