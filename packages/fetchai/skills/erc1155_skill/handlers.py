@@ -66,6 +66,17 @@ class TransactionHandler(Handler):
                 tx_msg_response.tx_signature
             )
             self.context.logger.info(result)
+        elif tx_msg_response.tx_id == "contract_mint_batch":
+            self.context.logger.info(contract.instance.address)
+            ledger_api = self.context.ledger_apis.apis.get("ethereum")
+            result = ledger_api.send_raw_transaction(  # type: ignore
+                tx_msg_response.tx_signature
+            )
+            self.context.logger.info(result)
+            contract.is_items_created = True
+            self.context.logger.info("Ask the contract about my balances:")
+            result = contract.get_balance_of_batch(address=self.context.agent_address)
+            self.context.logger.info(result)
 
     def teardown(self) -> None:
         """

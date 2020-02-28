@@ -64,6 +64,17 @@ class ERC1155Behaviour(Behaviour):
             contract.is_items_created = True
             time.sleep(20)
 
+        if contract.is_deployed and contract.is_items_created and not contract.is_items_minted:
+            mint_items = [2, 0, 0, 0, 6, 4, 2, 1, 3, 2]
+            self.context.logger.info("Minting a batch of items")
+            mint_message = contract.get_mint_batch_transaction(deployer_address=self.context.agent_address,
+                                                               recipient_address=self.context.agent_address,
+                                                               mint_quantities=mint_items,
+                                                               ledger_api=self.context.ledger_apis.apis.get('ethereum'))
+            self.context.decision_maker_message_queue.put_nowait(mint_message)
+            contract.is_items_created = True
+            time.sleep(10)
+
     def teardown(self) -> None:
         """
         Implement the task teardown.

@@ -49,6 +49,7 @@ class ERC1155Contract(Contract):
 
         self.is_deployed = False
         self.is_items_created = False
+        self.is_items_minted = False
         self.abi = None
         self.bytecode = None
         self.instance = None
@@ -222,7 +223,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
-            tx_id="contract_deployment",
+            tx_id="contract_mint_batch",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -241,7 +242,10 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Mint a batch of items."""
         # mint batch
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        nonce = ledger_api.api.eth.getTransactionCount(
+            ledger_api.api.toChecksumAddress(deployer_address)
+        )
+        nonce += 1
         tx = self.instance.functions.mintBatch(
             recipient_address, self.item_ids, batch_mint_quantities
         ).buildTransaction(
@@ -350,10 +354,10 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_balance_of_batch(self, contract, address, item_ids):
+    def get_balance_of_batch(self, address):
         """Get the balance for a batch of items"""
-        return contract.instance.functions.balanceOfBatch(
-            [address] * 10, item_ids
+        return self.instance.functions.balanceOfBatch(
+            [address] * 10, self.item_ids
         ).call()
 
     def get_atomic_swap_batch_transaction_proposal(
