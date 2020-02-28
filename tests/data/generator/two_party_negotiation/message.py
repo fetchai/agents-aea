@@ -25,7 +25,7 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.two_party_negotiation.models import (
+from tests.data.generator.two_party_negotiation.models import (
     DataModel,
     IOTApp7,
     Unit,

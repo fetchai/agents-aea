@@ -1188,7 +1188,7 @@ class ProtocolGenerator:
             self.protocol_specification.author,
             "protocols",
             self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
+            self.protocol_specification.name,
         )
         cls_str += str.format(
             "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
@@ -1222,7 +1222,7 @@ class ProtocolGenerator:
         )
         cls_str += "        {}_msg = {}_pb2.{}Message()\n".format(
             self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
+            self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
         cls_str += "        {}_msg.message_id = msg.message_id\n".format(
@@ -1251,7 +1251,7 @@ class ProtocolGenerator:
                     self.protocol_specification_in_camel_case, performative.upper()
                 )
             cls_str += "            performative = {}_pb2.{}Message.{}()  # type: ignore\n".format(
-                self.protocol_specification_in_camel_case,
+                self.protocol_specification.name,
                 self.protocol_specification_in_camel_case,
                 performative.title(),
             )
@@ -1292,7 +1292,7 @@ class ProtocolGenerator:
         cls_str += '        """\n'
         cls_str += "        {}_pb = {}_pb2.{}Message()\n".format(
             self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
+            self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
         cls_str += "        {}_pb.ParseFromString(obj)\n".format(
