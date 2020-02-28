@@ -21,18 +21,28 @@
 
 from abc import ABC
 
-from aea.configurations.base import ContractId
+from aea.configurations.base import ContractId, ContractConfig
 
 
 class Contract(ABC):
     """Abstract definition of a contract."""
 
-    contract_id = None  # type: ContractId
-
-    def __init__(self, **kwargs):
+    def __init__(self, contract_id: ContractId, config: ContractConfig, **kwargs):
         """
         Initialize the contract.
 
         :param contract_id: the contract id.
         :param config: the contract configurations.
         """
+        self._contract_id = contract_id  # type: ContractId
+        self._config = config
+
+    @property
+    def id(self) -> ContractId:
+        """Get the name."""
+        return self._contract_id
+
+    @property
+    def config(self) -> ContractConfig:
+        """Get the configuration."""
+        return self._config

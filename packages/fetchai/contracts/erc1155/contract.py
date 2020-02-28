@@ -48,11 +48,12 @@ logger = logging.getLogger(__name__)
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
 
-    contract_id = ContractId("fetchai", "erc1155", "0.1.0")
-
-    def __init__(self, **kwargs):
+    def __init__(self, contract_config, **kwargs):
         """Initialize."""
-        super().__init__(**kwargs)
+        self.contract_id = ContractId("fetchai", "erc1155", "0.1.0")
+
+        super().__init__(self.contract_id, contract_config, **kwargs)
+
         self.deployed = False
         self.abi = None
         self.bytecode = None

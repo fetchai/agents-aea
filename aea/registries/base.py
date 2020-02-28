@@ -26,6 +26,7 @@ import os
 import pprint
 import queue
 import re
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
@@ -143,10 +144,10 @@ class ContractRegistry(Registry[PublicId, Contract]):
             raise ValueError(
                 "Contract already registered with contract id '{}'".format(contract_id)
             )
-        if contract.contract_id != contract_id:
+        if contract.id != contract_id:
             raise ValueError(
                 "Contract id '{}' is different to the id '{}' specified.".format(
-                    contract.contract_id, contract_id
+                    contract.id, contract_id
                 )
             )
         self._contracts[contract_id] = contract
@@ -242,19 +243,21 @@ class ContractRegistry(Registry[PublicId, Contract]):
         contract_config = config_loader.load(
             open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
         )
-
-        contract_spec = importlib.util.spec_from_file_location(
-            "contracts", contract_directory / "contract.py"
-        )
-
-        contract_module = importlib.util.module_from_spec(contract_spec)
+        try:
+            contract_spec = importlib.util.spec_from_file_location(
+                "contracts", contract_directory / "contract.py"
+            )
+            contract_module = importlib.util.module_from_spec(contract_spec)
+        except FileNotFoundError:
+            logger.warning("File not found.")
+            sys.exit(1)
         contract_spec.loader.exec_module(contract_module)  # type: ignore
         classes = inspect.getmembers(contract_module, inspect.isclass)
         contract_classes = list(
             filter(lambda x: re.match("\\w+Contract", x[0]), classes)
         )
         contract_class = contract_classes[0][1]
-        contract = contract_class()
+        contract = contract_class(contract_config)
         contract_public_id = PublicId(
             contract_config.author, contract_config.name, contract_config.version
         )
