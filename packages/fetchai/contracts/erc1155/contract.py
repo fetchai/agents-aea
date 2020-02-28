@@ -21,17 +21,10 @@
 import json
 import logging
 import os
-import random
-import sys
-import time
-from operator import add
 from pathlib import Path
 from typing import Any, Dict, List
 
 from vyper.utils import keccak256
-
-import web3.exceptions
-from web3 import Web3
 
 from aea.configurations.base import ContractId
 from aea.contracts.base import Contract
@@ -191,10 +184,6 @@ class ERC1155Contract(Contract):
                 "nonce": nonce,
             }
         )
-        logger.info(tx)
-        logger.info(ledger_api.api.provider)
-        # gas_estimate = self.w3.eth.estimateGas(transaction=tx)
-        # logger.info("gas estimate create_batch: {}".format(gas_estimate))
         return tx
 
     def mint_batch(self, deployer_address: Address, recipient_address: Address, mint_quantities: List[int], ledger_api: LedgerApi):
@@ -476,10 +465,10 @@ class Helpers:
         index = item_id
         final_id_int = (token_id << 128) + index
         return final_id_int
-
-    def generate_trade_nonce(self, contract, address):
-        """Generate a valid trade nonce."""
-        trade_nonce = random.randrange(0, 10000000)
-        while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
-            trade_nonce = random.randrange(0, 10000000)
-        return trade_nonce
+    #
+    # def generate_trade_nonce(self, contract, address):
+    #     """Generate a valid trade nonce."""
+    #     trade_nonce = random.randrange(0, 10000000)
+    #     while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
+    #         trade_nonce = random.randrange(0, 10000000)
+    #     return trade_nonce
