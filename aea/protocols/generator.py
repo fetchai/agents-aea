@@ -927,7 +927,7 @@ class ProtocolGenerator:
         )
 
         cls_str += "            # Light Protocol Rule 2\n"
-        cls_str += "            # # Check correct performative\n"
+        cls_str += "            # Check correct performative\n"
         cls_str += "            assert (\n"
         cls_str += "                type(self.performative) == {}Message.Performative\n".format(
             self.protocol_specification_in_camel_case
@@ -935,7 +935,7 @@ class ProtocolGenerator:
         cls_str += "            ), \"'{}' is not in the list of valid performatives: {}\".format(\n"
         cls_str += "                self.performative, self.valid_performatives\n"
         cls_str += "            )\n\n"
-        cls_str += "            # # Check correct contents\n"
+        cls_str += "            # Check correct contents\n"
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
@@ -957,7 +957,7 @@ class ProtocolGenerator:
             for content_name, content_type in contents.items():
                 cls_str += self._check_content_type_str(4, content_name, content_type)
             counter += 1
-        cls_str += "\n            # # Check correct content count\n"
+        cls_str += "\n            # Check correct content count\n"
         cls_str += "            assert (\n"
         cls_str += "                expected_nb_of_contents == actual_nb_of_contents\n"
         cls_str += '            ), "Incorrect number of contents. Expected {} contents. Found {}".format(\n'
@@ -1003,31 +1003,15 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            # if not self._includes_custom_type(content_type):
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
             encoding_str += indents + "performative.{}.extend({})\n".format(
                 content_name, content_name
             )
-            # else:
-            #     encoding_str += (
-            #         indents
-            #         + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-            #             content_name, content_type
-            #         )
-            #     )
         elif content_type.startswith("Dict"):
-            # if not self._includes_custom_type(content_type):
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
             encoding_str += indents + "performative.{}.update({})\n".format(
                 content_name, content_name
             )
-            # else:
-            #     encoding_str += (
-            #         indents
-            #         + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-            #             content_name, content_type
-            #         )
-            #     )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1049,12 +1033,6 @@ class ProtocolGenerator:
                 content_name, sub_type, no_indents
             )
         else:
-            # encoding_str += (
-            #     indents
-            #     + "raise NotImplementedError(\"The encoding of content '{}' of type '{}' is missing.\")\n".format(
-            #         content_name, content_type
-            #     )
-            # )
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
             encoding_str += indents + "performative.{} = {}\n".format(
                 content_name, content_name
@@ -1096,7 +1074,6 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
@@ -1106,15 +1083,7 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
-        # else:
-        #     decoding_str += (
-        #         indents
-        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-        #             content_name, content_type
-        #         )
-        #     )
         elif content_type.startswith("Dict"):
-            # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
@@ -1124,13 +1093,6 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
-        # else:
-        #     decoding_str += (
-        #         indents
-        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-        #             content_name, content_type
-        #         )
-        #     )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1160,12 +1122,6 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-            # decoding_str += (
-            #     indents
-            #     + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-            #         content_name, content_type
-            #     )
-            # )
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
@@ -1175,7 +1131,6 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
-
         return decoding_str
 
     def _includes_custom_type(self, content_type: str) -> bool:
