@@ -20,7 +20,7 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, cast, Union
+from typing import Any, Dict, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS

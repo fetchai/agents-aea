@@ -47,17 +47,25 @@ class TransactionHandler(Handler):
         contract = self.context.contracts.erc1155
         if tx_msg_response.tx_id == "contract_deploy":
             self.context.logger.info(type(tx_msg_response.tx_signature))
-            result = self.context.ledger_apis.apis.get("ethereum").send_raw_transaction(tx_msg_response.tx_signature)
+            ledger_api = self.context.ledger_apis.apis.get("ethereum")
+            result = ledger_api.send_raw_transaction(  # type: ignore
+                tx_msg_response.tx_signature
+            )
             self.context.logger.info(result)
             while contract.instance.address is None:
-                contract.update_contract_instance(contract_address=result.contractAddress,
-                                                  ledger_api=self.context.ledger_apis.apis.get('ethereum'))
+                contract.update_contract_instance(
+                    contract_address=result.contractAddress,
+                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                )
                 time.sleep(3)
             contract.is_deployed = True
         elif tx_msg_response.tx_id == "contract_create_batch":
             self.context.logger.info(contract.instance.address)
-            result = self.context.ledger_apis.apis.get("ethereum").send_raw_transaction(tx_msg_response.tx_signature)
-
+            ledger_api = self.context.ledger_apis.apis.get("ethereum")
+            result = ledger_api.send_raw_transaction(  # type: ignore
+                tx_msg_response.tx_signature
+            )
+            self.context.logger.info(result)
 
     def teardown(self) -> None:
         """

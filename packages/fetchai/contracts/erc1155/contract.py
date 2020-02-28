@@ -148,7 +148,9 @@ class ERC1155Contract(Contract):
         assert (
             self.instance.address is None
         ), "Contract is already deployed with a known address."
-        self.instance = ledger_api.api.eth.contract(address=contract_address, abi=self.abi)
+        self.instance = ledger_api.api.eth.contract(
+            address=contract_address, abi=self.abi
+        )
 
     def get_create_batch_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi
@@ -294,7 +296,9 @@ class ERC1155Contract(Contract):
         """
         data = b"hello"
         nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         tx = self.instance.functions.tradeBatch(
             terms.from_address,
             terms.to_address,
@@ -378,7 +382,7 @@ class ERC1155Contract(Contract):
 
     def get_hash_single_transaction(self, terms) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
-        assert self.address == terms.to_address
+        # assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
             terms.from_address
         ).call()

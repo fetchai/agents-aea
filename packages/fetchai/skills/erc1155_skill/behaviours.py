@@ -35,9 +35,13 @@ class ERC1155Behaviour(Behaviour):
 
         contract = self.context.contracts.erc1155
         self.context.logger.info("Loading details from json")
-        contract.load_from_json(ledger_api=self.context.ledger_apis.apis.get("ethereum"))
-        dm_message_for_deploy = contract.get_deploy_transaction(deployer_address=self.context.agent_address,
-                                                                ledger_api=self.context.ledger_apis.apis.get("ethereum"))
+        contract.load_from_json(
+            ledger_api=self.context.ledger_apis.apis.get("ethereum")
+        )
+        dm_message_for_deploy = contract.get_deploy_transaction(
+            deployer_address=self.context.agent_address,
+            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+        )
         self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
 
     def act(self) -> None:
@@ -52,13 +56,13 @@ class ERC1155Behaviour(Behaviour):
             contract.create_item_ids(token_ids=create_items)
 
             self.context.logger.info("Creating a batch of items")
-            creation_message = contract.get_create_batch_transaction(deployer_address=self.context.agent_address,
-                                                                     ledger_api=self.context.ledger_apis.apis.get(
-                                                                         "ethereum"))
+            creation_message = contract.get_create_batch_transaction(
+                deployer_address=self.context.agent_address,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
             contract.is_items_created = True
             time.sleep(20)
-
 
     def teardown(self) -> None:
         """

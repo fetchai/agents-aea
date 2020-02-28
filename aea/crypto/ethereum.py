@@ -238,7 +238,7 @@ class EthereumApi(LedgerApi):
 
         return result.transactionHash.hex()
 
-    def send_raw_transaction(self, tx_signed) -> Optional[AttributeDict]:
+    def send_raw_transaction(self, tx_signed) -> AttributeDict:
         """Send a signed transaction and wait for confirmation."""
         # send the transaction to the ropsten test network
 
