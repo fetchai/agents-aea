@@ -70,6 +70,35 @@ class ConfigLoader(Generic[T]):
         self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
+    def load_protocol_specification(self, fp: TextIO) -> T:
+        """
+        Load an agent configuration file.
+
+        :param fp: the file pointer to the configuration file
+        :return: the configuration object.
+        :raises
+        """
+        yaml_data = yaml.safe_load_all(fp)
+        yaml_documents = []
+        for document in yaml_data:
+            yaml_documents.append(document)
+        configuration_file_json = yaml_documents[0]
+        if len(yaml_documents) == 2:
+            protobuf_snippets_json = yaml_documents[1]
+        elif len(yaml_documents) == 1:
+            protobuf_snippets_json = {}
+        else:
+            raise ValueError("Wrong number of documents in protocol specification.")
+        try:
+            self.validator.validate(instance=configuration_file_json)
+        except Exception:
+            raise
+        protocol_specification = self.configuration_type.from_json(
+            configuration_file_json
+        )
+        protocol_specification.protobuf_snippets = protobuf_snippets_json
+        return protocol_specification
+
     def load(self, fp: TextIO) -> T:
         """
         Load an agent configuration file.

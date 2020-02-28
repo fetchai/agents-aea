@@ -1,3 +1,4 @@
+---
 name: fipa
 author: fetchai
 version: 0.1.0
@@ -18,11 +19,18 @@ speech_acts:
   accept: {}
   decline: {}
   match_accept: {}
-
-  # Problems:
-  # info is of type dict[str, Any]. Any is problematic.
-  #
-  # Differences:
-  # propose -> proposal was a list of Descriptions.
-  # cfp -> query was a union of Query, byte, or None.
-  # dialogue_reference is missing
+...
+---
+ct:Query: |
+  message Nothing {
+  }
+  oneof query{
+      bytes bytes = 1;
+      Nothing nothing = 2;
+      bytes query_bytes = 3;
+  }
+ct:Proposal: |
+  bytes bytes = 1;
+ct:Info: |
+  repeated bytes proposal = 1;
+...
