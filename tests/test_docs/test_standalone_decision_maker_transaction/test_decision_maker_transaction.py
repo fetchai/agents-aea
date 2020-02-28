@@ -84,12 +84,17 @@ class TestDecisionMakerTransaction:
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
+        old_cwd = os.getcwd()
         try:
-            run()
-            self.mocked_logger_info.assert_any_call("Transaction was not successful.")
+            with tempfile.TemporaryDirectory() as tempdir:
+                os.chdir(tempdir)
+                run()
+                self.mocked_logger_info.assert_any_call("Transaction was not successful.")
 
         except RuntimeError:
             test_logger.info("RuntimeError: Some transactions have failed")
+        finally:
+            os.chdir(old_cwd)
 
     @classmethod
     def teardown(cls):
