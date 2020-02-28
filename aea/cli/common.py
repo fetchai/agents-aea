@@ -42,6 +42,7 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     ConnectionConfig,
+    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     Dependencies,
@@ -86,6 +87,9 @@ class Context(object):
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         self.connection_loader = ConfigLoader(
             "connection-config_schema.json", ConnectionConfig
+        )
+        self.contract_loader = ConfigLoader(
+            "contract-config_schema.json", ContractConfig
         )
         self.protocol_loader = ConfigLoader(
             "protocol-config_schema.json", ProtocolConfig
@@ -242,29 +246,6 @@ def format_items(items):
                 description=item["description"],
                 author=item["author"],
                 version=item["version"],
-                line="-" * 30,
-            )
-        )
-    return list_str
-
-
-def format_skills(items):
-    """Format list of skills to a string for CLI output."""
-    list_str = ""
-    for item in items:
-        list_str += (
-            "{line}\n"
-            "Public ID: {public_id}\n"
-            "Name: {name}\n"
-            "Description: {description}\n"
-            "Protocols: {protocols}\n"
-            "Version: {version}\n"
-            "{line}\n".format(
-                name=item["name"],
-                public_id=item["public_id"],
-                description=item["description"],
-                version=item["version"],
-                protocols="".join(name + " | " for name in item["protocol_names"]),
                 line="-" * 30,
             )
         )

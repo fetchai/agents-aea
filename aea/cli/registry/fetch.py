@@ -45,7 +45,7 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     os.makedirs(target_folder, exist_ok=True)
 
     click.echo("Fetching dependencies...")
-    for item_type in ("connection", "skill", "protocol"):
+    for item_type in ("connection", "contract", "skill", "protocol"):
         item_type_plural = item_type + "s"
         for item_public_id in resp[item_type_plural]:
             item_public_id = PublicId.from_str(item_public_id)

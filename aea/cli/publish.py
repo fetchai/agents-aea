@@ -69,7 +69,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     :return: None
     """
-    for item_type_plural in ("connections", "protocols", "skills"):
+    for item_type_plural in ("connections", "contracts", "protocols", "skills"):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             _check_is_item_in_local_registry(

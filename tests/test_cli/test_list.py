@@ -22,7 +22,7 @@
 import json
 import os
 from pathlib import Path
-from unittest import mock
+from unittest import TestCase, mock
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -155,3 +155,21 @@ class TestListSkills:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+
+
+@mock.patch("aea.cli.list.try_to_load_agent_config")
+class ListContractsCommandTestCase(TestCase):
+    """Test that the command 'aea list contracts' works as expected."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    @mock.patch("aea.cli.list._get_item_details")
+    @mock.patch("aea.cli.list.format_items")
+    def test_list_contracts_positive(self, *mocks):
+        """Test list contracts command positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "list", "contracts"], standalone_mode=False
+        )
+        self.assertEqual(result.exit_code, 0)

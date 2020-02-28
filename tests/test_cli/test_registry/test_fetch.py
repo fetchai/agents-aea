@@ -49,7 +49,13 @@ class TestFetchAgent(TestCase):
 
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
-        return_value={"file": "url", "connections": [], "protocols": [], "skills": []},
+        return_value={
+            "file": "url",
+            "connections": [],
+            "contracts": [],
+            "protocols": [],
+            "skills": [],
+        },
     )
     def test_fetch_agent_positive(
         self, request_api_mock, extract_mock, download_file_mock,
@@ -68,6 +74,7 @@ class TestFetchAgent(TestCase):
         return_value={
             "file": "url",
             "connections": ["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)],
+            "contracts": ["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)],
             "protocols": ["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)],
             "skills": ["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)],
         },
@@ -90,13 +97,14 @@ class TestFetchAgent(TestCase):
         return_value={
             "file": "url",
             "connections": ["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)],
+            "contracts": [],
             "protocols": [],
             "skills": [],
         },
     )
     @mock.patch("aea.cli.registry.fetch.rmtree")
     def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
-        """Test for fetch_agent method positive result."""
+        """Test for fetch_agent method unable to fetch."""
         with self.assertRaises(ClickException):
             fetch_agent(ContextMock(), PublicIdMock())
 
