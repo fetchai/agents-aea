@@ -5,15 +5,12 @@ First, import the python and application specific libraries and set the static v
 
 ``` python
 import logging
-import os
 
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
-
-ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -82,15 +79,12 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 
 ``` python
 import logging
-import os
 
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
-
-ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)

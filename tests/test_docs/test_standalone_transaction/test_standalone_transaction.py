@@ -108,7 +108,7 @@ class TestStandaloneTransaction:
             ), "Code-block doesn't exist in the python file."
 
     @classmethod
-    def teardown(cls):
+    def teardown_class(cls):
         cls._unpatch_logger()
         os.chdir(cls.cwd)
         try:

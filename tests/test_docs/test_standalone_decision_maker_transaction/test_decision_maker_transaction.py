@@ -87,12 +87,11 @@ class TestDecisionMakerTransaction:
         try:
             run()
             self.mocked_logger_info.assert_any_call("Transaction was not successful.")
-
         except RuntimeError:
             test_logger.info("RuntimeError: Some transactions have failed")
 
     @classmethod
-    def teardown(cls):
+    def teardown_class(cls):
         cls._unpatch_logger()
         os.chdir(cls.cwd)
         try:
