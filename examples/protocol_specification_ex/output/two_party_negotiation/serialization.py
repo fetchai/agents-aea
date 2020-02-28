@@ -24,7 +24,9 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.two_party_negotiation import TwoPartyNegotiation_pb2
+from packages.fetchai.protocols.two_party_negotiation import (
+    TwoPartyNegotiation_pb2,
+)
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
@@ -78,21 +80,13 @@ class TwoPartyNegotiationSerializer(Serializer):
                 performative.conditions_type_str = conditions_type_str
             if msg.is_set("conditions_type_dict_of_str_int"):
                 conditions_type_dict_of_str_int = msg.conditions_type_dict_of_str_int
-                performative.conditions_type_dict_of_str_int.update(
-                    conditions_type_dict_of_str_int
-                )
+                performative.conditions_type_dict_of_str_int.update(conditions_type_dict_of_str_int)
             if msg.is_set("conditions_type_set_of_DataModel"):
                 conditions_type_set_of_DataModel = msg.conditions_type_set_of_DataModel
-                performative.conditions_type_set_of_DataModel.extend(
-                    conditions_type_set_of_DataModel
-                )
+                performative.conditions_type_set_of_DataModel.extend(conditions_type_set_of_DataModel)
             if msg.is_set("conditions_type_dict_of_str_float"):
-                conditions_type_dict_of_str_float = (
-                    msg.conditions_type_dict_of_str_float
-                )
-                performative.conditions_type_dict_of_str_float.update(
-                    conditions_type_dict_of_str_float
-                )
+                conditions_type_dict_of_str_float = msg.conditions_type_dict_of_str_float
+                performative.conditions_type_dict_of_str_float.update(conditions_type_dict_of_str_float)
             two_party_negotiation_msg.propose.CopyFrom(performative)
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             performative = TwoPartyNegotiation_pb2.TwoPartyNegotiationMessage.Accept()  # type: ignore
@@ -152,19 +146,13 @@ class TwoPartyNegotiationSerializer(Serializer):
             if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
                 conditions = two_party_negotiation_pb.propose.conditions_type_str
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_int"
-            ):
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_int"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_set_of_DataModel"
-            ):
+            if two_party_negotiation_pb.propose.HasField("conditions_type_set_of_DataModel"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_float"
-            ):
+            if two_party_negotiation_pb.propose.HasField("conditions_type_dict_of_str_float"):
                 conditions = two_party_negotiation_pb.propose.conditions
                 performative_content["conditions"] = conditions
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:

@@ -91,7 +91,7 @@ def _copyright_header_str(author: str) -> str:
     return copy_right_str
 
 
-def to_camel_case(text: str) -> str:
+def _to_camel_case(text: str) -> str:
     """
     Convert a text in snake_case format into the CamelCase format
 
@@ -101,7 +101,7 @@ def to_camel_case(text: str) -> str:
     return "".join(word.title() for word in text.split("_"))
 
 
-def get_indent_str(no_of_indents: int) -> str:
+def _get_indent_str(no_of_indents: int) -> str:
     """
     Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
 
@@ -344,10 +344,7 @@ class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
-        self,
-        protocol_specification: ProtocolSpecification,
-        protobuf_part: Dict,
-        output_path: str = ".",
+        self, protocol_specification: ProtocolSpecification, output_path: str = ".",
     ) -> None:
         """
         Instantiate a protocol generator.
@@ -357,11 +354,10 @@ class ProtocolGenerator:
         :return: None
         """
         self.protocol_specification = protocol_specification
-        self.protocol_specification_in_camel_case = to_camel_case(
+        self.protocol_specification_in_camel_case = _to_camel_case(
             self.protocol_specification.name
         )
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
-        self.protobuf_part = protobuf_part
 
         self._imports = {
             "Set": True,
@@ -531,7 +527,7 @@ class ProtocolGenerator:
         :return: the string containing the checks.
         """
         check_str = ""
-        indents = get_indent_str(no_of_indents)
+        indents = _get_indent_str(no_of_indents)
         if content_type.startswith("Optional["):
             # check if the content exists then...
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
@@ -830,14 +826,6 @@ class ProtocolGenerator:
         cls_str += "        performative: Performative,\n"
         cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
-        """
-        Initialize.
-
-        :param message_id: the message id.
-        :param dialogue_reference: the dialogue reference.
-        :param target: the message target.
-        :param performative: the message performative.
-        """
         cls_str += '        """\n'
         cls_str += "        Initialise an instance of {}Message.\n\n".format(
             self.protocol_specification_in_camel_case
@@ -1008,7 +996,7 @@ class ProtocolGenerator:
         :return: the encoding string
         """
         encoding_str = ""
-        indents = get_indent_str(no_indents)
+        indents = _get_indent_str(no_indents)
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
             encoding_str += indents + "performative.{} = {}\n".format(
@@ -1091,7 +1079,7 @@ class ProtocolGenerator:
         :return: the decoding string
         """
         decoding_str = ""
-        indents = get_indent_str(no_indents)
+        indents = _get_indent_str(no_indents)
         variable_name = (
             content_name
             if variable_name_in_protobuf == ""
@@ -1296,7 +1284,7 @@ class ProtocolGenerator:
             self.protocol_specification.name
         )
         cls_str += "        performative_id = msg.performative\n"
-        indents = get_indent_str(3)
+        indents = _get_indent_str(3)
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -1321,9 +1309,9 @@ class ProtocolGenerator:
             )
 
             counter += 1
-        indents = get_indent_str(2)
+        indents = _get_indent_str(2)
         cls_str += indents + "else:\n"
-        indents = get_indent_str(3)
+        indents = _get_indent_str(3)
         cls_str += (
             indents
             + 'raise ValueError("Performative not valid: {}".format(performative_id))\n\n'
@@ -1387,7 +1375,7 @@ class ProtocolGenerator:
                     self.protocol_specification_in_camel_case, performative.upper()
                 )
             if len(contents.keys()) == 0:
-                indents = get_indent_str(3)
+                indents = _get_indent_str(3)
                 cls_str += indents + "pass\n"
             else:
                 for content_name, content_type in contents.items():
@@ -1395,9 +1383,9 @@ class ProtocolGenerator:
                         performative, content_name, content_type, 3
                     )
             counter += 1
-        indents = get_indent_str(2)
+        indents = _get_indent_str(2)
         cls_str += indents + "else:\n"
-        indents = get_indent_str(3)
+        indents = _get_indent_str(3)
         cls_str += (
             indents
             + 'raise ValueError("Performative not valid: {}.".format(performative_id))\n\n'
@@ -1427,7 +1415,7 @@ class ProtocolGenerator:
         :param no_of_indents: the number of indents based on the previous sections of the code
         :return: the content in protocol buffer schema
         """
-        indents = get_indent_str(no_of_indents)
+        indents = _get_indent_str(no_of_indents)
         entry = ""
 
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
@@ -1481,7 +1469,7 @@ class ProtocolGenerator:
 
         :return: the protocol buffers schema content
         """
-        indents = get_indent_str(0)
+        indents = _get_indent_str(0)
 
         # heading
         proto_buff_schema_str = ""
@@ -1494,16 +1482,20 @@ class ProtocolGenerator:
         )
 
         # custom types
-        indents = get_indent_str(1)
-        if len(self._all_custom_types) != 0:
+        indents = _get_indent_str(1)
+        if (len(self._all_custom_types) != 0) and (
+            self.protocol_specification.protobuf_snippets is not None
+        ):
             proto_buff_schema_str += indents + "// Custom Types\n"
             for custom_type in self._all_custom_types:
                 proto_buff_schema_str += indents + "message {}{{\n".format(custom_type)
-                indents = get_indent_str(2)
+                indents = _get_indent_str(2)
 
                 # formatting and adding the custom type protobuf entry
                 specification_custom_type = "ct:" + custom_type
-                proto_part = self.protobuf_part[specification_custom_type]
+                proto_part = self.protocol_specification.protobuf_snippets[
+                    specification_custom_type
+                ]
                 number_of_new_lines = proto_part.count("\n")
                 if number_of_new_lines != 0:
                     formatted_proto_part = proto_part.replace(
@@ -1513,7 +1505,7 @@ class ProtocolGenerator:
                     formatted_proto_part = proto_part
                 proto_buff_schema_str += indents + formatted_proto_part
 
-                indents = get_indent_str(1)
+                indents = _get_indent_str(1)
                 proto_buff_schema_str += indents + "}\n\n"
             proto_buff_schema_str += "\n"
 
@@ -1545,17 +1537,17 @@ class ProtocolGenerator:
         proto_buff_schema_str += indents + "string dialogue_responder_reference = 3;\n"
         proto_buff_schema_str += indents + "int32 target = 4;\n"
         proto_buff_schema_str += indents + "oneof performative{\n"
-        indents = get_indent_str(2)
+        indents = _get_indent_str(2)
         tag_no = 5
         for performative in self._all_performatives:
             proto_buff_schema_str += indents + "{} {} = {};\n".format(
                 performative.title(), performative, tag_no
             )
             tag_no += 1
-        indents = get_indent_str(1)
+        indents = _get_indent_str(1)
         proto_buff_schema_str += indents + "}\n"
 
-        indents = get_indent_str(0)
+        indents = _get_indent_str(0)
         proto_buff_schema_str += indents + "}\n"
         return proto_buff_schema_str
 
@@ -1626,7 +1618,7 @@ class ProtocolGenerator:
             self._generate_file(MODELSPY_FILE_NAME, self._models_module_str())
         self._generate_file(SERIALIZATIONPY_FILE_NAME, self._serialization_class_str())
         self._generate_file(
-            "{}.proto".format(self.protocol_specification_in_camel_case),
+            "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
         )
 
@@ -1640,6 +1632,6 @@ class ProtocolGenerator:
 
         # Compile protobuf schema
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
-            self.protocol_specification.name, self.protocol_specification_in_camel_case,
+            self.protocol_specification.name, self.protocol_specification.name,
         )
         os.system(cmd)  # nosec

@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Dict, Generic, TextIO, Type, TypeVar, Union
+from typing import Generic, TextIO, Type, TypeVar, Union
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -70,23 +70,6 @@ class ConfigLoader(Generic[T]):
         self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
-    def load_protobuf_part_of_protocol_specification(self, fp: TextIO) -> Dict:
-        """
-        Load a protocol specification file.
-
-        :param fp: the file pointer to the specification file
-        :return: the configuration object.
-        :raises
-        """
-        yaml_data = yaml.safe_load_all(fp)
-        yaml_documents = []
-        for document in yaml_data:
-            yaml_documents.append(document)
-        if len(yaml_documents) >= 2:
-            return yaml_documents[1]
-        else:
-            return dict()
-
     def load_protocol_specification(self, fp: TextIO) -> T:
         """
         Load an agent configuration file.
@@ -100,11 +83,21 @@ class ConfigLoader(Generic[T]):
         for document in yaml_data:
             yaml_documents.append(document)
         configuration_file_json = yaml_documents[0]
+        if len(yaml_documents) == 2:
+            protobuf_snippets_json = yaml_documents[1]
+        elif len(yaml_documents) == 1:
+            protobuf_snippets_json = {}
+        else:
+            raise ValueError("Wrong number of documents in protocol specification.")
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        return self.configuration_type.from_json(configuration_file_json)
+        protocol_specification = self.configuration_type.from_json(
+            configuration_file_json
+        )
+        protocol_specification.protobuf_snippets = protobuf_snippets_json
+        return protocol_specification
 
     def load(self, fp: TextIO) -> T:
         """
