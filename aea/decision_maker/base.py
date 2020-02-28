@@ -28,7 +28,6 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
-from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
@@ -602,12 +601,6 @@ class DecisionMaker:
             == TransactionMessage.Performative.PROPOSE_FOR_SIGNING
         ):
             self._handle_tx_message_for_signing(tx_message)
-
-        elif (
-            tx_message.performative
-            == TransactionMessage.Performative.PROPOSE_FOR_CONTRACT
-        ):
-            self._handle_tx_message_for_deployment(tx_message)
         else:
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
@@ -759,19 +752,34 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        if self._is_acceptable_for_signing(tx_message):
-            tx_signature = self._sign_tx(tx_message)
-            tx_message_response = TransactionMessage.respond_signing(
-                tx_message,
-                performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                tx_signature=tx_signature,
-            )
+        if "contract" in tx_message.tx_id:
+            if self._is_acceptable_for_deployment(tx_message):
+                tx_signature = self._sign_contract_tx(tx_message=tx_message)
+                tx_message_response = TransactionMessage.respond_signing(
+                    tx_message,
+                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                    tx_signature=tx_signature,
+                )
+            else:
+                tx_message_response = TransactionMessage.respond_signing(
+                    tx_message,
+                    performative=TransactionMessage.Performative.REJECTED_SIGNING,
+                )
+            self.message_out_queue.put(tx_message_response)
         else:
-            tx_message_response = TransactionMessage.respond_signing(
-                tx_message,
-                performative=TransactionMessage.Performative.REJECTED_SIGNING,
-            )
-        self.message_out_queue.put(tx_message_response)
+            if self._is_acceptable_for_signing(tx_message):
+                tx_signature = self._sign_tx(tx_message)
+                tx_message_response = TransactionMessage.respond_signing(
+                    tx_message,
+                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                    tx_signature=tx_signature,
+                )
+            else:
+                tx_message_response = TransactionMessage.respond_signing(
+                    tx_message,
+                    performative=TransactionMessage.Performative.REJECTED_SIGNING,
+                )
+            self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
         """
@@ -849,26 +857,21 @@ class DecisionMaker:
             )
             self._ownership_state = new_ownership_state
 
-    def _handle_tx_message_for_deployment(self, tx_message) -> None:
+    def _sign_contract_tx(self, tx_message):
         """
         Handle a transaction message for deployment.
 
         :param tx_message: the transaction message
         :return: None
         """
-        logger.info(self._is_valid_tx_amount(tx_message))
-        if self._is_acceptable_for_deployment(tx_message):
-            if tx_message.ledger_id == OFF_CHAIN:
-                crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
-                # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
-            else:
-                crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-            # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
-            signature = crypto_object.sign_transaction(tx_message.signing_payload)
-            ledger_api = cast(
-                LedgerApi, self.ledger_apis.apis.get(tx_message.ledger_id)
-            )
-            ledger_api.send_raw_transaction(tx_signed=signature)
+        if tx_message.ledger_id == OFF_CHAIN:
+            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
+            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
+        else:
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
+        # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
+        signature = crypto_object.sign_transaction(tx_message.signing_payload)
+        return signature
 
     def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
         """

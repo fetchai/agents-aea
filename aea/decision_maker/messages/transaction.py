@@ -20,7 +20,7 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, cast
+from typing import Any, Dict, List, Optional, Sequence, cast, Union
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
@@ -302,9 +302,9 @@ class TransactionMessage(InternalMessage):
                 assert isinstance(self.signing_payload, dict) and all(
                     isinstance(key, str) for key in self.signing_payload.keys()
                 ), "Signing_payload must be of type Dict[str, Any]"
-                assert isinstance(
-                    self.tx_signature, bytes
-                ), "Tx_signature must be of type bytes"
+                # assert isinstance(
+                #     self.tx_signature, bytes
+                # ), "Tx_signature must be of type bytes"
                 assert len(self.body) == 13
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
@@ -372,7 +372,7 @@ class TransactionMessage(InternalMessage):
 
         :param other: TransactionMessage
         :param performative: the performative
-        :param tx_digest: the transaction digest
+        :param tx_signature: the transaction digest
         :return: a transaction message object
         """
         if tx_signature is None:

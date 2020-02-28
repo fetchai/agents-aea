@@ -47,7 +47,8 @@ class ERC1155Contract(Contract):
 
         super().__init__(self.contract_id, contract_config, **kwargs)
 
-        self.deployed = False
+        self.is_deployed = False
+        self.is_items_created = False
         self.abi = None
         self.bytecode = None
         self.instance = None
@@ -94,9 +95,9 @@ class ERC1155Contract(Contract):
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
-            performative=TransactionMessage.Performative.PROPOSE_FOR_CONTRACT,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
-            tx_id="contract_deployment",
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            tx_id="contract_deploy",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -167,8 +168,8 @@ class ERC1155Contract(Contract):
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
-            tx_id="contract_deployment",
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            tx_id="contract_create_batch",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -218,7 +219,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
@@ -293,6 +294,7 @@ class ERC1155Contract(Contract):
         """
         data = b"hello"
         nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
+        import pdb; pdb.set_trace()
         tx = self.instance.functions.tradeBatch(
             terms.from_address,
             terms.to_address,
@@ -323,13 +325,13 @@ class ERC1155Contract(Contract):
         self, contract, terms, signature
     ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
-        assert self.address == terms.from_address, "Wrong from address"
+        # assert self.address == terms.from_address, "Wrong from address"
 
         tx = contract.get_trade_tx(terms=terms, signature=signature)
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=terms.from_address,
             tx_counterparty_addr="",
@@ -359,7 +361,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=terms.from_address,
             tx_counterparty_addr="",
@@ -393,7 +395,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("author", "my_skill", "0.1.0")],
+            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
             tx_id="contract_deployment",
             tx_sender_addr=terms.from_address,
             tx_counterparty_addr="",
@@ -410,7 +412,7 @@ class ERC1155Contract(Contract):
 
     def get_hash_batch_transaction(self, terms):
         """Sign the transaction before send them to agent1."""
-        assert self.address == terms.to_address
+        # assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(
             terms.from_address
         ).call()

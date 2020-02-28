@@ -1,0 +1,25 @@
+author: fetchai
+behaviours:
+  scaffold:
+    args:
+      foo: bar
+    class_name: ERC1155Behaviour
+contracts: ['fetchai/erc1155:0.1.0']
+dependencies:
+  vyper: { version: "==0.1.0b12"}
+description: The scaffold skill is a scaffold for your own skill implementation.
+fingerprint: {}
+handlers:
+  scaffold:
+    args:
+      foo: bar
+    class_name: TransactionHandler
+license: Apache-2.0
+models:
+  scaffold:
+    args:
+      foo: bar
+    class_name: MyModel
+name: erc1155_skill
+protocols: []
+version: 0.1.0
