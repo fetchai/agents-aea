@@ -725,6 +725,32 @@ class TestDecisionMaker:
         tx_signature = self.decision_maker._sign_tx(tx_message)
         assert tx_signature is not None
 
+    def test_respond_message(self):
+        tx_hash = Web3.keccak(text="some_bytes")
+        tx_signature = Web3.keccak(text="tx_signature")
+
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+            tx_id=self.tx_id,
+            tx_sender_addr=self.tx_sender_addr,
+            tx_counterparty_addr=self.tx_counterparty_addr,
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 0},
+            ledger_id=self.ledger_id,
+            info=self.info,
+            signing_payload={"tx_hash": tx_hash},
+        )
+
+        tx_message_response = TransactionMessage.respond_signing(
+            tx_message,
+            performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+            tx_signature=tx_signature,
+        )
+        assert tx_message_response.tx_signature == tx_signature
+
     @classmethod
     def teardown_class(cls):
         """Tear the tests down."""

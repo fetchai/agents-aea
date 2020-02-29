@@ -47,6 +47,9 @@ aea config set agent.default_ledger ethereum
 ``` bash
 aea run --connections fetchai/oef:0.1.0
 ```
+```bash
+aea launch tac_controller tac_participant_one tac_participant_two
+```
 ``` yaml
 ledger_apis:
   ethereum:
