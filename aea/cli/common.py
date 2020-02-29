@@ -74,7 +74,7 @@ DEFAULT_LICENSE = "Apache-2.0"
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
-class Context(object):
+class Context:
     """A class to keep configuration of the cli tool."""
 
     agent_config: AgentConfig
@@ -101,9 +101,10 @@ class Context(object):
         :return: None
         """
         self.config[key] = value
-        logger.debug("  config[%s] = %s" % (key, value))
+        logger.debug("  config[{}] = {}".format(key, value))
 
-    def _get_item_dependencies(self, item_type, public_id: PublicId) -> Dependencies:
+    @staticmethod
+    def _get_item_dependencies(item_type, public_id: PublicId) -> Dependencies:
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
         default_config_file_name = _get_default_configuration_file_name_from_type(
