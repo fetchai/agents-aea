@@ -42,7 +42,7 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ProtocolRegistry, Resources
 
-from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
+from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection, ROOT_DIR
 
 
 class TestProtocolRegistry:
@@ -173,6 +173,11 @@ class TestResources:
             PublicId("fetchai", "error", "0.1.0"),
         }
 
+        cls.expected_protocols = {
+            PublicId("fetchai", "default", "0.1.0"),
+            PublicId("fetchai", "oef", "0.1.0"),
+        }
+
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
         assert len(self.resources.handler_registry.fetch_all()) == 3
@@ -226,12 +231,23 @@ class TestResources:
         self.mocked_logger_warning.assert_called_once_with(s)
 
     def test_remove_skill(self):
-        """Test that the 'remove skill' method works correctly."""
+        """Test that the 'remove skill' and 'add skill' method works correctly."""
         error_skill = self.resources.get_skill(self.error_skill_public_id)
         self.resources.remove_skill(self.error_skill_public_id)
         assert self.resources.get_skill(self.error_skill_public_id) is None
         self.resources.add_skill(error_skill)
         assert self.resources.get_skill(self.error_skill_public_id) == error_skill
+
+    def test_add_protocol(self):
+        """Test that the 'add protocol' method works correctly."""
+        oef_protocol = Protocol.from_dir(
+            os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef")
+        )
+        self.resources.add_protocol(oef_protocol)
+        for protocol_id in self.expected_protocols:
+            assert (
+                self.resources.protocol_registry.fetch(protocol_id) is not None
+            ), "Protocol missing!"
 
     def test_register_behaviour_with_already_existing_skill_id(self):
         """Test that registering a behaviour with an already existing skill id behaves as expected."""

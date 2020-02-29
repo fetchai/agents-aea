@@ -594,6 +594,10 @@ class Resources(object):
             for model in skill.models.values():
                 self.model_registry.register((skill_id, model.name), model)
 
+    def add_protocol(self, protocol: Protocol):
+        """Add a protocol to the set of resources."""
+        self.protocol_registry.register(protocol.id, protocol)
+
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
         return self._skills.get(skill_id, None)
