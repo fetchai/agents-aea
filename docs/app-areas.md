@@ -2,11 +2,11 @@ An AEA is an intelligent agent whose goal is generating economic value for its o
 
 There are five general application areas for AEAs:
 
-* **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc.
+* **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example can be found <a href="../thermometer-skills">here</a>.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old (Web 2.0) and new (Web 3.0) economic models.
 * **Pure software**: software agents living in the digital space that interact with inhabitant and interface agents and others.
-* **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework.
-* **Representative**: an agent which represents an individual's activities on the Fetch.ai network.
+* **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="../ml-skills">here</a>.
+* **Representative**: an agent which represents an individual's activities on the Fetch.ai network. An example can be found <a href="../tac-skills">here</a>.
 
 ## Multi-agent system versus agent-based modelling
 
