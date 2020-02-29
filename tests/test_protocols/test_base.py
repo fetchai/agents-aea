@@ -19,8 +19,12 @@
 
 """This module contains the tests of the messages module."""
 
+import os
+import shutil
+import tempfile
 from typing import cast
 
+from aea import AEA_DIR
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.mail.base import Envelope
 from aea.protocols.base import (
@@ -107,3 +111,32 @@ class TestBaseSerializations:
             config=ProtocolConfig(),
         )
         assert protocol.config is not None
+
+
+class TestProtocolFromDir:
+    """Test the 'Protocol.from_dir' method."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+    def test_protocol_load_positive(self):
+        """Test protocol loaded correctly."""
+        default_protocol = Protocol.from_dir(
+            os.path.join(AEA_DIR, "protocols", "default")
+        )
+        assert (
+            str(default_protocol.id) == "fetchai/default:0.1.0"
+        ), "Protocol not loaded correctly."
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the tests down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

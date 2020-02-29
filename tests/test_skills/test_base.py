@@ -193,8 +193,11 @@ class TestSkillFromDir:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
-        shutil.rmtree(cls.t)
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class SkillContextTestCase(TestCase):

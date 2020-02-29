@@ -38,8 +38,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import (
-    # add_agent_component_module_to_sys_modules,
-    # load_agent_component_package,
+    add_agent_component_module_to_sys_modules,
     load_module,
 )
 from aea.mail.base import Address
@@ -278,12 +277,9 @@ class Protocol(ABC):
             open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE))
         )
         protocol_module = load_module("protocols", Path(directory, "serialization.py"))
-        # protocol_module = load_agent_component_package(
-        #     "protocol", protocol_config.name, protocol_config.author, Path(directory)
-        # )
-        # add_agent_component_module_to_sys_modules(
-        #     "protocol", protocol_config.name, protocol_config.author, protocol_module
-        # )
+        add_agent_component_module_to_sys_modules(
+            "protocol", protocol_config.name, protocol_config.author, protocol_module
+        )
         classes = inspect.getmembers(protocol_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
@@ -294,5 +290,5 @@ class Protocol(ABC):
         protocol_id = PublicId(
             protocol_config.author, protocol_config.name, protocol_config.version
         )
-        protocol = Protocol(protocol_id, serializer_class, protocol_config)
+        protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
