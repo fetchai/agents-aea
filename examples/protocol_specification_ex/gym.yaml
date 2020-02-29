@@ -15,10 +15,10 @@ speech_acts:
     info: pt:dict[pt:str, ct:PerceptInfo]
   reset: {}
   close: {}
-
-
-  # Problems:
-  # info is of type dict[str, Any]. Any is problematic.
-  #
-  # Differences:
-  # Previously action and observation were of type 'Any'. 'Any' is problematic. We decided to use custom types instead.
+---
+ct:Action: |
+  bytes action = 1;
+ct:Observation: |
+  bytes observation = 1;
+ct:PerceptInfo: |
+  bytes perceptInfo = 1;

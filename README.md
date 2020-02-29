@@ -56,7 +56,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - Install package in development mode (this step replaces `pip install aea[all]` above):
 
-	  pip install -e .
+	  pip install -e .[all]
 
 - To run tests (ensure no oef docker containers are running):
 

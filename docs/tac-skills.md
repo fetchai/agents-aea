@@ -113,6 +113,22 @@ aea config set agent.default_ledger ethereum
 aea run --connections fetchai/oef:0.1.0
 ```
 	
+## Using `aea launch`
+
+The CLI tool supports the launch of several agents
+at once.
+
+For example, assuming you followed the tutorial, you
+can launch the TAC agents as follows:
+
+- set the default connection `fetchai/oef:0.1.0` for every
+agent;
+- run:
+```bash
+aea launch tac_controller tac_participant_one tac_participant_two
+```
+
+	
 ## Communication
 
 There are two types of interactions:

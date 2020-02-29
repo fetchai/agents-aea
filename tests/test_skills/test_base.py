@@ -129,7 +129,7 @@ class TestSkillContext:
         assert set(self.skill_context.ledger_apis.apis.keys()) == {"fetchai"}
 
     @classmethod
-    def teardown(cls):
+    def teardown_class(cls):
         """Test teardown."""
         pass
 

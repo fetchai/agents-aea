@@ -31,12 +31,19 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
+from aea.cli.common import (
+    AgentDirectory,
+    Context,
+    logger,
+    pass_ctx,
+    try_to_load_agent_config,
+)
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
 from aea.cli.generate import generate
 from aea.cli.install import install
+from aea.cli.launch import launch
 from aea.cli.list import list as _list
 from aea.cli.loggers import simple_verbosity_option
 from aea.cli.login import login
@@ -74,33 +81,16 @@ def cli(ctx) -> None:
 
 @cli.command()
 @click.argument(
-    "agent_name",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    required=True,
+    "agent_name", type=AgentDirectory(), required=True,
 )
 @pass_ctx
 def delete(ctx: Context, agent_name):
     """Delete an agent."""
-    path = Path(agent_name)
-
-    cwd = os.getcwd()
-    try:
-        # check that the target folder is an AEA project.
-        os.chdir(agent_name)
-        fp = open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8")
-        ctx.agent_config = ctx.agent_loader.load(fp)
-        try_to_load_agent_config(ctx)
-    except Exception:
-        logger.error("The name provided is not an AEA project.")
-        sys.exit(1)
-    finally:
-        os.chdir(cwd)
-
-    click.echo("Deleting AEA project directory './{}'...".format(path))
+    click.echo("Deleting AEA project directory './{}'...".format(agent_name))
 
     # delete the agent's directory
     try:
-        shutil.rmtree(path, ignore_errors=False)
+        shutil.rmtree(agent_name, ignore_errors=False)
     except OSError:
         logger.error(
             "An error occurred while deleting the agent directory. Aborting..."
@@ -322,6 +312,7 @@ cli.add_command(config)
 cli.add_command(fetch)
 cli.add_command(generate)
 cli.add_command(install)
+cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(publish)
 cli.add_command(push)

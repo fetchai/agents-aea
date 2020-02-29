@@ -21,6 +21,9 @@
 
 import logging
 import os
+import shutil
+import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -44,6 +47,9 @@ class TestAgentVsAEA:
         cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(path)
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""
@@ -58,16 +64,16 @@ class TestAgentVsAEA:
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
         run()
-        assert os.path.exists("input.txt")
-        assert os.path.exists("output.txt")
+        assert os.path.exists(Path(self.t, "input.txt"))
+        assert os.path.exists(Path(self.t, "input.txt"))
 
         message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
-        path = os.path.join(ROOT_DIR, "input.txt")
+        path = os.path.join(self.t, "input.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text, "The messages must be identical."
         message_text = 'other_agent,my_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}\n'
-        path = os.path.join(ROOT_DIR, "output.txt")
+        path = os.path.join(self.t, "output.txt")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text, "The messages must be identical."
@@ -82,9 +88,8 @@ class TestAgentVsAEA:
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        input_path = os.path.join(ROOT_DIR, "input.txt")
-        output_path = os.path.join(ROOT_DIR, "output.txt")
-        paths = [input_path, output_path]
-        for path in paths:
-            if os.path.exists(path):
-                os.remove(path)
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
