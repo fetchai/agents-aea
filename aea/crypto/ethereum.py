@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -108,16 +108,22 @@ class EthereumCrypto(Crypto):
         """
         Sign a message in bytes string form.
 
-        :param message: the message we want to send
-        :return: Signed message in bytes
+        :param message: the message to be signed
+        :return: signature of the message in bytes form
         """
         signable_message = encode_defunct(primitive=message)
         signature = self.entity.sign_message(signable_message=signable_message)
         return signature["signature"]
 
-    def sign_transaction(self, transaction):
-        signature = self.entity.sign_transaction(transaction_dict=transaction)
-        return signature
+    def sign_transaction(self, transaction: bytes) -> bytes:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction in bytes form
+        """
+        signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
+        return signed_transaction
 
     def recover_message(self, message: bytes, signature: bytes) -> Address:
         """
@@ -198,19 +204,21 @@ class EthereumApi(LedgerApi):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        chain_id: int = 3,
+        is_waiting_for_confirmation: bool = True,
+        chain_id: int = 1,
         **kwargs
     ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
-        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
-        :return: the transaction digest, or None if not available.
+        :return: tx digest if successful, otherwise None
         """
         nonce = self._api.eth.getTransactionCount(
             self._api.toChecksumAddress(crypto.address)
@@ -232,36 +240,60 @@ class EthereumApi(LedgerApi):
         ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
             gas_estimation
         )
-        signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+        signed_transaction = crypto.sign_transaction(transaction)
 
-        result = cast(AttributeDict, self.send_raw_transaction(tx_signed=signed))
+        tx_digest = self.send_signed_transaction(
+            is_waiting_for_confirmation=is_waiting_for_confirmation,
+            tx_signed=signed_transaction,
+        )
 
-        return result.transactionHash.hex()
+        return tx_digest
 
-    def send_raw_transaction(self, tx_signed) -> AttributeDict:
-        """Send a signed transaction and wait for confirmation."""
-        # send the transaction to the ropsten test network
+    def send_signed_transaction(
+        self, is_waiting_for_confirmation: bool, tx_signed: Dict
+    ) -> str:
+        """
+        Send a signed transaction and wait for confirmation.
 
+        :param tx_signed: the signed transaction
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        """
         hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
-
-        logger.info("TX Hash: {}".format(str(hex_value.hex())))
-        while True:
-            try:
-                result = self._api.eth.getTransactionReceipt(hex_value)
-                logger.info("transaction validated - exiting")
-                break
-            except web3.exceptions.TransactionNotFound:  # pragma: no cover
-                logger.info("transaction not found - sleeping for 3.0 seconds")
-                time.sleep(3.0)
-        return result
+        tx_digest = hex_value.hex()
+        logger.debug("TX digest: {}".format(tx_digest))
+        if is_waiting_for_confirmation:
+            while True:
+                try:
+                    self._api.eth.getTransactionReceipt(hex_value)
+                    logger.debug("Transaction validated - exiting")
+                    break
+                except web3.exceptions.TransactionNotFound:  # pragma: no cover
+                    logger.debug("Transaction not found - sleeping for 3.0 seconds")
+                    time.sleep(3.0)
+        return tx_digest
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
-        """Check whether a transaction is settled or not."""
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
+        """
         tx_status = self._api.eth.getTransactionReceipt(tx_digest)
         is_successful = False
         if tx_status is not None:
             is_successful = True
         return is_successful
+
+    def get_transaction_status(self, tx_digest: str) -> Any:
+        """
+        Get the transaction status for a transaction digest.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx status, if present
+        """
+        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
+        return tx_status
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """

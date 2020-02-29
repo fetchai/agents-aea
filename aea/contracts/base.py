@@ -27,14 +27,14 @@ from aea.configurations.base import ContractConfig, ContractId
 class Contract(ABC):
     """Abstract definition of a contract."""
 
-    def __init__(self, contract_id: ContractId, config: ContractConfig, **kwargs):
+    def __init__(self, contract_id: ContractId, config: ContractConfig):
         """
         Initialize the contract.
 
         :param contract_id: the contract id.
         :param config: the contract configurations.
         """
-        self._contract_id = contract_id  # type: ContractId
+        self._contract_id = contract_id
         self._config = config
 
     @property

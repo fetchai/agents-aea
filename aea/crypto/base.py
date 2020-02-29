@@ -22,8 +22,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Optional, Union
 
-from eth_account.datastructures import AttributeDict
-
 from aea.mail.base import Address
 
 AddressLike = Union[str, bytes]
@@ -76,8 +74,17 @@ class Crypto(ABC):
         """
         Sign a message in bytes string form.
 
-        :param message: the message we want to send
-        :return: Signed message in bytes
+        :param message: the message to be signed
+        :return: signature of the message in bytes form
+        """
+
+    @abstractmethod
+    def sign_transaction(self, transaction: bytes) -> bytes:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction in bytes form
         """
 
     @abstractmethod
@@ -144,6 +151,7 @@ class LedgerApi(ABC):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
+        is_waiting_for_confirmation: bool = True,
         **kwargs
     ) -> Optional[str]:
         """
@@ -152,17 +160,26 @@ class LedgerApi(ABC):
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
-        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :return: tx digest if successful, otherwise None
         """
 
     @abstractmethod
-    def send_raw_transaction(self, tx_signed) -> AttributeDict:
-        """Send a signed transaction and wait for confirmation."""
+    def send_signed_transaction(
+        self, is_waiting_for_confirmation: bool, **kwargs
+    ) -> str:
+        """
+        Send a signed transaction and wait for confirmation.
+
+        Use keyword arguments for the specifying the signed transaction payload.
+
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        """
 
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:
@@ -171,6 +188,25 @@ class LedgerApi(ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
+        """
+
+    @abstractmethod
+    def get_transaction_status(self, tx_digest: str) -> Any:
+        """
+        Get the transaction status for a transaction digest.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx status, if present
+        """
+
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """
 
     @abstractmethod
@@ -192,14 +228,4 @@ class LedgerApi(ABC):
         :param tx_digest: the transaction digest.
 
         :return: True if the transaction referenced by the tx_digest matches the terms.
-        """
-
-    @abstractmethod
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-        """
-        Generate a random str message.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
         """
