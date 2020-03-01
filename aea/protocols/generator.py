@@ -939,6 +939,7 @@ class ProtocolGenerator:
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
+        cls_str += "            expected_nb_of_contents = 0\n"
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -1512,18 +1513,14 @@ class ProtocolGenerator:
 
         :return: the protocol.yaml content
         """
-        protocol_yaml_str = "name: '{}'\n".format(self.protocol_specification.name)
-        protocol_yaml_str += "author: '{}'\n".format(self.protocol_specification.author)
-        protocol_yaml_str += "version: '{}'\n".format(
-            self.protocol_specification.version
-        )
-        protocol_yaml_str += "license: '{}'\n".format(
-            self.protocol_specification.license
-        )
+        protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
+        protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
+        protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
+        protocol_yaml_str += "license: {}\n".format(self.protocol_specification.license)
         protocol_yaml_str += "fingerprint: ''\n"
         protocol_yaml_str += "dependencies: \n"
         protocol_yaml_str += "    protobuf: {} \n"
-        protocol_yaml_str += "description: '{}'\n".format(
+        protocol_yaml_str += "description: {}\n".format(
             self.protocol_specification.description
         )
 

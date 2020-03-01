@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serialization module for the default protocol."""
+"""Serialization module for default protocol."""
 
-import base64
-import json
 from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+from aea.protocols.default import default_pb2
 from aea.protocols.default.message import DefaultMessage
 
 
@@ -32,38 +31,77 @@ class DefaultSerializer(Serializer):
     """Serialization for the 'default' protocol."""
 
     def encode(self, msg: Message) -> bytes:
-        """Encode a 'default' message into bytes."""
+        """
+        Encode a 'Default' message into bytes.
+
+        :param msg: the message object.
+        :return: the bytes.
+        """
         msg = cast(DefaultMessage, msg)
-        body = {}  # Dict[str, Any]
-        body["type"] = msg.type.value
+        default_msg = default_pb2.DefaultMessage()
+        default_msg.message_id = msg.message_id
+        dialogue_reference = msg.dialogue_reference
+        default_msg.dialogue_starter_reference = dialogue_reference[0]
+        default_msg.dialogue_responder_reference = dialogue_reference[1]
+        default_msg.target = msg.target
 
-        if msg.type == DefaultMessage.Type.BYTES:
-            body["content"] = base64.b64encode(msg.content).decode("utf-8")
-        elif msg.type == DefaultMessage.Type.ERROR:
-            body["error_code"] = msg.error_code.value
-            body["error_msg"] = msg.error_msg
-            body["error_data"] = msg.error_data
+        performative_id = msg.performative
+        if performative_id == DefaultMessage.Performative.BYTES:
+            performative = default_pb2.DefaultMessage.Bytes()  # type: ignore
+            content = msg.content
+            performative.content = content
+            default_msg.bytes.CopyFrom(performative)
+        elif performative_id == DefaultMessage.Performative.ERROR:
+            performative = default_pb2.DefaultMessage.Error()  # type: ignore
+            error_code = msg.error_code
+            performative.error_code = error_code
+            error_msg = msg.error_msg
+            performative.error_msg = error_msg
+            error_data = msg.error_data
+            performative.error_data.update(error_data)
+            default_msg.error.CopyFrom(performative)
         else:
-            raise ValueError("Type not recognized.")
+            raise ValueError("Performative not valid: {}".format(performative_id))
 
-        bytes_msg = json.dumps(body).encode("utf-8")
-        return bytes_msg
+        default_bytes = default_msg.SerializeToString()
+        return default_bytes
 
     def decode(self, obj: bytes) -> Message:
-        """Decode bytes into a 'default' message."""
-        json_body = json.loads(obj.decode("utf-8"))
-        body = {}
+        """
+        Decode bytes into a 'Default' message.
 
-        msg_type = DefaultMessage.Type(json_body["type"])
-        body["type"] = msg_type
-        if msg_type == DefaultMessage.Type.BYTES:
-            content = base64.b64decode(json_body["content"].encode("utf-8"))
-            body["content"] = content  # type: ignore
-        elif msg_type == DefaultMessage.Type.ERROR:
-            body["error_code"] = json_body["error_code"]
-            body["error_msg"] = json_body["error_msg"]
-            body["error_data"] = json_body["error_data"]
+        :param obj: the bytes object.
+        :return: the 'Default' message.
+        """
+        default_pb = default_pb2.DefaultMessage()
+        default_pb.ParseFromString(obj)
+        message_id = default_pb.message_id
+        dialogue_reference = (
+            default_pb.dialogue_starter_reference,
+            default_pb.dialogue_responder_reference,
+        )
+        target = default_pb.target
+
+        performative = default_pb.WhichOneof("performative")
+        performative_id = DefaultMessage.Performative(str(performative))
+        performative_content = dict()
+        if performative_id == DefaultMessage.Performative.BYTES:
+            content = default_pb.bytes.content
+            performative_content["content"] = content
+        elif performative_id == DefaultMessage.Performative.ERROR:
+            error_code = default_pb.error.error_code
+            performative_content["error_code"] = error_code
+            error_msg = default_pb.error.error_msg
+            performative_content["error_msg"] = error_msg
+            error_data = default_pb.error.error_data
+            performative_content["error_data"] = error_data
         else:
-            raise ValueError("Type not recognized.")
+            raise ValueError("Performative not valid: {}.".format(performative_id))
 
-        return DefaultMessage(type=msg_type, body=body)
+        return DefaultMessage(
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=performative,
+            **performative_content
+        )

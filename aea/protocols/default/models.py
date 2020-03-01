@@ -17,4 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the default protocol."""
+"""This module contains class representations corresponding to every custom type in the protocol specification."""
+
+from enum import Enum
+
+
+class ErrorCode(Enum):
+    """This class represents an instance of ErrorCode."""
+
+    UNSUPPORTED_PROTOCOL = -10001
+    DECODING_ERROR = -10002
+    INVALID_MESSAGE = -10003
+    UNSUPPORTED_SKILL = -10004
+    INVALID_DIALOGUE = -10005

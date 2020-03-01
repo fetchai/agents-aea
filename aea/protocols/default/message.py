@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,22 +17,25 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the default message definition."""
+"""This module contains default's message definition."""
 
 from enum import Enum
-from typing import Any, Dict, cast
+from typing import Dict, Set, Tuple, cast
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
+from aea.protocols.default.models import ErrorCode
+
+DEFAULT_BODY_SIZE = 4
 
 
 class DefaultMessage(Message):
-    """The Default message class."""
+    """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId("fetchai", "default", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "default", "0.1.0")
 
-    class Type(Enum):
-        """Default message types."""
+    class Performative(Enum):
+        """Performatives for the default protocol."""
 
         BYTES = "bytes"
         ERROR = "error"
@@ -41,75 +44,159 @@ class DefaultMessage(Message):
             """Get the string representation."""
             return self.value
 
-    class ErrorCode(Enum):
-        """The error codes."""
-
-        UNSUPPORTED_PROTOCOL = -10001
-        DECODING_ERROR = -10002
-        INVALID_MESSAGE = -10003
-        UNSUPPORTED_SKILL = -10004
-        INVALID_DIALOGUE = -10005
-
-    def __init__(self, type: Type, **kwargs):
+    def __init__(
+        self,
+        dialogue_reference: Tuple[str, str],
+        message_id: int,
+        target: int,
+        performative: Performative,
+        **kwargs,
+    ):
         """
-        Initialize.
+        Initialise an instance of DefaultMessage.
 
-        :param type: the type.
+        :param message_id: the message id.
+        :param dialogue_reference: the dialogue reference.
+        :param target: the message target.
+        :param performative: the message performative.
         """
-        super().__init__(type=type, **kwargs)
-        assert self._is_consistent(), "DefaultMessage initialization inconsistent."
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=DefaultMessage.Performative(performative),
+            **kwargs,
+        )
+        self._performatives = {"bytes", "error"}
+        assert (
+            self._is_consistent()
+        ), "This message is invalid according to the 'default' protocol."
 
     @property
-    def type(self) -> Type:  # noqa: F821
-        """Get the type of the message."""
-        assert self.is_set("type"), "type is not set"
-        return DefaultMessage.Type(self.get("type"))
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
+
+    @property
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
+
+    @property
+    def message_id(self) -> int:
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set."
+        return cast(int, self.get("message_id"))
+
+    @property
+    def performative(self) -> Performative:  # noqa: F821
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set."
+        return cast(DefaultMessage.Performative, self.get("performative"))
+
+    @property
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
 
     @property
     def content(self) -> bytes:
-        """Get the content of the message."""
-        assert self.is_set("content"), "content is not set!"
+        """Get the 'content' content from the message."""
+        assert self.is_set("content"), "'content' content is not set."
         return cast(bytes, self.get("content"))
 
     @property
-    def error_code(self) -> ErrorCode:  # noqa: F821
-        """Get the error_code of the message."""
-        assert self.is_set("error_code"), "error_code is not set"
-        return DefaultMessage.ErrorCode(self.get("error_code"))
+    def error_code(self) -> ErrorCode:
+        """Get the 'error_code' content from the message."""
+        assert self.is_set("error_code"), "'error_code' content is not set."
+        return cast(ErrorCode, self.get("error_code"))
+
+    @property
+    def error_data(self) -> Dict[str, bytes]:
+        """Get the 'error_data' content from the message."""
+        assert self.is_set("error_data"), "'error_data' content is not set."
+        return cast(Dict[str, bytes], self.get("error_data"))
 
     @property
     def error_msg(self) -> str:
-        """Get the error message."""
-        assert self.is_set("error_msg"), "error_msg is not set"
+        """Get the 'error_msg' content from the message."""
+        assert self.is_set("error_msg"), "'error_msg' content is not set."
         return cast(str, self.get("error_msg"))
 
-    @property
-    def error_data(self) -> Dict[str, Any]:
-        """Get the data of the error message."""
-        assert self.is_set("error_data"), "error_data is not set."
-        return cast(Dict[str, Any], self.get("error_data"))
-
     def _is_consistent(self) -> bool:
-        """Check that the data is consistent."""
+        """Check that the message follows the default protocol."""
         try:
-            assert isinstance(self.type, DefaultMessage.Type)
-            if self.type == DefaultMessage.Type.BYTES:
-                assert isinstance(self.content, bytes), "Expect the content to be bytes"
-                assert len(self.body) == 2
-            elif self.type == DefaultMessage.Type.ERROR:
-                assert (
-                    self.error_code in DefaultMessage.ErrorCode
-                ), "ErrorCode is not valid"
-                assert isinstance(
-                    self.error_code, DefaultMessage.ErrorCode
-                ), "error_code has wrong type."
-                assert isinstance(self.error_msg, str), "error_msg should be str"
-                assert isinstance(self.error_data, dict), "error_data should be dict"
-                assert len(self.body) == 4
-            else:
-                raise ValueError("Type not recognized.")
+            assert (
+                type(self.dialogue_reference) == tuple
+            ), "dialogue_reference must be 'tuple' but it is not."
+            assert (
+                type(self.dialogue_reference[0]) == str
+            ), "The first element of dialogue_reference must be 'str' but it is not."
+            assert (
+                type(self.dialogue_reference[1]) == str
+            ), "The second element of dialogue_reference must be 'str' but it is not."
+            assert type(self.message_id) == int, "message_id is not int"
+            assert type(self.target) == int, "target is not int"
 
-        except (AssertionError, ValueError, KeyError):
+            # Light Protocol Rule 2
+            # Check correct performative
+            assert (
+                type(self.performative) == DefaultMessage.Performative
+            ), "'{}' is not in the list of valid performatives: {}".format(
+                self.performative, self.valid_performatives
+            )
+
+            # Check correct contents
+            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            expected_nb_of_contents = 0
+            if self.performative == DefaultMessage.Performative.BYTES:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.content) == bytes
+                ), "Content 'content' is not of type 'bytes'."
+            elif self.performative == DefaultMessage.Performative.ERROR:
+                expected_nb_of_contents = 3
+                assert (
+                    type(self.error_code) == ErrorCode
+                ), "Content 'error_code' is not of type 'ErrorCode'."
+                assert (
+                    type(self.error_msg) == str
+                ), "Content 'error_msg' is not of type 'str'."
+                assert (
+                    type(self.error_data) == dict
+                ), "Content 'error_data' is not of type 'dict'."
+                for key, value in self.error_data.items():
+                    assert (
+                        type(key) == str
+                    ), "Keys of 'error_data' dictionary are not of type 'str'."
+                    assert (
+                        type(value) == bytes
+                    ), "Values of 'error_data' dictionary are not of type 'bytes'."
+
+            # Check correct content count
+            assert (
+                expected_nb_of_contents == actual_nb_of_contents
+            ), "Incorrect number of contents. Expected {} contents. Found {}".format(
+                expected_nb_of_contents, actual_nb_of_contents
+            )
+
+            # Light Protocol Rule 3
+            if self.message_id == 1:
+                assert (
+                    self.target == 0
+                ), "Expected target to be 0 when message_id is 1. Found {}.".format(
+                    self.target
+                )
+            else:
+                assert (
+                    0 < self.target < self.message_id
+                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(
+                    self.target
+                )
+        except (AssertionError, ValueError, KeyError) as e:
+            print(str(e))
             return False
 
         return True
