@@ -26,7 +26,7 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
     utility_params_by_good_id: pt:dict[pt:str, pt:float]
     tx_fee: pt:int
-    agent_addr_to_name: pt:dict[ct:Address, pt:str]
+    agent_addr_to_name: pt:dict[pt:str, pt:str]
     good_id_to_name: pt:dict[pt:str, pt:str]
     version_id: pt:str
   transaction_confirmation:
@@ -37,8 +37,7 @@ speech_acts:
     error_code: ct:ErrorCode
     info: pt:dict[pt:str, ct:ErrorInfo]
 ---
-ct:Address: |
-  string address = 1;
+...
 ct:ErrorCode: |
   enum ErrorCodeEnum {
     GENERIC_ERROR = 0;
@@ -55,3 +54,4 @@ ct:ErrorCode: |
   ErrorCodeEnum error_code = 1;
 ct:ErrorInfo: |
   map<string, string> error_info = 1;
+...
