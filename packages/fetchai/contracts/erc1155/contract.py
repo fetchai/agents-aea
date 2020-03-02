@@ -26,7 +26,7 @@ from typing import Any, Dict, List
 
 from vyper.utils import keccak256
 
-from aea.configurations.base import ContractId
+from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -41,11 +41,10 @@ logger = logging.getLogger(__name__)
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
 
-    def __init__(self, contract_config, **kwargs):
+    def __init__(self, contract_id: ContractId, contract_config: ContractConfig, **kwargs):
         """Initialize."""
-        self.contract_id = ContractId("fetchai", "erc1155", "0.1.0")
 
-        super().__init__(self.contract_id, contract_config, **kwargs)
+        super().__init__(contract_id, contract_config)
 
         self.is_deployed = False
         self.is_items_created = False

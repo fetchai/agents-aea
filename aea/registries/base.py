@@ -243,14 +243,10 @@ class ContractRegistry(Registry[PublicId, Contract]):
         contract_config = config_loader.load(
             open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
         )
-        try:
-            contract_spec = importlib.util.spec_from_file_location(
-                "contracts", contract_directory / "contract.py"
-            )
-            contract_module = importlib.util.module_from_spec(contract_spec)
-        except FileNotFoundError:
-            logger.warning("File not found.")
-            sys.exit(1)
+        contract_spec = importlib.util.spec_from_file_location(
+            "contracts", contract_directory / "contract.py"
+        )
+        contract_module = importlib.util.module_from_spec(contract_spec)
         contract_spec.loader.exec_module(contract_module)  # type: ignore
         classes = inspect.getmembers(contract_module, inspect.isclass)
         contract_classes = list(
@@ -379,15 +375,11 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         """
         # get the serializer
         protocol_name = protocol_directory.name
-        try:
-            serialization_spec = importlib.util.spec_from_file_location(
-                "serialization", protocol_directory / "serialization.py"
-            )
-            serialization_module = importlib.util.module_from_spec(serialization_spec)
-            serialization_spec.loader.exec_module(serialization_module)  # type: ignore
-        except FileNotFoundError:
-            logger.warning("File not found.")
-            sys.exit(1)
+        serialization_spec = importlib.util.spec_from_file_location(
+            "serialization", protocol_directory / "serialization.py"
+        )
+        serialization_module = importlib.util.module_from_spec(serialization_spec)
+        serialization_spec.loader.exec_module(serialization_module)  # type: ignore
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
