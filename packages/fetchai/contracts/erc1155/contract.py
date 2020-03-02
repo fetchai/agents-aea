@@ -41,7 +41,9 @@ logger = logging.getLogger(__name__)
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
 
-    def __init__(self, contract_id: ContractId, contract_config: ContractConfig, **kwargs):
+    def __init__(
+        self, contract_id: ContractId, contract_config: ContractConfig, **kwargs
+    ):
         """Initialize."""
 
         super().__init__(contract_id, contract_config)
