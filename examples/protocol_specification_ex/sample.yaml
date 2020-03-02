@@ -1,3 +1,4 @@
+---
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
@@ -17,10 +18,14 @@ speech_acts:
     items: pt:list[ct:Unit]
     conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:str, pt:float]]]
   accept: {}
+  inform:
+    inform_number: pt:list[pt:int]
+  inform_reply:
+    reply_message: pt:dict[pt:int, pt:str]
   decline: {}
   match_accept: {}
----
 ...
+---
 ct:DataModel: |
   bytes data_model = 1;
 ct:IOTApp7: |
