@@ -140,6 +140,9 @@ class Context(object):
         for skill_id in self.agent_config.skills:
             dependencies.update(self._get_item_dependencies("skill", skill_id))
 
+        for contract_id in self.agent_config.contracts:
+            dependencies.update(self._get_item_dependencies("contract", contract_id))
+
         return dependencies
 
 
