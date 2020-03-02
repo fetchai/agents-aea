@@ -23,7 +23,7 @@ import inspect
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Union, cast
+from typing import List, cast
 
 import click
 from click import pass_context
@@ -34,36 +34,19 @@ from aea.cli.common import (
     ConnectionsOption,
     Context,
     _load_env_file,
-    _try_to_load_protocols,
+    _verify_or_create_private_keys,
     logger,
     try_to_load_agent_config,
 )
 from aea.cli.install import install
 from aea.configurations.base import (
-    AgentConfig,
-    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
-)
-from aea.crypto.ledger_apis import (
-    LedgerApis,
-    SUPPORTED_LEDGER_APIS,
-    _try_to_instantiate_ethereum_ledger_api,
-    _try_to_instantiate_fetchai_ledger_api,
-)
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
     load_agent_component_package,
@@ -73,91 +56,7 @@ from aea.identity.base import Identity
 from aea.registries.base import Resources
 
 
-def _verify_or_create_private_keys(ctx: Context) -> None:
-    """
-    Verify or create private keys.
-
-    :param ctx: Context
-    """
-    path = Path(DEFAULT_AEA_CONFIG_FILE)
-    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = path.open(mode="r", encoding="utf-8")
-    aea_conf = agent_loader.load(fp)
-
-    for identifier, _value in aea_conf.private_key_paths.read_all():
-        if identifier not in SUPPORTED_CRYPTOS:
-            ValueError("Unsupported identifier in private key paths.")
-
-    fetchai_private_key_path = aea_conf.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_path is None:
-        _create_fetchai_private_key()
-        aea_conf.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_fet_private_key_path(fetchai_private_key_path)
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_path), FETCHAI,
-                )
-            )
-            sys.exit(1)
-
-    ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_path is None:
-        _create_ethereum_private_key()
-        aea_conf.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_ethereum_private_key_path(ethereum_private_key_path)
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_path), ETHEREUM,
-                )
-            )
-            sys.exit(1)
-
-    # update aea config
-    path = Path(DEFAULT_AEA_CONFIG_FILE)
-    fp = path.open(mode="w", encoding="utf-8")
-    agent_loader.dump(aea_conf, fp)
-    ctx.agent_config = aea_conf
-
-
-def _verify_ledger_apis_access() -> None:
-    """Verify access to ledger apis."""
-    path = Path(DEFAULT_AEA_CONFIG_FILE)
-    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = path.open(mode="r", encoding="utf-8")
-    aea_conf = agent_loader.load(fp)
-
-    for identifier, _value in aea_conf.ledger_apis.read_all():
-        if identifier not in SUPPORTED_LEDGER_APIS:
-            ValueError("Unsupported identifier in ledger apis.")
-
-    fetchai_ledger_api_config = aea_conf.ledger_apis.read(FETCHAI)
-    if fetchai_ledger_api_config is None:
-        logger.debug("No fetchai ledger api config specified.")
-    else:
-        network = cast(str, fetchai_ledger_api_config.get("network"))
-        host = cast(str, fetchai_ledger_api_config.get("host"))
-        port = cast(int, fetchai_ledger_api_config.get("port"))
-        if network is not None:
-            _try_to_instantiate_fetchai_ledger_api(network=network)
-        elif host is not None and port is not None:
-            _try_to_instantiate_fetchai_ledger_api(host=host, port=port)
-        else:  # pragma: no cover
-            raise ValueError("Either network or host and port must be specified.")
-    ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
-    if ethereum_ledger_config is None:
-        logger.debug("No ethereum ledger api config specified.")
-    else:
-        address = cast(str, ethereum_ledger_config.get("address"))
-        if address is not None:
-            _try_to_instantiate_ethereum_ledger_api(address)
-        else:  # pragma: no cover
-            raise ValueError("Address must be specified.")
+AEA_DIR = str(Path("."))
 
 
 def _setup_connection(
@@ -174,6 +73,7 @@ def _setup_connection(
                               | or if the connection type is not supported by the framework.
     """
     # TODO handle the case when there are multiple connections with the same name
+    _try_to_load_required_protocols(ctx)
     supported_connection_ids = ctx.agent_config.connections
     if connection_public_id not in supported_connection_ids:
         raise AEAConfigException(
@@ -233,6 +133,116 @@ def _setup_connection(
     return connection
 
 
+def _try_to_load_required_protocols(ctx: Context):
+    for protocol_public_id in ctx.agent_config.protocols:
+        protocol_name = protocol_public_id.name
+        protocol_author = protocol_public_id.author
+        logger.debug("Processing protocol {}".format(protocol_public_id))
+        protocol_dir = Path(
+            "vendor", protocol_public_id.author, "protocols", protocol_name
+        )
+        if not protocol_dir.exists():
+            protocol_dir = Path("protocols", protocol_name)
+
+        try:
+            ctx.protocol_loader.load(open(protocol_dir / DEFAULT_PROTOCOL_CONFIG_FILE))
+        except FileNotFoundError:
+            logger.error(
+                "Protocol configuration file for protocol {} not found.".format(
+                    protocol_name
+                )
+            )
+            sys.exit(1)
+
+        try:
+            protocol_package = load_agent_component_package(
+                "protocol", protocol_name, protocol_author, protocol_dir
+            )
+            add_agent_component_module_to_sys_modules(
+                "protocol", protocol_name, protocol_author, protocol_package
+            )
+        except Exception:
+            logger.error(
+                "A problem occurred while processing protocol {}.".format(
+                    protocol_public_id
+                )
+            )
+            sys.exit(1)
+
+
+def _validate_aea(ctx: Context) -> None:
+    """
+    Validate aea project.
+
+    :param ctx: the context
+    """
+    try_to_load_agent_config(ctx)
+    _verify_or_create_private_keys(ctx)
+
+
+def _prepare_environment(click_context, env_file: str, is_install_deps: bool) -> None:
+    """
+    Prepare the AEA project environment.
+
+    :param click_context: the click context
+    :param env_file: the path to the envrionemtn file.
+    :param is_install_deps: whether to install the dependencies
+    """
+    _load_env_file(env_file)
+    if is_install_deps:
+        if Path("requirements.txt").exists():
+            click_context.invoke(install, requirement="requirements.txt")
+        else:
+            click_context.invoke(install)
+
+
+def _build_aea(ctx: Context, connection_ids: List[PublicId]) -> AEA:
+    """
+    Build the aea.
+
+    :param ctx: the context
+    :param connection_ids: the list of connection ids
+    """
+    agent_name = cast(str, ctx.agent_config.agent_name)
+
+    wallet = Wallet(ctx.agent_config.private_key_paths_dict)
+
+    if len(wallet.addresses) > 1:
+        identity = Identity(
+            agent_name,
+            addresses=wallet.addresses,
+            default_address_key=ctx.agent_config.default_ledger,
+        )
+    else:  # pragma: no cover
+        identity = Identity(
+            agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
+        )
+
+    ledger_apis = LedgerApis(
+        ctx.agent_config.ledger_apis_dict, ctx.agent_config.default_ledger
+    )
+
+    default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
+    connection_ids = (
+        [default_connection_id] if connection_ids is None else connection_ids
+    )
+    connections = []
+    try:
+        for connection_id in connection_ids:
+            connection = _setup_connection(connection_id, identity.address, ctx)
+            connections.append(connection)
+    except AEAConfigException as e:
+        logger.error(str(e))
+        sys.exit(1)
+
+    resources = Resources(AEA_DIR)
+
+    aea = AEA(
+        identity, connections, wallet, ledger_apis, resources, is_programmatic=False,
+    )
+    return aea
+
+
 @click.command()
 @click.option(
     "--connections",
@@ -264,70 +274,19 @@ def run(
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
-    try_to_load_agent_config(ctx)
-    _load_env_file(env_file)
-    agent_name = cast(str, ctx.agent_config.agent_name)
 
-    _verify_or_create_private_keys(ctx)
-    _verify_ledger_apis_access()
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    ledger_api_configs = dict(
-        [
-            (identifier, cast(Dict[str, Union[str, int]], config))
-            for identifier, config in ctx.agent_config.ledger_apis.read_all()
-        ]
-    )
+    _validate_aea(ctx)
 
-    wallet = Wallet(private_key_paths)
-    if len(wallet.addresses) > 1:
-        identity = Identity(
-            agent_name,
-            addresses=wallet.addresses,
-            default_address_key=ctx.agent_config.default_ledger,
-        )
-    else:  # pragma: no cover
-        identity = Identity(
-            agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
-        )
-    ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
+    _prepare_environment(click_context, env_file, is_install_deps)
 
-    default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
-    connection_ids = (
-        [default_connection_id] if connection_ids is None else connection_ids
-    )
-    connections = []
-    _try_to_load_protocols(ctx)
+    aea = _build_aea(ctx, connection_ids)
+
     try:
-        for connection_id in connection_ids:
-            connection = _setup_connection(connection_id, identity.address, ctx)
-            connections.append(connection)
-    except AEAConfigException as e:
-        logger.error(str(e))
-        sys.exit(1)
-
-    if is_install_deps:
-        if Path("requirements.txt").exists():
-            click_context.invoke(install, requirement="requirements.txt")
-        else:
-            click_context.invoke(install)
-
-    agent = AEA(
-        identity,
-        connections,
-        wallet,
-        ledger_apis,
-        resources=Resources(str(Path("."))),
-        is_programmatic=False,
-    )
-    try:
-        agent.start()
+        aea.start()
     except KeyboardInterrupt:
         click.echo("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
         sys.exit(1)
     finally:
-        agent.stop()
+        aea.stop()

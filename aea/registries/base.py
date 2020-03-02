@@ -230,8 +230,13 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         :param protocol_directory: the directory of the protocol to be added.
         :return: None
         """
-        # get the serializer
         protocol_name = protocol_directory.name
+        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        protocol_config = config_loader.load(
+            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
+        )
+
+        # get the serializer
         serialization_spec = importlib.util.spec_from_file_location(
             "serialization", protocol_directory / "serialization.py"
         )
@@ -250,12 +255,7 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         )
         serializer = serializer_class()
 
-        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(
-            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
-        )
-
-        # instantiate the protocol manager.
+        # instantiate the protocol
         protocol = Protocol(protocol_config.public_id, serializer, protocol_config)
         protocol_public_id = PublicId(
             protocol_config.author, protocol_config.name, protocol_config.version

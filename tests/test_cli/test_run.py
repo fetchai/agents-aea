@@ -35,7 +35,7 @@ import yaml
 
 import aea.cli.common
 from aea.cli import cli
-from aea.cli.run import _setup_connection, _verify_ledger_apis_access
+from aea.cli.run import _setup_connection
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -43,7 +43,6 @@ from aea.configurations.base import (
 )
 
 from .tools_for_testing import (
-    ConfigLoaderMock,
     ContextMock,
     PublicIdMock,
     StopTest,
@@ -1247,17 +1246,6 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-@mock.patch("aea.cli.run._try_to_instantiate_fetchai_ledger_api")
-@mock.patch("aea.cli.run.ConfigLoader", ConfigLoaderMock)
-@mock.patch("aea.cli.run.Path.open")
-class VerifyLedgerApiAccessTestCase(TestCase):
-    """Test case for _verify_ledger_apis_access method."""
-
-    def test__verify_ledger_apis_access_with_host(self, *mocks):
-        """Test for _verify_ledger_apis_access method with host."""
-        _verify_ledger_apis_access()
 
 
 @mock.patch("builtins.open", mock.mock_open())

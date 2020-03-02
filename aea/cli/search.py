@@ -30,11 +30,11 @@ from aea.cli.common import (
     ConfigLoader,
     Context,
     DEFAULT_REGISTRY_PATH,
-    format_items,
-    format_skills,
+    _format_items,
+    _format_skills,
+    _retrieve_details,
     logger,
     pass_ctx,
-    retrieve_details,
     try_to_load_agent_config,
 )
 from aea.cli.registry.utils import request_api
@@ -99,7 +99,7 @@ def _get_details_from_dir(
         if _is_invalid_item(dir_path.name, dir_path, config_path):
             continue
 
-        details = retrieve_details(dir_path.name, loader, str(config_path))
+        details = _retrieve_details(dir_path.name, loader, str(config_path))
         results.append(details)
 
 
@@ -115,7 +115,7 @@ def connections(ctx: Context, query):
             click.echo("No connections found.")  # pragma: no cover
         else:
             click.echo("Connections found:\n")
-            click.echo(format_items(resp))
+            click.echo(_format_items(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
@@ -136,7 +136,7 @@ def connections(ctx: Context, query):
     )
 
     print("Available connections:")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
@@ -151,7 +151,7 @@ def protocols(ctx: Context, query):
             click.echo("No protocols found.")  # pragma: no cover
         else:
             click.echo("Protocols found:\n")
-            click.echo(format_items(resp))
+            click.echo(_format_items(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
@@ -168,7 +168,7 @@ def protocols(ctx: Context, query):
     )
 
     print("Available protocols:")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
@@ -183,7 +183,7 @@ def skills(ctx: Context, query):
             click.echo("No skills found.")  # pragma: no cover
         else:
             click.echo("Skills found:\n")
-            click.echo(format_skills(resp))
+            click.echo(_format_skills(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
@@ -196,7 +196,7 @@ def skills(ctx: Context, query):
     )
 
     print("Available skills:")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
@@ -210,7 +210,7 @@ def agents(ctx: Context, query):
             click.echo("No agents found.")  # pragma: no cover
         else:
             click.echo("Agents found:\n")
-            click.echo(format_items(resp))
+            click.echo(_format_items(resp))
         return
     else:
         registry = cast(str, ctx.config.get("registry_directory"))
@@ -220,4 +220,4 @@ def agents(ctx: Context, query):
         )
 
         print("Available agents:")
-        print(format_items(sorted(result, key=lambda k: k["name"])))
+        print(_format_items(sorted(result, key=lambda k: k["name"])))
