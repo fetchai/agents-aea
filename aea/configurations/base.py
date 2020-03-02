@@ -836,6 +836,7 @@ class ContractConfig(PackageConfiguration):
         license: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        path_to_contract_interface: str = "",
     ):
         """Initialize a protocol configuration object."""
         super().__init__(name, author, version)
@@ -843,6 +844,7 @@ class ContractConfig(PackageConfiguration):
         self.fingerprint = ""
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
+        self.path_to_contract_interface = path_to_contract_interface
 
     @property
     def json(self) -> Dict:
@@ -855,6 +857,7 @@ class ContractConfig(PackageConfiguration):
             "fingerprint": self.fingerprint,
             "dependencies": self.dependencies,
             "description": self.description,
+            "path_to_contract_interface": self.path_to_contract_interface,
         }
 
     @classmethod
@@ -868,4 +871,7 @@ class ContractConfig(PackageConfiguration):
             license=cast(str, obj.get("license")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
+            path_to_contract_interface=cast(
+                str, obj.get("path_to_contract_interface", "")
+            ),
         )

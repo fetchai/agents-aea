@@ -18,16 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the scaffold contract definition."""
-import json
 import logging
-import os
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from vyper.utils import keccak256
 
 from aea.configurations.base import ContractConfig, ContractId
-from aea.contracts.base import Contract
+from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
@@ -41,44 +38,31 @@ logger = logging.getLogger(__name__)
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
 
-    def __init__(self, contract_id: ContractId, contract_config: ContractConfig, **kwargs):
-        """Initialize."""
+    def __init__(
+        self,
+        contract_id: ContractId,
+        contract_config: ContractConfig,
+        contracts_interface: Dict[str, Any],
+    ):
+        """
+        Initialize the contract.
 
-        super().__init__(contract_id, contract_config)
-
-        self.is_deployed = False
+        :param contract_id: the contract id.
+        :param config: the contract configurations.
+        :param contract_interface: the contract interface.
+        """
+        super().__init__(contract_id, contract_config, contracts_interface)
         self.is_items_created = False
         self.is_items_minted = False
-        self.abi = None
-        self.bytecode = None
-        self.instance = None
-        self.item_ids = []
+        self.token_ids = []  # type: List[int]
+        self.item_ids = []  # type: List[int]
 
-    def create_item_ids(self, token_ids: List[int]) -> None:
+    def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
         """Populate the item_ids list."""
-        assert len(token_ids) == 10, "The length of the list must be equal to ten."
+        assert self.token_ids is [], "Item ids already created."
+        self.token_ids = token_ids
         for token_id in token_ids:
-            self.item_ids.append(Helpers().generate_id(FT, token_id))
-
-    def load_from_json(self, ledger_api: LedgerApi) -> None:
-        """Load ABI and BYTECODE from json file."""
-        path = Path(
-            os.getcwd(),
-            "vendor",
-            "fetchai",
-            "contracts",
-            "erc1155",
-            "build",
-            "erc1155.json",
-        )
-        with open(path, "r") as f_contract:
-            contract_interface = json.load(f_contract)
-
-        self.abi = contract_interface["abi"]
-        self.bytecode = contract_interface["bytecode"]
-        self.instance = ledger_api.api.eth.contract(
-            abi=self.abi, bytecode=self.bytecode
-        )
+            self.item_ids.append(Helpers().generate_id(token_type, token_id))
 
     def get_deploy_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi
@@ -88,7 +72,7 @@ class ERC1155Contract(Contract):
 
         :params deployer_address: The address that deploys the smart-contract
         """
-        assert self.instance.address is None, "The contract is already deployed"
+        assert not self.is_deployed, "The contract is already deployed!"
         tx = self._create_deploy_transaction(
             deployer_address=deployer_address, ledger_api=ledger_api
         )
@@ -139,18 +123,6 @@ class ERC1155Contract(Contract):
         logger.info("gas estimate deploy: {}".format(gas_estimate))
         tx["gas"] = gas_estimate
         return tx
-
-    def update_contract_instance(
-        self, contract_address: Address, ledger_api: LedgerApi
-    ):
-        """Update the local instance of the smart contract with the deployed one."""
-        logger.info("Updating the local instance of the contract...")
-        assert (
-            self.instance.address is None
-        ), "Contract is already deployed with a known address."
-        self.instance = ledger_api.api.eth.contract(
-            address=contract_address, abi=self.abi
-        )
 
     def get_create_batch_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi
@@ -211,7 +183,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
     ):
 
-        assert len(mint_quantities) == len(self.item_ids)
+        assert len(mint_quantities) == len(self.item_ids), "Wrong number of items."
         tx = self._create_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
@@ -324,9 +296,9 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_balance(self, contract, from_address: Address, item_id: int):
+    def get_balance(self, from_address: Address, item_id: int):
         """Get the balance for the specific id."""
-        return contract.instance.functions.balanceOf(from_address, item_id).call()
+        return self.instance.functions.balanceOf(from_address, item_id).call()
 
     def get_atomic_swap_single_proposal(
         self, contract, terms, signature

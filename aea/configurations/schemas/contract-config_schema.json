@@ -30,6 +30,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "path_to_contract_interface": {
+      "type": "string"
     }
   }
 }

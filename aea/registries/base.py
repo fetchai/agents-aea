@@ -21,12 +21,12 @@
 
 import importlib.util
 import inspect
+import json
 import logging
 import os
 import pprint
 import queue
 import re
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
@@ -256,7 +256,12 @@ class ContractRegistry(Registry[PublicId, Contract]):
         contract_public_id = PublicId(
             contract_config.author, contract_config.name, contract_config.version
         )
-        contract = contract_class(contract_public_id, contract_config)
+        path = Path(contract_directory, contract_config.path_to_contract_interface)
+        with open(path, "r") as interface_file:
+            contract_interface = json.load(interface_file)
+        contract = contract_class(
+            contract_public_id, contract_config, contract_interface
+        )
         self.register(contract_public_id, contract)
 
 

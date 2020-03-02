@@ -17,16 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The base contract."""
+"""The base ethereum contract."""
 
-from abc import ABC
 from typing import Any, Dict
 
+from web3.eth import Contract as EthContract
+
 from aea.configurations.base import ContractConfig, ContractId
+from aea.contracts.base import Contract as BaseContract
 
 
-class Contract(ABC):
-    """Abstract definition of a contract."""
+class Contract(BaseContract):
+    """Definition of an ethereum contract."""
 
     def __init__(
         self,
@@ -39,23 +41,34 @@ class Contract(ABC):
 
         :param contract_id: the contract id.
         :param config: the contract configurations.
-        :param contract_interface: the contract interface
+        :param contract_interface: the contract interface.
         """
-        self._contract_id = contract_id
-        self._config = config
-        self._contract_interface = contract_interface
+        super().__init__(contract_id, config, contract_interface)
+        self._abi = contract_interface["abi"]
+        self._bytecode = contract_interface["bytecode"]
+        self._instance = EthContract(abi=self.abi, bytecode=self.bytecode)
 
     @property
-    def id(self) -> ContractId:
-        """Get the name."""
-        return self._contract_id
+    def abi(self) -> Dict[str, Any]:
+        return self._abi
 
     @property
-    def config(self) -> ContractConfig:
-        """Get the configuration."""
-        return self._config
+    def bytecode(self) -> bytes:
+        return self._bytecode
 
     @property
-    def contract_interface(self) -> Dict[str, Any]:
-        """Get the contract interface."""
-        return self._contract_interface
+    def instance(self) -> EthContract:
+        return self._instance
+
+    @property
+    def is_deployed(self) -> bool:
+        return self.instance.address is not None
+
+    def set_address(self, contract_address: str) -> None:
+        """
+        Set the contract address.
+
+        :param contract_address: the contract address
+        """
+        assert self.instance.address is None, "Address already set!"
+        self._instance = EthContract(address=contract_address, abi=self.abi)
