@@ -112,8 +112,8 @@ class TestContractRegistry:
     def teardown_class(cls):
         """Tear down the tests."""
         cls.mocked_logger.__exit__()
-        shutil.rmtree(cls.t, ignore_errors=True)
         os.chdir(cls.oldcwd)
+        shutil.rmtree(cls.t, ignore_errors=True)
 
 
 class TestProtocolRegistry:

@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxContents, TxStatus
@@ -115,6 +115,15 @@ class FetchAICrypto(Crypto):
         signature = self.entity.sign(message)
         return signature
 
+    def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction
+        """
+        raise NotImplementedError
+
     def recover_message(self, message: bytes, signature: bytes) -> Address:
         """
         Recover the address from the hash.
@@ -185,6 +194,7 @@ class FetchAIApi(LedgerApi):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
+        is_waiting_for_confirmation: bool = True,
         **kwargs
     ) -> Optional[str]:
         """Submit a transaction to the ledger."""
@@ -194,6 +204,9 @@ class FetchAIApi(LedgerApi):
         self._api.sync(tx_digest)
         return tx_digest
 
+    def send_raw_transaction(self, tx_signed) -> Optional[Dict]:
+        """Send a signed transaction and wait for confirmation."""
+
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""
         tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
@@ -201,6 +214,44 @@ class FetchAIApi(LedgerApi):
         if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
             is_successful = True
         return is_successful
+
+    def send_signed_transaction(
+        self, is_waiting_for_confirmation: bool, tx_signed: Any, **kwargs
+    ) -> str:
+        """
+        Send a signed transaction and wait for confirmation.
+
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        :param tx_signed: the signed transaction
+        """
+        raise NotImplementedError
+
+    def get_transaction_status(self, tx_digest: str) -> Any:
+        """
+        Get the transaction status for a transaction digest.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx status, if present
+        """
+        raise NotImplementedError
+
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+
+        time_stamp = int(time.time())
+        seller = cast(str, seller)
+        client = cast(str, client)
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+
+        return aggregate_hash.hex()
 
     def validate_transaction(
         self,
@@ -232,21 +283,3 @@ class FetchAIApi(LedgerApi):
         is_settled = self.is_transaction_settled(tx_digest=tx_digest)
         result = is_valid and is_settled
         return result
-
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-        """
-        Generate a random str message.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
-        """
-
-        time_stamp = int(time.time())
-        seller = cast(str, seller)
-        client = cast(str, client)
-        aggregate_hash = sha256_hash(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-        )
-
-        return aggregate_hash.hex()

@@ -17,9 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The base contracts package."""
+"""The base contract."""
 
 from abc import ABC
+from typing import Any, Dict
 
 from aea.configurations.base import ContractConfig, ContractId
 
@@ -28,16 +29,21 @@ class Contract(ABC):
     """Abstract definition of a contract."""
 
     def __init__(
-        self, contract_id: ContractId, config: ContractConfig,
+        self,
+        contract_id: ContractId,
+        config: ContractConfig,
+        contract_interface: Dict[str, Any],
     ):
         """
         Initialize the contract.
 
         :param contract_id: the contract id.
         :param config: the contract configurations.
+        :param contract_interface: the contract interface
         """
         self._contract_id = contract_id
         self._config = config
+        self._contract_interface = contract_interface
 
     @property
     def id(self) -> ContractId:
@@ -48,3 +54,8 @@ class Contract(ABC):
     def config(self) -> ContractConfig:
         """Get the configuration."""
         return self._config
+
+    @property
+    def contract_interface(self) -> Dict[str, Any]:
+        """Get the contract interface."""
+        return self._contract_interface

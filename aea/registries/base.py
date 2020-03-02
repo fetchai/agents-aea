@@ -21,6 +21,7 @@
 
 import importlib.util
 import inspect
+import json
 import logging
 import os
 import pprint
@@ -242,12 +243,28 @@ class ContractRegistry(Registry[PublicId, Contract]):
         contract_config = config_loader.load(
             open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
         )
-
-        # instantiate the protocol manager.
-        contract = Contract(contract_config.public_id, contract_config)
+        contract_spec = importlib.util.spec_from_file_location(
+            "contracts", contract_directory / "contract.py"
+        )
+        contract_module = importlib.util.module_from_spec(contract_spec)
+        contract_spec.loader.exec_module(contract_module)  # type: ignore
+        classes = inspect.getmembers(contract_module, inspect.isclass)
+        contract_classes = list(
+            filter(lambda x: re.match("\\w+Contract", x[0]), classes)
+        )
+        contract_class = contract_classes[0][1]
         contract_public_id = PublicId(
             contract_config.author, contract_config.name, contract_config.version
         )
+        path = Path(contract_directory, contract_config.path_to_contract_interface)
+        with open(path, "r") as interface_file:
+            contract_interface = json.load(interface_file)
+        contract = contract_class(
+            contract_id=contract_public_id,
+            contract_config=contract_config,
+            contract_interface=contract_interface,
+        )
+
         self.register(contract_public_id, contract)
 
 
