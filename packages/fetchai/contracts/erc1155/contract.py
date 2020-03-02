@@ -44,8 +44,10 @@ class ERC1155Contract(Contract):
         contract_config: ContractConfig,
         contracts_interface: Dict[str, Any],
     ):
-        """
-        Initialize the contract.
+        """Initialize.
+
+        super().__init__(contract_id, contract_config)
+
 
         :param contract_id: the contract id.
         :param config: the contract configurations.
