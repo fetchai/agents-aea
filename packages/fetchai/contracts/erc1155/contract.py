@@ -107,7 +107,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx,
+            signing_payload={"tx": tx},
         )
 
         return tx_message
@@ -181,7 +181,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx,
+            signing_payload={"tx": tx},
         )
 
         return tx_message
@@ -232,7 +232,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx,
+            signing_payload={"tx": tx},
         )
 
         return tx_message
@@ -349,7 +349,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx,
+            signing_payload={"tx": tx},
         )
 
         return tx_message
@@ -379,7 +379,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx,
+            signing_payload={"tx": tx},
         )
 
         return tx_message
@@ -413,7 +413,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload=tx_hash,
+            signing_payload={"tx_hashh": tx_hash},
         )
 
         return tx_message

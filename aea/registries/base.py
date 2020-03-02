@@ -257,10 +257,10 @@ class ContractRegistry(Registry[PublicId, Contract]):
             filter(lambda x: re.match("\\w+Contract", x[0]), classes)
         )
         contract_class = contract_classes[0][1]
-        contract = contract_class(contract_config)
         contract_public_id = PublicId(
             contract_config.author, contract_config.name, contract_config.version
         )
+        contract = contract_class(contract_public_id, contract_config)
         self.register(contract_public_id, contract)
 
 

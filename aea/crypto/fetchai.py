@@ -115,12 +115,12 @@ class FetchAICrypto(Crypto):
         signature = self.entity.sign(message)
         return signature
 
-    def sign_transaction(self, transaction: bytes) -> bytes:
+    def sign_transaction(self, transaction: Any) -> Any:
         """
         Sign a transaction in bytes string form.
 
         :param transaction: the transaction to be signed
-        :return: signed transaction in bytes form
+        :return: signed transaction
         """
         raise NotImplementedError
 
@@ -216,7 +216,7 @@ class FetchAIApi(LedgerApi):
         return is_successful
 
     def send_signed_transaction(
-        self, is_waiting_for_confirmation: bool, tx_signed: Dict, **kwargs
+        self, is_waiting_for_confirmation: bool, tx_signed: Any, **kwargs
     ) -> str:
         """
         Send a signed transaction and wait for confirmation.

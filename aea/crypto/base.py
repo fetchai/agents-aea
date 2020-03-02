@@ -79,12 +79,12 @@ class Crypto(ABC):
         """
 
     @abstractmethod
-    def sign_transaction(self, transaction: bytes) -> bytes:
+    def sign_transaction(self, transaction: Any) -> Any:
         """
         Sign a transaction in bytes string form.
 
         :param transaction: the transaction to be signed
-        :return: signed transaction in bytes form
+        :return: signed transaction
         """
 
     @abstractmethod
@@ -171,7 +171,7 @@ class LedgerApi(ABC):
 
     @abstractmethod
     def send_signed_transaction(
-        self, is_waiting_for_confirmation: bool, **kwargs
+        self, is_waiting_for_confirmation: bool, tx_signed: Any
     ) -> str:
         """
         Send a signed transaction and wait for confirmation.
@@ -179,6 +179,7 @@ class LedgerApi(ABC):
         Use keyword arguments for the specifying the signed transaction payload.
 
         :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        :param tx_signed: the signed transaction
         """
 
     @abstractmethod

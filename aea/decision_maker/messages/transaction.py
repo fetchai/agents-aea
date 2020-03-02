@@ -46,7 +46,6 @@ class TransactionMessage(InternalMessage):
         PROPOSE_FOR_SIGNING = "propose_for_signing"
         SUCCESSFUL_SIGNING = "successful_signing"
         REJECTED_SIGNING = "rejected_signing"
-        PROPOSE_FOR_CONTRACT = "propose_for_contract"
 
     def __init__(
         self,
@@ -183,10 +182,10 @@ class TransactionMessage(InternalMessage):
         return cast(Dict[str, Any], self.get("signing_payload"))
 
     @property
-    def tx_signature(self) -> str:
-        """Get the transaction signature."""
-        assert self.is_set("tx_signature"), "Tx_signature is not set."
-        return cast(str, self.get("tx_signature"))
+    def signed_payload(self) -> Dict[str, Any]:
+        """Get the signed payload."""
+        assert self.is_set("signed_payload"), "Signed_payload is not set."
+        return cast(Dict[str, Any], self.get("signed_payload"))
 
     @property
     def amount(self) -> int:
@@ -292,7 +291,6 @@ class TransactionMessage(InternalMessage):
             elif self.performative in {
                 self.Performative.PROPOSE_FOR_SIGNING,
                 self.Performative.REJECTED_SIGNING,
-                self.performative.PROPOSE_FOR_CONTRACT,
             }:
                 assert isinstance(self.signing_payload, dict) and all(
                     isinstance(key, str) for key in self.signing_payload.keys()
@@ -302,9 +300,6 @@ class TransactionMessage(InternalMessage):
                 assert isinstance(self.signing_payload, dict) and all(
                     isinstance(key, str) for key in self.signing_payload.keys()
                 ), "Signing_payload must be of type Dict[str, Any]"
-                # assert isinstance(
-                #     self.tx_signature, bytes
-                # ), "Tx_signature must be of type bytes"
                 assert len(self.body) == 13
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
@@ -365,17 +360,17 @@ class TransactionMessage(InternalMessage):
         cls,
         other: "TransactionMessage",
         performative: Performative,
-        tx_signature: Optional[str] = None,
+        signed_payload: Optional[Dict[str, Any]] = None,
     ) -> "TransactionMessage":
         """
         Create response message.
 
         :param other: TransactionMessage
         :param performative: the performative
-        :param tx_signature: the transaction digest
+        :param signed_payload: the signed payload
         :return: a transaction message object
         """
-        if tx_signature is None:
+        if signed_payload is None:
             tx_msg = TransactionMessage(
                 performative=performative,
                 skill_callback_ids=other.skill_callback_ids,
@@ -404,6 +399,6 @@ class TransactionMessage(InternalMessage):
                 ledger_id=other.ledger_id,
                 info=other.info,
                 signing_payload=other.signing_payload,
-                tx_signature=tx_signature,
+                signed_payload=signed_payload,
             )
         return tx_msg

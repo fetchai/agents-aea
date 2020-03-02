@@ -46,10 +46,10 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         contract = self.context.contracts.erc1155
         if tx_msg_response.tx_id == "contract_deploy":
-            self.context.logger.info(type(tx_msg_response.tx_signature))
+            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_raw_transaction(  # type: ignore
-                tx_msg_response.tx_signature
+                tx_signed
             )
             self.context.logger.info(result)
             while contract.instance.address is None:
@@ -63,14 +63,14 @@ class TransactionHandler(Handler):
             self.context.logger.info(contract.instance.address)
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_raw_transaction(  # type: ignore
-                tx_msg_response.tx_signature
+                tx_msg_response.signed_payload.get("tx_signed")
             )
             self.context.logger.info(result)
         elif tx_msg_response.tx_id == "contract_mint_batch":
             self.context.logger.info(contract.instance.address)
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_raw_transaction(  # type: ignore
-                tx_msg_response.tx_signature
+                tx_msg_response.signed_payload.get("tx_signed")
             )
             self.context.logger.info(result)
             contract.is_items_created = True

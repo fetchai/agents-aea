@@ -26,7 +26,7 @@ import threading
 from enum import Enum
 from queue import Queue
 from threading import Thread
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
@@ -752,50 +752,43 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        if "contract" in tx_message.tx_id:
-            if self._is_acceptable_for_deployment(tx_message):
-                tx_signature = self._sign_contract_tx(tx_message=tx_message)
+        if self._is_acceptable_for_signing(tx_message):
+            if self._is_valid_message(tx_message):
+                tx_signature = self._sign_tx_hash(tx_message)
                 tx_message_response = TransactionMessage.respond_signing(
                     tx_message,
                     performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                    tx_signature=tx_signature,
+                    signed_payload={"tx_signature": tx_signature},
                 )
-            else:
+            if self._is_valid_tx(tx_message):
+                tx_signed = self._sign_ledger_tx(tx_message)
                 tx_message_response = TransactionMessage.respond_signing(
                     tx_message,
-                    performative=TransactionMessage.Performative.REJECTED_SIGNING,
+                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                    signed_payload={"tx_signed": tx_signed},
                 )
-            self.message_out_queue.put(tx_message_response)
         else:
-            if self._is_acceptable_for_signing(tx_message):
-                tx_signature = self._sign_tx(tx_message)
-                tx_message_response = TransactionMessage.respond_signing(
-                    tx_message,
-                    performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                    tx_signature=tx_signature,
-                )
-            else:
-                tx_message_response = TransactionMessage.respond_signing(
-                    tx_message,
-                    performative=TransactionMessage.Performative.REJECTED_SIGNING,
-                )
-            self.message_out_queue.put(tx_message_response)
+            tx_message_response = TransactionMessage.respond_signing(
+                tx_message,
+                performative=TransactionMessage.Performative.REJECTED_SIGNING,
+            )
+        self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
         """
-        Check if the tx is acceptable.
+        Check if the tx message is acceptable for signing.
 
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
         result = (
-            self._is_valid_tx_hash(tx_message)
+            (self._is_valid_message(tx_message) or self._is_valid_tx(tx_message))
             and self._is_utility_enhancing(tx_message)
             and self._is_affordable(tx_message)
         )
         return result
 
-    def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
+    def _is_valid_message(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx hash is present and matches the terms.
 
@@ -807,9 +800,21 @@ class DecisionMaker:
         is_valid = isinstance(tx_hash, bytes)
         return is_valid
 
-    def _sign_tx(self, tx_message: TransactionMessage) -> str:
+    def _is_valid_tx(self, tx_message: TransactionMessage) -> bool:
         """
-        Sign the tx.
+        Check if the transaction message contains a valid ledger transaction.
+
+
+        :param tx_message: the transaction message
+        :return: whether the transaction is valid
+        """
+        tx = tx_message.signing_payload.get("tx")
+        is_valid = tx is not None
+        return is_valid
+
+    def _sign_tx_hash(self, tx_message: TransactionMessage) -> str:
+        """
+        Sign the tx hash.
 
         :param tx_message: the transaction message
         :return: the signature of the signing payload
@@ -822,6 +827,22 @@ class DecisionMaker:
         tx_hash = tx_message.signing_payload.get("tx_hash")
         tx_signature = crypto_object.sign_message(tx_hash)
         return tx_signature
+
+    def _sign_ledger_tx(self, tx_message) -> Any:
+        """
+        Handle a transaction message for deployment.
+
+        :param tx_message: the transaction message
+        :return: None
+        """
+        if tx_message.ledger_id == OFF_CHAIN:
+            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
+            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
+        else:
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
+        tx = tx_message.signing_payload.get("tx")
+        tx_signed = crypto_object.sign_transaction(tx)
+        return tx_signed
 
     def _handle_state_update_message(
         self, state_update_message: StateUpdateMessage
@@ -856,31 +877,3 @@ class DecisionMaker:
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
             )
             self._ownership_state = new_ownership_state
-
-    def _sign_contract_tx(self, tx_message):
-        """
-        Handle a transaction message for deployment.
-
-        :param tx_message: the transaction message
-        :return: None
-        """
-        if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
-            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
-        else:
-            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-        # TODO: add support for FETCHAI too. Currently works only for ETHEREUM
-        signature = crypto_object.sign_transaction(tx_message.signing_payload)
-        return signature
-
-    def _is_acceptable_for_deployment(self, tx_message: TransactionMessage) -> bool:
-        """
-                Check if the tx is acceptable.
-
-                :param tx_message: the transaction message
-                :return: whether the transaction is acceptable or not
-                """
-        result = self._is_valid_tx_amount(tx_message) and self._is_affordable(
-            tx_message
-        )
-        return result

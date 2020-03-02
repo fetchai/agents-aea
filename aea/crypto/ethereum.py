@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, cast
+from typing import Any, BinaryIO, Optional, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -115,12 +115,12 @@ class EthereumCrypto(Crypto):
         signature = self.entity.sign_message(signable_message=signable_message)
         return signature["signature"]
 
-    def sign_transaction(self, transaction: bytes) -> bytes:
+    def sign_transaction(self, transaction: Any) -> Any:
         """
         Sign a transaction in bytes string form.
 
         :param transaction: the transaction to be signed
-        :return: signed transaction in bytes form
+        :return: signed transaction
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
         return signed_transaction
@@ -250,7 +250,7 @@ class EthereumApi(LedgerApi):
         return tx_digest
 
     def send_signed_transaction(
-        self, is_waiting_for_confirmation: bool, tx_signed: Dict
+        self, is_waiting_for_confirmation: bool, tx_signed: Any
     ) -> str:
         """
         Send a signed transaction and wait for confirmation.
@@ -258,6 +258,7 @@ class EthereumApi(LedgerApi):
         :param tx_signed: the signed transaction
         :param is_waiting_for_confirmation: whether or not to wait for confirmation
         """
+        tx_signed = cast(AttributeDict, tx_signed)
         hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
         tx_digest = hex_value.hex()
         logger.debug("TX digest: {}".format(tx_digest))
