@@ -6,15 +6,15 @@ message TwoPartyNegotiationMessage{
 
     // Custom Types
     message DataModel{
-        // Implement this
+        bytes data_model = 1;
     }
 
     message IOTApp7{
-        // Implement this
+        bytes iot_app_7 = 1;
     }
 
     message Unit{
-        // Implement this
+        bytes unit = 1;
     }
 
 

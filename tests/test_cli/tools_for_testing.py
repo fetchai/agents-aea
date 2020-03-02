@@ -63,6 +63,7 @@ class ContextMock:
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
         self.connection_loader = ConfigLoaderMock()
+        self.agent_loader = ConfigLoaderMock()
 
 
 class PublicIdMock:
@@ -106,6 +107,10 @@ class ConfigLoaderMock:
     def load(self, *args, **kwargs):
         """Mock the load method."""
         return AEAConfMock()
+
+    def dump(self, *args, **kwargs):
+        """Mock the dump method."""
+        pass
 
 
 class StopTest(Exception):

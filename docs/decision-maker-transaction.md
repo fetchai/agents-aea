@@ -28,7 +28,6 @@ logging.basicConfig(level=logging.INFO)
 FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
-ROOT_DIR = "./"
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 ```
@@ -231,7 +230,6 @@ logging.basicConfig(level=logging.INFO)
 FETCHAI_PRIVATE_KEY_FILE_1 = "fet_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
-ROOT_DIR = "./"
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
 

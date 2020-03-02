@@ -69,7 +69,9 @@ def _generate_item(ctx: Context, item_type, specification_path):
         config_loader = ConfigLoader(
             "protocol-specification_schema.json", ProtocolSpecification
         )
-        protocol_spec = config_loader.load(open(specification_path))
+        protocol_spec = config_loader.load_protocol_specification(
+            open(specification_path)
+        )
     except Exception as e:
         logger.exception(e)
         sys.exit(1)

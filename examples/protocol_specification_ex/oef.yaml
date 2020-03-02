@@ -27,3 +27,26 @@ speech_acts:
   dialogue_error:
     dialogue_id: pt:int
     origin: pt:str
+---
+ct:Query: |
+  message Nothing {
+  }
+  oneof query{
+      bytes bytes = 1;
+      Nothing nothing = 2;
+      bytes query_bytes = 3;
+  }
+ct:Description: |
+  bytes bytes = 1;
+ct:OEFErrorOperation: |
+  enum OEFError {
+        REGISTER_SERVICE = 0;
+        UNREGISTER_SERVICE = 1;
+        SEARCH_SERVICES = 2;
+        SEARCH_SERVICES_WIDE = 3;
+        SEARCH_AGENTS = 4;
+        SEND_MESSAGE = 5;
+        REGISTER_AGENT = 6;
+        UNREGISTER_AGENT = 7;
+      }
+    OEFError oef_error = 1;

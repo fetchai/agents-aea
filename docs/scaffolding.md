@@ -11,8 +11,6 @@ cd my_aea
 
 Then, cd into your project directory and scaffold your project skill, protocol, or connection.
 
-You will see the directories filled out with the files required and the skill, protocol, or connection registered in the top level `aea-config.yaml`.
-
 
 ### Scaffold a skill
 
@@ -34,9 +32,6 @@ aea scaffold protocol my_protocol
 aea scaffold connection my_connection
 ```
 
-After running the above commands, you will have the fully constructed file system required by the AEA.
-
-<center>![The directories and files created by the scaffolding tool](assets/full-scaffold.png)</center>
-
+After running the above commands, you are ready to develop your own skill, protocol and connection.
 
 <br />

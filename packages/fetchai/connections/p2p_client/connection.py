@@ -152,7 +152,7 @@ class PeerToPeerChannel:
                 self.thread.join()
 
 
-class PeerToPeerConnection(Connection):
+class PeerToPeerClientConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
     def __init__(
@@ -248,7 +248,7 @@ class PeerToPeerConnection(Connection):
         excluded_protocols_names = {
             p.name for p in connection_configuration.excluded_protocols
         }
-        return PeerToPeerConnection(
+        return PeerToPeerClientConnection(
             address,
             addr,
             port,

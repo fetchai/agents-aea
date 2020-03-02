@@ -20,15 +20,12 @@
 """This module contains the last code-block from the standalone-transaction.md file."""
 
 import logging
-import os
 
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
-
-ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
