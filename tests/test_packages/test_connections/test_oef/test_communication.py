@@ -21,7 +21,6 @@
 
 import asyncio
 import logging
-import os
 import sys
 import time
 import unittest
@@ -34,8 +33,7 @@ from oef.query import ConstraintExpr
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
-from aea.crypto.wallet import Wallet
+from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -60,7 +58,6 @@ from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
-from ....conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -973,9 +970,7 @@ class DummyConstrainExpr(ConstraintExpr):
 @pytest.mark.asyncio
 async def test_send_oef_message(network_node):
     """Test the send oef message."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({FETCHAI: private_key_pem_path})
-    address = wallet.addresses[FETCHAI]
+    address = FetchAICrypto().address
     oef_connection = OEFConnection(
         address=address,
         oef_addr="127.0.0.1",
@@ -1011,16 +1006,18 @@ async def test_send_oef_message(network_node):
         message=msg_bytes,
     )
     await oef_connection.send(envelope)
+    search_result = await oef_connection.receive()
+    assert isinstance(search_result, Envelope)
+    await asyncio.sleep(2.0)
     await oef_connection.disconnect()
 
 
 @pytest.mark.asyncio
 async def test_cancelled_receive(network_node):
     """Test the case when a receive request is cancelled."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({FETCHAI: private_key_pem_path})
+    address = FetchAICrypto().address
     oef_connection = OEFConnection(
-        address=wallet.addresses[FETCHAI],
+        address=address,
         oef_addr="127.0.0.1",
         oef_port=10000,
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
@@ -1048,10 +1045,9 @@ async def test_cancelled_receive(network_node):
 @pytest.mark.asyncio
 async def test_exception_during_receive(network_node):
     """Test the case when there is an exception during a receive request."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({FETCHAI: private_key_pem_path})
+    address = FetchAICrypto().address
     oef_connection = OEFConnection(
-        address=wallet.addresses[FETCHAI],
+        address=address,
         oef_addr="127.0.0.1",
         oef_port=10000,
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
@@ -1074,10 +1070,9 @@ async def test_exception_during_receive(network_node):
 )
 async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({FETCHAI: private_key_pem_path})
+    address = FetchAICrypto().address
     oef_connection = OEFConnection(
-        address=wallet.addresses[FETCHAI],
+        address=address,
         oef_addr="a_fake_address",
         oef_port=10000,
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
@@ -1104,10 +1099,9 @@ async def test_cannot_connect_to_oef():
 @pytest.mark.asyncio
 async def test_connecting_twice_is_ok(network_node):
     """Test that calling 'connect' twice works as expected."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({FETCHAI: private_key_pem_path})
+    address = FetchAICrypto().address
     oef_connection = OEFConnection(
-        address=wallet.addresses[FETCHAI],
+        address=address,
         oef_addr="127.0.0.1",
         oef_port=10000,
         connection_id=PublicId("fetchai", "oef", "0.1.0"),

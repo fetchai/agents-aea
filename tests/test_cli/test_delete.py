@@ -181,7 +181,7 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
 
         The expected message is: 'Directory already exist. Aborting...'
         """
-        s = "The name provided is not an AEA project."
+        s = "The name provided is not a path to an AEA project."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

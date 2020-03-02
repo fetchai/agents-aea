@@ -107,36 +107,46 @@ base_deps = [
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
-with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
+with open(os.path.join(here, PACKAGE_NAME, "__version__.py"), "r") as f:
     exec(f.read(), about)
 
-with open('README.md', 'r') as f:
+with open("README.md", "r") as f:
     readme = f.read()
 
 
 setup(
-    name=about['__title__'],
-    description=about['__description__'],
-    version=about['__version__'],
-    author=about['__author__'],
-    url=about['__url__'],
+    name=about["__title__"],
+    description=about["__description__"],
+    version=about["__version__"],
+    author=about["__author__"],
+    url=about["__url__"],
     long_description=readme,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     packages=find_packages(include=["aea*"]),
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
-        'Natural Language :: English',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        "Environment :: Console",
+        "Environment :: Web Environment",
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft",
+        "Operating System :: Unix",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Communications",
+        "Topic :: Internet",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development",
+        "Topic :: System",
     ],
     install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
     entry_points={
-        'console_scripts': ["aea=aea.cli:cli"],
+        "console_scripts": ["aea=aea.cli:cli"],
     },
     zip_safe=False,
     include_package_data=True,
@@ -146,11 +156,11 @@ setup(
             glob.glob(os.path.join("aea", "skills", "base", "schemas", "*.json"))
         ),
     ],
-    license=about['__license__'],
+    license=about["__license__"],
     python_requires=">=3.6",
     keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
     project_urls={
-        'Bug Reports': 'https://github.com/fetchai/agents-aea/issues',
-        'Source': 'https://github.com/fetchai/agents-aea',
+        "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
+        "Source": "https://github.com/fetchai/agents-aea",
     },
 )
