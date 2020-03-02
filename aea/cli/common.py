@@ -496,3 +496,8 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
         sys.exit(1)
 
     return package_path
+
+
+def _validate_config_consistency(ctx: Context):
+    """Validate fingerprints for every agent component."""
+

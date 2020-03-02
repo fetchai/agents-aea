@@ -35,6 +35,7 @@ from aea.cli.common import (
     Context,
     _load_env_file,
     _try_to_load_protocols,
+    _validate_config_consistency,
     logger,
     try_to_load_agent_config,
 )
@@ -265,6 +266,7 @@ def run(
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     try_to_load_agent_config(ctx)
+    _validate_config_consistency(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
 
