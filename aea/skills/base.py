@@ -402,11 +402,10 @@ class Handler(SkillComponent):
 class Model(SkillComponent):
     """This class implements an abstract model."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize a model.
 
-        :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
         super().__init__(**kwargs)

@@ -111,7 +111,7 @@ def connections(ctx: Context, query):
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
         resp = request_api("GET", "/connections", params={"search": query})
-        if not len(resp):
+        if len(resp) == 0:
             click.echo("No connections found.")  # pragma: no cover
         else:
             click.echo("Connections found:\n")
@@ -147,7 +147,7 @@ def protocols(ctx: Context, query):
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
         resp = request_api("GET", "/protocols", params={"search": query})
-        if not len(resp):
+        if len(resp) == 0:
             click.echo("No protocols found.")  # pragma: no cover
         else:
             click.echo("Protocols found:\n")
@@ -179,7 +179,7 @@ def skills(ctx: Context, query):
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
         resp = request_api("GET", "/skills", params={"search": query})
-        if not len(resp):
+        if len(resp) == 0:
             click.echo("No skills found.")  # pragma: no cover
         else:
             click.echo("Skills found:\n")
@@ -206,7 +206,7 @@ def agents(ctx: Context, query):
     """Search for Agents."""
     if ctx.config.get("is_registry"):
         resp = request_api("GET", "/agents", params={"search": query})
-        if not len(resp):
+        if len(resp) == 0:
             click.echo("No agents found.")  # pragma: no cover
         else:
             click.echo("Agents found:\n")

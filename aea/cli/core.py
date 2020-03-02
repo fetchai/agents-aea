@@ -141,10 +141,10 @@ def generate_key(ctx: Context, type_):
         else:
             return True
 
-    if type_ == FetchAICrypto.identifier or type_ == "all":
+    if type_ in (FetchAICrypto.identifier, "all"):
         if _can_write(FETCHAI_PRIVATE_KEY_FILE):
             FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
-    if type_ == EthereumCrypto.identifier or type_ == "all":
+    if type_ in (EthereumCrypto.identifier, "all"):
         if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
             EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 

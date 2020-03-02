@@ -41,7 +41,7 @@ OK = "OK"
 ERROR = "ERROR"
 
 
-class LedgerApis(object):
+class LedgerApis:
     """Store all the ledger apis we initialise."""
 
     def __init__(
@@ -260,9 +260,9 @@ def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:
     :param kwargs: the keyword arguments
     """
     try:
-        from fetchai.ledger.api import LedgerApi
+        from fetchai.ledger.api import LedgerApi as FetchLedgerApi
 
-        LedgerApi(**kwargs)
+        FetchLedgerApi(**kwargs)
     except Exception as e:
         logger.error(
             "Cannot connect to fetchai ledger with provided config:\n{}".format(e)

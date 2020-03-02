@@ -506,7 +506,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         return self.fetch_by_protocol_and_skill(INTERNAL_PROTOCOL_ID, skill_id)
 
 
-class Resources(object):
+class Resources:
     """This class implements the resources of an AEA."""
 
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
@@ -642,7 +642,7 @@ class Resources(object):
             r.teardown()
 
 
-class Filter(object):
+class Filter:
     """This class implements the filter of an AEA."""
 
     def __init__(self, resources: Resources, decision_maker_out_queue: Queue):
