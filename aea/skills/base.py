@@ -30,7 +30,7 @@ from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
     BehaviourConfig,
@@ -310,6 +310,13 @@ class Behaviour(SkillComponent):
         )
 
         name_to_class = dict(behaviours_classes)
+        _print_warning_message_for_non_declared_skill_components(
+            set(name_to_class.keys()),
+            set(behaviours_configs.keys()),
+            "behaviours",
+            path,
+        )
+
         for behaviour_id, behaviour_config in behaviours_configs.items():
             behaviour_class_name = cast(str, behaviour_config.class_name)
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
@@ -375,6 +382,9 @@ class Handler(SkillComponent):
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
 
         name_to_class = dict(handler_classes)
+        _print_warning_message_for_non_declared_skill_components(
+            set(name_to_class.keys()), set(handler_configs.keys()), "handlers", path
+        )
         for handler_id, handler_config in handler_configs.items():
             handler_class_name = cast(str, handler_config.class_name)
             logger.debug("Processing handler {}".format(handler_class_name))
@@ -463,6 +473,9 @@ class Model(SkillComponent):
             models.extend(filtered_classes)
 
         name_to_class = dict(models)
+        _print_warning_message_for_non_declared_skill_components(
+            set(name_to_class.keys()), set(model_configs.keys()), "models", path
+        )
         for model_id, model_config in model_configs.items():
             model_class_name = model_config.class_name
             logger.debug(
@@ -547,28 +560,17 @@ class Skill:
         skill_context._logger = logging.getLogger(logger_name)
 
         handlers_by_id = dict(skill_config.handlers.read_all())
-        if len(handlers_by_id) > 0:
-            handlers = Handler.parse_module(
-                os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
-            )
-        else:
-            handlers = {}  # pragma: no cover
+        handlers = Handler.parse_module(
+            os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
+        )
 
         behaviours_by_id = dict(skill_config.behaviours.read_all())
-        if len(behaviours_by_id) > 0:
-            behaviours = Behaviour.parse_module(
-                os.path.join(directory, "behaviours.py"),
-                behaviours_by_id,
-                skill_context,
-            )
-        else:
-            behaviours = {}
+        behaviours = Behaviour.parse_module(
+            os.path.join(directory, "behaviours.py"), behaviours_by_id, skill_context,
+        )
 
         models_by_id = dict(skill_config.models.read_all())
-        if len(models_by_id) > 0:
-            model_instances = Model.parse_module(directory, models_by_id, skill_context)
-        else:
-            model_instances = {}
+        model_instances = Model.parse_module(directory, models_by_id, skill_context)
 
         skill = Skill(
             skill_config, skill_context, handlers, behaviours, model_instances
@@ -576,3 +578,15 @@ class Skill:
         skill_context._skill = skill
 
         return skill
+
+
+def _print_warning_message_for_non_declared_skill_components(
+    classes: Set[str], config_components: Set[str], item_type, skill_path
+):
+    """Print a warning message if a skill component is not declared in the config files."""
+    for class_name in classes.difference(config_components):
+        logger.warning(
+            "Class {} of type {} found but not declared in the configuration file {}.".format(
+                class_name, item_type, skill_path
+            )
+        )
