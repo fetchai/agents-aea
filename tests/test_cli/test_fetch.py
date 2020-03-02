@@ -36,7 +36,7 @@ def _raise_sys_exit(self, *args, **kwargs):
 
 @mock.patch("aea.cli.fetch.copy_tree")
 @mock.patch("aea.cli.fetch.os.path.join", return_value="joined-path")
-@mock.patch("aea.cli.fetch.try_get_item_source_path", return_value="path")
+@mock.patch("aea.cli.fetch._try_get_item_source_path", return_value="path")
 @mock.patch("aea.cli.fetch.try_to_load_agent_config")
 class FetchAgentLocallyTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
@@ -46,7 +46,7 @@ class FetchAgentLocallyTestCase(TestCase):
         self,
         exists_mock,
         try_to_load_agent_config_mock,
-        try_get_item_source_path_mock,
+        _try_get_item_source_path_mock,
         join_mock,
         copy_tree,
     ):

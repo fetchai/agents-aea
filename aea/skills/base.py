@@ -291,18 +291,20 @@ class Behaviour(SkillComponent):
     def parse_module(
         cls,
         path: str,
-        behaviours_configs: Dict[str, BehaviourConfig],
+        behaviour_configs: Dict[str, BehaviourConfig],
         skill_context: SkillContext,
     ) -> Dict[str, "Behaviour"]:
         """
         Parse the behaviours module.
 
         :param path: path to the Python module containing the Behaviour classes.
-        :param behaviours_configs: a list of behaviour configurations.
+        :param behaviour_configs: a list of behaviour configurations.
         :param skill_context: the skill context
         :return: a list of Behaviour.
         """
-        behaviours = {}
+        behaviours = {}  # type: Dict[str, "Behaviour"]
+        if behaviour_configs == {}:
+            return behaviours
         behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(
@@ -312,12 +314,17 @@ class Behaviour(SkillComponent):
         name_to_class = dict(behaviours_classes)
         _print_warning_message_for_non_declared_skill_components(
             set(name_to_class.keys()),
-            set(behaviours_configs.keys()),
+            set(
+                [
+                    behaviour_config.class_name
+                    for behaviour_config in behaviour_configs.values()
+                ]
+            ),
             "behaviours",
             path,
         )
 
-        for behaviour_id, behaviour_config in behaviours_configs.items():
+        for behaviour_id, behaviour_config in behaviour_configs.items():
             behaviour_class_name = cast(str, behaviour_config.class_name)
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
             assert (
@@ -374,7 +381,9 @@ class Handler(SkillComponent):
         :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
-        handlers = {}
+        handlers = {}  # type: Dict[str, "Handler"]
+        if handler_configs == {}:
+            return handlers
         handler_spec = importlib.util.spec_from_file_location("handlers", location=path)
         handler_module = importlib.util.module_from_spec(handler_spec)
         handler_spec.loader.exec_module(handler_module)  # type: ignore
@@ -383,7 +392,15 @@ class Handler(SkillComponent):
 
         name_to_class = dict(handler_classes)
         _print_warning_message_for_non_declared_skill_components(
-            set(name_to_class.keys()), set(handler_configs.keys()), "handlers", path
+            set(name_to_class.keys()),
+            set(
+                [
+                    handler_config.class_name
+                    for handler_config in handler_configs.values()
+                ]
+            ),
+            "handlers",
+            path,
         )
         for handler_id, handler_config in handler_configs.items():
             handler_class_name = cast(str, handler_config.class_name)
@@ -441,7 +458,9 @@ class Model(SkillComponent):
         :param skill_context: the skill context
         :return: a list of Model.
         """
-        instances = {}
+        instances = {}  # type: Dict[str, "Model"]
+        if model_configs == {}:
+            return instances
         models = []
 
         model_names = set(config.class_name for _, config in model_configs.items())
@@ -474,7 +493,10 @@ class Model(SkillComponent):
 
         name_to_class = dict(models)
         _print_warning_message_for_non_declared_skill_components(
-            set(name_to_class.keys()), set(model_configs.keys()), "models", path
+            set(name_to_class.keys()),
+            set([model_config.class_name for model_config in model_configs.values()]),
+            "models",
+            path,
         )
         for model_id, model_config in model_configs.items():
             model_class_name = model_config.class_name

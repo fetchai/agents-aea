@@ -34,7 +34,7 @@ from aea.cli.common import (
     Context,
     DEFAULT_REGISTRY_PATH,
     PublicIdParameter,
-    try_get_item_source_path,
+    _try_get_item_source_path,
     try_to_load_agent_config,
 )
 from aea.cli.registry.fetch import fetch_agent
@@ -64,7 +64,7 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> No
     :return: None
     """
     packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
-    source_path = try_get_item_source_path(
+    source_path = _try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
     target_path = os.path.join(ctx.cwd, public_id.name)

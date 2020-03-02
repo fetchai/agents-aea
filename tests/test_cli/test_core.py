@@ -46,15 +46,11 @@ class WaitFundsReleaseTestCase(TestCase):
         _wait_funds_release("agent_config", "wallet", "type_")
 
 
-@mock.patch("aea.cli.core._verify_ledger_apis_access")
 @mock.patch("aea.cli.core.LedgerApis", mock.MagicMock())
-@mock.patch("aea.cli.core.cast")
 class TryGetBalanceTestCase(TestCase):
     """Test case for _try_get_balance method."""
 
-    def test__try_get_balance_positive(
-        self, _verify_ledger_apis_access_mock, cast_mock
-    ):
+    def test__try_get_balance_positive(self):
         """Test for _try_get_balance method positive result."""
         agent_config = mock.Mock()
         ledger_apis = mock.Mock()

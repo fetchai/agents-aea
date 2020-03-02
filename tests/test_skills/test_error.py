@@ -33,9 +33,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import SkillContext
-from aea.skills.error.behaviours import ErrorBehaviour
 from aea.skills.error.handlers import ErrorHandler
-from aea.skills.error.tasks import ErrorTask
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FIPAMessage
@@ -180,14 +178,6 @@ class TestSkillError:
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
-
-    def test_error_behaviour_instantiation(self):
-        """Test that we can instantiate the 'ErrorBehaviour' class."""
-        ErrorBehaviour(name="error", skill_context=self.skill_context)
-
-    def test_error_task_instantiation(self):
-        """Test that we can instantiate the 'ErrorTask' class."""
-        ErrorTask()
 
     @classmethod
     def teardown_class(cls):
