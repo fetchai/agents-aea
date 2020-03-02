@@ -57,21 +57,16 @@ class LedgerApis:
         """
         apis = {}  # type: Dict[str, LedgerApi]
         configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
-        self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
                 try:
                     api = FetchAIApi(**config)  # type: LedgerApi
-                except Exception as e:
+                except Exception:
                     logger.error(
-                        "Cannot connect to fetchai ledger with provided config:\n{}".format(
-                            e
-                        )
+                        "Cannot connect to fetchai ledger with provided config."
                     )
                     sys.exit(1)
-                apis[identifier] = api
-                configs[identifier] = config
             elif identifier == ETHEREUM:
                 try:
                     api = EthereumApi(
@@ -82,13 +77,13 @@ class LedgerApis:
                         "Cannot connect to ethereum ledger with provided config."
                     )
                     sys.exit(1)
-                apis[identifier] = api
-                configs[identifier] = config
             else:
                 raise ValueError("Unsupported identifier in ledger apis.")
-
+            apis[identifier] = api
+            configs[identifier] = config
         self._apis = apis
         self._configs = configs
+        self._last_tx_statuses = {}  # type: Dict[str, str]
         self._default_ledger_id = default_ledger_id
 
     @property
