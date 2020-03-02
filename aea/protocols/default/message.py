@@ -24,7 +24,7 @@ from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
-from aea.protocols.default.models import ErrorCode
+from aea.protocols.default.custom_types import ErrorCode
 
 DEFAULT_BODY_SIZE = 4
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 from aea.protocols.default import default_pb2
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.custom_types import ErrorCode
 
 
 class DefaultSerializer(Serializer):
@@ -89,12 +90,14 @@ class DefaultSerializer(Serializer):
             content = default_pb.bytes.content
             performative_content["content"] = content
         elif performative_id == DefaultMessage.Performative.ERROR:
-            error_code = default_pb.error.error_code
+            serialised_error_code_from_message = default_pb.error.error_code
+            error_code = ErrorCode.deserialise(serialised_error_code_from_message)
             performative_content["error_code"] = error_code
             error_msg = default_pb.error.error_msg
             performative_content["error_msg"] = error_msg
             error_data = default_pb.error.error_data
-            performative_content["error_data"] = error_data
+            error_data_dict = dict(error_data)
+            performative_content["error_data"] = error_data_dict
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

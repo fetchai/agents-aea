@@ -19,14 +19,20 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-from enum import Enum
 
-
-class ErrorCode(Enum):
+class ErrorCode:
     """This class represents an instance of ErrorCode."""
 
-    UNSUPPORTED_PROTOCOL = -10001
-    DECODING_ERROR = -10002
-    INVALID_MESSAGE = -10003
-    UNSUPPORTED_SKILL = -10004
-    INVALID_DIALOGUE = -10005
+    def __init__(self):
+        """Initialise an instance of ErrorCode."""
+        raise NotImplementedError
+
+    @classmethod
+    def serialise(cls, error_code: "ErrorCode") -> bytes:
+        """Serialise an instance of this class."""
+        raise NotImplementedError
+
+    @classmethod
+    def deserialise(cls, obj: bytes) -> "ErrorCode":
+        """Deserialise an instance of this class that has been serialised."""
+        raise NotImplementedError
