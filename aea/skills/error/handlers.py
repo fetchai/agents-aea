@@ -25,8 +25,8 @@ from typing import Optional
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.custom_types import ErrorCode
+from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 

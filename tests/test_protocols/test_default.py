@@ -26,7 +26,7 @@ from unittest import mock
 import pytest
 
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.models import ErrorCode
+from aea.protocols.default.custom_types import ErrorCode
 from aea.protocols.default.serialization import DefaultSerializer
 
 

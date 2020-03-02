@@ -1260,14 +1260,6 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.name,
         )
-        cls_str += str.format(
-            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
-            PATH_TO_PACKAGES,
-            self.protocol_specification.author,
-            "protocols",
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-        )
         for custom_type in self._all_custom_types:
             cls_str += str.format(
                 "from {}.{}.{}.{}.custom_types import (\n    {},\n)\n",
@@ -1277,6 +1269,14 @@ class ProtocolGenerator:
                 self.protocol_specification.name,
                 custom_type,
             )
+        cls_str += str.format(
+            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
+            PATH_TO_PACKAGES,
+            self.protocol_specification.author,
+            "protocols",
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
 
         # Class Header
         cls_str += "\n\nclass {}Serializer(Serializer):\n".format(
