@@ -260,8 +260,11 @@ class ContractRegistry(Registry[PublicId, Contract]):
         with open(path, "r") as interface_file:
             contract_interface = json.load(interface_file)
         contract = contract_class(
-            contract_public_id, contract_config, contract_interface
+            contract_id=contract_public_id,
+            contract_config=contract_config,
+            contract_interface=contract_interface,
         )
+
         self.register(contract_public_id, contract)
 
 

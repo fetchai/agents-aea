@@ -19,12 +19,13 @@
 
 """The base ethereum contract."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
-from web3.eth import Contract as EthContract
+from web3.contract import Contract as EthereumContract
 
 from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.base import Contract as BaseContract
+from aea.crypto.ethereum import EthereumApi
 
 
 class Contract(BaseContract):
@@ -46,7 +47,7 @@ class Contract(BaseContract):
         super().__init__(contract_id, config, contract_interface)
         self._abi = contract_interface["abi"]
         self._bytecode = contract_interface["bytecode"]
-        self._instance = EthContract(abi=self.abi, bytecode=self.bytecode)
+        self._instance = None  # type: Optional[EthereumContract]
 
     @property
     def abi(self) -> Dict[str, Any]:
@@ -57,18 +58,31 @@ class Contract(BaseContract):
         return self._bytecode
 
     @property
-    def instance(self) -> EthContract:
+    def instance(self) -> EthereumContract:
         return self._instance
 
     @property
     def is_deployed(self) -> bool:
         return self.instance.address is not None
 
-    def set_address(self, contract_address: str) -> None:
+    def set_instance(self, ledger_api: EthereumApi) -> None:
+        """
+        Set the instance.
+
+        :param ledger_api: the ethereum ledger api
+        """
+        assert self._instance is None, "Instance already set!"
+        self._instance = ledger_api.api.web3.Contract(
+            abi=self.abi, bytecode=self.bytecode
+        )
+
+    def set_address(self, ledger_api: EthereumApi, contract_address: str) -> None:
         """
         Set the contract address.
 
         :param contract_address: the contract address
         """
         assert self.instance.address is None, "Address already set!"
-        self._instance = EthContract(address=contract_address, abi=self.abi)
+        self._instance = ledger_api.api.web3.Contract(
+            address=contract_address, abi=self.abi
+        )

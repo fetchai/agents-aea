@@ -19,7 +19,7 @@
 
 """This module contains the scaffold contract definition."""
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from vyper.utils import keccak256
 
@@ -42,7 +42,7 @@ class ERC1155Contract(Contract):
         self,
         contract_id: ContractId,
         contract_config: ContractConfig,
-        contracts_interface: Dict[str, Any],
+        contract_interface: Dict[str, Any],
     ):
         """Initialize.
 
@@ -53,7 +53,7 @@ class ERC1155Contract(Contract):
         :param config: the contract configurations.
         :param contract_interface: the contract interface.
         """
-        super().__init__(contract_id, contract_config, contracts_interface)
+        super().__init__(contract_id, contract_config, contract_interface)
         self.is_items_created = False
         self.is_items_minted = False
         self.token_ids = []  # type: List[int]
