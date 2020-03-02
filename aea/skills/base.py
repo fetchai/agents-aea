@@ -561,28 +561,17 @@ class Skill:
         skill_context._logger = logging.getLogger(logger_name)
 
         handlers_by_id = dict(skill_config.handlers.read_all())
-        if len(handlers_by_id) > 0:
-            handlers = Handler.parse_module(
-                os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
-            )
-        else:
-            handlers = {}  # pragma: no cover
+        handlers = Handler.parse_module(
+            os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
+        )
 
         behaviours_by_id = dict(skill_config.behaviours.read_all())
-        if len(behaviours_by_id) > 0:
-            behaviours = Behaviour.parse_module(
-                os.path.join(directory, "behaviours.py"),
-                behaviours_by_id,
-                skill_context,
-            )
-        else:
-            behaviours = {}
+        behaviours = Behaviour.parse_module(
+            os.path.join(directory, "behaviours.py"), behaviours_by_id, skill_context,
+        )
 
         models_by_id = dict(skill_config.models.read_all())
-        if len(models_by_id) > 0:
-            model_instances = Model.parse_module(directory, models_by_id, skill_context)
-        else:
-            model_instances = {}
+        model_instances = Model.parse_module(directory, models_by_id, skill_context)
 
         skill = Skill(
             skill_config, skill_context, handlers, behaviours, model_instances
