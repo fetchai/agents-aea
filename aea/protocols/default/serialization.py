@@ -55,7 +55,8 @@ class DefaultSerializer(Serializer):
         elif performative_id == DefaultMessage.Performative.ERROR:
             performative = default_pb2.DefaultMessage.Error()  # type: ignore
             error_code = msg.error_code
-            performative.error_code = error_code
+            serialised_error_code = ErrorCode.serialise(error_code)
+            performative.error_code = serialised_error_code
             error_msg = msg.error_msg
             performative.error_msg = error_msg
             error_data = msg.error_data
