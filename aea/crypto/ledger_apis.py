@@ -57,6 +57,7 @@ class LedgerApis:
         """
         apis = {}  # type: Dict[str, LedgerApi]
         configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
+        self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
@@ -83,7 +84,6 @@ class LedgerApis:
             configs[identifier] = config
         self._apis = apis
         self._configs = configs
-        self._last_tx_statuses = {}  # type: Dict[str, str]
         self._default_ledger_id = default_ledger_id
 
     @property
