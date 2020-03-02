@@ -19,6 +19,7 @@
 
 """This module contains the scaffold contract definition."""
 import logging
+import random
 from typing import Any, Dict, List
 
 from vyper.utils import keccak256
@@ -56,6 +57,7 @@ class ERC1155Contract(Contract):
         super().__init__(contract_id, contract_config, contract_interface)
         self.is_items_created = False
         self.is_items_minted = False
+        self.is_trade = False
         self.token_ids = []  # type: List[int]
         self.item_ids = []  # type: List[int]
 
@@ -232,7 +234,7 @@ class ERC1155Contract(Contract):
 
         return tx
 
-    def _create_trade_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+    def _create_trade_tx(self, from_address, to_address, item_id, from_supply, to_supply, value_eth_wei, trade_nonce, signature, ledger_api: LedgerApi) -> str:
         """
         Create a trade tx.
 
@@ -240,23 +242,23 @@ class ERC1155Contract(Contract):
         :params signature: The signed terms from the counterparty.
         """
         data = b"hello"
-        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
+        nonce = ledger_api.api.eth.getTransactionCount(from_address)
         tx = self.instance.functions.trade(
-            terms.from_address,
-            terms.to_address,
-            terms.item_id,
-            terms.from_supply,
-            terms.to_supply,
-            terms.value_eth_wei,
-            terms.trade_nonce,
+            from_address,
+            to_address,
+            item_id,
+            from_supply,
+            to_supply,
+            value_eth_wei,
+            trade_nonce,
             signature,
             data,
         ).buildTransaction(
             {
                 "chainId": 3,
                 "gas": 2818111,
-                "from": terms.from_address,
-                "value": terms.value_eth_wei,
+                "from": from_address,
+                "value": value_eth_wei,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -303,18 +305,18 @@ class ERC1155Contract(Contract):
         return self.instance.functions.balanceOf(from_address, item_id).call()
 
     def get_atomic_swap_single_proposal(
-        self, contract, terms, signature
+        self, from_address, to_address, item_id, from_supply, to_supply, value, trade_nonce, signature, ledger_api: LedgerApi
     ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         # assert self.address == terms.from_address, "Wrong from address"
-
-        tx = contract.get_trade_tx(terms=terms, signature=signature)
+        value_eth_wei = ledger_api.api.toWei(value, 'ether')
+        tx = self._create_trade_tx(from_address, to_address, item_id, from_supply, to_supply, value_eth_wei, trade_nonce, signature, ledger_api)
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
             tx_id="contract_deployment",
-            tx_sender_addr=terms.from_address,
+            tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
             tx_sender_fee=0,
@@ -410,6 +412,13 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
+    def generate_trade_nonce(self, address):
+        """Generate a valid trade nonce."""
+        trade_nonce = random.randrange(0, 10000000)
+        while self.instance.functions.is_nonce_used(address, trade_nonce).call():
+            trade_nonce = random.randrange(0, 10000000)
+        return trade_nonce
+
 
 class Helpers:
     """Helper functions for hashing."""
@@ -472,10 +481,32 @@ class Helpers:
         final_id_int = (token_id << 128) + index
         return final_id_int
 
-    #
-    # def generate_trade_nonce(self, contract, address):
-    #     """Generate a valid trade nonce."""
-    #     trade_nonce = random.randrange(0, 10000000)
-    #     while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
-    #         trade_nonce = random.randrange(0, 10000000)
-    #     return trade_nonce
+
+    def generate_trade_nonce(self, contract, address):
+        """Generate a valid trade nonce."""
+        trade_nonce = random.randrange(0, 10000000)
+        while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
+            trade_nonce = random.randrange(0, 10000000)
+        return trade_nonce
+
+
+class TermsSingle:
+    """Terms of the single trade."""
+
+    def __init__(self, ledger_api, from_address, to_address, contract):
+        """Initialization."""
+        self.from_address = from_address
+        self.to_address = to_address
+        self.item_id = contract.item_ids[0]
+        self.from_supply = 2
+        self.to_supply = 0
+        self.value_eth_wei = ledger_api.api.toWei('0', 'ether')
+        self.trade_nonce = Helpers().generate_trade_nonce(contract=contract,
+                                                          address=from_address)
+        logger.info("terms_single: from={}, to={}, item_id={}, from_supply={}, to_supply={}, value_eth_wei={}, trade_nonce={}".format(self.from_address,
+                                                                                                                                      self.to_address,
+                                                                                                                                      self.item_id,
+                                                                                                                                      self.from_supply,
+                                                                                                                                      self.to_supply,
+                                                                                                                                      self.value_eth_wei,
+                                                                                                                                      self.trade_nonce))

@@ -22,7 +22,6 @@ import time
 
 from aea.skills.base import Behaviour
 
-
 class ERC1155Behaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
@@ -35,9 +34,7 @@ class ERC1155Behaviour(Behaviour):
 
         contract = self.context.contracts.erc1155
         self.context.logger.info("Loading details from json")
-        contract.load_from_json(
-            ledger_api=self.context.ledger_apis.apis.get("ethereum")
-        )
+        contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
         dm_message_for_deploy = contract.get_deploy_transaction(
             deployer_address=self.context.agent_address,
             ledger_api=self.context.ledger_apis.apis.get("ethereum"),
@@ -80,6 +77,34 @@ class ERC1155Behaviour(Behaviour):
             self.context.decision_maker_message_queue.put_nowait(mint_message)
             contract.is_items_created = True
             time.sleep(10)
+
+        if (
+                contract.is_deployed
+                and contract.is_items_created
+                and contract.is_items_minted
+                and not contract.is_trade
+        ):
+            receiver_address = "0x307CB021482575A61Db80F5365A47A07F3Ffed65"
+            nonce = contract.generate_trade_nonce(contract=contract,
+                                                          address=self.context.agent_address)
+            self.context.logger.info("Making a trade with an other address")
+            trade_message = contract.get_atomic_swap_single_proposal(
+                from_address=self.context.agent_address,
+                to_address=receiver_address,
+                item_id=contract.item_ids[0],
+                from_supply=2,
+                to_supply=0,
+                value=0,
+                trade_nonce=nonce,
+                signature=contract.get_single_hash(_from=self.context.agent_address,
+                                                    _to=receiver_address,
+                                                    _id=contract.item_ids[0],
+                                                    _from_value=2,
+                                                    _to_value=0,
+                                                    _value_eth=0,
+                                                    _nonce=nonce)
+            )
+            self.context.decision_maker_message_queue.put_nowait(trade_message)
 
     def teardown(self) -> None:
         """
