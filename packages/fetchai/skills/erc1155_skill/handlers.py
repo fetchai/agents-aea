@@ -49,8 +49,7 @@ class TransactionHandler(Handler):
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_signed_transaction(  # type: ignore
-                True,
-                tx_signed
+                True, tx_signed
             )
             self.context.logger.info(result)
             contract.set_address(ledger_api, result)

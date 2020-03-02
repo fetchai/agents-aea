@@ -234,7 +234,18 @@ class ERC1155Contract(Contract):
 
         return tx
 
-    def _create_trade_tx(self, from_address, to_address, item_id, from_supply, to_supply, value_eth_wei, trade_nonce, signature, ledger_api: LedgerApi) -> str:
+    def _create_trade_tx(
+        self,
+        from_address,
+        to_address,
+        item_id,
+        from_supply,
+        to_supply,
+        value_eth_wei,
+        trade_nonce,
+        signature,
+        ledger_api: LedgerApi,
+    ) -> str:
         """
         Create a trade tx.
 
@@ -305,12 +316,31 @@ class ERC1155Contract(Contract):
         return self.instance.functions.balanceOf(from_address, item_id).call()
 
     def get_atomic_swap_single_proposal(
-        self, from_address, to_address, item_id, from_supply, to_supply, value, trade_nonce, signature, ledger_api: LedgerApi
+        self,
+        from_address,
+        to_address,
+        item_id,
+        from_supply,
+        to_supply,
+        value,
+        trade_nonce,
+        signature,
+        ledger_api: LedgerApi,
     ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         # assert self.address == terms.from_address, "Wrong from address"
-        value_eth_wei = ledger_api.api.toWei(value, 'ether')
-        tx = self._create_trade_tx(from_address, to_address, item_id, from_supply, to_supply, value_eth_wei, trade_nonce, signature, ledger_api)
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
+        tx = self._create_trade_tx(
+            from_address,
+            to_address,
+            item_id,
+            from_supply,
+            to_supply,
+            value_eth_wei,
+            trade_nonce,
+            signature,
+            ledger_api,
+        )
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
@@ -481,32 +511,9 @@ class Helpers:
         final_id_int = (token_id << 128) + index
         return final_id_int
 
-
     def generate_trade_nonce(self, contract, address):
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
             trade_nonce = random.randrange(0, 10000000)
         return trade_nonce
-
-
-class TermsSingle:
-    """Terms of the single trade."""
-
-    def __init__(self, ledger_api, from_address, to_address, contract):
-        """Initialization."""
-        self.from_address = from_address
-        self.to_address = to_address
-        self.item_id = contract.item_ids[0]
-        self.from_supply = 2
-        self.to_supply = 0
-        self.value_eth_wei = ledger_api.api.toWei('0', 'ether')
-        self.trade_nonce = Helpers().generate_trade_nonce(contract=contract,
-                                                          address=from_address)
-        logger.info("terms_single: from={}, to={}, item_id={}, from_supply={}, to_supply={}, value_eth_wei={}, trade_nonce={}".format(self.from_address,
-                                                                                                                                      self.to_address,
-                                                                                                                                      self.item_id,
-                                                                                                                                      self.from_supply,
-                                                                                                                                      self.to_supply,
-                                                                                                                                      self.value_eth_wei,
-                                                                                                                                      self.trade_nonce))
