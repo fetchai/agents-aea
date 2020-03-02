@@ -57,6 +57,17 @@ def connection(ctx: Context, connection_id):
         push_item(ctx, "connection", connection_id)
 
 
+@push.command(name="contract")
+@click.argument("contract-id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_id):
+    """Push connection to Registry or save it in local packages."""
+    if not ctx.config.get("registry"):
+        _save_item_locally(ctx, "contract", contract_id)
+    else:
+        push_item(ctx, "contract", contract_id)
+
+
 @push.command(name="protocol")
 @click.argument("protocol-id", type=PublicIdParameter(), required=True)
 @pass_ctx

@@ -589,6 +589,7 @@ class AgentConfig(PackageConfiguration):
         self._default_ledger = None  # type: Optional[str]
         self._default_connection = None  # type: Optional[PublicId]
         self.connections = set()  # type: Set[PublicId]
+        self.contracts = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
         self.skills = set()  # type: Set[PublicId]
 
@@ -683,6 +684,10 @@ class AgentConfig(PackageConfiguration):
             map(lambda x: PublicId.from_str(x), obj.get("connections", []))
         )
         agent_config.connections = cast(Set[PublicId], connections)
+
+        # parse contracts public ids
+        contracts = set(map(lambda x: PublicId.from_str(x), obj.get("contracts", [])))
+        agent_config.contracts = cast(Set[PublicId], contracts)
 
         # parse protocol public ids
         protocols = set(map(lambda x: PublicId.from_str(x), obj.get("protocols", [])))

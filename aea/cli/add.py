@@ -162,6 +162,14 @@ def connection(click_context, connection_public_id: PublicId):
 
 
 @add.command()
+@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
+@pass_context
+def contract(click_context, contract_public_id: PublicId):
+    """Add a contract to the configuration file."""
+    _add_item(click_context, "contract", contract_public_id)
+
+
+@add.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_context
 def protocol(click_context, protocol_public_id):
