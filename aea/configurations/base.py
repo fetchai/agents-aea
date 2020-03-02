@@ -752,6 +752,17 @@ class ProtocolSpecification(ProtocolConfig):
         """Initialize a protocol specification configuration object."""
         super().__init__(name, author, version, license, description=description)
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
+        self._protobuf_snippets = None  # type: Optional[Dict]
+
+    @property
+    def protobuf_snippets(self) -> Optional[Dict]:
+        """Get the protobuf snippets."""
+        return self._protobuf_snippets
+
+    @protobuf_snippets.setter
+    def protobuf_snippets(self, protobuf_snippets: Optional[Dict]):
+        """Set the protobuf snippets."""
+        self._protobuf_snippets = protobuf_snippets
 
     @property
     def json(self) -> Dict:

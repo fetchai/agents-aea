@@ -70,6 +70,7 @@ Commands:
   get-wealth       Get the wealth associated with the private key.
   gui              Run the CLI GUI.
   install          Install the dependencies.
+  launch           Launch many agents.
   list             List the installed resources.
   login            Login to Registry account
   publish          Publish Agent to Registry.

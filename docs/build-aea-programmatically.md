@@ -14,8 +14,6 @@ First, import the necessary common Python libraries and classes.
 import os
 import time
 from threading import Thread
-
-import yaml
 ```
 
 Then, import the application specific libraries.
@@ -23,7 +21,6 @@ Then, import the application specific libraries.
 ``` python
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
@@ -31,7 +28,6 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
 ```
@@ -86,19 +82,8 @@ Then we pass all of this into the AEA constructor to create our AEA.
 Create the default protocol and add it to the AEA.
 ``` python
     # Add the default protocol (which is part of the AEA distribution)
-    default_protocol_configuration = ProtocolConfig.from_json(
-        yaml.safe_load(
-            open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
-        )
-    )
-    default_protocol = Protocol(
-        PublicId.from_str("fetchai/default:0.1.0"),
-        DefaultSerializer(),
-        default_protocol_configuration,
-    )
-    resources.protocol_registry.register(
-        PublicId.from_str("fetchai/default:0.1.0"), default_protocol
-    )
+    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
+    resources.add_protocol(default_protocol)
 ```
 
 Create the error skill (needed by all AEAs) and the echo skill which will bounce our messages back to us, and add them both to the AEA.
@@ -171,11 +156,8 @@ import os
 import time
 from threading import Thread
 
-import yaml
-
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
@@ -183,7 +165,6 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
 
@@ -220,19 +201,8 @@ def run():
     my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 
     # Add the default protocol (which is part of the AEA distribution)
-    default_protocol_configuration = ProtocolConfig.from_json(
-        yaml.safe_load(
-            open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
-        )
-    )
-    default_protocol = Protocol(
-        PublicId.from_str("fetchai/default:0.1.0"),
-        DefaultSerializer(),
-        default_protocol_configuration,
-    )
-    resources.protocol_registry.register(
-        PublicId.from_str("fetchai/default:0.1.0"), default_protocol
-    )
+    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
+    resources.add_protocol(default_protocol)
 
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(

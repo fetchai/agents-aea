@@ -20,6 +20,7 @@
 """This test module contains the tests for the stub connection."""
 
 import base64
+import os
 import shutil
 import tempfile
 import time
@@ -42,6 +43,7 @@ class TestStubConnection:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
+        cls.cwd = os.getcwd()
         cls.tmpdir = Path(tempfile.mkdtemp())
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
@@ -54,6 +56,7 @@ class TestStubConnection:
         )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
+        os.chdir(cls.tmpdir)
 
     def test_reception(self):
         """Test that the connection receives what has been enqueued in the input file."""
@@ -149,7 +152,11 @@ class TestStubConnection:
     @classmethod
     def teardown_class(cls):
         """Tear down the test."""
-        shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        except (OSError, IOError):
+            pass
         cls.multiplexer.disconnect()
 
 

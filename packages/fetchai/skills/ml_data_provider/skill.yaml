@@ -31,5 +31,5 @@ models:
       is_ledger_tx: False
 protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
 dependencies:
-  tensorflow: {}
+  tensorflow: { version: "==1.14.0" }
   numpy: {}

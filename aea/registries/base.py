@@ -47,7 +47,7 @@ from aea.contracts.base import Contract
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
-from aea.skills.base import AgentContext, Behaviour, Handler, Skill
+from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ DECISION_MAKER = "decision_maker"
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
 ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task)
+SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Registry(Generic[ItemId, Item], ABC):
@@ -671,6 +671,7 @@ class Resources(object):
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = ComponentRegistry[Behaviour]()
+        self.model_registry = ComponentRegistry[Model]()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
@@ -678,6 +679,7 @@ class Resources(object):
             self.protocol_registry,
             self.handler_registry,
             self.behaviour_registry,
+            self.model_registry,
         ]
 
     @property
@@ -743,6 +745,13 @@ class Resources(object):
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
                 self.behaviour_registry.register((skill_id, behaviour.name), behaviour)
+        if skill.models is not None:
+            for model in skill.models.values():
+                self.model_registry.register((skill_id, model.name), model)
+
+    def add_protocol(self, protocol: Protocol):
+        """Add a protocol to the set of resources."""
+        self.protocol_registry.register(protocol.id, protocol)
 
     def inject_contracts(self, skill: Skill) -> None:
         if skill.config.contracts is not None:

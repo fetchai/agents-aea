@@ -20,7 +20,20 @@
 """This test module contains the tests for commands in aea.cli.core module."""
 from unittest import TestCase, mock
 
-from aea.cli.core import _try_get_balance, _wait_funds_release
+from aea.cli import cli
+from aea.cli.core import (
+    _try_add_key,
+    _try_generate_wealth,
+    _try_get_address,
+    _try_get_balance,
+    _try_get_wealth,
+    _wait_funds_release,
+)
+from aea.crypto.fetchai import FETCHAI
+
+from tests.common.click_testing import CliRunner
+from tests.conftest import CLI_LOG_OPTION
+from tests.test_cli.tools_for_testing import ContextMock
 
 
 @mock.patch("aea.cli.core._try_get_balance", return_value=0)
@@ -51,3 +64,126 @@ class TryGetBalanceTestCase(TestCase):
         wallet_mock = mock.Mock()
         wallet_mock.addresses = {"type_": "some-adress"}
         _try_get_balance(agent_config, wallet_mock, "type_")
+
+
+class GenerateWealthTestCase(TestCase):
+    """Test case for _generate_wealth method."""
+
+    @mock.patch("aea.cli.core.Wallet")
+    @mock.patch("aea.cli.core.TESTNETS", {"type": "value"})
+    @mock.patch("aea.cli.core.click.echo")
+    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core._wait_funds_release")
+    def test__generate_wealth_positive(self, *mocks):
+        """Test for _generate_wealth method positive result."""
+        ctx = ContextMock()
+        _try_generate_wealth(ctx, "type", True)
+
+
+class GetWealthTestCase(TestCase):
+    """Test case for _get_wealth method."""
+
+    @mock.patch("aea.cli.core.Wallet")
+    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core._try_get_balance")
+    def test__get_wealth_positive(self, *mocks):
+        """Test for _get_wealth method positive result."""
+        ctx = ContextMock()
+        _try_get_wealth(ctx, "type")
+
+
+class GetAddressTestCase(TestCase):
+    """Test case for _get_address method."""
+
+    @mock.patch("aea.cli.core.Wallet")
+    def test__get_address_positive(self, *mocks):
+        """Test for _get_address method positive result."""
+        ctx = ContextMock()
+        _try_get_address(ctx, "type")
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class AddKeyTestCase(TestCase):
+    """Test case for _add_key method."""
+
+    def test__add_key_positive(self, *mocks):
+        """Test for _add_key method positive result."""
+        ctx = ContextMock()
+        _try_add_key(ctx, "type", "filepath")
+
+
+@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core._try_generate_wealth")
+class GenerateWealthCommandTestCase(TestCase):
+    """Test case for CLI generate_wealth command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_run_positive(self, *mocks):
+        """Test for CLI generate_wealth positive result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "generate-wealth", "--sync", FETCHAI],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+
+
+@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core._try_get_wealth")
+@mock.patch("aea.cli.core.click.echo")
+class GetWealthCommandTestCase(TestCase):
+    """Test case for CLI get_wealth command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_run_positive(self, *mocks):
+        """Test for CLI get_wealth positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "get-wealth", FETCHAI], standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+
+
+@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core._try_get_address")
+@mock.patch("aea.cli.core.click.echo")
+class GetAddressCommandTestCase(TestCase):
+    """Test case for CLI get_address command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_run_positive(self, *mocks):
+        """Test for CLI get_address positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "get-address", FETCHAI], standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+
+
+@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.core._validate_private_key_path")
+@mock.patch("aea.cli.core._try_add_key")
+class AddKeyCommandTestCase(TestCase):
+    """Test case for CLI add_key command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_run_positive(self, *mocks):
+        """Test for CLI add_key positive result."""
+        filepath = "setup.py"  # some existing filepath to pass CLI argument check
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, filepath], standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)

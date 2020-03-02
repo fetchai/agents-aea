@@ -19,14 +19,28 @@
 
 """This module contains the base message and serialization definition."""
 
+import inspect
 import json
+import os
+import re
 from abc import ABC, abstractmethod
 from copy import copy
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.configurations.base import ProtocolConfig, ProtocolId, PublicId
+from aea.configurations.base import (
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    ProtocolConfig,
+    ProtocolId,
+    PublicId,
+)
+from aea.configurations.loader import ConfigLoader
+from aea.helpers.base import (
+    add_agent_component_module_to_sys_modules,
+    load_module,
+)
 from aea.mail.base import Address
 
 
@@ -246,3 +260,35 @@ class Protocol(ABC):
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
         return self._config
+
+    @classmethod
+    def from_dir(cls, directory: str) -> "Protocol":
+        """
+        Load a protocol from a directory.
+
+        :param directory: the skill directory.
+        :param agent_context: the agent's context
+        :return: the Protocol object.
+        :raises Exception: if the parsing failed.
+        """
+        # check if there is the config file. If not, then return None.
+        protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        protocol_config = protocol_loader.load(
+            open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE))
+        )
+        protocol_module = load_module("protocols", Path(directory, "serialization.py"))
+        add_agent_component_module_to_sys_modules(
+            "protocol", protocol_config.name, protocol_config.author, protocol_module
+        )
+        classes = inspect.getmembers(protocol_module, inspect.isclass)
+        serializer_classes = list(
+            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+        )
+        assert len(serializer_classes) == 1, "Not exactly one serializer detected."
+        serializer_class = serializer_classes[0][1]
+
+        protocol_id = PublicId(
+            protocol_config.author, protocol_config.name, protocol_config.version
+        )
+        protocol = Protocol(protocol_id, serializer_class(), protocol_config)
+        return protocol
