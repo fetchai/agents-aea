@@ -59,6 +59,7 @@ class Contract(BaseContract):
 
     @property
     def instance(self) -> EthereumContract:
+        assert self._instance is not None, "Instance not set!"
         return self._instance
 
     @property
