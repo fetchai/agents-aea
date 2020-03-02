@@ -31,6 +31,7 @@ from click import pass_context
 from aea.aea import AEA
 from aea.cli.common import (
     AEAConfigException,
+    AEA_LOGO,
     ConnectionsOption,
     Context,
     _load_env_file,
@@ -281,12 +282,17 @@ def run(
 
     aea = _build_aea(ctx, connection_ids)
 
+    click.echo(AEA_LOGO)
+    click.echo("{} starting ...".format(ctx.agent_config.agent_name))
     try:
         aea.start()
     except KeyboardInterrupt:
-        click.echo("Interrupted.")  # pragma: no cover
+        click.echo(
+            " {} interrupted!".format(ctx.agent_config.agent_name)
+        )  # pragma: no cover
     except Exception as e:
         logger.exception(e)
         sys.exit(1)
     finally:
+        click.echo("{} stopping ...".format(ctx.agent_config.agent_name))
         aea.stop()

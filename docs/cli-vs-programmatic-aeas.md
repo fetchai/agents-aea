@@ -111,26 +111,14 @@ def run():
 
     # Add the oef protocol (which is a package)
     oef_protocol = Protocol.from_dir(
-                os.path.join(
-                    os.getcwd(),
-                    "packages",
-                    "fetchai",
-                    "protocols",
-                    "oef",
-                )
-        )
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef",)
+    )
     resources.add_protocol(oef_protocol)
 
     # Add the fipa protocol (which is a package)
     fipa_protocol = Protocol.from_dir(
-                os.path.join(
-                    os.getcwd(),
-                    "packages",
-                    "fetchai",
-                    "protocols",
-                    "fipa",
-                )
-        )
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
+    )
     resources.add_protocol(fipa_protocol)
 
     # Add the error and weather_station skills

@@ -74,7 +74,7 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: P
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
-
+AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
