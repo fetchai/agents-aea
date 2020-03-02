@@ -1107,7 +1107,7 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
-        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
+        elif content_type.startswith("FrozenSet"):
             # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
@@ -1115,7 +1115,34 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+            decoding_str += indents + "{}_frozenset = frozenset({})\n".format(
+                content_name, content_name
+            )
+            decoding_str += (
+                indents
+                + 'performative_content["{}"] = {}_frozenset\n'.format(
+                    content_name, content_name
+                )
+            )
+        # else:
+        #     decoding_str += (
+        #         indents
+        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+        #             content_name, content_type
+        #         )
+        #     )
+        elif content_type.startswith("Tuple"):
+            # if not self._includes_custom_type(content_type):
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
+            decoding_str += indents + "{}_tuple = tuple({})\n".format(
+                content_name, content_name
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}_tuple\n'.format(
                 content_name, content_name
             )
         # else:
@@ -1133,7 +1160,10 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+            decoding_str += indents + "{}_dict = dict({})\n".format(
+                content_name, content_name
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}_dict\n'.format(
                 content_name, content_name
             )
         # else:

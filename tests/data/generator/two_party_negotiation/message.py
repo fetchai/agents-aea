@@ -25,7 +25,11 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from tests.data.generator.two_party_negotiation.models import DataModel, IOTApp7, Unit
+from tests.data.generator.two_party_negotiation.models import (
+    DataModel,
+    IOTApp7,
+    Unit,
+)
 
 DEFAULT_BODY_SIZE = 4
 
@@ -41,6 +45,8 @@ class TwoPartyNegotiationMessage(Message):
         ACCEPT = "accept"
         CFP = "cfp"
         DECLINE = "decline"
+        INFORM = "inform"
+        INFORM_REPLY = "inform_reply"
         MATCH_ACCEPT = "match_accept"
         PROPOSE = "propose"
 
@@ -71,7 +77,15 @@ class TwoPartyNegotiationMessage(Message):
             performative=TwoPartyNegotiationMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"accept", "cfp", "decline", "match_accept", "propose"}
+        self._performatives = {
+            "accept",
+            "cfp",
+            "decline",
+            "inform",
+            "inform_reply",
+            "match_accept",
+            "propose",
+        }
         assert (
             self._is_consistent()
         ), "This message is invalid according to the 'two_party_negotiation' protocol."
@@ -131,6 +145,12 @@ class TwoPartyNegotiationMessage(Message):
         return cast(bool, self.get("flag"))
 
     @property
+    def inform_number(self) -> Tuple[int, ...]:
+        """Get the 'inform_number' content from the message."""
+        assert self.is_set("inform_number"), "'inform_number' content is not set."
+        return cast(Tuple[int, ...], self.get("inform_number"))
+
+    @property
     def items(self) -> Tuple[Unit, ...]:
         """Get the 'items' content from the message."""
         assert self.is_set("items"), "'items' content is not set."
@@ -159,6 +179,12 @@ class TwoPartyNegotiationMessage(Message):
         """Get the 'query' content from the message."""
         assert self.is_set("query"), "'query' content is not set."
         return cast(DataModel, self.get("query"))
+
+    @property
+    def reply_message(self) -> Dict[int, str]:
+        """Get the 'reply_message' content from the message."""
+        assert self.is_set("reply_message"), "'reply_message' content is not set."
+        return cast(Dict[int, str], self.get("reply_message"))
 
     @property
     def rounds(self) -> FrozenSet[int]:
@@ -251,6 +277,29 @@ class TwoPartyNegotiationMessage(Message):
                             ), "The type of keys and values of 'conditions' dictionary must be 'str' and 'float' respectively."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
+            elif self.performative == TwoPartyNegotiationMessage.Performative.INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.inform_number) == tuple
+                ), "Content 'inform_number' is not of type 'tuple'."
+                assert all(
+                    type(element) == int for element in self.inform_number
+                ), "Elements of the content 'inform_number' are not of type 'int'."
+            elif (
+                self.performative
+                == TwoPartyNegotiationMessage.Performative.INFORM_REPLY
+            ):
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.reply_message) == dict
+                ), "Content 'reply_message' is not of type 'dict'."
+                for key, value in self.reply_message.items():
+                    assert (
+                        type(key) == int
+                    ), "Keys of 'reply_message' dictionary are not of type 'int'."
+                    assert (
+                        type(value) == str
+                    ), "Values of 'reply_message' dictionary are not of type 'str'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
             elif (

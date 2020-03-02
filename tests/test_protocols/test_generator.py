@@ -82,11 +82,14 @@ class TestGenerateProtocol:
     def test_generated_protocol_serialisation(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message
+        reply_message = {1: "number one", 2: "number two", 7: "number seven"}
+        # message 1
         message = TwoPartyNegotiationMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+            performative=TwoPartyNegotiationMessage.Performative.INFORM_REPLY,
+            reply_message=reply_message,
         )
 
         # serialise the message
@@ -104,6 +107,7 @@ class TestGenerateProtocol:
         assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
         assert decoded_message.target == message.target
         assert decoded_message.performative == message.performative
+        assert decoded_message.reply_message == message.reply_message
 
     def test_generated_protocol_end_to_end(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
@@ -165,12 +169,14 @@ class TestGenerateProtocol:
         aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
         aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
 
+        inform_number = tuple((1370, 1991, 1, 4, 17, 6))
         # message 1
         message = TwoPartyNegotiationMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TwoPartyNegotiationMessage.Performative.ACCEPT,
+            performative=TwoPartyNegotiationMessage.Performative.INFORM,
+            inform_number=inform_number,
         )
         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
         envelope = Envelope(
@@ -180,11 +186,13 @@ class TestGenerateProtocol:
             message=encoded_message_in_bytes,
         )
         # message 2
+        reply_message = {1: "number one", 2: "number two", 7: "number seven"}
         message_2 = TwoPartyNegotiationMessage(
             message_id=2,
             dialogue_reference=(str(0), ""),
             target=1,
-            performative=TwoPartyNegotiationMessage.Performative.DECLINE,
+            performative=TwoPartyNegotiationMessage.Performative.INFORM_REPLY,
+            reply_message=reply_message,
         )
         encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(message_2)
 
@@ -253,6 +261,9 @@ class TestGenerateProtocol:
             assert (
                 agent_2_handler.handled_message.performative == message.performative
             ), "Message from Agent 1 to 2: performatives do not match"
+            assert (
+                agent_2_handler.handled_message.inform_number == message.inform_number
+            ), "Message from Agent 1 to 2: inform_numbers do not match"
 
             assert (
                 agent_1_handler.handled_message.message_id == message_2.message_id
@@ -275,6 +286,9 @@ class TestGenerateProtocol:
             assert (
                 agent_1_handler.handled_message.performative == message_2.performative
             ), "Message from Agent 2 to 1: performatives do not match"
+            assert (
+                agent_1_handler.handled_message.reply_message == message_2.reply_message
+            ), "Message from Agent 1 to 2: reply_messages do not match"
             time.sleep(2.0)
         finally:
             aea_1.stop()
