@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import glob
 import importlib
 import os
 import re
@@ -34,17 +33,29 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
     # parse connections dependencies
     connection_module = importlib.import_module("aea.connections")
-    connection_dependencies = {k.split("_")[0] + "-connection": v for k, v in vars(connection_module).items() if re.match(".+_dependencies", k)}
+    connection_dependencies = {
+        k.split("_")[0] + "-connection": v
+        for k, v in vars(connection_module).items()
+        if re.match(".+_dependencies", k)
+    }
     result.update(connection_dependencies)
 
     # parse protocols dependencies
     protocols_module = importlib.import_module("aea.protocols")
-    protocols_dependencies = {k.split("_")[0] + "-protocol": v for k, v in vars(protocols_module).items() if re.match(".+_dependencies", k)}
+    protocols_dependencies = {
+        k.split("_")[0] + "-protocol": v
+        for k, v in vars(protocols_module).items()
+        if re.match(".+_dependencies", k)
+    }
     result.update(protocols_dependencies)
 
     # parse skills dependencies
     skills_module = importlib.import_module("aea.skills")
-    skills_dependencies = {k.split("_")[0] + "-skill": v for k, v in vars(skills_module).items() if re.match(".+_dependencies", k)}
+    skills_dependencies = {
+        k.split("_")[0] + "-skill": v
+        for k, v in vars(skills_module).items()
+        if re.match(".+_dependencies", k)
+    }
     result.update(skills_dependencies)
 
     return result
@@ -52,41 +63,28 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
 def get_all_extras() -> Dict:
 
-    fetch_ledger_deps = [
-        "fetchai-ledger-api==1.0.0rc1"
-    ]
+    fetch_ledger_deps = ["fetchai-ledger-api==1.0.0rc1"]
 
-    ethereum_ledger_deps = [
-        "web3==5.2.2",
-        "eth-account==0.4.0"
-    ]
+    ethereum_ledger_deps = ["web3==5.2.2", "eth-account==0.4.0"]
 
-    crypto_deps = [
-        *fetch_ledger_deps,
-        *ethereum_ledger_deps
-    ]
+    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps]
 
     cli_deps = [
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
         "python-dotenv",
-        *crypto_deps
+        *crypto_deps,
     ]
 
-    cli_gui = [
-        "flask",
-        "connexion[swagger-ui]>=2.4.0",
-        "docker",
-        *cli_deps
-    ]
+    cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", "docker", *cli_deps]
 
     extras = {
         "cli": cli_deps,
         "cli_gui": cli_gui,
         "fetch": fetch_ledger_deps,
         "ethereum": ethereum_ledger_deps,
-        "crypto": crypto_deps
+        "crypto": crypto_deps,
     }
     extras.update(get_aea_extras())
 
@@ -98,11 +96,11 @@ def get_all_extras() -> Dict:
 all_extras = get_all_extras()
 
 base_deps = [
-   *all_extras.get("crypto", []),
+    *all_extras.get("crypto", []),
     "pyyaml>=4.2b1",
     "jsonschema>=3.0.0",
     "protobuf",
-    "watchdog"
+    "watchdog",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -145,17 +143,10 @@ setup(
     install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
-    entry_points={
-        "console_scripts": ["aea=aea.cli:cli"],
-    },
+    entry_points={"console_scripts": ["aea=aea.cli:cli"],},
     zip_safe=False,
     include_package_data=True,
-    data_files=[
-        (
-            os.path.join("aea", "skills", "base", "schemas"),
-            glob.glob(os.path.join("aea", "skills", "base", "schemas", "*.json"))
-        ),
-    ],
+    package_data={"": ["*.json", "*.yaml"]},
     license=about["__license__"],
     python_requires=">=3.6",
     keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
