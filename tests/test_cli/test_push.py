@@ -67,7 +67,7 @@ class SaveItemLocallyTestCase(TestCase):
 
 
 @mock.patch(
-    "aea.cli.push.load_yaml",
+    "aea.cli.push._load_yaml",
     return_value={"author": "author", "name": "name", "version": "0.1.0"},
 )
 class CheckPackagePublicIdTestCase(TestCase):

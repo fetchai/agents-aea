@@ -19,16 +19,23 @@
 
 """This test module contains the tests for cli.common module."""
 
+from builtins import FileNotFoundError
 from unittest import TestCase, mock
 
 from click import ClickException
 
+from yaml import YAMLError
+
 from aea.cli.common import (
+    AEAConfigException,
     PublicIdParameter,
     _format_items,
     _format_skills,
+    _get_or_create_cli_config,
+    _init_cli_config,
     _try_get_item_source_path,
     _try_get_vendorized_item_target_path,
+    _update_cli_config,
 )
 
 
@@ -140,3 +147,63 @@ class PublicIdParameterTestCase(TestCase):
         result = PublicIdParameter.get_metavar("obj", "param")
         expected_result = "PUBLIC_ID"
         self.assertEqual(result, expected_result)
+
+
+@mock.patch("aea.cli.common.os.path.dirname", return_value="dir-name")
+@mock.patch("aea.cli.common.os.path.exists", return_value=False)
+@mock.patch("aea.cli.common.os.makedirs")
+class InitConfigFolderTestCase(TestCase):
+    """Test case for _init_cli_config method."""
+
+    def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
+        """Test for _init_cli_config method positive result."""
+        _init_cli_config()
+        dirname_mock.assert_called_once()
+        exists_mock.assert_called_once_with("dir-name")
+        makedirs_mock.assert_called_once_with("dir-name")
+
+
+# @mock.patch("aea.cli.common._init_cli_config")
+# @mock.patch("aea.cli.common.yaml.dump")
+# @mock.patch("builtins.open", mock.mock_open())
+# class UpdateCLIConfigTestCase(TestCase):
+#     """Test case for _update_cli_config method."""
+
+#     def test_update_cli_config_positive(self, dump_mock, icf_mock):
+#         """Test for _update_cli_config method positive result."""
+#         _update_cli_config({"some": "config"})
+#         icf_mock.assert_called_once()
+#         dump_mock.assert_called_once()
+
+
+def _raise_yamlerror(*args):
+    raise YAMLError()
+
+
+def _raise_file_not_found_error(*args):
+    raise FileNotFoundError()
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class GetOrCreateCLIConfigTestCase(TestCase):
+    """Test case for read_cli_config method."""
+
+    @mock.patch("aea.cli.common.yaml.safe_load", return_value={"correct": "output"})
+    def test_get_or_create_cli_config_positive(self, safe_load_mock):
+        """Test for _get_or_create_cli_config method positive result."""
+        result = _get_or_create_cli_config()
+        expected_result = {"correct": "output"}
+        self.assertEqual(result, expected_result)
+        safe_load_mock.assert_called_once()
+
+    @mock.patch("aea.cli.common.yaml.safe_load", _raise_yamlerror)
+    def test_get_or_create_cli_config_bad_yaml(self):
+        """Test for r_get_or_create_cli_config method bad yaml behavior."""
+        with self.assertRaises(ClickException):
+            _get_or_create_cli_config()
+
+    # @mock.patch("aea.cli.common.yaml.safe_load", _raise_file_not_found_error)
+    # def test_get_or_create_cli_config_file_not_found(self):
+    #     """Test for read_cli_config method bad yaml behavior."""
+    #     with self.assertRaises(AEAConfigException):
+    #         _get_or_create_cli_config()

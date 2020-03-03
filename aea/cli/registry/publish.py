@@ -24,11 +24,10 @@ from typing import Dict
 
 import click
 
-from aea.cli.common import Context, logger
+from aea.cli.common import Context, _load_yaml, logger, try_to_load_agent_config
 from aea.cli.registry.utils import (
     check_is_author_logged_in,
     clean_tarfiles,
-    load_yaml,
     request_api,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
@@ -47,12 +46,17 @@ def _load_agent_config(agent_config_path: str) -> Dict:
             "Agent config not found. Make sure you run push command "
             "from a correct folder."
         )
-    return load_yaml(agent_config_path)
+    return _load_yaml(agent_config_path)
 
 
 @clean_tarfiles
 def publish_agent(ctx: Context):
     """Publish an agent."""
+    try_to_load_agent_config(ctx)
+    import pdb
+
+    pdb.set_trace()
+    ctx.agent_config.author
     agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     agent_config = _load_agent_config(agent_config_path)
     check_is_author_logged_in(agent_config["author"])

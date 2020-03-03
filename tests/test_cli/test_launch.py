@@ -36,7 +36,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from ..common.click_testing import CliRunner
-from ..conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
 class TestLaunch:
@@ -51,7 +51,8 @@ class TestLaunch:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_1])
         assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_2])
@@ -113,6 +114,8 @@ class TestLaunchWithOneFailingAgent:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_1])
         assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_2])

@@ -37,6 +37,7 @@ from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
@@ -138,6 +139,8 @@ class TestSearchAgents:
 
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False
         )
@@ -336,6 +339,9 @@ class TestSearchInAgentDirectory:
             for p in Path(cls.t, "packages", "fetchai", "skills").iterdir()
             if p.name != "echo" and p.is_dir()
         ]
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
 
         # create an AEA proejct and enter into it.
         result = cls.runner.invoke(
