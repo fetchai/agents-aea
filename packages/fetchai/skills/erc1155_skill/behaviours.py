@@ -28,7 +28,7 @@ from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from packages.fetchai.skills.generic_seller.strategy import Strategy
+from packages.fetchai.skills.erc1155_skill.strategy import Strategy
 
 
 SERVICE_ID = ""
@@ -52,6 +52,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+
+        strategy = cast(Strategy, self.context.strategy)
+
         if self.context.ledger_apis.has_fetchai:
             fet_balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
@@ -88,14 +91,15 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         self._register_service()
 
-        contract = self.context.contracts.erc1155
-        self.context.logger.info("Loading details from json")
-        contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
-        dm_message_for_deploy = contract.get_deploy_transaction(
-            deployer_address=self.context.agent_address,
-            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-        )
-        self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
+        if strategy.is_deploying_contract:
+            contract = self.context.contracts.erc1155
+            self.context.logger.info("Loading details from json")
+            contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
+            dm_message_for_deploy = contract.get_deploy_transaction(
+                deployer_address=self.context.agent_address,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            )
+            self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
 
     def act(self) -> None:
         """
@@ -105,35 +109,36 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         contract = self.context.contracts.erc1155
         strategy = cast(Strategy, self.context.strategy)
-        if contract.is_deployed and not contract.is_items_created:
-            create_items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            contract.create_item_ids(token_type=strategy.ft, token_ids=create_items)
+        if strategy.is_deploying_contract:
+            if contract.is_deployed and not contract.is_items_created:
+                create_items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                contract.create_item_ids(token_type=strategy.ft, token_ids=create_items)
 
-            self.context.logger.info("Creating a batch of items")
-            creation_message = contract.get_create_batch_transaction(
-                deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-            )
-            self.context.decision_maker_message_queue.put_nowait(creation_message)
-            contract.is_items_created = True
-            time.sleep(20)
+                self.context.logger.info("Creating a batch of items")
+                creation_message = contract.get_create_batch_transaction(
+                    deployer_address=self.context.agent_address,
+                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                )
+                self.context.decision_maker_message_queue.put_nowait(creation_message)
+                contract.is_items_created = True
+                time.sleep(20)
 
-        if (
+            if (
                 contract.is_deployed
                 and contract.is_items_created
                 and not contract.is_items_minted
-        ):
-            mint_items = [20, 20, 20, 20, 26, 24, 22, 21, 23, 22]
-            self.context.logger.info("Minting a batch of items")
-            mint_message = contract.get_mint_batch_transaction(
-                deployer_address=self.context.agent_address,
-                recipient_address=self.context.agent_address,
-                mint_quantities=mint_items,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-            )
-            self.context.decision_maker_message_queue.put_nowait(mint_message)
-            contract.is_items_created = True
-            time.sleep(10)
+            ):
+                mint_items = [20, 20, 20, 20, 26, 24, 22, 21, 23, 22]
+                self.context.logger.info("Minting a batch of items")
+                mint_message = contract.get_mint_batch_transaction(
+                    deployer_address=self.context.agent_address,
+                    recipient_address=self.context.agent_address,
+                    mint_quantities=mint_items,
+                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                )
+                self.context.decision_maker_message_queue.put_nowait(mint_message)
+                contract.is_items_minted = True
+                time.sleep(10)
 
         self._unregister_service()
         self._register_service()

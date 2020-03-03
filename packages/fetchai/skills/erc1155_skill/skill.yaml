@@ -1,4 +1,4 @@
-name: erc1155_deploy
+name: erc1155_skill
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
@@ -14,6 +14,9 @@ handlers:
   fipa:
     class_name: FIPAHandler
     args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
 models:
   strategy:
     class_name: Strategy
@@ -22,6 +25,7 @@ models:
       is_ledger_tx: True
       nft: 1
       ft: 2
+      is_deploying_contract: False
       search_schema:
         attribute_one:
           name: country

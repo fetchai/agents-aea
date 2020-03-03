@@ -18,19 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-from typing import Any, Dict, List, Optional, Tuple
 
 from aea.helpers.search.models import Description, Query
-from aea.mail.base import Address
 from aea.skills.base import Model
 
-from packages.fetchai.skills.generic_seller.generic_data_model import Generic_Data_Model
+from packages.fetchai.skills.erc1155_skill.generic_data_model import Generic_Data_Model
 
 
 DEFAULT_LEDGER_ID = "ethereum"
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_NFT = 1
 DEFAULT_FT = 2
+DEFAULT_IS_DEPLOYING_CONTRACT = True
 
 
 class Strategy(Model):
@@ -49,6 +48,9 @@ class Strategy(Model):
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self.nft = kwargs.pop("nft", DEFAULT_NFT)
         self.ft = kwargs.pop("ft", DEFAULT_NFT)
+        self.is_deploying_contract = kwargs.pop(
+            "is_deploying_contract", DEFAULT_IS_DEPLOYING_CONTRACT
+        )
 
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
