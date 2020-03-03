@@ -53,9 +53,6 @@ def _load_agent_config(agent_config_path: str) -> Dict:
 def publish_agent(ctx: Context):
     """Publish an agent."""
     try_to_load_agent_config(ctx)
-    import pdb
-
-    pdb.set_trace()
     ctx.agent_config.author
     agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     agent_config = _load_agent_config(agent_config_path)

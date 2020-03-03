@@ -75,6 +75,9 @@ class TestBuildSkill:
 
         os.chdir(cls.t)
         cls.create_result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", "author"], standalone_mode=False
+        )
+        cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
         if cls.create_result.exit_code == 0:
