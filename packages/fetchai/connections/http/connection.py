@@ -23,9 +23,10 @@ import asyncio
 import json
 import logging
 import threading
+import time
 from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Optional, cast
+from typing import Optional, Tuple, cast
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
@@ -34,6 +35,10 @@ import yaml
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+
+SUCCESS = 200
+NOT_FOUND = 404
+REQUEST_TIMEOUT = 408
 
 logger = logging.getLogger(__name__)
 
@@ -71,52 +76,9 @@ class HTTPChannel:
         self.stopped = True
         # It is possible that env need to be stored as self.api_spec_envelope so that it can be sent
         #    upon connection and self.loop has been initialized.
-        api_spec_envelope = (
-            self._process_initial_api(api_spec_path)
-            if api_spec_path is not None
-            else None
-        )
-        self._helper = APIVerificationHelper(api_spec_envelope)
-        # assert self.in_queue is not None, "Input queue not initialized."
-        # assert self.loop is not None, "Loop not initialized."
-        # self.send(api_spec_envelope)
+        self._helper = APIVerificationHelper(api_spec_path)
 
-    def _process_initial_api(self, api_spec_path) -> Envelope:
-        """Process the initial API specification from a file path and package it into an Envelope.
-
-        The API paths are placed into the Envelope's message body, and each path as a key and its content as value.
-        """
-        # the following api_spec format checks will be in their own function check_api (api_spec)
-        try:
-            with open(api_spec_path, "r") as f:
-                api_spec = yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(
-                "API specification YAML source file not found. Please double-check filename and path."
-            )
-        try:
-            paths = api_spec["paths"]
-        except KeyError:
-            logger.error("Key 'paths' not found in API spec.")
-
-        # Prepare the individual contents of the Envelope.
-        # Spec_id the is the sender address of the initial API specificaion.
-        self._spec_id = uuid4().hex
-        # uri = URI(f"http://{self.host}:{self.port}{url}")
-        context = EnvelopeContext(connection_id=self.connection_id)
-        # Put the 'paths' into the Envelope's message body and encode it into bytes.
-        msg_bytes = json.dumps(paths).encode()
-        # Prepare the Envelope itself using the individual contents.
-        envelope = Envelope(
-            to=self.address,
-            sender=self._spec_id,
-            protocol_id=self.protocol_id,
-            context=context,
-            message=msg_bytes,
-        )
-        return envelope
-
-    def _process_incoming_request(
+    def _process_request(
         self, http_method: str, url: str, param: str, body: str = "{}"
     ) -> Envelope:
         """Process incoming API request by packaging into Envelope and sending it in-queue.
@@ -156,13 +118,24 @@ class HTTPChannel:
         assert self.loop is not None, "Loop not initialized."
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
-    def _send_response(self):
-        """Pass the response from out-bounded Envelope back to the front-end client.
-
-        Currently, the response will be written back in the cmd terminal.
+    def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
-        # self.wfile.write(self.path.encode())
-        pass
+        Receive the envelope in_queue. Or in out_queue?
+
+        :param envelope: the envelope
+        :return: None
+        """
+        assert self.in_queue is not None
+        try:
+            # No await keyword as this is not an async function?
+            envelope = self.in_queue.get()
+            # envelope = await self.in_queue.get()
+            # Why does envelope keep getting <coroutine object Queue.get> rather than just None?
+            if envelope is None:
+                return None  # pragma: no cover
+            return envelope
+        except CancelledError:  # pragma: no cover
+            return None
 
     def connect(self):
         """
@@ -214,84 +187,117 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 
         def do_GET(self):
             """Respond to a GET request."""
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-
             parsed_path = urlparse(self.path)
             url = parsed_path.path
-            # url = parsed_path.geturl()
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
 
-            self._send("GET", url, param)
+            response_code, response_desc = self._process("GET", url, param)
+            # Wfile write: for additional response description.
+            self.wfile.write(response_desc.encode())
+            self.send_response(response_code)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
 
         def do_POST(self):
             """Respond to a POST request."""
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-
             parsed_path = urlparse(self.path)
             url = parsed_path.path
-            # url = parsed_path.geturl()
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
-
             content_length = int(self.headers["Content-Length"])
             body = self.rfile.read(content_length).decode()
 
-            self._send("POST", url, param, body)
+            response_code, response_desc = self._process("POST", url, param, body)
+            # Wfile write: for additional response description.
+            self.wfile.write(response_desc.encode())
+            self.send_response(response_code)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
 
-        def _send(
-            self, http_method: str, url: str, param: str, body: Optional[str] = r"{}"
-        ):
-            api_req_envelope = self._channel._process_incoming_request(
-                http_method, url, param, body
-            )
-            response = self._channel._helper._verify(api_req_envelope)
-            # Write the API response back to console
-            console_response = f"\n{response}\n\n"
-            self.wfile.write(console_response.encode())
-            # Send the Envelope to the Agent's InBox.
-            # assert self._channel.in_queue is not None, "Input queue not initialized."
-            # assert self._channel.loop is not None, "Loop not initialized."
-            # self._channel.send(api_req_envelope)
+        def _process(
+            self,
+            http_method: str,
+            url: str,
+            param: str,
+            body: Optional[str] = r"{}",
+            timeout_window: int = 5,
+        ) -> Tuple[int, str]:
+            """Verify the request then send the request to Agent as an envelope."""
+            valid_request = self._channel._helper._verify(http_method, url, param)
+
+            if valid_request:
+                # Create Envelope
+                req_envelope = self._channel._process_request(
+                    http_method, url, param, body
+                )
+                # Send the Envelope to the Agent's InBox.
+                assert (
+                    self._channel.in_queue is not None
+                ), "Input queue not initialized."
+                assert self._channel.loop is not None, "Loop not initialized."
+                self._channel.send(req_envelope)
+                # Wait for response Envelope within given timeout window
+                time.sleep(timeout_window)
+                # Check for response Envelope in Agent's InBox again. Or OutBox?
+                # Note: A handler (i.e. Skill) need to be written in order to finalize the following below.
+                resp_envelop = self._channel.receive()
+                # Write the API response back to console
+                if resp_envelop is not None:
+                    # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
+                    resp_msg = json.loads(resp_envelop.message.decode())
+                    status_code = resp_msg["status_code"]
+                    raw_response = resp_msg["response"]
+                    body = resp_msg["payload"]
+                else:
+                    status_code = REQUEST_TIMEOUT
+                    raw_response = "Request Timeout"
+            else:
+                # Respond "Reqeust Not Found" without sending Envelope
+                status_code = NOT_FOUND
+                raw_response = "Request Not Found"
+
+            console_response = f"\n\nResponse: {raw_response}\nStatus: "
+            return status_code, console_response
 
     return HTTPHandler
 
 
 class APIVerificationHelper:
-    def __init__(self, e: Optional[Envelope]):
+    def __init__(self, api_spec_path: Optional[str]):
         self.valid_paths = {}
-        if e is not None:
-            self.valid_paths = json.loads(e.message.decode())
+        if api_spec_path is not None:
+            # the following api_spec format checks will be in their own function check_api (api_spec)
+            try:
+                with open(api_spec_path, "r") as f:
+                    api_spec = yaml.safe_load(f)
+            except FileNotFoundError:
+                logger.error(
+                    "API specification YAML source file not found. Please double-check filename and path."
+                )
+                return
+            try:
+                self.valid_paths = api_spec["paths"]
+            except KeyError:
+                logger.error("Key 'paths' not found in API spec.")
+                return
 
-    def _verify(self, e: Envelope) -> str:
+    def _verify(self, http_method: str, url: str, param: str) -> bool:
 
-        msg = json.loads(e.message.decode())
-        path_key = msg["path"]
-        params = json.loads(msg["params"])
-        if bool(params):  # Check param dict is not empty
-            param_key, param_value = list(params.items())[0]
+        path_key = url
+        param_dict = json.loads(param)
+        if bool(param_dict):  # Check param dict is not empty
+            param_key, param_value = list(param_dict.items())[0]
             param_value = param_value[0]
             path_key += r"/{" + param_key + r"}"
-        method_key = msg["performative"].lower()
+        method_key = http_method.lower()
 
         try:
-            status_code = "200"
-            response_desc = self.valid_paths[path_key][method_key]["responses"][
-                status_code
-            ]["description"]
-            response = (
-                f"Status Code: '{status_code}', Found path: '{path_key}', HTTP method: '{msg['performative']}', "
-                + f"Response: '{response_desc}'."
-            )
+            path_reconstruction_test = self.valid_paths[path_key][method_key]
+            logger.debug(f"Verified path: {path_reconstruction_test}")
         except KeyError:
-            status_code = "404"
-            response = f"Status Code: '{status_code}', Response: The HTTPServer AEA is unable to verify this request."
-
-        return response
+            return False
+        return True
 
 
 class HTTPConnection(Connection):
@@ -371,15 +377,7 @@ class HTTPConnection(Connection):
             raise ConnectionError(
                 "Connection not established yet. Please use 'connect()'."
             )  # pragma: no cover
-        assert self.channel.in_queue is not None
-        try:
-            envelope = await self.channel.in_queue.get()
-            if envelope is None:
-                return None  # pragma: no cover
-
-            return envelope
-        except CancelledError:  # pragma: no cover
-            return None
+        return self.channel.receive(*args, **kwargs)
 
     @classmethod
     def from_config(
