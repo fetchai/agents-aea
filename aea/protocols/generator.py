@@ -1057,7 +1057,9 @@ class ProtocolGenerator:
             )
         else:
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "serialised_{} = {}.serialise({})\n".format(content_name, content_type, content_name)
+            encoding_str += indents + "serialised_{} = {}.serialise({})\n".format(
+                content_name, content_type, content_name
+            )
             encoding_str += indents + "performative.{} = serialised_{}\n".format(
                 content_name, content_name
             )
