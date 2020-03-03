@@ -334,11 +334,17 @@ class ProtocolGeneratorTestCase(TestCase):
 
     @mock.patch(
         "aea.protocols.generator._get_sub_types_of_compositional_types",
-        return_value=["Tuple"],
+        return_value=["some"],
     )
     def test__includes_custom_type_positive(self, *mocks):
         """Test _includes_custom_type method positive result."""
-        pass  # TODO: finish this test
+        content_type = "Union[str]"
+        result = self.protocol_generator._includes_custom_type(content_type)
+        self.assertTrue(result)
+
+        content_type = "Optional[str]"
+        result = self.protocol_generator._includes_custom_type(content_type)
+        self.assertTrue(result)
 
     @mock.patch("aea.protocols.generator._get_indent_str")
     @mock.patch(
