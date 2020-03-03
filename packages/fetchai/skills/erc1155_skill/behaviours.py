@@ -124,9 +124,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 time.sleep(20)
 
             if (
-                contract.is_deployed
-                and contract.is_items_created
-                and not contract.is_items_minted
+                    contract.is_deployed
+                    and contract.is_items_created
+                    and not contract.is_items_minted
             ):
                 mint_items = [20, 20, 20, 20, 26, 24, 22, 21, 23, 22]
                 self.context.logger.info("Minting a batch of items")
@@ -194,7 +194,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OEFSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating generic seller services on OEF.".format(
+            "[{}]: updating erc1155 service on OEF.".format(
                 self.context.agent_name
             )
         )
@@ -220,7 +220,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OEFSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering generic seller services from OEF.".format(
+            "[{}]: unregistering erc1155 service from OEF.".format(
                 self.context.agent_name
             )
         )

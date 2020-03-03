@@ -7,12 +7,12 @@ description: "The weather station skill implements the functionality to sell wea
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
+    class_name: MySearchBehaviour
     args:
       services_interval: 60
 handlers:
-  fipa:
-    class_name: FIPAHandler
+  default:
+    class_name: DefaultHandler
     args: {}
   transaction:
     class_name: TransactionHandler
@@ -25,7 +25,11 @@ models:
       is_ledger_tx: True
       nft: 1
       ft: 2
-      is_deploying_contract: False
+      is_deploying_contract: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
       search_schema:
         attribute_one:
           name: country

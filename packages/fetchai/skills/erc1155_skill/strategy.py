@@ -19,7 +19,7 @@
 
 """This module contains the strategy class."""
 
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import Model
 
 from packages.fetchai.skills.erc1155_skill.generic_data_model import Generic_Data_Model
@@ -60,6 +60,9 @@ class Strategy(Model):
 
         self._scheme = kwargs.pop("search_data")
         self._datamodel = kwargs.pop("search_schema")
+        self.is_searching = True
+        self.search_query = kwargs.pop("search_query")
+        self._search_id = 0
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -88,3 +91,32 @@ class Strategy(Model):
         """
         # TODO, this is a stub
         return True
+
+    def get_next_search_id(self) -> int:
+        """
+        Get the next search id and set the search time.
+
+        :return: the next search id
+        """
+        self._search_id += 1
+        return self._search_id
+
+    def get_service_query(self) -> Query:
+        """
+        Get the service query of the agent.
+
+        :return: the query
+        """
+        query = Query(
+            [
+                Constraint(
+                    self.search_query["search_term"],
+                    ConstraintType(
+                        self.search_query["constraint_type"],
+                        self.search_query["search_value"],
+                    ),
+                )
+            ],
+            model=None,
+        )
+        return query
