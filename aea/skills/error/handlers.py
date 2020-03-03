@@ -72,7 +72,7 @@ class ErrorHandler(Handler):
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_code=ErrorCode.Type.UNSUPPORTED_PROTOCOL,
             error_msg="Unsupported protocol.",
             error_data={"protocol_id": str.encode(str(envelope.protocol_id))},
         )
@@ -97,7 +97,7 @@ class ErrorHandler(Handler):
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.DECODING_ERROR,
+            error_code=ErrorCode.Type.DECODING_ERROR,
             error_msg="Decoding error.",
             error_data={"envelope": encoded_envelope},
         )
@@ -122,7 +122,7 @@ class ErrorHandler(Handler):
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.INVALID_MESSAGE,
+            error_code=ErrorCode.Type.INVALID_MESSAGE,
             error_msg="Invalid message.",
             error_data={"envelope": encoded_envelope},
         )
@@ -151,7 +151,7 @@ class ErrorHandler(Handler):
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.UNSUPPORTED_SKILL,
+            error_code=ErrorCode.Type.UNSUPPORTED_SKILL,
             error_msg="Unsupported skill.",
             error_data={"envelope": encoded_envelope},
         )

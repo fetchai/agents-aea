@@ -58,7 +58,7 @@ def test_default_error_serialization():
         message_id=1,
         target=0,
         performative=DefaultMessage.Performative.ERROR,
-        error_code=ErrorCode(ErrorCode.ErrorCodeEnum.UNSUPPORTED_PROTOCOL),
+        error_code=ErrorCode(ErrorCode.Type.UNSUPPORTED_PROTOCOL),
         error_msg="An error",
         error_data={"error": b"Some error data"},
     )

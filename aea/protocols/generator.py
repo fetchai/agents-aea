@@ -975,7 +975,16 @@ class ProtocolGenerator:
 
         # Module docstring
         cls_str += str.format(
-            '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n\n\n'
+            '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
+        )
+
+        # Imports
+        cls_str += "from {}.{}.{}.{}_pb2 import {}Message\n".format(
+            PATH_TO_PACKAGES,
+            self.protocol_specification.author,
+            "protocols",
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
         )
 
         if len(self._all_custom_types) == 0:
@@ -983,28 +992,31 @@ class ProtocolGenerator:
 
         # class code per custom type
         for custom_type in self._all_custom_types:
-            cls_str += str.format("class {}:\n", custom_type)
-            cls_str += str.format(
-                '    """This class represents an instance of {}."""\n\n', custom_type
-            )
-            cls_str += "    def __init__(self):\n"
-            cls_str += str.format(
-                '        """Initialise an instance of {}."""\n', custom_type
-            )
-            cls_str += "        raise NotImplementedError\n\n"
-            cls_str += "    @classmethod\n"
-            cls_str += '    def serialise(cls, {}: "{}") -> bytes:\n'.format(
-                _camel_case_to_snake_case(custom_type), custom_type
-            )
-            cls_str += '        """Serialise an instance of this class."""\n'
-            cls_str += "        raise NotImplementedError\n\n"
-            cls_str += "    @classmethod\n"
-            cls_str += '    def deserialise(cls, obj: bytes) -> "{}":\n'.format(
+            cls_str += "\n\nclass {}:\n".format(custom_type)
+            cls_str += '    """This class represents an instance of {}."""\n\n'.format(
                 custom_type
             )
-            cls_str += '        """Deserialise an instance of this class that has been serialised."""\n'
-            cls_str += "        raise NotImplementedError\n\n\n"
-        cls_str = cls_str[:-2]
+            cls_str += "    def __init__(self):\n"
+            cls_str += '        """Initialise an instance of {}."""\n'.format(
+                custom_type
+            )
+            cls_str += "        raise NotImplementedError\n\n"
+            cls_str += "    @classmethod\n"
+            cls_str += '    def encode(cls, performative, {}_from_message: "{}"):\n'.format(
+                _camel_case_to_snake_case(custom_type), custom_type
+            )
+            cls_str += '        """Encode an instance of this class into its protocol buffer object."""\n'
+            cls_str += "        raise NotImplementedError\n\n"
+            cls_str += "    @classmethod\n"
+            cls_str += '    def decode(cls, {}_from_pb2) -> "{}":\n'.format(
+                _camel_case_to_snake_case(custom_type),
+                custom_type,
+            )
+            cls_str += '        """Decode a protocol buffer instance of this class into an object of this class."""\n'
+            cls_str += "        raise NotImplementedError\n\n"
+
+            cls_str += "def __eq__(self, other):\n"
+            cls_str += "    raise NotImplementedError\n"
         return cls_str
 
     def _encoding_message_content_from_python_to_protobuf(

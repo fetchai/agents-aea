@@ -21,42 +21,38 @@
 
 from enum import Enum
 
-from aea.protocols.default import default_pb2
+from aea.protocols.default.default_pb2 import DefaultMessage
 
 
 class ErrorCode:
     """This class represents an instance of ErrorCode."""
 
-    class ErrorCodeEnum(Enum):
+    class Type(Enum):
         UNSUPPORTED_PROTOCOL = 0
         DECODING_ERROR = 1
         INVALID_MESSAGE = 2
         UNSUPPORTED_SKILL = 3
         INVALID_DIALOGUE = 4
 
-    def __init__(self, error_code_enum: ErrorCodeEnum):
+    def __init__(self, error_code_enum: Type):
         """Initialise an instance of ErrorCode."""
         self.error_code_enum = error_code_enum
 
     @classmethod
     def encode(
-        cls,
-        performative: default_pb2.DefaultMessage.Error,
-        error_code_from_message: "ErrorCode",
-    ) -> default_pb2.DefaultMessage.ErrorCode:
-        """Serialise an instance of this class into its protobuf object."""
+        cls, performative, error_code_from_message: "ErrorCode",
+    ):
+        """Encode an instance of this class into its protobuf object."""
         performative.error_code.error_code = (
             error_code_from_message.error_code_enum.value
         )
         return performative
 
     @classmethod
-    def decode(
-        cls, error_code_from_pb2: default_pb2.DefaultMessage.ErrorCode
-    ) -> "ErrorCode":
-        """Deserialise an instance of this class that has been serialised."""
+    def decode(cls, error_code_from_pb2) -> "ErrorCode":
+        """Decode an instance of this class that has been serialised."""
         enum_value_from_pb2 = error_code_from_pb2.error_code
-        error_code_enum = ErrorCode.ErrorCodeEnum(enum_value_from_pb2)
+        error_code_enum = ErrorCode.Type(enum_value_from_pb2)
         error_code = ErrorCode(error_code_enum)
         return error_code
 
