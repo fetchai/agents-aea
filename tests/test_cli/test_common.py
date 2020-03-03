@@ -35,7 +35,7 @@ from aea.cli.common import (
     _init_cli_config,
     _try_get_item_source_path,
     _try_get_vendorized_item_target_path,
-    # _update_cli_config,
+    _update_cli_config,
 )
 
 
@@ -163,17 +163,17 @@ class InitConfigFolderTestCase(TestCase):
         makedirs_mock.assert_called_once_with("dir-name")
 
 
-# @mock.patch("aea.cli.common._init_cli_config")
-# @mock.patch("aea.cli.common.yaml.dump")
-# @mock.patch("builtins.open", mock.mock_open())
-# class UpdateCLIConfigTestCase(TestCase):
-#     """Test case for _update_cli_config method."""
+@mock.patch("aea.cli.common._get_or_create_cli_config")
+@mock.patch("aea.cli.common.yaml.dump")
+@mock.patch("builtins.open", mock.mock_open())
+class UpdateCLIConfigTestCase(TestCase):
+    """Test case for _update_cli_config method."""
 
-#     def test_update_cli_config_positive(self, dump_mock, icf_mock):
-#         """Test for _update_cli_config method positive result."""
-#         _update_cli_config({"some": "config"})
-#         icf_mock.assert_called_once()
-#         dump_mock.assert_called_once()
+    def test_update_cli_config_positive(self, dump_mock, icf_mock):
+        """Test for _update_cli_config method positive result."""
+        _update_cli_config({"some": "config"})
+        icf_mock.assert_called_once()
+        dump_mock.assert_called_once()
 
 
 def _raise_yamlerror(*args):
