@@ -1009,8 +1009,7 @@ class ProtocolGenerator:
             cls_str += "        raise NotImplementedError\n\n"
             cls_str += "    @classmethod\n"
             cls_str += '    def decode(cls, {}_from_pb2) -> "{}":\n'.format(
-                _camel_case_to_snake_case(custom_type),
-                custom_type,
+                _camel_case_to_snake_case(custom_type), custom_type,
             )
             cls_str += '        """Decode a protocol buffer instance of this class into an object of this class."""\n'
             cls_str += "        raise NotImplementedError\n\n"
