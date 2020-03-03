@@ -21,8 +21,6 @@
 
 from enum import Enum
 
-from aea.protocols.default.default_pb2 import DefaultMessage
-
 
 class ErrorCode:
     """This class represents an instance of ErrorCode."""
