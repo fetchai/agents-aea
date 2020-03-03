@@ -75,7 +75,12 @@ def _setup_package_folder(ctx, item_type_plural):
 
 @click.command()
 @click.argument("agent_name", type=str, required=True)
-@click.option("--author", type=str, required=False)
+@click.option(
+    "--author",
+    type=str,
+    required=False,
+    help="Add the author to run `init` before `create` execution.",
+)
 @pass_context
 def create(click_context, agent_name, author):
     """Create an agent."""
