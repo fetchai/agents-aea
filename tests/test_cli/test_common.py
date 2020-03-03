@@ -27,7 +27,7 @@ from click import ClickException
 from yaml import YAMLError
 
 from aea.cli.common import (
-    AEAConfigException,
+    # AEAConfigException,
     PublicIdParameter,
     _format_items,
     _format_skills,
@@ -35,7 +35,7 @@ from aea.cli.common import (
     _init_cli_config,
     _try_get_item_source_path,
     _try_get_vendorized_item_target_path,
-    _update_cli_config,
+    # _update_cli_config,
 )
 
 

@@ -28,6 +28,7 @@ from typing import List, cast
 import click
 from click import pass_context
 
+from aea import __version__
 from aea.aea import AEA
 from aea.cli.common import (
     AEAConfigException,
@@ -282,7 +283,7 @@ def run(
 
     aea = _build_aea(ctx, connection_ids)
 
-    click.echo(AEA_LOGO)
+    click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo("{} starting ...".format(ctx.agent_config.agent_name))
     try:
         aea.start()

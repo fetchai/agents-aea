@@ -21,7 +21,9 @@
 
 import click
 
+from aea import __version__
 from aea.cli.common import (
+    AEA_LOGO,
     AUTHOR,
     Context,
     _get_or_create_cli_config,
@@ -56,6 +58,9 @@ def init(ctx: Context, author: str):
                 )
         _update_cli_config({AUTHOR: author})
         config = _get_or_create_cli_config()
+        click.echo(AEA_LOGO)
+        click.echo(AEA_LOGO + "v" + __version__ + "\n")
         click.echo("AEA configurations successfully initialized: {}".format(config))
     else:
+        click.echo(AEA_LOGO + "v" + __version__ + "\n")
         click.echo("AEA configurations already initialized: {}".format(config))
