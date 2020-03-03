@@ -53,22 +53,13 @@ class TransactionHandler(Handler):
             self.context.logger.info(result)
             contract.set_address(ledger_api, result)
             self.context.logger.info(contract.is_deployed)
-            # while contract.instance.address is None:
-            #     contract.set_address(
-            #         contract_address=result.contractAddress,
-            #         ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-            #     )
-            #     time.sleep(3)
-            # contract.is_deployed = True
         elif tx_msg_response.tx_id == "contract_create_batch":
-            self.context.logger.info(contract.instance.address)
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_raw_transaction(  # type: ignore
                 tx_msg_response.signed_payload.get("tx_signed")
             )
             self.context.logger.info(result)
         elif tx_msg_response.tx_id == "contract_mint_batch":
-            self.context.logger.info(contract.instance.address)
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
             result = ledger_api.send_raw_transaction(  # type: ignore
                 tx_msg_response.signed_payload.get("tx_signed")

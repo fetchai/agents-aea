@@ -51,7 +51,7 @@ class ERC1155Behaviour(Behaviour):
         contract = self.context.contracts.erc1155
         if contract.is_deployed and not contract.is_items_created:
             create_items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            contract.create_item_ids(token_ids=create_items)
+            contract.create_item_ids(token_type=2, token_ids=create_items)
 
             self.context.logger.info("Creating a batch of items")
             creation_message = contract.get_create_batch_transaction(

@@ -63,7 +63,7 @@ class ERC1155Contract(Contract):
 
     def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
         """Populate the item_ids list."""
-        assert self.token_ids is [], "Item ids already created."
+        assert len(self.token_ids) == 0, "Item ids already created."
         self.token_ids = token_ids
         for token_id in token_ids:
             self.item_ids.append(Helpers().generate_id(token_type, token_id))
@@ -253,7 +253,7 @@ class ERC1155Contract(Contract):
         :params signature: The signed terms from the counterparty.
         """
         data = b"hello"
-        nonce = ledger_api.api.eth.getTransactionCount(from_address)
+        nonce = ledger_api.api.eth.getTransactionCount(from_address) + 1
         tx = self.instance.functions.trade(
             from_address,
             to_address,
@@ -285,10 +285,7 @@ class ERC1155Contract(Contract):
         :params signature: The signed terms from the counterparty.
         """
         data = b"hello"
-        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address)
-        import pdb
-
-        pdb.set_trace()
+        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address) + 1
         tx = self.instance.functions.tradeBatch(
             terms.from_address,
             terms.to_address,
@@ -345,7 +342,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
-            tx_id="contract_deployment",
+            tx_id="contract_atomic_swap_single",
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -389,28 +386,37 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_hash_single_transaction(self, terms) -> TransactionMessage:
+    def get_hash_single_transaction(
+        self,
+        from_address,
+        to_address,
+        item_id,
+        from_supply,
+        to_supply,
+        value,
+        trade_nonce,
+        ledger_api,
+    ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
-        from_address_hash = self.instance.functions.getAddress(
-            terms.from_address
-        ).call()
-        to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
+        from_address_hash = self.instance.functions.getAddress(from_address).call()
+        to_address_hash = self.instance.functions.getAddress(to_address).call()
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
         tx_hash = Helpers().get_single_hash(
             _from=from_address_hash,
             _to=to_address_hash,
-            _id=terms.item_id,
-            _from_value=terms.from_supply,
-            _to_value=terms.to_supply,
-            _value_eth=terms.value_eth_wei,
-            _nonce=terms.trade_nonce,
+            _id=item_id,
+            _from_value=from_supply,
+            _to_value=to_supply,
+            _value_eth=value_eth_wei,
+            _nonce=trade_nonce,
         )
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
-            tx_id="contract_deployment",
-            tx_sender_addr=terms.from_address,
+            tx_id="contract-sign-hash",
+            tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
             tx_sender_fee=0,
@@ -423,26 +429,35 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_hash_batch_transaction(self, terms):
+    def get_hash_batch_transaction(
+        self,
+        from_address,
+        to_address,
+        item_ids,
+        from_supplies,
+        to_supplies,
+        value,
+        trade_nonce,
+        ledger_api,
+    ):
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
-        from_address_hash = self.instance.functions.getAddress(
-            terms.from_address
-        ).call()
-        to_address_hash = self.instance.functions.getAddress(terms.to_address).call()
+        from_address_hash = self.instance.functions.getAddress(from_address).call()
+        to_address_hash = self.instance.functions.getAddress(to_address).call()
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
         tx_hash = Helpers().get_hash(
             _from=from_address_hash,
             _to=to_address_hash,
-            _ids=terms.item_ids,
-            _from_values=terms.from_supplies,
-            _to_values=terms.to_supplies,
-            _value_eth=terms.value_eth_wei,
-            _nonce=terms.trade_nonce,
+            _ids=item_ids,
+            _from_values=from_supplies,
+            _to_values=to_supplies,
+            _value_eth=value_eth_wei,
+            _nonce=trade_nonce,
         )
 
         return tx_hash
 
-    def generate_trade_nonce(self, address):  # nosec
+    def generate_trade_nonce(self, address):
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():

@@ -77,14 +77,14 @@ class Contract(BaseContract):
             abi=self.abi, bytecode=self.bytecode
         )
 
-    def set_address(self, ledger_api: EthereumApi, tx_digest: str) -> None:
+    def set_address(self, ledger_api: EthereumApi, contract_address: str) -> None:
         """
         Set the contract address.
 
+        :param ledger_api: the ledger_api we are using.
         :param contract_address: the contract address
         """
         assert self.instance.address is None, "Address already set!"
-        result = ledger_api.api.eth.getTransactionReceipt(tx_digest)
         self._instance = ledger_api.api.eth.contract(
-            address=result.contractAddress, abi=self.abi
+            address=contract_address, abi=self.abi
         )
