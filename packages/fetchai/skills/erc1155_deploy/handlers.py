@@ -23,7 +23,7 @@ from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.helpers.search.models import Description, Query
+from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer

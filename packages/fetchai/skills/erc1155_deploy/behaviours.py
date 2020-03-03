@@ -148,7 +148,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-            self.context.self.context.logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on fetchai ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -158,7 +158,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
-            self.context.self.context.logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on ethereum ledger={}.".format(
                     self.context.agent_name, balance
                 )

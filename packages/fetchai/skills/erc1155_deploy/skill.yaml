@@ -4,6 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint: {}
 description: "The weather station skill implements the functionality to sell weather data."
+contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   service_registration:
     class_name: ServiceRegistrationBehaviour
@@ -17,7 +18,7 @@ models:
   strategy:
     class_name: Strategy
     args:
-      ledger_id: 'fetchai'
+      ledger_id: 'ethereum'
       is_ledger_tx: True
       nft: 1
       ft: 2
@@ -38,3 +39,5 @@ models:
     args: {}
 protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
+dependencies:
+  vyper: { version: "==0.1.0b12"}
