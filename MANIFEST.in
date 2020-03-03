@@ -1,5 +1,6 @@
 include README.md LICENSE HISTORY.md AUTHORS.md Pipfile mkdocs.yml tox.ini pytest.ini strategy.ini
 
+recursive-include aea *.json *.yaml
 recursive-include docs *
 recursive-include examples *
 recursive-include packages *
