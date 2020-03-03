@@ -313,7 +313,11 @@ class Behaviour(SkillComponent):
         behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(
-            filter(lambda x: re.match("\\w+Behaviour", x[0]), classes)
+            filter(
+                lambda x: re.match("\\w+Behaviour", x[0])
+                and not str.startswith(x[1].__module__, "aea."),
+                classes,
+            )
         )
 
         name_to_class = dict(behaviours_classes)
@@ -379,7 +383,13 @@ class Handler(SkillComponent):
         handler_module = importlib.util.module_from_spec(handler_spec)
         handler_spec.loader.exec_module(handler_module)  # type: ignore
         classes = inspect.getmembers(handler_module, inspect.isclass)
-        handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
+        handler_classes = list(
+            filter(
+                lambda x: re.match("\\w+Handler", x[0])
+                and not str.startswith(x[1].__module__, "aea."),
+                classes,
+            )
+        )
 
         name_to_class = dict(handler_classes)
         for handler_id, handler_config in handler_configs.items():
@@ -464,7 +474,8 @@ class Model(SkillComponent):
             filtered_classes = list(
                 filter(
                     lambda x: any(re.match(shared, x[0]) for shared in model_names)
-                    and Model in inspect.getmro(x[1]),
+                    and Model in inspect.getmro(x[1])
+                    and not str.startswith(x[1].__module__, "aea."),
                     classes,
                 )
             )
