@@ -72,6 +72,16 @@ class ConfigLoader(Generic[T]):
         self._validator = Draft4Validator(self._schema, resolver=self._resolver)
         self._configuration_type = configuration_type  # type: Type[T]
 
+    @property
+    def validator(self) -> Draft4Validator:
+        """Get the json schema validator."""
+        return self._validator
+
+    @property
+    def configuration_type(self) -> Type[T]:
+        """Get the configuration type of the loader."""
+        return self._configuration_type
+
     def load_protocol_specification(self, fp: TextIO) -> T:
         """
         Load an agent configuration file.
@@ -92,10 +102,10 @@ class ConfigLoader(Generic[T]):
         else:
             raise ValueError("Wrong number of documents in protocol specification.")
         try:
-            self._validator.validate(instance=configuration_file_json)
+            self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        protocol_specification = self._configuration_type.from_json(
+        protocol_specification = self.configuration_type.from_json(
             configuration_file_json
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
@@ -111,10 +121,10 @@ class ConfigLoader(Generic[T]):
         """
         configuration_file_json = yaml.safe_load(fp)
         try:
-            self._validator.validate(instance=configuration_file_json)
+            self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        return self._configuration_type.from_json(configuration_file_json)
+        return self.configuration_type.from_json(configuration_file_json)
 
     def dump(self, configuration: T, fp: TextIO) -> None:
         """Dump a configuration.
@@ -124,7 +134,7 @@ class ConfigLoader(Generic[T]):
         :return: None
         """
         result = configuration.json
-        self._validator.validate(instance=result)
+        self.validator.validate(instance=result)
         yaml.safe_dump(result, fp)
 
     @classmethod
