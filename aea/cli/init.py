@@ -58,9 +58,8 @@ def init(ctx: Context, author: str):
                 )
         _update_cli_config({AUTHOR: author})
         config = _get_or_create_cli_config()
-        click.echo(AEA_LOGO)
-        click.echo(AEA_LOGO + "v" + __version__ + "\n")
-        click.echo("AEA configurations successfully initialized: {}".format(config))
+        success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
-        click.echo(AEA_LOGO + "v" + __version__ + "\n")
-        click.echo("AEA configurations already initialized: {}".format(config))
+        success_msg = "AEA configurations already initialized: {}".format(config)
+    click.echo(AEA_LOGO + "v" + __version__ + "\n")
+    click.echo(success_msg)

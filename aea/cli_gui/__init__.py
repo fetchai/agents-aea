@@ -46,6 +46,8 @@ elements = [
     ["local", "skill", "localSkills"],
 ]
 
+DEFAULT_AUTHOR = "default_author"
+
 
 class ProcessState(Enum):
     """The state of execution of the OEF Node."""
@@ -165,7 +167,15 @@ def create_agent(agent_id: str):
     """Create a new AEA project."""
     if (
         _call_aea(
-            [sys.executable, "-m", "aea.cli", "create", agent_id],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "create",
+                agent_id,
+                "--author",
+                DEFAULT_AUTHOR,
+            ],
             app_context.agents_dir,
         )
         == 0

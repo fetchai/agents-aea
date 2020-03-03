@@ -20,11 +20,10 @@
 
 import os
 import tarfile
-from typing import Dict
 
 import click
 
-from aea.cli.common import Context, _load_yaml, logger, try_to_load_agent_config
+from aea.cli.common import Context, logger, try_to_load_agent_config
 from aea.cli.registry.utils import (
     check_is_author_logged_in,
     clean_tarfiles,
@@ -40,35 +39,25 @@ def _compress(output_filename: str, *filepaths):
             f.add(filepath, arcname=os.path.basename(filepath))
 
 
-def _load_agent_config(agent_config_path: str) -> Dict:
-    if not os.path.exists(agent_config_path):
-        raise click.ClickException(
-            "Agent config not found. Make sure you run push command "
-            "from a correct folder."
-        )
-    return _load_yaml(agent_config_path)
-
-
 @clean_tarfiles
 def publish_agent(ctx: Context):
     """Publish an agent."""
     try_to_load_agent_config(ctx)
-    ctx.agent_config.author
-    agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
-    agent_config = _load_agent_config(agent_config_path)
-    check_is_author_logged_in(agent_config["author"])
+    check_is_author_logged_in(ctx.agent_config.author)
 
-    name = agent_config["agent_name"]
+    name = ctx.agent_config.agent_name
+    agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     output_tar = os.path.join(ctx.cwd, "{}.tar.gz".format(name))
     _compress(output_tar, agent_config_path)
 
     data = {
         "name": name,
-        "description": agent_config["description"],
-        "version": agent_config["version"],
+        "description": ctx.agent_config.description,
+        "version": ctx.agent_config.version,
+        "connections": ctx.agent_config.connections,
+        "protocols": ctx.agent_config.protocols,
+        "skills": ctx.agent_config.skills,
     }
-    for key in ("connections", "protocols", "skills"):
-        data[key] = agent_config[key]
 
     path = "/agents/create"
     logger.debug("Publishing agent {} to Registry ...".format(name))

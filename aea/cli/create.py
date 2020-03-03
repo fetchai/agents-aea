@@ -43,6 +43,7 @@ from aea.cli.common import (
     _get_or_create_cli_config,
     logger,
 )
+from aea.cli.init import init
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 
@@ -74,8 +75,9 @@ def _setup_package_folder(ctx, item_type_plural):
 
 @click.command()
 @click.argument("agent_name", type=str, required=True)
+@click.option("--author", type=str, required=False)
 @pass_context
-def create(click_context, agent_name):
+def create(click_context, agent_name, author):
     """Create an agent."""
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
@@ -85,11 +87,14 @@ def create(click_context, agent_name):
         )
         sys.exit(1)
 
+    if author is not None:
+        click_context.invoke(init, author=author)
+
     config = _get_or_create_cli_config()
-    author = config.get(AUTHOR, None)
-    if author is None:
+    set_author = config.get(AUTHOR, None)
+    if set_author is None:
         click.echo(
-            "The AEA configurations are not initialized. Uses `aea init` before continuing."
+            "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
         )
         sys.exit(1)
 
@@ -109,7 +114,7 @@ def create(click_context, agent_name):
         agent_config = AgentConfig(
             agent_name=agent_name,
             aea_version=aea.__version__,
-            author=author,
+            author=set_author,
             version=DEFAULT_VERSION,
             license=DEFAULT_LICENSE,
             fingerprint="",
