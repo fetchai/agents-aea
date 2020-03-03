@@ -259,14 +259,27 @@ def _setup_connection(
     default=False,
     help="Install all the dependencies before running the agent.",
 )
+@click.option(
+    "--skip-consistency-check",
+    "skip_check",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="Skip consistency check..",
+)
 @pass_context
 def run(
-    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
+    click_context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+    skip_check: bool,
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     try_to_load_agent_config(ctx)
-    _validate_config_consistency(ctx)
+    if not skip_check:
+        _validate_config_consistency(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
 

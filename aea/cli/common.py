@@ -547,7 +547,12 @@ def _check_package_fingerprints(
 
 
 def _validate_config_consistency(ctx: Context):
-    """Validate fingerprints for every agent component."""
+    """
+    Validate fingerprints for every agent component.
+
+    :raise ValueError: if the fingerprints do not match
+                       or if the packages are bad formatted (e.g. missing configuration file.)
+    """
 
     packages_public_ids_to_types = dict(
         [
@@ -571,6 +576,7 @@ def _validate_config_consistency(ctx: Context):
 
         loader = ConfigLoaders.from_configuration_type(item_type)
         config_file_name = _get_default_configuration_file_name_from_type(item_type)
+
         package_configuration = loader.load(
             (package_directory / config_file_name).open("r")
         )
