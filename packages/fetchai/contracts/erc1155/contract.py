@@ -442,7 +442,7 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
-    def generate_trade_nonce(self, address):
+    def generate_trade_nonce(self, address):  # nosec
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():
@@ -510,10 +510,3 @@ class Helpers:
         index = item_id
         final_id_int = (token_id << 128) + index
         return final_id_int
-
-    def generate_trade_nonce(self, contract, address):
-        """Generate a valid trade nonce."""
-        trade_nonce = random.randrange(0, 10000000)
-        while contract.instance.functions.is_nonce_used(address, trade_nonce).call():
-            trade_nonce = random.randrange(0, 10000000)
-        return trade_nonce

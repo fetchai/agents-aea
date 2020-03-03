@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a handler."""
-import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
