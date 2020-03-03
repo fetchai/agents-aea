@@ -129,7 +129,7 @@ class TestSkillContext:
         assert set(self.skill_context.ledger_apis.apis.keys()) == {"fetchai"}
 
     @classmethod
-    def teardown(cls):
+    def teardown_class(cls):
         """Test teardown."""
         pass
 
@@ -193,8 +193,11 @@ class TestSkillFromDir:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
-        shutil.rmtree(cls.t)
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class SkillContextTestCase(TestCase):

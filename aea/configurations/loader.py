@@ -70,31 +70,60 @@ class ConfigLoader(Generic[T]):
         self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
-    def load(self, fp: TextIO) -> T:
+    def load_protocol_specification(self, file_pointer: TextIO) -> T:
         """
         Load an agent configuration file.
 
-        :param fp: the file pointer to the configuration file
+        :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
         :raises
         """
-        configuration_file_json = yaml.safe_load(fp)
+        yaml_data = yaml.safe_load_all(file_pointer)
+        yaml_documents = []
+        for document in yaml_data:
+            yaml_documents.append(document)
+        configuration_file_json = yaml_documents[0]
+        if len(yaml_documents) == 2:
+            protobuf_snippets_json = yaml_documents[1]
+        elif len(yaml_documents) == 1:
+            protobuf_snippets_json = {}
+        else:
+            raise ValueError("Wrong number of documents in protocol specification.")
+        try:
+            self.validator.validate(instance=configuration_file_json)
+        except Exception:
+            raise
+        protocol_specification = self.configuration_type.from_json(
+            configuration_file_json
+        )
+        protocol_specification.protobuf_snippets = protobuf_snippets_json
+        return protocol_specification
+
+    def load(self, file_pointer: TextIO) -> T:
+        """
+        Load an agent configuration file.
+
+        :param file_pointer: the file pointer to the configuration file
+        :return: the configuration object.
+        :raises
+        """
+        configuration_file_json = yaml.safe_load(file_pointer)
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
         return self.configuration_type.from_json(configuration_file_json)
 
-    def dump(self, configuration: T, fp: TextIO) -> None:
+    def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
 
         :param configuration: the configuration to be dumped.
-        :param fp: the file pointer to the configuration file
+        :param file_pointer: the file pointer to the configuration file
         :return: None
         """
         result = configuration.json
         self.validator.validate(instance=result)
-        yaml.safe_dump(result, fp)
+        yaml.safe_dump(result, file_pointer)
 
     @classmethod
     def from_configuration_type(
@@ -117,7 +146,7 @@ class ConfigLoader(Generic[T]):
 def _config_loader():
     envvar_matcher = re.compile(r"\${([^}^{]+)\}")
 
-    def envvar_constructor(loader, node):  # pragma: no cover
+    def envvar_constructor(_loader, node):  # pragma: no cover
         """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = envvar_matcher.match(node_value)

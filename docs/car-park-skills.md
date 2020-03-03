@@ -65,13 +65,13 @@ aea install
 
 Additionally, create the private key for the car data buyer AEA based on the network you want to transact.
 
-To generate and add a key for Fetch.ai use:
+To generate and add a private-public key pair for Fetch.ai use:
 ```bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-To generate and add a key for Ethereum use:
+To generate and add a private-public key pair for Ethereum use:
 ```bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt

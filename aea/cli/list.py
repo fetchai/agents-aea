@@ -27,9 +27,9 @@ import click
 
 from aea.cli.common import (
     Context,
-    format_items,
+    _format_items,
+    _retrieve_details,
     pass_ctx,
-    retrieve_details,
     try_to_load_agent_config,
 )
 from aea.configurations.base import (
@@ -71,7 +71,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
         configuration_loader = ConfigLoader.from_configuration_type(
             ConfigurationType(item_type)
         )
-        details = retrieve_details(
+        details = _retrieve_details(
             public_id.name, configuration_loader, str(configuration_filepath)
         )
         result.append(details)
@@ -83,7 +83,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
 def connections(ctx: Context):
     """List all the installed connections."""
     result = _get_item_details(ctx, "connection")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -91,7 +91,7 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the installed protocols."""
     result = _get_item_details(ctx, "protocol")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -99,4 +99,4 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the installed skills."""
     result = _get_item_details(ctx, "skill")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))

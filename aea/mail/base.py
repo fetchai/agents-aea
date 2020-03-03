@@ -592,7 +592,7 @@ class Multiplexer:
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
                 logger.debug("Waiting for incoming messages...")
-                done, pending = await asyncio.wait(
+                done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
 
@@ -690,7 +690,7 @@ class Multiplexer:
         fut.result()
 
 
-class InBox(object):
+class InBox:
     """A queue from where you can only consume messages."""
 
     def __init__(self, multiplexer: Multiplexer):
@@ -744,7 +744,7 @@ class InBox(object):
         return envelope
 
 
-class OutBox(object):
+class OutBox:
     """A queue from where you can only enqueue messages."""
 
     def __init__(self, multiplexer: Multiplexer):

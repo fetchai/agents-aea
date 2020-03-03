@@ -25,31 +25,13 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from tests.data.generator.two_party_negotiation.models import (
+    DataModel,
+    IOTApp7,
+    Unit,
+)
+
 DEFAULT_BODY_SIZE = 4
-
-
-class DataModel:
-    """This class represents an instance of DataModel."""
-
-    def __init__(self):
-        """Initialise an instance of DataModel."""
-        raise NotImplementedError
-
-
-class IOTApp7:
-    """This class represents an instance of IOTApp7."""
-
-    def __init__(self):
-        """Initialise an instance of IOTApp7."""
-        raise NotImplementedError
-
-
-class Unit:
-    """This class represents an instance of Unit."""
-
-    def __init__(self):
-        """Initialise an instance of Unit."""
-        raise NotImplementedError
 
 
 class TwoPartyNegotiationMessage(Message):
@@ -204,14 +186,14 @@ class TwoPartyNegotiationMessage(Message):
             assert type(self.target) == int, "target is not int"
 
             # Light Protocol Rule 2
-            # # Check correct performative
+            # Check correct performative
             assert (
                 type(self.performative) == TwoPartyNegotiationMessage.Performative
             ), "'{}' is not in the list of valid performatives: {}".format(
                 self.performative, self.valid_performatives
             )
 
-            # # Check correct contents
+            # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             if self.performative == TwoPartyNegotiationMessage.Performative.CFP:
                 expected_nb_of_contents = 1
@@ -281,7 +263,7 @@ class TwoPartyNegotiationMessage(Message):
             ):
                 expected_nb_of_contents = 0
 
-            # # Check correct content count
+            # Check correct content count
             assert (
                 expected_nb_of_contents == actual_nb_of_contents
             ), "Incorrect number of contents. Expected {} contents. Found {}".format(

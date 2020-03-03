@@ -76,6 +76,7 @@ class AgentContext:
 
     @property
     def identity(self) -> Identity:
+        """Get the identity."""
         return self._identity
 
     @property
