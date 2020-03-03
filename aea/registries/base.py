@@ -230,8 +230,13 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         :param protocol_directory: the directory of the protocol to be added.
         :return: None
         """
-        # get the serializer
         protocol_name = protocol_directory.name
+        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        protocol_config = config_loader.load(
+            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
+        )
+
+        # get the serializer
         serialization_spec = importlib.util.spec_from_file_location(
             "serialization", protocol_directory / "serialization.py"
         )
@@ -250,12 +255,7 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         )
         serializer = serializer_class()
 
-        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(
-            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
-        )
-
-        # instantiate the protocol manager.
+        # instantiate the protocol
         protocol = Protocol(protocol_config.public_id, serializer, protocol_config)
         protocol_public_id = PublicId(
             protocol_config.author, protocol_config.name, protocol_config.version
@@ -506,7 +506,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         return self.fetch_by_protocol_and_skill(INTERNAL_PROTOCOL_ID, skill_id)
 
 
-class Resources(object):
+class Resources:
     """This class implements the resources of an AEA."""
 
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
@@ -594,6 +594,10 @@ class Resources(object):
             for model in skill.models.values():
                 self.model_registry.register((skill_id, model.name), model)
 
+    def add_protocol(self, protocol: Protocol):
+        """Add a protocol to the set of resources."""
+        self.protocol_registry.register(protocol.id, protocol)
+
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
         return self._skills.get(skill_id, None)
@@ -638,7 +642,7 @@ class Resources(object):
             r.teardown()
 
 
-class Filter(object):
+class Filter:
     """This class implements the filter of an AEA."""
 
     def __init__(self, resources: Resources, decision_maker_out_queue: Queue):

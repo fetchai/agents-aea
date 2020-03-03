@@ -417,7 +417,8 @@ class Preferences:
         )
         return new_score - current_score
 
-    def _split_tx_fees(self, tx_fee: int) -> Dict[str, int]:
+    @staticmethod
+    def _split_tx_fees(tx_fee: int) -> Dict[str, int]:
         """
         Split the transaction fee.
 
@@ -479,6 +480,7 @@ class DecisionMaker:
 
     @property
     def wallet(self) -> Wallet:
+        """Get wallet."""
         return self._wallet
 
     @property
@@ -523,6 +525,7 @@ class DecisionMaker:
             self._thread.start()
 
     def stop(self):
+        """Stop the decision maker."""
         with self._lock:
             self._stopped = True
             self.message_in_queue.put(None)
@@ -649,7 +652,8 @@ class DecisionMaker:
         )
         return result
 
-    def _is_valid_tx_amount(self, tx_message: TransactionMessage) -> bool:
+    @staticmethod
+    def _is_valid_tx_amount(tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction amount is negative (agent is buyer).
 
@@ -780,7 +784,8 @@ class DecisionMaker:
         )
         return result
 
-    def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
+    @staticmethod
+    def _is_valid_tx_hash(tx_message: TransactionMessage) -> bool:
         """
         Check if the tx hash is present and matches the terms.
 

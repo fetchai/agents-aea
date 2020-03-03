@@ -87,8 +87,7 @@ class DialogueLabel:
                 and self.dialogue_starter_addr == other.dialogue_starter_addr
                 and self.dialogue_opponent_addr == other.dialogue_opponent_addr
             )
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         """Turn object into hash."""

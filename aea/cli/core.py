@@ -25,7 +25,6 @@ import shutil
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Union, cast
 
 import click
 
@@ -50,7 +49,7 @@ from aea.cli.login import login
 from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.remove import remove
-from aea.cli.run import _verify_ledger_apis_access, _verify_or_create_private_keys, run
+from aea.cli.run import _verify_or_create_private_keys, run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
@@ -141,10 +140,10 @@ def generate_key(ctx: Context, type_):
         else:
             return True
 
-    if type_ == FetchAICrypto.identifier or type_ == "all":
+    if type_ in (FetchAICrypto.identifier, "all"):
         if _can_write(FETCHAI_PRIVATE_KEY_FILE):
             FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
-    if type_ == EthereumCrypto.identifier or type_ == "all":
+    if type_ in (EthereumCrypto.identifier, "all"):
         if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
             EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
@@ -213,14 +212,9 @@ def get_address(ctx: Context, type_):
 
 def _try_get_balance(agent_config, wallet, type_):
     try:
-        _verify_ledger_apis_access()
-        ledger_api_configs = dict(
-            [
-                (identifier, cast(Dict[str, Union[str, int]], config))
-                for identifier, config in agent_config.ledger_apis.read_all()
-            ]
+        ledger_apis = LedgerApis(
+            agent_config.ledger_apis_dict, agent_config.default_ledger
         )
-        ledger_apis = LedgerApis(ledger_api_configs, agent_config.default_ledger)
 
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)

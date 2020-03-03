@@ -27,9 +27,9 @@ import click
 from aea.cli.common import (
     Context,
     PublicIdParameter,
+    _try_get_item_source_path,
+    _try_get_vendorized_item_target_path,
     pass_ctx,
-    try_get_item_source_path,
-    try_get_vendorized_item_target_path,
     try_to_load_agent_config,
 )
 from aea.cli.registry.push import push_item
@@ -89,10 +89,10 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     item_type_plural = item_type + "s"
 
-    source_path = try_get_item_source_path(
+    source_path = _try_get_item_source_path(
         ctx.cwd, item_id.author, item_type_plural, item_id.name
     )
-    target_path = try_get_vendorized_item_target_path(
+    target_path = _try_get_vendorized_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,
