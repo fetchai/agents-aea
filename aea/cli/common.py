@@ -562,7 +562,7 @@ def _init_cli_config() -> None:
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
-    with open(CLI_CONFIG_PATH, "w") as f:
+    with open(CLI_CONFIG_PATH, "w+") as f:
         yaml.dump({}, f, default_flow_style=False)
 
 
