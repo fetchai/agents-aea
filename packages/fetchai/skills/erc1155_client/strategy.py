@@ -19,17 +19,16 @@
 
 """This module contains the strategy class."""
 
+from typing import cast
+
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import Model
 
-from packages.fetchai.skills.erc1155_skill.generic_data_model import Generic_Data_Model
-
-
-DEFAULT_LEDGER_ID = "ethereum"
+DEFAULT_MAX_PRICE = 5
+DEFAULT_MAX_BUYER_TX_FEE = 2
+DEFAULT_CURRENCY_PBK = "FET"
+DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
-DEFAULT_NFT = 1
-DEFAULT_FT = 2
-DEFAULT_IS_DEPLOYING_CONTRACT = True
 
 
 class Strategy(Model):
@@ -39,58 +38,17 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
         :return: None
         """
+        self._max_price = kwargs.pop("max_price", DEFAULT_MAX_PRICE)
+        self.max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_BUYER_TX_FEE)
+        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
-        self.nft = kwargs.pop("nft", DEFAULT_NFT)
-        self.ft = kwargs.pop("ft", DEFAULT_NFT)
-        self.is_deploying_contract = kwargs.pop(
-            "is_deploying_contract", DEFAULT_IS_DEPLOYING_CONTRACT
-        )
-
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
-
         super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
+        self._search_id = 0
         self.is_searching = True
         self.search_query = kwargs.pop("search_query")
-        self._search_id = 0
-
-    def get_next_oef_msg_id(self) -> int:
-        """
-        Get the next oef msg id.
-
-        :return: the next oef msg id
-        """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
-
-    def get_service_description(self) -> Description:
-        """
-        Get the service description.
-
-        :return: a description of the offered services
-        """
-        desc = Description(self._scheme, data_model=Generic_Data_Model(self._datamodel))
-        return desc
-
-    def is_matching_supply(self, query: Query) -> bool:
-        """
-        Check if the query matches the supply.
-
-        :param query: the query
-        :return: bool indiciating whether matches or not
-        """
-        # TODO, this is a stub
-        return True
 
     def get_next_search_id(self) -> int:
         """
@@ -120,3 +78,33 @@ class Strategy(Model):
             model=None,
         )
         return query
+
+    def is_acceptable_proposal(self, proposal: Description) -> bool:
+        """
+        Check whether it is an acceptable proposal.
+
+        :return: whether it is acceptable
+        """
+        result = (
+            (proposal.values["price"] - proposal.values["seller_tx_fee"] > 0)
+            and (proposal.values["price"] <= self._max_price)
+            and (proposal.values["currency_id"] == self._currency_id)
+            and (proposal.values["ledger_id"] == self._ledger_id)
+        )
+        return result
+
+    def is_affordable_proposal(self, proposal: Description) -> bool:
+        """
+        Check whether it is an affordable proposal.
+
+        :return: whether it is affordable
+        """
+        if self.is_ledger_tx:
+            payable = proposal.values["price"] + self.max_buyer_tx_fee
+            ledger_id = proposal.values["ledger_id"]
+            address = cast(str, self.context.agent_addresses.get(ledger_id))
+            balance = self.context.ledger_apis.token_balance(ledger_id, address)
+            result = balance >= payable
+        else:
+            result = True
+        return result

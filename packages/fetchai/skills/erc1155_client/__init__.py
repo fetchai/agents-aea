@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the generic seller skill."""
+"""This module contains the implementation of the generic buyer skill."""
