@@ -57,13 +57,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
             if fet_balance > 0:
-                self.context.self.context.logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on fetchai ledger={}.".format(
                         self.context.agent_name, fet_balance
                     )
                 )
             else:
-                self.context.self.context.logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on fetchai ledger!".format(
                         self.context.agent_name
                     )
@@ -74,13 +74,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
             if eth_balance > 0:
-                self.context.self.context.logger.info(
+                self.context.logger.info(
                     "[{}]: starting balance on ethereum ledger={}.".format(
                         self.context.agent_name, eth_balance
                     )
                 )
             else:
-                self.context.self.context.logger.warning(
+                self.context.logger.warning(
                     "[{}]: you have no starting balance on ethereum ledger!".format(
                         self.context.agent_name
                     )
@@ -107,7 +107,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-            self.context.self.context.logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on fetchai ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -117,7 +117,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
-            self.context.self.context.logger.info(
+            self.context.logger.info(
                 "[{}]: ending balance on ethereum ledger={}.".format(
                     self.context.agent_name, balance
                 )
@@ -147,7 +147,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             protocol_id=OEFMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
-        self.context.self.context.logger.info(
+        self.context.logger.info(
             "[{}]: updating generic seller services on OEF.".format(
                 self.context.agent_name
             )
@@ -173,7 +173,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             protocol_id=OEFMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
-        self.context.self.context.logger.info(
+        self.context.logger.info(
             "[{}]: unregistering generic seller services from OEF.".format(
                 self.context.agent_name
             )
