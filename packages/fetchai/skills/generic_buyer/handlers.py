@@ -27,7 +27,6 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
-from aea.protocols.default.custom_types import ErrorCode
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
@@ -107,7 +106,7 @@ class FIPAHandler(Handler):
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.Type.INVALID_DIALOGUE.value,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data="fipa_message",
         )  # TODO: send back FIPASerializer().encode(msg))

@@ -56,10 +56,6 @@ class DefaultSerializer(Serializer):
             performative = default_pb2.DefaultMessage.Error()  # type: ignore
             error_code = msg.error_code
             performative = ErrorCode.encode(performative, error_code)
-
-            # import pdb;pdb.set_trace()
-            #
-
             error_msg = msg.error_msg
             performative.error_msg = error_msg
             error_data = msg.error_data

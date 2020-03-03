@@ -22,39 +22,25 @@
 from enum import Enum
 
 
-class ErrorCode:
+class ErrorCode(Enum):
     """This class represents an instance of ErrorCode."""
 
-    class Type(Enum):
-        UNSUPPORTED_PROTOCOL = 0
-        DECODING_ERROR = 1
-        INVALID_MESSAGE = 2
-        UNSUPPORTED_SKILL = 3
-        INVALID_DIALOGUE = 4
-
-    def __init__(self, error_code_enum: Type):
-        """Initialise an instance of ErrorCode."""
-        self.error_code_enum = error_code_enum
+    UNSUPPORTED_PROTOCOL = 0
+    DECODING_ERROR = 1
+    INVALID_MESSAGE = 2
+    UNSUPPORTED_SKILL = 3
+    INVALID_DIALOGUE = 4
 
     @classmethod
     def encode(
         cls, performative, error_code_from_message: "ErrorCode",
     ):
         """Encode an instance of this class into its protobuf object."""
-        performative.error_code.error_code = (
-            error_code_from_message.error_code_enum.value
-        )
+        performative.error_code.error_code = error_code_from_message.value
         return performative
 
     @classmethod
     def decode(cls, error_code_from_pb2) -> "ErrorCode":
         """Decode an instance of this class that has been serialised."""
         enum_value_from_pb2 = error_code_from_pb2.error_code
-        error_code_enum = ErrorCode.Type(enum_value_from_pb2)
-        error_code = ErrorCode(error_code_enum)
-        return error_code
-
-    def __eq__(self, other):
-        if isinstance(other, ErrorCode):
-            return self.error_code_enum == other.error_code_enum
-        return NotImplemented
+        return ErrorCode(enum_value_from_pb2)

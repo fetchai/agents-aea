@@ -76,7 +76,13 @@ class TestDialogueBase:
     def test_dialogue(self):
         """Test the dialogue."""
         assert self.dialogue.is_self_initiated
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"Hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello",
+        )
         msg.counterparty = "my_agent"
         assert self.dialogue.last_incoming_message is None
         assert self.dialogue.last_outgoing_message is None

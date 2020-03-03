@@ -24,7 +24,7 @@ from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
-from aea.protocols.default.custom_types import ErrorCode
+from aea.protocols.default.custom_types import ErrorCode as CustomErrorCode
 
 DEFAULT_BODY_SIZE = 4
 
@@ -33,6 +33,8 @@ class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
     protocol_id = ProtocolId("fetchai", "default", "0.1.0")
+
+    ErrorCode = CustomErrorCode
 
     class Performative(Enum):
         """Performatives for the default protocol."""
@@ -108,10 +110,10 @@ class DefaultMessage(Message):
         return cast(bytes, self.get("content"))
 
     @property
-    def error_code(self) -> ErrorCode:
+    def error_code(self) -> CustomErrorCode:
         """Get the 'error_code' content from the message."""
         assert self.is_set("error_code"), "'error_code' content is not set."
-        return cast(ErrorCode, self.get("error_code"))
+        return cast(CustomErrorCode, self.get("error_code"))
 
     @property
     def error_data(self) -> Dict[str, bytes]:
@@ -159,7 +161,7 @@ class DefaultMessage(Message):
             elif self.performative == DefaultMessage.Performative.ERROR:
                 expected_nb_of_contents = 3
                 assert (
-                    type(self.error_code) == ErrorCode
+                    type(self.error_code) == CustomErrorCode
                 ), "Content 'error_code' is not of type 'ErrorCode'."
                 assert (
                     type(self.error_msg) == str

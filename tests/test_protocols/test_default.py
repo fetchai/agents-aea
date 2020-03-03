@@ -25,7 +25,6 @@ from unittest import mock
 
 import pytest
 
-from aea.protocols.default.custom_types import ErrorCode
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
@@ -58,7 +57,7 @@ def test_default_error_serialization():
         message_id=1,
         target=0,
         performative=DefaultMessage.Performative.ERROR,
-        error_code=ErrorCode(ErrorCode.Type.UNSUPPORTED_PROTOCOL),
+        error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
         error_msg="An error",
         error_data={"error": b"Some error data"},
     )

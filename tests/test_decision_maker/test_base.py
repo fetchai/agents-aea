@@ -521,7 +521,11 @@ class TestDecisionMaker:
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""
         default_message = DefaultMessage(
-            type=DefaultMessage.Type.BYTES, content=b"hello"
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
         )
 
         self.decision_maker.message_in_queue.put_nowait(default_message)

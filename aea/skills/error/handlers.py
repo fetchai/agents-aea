@@ -25,7 +25,6 @@ from typing import Optional
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.custom_types import ErrorCode
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
@@ -67,14 +66,15 @@ class ErrorHandler(Handler):
         :return: None
         """
         logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
+        encoded_protocol_id = base64.b85encode(str.encode(str(envelope.protocol_id)))
         reply = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.Type.UNSUPPORTED_PROTOCOL,
+            error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
             error_msg="Unsupported protocol.",
-            error_data={"protocol_id": str.encode(str(envelope.protocol_id))},
+            error_data={"protocol_id": encoded_protocol_id},
         )
         self.context.outbox.put_message(
             to=envelope.sender,
@@ -91,13 +91,13 @@ class ErrorHandler(Handler):
         :return: None
         """
         logger.warning("Decoding error: {}.".format(envelope))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.Type.DECODING_ERROR,
+            error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
             error_msg="Decoding error.",
             error_data={"envelope": encoded_envelope},
         )
@@ -116,13 +116,13 @@ class ErrorHandler(Handler):
         :return: None
         """
         logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.Type.INVALID_MESSAGE,
+            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
             error_msg="Invalid message.",
             error_data={"envelope": encoded_envelope},
         )
@@ -145,13 +145,13 @@ class ErrorHandler(Handler):
                 envelope.protocol_id
             )
         )
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.ERROR,
-            error_code=ErrorCode.Type.UNSUPPORTED_SKILL,
+            error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL,
             error_msg="Unsupported skill.",
             error_data={"envelope": encoded_envelope},
         )
