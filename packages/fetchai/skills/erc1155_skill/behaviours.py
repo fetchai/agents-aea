@@ -98,6 +98,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dm_message_for_deploy = contract.get_deploy_transaction(
                 deployer_address=self.context.agent_address,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
 
@@ -118,15 +119,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 creation_message = contract.get_create_batch_transaction(
                     deployer_address=self.context.agent_address,
                     ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                    skill_callback_id=self.context.skill_id,
                 )
                 self.context.decision_maker_message_queue.put_nowait(creation_message)
                 contract.is_items_created = True
                 time.sleep(20)
 
             if (
-                    contract.is_deployed
-                    and contract.is_items_created
-                    and not contract.is_items_minted
+                contract.is_deployed
+                and contract.is_items_created
+                and not contract.is_items_minted
             ):
                 mint_items = [20, 20, 20, 20, 26, 24, 22, 21, 23, 22]
                 self.context.logger.info("Minting a batch of items")
@@ -135,6 +137,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                     recipient_address=self.context.agent_address,
                     mint_quantities=mint_items,
                     ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                    skill_callback_id=self.context.skill_id,
                 )
                 self.context.decision_maker_message_queue.put_nowait(mint_message)
                 contract.is_items_minted = True
@@ -194,9 +197,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OEFSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating erc1155 service on OEF.".format(
-                self.context.agent_name
-            )
+            "[{}]: updating erc1155 service on OEF.".format(self.context.agent_name)
         )
 
     def _unregister_service(self) -> None:

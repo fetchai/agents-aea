@@ -52,13 +52,13 @@ class DefaultHandler(Handler):
         self.context.logger.info(content)
         if "command" in content:
             if "contractAddress" in content.keys():
-                json_data = {"command": "contract_address",
-                             "address": contract.address}
-                msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
-                                     content=json_data)
-                json_bytes = json.dumps(msg).encode('utf8')
+                json_data = {"command": "contract_address", "address": contract.address}
+                msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=json_data)
+                json_bytes = json.dumps(msg).encode("utf8")
                 msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=json_bytes)
-                self.context.logger.info("Sending response to {}".format(message.counterparty))
+                self.context.logger.info(
+                    "Sending response to {}".format(message.counterparty)
+                )
                 self.context.outbox.put_message(
                     to=message.counterparty,
                     sender=self.context.agent_address,
@@ -96,8 +96,9 @@ class TransactionHandler(Handler):
         if tx_msg_response.tx_id == "contract_deploy":
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
-            tx_digest = ledger_api.send_signed_transaction(is_waiting_for_confirmation= True,
-                                                           tx_signed=tx_signed)
+            tx_digest = ledger_api.send_signed_transaction(
+                is_waiting_for_confirmation=True, tx_signed=tx_signed
+            )
             transaction = ledger_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -107,14 +108,16 @@ class TransactionHandler(Handler):
         elif tx_msg_response.tx_id == "contract_create_batch":
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
-            ledger_api.send_signed_transaction(is_waiting_for_confirmation=True,
-                                               tx_signed=tx_signed)
+            ledger_api.send_signed_transaction(
+                is_waiting_for_confirmation=True, tx_signed=tx_signed
+            )
             self.context.logger.info("Created the items.")
         elif tx_msg_response.tx_id == "contract_mint_batch":
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = self.context.ledger_apis.apis.get("ethereum")
-            ledger_api.send_signed_transaction(is_waiting_for_confirmation=True,
-                                               tx_signed=tx_signed)
+            ledger_api.send_signed_transaction(
+                is_waiting_for_confirmation=True, tx_signed=tx_signed
+            )
             self.context.logger.info("Ask the contract about my balances:")
             result = contract.get_balance_of_batch(address=self.context.agent_address)
             self.context.logger.info(result)

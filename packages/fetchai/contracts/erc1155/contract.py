@@ -69,7 +69,10 @@ class ERC1155Contract(Contract):
             self.item_ids.append(Helpers().generate_id(token_type, token_id))
 
     def get_deploy_transaction(
-        self, deployer_address: Address, ledger_api: LedgerApi
+        self,
+        deployer_address: Address,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ) -> TransactionMessage:
         """
         Deploy a smart contract.
@@ -84,7 +87,7 @@ class ERC1155Contract(Contract):
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract_deploy",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
@@ -129,7 +132,10 @@ class ERC1155Contract(Contract):
         return tx
 
     def get_create_batch_transaction(
-        self, deployer_address: Address, ledger_api: LedgerApi
+        self,
+        deployer_address: Address,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ) -> TransactionMessage:
         """
         Create an mint a batch of items.
@@ -146,7 +152,7 @@ class ERC1155Contract(Contract):
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract_create_batch",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
@@ -185,6 +191,7 @@ class ERC1155Contract(Contract):
         recipient_address: Address,
         mint_quantities: List[int],
         ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ):
 
         assert len(mint_quantities) == len(self.item_ids), "Wrong number of items."
@@ -197,7 +204,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract_mint_batch",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
@@ -323,6 +330,7 @@ class ERC1155Contract(Contract):
         trade_nonce,
         signature,
         ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         # assert self.address == terms.from_address, "Wrong from address"
@@ -341,7 +349,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract_atomic_swap_single",
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
@@ -363,7 +371,7 @@ class ERC1155Contract(Contract):
         ).call()
 
     def get_atomic_swap_batch_transaction_proposal(
-        self, deployer_address, contract, terms, signature
+        self, deployer_address, contract, terms, signature, skill_callback_id
     ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == terms.from_address, "Wrong 'from' address"
@@ -371,7 +379,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract_deployment",
             tx_sender_addr=terms.from_address,
             tx_counterparty_addr="",
@@ -396,6 +404,7 @@ class ERC1155Contract(Contract):
         value,
         trade_nonce,
         ledger_api,
+        skill_callback_id,
     ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -414,7 +423,7 @@ class ERC1155Contract(Contract):
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=[ContractId("fetchai", "erc1155_skill", "0.1.0")],
+            skill_callback_ids=[skill_callback_id],
             tx_id="contract-sign-hash",
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
