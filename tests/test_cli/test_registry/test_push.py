@@ -33,7 +33,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 @mock.patch("aea.cli.registry.push.os.getcwd", return_value="cwd")
 @mock.patch("aea.cli.registry.push._compress_dir")
 @mock.patch(
-    "aea.cli.registry.push.load_yaml",
+    "aea.cli.registry.push._load_yaml",
     return_value={
         "description": "some-description",
         "version": "some-version",
@@ -51,7 +51,7 @@ class PushItemTestCase(TestCase):
         self,
         path_exists_mock,
         request_api_mock,
-        load_yaml_mock,
+        _load_yaml_mock,
         compress_mock,
         getcwd_mock,
         rm_tarfiles_mock,
@@ -81,7 +81,7 @@ class PushItemTestCase(TestCase):
         self,
         path_exists_mock,
         request_api_mock,
-        load_yaml_mock,
+        _load_yaml_mock,
         compress_mock,
         getcwd_mock,
         rm_tarfiles_mock,

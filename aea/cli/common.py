@@ -36,6 +36,8 @@ from dotenv import load_dotenv
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
+import yaml
+
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
@@ -65,8 +67,10 @@ from aea.crypto.wallet import SUPPORTED_CRYPTOS
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
+AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
+AUTHOR = "author"
+CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_AUTHOR = "author"
 DEFAULT_CONNECTION = PublicId.from_str(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
@@ -74,7 +78,6 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: P
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
-AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
@@ -412,6 +415,21 @@ def _validate_package_name(package_name: str):
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
+def _is_validate_author_handle(author: str) -> bool:
+    """Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
+
+    >>> _is_validate_author_handle("this_is_a_good_author_name")
+    ...
+    True
+    >>> _is_validate_author_handle("this-is-not")
+    ...
+    False
+    """
+    if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
+        return False
+    return True
+
+
 def _try_get_item_source_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
@@ -533,3 +551,60 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
         sys.exit(1)
 
     return package_path
+
+
+def _init_cli_config() -> None:
+    """
+    Create cli config folder and file.
+
+    :return: None
+    """
+    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
+    with open(CLI_CONFIG_PATH, "w") as f:
+        yaml.dump({}, f, default_flow_style=False)
+
+
+def _update_cli_config(dict_conf: Dict) -> None:
+    """
+    Update CLI config and write to yaml file.
+
+    :param dict_conf: dict config to write.
+
+    :return: None
+    """
+    config = _get_or_create_cli_config()
+    config.update(dict_conf)
+    with open(CLI_CONFIG_PATH, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+
+def _get_or_create_cli_config() -> Dict:
+    """
+    Read or create CLI config from yaml file.
+
+    :return: dict CLI config.
+    """
+    try:
+        return _load_yaml(CLI_CONFIG_PATH)
+    except FileNotFoundError:
+        _init_cli_config()
+    return _load_yaml(CLI_CONFIG_PATH)
+
+
+def _load_yaml(filepath: str) -> Dict:
+    """
+    Read content from yaml file.
+
+    :param filepath: str path to yaml file.
+
+    :return: dict YAML content
+    """
+    with open(filepath, "r") as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                "Loading yaml config from {} failed: {}".format(filepath, e)
+            )

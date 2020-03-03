@@ -20,6 +20,9 @@ pip install aea[all]
 sudo apt-get install python3.7-dev
 ```
 ``` bash
+aea init
+```
+``` bash
 aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
 ```

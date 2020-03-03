@@ -68,6 +68,7 @@ Commands:
   get-address      Get the address associated with the private key.
   get-wealth       Get the wealth associated with the private key.
   gui              Run the CLI GUI.
+  init             Initialize your AEA configurations.
   install          Install the dependencies.
   launch           Launch many agents.
   list             List the installed resources.

@@ -71,6 +71,12 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>. 
 
+## Setup Author name
+
+You can now setup your author name:
+``` bash
+aea init
+```
 
 ## Echo skill demo
 

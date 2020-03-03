@@ -129,6 +129,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         )
         config = loader.load(config_filepath.open())
         config.name = item_name
+        config.author = author_name
         loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:
