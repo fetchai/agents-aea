@@ -37,7 +37,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 
-class TestStubConnection:
+class TestStubConnectionReception:
     """Test that the stub connection is implemented correctly."""
 
     @classmethod
@@ -85,7 +85,7 @@ class TestStubConnection:
             f.write(encoded_envelope)
             f.flush()
 
-        actual_envelope = self.multiplexer.get(block=True, timeout=2.0)
+        actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
 
     def test_reception_fails(self):
@@ -102,6 +102,38 @@ class TestStubConnection:
             )
 
         patch.__exit__()
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        except (OSError, IOError):
+            pass
+        cls.multiplexer.disconnect()
+
+
+class TestStubConnectionSending:
+    """Test that the stub connection is implemented correctly."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.tmpdir = Path(tempfile.mkdtemp())
+        d = cls.tmpdir / "test_stub"
+        d.mkdir(parents=True)
+        cls.input_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "input_file.csv"
+
+        connection_id = PublicId("fetchai", "stub", "0.1.0")
+        cls.connection = StubConnection(
+            cls.input_file_path, cls.output_file_path, connection_id=connection_id
+        )
+        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer.connect()
+        os.chdir(cls.tmpdir)
 
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
