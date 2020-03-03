@@ -457,7 +457,7 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
-    def generate_trade_nonce(self, address):
+    def generate_trade_nonce(self, address):  # nosec
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():
