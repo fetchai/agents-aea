@@ -160,10 +160,10 @@ class TestSearchAgents:
         assert (
             self.result.output == "Available agents:\n"
             "------------------------------\n"
-            "Public ID: author/myagent:0.1.0\n"
+            "Public ID: default_author/myagent:0.1.0\n"
             "Name: myagent\n"
             "Description: \n"
-            "Author: author\n"
+            "Author: default_author\n"
             "Version: 0.1.0\n"
             "------------------------------\n\n"
         )

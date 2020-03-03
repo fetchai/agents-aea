@@ -55,9 +55,13 @@ class TestFetchAgent(TestCase):
         self, request_api_mock, extract_mock, download_file_mock,
     ):
         """Test for fetch_agent method positive result."""
-        fetch_agent(ContextMock(), PublicIdMock())
+        public_id_mock = PublicIdMock()
+        fetch_agent(ContextMock(), public_id_mock)
         request_api_mock.assert_called_with(
-            "GET", "/agents/author/name/{}".format(PublicIdMock.DEFAULT_VERSION)
+            "GET",
+            "/agents/{}/{}/{}".format(
+                public_id_mock.author, public_id_mock.name, public_id_mock.version
+            ),
         )
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", "cwd/name")
@@ -76,9 +80,13 @@ class TestFetchAgent(TestCase):
         self, request_api_mock, fetch_package_mock, extract_mock, download_file_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
-        fetch_agent(ContextMock(), PublicIdMock())
+        public_id_mock = PublicIdMock()
+        fetch_agent(ContextMock(), public_id_mock)
         request_api_mock.assert_called_with(
-            "GET", "/agents/author/name/{}".format(PublicIdMock.DEFAULT_VERSION)
+            "GET",
+            "/agents/{}/{}/{}".format(
+                public_id_mock.author, public_id_mock.name, public_id_mock.version
+            ),
         )
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", "cwd/name")
