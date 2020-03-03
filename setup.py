@@ -146,7 +146,6 @@ setup(
     entry_points={"console_scripts": ["aea=aea.cli:cli"],},
     zip_safe=False,
     include_package_data=True,
-    package_data={"": ["*.json", "*.yaml"]},
     license=about["__license__"],
     python_requires=">=3.6",
     keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
