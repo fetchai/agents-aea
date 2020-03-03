@@ -24,7 +24,8 @@ import json
 import logging
 import threading
 import time
-from asyncio import CancelledError
+
+# from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional, Tuple, cast
 from urllib.parse import parse_qs, urlparse
@@ -118,24 +119,25 @@ class HTTPChannel:
         assert self.loop is not None, "Loop not initialized."
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
-    def receive(self, *args, **kwargs) -> Optional["Envelope"]:
-        """
-        Receive the envelope in_queue. Or in out_queue?
+    # Commented because: Incompatible return value type (got "Coroutine[Any, Any, Any]", expected "Optional[Envelope]") line 136
+    # def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    #     """
+    #     Receive the envelope in_queue. Or in out_queue?
 
-        :param envelope: the envelope
-        :return: None
-        """
-        assert self.in_queue is not None
-        try:
-            # No await keyword as this is not an async function?
-            envelope = self.in_queue.get()
-            # envelope = await self.in_queue.get()
-            # Why does envelope keep getting <coroutine object Queue.get> rather than just None?
-            if envelope is None:
-                return None  # pragma: no cover
-            return envelope
-        except CancelledError:  # pragma: no cover
-            return None
+    #     :param envelope: the envelope
+    #     :return: None
+    #     """
+    #     assert self.in_queue is not None
+    #     try:
+    #         # No await keyword as this is not an async function?
+    #         envelope = self.in_queue.get()
+    #         # envelope = await self.in_queue.get()
+    #         # Why does envelope keep getting <coroutine object Queue.get> rather than just None?
+    #         if envelope is None:
+    #             return None  # pragma: no cover
+    #         return envelope
+    #     except CancelledError:  # pragma: no cover
+    #         return None
 
     def connect(self):
         """
@@ -241,6 +243,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
                 time.sleep(timeout_window)
                 # Check for response Envelope in Agent's InBox again. Or OutBox?
                 # Note: A handler (i.e. Skill) need to be written in order to finalize the following below.
+                """
                 resp_envelop = self._channel.receive()
                 # Write the API response back to console
                 if resp_envelop is not None:
@@ -252,6 +255,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
                 else:
                     status_code = REQUEST_TIMEOUT
                     raw_response = "Request Timeout"
+                """
             else:
                 # Respond "Reqeust Not Found" without sending Envelope
                 status_code = NOT_FOUND
@@ -367,17 +371,17 @@ class HTTPConnection(Connection):
             )  # pragma: no cover
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
-        """
-        Receive an envelope.
+    # async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    #     """
+    #     Receive an envelope.
 
-        :return: the envelope received, or None.
-        """
-        if not self.connection_status.is_connected:
-            raise ConnectionError(
-                "Connection not established yet. Please use 'connect()'."
-            )  # pragma: no cover
-        return self.channel.receive(*args, **kwargs)
+    #     :return: the envelope received, or None.
+    #     """
+    #     if not self.connection_status.is_connected:
+    #         raise ConnectionError(
+    #             "Connection not established yet. Please use 'connect()'."
+    #         )  # pragma: no cover
+    #     return self.channel.receive(*args, **kwargs)
 
     @classmethod
     def from_config(
