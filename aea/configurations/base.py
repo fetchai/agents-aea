@@ -61,6 +61,24 @@ class ConfigurationType(Enum):
     CONTRACT = "contract"
     SKILL = "skill"
 
+    def to_plural(self) -> str:
+        """
+        Get the plural name.
+
+        >>> ConfigurationType.AGENT.to_plural()
+        'agents'
+        >>> ConfigurationType.PROTOCOL.to_plural()
+        'protocols'
+        >>> ConfigurationType.CONNECTION.to_plural()
+        'connections'
+        >>> ConfigurationType.SKILL.to_plural()
+        'skills'
+        >>> ConfigurationType.CONTRACT.to_plural()
+        'contracts'
+
+        """
+        return self.value + "s"
+
 
 def _get_default_configuration_file_name_from_type(
     item_type: Union[str, ConfigurationType]
@@ -273,7 +291,14 @@ ContractId = PublicId
 class PackageConfiguration(Configuration, ABC):
     """This class represent a package configuration."""
 
-    def __init__(self, name: str, author: str, version: str, license: str, fingerprint: Optional[Dict[str, str]] = None):
+    def __init__(
+        self,
+        name: str,
+        author: str,
+        version: str,
+        license: str,
+        fingerprint: Optional[Dict[str, str]] = None,
+    ):
         """Initialize a package configuration."""
         self.name = name
         self.author = author
@@ -353,6 +378,7 @@ class ConnectionConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
@@ -403,6 +429,7 @@ class ProtocolConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )

@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Generic, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, TextIO, Type, TypeVar, Union
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -66,11 +66,11 @@ class ConfigLoader(Generic[T]):
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         :param configuration_type:
         """
-        self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
+        self._schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
-        self.resolver = jsonschema.RefResolver(root_path, self.schema)
-        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
-        self.configuration_type = configuration_type  # type: Type[T]
+        self._resolver = jsonschema.RefResolver(root_path, self._schema)
+        self._validator = Draft4Validator(self._schema, resolver=self._resolver)
+        self._configuration_type = configuration_type  # type: Type[T]
 
     def load_protocol_specification(self, fp: TextIO) -> T:
         """
@@ -92,10 +92,10 @@ class ConfigLoader(Generic[T]):
         else:
             raise ValueError("Wrong number of documents in protocol specification.")
         try:
-            self.validator.validate(instance=configuration_file_json)
+            self._validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        protocol_specification = self.configuration_type.from_json(
+        protocol_specification = self._configuration_type.from_json(
             configuration_file_json
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
@@ -111,10 +111,10 @@ class ConfigLoader(Generic[T]):
         """
         configuration_file_json = yaml.safe_load(fp)
         try:
-            self.validator.validate(instance=configuration_file_json)
+            self._validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        return self.configuration_type.from_json(configuration_file_json)
+        return self._configuration_type.from_json(configuration_file_json)
 
     def dump(self, configuration: T, fp: TextIO) -> None:
         """Dump a configuration.
@@ -124,7 +124,7 @@ class ConfigLoader(Generic[T]):
         :return: None
         """
         result = configuration.json
-        self.validator.validate(instance=result)
+        self._validator.validate(instance=result)
         yaml.safe_dump(result, fp)
 
     @classmethod
@@ -133,18 +133,31 @@ class ConfigLoader(Generic[T]):
     ) -> "ConfigLoader":
         """Get the configuration loader from the type."""
         configuration_type = ConfigurationType(configuration_type)
-        if configuration_type == ConfigurationType.AGENT:
-            return ConfigLoader("aea-config_schema.json", AgentConfig)
-        elif configuration_type == ConfigurationType.PROTOCOL:
-            return ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        elif configuration_type == ConfigurationType.CONNECTION:
-            return ConfigLoader("connection-config_schema.json", ConnectionConfig)
-        elif configuration_type == ConfigurationType.SKILL:
-            return ConfigLoader("skill-config_schema.json", SkillConfig)
-        elif configuration_type == ConfigurationType.CONTRACT:
-            return ConfigLoader("contract-config_schema.json", ContractConfig)
-        else:  # pragma: no cover
-            raise ValueError("Invalid configuration type.")
+        return ConfigLoaders.from_configuration_type(configuration_type)
+
+
+class ConfigLoaders:
+
+    _from_configuration_type_to_loaders = {
+        ConfigurationType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
+        ConfigurationType.PROTOCOL: ConfigLoader(
+            "protocol-config_schema.json", ProtocolConfig
+        ),
+        ConfigurationType.CONNECTION: ConfigLoader(
+            "connection-config_schema.json", ConnectionConfig
+        ),
+        ConfigurationType.SKILL: ConfigLoader("skill-config_schema.json", SkillConfig),
+        ConfigurationType.CONTRACT: ConfigLoader(
+            "contract-config_schema.json", ContractConfig
+        ),
+    }  # type: Dict[ConfigurationType, ConfigLoader]
+
+    @classmethod
+    def from_configuration_type(
+        cls, configuration_type: Union[ConfigurationType, str]
+    ) -> "ConfigLoader":
+        configuration_type = ConfigurationType(configuration_type)
+        return cls._from_configuration_type_to_loaders[configuration_type]
 
 
 def _config_loader():

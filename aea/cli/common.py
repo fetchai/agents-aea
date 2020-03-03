@@ -18,10 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the common utils of the aea cli."""
-
 import logging
 import logging.config
 import os
+import pprint
 import re
 import shutil
 import sys
@@ -41,22 +41,20 @@ from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
-    ConnectionConfig,
-    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     Dependencies,
-    ProtocolConfig,
+    PackageConfiguration,
     PublicId,
-    SkillConfig,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
     load_agent_component_package,
 )
+from aea.helpers.ipfs.base import IPFSHashOnly
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
@@ -71,7 +69,6 @@ DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
 
-
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
@@ -83,18 +80,32 @@ class Context(object):
     def __init__(self, cwd: str = "."):
         """Init the context."""
         self.config = dict()  # type: Dict
-        self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        self.connection_loader = ConfigLoader(
-            "connection-config_schema.json", ConnectionConfig
-        )
-        self.contract_loader = ConfigLoader(
-            "contract-config_schema.json", ContractConfig
-        )
-        self.protocol_loader = ConfigLoader(
-            "protocol-config_schema.json", ProtocolConfig
-        )
         self.cwd = cwd
+
+    @property
+    def agent_loader(self) -> ConfigLoader:
+        """Get the agent loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+
+    @property
+    def protocol_loader(self) -> ConfigLoader:
+        """Get the protocol loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.PROTOCOL)
+
+    @property
+    def connection_loader(self) -> ConfigLoader:
+        """Get the connection loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONNECTION)
+
+    @property
+    def skill_loader(self) -> ConfigLoader:
+        """Get the skill loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.SKILL)
+
+    @property
+    def contract_loader(self) -> ConfigLoader:
+        """Get the contract loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONTRACT)
 
     def set_config(self, key, value) -> None:
         """
@@ -498,6 +509,69 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
+def _check_package_fingerprints(
+    package_configuration: PackageConfiguration, package_directory: Path
+):
+    """Given a package configuration and a package directory, check whether
+    the hash of the files in the package directory match the one in the package configurations."""
+    hasher = IPFSHashOnly()
+    expected_fingerprints = package_configuration.fingerprint
+
+    # compute fingerprints
+    actual_fingerprints = {}  # type: Dict[str, str]
+    # find all valid files of the package
+    all_files = [
+        x
+        for x in package_directory.glob("**/*")
+        if x.is_file()
+        and not x.match("*__pycache__/*")
+        and not x.match(
+            "*.yaml"
+        )  # TODO this should only match "protocol.yaml", "connection.yaml" etc.
+    ]
+
+    for file in all_files:
+        file_hash = hasher.get(str(file))
+        key = str(file.relative_to(package_directory))
+        assert key not in actual_fingerprints  # nosec
+        actual_fingerprints[key] = file_hash
+
+    if expected_fingerprints != actual_fingerprints:
+        raise ValueError(
+            "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}".format(
+                package_directory,
+                pprint.pformat(expected_fingerprints),
+                pprint.pformat(actual_fingerprints),
+            )
+        )
+
+
 def _validate_config_consistency(ctx: Context):
     """Validate fingerprints for every agent component."""
 
+    packages_public_ids_to_types = dict(
+        [
+            *map(lambda x: (x, ConfigurationType.PROTOCOL), ctx.agent_config.protocols),
+            *map(
+                lambda x: (x, ConfigurationType.CONNECTION),
+                ctx.agent_config.connections,
+            ),
+            *map(lambda x: (x, ConfigurationType.SKILL), ctx.agent_config.skills),
+            *map(lambda x: (x, ConfigurationType.CONTRACT), ctx.agent_config.contracts),
+        ]
+    )  # type: Dict[PublicId, ConfigurationType]
+
+    for public_id, item_type in packages_public_ids_to_types.items():
+        if public_id.author == ctx.agent_config.public_id.author:
+            package_directory = Path(item_type.to_plural(), public_id.name)
+        else:
+            package_directory = Path(
+                "vendor", public_id.author, item_type.to_plural(), public_id.name
+            )
+
+        loader = ConfigLoaders.from_configuration_type(item_type)
+        config_file_name = _get_default_configuration_file_name_from_type(item_type)
+        package_configuration = loader.load(
+            (package_directory / config_file_name).open("r")
+        )
+        _check_package_fingerprints(package_configuration, package_directory)

@@ -184,7 +184,7 @@ def get(ctx: Context, json_path: List[str]):
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
     configuration_object = yaml.safe_load(open(configuration_file_path))
-    config_loader.validator.validate(instance=configuration_object)
+    config_loader._validator.validate(instance=configuration_object)
 
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
@@ -222,7 +222,7 @@ def set(ctx: Context, json_path: List[str], value, type):
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
     configuration_dict = yaml.safe_load(open(configuration_file_path))
-    config_loader.validator.validate(instance=configuration_dict)
+    config_loader._validator.validate(instance=configuration_dict)
 
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
@@ -250,10 +250,10 @@ def set(ctx: Context, json_path: List[str], value, type):
         logger.error("Cannot convert {} to type {}".format(value, type_))
 
     try:
-        configuration_obj = config_loader.configuration_type.from_json(
+        configuration_obj = config_loader._configuration_type.from_json(
             configuration_dict
         )
-        config_loader.validator.validate(instance=configuration_obj.json)
+        config_loader._validator.validate(instance=configuration_obj.json)
         config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
         logger.error("Attribute or value not valid.")
