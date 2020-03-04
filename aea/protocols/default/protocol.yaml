@@ -1,7 +1,8 @@
-name: 'default'
+name: default
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
-description: "The default protocol allows for any bytes message."
-dependencies: {}
+fingerprint: ''
+dependencies: 
+    protobuf: {} 
+description: A protocol for exchanging any bytes message.

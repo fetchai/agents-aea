@@ -386,7 +386,13 @@ def test_multiple_connection():
         assert connection_1.connection_status.is_connected
         assert connection_2.connection_status.is_connected
 
-        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        message = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         envelope_from_1_to_2 = Envelope(
             to=address_2,
             sender=address_1,

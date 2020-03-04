@@ -107,7 +107,7 @@ class TestSkillError:
 
         envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert msg.type == DefaultMessage.Type.ERROR
+        assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL
 
     def test_error_decoding_error(self):
@@ -130,8 +130,8 @@ class TestSkillError:
 
         envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") == DefaultMessage.ErrorCode.DECODING_ERROR.value
+        assert msg.performative == DefaultMessage.Performative.ERROR
+        assert msg.error_code == DefaultMessage.ErrorCode.DECODING_ERROR
 
     def test_error_invalid_message(self):
         """Test the invalid message."""
@@ -153,8 +153,8 @@ class TestSkillError:
 
         envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") == DefaultMessage.ErrorCode.INVALID_MESSAGE.value
+        assert msg.performative == DefaultMessage.Performative.ERROR
+        assert msg.error_code == DefaultMessage.ErrorCode.INVALID_MESSAGE
 
     def test_error_unsupported_skill(self):
         """Test the unsupported skill."""
@@ -176,8 +176,8 @@ class TestSkillError:
 
         envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
+        assert msg.performative == DefaultMessage.Performative.ERROR
+        assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL
 
     @classmethod
     def teardown_class(cls):

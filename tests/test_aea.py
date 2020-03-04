@@ -138,7 +138,13 @@ def test_react():
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         msg.counterparty = identity.address
         message_bytes = DefaultSerializer().encode(msg)
 
@@ -189,7 +195,13 @@ async def test_handle():
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         msg.counterparty = agent_name
         message_bytes = DefaultSerializer().encode(msg)
 
@@ -282,7 +294,11 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         )
 
         cls.expected_message = DefaultMessage(
-            type=DefaultMessage.Type.BYTES, content=b"hello"
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
         )
         cls.expected_message.counterparty = cls.agent_name
         envelope = Envelope(
@@ -386,7 +402,11 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.resources.add_skill(cls.error_skill)
 
         cls.expected_message = DefaultMessage(
-            type=DefaultMessage.Type.BYTES, content=b"hello"
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
         )
         cls.expected_message.counterparty = cls.agent_name
 

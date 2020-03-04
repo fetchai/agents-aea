@@ -139,7 +139,10 @@ class FIPANegotiationHandler(Handler):
                 "[{}]: Unidentified dialogue.".format(self.context.agent_name)
             )
             default_msg = DefaultMessage(
-                type=DefaultMessage.Type.BYTES,
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
                 content=b"This message belongs to an unidentified dialogue.",
             )
             self.context.outbox.put_message(

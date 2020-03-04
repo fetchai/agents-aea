@@ -12,13 +12,15 @@ speech_acts:
     observation: ct:Observation
     reward: pt:float
     done: pt:bool
-    info: pt:dict[pt:str, ct:PerceptInfo]
+    info: pt:dict[pt:str, ct:Info]
   reset: {}
   close: {}
 ---
+...
 ct:Action: |
   bytes action = 1;
 ct:Observation: |
   bytes observation = 1;
-ct:PerceptInfo: |
-  bytes perceptInfo = 1;
+ct:Info: |
+  bytes info = 1;
+...

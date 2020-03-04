@@ -35,9 +35,9 @@ SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
 PATH_TO_PACKAGES = "packages"
 INIT_FILE_NAME = "__init__.py"
 PROTOCOL_YAML_FILE_NAME = "protocol.yaml"
-MESSAGEPY_FILE_NAME = "message.py"
-MODELSPY_FILE_NAME = "models.py"
-SERIALIZATIONPY_FILE_NAME = "serialization.py"
+MESSAGE_DOT_PY_FILE_NAME = "message.py"
+CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"
+SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
 
 CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
 PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
@@ -99,6 +99,16 @@ def _to_camel_case(text: str) -> str:
     :return: The text in CamelCase format.
     """
     return "".join(word.title() for word in text.split("_"))
+
+
+def _camel_case_to_snake_case(text: str) -> str:
+    """
+    Convert a text in CamelCase format into the snake_case format
+
+    :param text: the text to be converted.
+    :return: The text in CamelCase format.
+    """
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
 def _get_indent_str(no_of_indents: int) -> str:
@@ -411,7 +421,7 @@ class ProtocolGenerator:
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
 
-    def _import_from_typing_str(self) -> str:
+    def _import_from_typing_module(self) -> str:
         """
         Manage import statement for the typing package.
 
@@ -433,16 +443,16 @@ class ProtocolGenerator:
         import_str = import_str[:-2]
         return import_str
 
-    def _import_models(self) -> str:
+    def _import_from_custom_types_module(self) -> str:
         """
-        Manage import statement from models module
+        Manage import statement from custom_types module
 
-        :return: import statement for the models module
+        :return: import statement for the custom_types module
         """
         if len(self._all_custom_types) == 0:
             import_str = ""
         else:
-            import_str = "from {}.{}.protocols.{}.models import ".format(
+            import_str = "from {}.{}.protocols.{}.custom_types import ".format(
                 PATH_TO_PACKAGES,
                 self.protocol_specification.author,
                 self.protocol_specification.name,
@@ -464,37 +474,6 @@ class ProtocolGenerator:
         performatives_str = performatives_str[:-2]
         performatives_str += "}"
         return performatives_str
-
-    def _models_module_str(self) -> str:
-        """
-        Produces the contents of the models module, containing classes corresponding to every custom type in the protocol specification.
-
-        :return: the models.py file content
-        """
-        # Header
-        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
-
-        # Module docstring
-        cls_str += str.format(
-            '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n\n\n'
-        )
-
-        if len(self._all_custom_types) == 0:
-            return cls_str
-
-        # class code per custom type
-        for custom_type in self._all_custom_types:
-            cls_str += str.format("class {}:\n", custom_type)
-            cls_str += str.format(
-                '    """This class represents an instance of {}."""\n\n', custom_type
-            )
-            cls_str += "    def __init__(self):\n"
-            cls_str += str.format(
-                '        """Initialise an instance of {}."""\n', custom_type
-            )
-            cls_str += "        raise NotImplementedError\n\n\n"
-        cls_str = cls_str[:-2]
-        return cls_str
 
     def _performatives_enum_str(self) -> str:
         """
@@ -789,13 +768,13 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += "from enum import Enum\n"
-        cls_str += "{}\n\n".format(self._import_from_typing_str())
+        cls_str += "{}\n\n".format(self._import_from_typing_module())
         cls_str += "from aea.configurations.base import ProtocolId\n"
         cls_str += "{}\n".format(MESSAGE_IMPORT)
-        if self._import_models() == "":
-            cls_str += self._import_models()
+        if self._import_from_custom_types_module() == "":
+            cls_str += self._import_from_custom_types_module()
         else:
-            cls_str += "\n{}\n".format(self._import_models())
+            cls_str += "\n{}\n".format(self._import_from_custom_types_module())
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
@@ -939,6 +918,7 @@ class ProtocolGenerator:
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
+        cls_str += "            expected_nb_of_contents = 0\n"
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -982,6 +962,60 @@ class ProtocolGenerator:
         cls_str += "            return False\n\n"
         cls_str += "        return True\n"
 
+        return cls_str
+
+    def _custom_types_module_str(self) -> str:
+        """
+        Produces the contents of the custom_types module, containing classes corresponding to every custom type in the protocol specification.
+
+        :return: the custom_types.py file content
+        """
+        # Header
+        cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
+
+        # Module docstring
+        cls_str += str.format(
+            '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
+        )
+
+        # Imports
+        cls_str += "from {}.{}.{}.{}_pb2 import {}Message\n".format(
+            PATH_TO_PACKAGES,
+            self.protocol_specification.author,
+            "protocols",
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
+
+        if len(self._all_custom_types) == 0:
+            return cls_str
+
+        # class code per custom type
+        for custom_type in self._all_custom_types:
+            cls_str += "\n\nclass {}:\n".format(custom_type)
+            cls_str += '    """This class represents an instance of {}."""\n\n'.format(
+                custom_type
+            )
+            cls_str += "    def __init__(self):\n"
+            cls_str += '        """Initialise an instance of {}."""\n'.format(
+                custom_type
+            )
+            cls_str += "        raise NotImplementedError\n\n"
+            cls_str += "    @classmethod\n"
+            cls_str += '    def encode(cls, performative, {}_from_message: "{}"):\n'.format(
+                _camel_case_to_snake_case(custom_type), custom_type
+            )
+            cls_str += '        """Encode an instance of this class into its protocol buffer object."""\n'
+            cls_str += "        raise NotImplementedError\n\n"
+            cls_str += "    @classmethod\n"
+            cls_str += '    def decode(cls, {}_from_pb2) -> "{}":\n'.format(
+                _camel_case_to_snake_case(custom_type), custom_type,
+            )
+            cls_str += '        """Decode a protocol buffer instance of this class into an object of this class."""\n'
+            cls_str += "        raise NotImplementedError\n\n"
+
+            cls_str += "def __eq__(self, other):\n"
+            cls_str += "    raise NotImplementedError\n"
         return cls_str
 
     def _encoding_message_content_from_python_to_protobuf(
@@ -1034,7 +1068,10 @@ class ProtocolGenerator:
             )
         else:
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative.{} = {}\n".format(
+            encoding_str += indents + "serialised_{} = {}.serialise({})\n".format(
+                content_name, content_type, content_name
+            )
+            encoding_str += indents + "performative.{} = serialised_{}\n".format(
                 content_name, content_name
             )
         return encoding_str
@@ -1073,16 +1110,51 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
             )
-        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
+        elif content_type.startswith("FrozenSet"):
+            # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
                 performative,
                 content_name,
             )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+            decoding_str += indents + "{}_frozenset = frozenset({})\n".format(
                 content_name, content_name
             )
+            decoding_str += (
+                indents
+                + 'performative_content["{}"] = {}_frozenset\n'.format(
+                    content_name, content_name
+                )
+            )
+        # else:
+        #     decoding_str += (
+        #         indents
+        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+        #             content_name, content_type
+        #         )
+        #     )
+        elif content_type.startswith("Tuple"):
+            # if not self._includes_custom_type(content_type):
+            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
+                content_name,
+                self.protocol_specification.name,
+                performative,
+                content_name,
+            )
+            decoding_str += indents + "{}_tuple = tuple({})\n".format(
+                content_name, content_name
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}_tuple\n'.format(
+                content_name, content_name
+            )
+        # else:
+        #     decoding_str += (
+        #         indents
+        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
+        #             content_name, content_type
+        #         )
+        #     )
         elif content_type.startswith("Dict"):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
@@ -1090,7 +1162,10 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
+            decoding_str += indents + "{}_dict = dict({})\n".format(
+                content_name, content_name
+            )
+            decoding_str += indents + 'performative_content["{}"] = {}_dict\n'.format(
                 content_name, content_name
             )
         elif content_type.startswith("Union"):
@@ -1122,11 +1197,20 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-            decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
-                content_name,
-                self.protocol_specification.name,
-                performative,
-                variable_name,
+            decoding_str += (
+                indents
+                + "serialised_{}_from_message = {}_pb.{}.{}\n".format(
+                    content_name,
+                    self.protocol_specification.name,
+                    performative,
+                    variable_name,
+                )
+            )
+            decoding_str += (
+                indents
+                + "{} = {}.deserialise(serialised_{}_from_message)\n".format(
+                    content_name, content_type, content_name,
+                )
             )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
@@ -1190,6 +1274,15 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.name,
         )
+        for custom_type in self._all_custom_types:
+            cls_str += str.format(
+                "from {}.{}.{}.{}.custom_types import (\n    {},\n)\n",
+                PATH_TO_PACKAGES,
+                self.protocol_specification.author,
+                "protocols",
+                self.protocol_specification.name,
+                custom_type,
+            )
         cls_str += str.format(
             "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n",
             PATH_TO_PACKAGES,
@@ -1512,18 +1605,14 @@ class ProtocolGenerator:
 
         :return: the protocol.yaml content
         """
-        protocol_yaml_str = "name: '{}'\n".format(self.protocol_specification.name)
-        protocol_yaml_str += "author: '{}'\n".format(self.protocol_specification.author)
-        protocol_yaml_str += "version: '{}'\n".format(
-            self.protocol_specification.version
-        )
-        protocol_yaml_str += "license: '{}'\n".format(
-            self.protocol_specification.license
-        )
+        protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
+        protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
+        protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
+        protocol_yaml_str += "license: {}\n".format(self.protocol_specification.license)
         protocol_yaml_str += "fingerprint: ''\n"
         protocol_yaml_str += "dependencies: \n"
         protocol_yaml_str += "    protobuf: {} \n"
-        protocol_yaml_str += "description: '{}'\n".format(
+        protocol_yaml_str += "description: {}\n".format(
             self.protocol_specification.description
         )
 
@@ -1568,10 +1657,14 @@ class ProtocolGenerator:
         # Generate the protocol files
         self._generate_file(INIT_FILE_NAME, self._init_str())
         self._generate_file(PROTOCOL_YAML_FILE_NAME, self._protocol_yaml_str())
-        self._generate_file(MESSAGEPY_FILE_NAME, self._message_class_str())
+        self._generate_file(MESSAGE_DOT_PY_FILE_NAME, self._message_class_str())
         if len(self._all_custom_types) > 0:
-            self._generate_file(MODELSPY_FILE_NAME, self._models_module_str())
-        self._generate_file(SERIALIZATIONPY_FILE_NAME, self._serialization_class_str())
+            self._generate_file(
+                CUSTOM_TYPES_DOT_PY_FILE_NAME, self._custom_types_module_str()
+            )
+        self._generate_file(
+            SERIALIZATION_DOT_PY_FILE_NAME, self._serialization_class_str()
+        )
         self._generate_file(
             "{}.proto".format(self.protocol_specification.name),
             self._protocol_buffer_schema_str(),
@@ -1582,7 +1675,9 @@ class ProtocolGenerator:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
                 self._all_custom_types
             )
-            incomplete_generation_warning_msg += "Update the generated 'models.py' file with the implementations of these custom types."
+            incomplete_generation_warning_msg += "Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                CUSTOM_TYPES_DOT_PY_FILE_NAME
+            )
             print(incomplete_generation_warning_msg)
 
         # Compile protobuf schema

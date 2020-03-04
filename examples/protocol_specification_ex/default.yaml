@@ -1,4 +1,5 @@
-name: default_test
+---
+name: default
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
@@ -9,16 +10,16 @@ speech_acts:
   error:
     error_code: ct:ErrorCode
     error_msg: pt:str
-    error_data: pt:dict[pt:str, ct:ErrorData]
+    error_data: pt:dict[pt:str, pt:bytes]
+...
 ---
 ct:ErrorCode: |
   enum ErrorCodeEnum {
-      UNSUPPORTED_PROTOCOL = -10001;
-      DECODING_ERROR = -10002;
-      INVALID_MESSAGE = -10003;
-      UNSUPPORTED_SKILL = -10004;
-      INVALID_DIALOGUE = -10005;
+      UNSUPPORTED_PROTOCOL = 0;
+      DECODING_ERROR = 1;
+      INVALID_MESSAGE = 2;
+      UNSUPPORTED_SKILL = 3;
+      INVALID_DIALOGUE = 4;
     }
-  ErrorCodeEnum error_code = 1;
-ct:ErrorData: |
-  bytes error_data = 1;
+  ErrorCodeEnum error_code_enum = 1;
+...

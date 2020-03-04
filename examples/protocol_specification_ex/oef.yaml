@@ -28,6 +28,7 @@ speech_acts:
     dialogue_id: pt:int
     origin: pt:str
 ---
+...
 ct:Query: |
   message Nothing {
   }
@@ -37,7 +38,7 @@ ct:Query: |
       bytes query_bytes = 3;
   }
 ct:Description: |
-  bytes bytes = 1;
+  bytes description = 1;
 ct:OEFErrorOperation: |
   enum OEFError {
         REGISTER_SERVICE = 0;
@@ -50,3 +51,4 @@ ct:OEFErrorOperation: |
         UNREGISTER_AGENT = 7;
       }
     OEFError oef_error = 1;
+...
