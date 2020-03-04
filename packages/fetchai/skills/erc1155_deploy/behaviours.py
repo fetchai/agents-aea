@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the behaviour of a erc1155 deploy skill AEA."""
-
+import time
 from typing import Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -45,7 +45,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
         self._registered_service_description = None  # type: Optional[Description]
-        self.contract_address = "0x7939eb9BF181bAE263BCb74bfb87464652A6dfE3"
 
     def setup(self) -> None:
         """
@@ -91,9 +90,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
 
         self._register_service()
-
         contract = self.context.contracts.erc1155
-        if self.contract_address is None:
+        if strategy.contract_address is None:
             self.context.logger.info("Loading details from json")
             contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
 
@@ -107,10 +105,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_instance_w_address(
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                contract_address=self.contract_address,
+                contract_address=str(strategy.contract_address),
             )
-            create_items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            contract.create_item_ids(token_type=strategy.ft, token_ids=create_items)
+            contract.create_item_ids(
+                token_type=strategy.ft, token_ids=strategy.item_ids
+            )
 
     def act(self) -> None:
         """
@@ -120,35 +119,36 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         contract = self.context.contracts.erc1155
         strategy = cast(Strategy, self.context.strategy)
-        if not contract.is_deployed or self.contract_address is None:
-            if contract.is_deployed and not contract.is_items_created:
-                create_items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                contract.create_item_ids(token_type=strategy.ft, token_ids=create_items)
+        #  if not contract.is_deployed or strategy.contract_address is None:
+        if contract.is_deployed and not contract.is_items_created:
+            contract.create_item_ids(
+                token_type=strategy.ft, token_ids=strategy.item_ids
+            )
 
-                self.context.logger.info("Creating a batch of items")
-                creation_message = contract.get_create_batch_transaction(
-                    deployer_address=self.context.agent_address,
-                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                    skill_callback_id=self.context.skill_id,
-                )
-                self.context.decision_maker_message_queue.put_nowait(creation_message)
-                contract.is_items_created = True
-            if (
-                contract.is_deployed
-                and contract.is_items_created
-                and not contract.is_items_minted
-            ):
-                mint_items = [20, 20, 20, 20, 26, 24, 22, 21, 23, 22]
-                self.context.logger.info("Minting a batch of items")
-                mint_message = contract.get_mint_batch_transaction(
-                    deployer_address=self.context.agent_address,
-                    recipient_address=self.context.agent_address,
-                    mint_quantities=mint_items,
-                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                    skill_callback_id=self.context.skill_id,
-                )
-                self.context.decision_maker_message_queue.put_nowait(mint_message)
-                contract.is_items_minted = True
+            self.context.logger.info("Creating a batch of items")
+            creation_message = contract.get_create_batch_transaction(
+                deployer_address=self.context.agent_address,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+            )
+            self.context.decision_maker_message_queue.put_nowait(creation_message)
+            contract.is_items_created = True
+            time.sleep(10)
+        if (
+            contract.is_deployed
+            and contract.is_items_created
+            and not contract.is_items_minted
+        ):
+            self.context.logger.info("Minting a batch of items")
+            mint_message = contract.get_mint_batch_transaction(
+                deployer_address=self.context.agent_address,
+                recipient_address=self.context.agent_address,
+                mint_quantities=strategy.mint_stock,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+            )
+            self.context.decision_maker_message_queue.put_nowait(mint_message)
+            contract.is_items_minted = True
 
         self._unregister_service()
         self._register_service()
