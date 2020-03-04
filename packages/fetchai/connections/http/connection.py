@@ -246,7 +246,9 @@ class HTTPChannel:
         response_desc = "\n\nResponse: {}\nStatus: ".format(raw_response)
         return response_code, response_desc
 
-    async def get_response(self, request_id: RequestId) -> Optional[Envelope]:
+    async def get_response(
+        self, request_id: RequestId, sleep: float = 0.1
+    ) -> Optional[Envelope]:
         """
         Get the response.
 
@@ -254,11 +256,12 @@ class HTTPChannel:
         :return: the envelope
         """
         not_received = True
-        timeout_count = 0
+        timeout_count = 0.0
         while not_received and timeout_count <= self.timeout_window:
             envelope = self.dispatch_ready_envelopes.get(request_id, None)
             if envelope is None:
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(sleep)
+                timeout_count += sleep
             else:
                 not_received = False
         if not_received:
