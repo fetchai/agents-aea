@@ -41,6 +41,8 @@ REQUEST_TIMEOUT = 408
 
 logger = logging.getLogger(__name__)
 
+RequestId = str
+
 
 class APIVerificationHelper:
     """API Verification Helper class to verify a request against an OpenAPI/Swagger spec."""
@@ -95,6 +97,7 @@ class APIVerificationHelper:
         except KeyError:
             return False
         return True
+        # TODO investigate if there is validation libraries
 
 
 class HTTPChannel:
@@ -116,8 +119,8 @@ class HTTPChannel:
         :param address: the address of the agent.
         :param host: RESTful API hostname / IP address
         :param port: RESTful API port number
-        :param timeout_window: the timeout (in seconds) for a request to be handled.
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
+        :param timeout_window: the timeout (in seconds) for a request to be handled.
         """
         self.address = address
         self.host = host
@@ -128,16 +131,39 @@ class HTTPChannel:
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self.thread = None  # type: Optional[Thread]
         self.lock = Lock()
-        self.stopped = True
+        self.is_stopped = True
         self._helper = APIVerificationHelper(api_spec_path)
         self.timeout_window = timeout_window
         self.http_server = None  # type: Optional[HTTPServer]
-        self.dispatch_ready_envelopes = {}  # type: Dict[str, Envelope]
+        self.dispatch_ready_envelopes = {}  # type: Dict[RequestId, Envelope]
+        self.timed_out_request_ids = set()  # type: Set[RequestId]
 
     @property
     def helper(self) -> APIVerificationHelper:
         """Get the api verification helper."""
         return self._helper
+
+    def connect(self):
+        """
+        Connect.
+
+        Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
+        """
+        if self.is_stopped:
+            try:
+                self.http_server = HTTPServer(
+                    (self.host, self.port), HTTPHandlerFactory(self)
+                )
+                logger.info("HTTP Server has connected to port: {}.".format(self.port))
+                self.thread = Thread(target=self.http_server.serve_forever)
+                self.thread.start()
+                self.is_stopped = False
+            except OSError:
+                logger.error(
+                    "{}:{} is already in use, please try another Socket.".format(
+                        self.host, self.port
+                    )
+                )
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -156,32 +182,15 @@ class HTTPChannel:
             )
             raise ValueError("Cannot send message.")
 
-        self.dispatch_ready_envelopes.update({envelope.to: envelope})
-
-    def connect(self):
-        """
-        Connect.
-
-        Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
-        """
-        with self.lock:
-            if self.stopped:
-                try:
-                    self.http_server = HTTPServer(
-                        (self.host, self.port), HTTPHandlerFactory(self)
-                    )
-                    logger.info(
-                        "HTTP Server has connected to port: {}.".format(self.port)
-                    )
-                    self.thread = Thread(target=self.http_server.serve_forever())
-                    self.thread.start()
-                    self.stopped = False
-                except OSError:
-                    logger.error(
-                        "{}:{} is already in use, please try another Socket.".format(
-                            self.host, self.port
-                        )
-                    )
+        if envelope.to in self.timed_out_request_ids:
+            self.timed_out_request_ids.remove(envelope.to)
+            logger.warning(
+                "Dropping envelope for request id {} which has timed out.".format(
+                    envelope.to
+                )
+            )
+        else:
+            self.dispatch_ready_envelopes.update({envelope.to: envelope})
 
     def disconnect(self) -> None:
         """
@@ -193,12 +202,11 @@ class HTTPChannel:
             self.http_server is not None and self.thread is not None
         ), "Server not connected, call connect first!"
 
-        with self.lock:
-            if not self.stopped:
-                self.http_server.shutdown()
-                logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
-                self.stopped = True
-                self.thread.join()
+        if not self.is_stopped:
+            self.http_server.shutdown()
+            logger.info("HTTP Server has shutdown on port: {}.".format(self.port))
+            self.is_stopped = True
+            self.thread.join()
 
     async def process(
         self, http_method: str, url: str, param: str, body: Optional[str] = None,
@@ -212,29 +220,50 @@ class HTTPChannel:
         :param body: the body
         :return: a tuple of response code and response description
         """
+        assert self.in_queue is not None, "Channel not connected!"
+
         valid_request = self.helper.verify(http_method, url, param)
 
         if valid_request:
-            # _envelope = self.build_envelope(http_method, url, param, body)
-            # Send the Envelope to the Agent's InBox (self.in_queue)
-            # Wait for response Envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
-            """
-            if resp_envelop is not None:
+            envelope = self.build_envelope(http_method, url, param, body)
+            # send the envelope to the agent's inbox (via self.in_queue)
+            self.in_queue.put_nowait(envelope)
+            # wait for response Envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
+            response = await self.get_response(envelope.sender)
+            if response is not None:
                 # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
-                resp_msg = json.loads(resp_envelop.message.decode())
-                status_code = resp_msg["status_code"]
+                resp_msg = json.loads(envelope.message.decode())
+                response_code = resp_msg["status_code"]
                 raw_response = resp_msg["response"]
                 body = resp_msg["payload"]
             else:
-                status_code = REQUEST_TIMEOUT
+                response_code = REQUEST_TIMEOUT
                 raw_response = "Request Timeout"
-            """
         else:
             response_code = NOT_FOUND
             raw_response = "Request Not Found"
 
         response_desc = "\n\nResponse: {}\nStatus: ".format(raw_response)
         return response_code, response_desc
+
+    async def get_response(self, request_id: RequestId) -> Optional[Envelope]:
+        """
+        Get the response.
+
+        :param request_id: the request id
+        :return: the envelope
+        """
+        not_received = True
+        timeout_count = 0
+        while not_received and timeout_count <= self.timeout_window:
+            envelope = self.dispatch_ready_envelopes.get(request_id, None)
+            if envelope is None:
+                await asyncio.sleep(0.1)
+            else:
+                not_received = False
+        if not_received:
+            self.timed_out_request_ids.add(request_id)
+        return envelope
 
     def build_envelope(
         self, http_method: str, url: str, param: str, body: Optional[str] = None
@@ -297,9 +326,10 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             param = parse_qs(parsed_path.query)
             param = json.dumps(param)
 
-            response_code, response_desc = self.channel.loop.call_soon_threadsafe(
-                self.channel.process, "GET", url, param
+            future = asyncio.run_coroutine_threadsafe(
+                self.channel.process("GET", url, param), self.channel.loop
             )
+            response_code, response_desc = future.result()
 
             # Wfile write: for additional response description.
             self.wfile.write(response_desc.encode())
@@ -316,9 +346,10 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             content_length = int(self.headers["Content-Length"])
             body = self.rfile.read(content_length).decode()
 
-            response_code, response_desc = self.channel.loop.call_soon_threadsafe(
-                self.channel.process, "POST", url, param, body
+            future = asyncio.run_coroutine_threadsafe(
+                self.channel.process("POST", url, param, body), self.channel.loop
             )
+            response_code, response_desc = future.result()
 
             # Wfile write: for additional response description.
             self.wfile.write(response_desc.encode())
@@ -337,7 +368,7 @@ class HTTPConnection(Connection):
         address: Address,
         host: str,
         port: int,
-        api_spec_path: Optional[str] = None,  # Directory path of the API YAML file.
+        api_spec_path: Optional[str] = None,
         *args,
         **kwargs,
     ):
