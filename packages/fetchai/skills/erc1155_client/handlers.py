@@ -83,10 +83,7 @@ class FIPAHandler(Handler):
             data = msg.info
             if "contract" in data.keys():
                 contract = self.context.contracts.erc1155
-                contract.set_instance(
-                    ledger_api=self.context.ledger_apis.apis.get("ethereum")
-                )
-                contract.set_address(
+                contract.set_instance_w_address(
                     ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                     contract_address=data["contract"],
                 )

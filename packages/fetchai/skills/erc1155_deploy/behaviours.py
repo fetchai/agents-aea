@@ -93,9 +93,10 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._register_service()
 
         contract = self.context.contracts.erc1155
-        self.context.logger.info("Loading details from json")
-        contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
         if self.contract_address is None:
+            self.context.logger.info("Loading details from json")
+            contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
+
             dm_message_for_deploy = contract.get_deploy_transaction(
                 deployer_address=self.context.agent_address,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
@@ -104,7 +105,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
         else:
             self.context.logger.info("Setting the address of the deployed contract")
-            contract.set_address(
+            contract.set_instance_w_address(
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 contract_address=self.contract_address,
             )

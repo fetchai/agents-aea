@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the generic buyer skill."""
+"""This module contains the implementation of the erc-1155 client skill."""
