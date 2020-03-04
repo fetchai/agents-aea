@@ -459,7 +459,7 @@ class ProtocolGenerator:
                     self.protocol_specification.author,
                     self.protocol_specification.name,
                     custom_class,
-                    custom_class
+                    custom_class,
                 )
             import_str = import_str[:-1]
         return import_str
@@ -592,7 +592,9 @@ class ProtocolGenerator:
                     )
                     for frozen_set_element_type in frozen_set_element_types:
                         if self._includes_custom_type(frozen_set_element_type):
-                            check_str += "'Custom{}' or ".format(frozen_set_element_type)
+                            check_str += "'Custom{}' or ".format(
+                                frozen_set_element_type
+                            )
                         else:
                             check_str += "'{}' or ".format(frozen_set_element_type)
                     check_str = check_str[:-4]
@@ -723,7 +725,7 @@ class ProtocolGenerator:
                 check_str += (
                     indents
                     + "    type(element) == {} for element in self.{}\n".format(
-                     element_type, content_name
+                        element_type, content_name
                     )
                 )
             check_str += (
@@ -778,9 +780,13 @@ class ProtocolGenerator:
             )
             check_str += indents + "    assert (\n"
             if self._includes_custom_type(element_type_1):
-                check_str += indents + "        type(key) == Custom{}\n".format(element_type_1)
+                check_str += indents + "        type(key) == Custom{}\n".format(
+                    element_type_1
+                )
             else:
-                check_str += indents + "        type(key) == {}\n".format(element_type_1)
+                check_str += indents + "        type(key) == {}\n".format(
+                    element_type_1
+                )
             check_str += (
                 indents
                 + "    ), \"Keys of '{}' dictionary are not of type '{}'.\"\n".format(
@@ -790,9 +796,13 @@ class ProtocolGenerator:
 
             check_str += indents + "    assert (\n"
             if self._includes_custom_type(element_type_1):
-                check_str += indents + "        type(value) == Custom{}\n".format(element_type_2)
+                check_str += indents + "        type(value) == Custom{}\n".format(
+                    element_type_2
+                )
             else:
-                check_str += indents + "        type(value) == {}\n".format(element_type_2)
+                check_str += indents + "        type(value) == {}\n".format(
+                    element_type_2
+                )
             check_str += (
                 indents
                 + "    ), \"Values of '{}' dictionary are not of type '{}'.\"\n".format(
@@ -860,11 +870,8 @@ class ProtocolGenerator:
             self.protocol_specification.version,
         )
         for custom_type in self._all_custom_types:
-            cls_str += '\n'
-            cls_str += '    {} = Custom{}\n'.format(
-                custom_type,
-                custom_type
-            )
+            cls_str += "\n"
+            cls_str += "    {} = Custom{}\n".format(custom_type, custom_type)
 
         # Performatives Enum
         cls_str += "\n{}".format(self._performatives_enum_str())
@@ -942,9 +949,13 @@ class ProtocolGenerator:
             content_type = self._all_unique_contents[content_name]
             cls_str += "    @property\n"
             if self._includes_custom_type(content_type):
-                cls_str += "    def {}(self) -> Custom{}:\n".format(content_name, content_type)
+                cls_str += "    def {}(self) -> Custom{}:\n".format(
+                    content_name, content_type
+                )
             else:
-                cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
+                cls_str += "    def {}(self) -> {}:\n".format(
+                    content_name, content_type
+                )
             cls_str += '        """Get the \'{}\' content from the message."""\n'.format(
                 content_name
             )
@@ -1098,7 +1109,9 @@ class ProtocolGenerator:
             )
             cls_str += '        """\n'
             cls_str += "        Decode a protocol buffer object that corresponds with this class into an instance of this class.\n\n"
-            cls_str += "        A new instance of this class must be created that matches the content in the '{}_from_pb2' argument.\n\n".format(_camel_case_to_snake_case(custom_type))
+            cls_str += "        A new instance of this class must be created that matches the content in the '{}_from_pb2' argument.\n\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
             cls_str += "        :param {}_from_pb2: the protocol buffer content object whose type corresponds with this class.\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
