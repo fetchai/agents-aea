@@ -405,7 +405,6 @@ class ERC1155Contract(Contract):
         trade_nonce,
         ledger_api,
         skill_callback_id,
-        counterparty,
     ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -432,9 +431,9 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={"counterparty": counterparty},
+            info={},
             ledger_id="ethereum",
-            signing_payload={"tx_hash": tx_hash},
+            signing_payload={"tx_hashh": tx_hash},
         )
 
         return tx_message
