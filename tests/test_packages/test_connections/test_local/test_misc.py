@@ -63,7 +63,13 @@ async def test_connection_twice_return_none():
         )
         await connection.connect()
         await node.connect(address, connection._reader)
-        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        message = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         message_bytes = DefaultSerializer().encode(message)
         expected_envelope = Envelope(
             to=address,
@@ -125,7 +131,13 @@ def test_communication():
         multiplexer1.connect()
         multiplexer2.connect()
 
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(
             to="multiplexer2",

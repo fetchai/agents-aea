@@ -28,7 +28,7 @@ from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 SUPPORTED_CRYPTOS = [ETHEREUM, FETCHAI]
 
 
-class Wallet(object):
+class Wallet:
     """Store all the cryptos we initialise."""
 
     def __init__(self, private_key_paths: Dict[str, str]):

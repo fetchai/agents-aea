@@ -32,10 +32,10 @@ from aea import AEA_DIR
 from aea.cli.common import (
     Context,
     DEFAULT_VERSION,
+    _validate_package_name,
     logger,
     pass_ctx,
     try_to_load_agent_config,
-    validate_package_name,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.base import (  # noqa: F401
@@ -78,7 +78,7 @@ def skill(ctx: Context, skill_name: str):
 
 def _scaffold_item(ctx: Context, item_type, item_name):
     """Add an item scaffolding to the configuration file and agent."""
-    validate_package_name(item_name)
+    _validate_package_name(item_name)
     author_name = ctx.agent_config.author
     loader = getattr(ctx, "{}_loader".format(item_type))
     default_config_filename = globals()[
@@ -129,6 +129,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         )
         config = loader.load(config_filepath.open())
         config.name = item_name
+        config.author = author_name
         loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:

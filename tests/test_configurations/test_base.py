@@ -39,6 +39,7 @@ from aea.configurations.base import (
 )
 
 from ..conftest import (
+    AUTHOR,
     agent_config_files,
     connection_config_files,
     contract_config_files,
@@ -211,24 +212,24 @@ class PublicIdTestCase(TestCase):
 
     def test_public_id_from_json_positive(self):
         """Test case for from_json method positive result."""
-        obj = {"author": "author", "name": "name", "version": "version"}
+        obj = {"author": AUTHOR, "name": "name", "version": "version"}
         PublicId.from_json(obj)
 
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
-        obj = PublicId("author", "name", "version")
+        obj = PublicId(AUTHOR, "name", "version")
         obj.json
 
     def test_public_id_eq_positive(self):
         """Test case for json __eq__ method positive result."""
-        obj1 = PublicId("author", "name", "version")
-        obj2 = PublicId("author", "name", "version")
+        obj1 = PublicId(AUTHOR, "name", "version")
+        obj2 = PublicId(AUTHOR, "name", "version")
         self.assertTrue(obj1 == obj2)
 
     def test_public_id_lt_positive(self):
         """Test case for json __lt__ method positive result."""
-        obj1 = PublicId("author", "name", "1")
-        obj2 = PublicId("author", "name", "2")
+        obj1 = PublicId(AUTHOR, "name", "1")
+        obj2 = PublicId(AUTHOR, "name", "2")
         self.assertTrue(obj1 < obj2)
 
 
@@ -291,7 +292,7 @@ class ProtocolSpecificationTestCase(TestCase):
         """Test case for from_json method positive result."""
         json_disc = {
             "name": "name",
-            "author": "author",
+            "author": AUTHOR,
             "version": "version",
             "license": "license",
             "description": "description",

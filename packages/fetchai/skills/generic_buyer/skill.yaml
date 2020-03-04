@@ -6,7 +6,7 @@ fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: Qmc2P8vwXpny8tCrvmJinfzZ9UkT6wHYqAdRVmMLfch3td
   dialogues.py: QmecN3nDkwtko9U4ZE83gxGiMXmM26tnHkSEACo8KSRo8F
-  handlers.py: QmQBxSxgyRbgssPeQamuPAMnnAiXsHS455zq6VTBQL2bBd
+  handlers.py: QmSC3g9piezn9ZYEkgKhw3ohm6tizRfoa3tq3zaN7C3sxo
   strategy.py: QmcXF3gjPpXG45vGugLk6d9AfLSv3q8HcUP7ww3jq99ghV
 description: "The weather client skill implements the skill to purchase weather data."
 behaviours:

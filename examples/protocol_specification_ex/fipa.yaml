@@ -8,8 +8,7 @@ speech_acts:
   cfp:
     query: ct:Query
   propose:
-    proposal: ct:Proposal
-    price: pt:float
+    proposal: pt:list[ct:Description]
   accept_w_inform:
     info: pt:dict[pt:str, ct:Info]
   match_accept_w_inform:
@@ -29,8 +28,8 @@ ct:Query: |
       Nothing nothing = 2;
       bytes query_bytes = 3;
   }
-ct:Proposal: |
-  bytes bytes = 1;
+ct:Description: |
+  bytes description = 1;
 ct:Info: |
-  repeated bytes proposal = 1;
+  bytes info = 1;
 ...

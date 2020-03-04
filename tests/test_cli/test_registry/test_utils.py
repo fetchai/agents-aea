@@ -19,28 +19,22 @@
 """This test module contains tests for CLI Registry utils."""
 
 import os
-from builtins import FileNotFoundError
 from unittest import TestCase, mock
 
 from click import ClickException
 
 from requests.exceptions import ConnectionError
 
-from yaml import YAMLError
-
 from aea.cli.common import AEAConfigException
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
-    _init_config_folder,
     _rm_tarfiles,
     check_is_author_logged_in,
     download_file,
     extract,
     fetch_package,
-    read_cli_config,
     registry_login,
     request_api,
-    write_cli_config,
 )
 from aea.configurations.base import PublicId
 
@@ -119,7 +113,7 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     def test_request_api_403(self, request_mock):
-        """Test for request_api method not authorized server response."""
+        """Test for request_api method notauthorized server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 403
         request_mock.return_value = resp_mock
@@ -151,16 +145,21 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    @mock.patch("aea.cli.registry.utils.read_cli_config", _raise_config_exception)
-    def test_request_api_no_auth_data(self, request_mock):
+    @mock.patch("aea.cli.registry.utils._get_or_create_cli_config", return_value={})
+    def test_request_api_no_auth_data(
+        self, _get_or_create_cli_config_mock, request_mock
+    ):
         """Test for request_api method no auth data."""
         with self.assertRaises(ClickException):
             request_api("GET", "/path", is_auth=True)
 
     @mock.patch(
-        "aea.cli.registry.utils.read_cli_config", return_value={AUTH_TOKEN_KEY: "key"}
+        "aea.cli.registry.utils._get_or_create_cli_config",
+        return_value={AUTH_TOKEN_KEY: "key"},
     )
-    def test_request_api_with_auth_positive(self, read_cli_config_mock, request_mock):
+    def test_request_api_with_auth_positive(
+        self, _get_or_create_cli_config_mock, request_mock
+    ):
         """Test for request_api method with auth positive result."""
         expected_result = {"correct": "json"}
 
@@ -256,70 +255,6 @@ class ExtractTestCase(TestCase):
         target = "target-folder"
         with self.assertRaises(Exception):
             extract(source, target)
-
-
-@mock.patch("aea.cli.registry.utils.os.path.dirname", return_value="dir-name")
-@mock.patch("aea.cli.registry.utils.os.path.exists", return_value=False)
-@mock.patch("aea.cli.registry.utils.os.makedirs")
-class InitConfigFolderTestCase(TestCase):
-    """Test case for _init_config_folder method."""
-
-    def test_init_config_folder_positive(
-        self, makedirs_mock, exists_mock, dirname_mock
-    ):
-        """Test for _init_config_folder method positive result."""
-        _init_config_folder()
-        dirname_mock.assert_called_once()
-        exists_mock.assert_called_once_with("dir-name")
-        makedirs_mock.assert_called_once_with("dir-name")
-
-
-@mock.patch("aea.cli.registry.utils._init_config_folder")
-@mock.patch("aea.cli.registry.utils.yaml.dump")
-@mock.patch("builtins.open", mock.mock_open())
-class WriteCLIConfigTestCase(TestCase):
-    """Test case for write_cli_config method."""
-
-    def test_write_cli_config_positive(self, dump_mock, icf_mock):
-        """Test for write_cli_config method positive result."""
-        write_cli_config({"some": "config"})
-        icf_mock.assert_called_once()
-        dump_mock.assert_called_once()
-
-
-def _raise_yamlerror(*args):
-    raise YAMLError()
-
-
-def _raise_file_not_found_error(*args):
-    raise FileNotFoundError()
-
-
-@mock.patch("builtins.open", mock.mock_open())
-class ReadCLIConfigTestCase(TestCase):
-    """Test case for read_cli_config method."""
-
-    @mock.patch(
-        "aea.cli.registry.utils.yaml.safe_load", return_value={"correct": "output"}
-    )
-    def test_read_cli_config_positive(self, safe_load_mock):
-        """Test for read_cli_config method positive result."""
-        result = read_cli_config()
-        expected_result = {"correct": "output"}
-        self.assertEqual(result, expected_result)
-        safe_load_mock.assert_called_once()
-
-    @mock.patch("aea.cli.registry.utils.yaml.safe_load", _raise_yamlerror)
-    def test_read_cli_config_bad_yaml(self):
-        """Test for read_cli_config method bad yaml behavior."""
-        with self.assertRaises(ClickException):
-            read_cli_config()
-
-    @mock.patch("aea.cli.registry.utils.yaml.safe_load", _raise_file_not_found_error)
-    def test_read_cli_config_file_not_found(self):
-        """Test for read_cli_config method bad yaml behavior."""
-        with self.assertRaises(AEAConfigException):
-            read_cli_config()
 
 
 @mock.patch(
