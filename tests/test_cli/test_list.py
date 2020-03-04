@@ -183,7 +183,7 @@ class ListContractsCommandTestCase(TestCase):
         self.runner = CliRunner()
 
     @mock.patch("aea.cli.list._get_item_details")
-    @mock.patch("aea.cli.list.format_items")
+    @mock.patch("aea.cli.list._format_items")
     def test_list_contracts_positive(self, *mocks):
         """Test list contracts command positive result."""
         result = self.runner.invoke(
