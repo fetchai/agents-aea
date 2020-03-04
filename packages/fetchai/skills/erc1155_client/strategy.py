@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,15 +19,12 @@
 
 """This module contains the strategy class."""
 
-from typing import cast
-
-from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
+from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.base import Model
 
 DEFAULT_MAX_PRICE = 5
 DEFAULT_MAX_BUYER_TX_FEE = 2
-DEFAULT_CURRENCY_PBK = "FET"
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_LEDGER_ID = "ethereum"
 DEFAULT_IS_LEDGER_TX = True
 
 
@@ -40,9 +37,6 @@ class Strategy(Model):
 
         :return: None
         """
-        self._max_price = kwargs.pop("max_price", DEFAULT_MAX_PRICE)
-        self.max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_BUYER_TX_FEE)
-        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         super().__init__(**kwargs)
@@ -78,33 +72,3 @@ class Strategy(Model):
             model=None,
         )
         return query
-
-    def is_acceptable_proposal(self, proposal: Description) -> bool:
-        """
-        Check whether it is an acceptable proposal.
-
-        :return: whether it is acceptable
-        """
-        result = (
-            (proposal.values["price"] - proposal.values["seller_tx_fee"] > 0)
-            and (proposal.values["price"] <= self._max_price)
-            and (proposal.values["currency_id"] == self._currency_id)
-            and (proposal.values["ledger_id"] == self._ledger_id)
-        )
-        return result
-
-    def is_affordable_proposal(self, proposal: Description) -> bool:
-        """
-        Check whether it is an affordable proposal.
-
-        :return: whether it is affordable
-        """
-        if self.is_ledger_tx:
-            payable = proposal.values["price"] + self.max_buyer_tx_fee
-            ledger_id = proposal.values["ledger_id"]
-            address = cast(str, self.context.agent_addresses.get(ledger_id))
-            balance = self.context.ledger_apis.token_balance(ledger_id, address)
-            result = balance >= payable
-        else:
-            result = True
-        return result
