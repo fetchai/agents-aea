@@ -31,16 +31,18 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import connection, skill
 from aea.cli.common import (
+    AUTHOR,
     Context,
-    DEFAULT_AUTHOR,
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL,
     DEFAULT_VERSION,
+    _get_or_create_cli_config,
     logger,
 )
+from aea.cli.init import init
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 
@@ -53,14 +55,13 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     current = Path(".").resolve()
     root = Path("/")
     home = current.home()
-    while current != home and current != root:
+    while current not in (home, root):
         files = set(map(lambda x: x.name, current.iterdir()))
         if DEFAULT_AEA_CONFIG_FILE in files:
             raise Exception(
                 "Folder {} has file named {}".format(current, DEFAULT_AEA_CONFIG_FILE)
             )
         current = current.parent.resolve()
-    return
 
 
 def _setup_package_folder(path: Path):
@@ -73,14 +74,31 @@ def _setup_package_folder(path: Path):
 
 @click.command()
 @click.argument("agent_name", type=str, required=True)
+@click.option(
+    "--author",
+    type=str,
+    required=False,
+    help="Add the author to run `init` before `create` execution.",
+)
 @click.pass_context
-def create(click_context, agent_name):
+def create(click_context, agent_name, author):
     """Create an agent."""
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
         logger.error(
             "The current folder is already an AEA project. Please move to the parent folder."
+        )
+        sys.exit(1)
+
+    if author is not None:
+        click_context.invoke(init, author=author)
+
+    config = _get_or_create_cli_config()
+    set_author = config.get(AUTHOR, None)
+    if set_author is None:
+        click.echo(
+            "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
         )
         sys.exit(1)
 
@@ -109,7 +127,7 @@ def create(click_context, agent_name):
         agent_config = AgentConfig(
             agent_name=agent_name,
             aea_version=aea.__version__,
-            author=DEFAULT_AUTHOR,
+            author=set_author,
             version=DEFAULT_VERSION,
             license=DEFAULT_LICENSE,
             registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),

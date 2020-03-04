@@ -39,6 +39,7 @@ from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
 from ...conftest import (
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
@@ -72,6 +73,9 @@ class TestGenerateProtocol:
 
         # create an agent
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -176,6 +180,9 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
 
         # create an agent
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -248,6 +255,9 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         # create an agent
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -332,6 +342,9 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         # create an agent
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -399,6 +412,9 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         # create an agent
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )

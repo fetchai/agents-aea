@@ -37,31 +37,40 @@ from dotenv import load_dotenv
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
+import yaml
+
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
     Dependencies,
     PackageConfiguration,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
+from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
-    load_agent_component_package,
+from aea.crypto.helpers import (
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+    _create_ethereum_private_key,
+    _create_fetchai_private_key,
+    _try_validate_ethereum_private_key_path,
+    _try_validate_fet_private_key_path,
 )
+from aea.crypto.wallet import SUPPORTED_CRYPTOS
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
+AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
+AUTHOR = "author"
+CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_AUTHOR = "author"
 DEFAULT_CONNECTION = PublicId.from_str(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
@@ -73,7 +82,7 @@ DEFAULT_LICENSE = "Apache-2.0"
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
-class Context(object):
+class Context:
     """A class to keep configuration of the cli tool."""
 
     agent_config: AgentConfig
@@ -117,9 +126,10 @@ class Context(object):
         :return: None
         """
         self.config[key] = value
-        logger.debug("  config[%s] = %s" % (key, value))
+        logger.debug("  config[{}] = {}".format(key, value))
 
-    def _get_item_dependencies(self, item_type, public_id: PublicId) -> Dependencies:
+    @staticmethod
+    def _get_item_dependencies(item_type, public_id: PublicId) -> Dependencies:
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
         default_config_file_name = _get_default_configuration_file_name_from_type(
@@ -197,43 +207,6 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
             sys.exit(1)
 
 
-def _try_to_load_protocols(ctx: Context):
-    for protocol_public_id in ctx.agent_config.protocols:
-        protocol_name = protocol_public_id.name
-        protocol_author = protocol_public_id.author
-        logger.debug("Processing protocol {}".format(protocol_public_id))
-        protocol_dir = Path(
-            "vendor", protocol_public_id.author, "protocols", protocol_name
-        )
-        if not protocol_dir.exists():
-            protocol_dir = Path("protocols", protocol_name)
-
-        try:
-            ctx.protocol_loader.load(open(protocol_dir / DEFAULT_PROTOCOL_CONFIG_FILE))
-        except FileNotFoundError:
-            logger.error(
-                "Protocol configuration file for protocol {} not found.".format(
-                    protocol_name
-                )
-            )
-            sys.exit(1)
-
-        try:
-            protocol_package = load_agent_component_package(
-                "protocol", protocol_name, protocol_author, protocol_dir
-            )
-            add_agent_component_module_to_sys_modules(
-                "protocol", protocol_name, protocol_author, protocol_package
-            )
-        except Exception:
-            logger.error(
-                "A problem occurred while processing protocol {}.".format(
-                    protocol_public_id
-                )
-            )
-            sys.exit(1)
-
-
 def _load_env_file(env_file: str):
     """
     Load the content of the environment file into the process environment.
@@ -244,7 +217,59 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
-def format_items(items):
+def _verify_or_create_private_keys(ctx: Context) -> None:
+    """
+    Verify or create private keys.
+
+    :param ctx: Context
+    """
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = path.open(mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier, _value in aea_conf.private_key_paths.read_all():
+        if identifier not in SUPPORTED_CRYPTOS:
+            ValueError("Unsupported identifier in private key paths.")
+
+    fetchai_private_key_path = aea_conf.private_key_paths.read(FETCHAI)
+    if fetchai_private_key_path is None:
+        _create_fetchai_private_key()
+        aea_conf.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+    else:
+        try:
+            _try_validate_fet_private_key_path(fetchai_private_key_path)
+        except FileNotFoundError:  # pragma: no cover
+            logger.error(
+                "File {} for private key {} not found.".format(
+                    repr(fetchai_private_key_path), FETCHAI,
+                )
+            )
+            sys.exit(1)
+
+    ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
+    if ethereum_private_key_path is None:
+        _create_ethereum_private_key()
+        aea_conf.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+    else:
+        try:
+            _try_validate_ethereum_private_key_path(ethereum_private_key_path)
+        except FileNotFoundError:  # pragma: no cover
+            logger.error(
+                "File {} for private key {} not found.".format(
+                    repr(ethereum_private_key_path), ETHEREUM,
+                )
+            )
+            sys.exit(1)
+
+    # update aea config
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    fp = path.open(mode="w", encoding="utf-8")
+    agent_loader.dump(aea_conf, fp)
+    ctx.agent_config = aea_conf
+
+
+def _format_items(items):
     """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ""
     for item in items:
@@ -267,7 +292,7 @@ def format_items(items):
     return list_str
 
 
-def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
+def _retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
@@ -374,11 +399,11 @@ class AgentDirectory(click.Path):
             os.chdir(cwd)
 
 
-def validate_package_name(package_name: str):
+def _validate_package_name(package_name: str):
     """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
-    >>> validate_package_name("this_is_a_good_package_name")
-    >>> validate_package_name("this-is-not")
+    >>> _validate_package_name("this_is_a_good_package_name")
+    >>> _validate_package_name("this-is-not")
     Traceback (most recent call last):
     ...
     click.exceptions.BadParameter: this-is-not is not a valid package name.
@@ -387,7 +412,22 @@ def validate_package_name(package_name: str):
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
-def try_get_item_source_path(
+def _is_validate_author_handle(author: str) -> bool:
+    """Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
+
+    >>> _is_validate_author_handle("this_is_a_good_author_name")
+    ...
+    True
+    >>> _is_validate_author_handle("this-is-not")
+    ...
+    False
+    """
+    if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
+        return False
+    return True
+
+
+def _try_get_item_source_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -408,7 +448,7 @@ def try_get_item_source_path(
     return source_path
 
 
-def try_get_vendorized_item_target_path(
+def _try_get_vendorized_item_target_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -622,3 +662,60 @@ def check_aea_project(f):
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)
+
+
+def _init_cli_config() -> None:
+    """
+    Create cli config folder and file.
+
+    :return: None
+    """
+    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
+    with open(CLI_CONFIG_PATH, "w+") as f:
+        yaml.dump({}, f, default_flow_style=False)
+
+
+def _update_cli_config(dict_conf: Dict) -> None:
+    """
+    Update CLI config and write to yaml file.
+
+    :param dict_conf: dict config to write.
+
+    :return: None
+    """
+    config = _get_or_create_cli_config()
+    config.update(dict_conf)
+    with open(CLI_CONFIG_PATH, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+
+def _get_or_create_cli_config() -> Dict:
+    """
+    Read or create CLI config from yaml file.
+
+    :return: dict CLI config.
+    """
+    try:
+        return _load_yaml(CLI_CONFIG_PATH)
+    except FileNotFoundError:
+        _init_cli_config()
+    return _load_yaml(CLI_CONFIG_PATH)
+
+
+def _load_yaml(filepath: str) -> Dict:
+    """
+    Read content from yaml file.
+
+    :param filepath: str path to yaml file.
+
+    :return: dict YAML content
+    """
+    with open(filepath, "r") as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                "Loading yaml config from {} failed: {}".format(filepath, e)
+            )

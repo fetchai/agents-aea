@@ -95,7 +95,9 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = (
+            "my_agent,other_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
+        )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
 

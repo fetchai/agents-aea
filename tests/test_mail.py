@@ -171,7 +171,13 @@ def test_inbox_get_nowait_returns_none():
 
 def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
         [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
@@ -193,7 +199,13 @@ def test_outbox_put():
 
 def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
         [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]

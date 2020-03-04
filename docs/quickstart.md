@@ -71,6 +71,12 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target=_blank>tools for Visual Studio</a>. 
 
+## Setup Author name
+
+You can now setup your author name:
+``` bash
+aea init
+```
 
 ## Echo skill demo
 
@@ -103,7 +109,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
 For example:		
 		
 ``` bash		
-recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello
 ```
 
 ## Run the AEA
@@ -137,7 +143,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.

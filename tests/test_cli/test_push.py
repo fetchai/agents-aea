@@ -29,21 +29,23 @@ from aea.cli.push import _check_package_public_id, _save_item_locally
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
+from ..conftest import AUTHOR
+
 
 @mock.patch("aea.cli.push.copytree")
 class SaveItemLocallyTestCase(TestCase):
     """Test case for save_item_locally method."""
 
     @mock.patch(
-        "aea.cli.push.try_get_vendorized_item_target_path", return_value="target"
+        "aea.cli.push._try_get_vendorized_item_target_path", return_value="target"
     )
-    @mock.patch("aea.cli.push.try_get_item_source_path", return_value="source")
+    @mock.patch("aea.cli.push._try_get_item_source_path", return_value="source")
     @mock.patch("aea.cli.push._check_package_public_id", return_value=None)
     def test_save_item_locally_positive(
         self,
         _check_package_public_id_mock,
-        try_get_item_source_path_mock,
-        try_get_vendorized_item_target_path_mock,
+        _try_get_item_source_path_mock,
+        _try_get_vendorized_item_target_path_mock,
         copy_tree_mock,
     ):
         """Test for save_item_locally positive result."""
@@ -51,10 +53,10 @@ class SaveItemLocallyTestCase(TestCase):
         item_id = PublicIdMock()
         ctx_mock = ContextMock()
         _save_item_locally(ctx_mock, item_type, item_id)
-        try_get_item_source_path_mock.assert_called_once_with(
+        _try_get_item_source_path_mock.assert_called_once_with(
             "cwd", item_id.author, "skills", item_id.name
         )
-        try_get_vendorized_item_target_path_mock.assert_called_once_with(
+        _try_get_vendorized_item_target_path_mock.assert_called_once_with(
             ctx_mock.agent_config.registry_path,
             item_id.author,
             item_type + "s",
@@ -67,8 +69,8 @@ class SaveItemLocallyTestCase(TestCase):
 
 
 @mock.patch(
-    "aea.cli.push.load_yaml",
-    return_value={"author": "author", "name": "name", "version": "0.1.0"},
+    "aea.cli.push._load_yaml",
+    return_value={"author": AUTHOR, "name": "name", "version": "0.1.0"},
 )
 class CheckPackagePublicIdTestCase(TestCase):
     """Test case for _check_package_public_id method."""
@@ -76,14 +78,18 @@ class CheckPackagePublicIdTestCase(TestCase):
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
         _check_package_public_id(
-            "source-path", "item-type", PublicIdMock.from_str("author/name:0.1.0")
+            "source-path",
+            "item-type",
+            PublicIdMock.from_str("{}/name:0.1.0".format(AUTHOR)),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
             _check_package_public_id(
-                "source-path", "item-type", PublicIdMock.from_str("author/name:0.1.1")
+                "source-path",
+                "item-type",
+                PublicIdMock.from_str("{}/name:0.1.1".format(AUTHOR)),
             )
 
 

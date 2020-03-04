@@ -243,9 +243,7 @@ def set(ctx: Context, json_path: List[str], value, type):
         if type_ != bool:
             parent_object[attribute_name] = type_(value)
         else:
-            parent_object[attribute_name] = (
-                False if value in FALSE_EQUIVALENTS else True
-            )
+            parent_object[attribute_name] = value not in FALSE_EQUIVALENTS
     except ValueError:  # pragma: no cover
         logger.error("Cannot convert {} to type {}".format(value, type_))
 

@@ -40,6 +40,14 @@ message TwoPartyNegotiationMessage{
 
     message Accept{}
 
+    message Inform{
+        repeated int32 inform_number = 1;
+    }
+
+    message Inform_Reply{
+        map<int32, string> reply_message = 1;
+    }
+
     message Decline{}
 
     message Match_Accept{}
@@ -54,7 +62,9 @@ message TwoPartyNegotiationMessage{
         Accept accept = 5;
         Cfp cfp = 6;
         Decline decline = 7;
-        Match_Accept match_accept = 8;
-        Propose propose = 9;
+        Inform inform = 8;
+        Inform_Reply inform_reply = 9;
+        Match_Accept match_accept = 10;
+        Propose propose = 11;
     }
 }

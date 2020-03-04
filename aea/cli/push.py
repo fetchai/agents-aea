@@ -28,13 +28,13 @@ import click
 from aea.cli.common import (
     Context,
     PublicIdParameter,
-    check_aea_project,
+    _load_yaml,
+    _try_get_item_source_path,
+    _try_get_vendorized_item_target_path,
     pass_ctx,
-    try_get_item_source_path,
-    try_get_vendorized_item_target_path,
+    check_aea_project,
 )
 from aea.cli.registry.push import push_item
-from aea.cli.registry.utils import load_yaml
 from aea.configurations.base import PublicId
 
 
@@ -102,10 +102,10 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     item_type_plural = item_type + "s"
 
-    source_path = try_get_item_source_path(
+    source_path = _try_get_item_source_path(
         ctx.cwd, item_id.author, item_type_plural, item_id.name
     )
-    target_path = try_get_vendorized_item_target_path(
+    target_path = _try_get_vendorized_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,
@@ -122,7 +122,7 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
 def _check_package_public_id(source_path, item_type, item_id) -> None:
     # we load only based on item_name, hence also check item_version and item_author match.
-    config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
+    config = _load_yaml(os.path.join(source_path, item_type + ".yaml"))
     item_author = config.get("author", "")
     item_name = config.get("name", "")
     item_version = config.get("version", "")

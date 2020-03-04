@@ -90,7 +90,9 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = (
+            "my_aea,other_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
+        )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
             print("input message: " + message_text)

@@ -1,3 +1,4 @@
+---
 name: ml_trade
 author: fetchai
 version: 0.1.0
@@ -14,6 +15,7 @@ speech_acts:
   data:
     terms: ct:Description
     data: ct:Data
+...
 ---
 ct:Query: |
   message Nothing {
@@ -24,6 +26,7 @@ ct:Query: |
       bytes query_bytes = 3;
   }
 ct:Description: |
-  bytes bytes = 1;
+  bytes description = 1;
 ct:Data: |
   repeated bytes bytes = 1;
+...

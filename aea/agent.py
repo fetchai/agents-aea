@@ -53,6 +53,14 @@ class Liveness:
         """Check whether the liveness is stopped."""
         return self._is_stopped
 
+    def start(self) -> None:
+        """Start the liveness."""
+        self._is_stopped = False
+
+    def stop(self) -> None:
+        """Stop the liveness."""
+        self._is_stopped = True
+
 
 class Agent(ABC):
     """This class implements a template agent."""
@@ -169,7 +177,7 @@ class Agent(ABC):
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
 
-        self.liveness._is_stopped = False
+        self.liveness.start()
         self._run_main_loop()
 
     def _run_main_loop(self) -> None:
@@ -193,7 +201,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self.liveness._is_stopped = True
+        self.liveness.stop()
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()
 

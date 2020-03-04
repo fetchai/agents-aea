@@ -8,7 +8,7 @@ fingerprint:
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmQ4swF4ZFTLsTPLh5uwDLeFZyYtJZoUCxC5mD1vxVnAGH
   dialogues.py: QmW1CB1mHTePURgb7jqnkRzuUf3jWVB3WACnriZEPQiG9U
-  handlers.py: Qme3HhEDx4HPWzn12gMKJwRqMNZcbqbdwNsoQQu5SJWzUV
+  handlers.py: QmVzjsSmAv9teEwwdDSU2BASzK58CTdLRWV48JAaLKyxpx
   strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
 description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
