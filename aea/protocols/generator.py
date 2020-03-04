@@ -1000,12 +1000,18 @@ class ProtocolGenerator:
                 _camel_case_to_snake_case(custom_type), custom_type
             )
             cls_str += '        """\n'
-            cls_str += '        Encode an instance of this class into the protocol buffer object.\n\n'
-            cls_str += '        \'performative\' argument is the protocol buffer object containing a content whose type is this class.\n'
-            cls_str += '        This content must be matched with the message content in the \'{}_from_message\' argument.\n\n'.format(_camel_case_to_snake_case(custom_type))
-            cls_str += '        :param performative: the performative protocol buffer object containing a content whose type is this class.\n'
-            cls_str += '        :param {}_from_message: the message content to be encoded in the protocol buffer object.\n'.format(_camel_case_to_snake_case(custom_type))
-            cls_str += '        :return: the \'performative\' protocol buffer object encoded with the message content in the \'{}_from_message\' argument.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += "        Encode an instance of this class into the protocol buffer object.\n\n"
+            cls_str += "        'performative' argument is the protocol buffer object containing a content whose type is this class.\n"
+            cls_str += "        This content must be matched with the message content in the '{}_from_message' argument.\n\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
+            cls_str += "        :param performative: the performative protocol buffer object containing a content whose type is this class.\n"
+            cls_str += "        :param {}_from_message: the message content to be encoded in the protocol buffer object.\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
+            cls_str += "        :return: the 'performative' protocol buffer object encoded with the message content in the '{}_from_message' argument.\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
             cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
 
@@ -1014,11 +1020,17 @@ class ProtocolGenerator:
                 _camel_case_to_snake_case(custom_type), custom_type,
             )
             cls_str += '        """\n'
-            cls_str += '        Decode a protocol buffer object that corresponds with this class into an instance of this class.\n\n'
-            cls_str += '        \'{}_from_pb2\' argument is the protocol buffer content object whose type corresponds with this class.\n'.format(_camel_case_to_snake_case(custom_type))
-            cls_str += '        A new instance of this class must be created that matches this content.\n\n'
-            cls_str += '        :param {}_from_pb2: the protocol buffer content object whose type corresponds with this class.\n'.format(_camel_case_to_snake_case(custom_type))
-            cls_str += '        :return: A new instance of this class that matches the protocol buffer object in the \'{}_from_pb2\' argument.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += "        Decode a protocol buffer object that corresponds with this class into an instance of this class.\n\n"
+            cls_str += "        '{}_from_pb2' argument is the protocol buffer content object whose type corresponds with this class.\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
+            cls_str += "        A new instance of this class must be created that matches this content.\n\n"
+            cls_str += "        :param {}_from_pb2: the protocol buffer content object whose type corresponds with this class.\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
+            cls_str += "        :return: A new instance of this class that matches the protocol buffer object in the '{}_from_pb2' argument.\n".format(
+                _camel_case_to_snake_case(custom_type)
+            )
             cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
 
@@ -1076,8 +1088,11 @@ class ProtocolGenerator:
             )
         else:
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "performative = {}.encode(performative, {})\n".format(
-                content_type, content_name
+            encoding_str += (
+                indents
+                + "performative = {}.encode(performative, {})\n".format(
+                    content_type, content_name
+                )
             )
         return encoding_str
 
@@ -1202,21 +1217,11 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-            decoding_str += (
-                    indents
-                    + "pb2_{} = default_pb.{}.{}\n".format(
-                    variable_name,
-                    performative,
-                    variable_name,
-                )
+            decoding_str += indents + "pb2_{} = default_pb.{}.{}\n".format(
+                variable_name, performative, variable_name,
             )
-            decoding_str += (
-                    indents
-                    + "{} = {}.decode(pb2_{})\n".format(
-                    content_name,
-                    content_type,
-                    variable_name,
-                )
+            decoding_str += indents + "{} = {}.decode(pb2_{})\n".format(
+                content_name, content_type, variable_name,
             )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
