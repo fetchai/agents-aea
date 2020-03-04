@@ -52,10 +52,8 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FIPAMessage, message)
 
-        # handle message
         if fipa_msg.performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg)
 
