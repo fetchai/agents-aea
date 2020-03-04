@@ -90,7 +90,7 @@ class AEAConfMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AEAConf mock object."""
-        self.author = "author"
+        self.author = AUTHOR
         self.ledger_apis = Mock()
         ledger_apis = ((ETHEREUM, "value"), (FETCHAI, "value"))
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)

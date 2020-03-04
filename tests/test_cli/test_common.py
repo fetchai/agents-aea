@@ -27,6 +27,7 @@ from click import ClickException
 from yaml import YAMLError
 
 from aea.cli.common import (
+    AUTHOR,
     # AEAConfigException,
     PublicIdParameter,
     _format_items,
@@ -100,17 +101,17 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.common.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = _try_get_item_source_path("cwd", "author", "skills", "skill-name")
+        result = _try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("cwd", "author", "skills", "skill-name")
+        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill-name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
         with self.assertRaises(ClickException):
-            _try_get_item_source_path("cwd", "author", "skills", "skill-name")
+            _try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
 
 
 @mock.patch("aea.cli.common.os.path.join", return_value="some-path")
@@ -121,12 +122,12 @@ class TryGetItemTargetPathTestCase(TestCase):
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
         result = _try_get_vendorized_item_target_path(
-            "packages", "author", "skills", "skill-name"
+            "packages", AUTHOR, "skills", "skill-name"
         )
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
         join_mock.assert_called_once_with(
-            "packages", "vendor", "author", "skills", "skill-name"
+            "packages", "vendor", AUTHOR, "skills", "skill-name"
         )
         exists_mock.assert_called_once_with("some-path")
 
@@ -135,7 +136,7 @@ class TryGetItemTargetPathTestCase(TestCase):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
             _try_get_vendorized_item_target_path(
-                "skills", "author", "skill-name", "packages_path"
+                "skills", AUTHOR, "skill-name", "packages_path"
             )
 
 
