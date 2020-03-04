@@ -38,8 +38,7 @@ class ErrorCode(Enum):
         """
         Encode an instance of this class into the protocol buffer object.
 
-        'performative' argument is the protocol buffer object containing a content whose type is this class.
-        This content must be matched with the message content in the 'error_code_from_message' argument.
+        The content in the 'performative' argument is matched with the message content in the 'error_code_from_message' argument.
 
         :param performative: the performative protocol buffer object containing a content whose type is this class.
         :param error_code_from_message: the message content to be encoded in the protocol buffer object.
@@ -53,8 +52,7 @@ class ErrorCode(Enum):
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        'error_code_from_pb2' argument is the protocol buffer content object whose type corresponds with this class.
-        A new instance of this class must be created that matches this content.
+        A new instance of this class is created that matches the content in the 'error_code_from_pb2' argument.
 
         :param error_code_from_pb2: the protocol buffer content object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'error_code_from_pb2' argument.
