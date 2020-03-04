@@ -31,13 +31,7 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import (
-    AgentDirectory,
-    Context,
-    logger,
-    pass_ctx,
-    try_to_load_agent_config,
-)
+from aea.cli.common import AgentDirectory, Context, check_aea_project, logger
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -74,18 +68,27 @@ FUNDS_RELEASE_TIMEOUT = 10
 @click.group(name="aea")
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
+@click.option(
+    "--skip-consistency-check",
+    "skip_consistency_check",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="Skip consistency check.",
+)
 @click.pass_context
-def cli(ctx) -> None:
+def cli(click_context, skip_consistency_check: bool) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
-    ctx.obj = Context(cwd=".")
+    click_context.obj = Context(cwd=".")
+    click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
 
 @cli.command()
 @click.argument(
     "agent_name", type=AgentDirectory(), required=True,
 )
-@pass_ctx
-def delete(ctx: Context, agent_name):
+@click.pass_context
+def delete(click_context, agent_name):
     """Delete an agent."""
     click.echo("Deleting AEA project directory './{}'...".format(agent_name))
 
@@ -100,10 +103,11 @@ def delete(ctx: Context, agent_name):
 
 
 @cli.command()
-@pass_ctx
-def freeze(ctx: Context):
+@click.pass_context
+@check_aea_project
+def freeze(click_context):
     """Get the dependencies."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     for dependency_name, dependency_data in sorted(
         ctx.get_dependencies().items(), key=lambda x: x[0]
     ):
@@ -111,9 +115,9 @@ def freeze(ctx: Context):
 
 
 @cli.command()
-@pass_ctx
 @click.option("-p", "--port", default=8080)
-def gui(ctx: Context, port):
+@click.pass_context
+def gui(click_context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
 
@@ -128,8 +132,8 @@ def gui(ctx: Context, port):
     type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all"]),
     required=True,
 )
-@pass_ctx
-def generate_key(ctx: Context, type_):
+@click.pass_context
+def generate_key(click_context, type_):
     """Generate private keys."""
 
     def _can_write(path) -> bool:
@@ -174,10 +178,11 @@ def _try_add_key(ctx, type_, filepath):
     type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
     required=True,
 )
-@pass_ctx
-def add_key(ctx: Context, type_, file):
+@click.pass_context
+@check_aea_project
+def add_key(click_context, type_, file):
     """Add a private key to the wallet."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     _validate_private_key_path(file, type_)
     _try_add_key(ctx, type_, file)
 
@@ -203,10 +208,11 @@ def _try_get_address(ctx, type_):
     type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
-@pass_ctx
-def get_address(ctx: Context, type_):
+@click.pass_context
+@check_aea_project
+def get_address(click_context, type_):
     """Get the address associated with the private key."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     _verify_or_create_private_keys(ctx)
     address = _try_get_address(ctx, type_)
     click.echo(address)
@@ -246,10 +252,10 @@ def _try_get_wealth(ctx, type_):
     type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
-@pass_ctx
+@click.pass_context
+@check_aea_project
 def get_wealth(ctx: Context, type_):
     """Get the wealth associated with the private key."""
-    try_to_load_agent_config(ctx)
     _verify_or_create_private_keys(ctx)
     wealth = _try_get_wealth(ctx, type_)
     click.echo(wealth)
@@ -298,10 +304,11 @@ def _try_generate_wealth(ctx, type_, sync):
 @click.option(
     "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
 )
-@pass_ctx
-def generate_wealth(ctx: Context, sync, type_):
+@click.pass_context
+@check_aea_project
+def generate_wealth(click_context, sync, type_):
     """Generate wealth for address on test network."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     _verify_or_create_private_keys(ctx)
     _try_generate_wealth(ctx, type_, sync)
 

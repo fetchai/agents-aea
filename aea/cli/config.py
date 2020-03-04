@@ -29,10 +29,10 @@ import yaml
 
 from aea.cli.common import (
     Context,
+    check_aea_project,
     from_string_to_type,
     logger,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -169,10 +169,10 @@ def _get_parent_object(obj: dict, dotted_path: List[str]):
 
 
 @click.group()
-@pass_ctx
-def config(ctx: Context):
+@click.pass_context
+@check_aea_project
+def config(click_context):
     """Read or modify a configuration."""
-    try_to_load_agent_config(ctx)
 
 
 @config.command()

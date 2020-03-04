@@ -26,7 +26,7 @@ from tests.common.click_testing import CliRunner
 from tests.conftest import CLI_LOG_OPTION
 
 
-@mock.patch("aea.cli.remove.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 class RemoveContractCommandTestCase(TestCase):
     """Test that the command 'aea remove contract' works as expected."""
 
@@ -39,7 +39,13 @@ class RemoveContractCommandTestCase(TestCase):
         """Test remove contract command positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "remove", "contract", "author/name:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "remove",
+                "contract",
+                "author/name:0.1.0",
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

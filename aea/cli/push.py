@@ -21,16 +21,17 @@
 
 import os
 from shutil import copytree
+from typing import cast
 
 import click
 
 from aea.cli.common import (
     Context,
     PublicIdParameter,
+    check_aea_project,
     pass_ctx,
     try_get_item_source_path,
     try_get_vendorized_item_target_path,
-    try_to_load_agent_config,
 )
 from aea.cli.registry.push import push_item
 from aea.cli.registry.utils import load_yaml
@@ -39,10 +40,11 @@ from aea.configurations.base import PublicId
 
 @click.group()
 @click.option("--registry", is_flag=True, help="For pushing items to Registry.")
-@pass_ctx
-def push(ctx: Context, registry):
+@click.pass_context
+@check_aea_project
+def push(click_context, registry):
     """Push item to Registry or save it in local packages."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     ctx.set_config("registry", registry)
 
 

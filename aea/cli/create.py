@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import cast
 
 import click
-from click import pass_context
 
 from jsonschema import ValidationError
 
@@ -74,7 +73,7 @@ def _setup_package_folder(path: Path):
 
 @click.command()
 @click.argument("agent_name", type=str, required=True)
-@pass_context
+@click.pass_context
 def create(click_context, agent_name):
     """Create an agent."""
     try:

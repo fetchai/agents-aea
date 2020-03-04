@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import Dict, List, Union, cast
 
 import click
-from click import pass_context
 
 from aea.aea import AEA
 from aea.cli.common import (
@@ -35,9 +34,8 @@ from aea.cli.common import (
     Context,
     _load_env_file,
     _try_to_load_protocols,
-    _validate_config_consistency,
+    check_aea_project,
     logger,
-    try_to_load_agent_config,
 )
 from aea.cli.install import install
 from aea.configurations.base import (
@@ -259,27 +257,13 @@ def _setup_connection(
     default=False,
     help="Install all the dependencies before running the agent.",
 )
-@click.option(
-    "--skip-consistency-check",
-    "skip_check",
-    is_flag=True,
-    required=False,
-    default=False,
-    help="Skip consistency check..",
-)
-@pass_context
+@click.pass_context
+@check_aea_project
 def run(
-    click_context,
-    connection_ids: List[PublicId],
-    env_file: str,
-    is_install_deps: bool,
-    skip_check: bool,
+    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
-    try_to_load_agent_config(ctx)
-    if not skip_check:
-        _validate_config_consistency(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
 

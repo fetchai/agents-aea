@@ -25,15 +25,8 @@ from pathlib import Path
 from typing import Dict, cast
 
 import click
-from click import pass_context
 
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
-    logger,
-    pass_ctx,
-    try_to_load_agent_config,
-)
+from aea.cli.common import Context, PublicIdParameter, check_aea_project, logger
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -48,10 +41,10 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 @click.group()
-@pass_ctx
-def fingerprint(ctx: Context):
+@click.pass_context
+@check_aea_project
+def fingerprint(click_context):
     """Fingerprint a resource."""
-    try_to_load_agent_config(ctx)
 
 
 def _fingerprint_item(click_context, item_type, item_public_id) -> None:
@@ -102,7 +95,7 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
 
 @fingerprint.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def connection(click_context, connection_public_id: PublicId):
     """Fingerprint a connection and add the fingerprints to the configuration file."""
     _fingerprint_item(click_context, "connection", connection_public_id)
@@ -110,7 +103,7 @@ def connection(click_context, connection_public_id: PublicId):
 
 @fingerprint.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def protocol(click_context, protocol_public_id):
     """Fingerprint a protocol and add the fingerprints to the configuration file.."""
     _fingerprint_item(click_context, "protocol", protocol_public_id)
@@ -118,7 +111,7 @@ def protocol(click_context, protocol_public_id):
 
 @fingerprint.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def skill(click_context, skill_public_id: PublicId):
     """Fingerprint a skill and add the fingerprints to the configuration file."""
     _fingerprint_item(click_context, "skill", skill_public_id)

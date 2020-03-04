@@ -26,6 +26,7 @@ import re
 import shutil
 import sys
 from collections import OrderedDict
+from functools import update_wrapper
 from pathlib import Path
 from typing import Dict, List, Optional, cast
 
@@ -509,32 +510,32 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def _check_package_fingerprints(
-    package_configuration: PackageConfiguration, package_directory: Path
-):
-    """Given a package configuration and a package directory, check whether
-    the hash of the files in the package directory match the one in the package configurations."""
+def _compute_fingerprint(package_directory) -> Dict[str, str]:
     hasher = IPFSHashOnly()
-    expected_fingerprints = package_configuration.fingerprint
-
-    # compute fingerprints
-    actual_fingerprints = {}  # type: Dict[str, str]
+    fingerprints = {}  # type: Dict[str, str]
     # find all valid files of the package
     all_files = [
         x
         for x in package_directory.glob("**/*")
-        if x.is_file()
-        and not x.match("*__pycache__/*")
-        and not x.match(
-            "*.yaml"
-        )  # TODO this should only match "protocol.yaml", "connection.yaml" etc.
+        if x.is_file() and not x.match("*__pycache__/*") and x.match("*.py")
     ]
 
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in actual_fingerprints  # nosec
-        actual_fingerprints[key] = file_hash
+        assert key not in fingerprints  # nosec
+        fingerprints[key] = file_hash
+
+    return fingerprints
+
+
+def _check_package_fingerprints(
+    package_configuration: PackageConfiguration, package_directory: Path
+):
+    """Given a package configuration and a package directory, check whether
+    the hash of the files in the package directory match the one in the package configurations."""
+    expected_fingerprints = package_configuration.fingerprint
+    actual_fingerprints = _compute_fingerprint(package_directory)
 
     if expected_fingerprints != actual_fingerprints:
         raise ValueError(
@@ -567,17 +568,57 @@ def _validate_config_consistency(ctx: Context):
     )  # type: Dict[PublicId, ConfigurationType]
 
     for public_id, item_type in packages_public_ids_to_types.items():
-        if public_id.author == ctx.agent_config.public_id.author:
+
+        try:
+            # either in vendor/ or in personal packages.
+            # we give precedence to custom skills.
             package_directory = Path(item_type.to_plural(), public_id.name)
-        else:
-            package_directory = Path(
-                "vendor", public_id.author, item_type.to_plural(), public_id.name
+            if not package_directory.exists():
+                package_directory = Path(
+                    "vendor", public_id.author, item_type.to_plural(), public_id.name
+                )
+            # we fail if none of the two alternative works.
+            assert package_directory.exists()
+
+            loader = ConfigLoaders.from_configuration_type(item_type)
+            config_file_name = _get_default_configuration_file_name_from_type(item_type)
+            configuration_file_path = package_directory / config_file_name
+            assert configuration_file_path.exists()
+        except Exception:
+            raise ValueError(
+                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
             )
 
-        loader = ConfigLoaders.from_configuration_type(item_type)
-        config_file_name = _get_default_configuration_file_name_from_type(item_type)
-
-        package_configuration = loader.load(
-            (package_directory / config_file_name).open("r")
-        )
+        try:
+            package_configuration = loader.load(configuration_file_path.open("r"))
+        except ValidationError as e:
+            raise ValueError(
+                "{} configuration file not valid: {}".format(
+                    item_type.value.capitalize(), str(e)
+                )
+            )
         _check_package_fingerprints(package_configuration, package_directory)
+
+
+def check_aea_project(f):
+    """
+    Decorator that checks the consistency of the project.
+
+    - try to load agent configuration file
+    - iterate over all the agent packages and check for consistency.
+    """
+
+    def wrapper(*args, **kwargs):
+        try:
+            click_context = args[0]
+            ctx = cast(Context, click_context.obj)
+            try_to_load_agent_config(ctx)
+            skip_consistency_check = ctx.config["skip_consistency_check"]
+            if not skip_consistency_check:
+                _validate_config_consistency(ctx)
+        except Exception as e:
+            logger.error(str(e))
+            sys.exit(1)
+        return f(*args, **kwargs)
+
+    return update_wrapper(wrapper, f)

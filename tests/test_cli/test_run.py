@@ -805,7 +805,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--skip-consistency-check"])
+            cli.main(["--skip-consistency-check", *CLI_LOG_OPTION, "run"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -978,11 +978,11 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         try:
             cli.main(
                 [
+                    "--skip-consistency-check",
                     *CLI_LOG_OPTION,
                     "run",
                     "--connections",
                     str(cls.connection_id),
-                    "--skip-consistency-check",
                 ]
             )
         except SystemExit as e:
@@ -1051,11 +1051,11 @@ class TestRunFailsWhenConnectionNotComplete:
         try:
             cli.main(
                 [
+                    "--skip-consistency-check",
                     *CLI_LOG_OPTION,
                     "run",
                     "--connections",
                     str(cls.connection_id),
-                    "--skip-consistency-check",
                 ]
             )
         except SystemExit as e:
@@ -1123,11 +1123,11 @@ class TestRunFailsWhenConnectionClassNotPresent:
         try:
             cli.main(
                 [
+                    "--skip-consistency-check",
                     *CLI_LOG_OPTION,
                     "run",
                     "--connections",
                     cls.connection_id,
-                    "--skip-consistency-check",
                 ]
             )
         except SystemExit as e:
@@ -1190,11 +1190,11 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         try:
             cli.main(
                 [
+                    "--skip-consistency-check",
                     *CLI_LOG_OPTION,
                     "run",
                     "--connections",
                     cls.connection_id,
-                    "--skip-consistency-check",
                 ]
             )
         except SystemExit as e:
@@ -1257,11 +1257,11 @@ class TestRunFailsWhenProtocolNotComplete:
         try:
             cli.main(
                 [
+                    "--skip-consistency-check",
                     *CLI_LOG_OPTION,
                     "run",
                     "--connections",
                     cls.connection_id,
-                    "--skip-consistency-check",
                 ]
             )
         except SystemExit as e:

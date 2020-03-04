@@ -112,7 +112,7 @@ class AddKeyTestCase(TestCase):
         _try_add_key(ctx, "type", "filepath")
 
 
-@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
@@ -126,13 +126,19 @@ class GenerateWealthCommandTestCase(TestCase):
         """Test for CLI generate_wealth positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "generate-wealth", "--sync", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "generate-wealth",
+                "--sync",
+                FETCHAI,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_wealth")
 @mock.patch("aea.cli.core.click.echo")
@@ -146,12 +152,14 @@ class GetWealthCommandTestCase(TestCase):
     def test_run_positive(self, *mocks):
         """Test for CLI get_wealth positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "get-wealth", FETCHAI], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-wealth", FETCHAI],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_address")
 @mock.patch("aea.cli.core.click.echo")
@@ -165,12 +173,14 @@ class GetAddressCommandTestCase(TestCase):
     def test_run_positive(self, *mocks):
         """Test for CLI get_address positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "get-address", FETCHAI], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-address", FETCHAI],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.core.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.core._validate_private_key_path")
 @mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):
@@ -184,6 +194,8 @@ class AddKeyCommandTestCase(TestCase):
         """Test for CLI add_key positive result."""
         filepath = "setup.py"  # some existing filepath to pass CLI argument check
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, filepath], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI, filepath],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
