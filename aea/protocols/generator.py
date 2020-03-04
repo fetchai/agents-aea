@@ -503,6 +503,9 @@ class ProtocolGenerator:
         """
         Produce the checks of elements of compositional types.
 
+        :param no_of_indents: the number of indents based on the previous sections of the code
+        :param content_name: the name of the content to be checked
+        :param content_type: the type of the content to be checked
         :return: the string containing the checks.
         """
         check_str = ""
@@ -978,15 +981,6 @@ class ProtocolGenerator:
             '"""This module contains class representations corresponding to every custom type in the protocol specification."""\n'
         )
 
-        # Imports
-        cls_str += "from {}.{}.{}.{}_pb2 import {}Message\n".format(
-            PATH_TO_PACKAGES,
-            self.protocol_specification.author,
-            "protocols",
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-        )
-
         if len(self._all_custom_types) == 0:
             return cls_str
 
@@ -1005,17 +999,31 @@ class ProtocolGenerator:
             cls_str += '    def encode(cls, performative, {}_from_message: "{}"):\n'.format(
                 _camel_case_to_snake_case(custom_type), custom_type
             )
-            cls_str += '        """Encode an instance of this class into its protocol buffer object."""\n'
+            cls_str += '        """\n'
+            cls_str += '        Encode an instance of this class into the protocol buffer object.\n\n'
+            cls_str += '        \'performative\' argument is the protocol buffer object containing a content whose type is this class.\n'
+            cls_str += '        This content must be matched with the message content in the \'{}_from_message\' argument.\n\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        :param performative: the performative protocol buffer object containing a content whose type is this class.\n'
+            cls_str += '        :param {}_from_message: the message content to be encoded in the protocol buffer object.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        :return: the \'performative\' protocol buffer object encoded with the message content in the \'{}_from_message\' argument.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
+
             cls_str += "    @classmethod\n"
             cls_str += '    def decode(cls, {}_from_pb2) -> "{}":\n'.format(
                 _camel_case_to_snake_case(custom_type), custom_type,
             )
-            cls_str += '        """Decode a protocol buffer instance of this class into an object of this class."""\n'
+            cls_str += '        """\n'
+            cls_str += '        Decode a protocol buffer object that corresponds with this class into an instance of this class.\n\n'
+            cls_str += '        \'{}_from_pb2\' argument is the protocol buffer content object whose type corresponds with this class.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        A new instance of this class must be created that matches this content.\n\n'
+            cls_str += '        :param {}_from_pb2: the protocol buffer content object whose type corresponds with this class.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        :return: A new instance of this class that matches the protocol buffer object in the \'{}_from_pb2\' argument.\n'.format(_camel_case_to_snake_case(custom_type))
+            cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
 
-            cls_str += "def __eq__(self, other):\n"
-            cls_str += "    raise NotImplementedError\n"
+            cls_str += "    def __eq__(self, other):\n"
+            cls_str += "        raise NotImplementedError\n"
         return cls_str
 
     def _encoding_message_content_from_python_to_protobuf(
@@ -1068,11 +1076,8 @@ class ProtocolGenerator:
             )
         else:
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += indents + "serialised_{} = {}.serialise({})\n".format(
-                content_name, content_type, content_name
-            )
-            encoding_str += indents + "performative.{} = serialised_{}\n".format(
-                content_name, content_name
+            encoding_str += indents + "performative = {}.encode(performative, {})\n".format(
+                content_type, content_name
             )
         return encoding_str
 
@@ -1198,18 +1203,19 @@ class ProtocolGenerator:
             )
         else:
             decoding_str += (
-                indents
-                + "serialised_{}_from_message = {}_pb.{}.{}\n".format(
-                    content_name,
-                    self.protocol_specification.name,
+                    indents
+                    + "pb2_{} = default_pb.{}.{}\n".format(
+                    variable_name,
                     performative,
                     variable_name,
                 )
             )
             decoding_str += (
-                indents
-                + "{} = {}.deserialise(serialised_{}_from_message)\n".format(
-                    content_name, content_type, content_name,
+                    indents
+                    + "{} = {}.decode(pb2_{})\n".format(
+                    content_name,
+                    content_type,
+                    variable_name,
                 )
             )
             decoding_str += indents + 'performative_content["{}"] = {}\n'.format(

@@ -35,12 +35,29 @@ class ErrorCode(Enum):
     def encode(
         cls, performative, error_code_from_message: "ErrorCode",
     ):
-        """Encode an instance of this class into its protobuf object."""
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        'performative' argument is the protocol buffer object containing a content whose type is this class.
+        This content must be matched with the message content in the 'error_code_from_message' argument.
+
+        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param error_code_from_message: the message content to be encoded in the protocol buffer object.
+        :return: the 'performative' protocol buffer object encoded with the message content in the 'error_code_from_message' argument.
+        """
         performative.error_code.error_code = error_code_from_message.value
         return performative
 
     @classmethod
     def decode(cls, error_code_from_pb2) -> "ErrorCode":
-        """Decode an instance of this class that has been serialised."""
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        'error_code_from_pb2' argument is the protocol buffer content object whose type corresponds with this class.
+        A new instance of this class must be created that matches this content.
+
+        :param error_code_from_pb2: the protocol buffer content object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'error_code_from_pb2' argument.
+        """
         enum_value_from_pb2 = error_code_from_pb2.error_code
         return ErrorCode(enum_value_from_pb2)
