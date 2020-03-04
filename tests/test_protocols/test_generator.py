@@ -360,22 +360,22 @@ class ProtocolGeneratorTestCase(TestCase):
         result = self.protocol_generator._includes_custom_type(content_type)
         self.assertTrue(result)
 
-    @mock.patch("aea.protocols.generator._get_indent_str")
-    @mock.patch(
-        "aea.protocols.generator._get_sub_types_of_compositional_types",
-        return_value=["Tuple", "FrozenSet"],
-    )
-    def test__check_content_type_str_tuple(self, *mocks):
-        """Test _check_content_type_str method tuple."""
-        no_of_indents = 1
-        content_name = "name"
-        content_type = (
-            "Union[str, Dict[str, int], FrozenSet[DataModel, int], Dict[str, float]]"
-        )
-        self.protocol_generator._check_content_type_str(
-            no_of_indents, content_name, content_type
-        )
-        # TODO: finish this test
+    # @mock.patch("aea.protocols.generator._get_indent_str")
+    # @mock.patch(
+    #     "aea.protocols.generator._get_sub_types_of_compositional_types",
+    #     return_value=["Tuple", "FrozenSet"],
+    # )
+    # def test__check_content_type_str_tuple(self, *mocks):
+    #     """Test _check_content_type_str method tuple."""
+    #     no_of_indents = 1
+    #     content_name = "name"
+    #     content_type = (
+    #         "Union[str, Dict[str, int], FrozenSet[DataModel, int], Dict[str, float]]"
+    #     )
+    #     self.protocol_generator._check_content_type_str(
+    #         no_of_indents, content_name, content_type
+    #     )
+    #     # TODO: finish this test
 
 
 class Agent1Handler(Handler):

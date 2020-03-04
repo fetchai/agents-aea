@@ -1,3 +1,4 @@
+---
 name: gym
 author: fetchai
 version: 0.1.0
@@ -15,8 +16,8 @@ speech_acts:
     info: pt:dict[pt:str, ct:Info]
   reset: {}
   close: {}
----
 ...
+---
 ct:Action: |
   bytes action = 1;
 ct:Observation: |
