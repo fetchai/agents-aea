@@ -31,7 +31,6 @@ from aea.cli.common import (
     Context,
     DEFAULT_REGISTRY_PATH,
     _format_items,
-    _format_skills,
     _retrieve_details,
     logger,
     pass_ctx,
@@ -164,7 +163,7 @@ def connections(ctx: Context, query):
         click.echo("No connections found.")  # pragma: no cover
     else:
         click.echo("Connections found:\n")
-        click.echo(format_items(results))
+        click.echo(_format_items(results))
 
 
 @search.command()
@@ -182,7 +181,8 @@ def contracts(ctx: Context, query):
         click.echo("No contracts found.")  # pragma: no cover
     else:
         click.echo("Contracts found:\n")
-        click.echo(format_items(results))
+        click.echo(_format_items(results))
+
 
 @search.command()
 @click.option("--query", default="", help="Query string to search Protocols by name.")
@@ -199,7 +199,7 @@ def protocols(ctx: Context, query):
         click.echo("No protocols found.")  # pragma: no cover
     else:
         click.echo("Protocols found:\n")
-        click.echo(format_items(results))
+        click.echo(_format_items(results))
 
 
 @search.command()
@@ -217,8 +217,7 @@ def skills(ctx: Context, query):
         click.echo("No skills found.")  # pragma: no cover
     else:
         click.echo("Skills found:\n")
-        click.echo(format_items(results))
-
+        click.echo(_format_items(results))
 
 
 @search.command()
@@ -232,10 +231,8 @@ def agents(ctx: Context, query):
     else:
         results = _search_items(ctx, "agents")
 
-
     if not len(results):
         click.echo("No agents found.")  # pragma: no cover
     else:
         click.echo("Agents found:\n")
-        click.echo(format_items(results))
-
+        click.echo(_format_items(results))

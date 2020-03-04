@@ -91,7 +91,7 @@ def connections(ctx: Context):
 def contracts(ctx: Context):
     """List all the installed protocols."""
     result = _get_item_details(ctx, "contract")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
+    print(_format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()

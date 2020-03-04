@@ -793,7 +793,7 @@ class DecisionMaker:
         return result
 
     @staticmethod
-    def _is_valid_tx_hash(tx_message: TransactionMessage) -> bool:
+    def _is_valid_message(tx_message: TransactionMessage) -> bool:
         """
         Check if the tx hash is present and matches the terms.
 
