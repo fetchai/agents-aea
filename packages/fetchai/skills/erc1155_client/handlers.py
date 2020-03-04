@@ -91,6 +91,7 @@ class FIPAHandler(Handler):
                     contract_address=data["contract"],
                 )
                 contract.item_ids = data["item_ids"]
+                self.context.shared_state["counterparty"] = msg.counterparty
                 tx = contract.get_hash_single_transaction(
                     from_address=msg.counterparty,
                     to_address=self.context.agent_address,
@@ -101,7 +102,6 @@ class FIPAHandler(Handler):
                     trade_nonce=500,
                     ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                     skill_callback_id=self.context.skill_id,
-                    counterparty=msg.counterparty,
                 )
 
                 self.context.decision_maker_message_queue.put_nowait(tx)
@@ -171,7 +171,7 @@ class OEFHandler(Handler):
             )
             cfp_msg = FIPAMessage(
                 message_id=FIPAMessage.STARTING_MESSAGE_ID,
-                dialogue_reference=("", ""),
+                dialogue_reference=(" ", " "),
                 performative=FIPAMessage.Performative.CFP,
                 target=FIPAMessage.STARTING_TARGET,
                 query=query,
@@ -209,7 +209,7 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         self.context.logger.info(tx_msg_response)
         if tx_msg_response.tx_id == "contract-sign-hash":
-            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            tx_signed = tx_msg_response.signed_payload.get("tx_signature")
             new_message_id = 2
             new_target = 1
 
@@ -220,7 +220,7 @@ class TransactionHandler(Handler):
                 performative=FIPAMessage.Performative.INFORM,
                 info={"signature": tx_signed},
             )
-            counterparty = cast(str, tx_msg_response.info.get("counterparty"))
+            counterparty = cast(str, self.context.shared_state.get("counterparty"))
             self.context.outbox.put_message(
                 to=counterparty,
                 sender=self.context.agent_address,

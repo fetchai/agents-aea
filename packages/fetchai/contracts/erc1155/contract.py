@@ -58,13 +58,11 @@ class ERC1155Contract(Contract):
         self.is_items_created = False
         self.is_items_minted = False
         self.is_trade = False
-        self.token_ids = []  # type: List[int]
         self.item_ids = []  # type: List[int]
 
     def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
         """Populate the item_ids list."""
-        assert len(self.token_ids) == 0, "Item ids already created."
-        self.token_ids = token_ids
+        assert len(token_ids) == 0, "Item ids already created."
         for token_id in token_ids:
             self.item_ids.append(Helpers().generate_id(token_type, token_id))
 
@@ -433,7 +431,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info={},
             ledger_id="ethereum",
-            signing_payload={"tx_hashh": tx_hash},
+            signing_payload={"tx_hash": tx_hash},
         )
 
         return tx_message

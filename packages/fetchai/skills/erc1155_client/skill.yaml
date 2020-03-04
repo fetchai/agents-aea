@@ -30,8 +30,5 @@ models:
         search_term: country
         search_value: UK
         constraint_type: '=='
-  dialogues:
-    class_name: Dialogues
-    args: {}
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
 ledgers: ['fetchai']
