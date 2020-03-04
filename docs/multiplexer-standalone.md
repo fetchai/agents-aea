@@ -51,7 +51,9 @@ We can run a multiplexer by calling, `connect()` which starts the receive and se
 We use the input and output text files to send an envelope to our agent and receive a response
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
-        message_text = 'multiplexer,some_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = (
+            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
+        )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
 
@@ -136,7 +138,9 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
-        message_text = 'multiplexer,some_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+        message_text = (
+            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
+        )
         with open(INPUT_FILE, "w") as f:
             f.write(message_text)
 

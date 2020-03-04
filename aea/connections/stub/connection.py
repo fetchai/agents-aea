@@ -219,7 +219,7 @@ class StubConnection(Connection):
         """
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
-        self.output_file.write(encoded_envelope + b"\n")
+        self.output_file.write(encoded_envelope)
         self.output_file.flush()
 
     @classmethod

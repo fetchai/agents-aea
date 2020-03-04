@@ -98,7 +98,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
         obj_type = "protocol"
         result = self.runner.invoke(
             cli,
@@ -198,7 +198,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
         obj_type = "protocol"
         result = self.runner.invoke(
             cli,

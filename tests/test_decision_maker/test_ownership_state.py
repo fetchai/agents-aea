@@ -26,6 +26,8 @@ from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 
+from ..conftest import AUTHOR
+
 
 def test_non_initialized_ownership_state_raises_exception():
     """Test that non-initialized ownership state raises exception."""
@@ -80,7 +82,7 @@ def test_transaction_is_affordable_agent_is_buyer():
     )
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -108,7 +110,7 @@ def test_transaction_is_affordable_there_is_no_wealth():
     )
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -136,7 +138,7 @@ def tests_transaction_is_affordable_agent_is_the_seller():
     )
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -164,7 +166,7 @@ def tests_transaction_is_affordable_else_statement():
     )
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -192,7 +194,7 @@ def test_apply():
     )
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -225,7 +227,7 @@ def test_transaction_update():
     assert ownership_state.quantities_by_good_id == good_endowment
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
@@ -256,7 +258,7 @@ def test_transaction_update_receive():
     assert ownership_state.quantities_by_good_id == good_endowment
     tx_message = TransactionMessage(
         performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-        skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
+        skill_callback_ids=[PublicId(AUTHOR, "a_skill", "0.1.0")],
         tx_id="transaction0",
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",

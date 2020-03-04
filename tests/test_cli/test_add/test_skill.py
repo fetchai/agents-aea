@@ -95,7 +95,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_skill_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
         obj_type = "skill"
         result = self.runner.invoke(
             cli,
@@ -188,7 +188,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_skill_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
         obj_type = "skill"
         result = self.runner.invoke(
             cli,

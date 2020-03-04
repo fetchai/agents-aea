@@ -29,6 +29,8 @@ from aea.cli.push import _check_package_public_id, _save_item_locally
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
+from ..conftest import AUTHOR
+
 
 @mock.patch("aea.cli.push.copytree")
 class SaveItemLocallyTestCase(TestCase):
@@ -68,7 +70,7 @@ class SaveItemLocallyTestCase(TestCase):
 
 @mock.patch(
     "aea.cli.push._load_yaml",
-    return_value={"author": "author", "name": "name", "version": "0.1.0"},
+    return_value={"author": AUTHOR, "name": "name", "version": "0.1.0"},
 )
 class CheckPackagePublicIdTestCase(TestCase):
     """Test case for _check_package_public_id method."""
@@ -76,14 +78,18 @@ class CheckPackagePublicIdTestCase(TestCase):
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
         _check_package_public_id(
-            "source-path", "item-type", PublicIdMock.from_str("author/name:0.1.0")
+            "source-path",
+            "item-type",
+            PublicIdMock.from_str("{}/name:0.1.0".format(AUTHOR)),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
             _check_package_public_id(
-                "source-path", "item-type", PublicIdMock.from_str("author/name:0.1.1")
+                "source-path",
+                "item-type",
+                PublicIdMock.from_str("{}/name:0.1.1".format(AUTHOR)),
             )
 
 
