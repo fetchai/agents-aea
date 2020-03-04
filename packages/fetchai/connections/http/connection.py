@@ -126,7 +126,7 @@ class HTTPChannel:
         self.restricted_to_protocols = restricted_to_protocols
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
-        # self.thread = Thread(target=self.receiving_loop)
+        self.thread = None  # type: Optional[Thread]
         self.lock = Lock()
         self.stopped = True
         self._helper = APIVerificationHelper(api_spec_path)
@@ -189,7 +189,9 @@ class HTTPChannel:
 
         Shut-off the HTTP Server and join the thread, then stop the channel.
         """
-        assert self.http_server is not None, "Server not connected, call connect first!"
+        assert (
+            self.http_server is not None and self.thread is not None
+        ), "Server not connected, call connect first!"
 
         with self.lock:
             if not self.stopped:
