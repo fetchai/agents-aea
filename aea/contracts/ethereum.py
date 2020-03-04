@@ -89,7 +89,9 @@ class Contract(BaseContract):
             address=contract_address, abi=self.abi
         )
 
-    def set_instance_w_address(self, ledger_api: EthereumApi, contract_address: str) -> None:
+    def set_instance_w_address(
+        self, ledger_api: EthereumApi, contract_address: str
+    ) -> None:
         """
                 Set the contract address.
 
