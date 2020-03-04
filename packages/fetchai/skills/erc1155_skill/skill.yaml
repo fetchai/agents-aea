@@ -6,7 +6,10 @@ contracts: ['fetchai/erc1155:0.1.0']
 dependencies:
   vyper: { version: "==0.1.0b12"}
 description: The erc1155 skill demonstrates deployment and usage of an erc1155 smart contract.
-fingerprint: {}
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmQKNvzHMisM1EDD3h4r14TfFv514QixfRmY8pRsCfs8Nz
+  handlers.py: QmcwHtiJ3Bf38okCfAYWmsdGDHqF6uXgsA2BHdYf7F5o7j
 handlers:
   tx_handler:
     class_name: TransactionHandler

@@ -3,9 +3,11 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  __init__.py: QmcuYWBYAcx3mLhKPfTNGwU1dD9xe7CCBeTHHpbPg3uepY
-  message.py: QmXZoV53hcvvAaWPSgT9Sc5MTD6MKg5FZWHP1zw3GPKt5n
-  serialization.py: QmXCJDxKVDTk4CBuEHtrdXeTDpaRRH65FUtQhMEJiGmg1k
+  __init__.py: QmTJvkXfMucCBFoAG29ghp4fVA2nH4HxUnSGFTH9ScGXNC
+  custom_types.py: QmZ676XPzG4hJpyXLSjffeDwXWxSZZX2hnNtzpg3cETmAm
+  default_pb2.py: QmRBkzaEXV4hmM58DGaNCX2cZsF7vhDhEF9Lu34YJGg2gM
+  message.py: QmU1mKhFH2NiAABLurXhuWLPCSi8RtjtYzBGNWZ4nQq3Yk
+  serialization.py: QmNRoQH2w1E4jJ1nDqoQ9PiCDgk5HcHJE22gt4aURofkN8
 description: A protocol for exchanging any bytes message.
 dependencies: 
     protobuf: {} 
