@@ -22,7 +22,7 @@
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import Model
 
-from packages.fetchai.skills.erc1155_deploy.generic_data_model import Generic_Data_Model
+from packages.fetchai.skills.erc1155_deploy.generic_data_model import GenericDataModel
 
 
 DEFAULT_LEDGER_ID = "ethereum"
@@ -83,7 +83,7 @@ class Strategy(Model):
 
         :return: a description of the offered services
         """
-        desc = Description(self._scheme, data_model=Generic_Data_Model(self._datamodel))
+        desc = Description(self._scheme, data_model=GenericDataModel(self._datamodel))
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:

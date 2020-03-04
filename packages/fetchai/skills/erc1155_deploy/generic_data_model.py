@@ -25,7 +25,7 @@ from aea.helpers.search.models import Attribute, DataModel
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
-class Generic_Data_Model(DataModel):
+class GenericDataModel(DataModel):
     """Data model for the the erc1155 deploy skill aea."""
 
     def __init__(self, data_model_attributes: Dict[str, Any]):

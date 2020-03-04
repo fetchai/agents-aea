@@ -48,10 +48,8 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FIPAMessage, message)
 
-        # handle message
         if fipa_msg.performative == FIPAMessage.Performative.CFP:
             self._handle_cfp(fipa_msg)
         elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
