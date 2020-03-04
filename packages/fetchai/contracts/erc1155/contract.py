@@ -30,9 +30,6 @@ from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
-NFT = 1
-FT = 2
-
 logger = logging.getLogger(__name__)
 
 
@@ -282,7 +279,18 @@ class ERC1155Contract(Contract):
 
         return tx
 
-    def _create_trade_batch_tx(self, terms, signature, ledger_api: LedgerApi) -> str:
+    def _create_trade_batch_tx(
+        self,
+        from_address,
+        to_address,
+        item_ids,
+        from_supplies,
+        to_supplies,
+        value,
+        trade_nonce,
+        signature,
+        ledger_api: LedgerApi,
+    ) -> str:
         """
         Create a batch trade tx.
 
@@ -290,23 +298,24 @@ class ERC1155Contract(Contract):
         :params signature: The signed terms from the counterparty.
         """
         data = b"hello"
-        nonce = ledger_api.api.eth.getTransactionCount(terms.from_address) + 1
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
+        nonce = ledger_api.api.eth.getTransactionCount(from_address) + 1
         tx = self.instance.functions.tradeBatch(
-            terms.from_address,
-            terms.to_address,
-            terms.item_ids,
-            terms.from_supplies,
-            terms.to_supplies,
-            terms.value_eth_wei,
-            terms.trade_nonce,
+            from_address,
+            to_address,
+            item_ids,
+            from_supplies,
+            to_supplies,
+            value_eth_wei,
+            trade_nonce,
             signature,
             data,
         ).buildTransaction(
             {
                 "chainId": 3,
                 "gas": 2818111,
-                "from": terms.from_address,
-                "value": terms.value_eth_wei,
+                "from": from_address,
+                "value": value_eth_wei,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -369,17 +378,37 @@ class ERC1155Contract(Contract):
         ).call()
 
     def get_atomic_swap_batch_transaction_proposal(
-        self, deployer_address, contract, terms, signature, skill_callback_id
+        self,
+        deployer_address,
+        contract,
+        from_address,
+        to_address,
+        item_ids,
+        from_supplies,
+        to_supplies,
+        value,
+        trade_nonce,
+        signature,
+        skill_callback_id,
     ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
-        assert deployer_address == terms.from_address, "Wrong 'from' address"
-        tx = contract.get_trade_batch_tx(terms=terms, signature=signature)
+        assert deployer_address == from_address, "Wrong 'from' address"
+        tx = contract._create_trade_batch_tx(
+            from_address=from_address,
+            to_address=to_address,
+            item_ids=item_ids,
+            from_supplies=from_supplies,
+            to_supplies=to_supplies,
+            value=value,
+            trade_nonce=trade_nonce,
+            signature=signature,
+        )
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
             tx_id="contract_deployment",
-            tx_sender_addr=terms.from_address,
+            tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
             tx_sender_fee=0,
