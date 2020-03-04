@@ -147,7 +147,7 @@ class ConstraintType:
 
     """
 
-    def __init__(self, type: Union[ConstraintTypes, str], value: Any, **kwargs):
+    def __init__(self, type: Union[ConstraintTypes, str], value: Any):
         """
         Initialize a constraint type.
 

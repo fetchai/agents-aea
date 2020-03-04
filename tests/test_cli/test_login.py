@@ -28,7 +28,7 @@ from ..conftest import CLI_LOG_OPTION
 
 
 @mock.patch("aea.cli.login.registry_login", return_value="token")
-@mock.patch("aea.cli.login.write_cli_config")
+@mock.patch("aea.cli.login._update_cli_config")
 class LoginTestCase(TestCase):
     """Test case for CLI login command."""
 
@@ -36,7 +36,7 @@ class LoginTestCase(TestCase):
         """Set it up."""
         self.runner = CliRunner()
 
-    def test_login_positive(self, write_cli_config_mock, registry_login_mock):
+    def test_login_positive(self, _update_cli_config_mock, registry_login_mock):
         """Test for CLI login positive result."""
         username, password = ("Username", "Password")
         result = self.runner.invoke(
@@ -49,4 +49,4 @@ class LoginTestCase(TestCase):
         )
         self.assertEqual(result.output, expected_output)
         registry_login_mock.assert_called_once_with(username, password)
-        write_cli_config_mock.assert_called_once_with({"auth_token": "token"})
+        _update_cli_config_mock.assert_called_once_with({"auth_token": "token"})

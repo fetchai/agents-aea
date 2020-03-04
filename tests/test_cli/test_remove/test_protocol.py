@@ -34,7 +34,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
-from ...conftest import CLI_LOG_OPTION, CUR_PATH
+from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
 class TestRemoveProtocolWithPublicId:
@@ -55,6 +55,8 @@ class TestRemoveProtocolWithPublicId:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -112,6 +114,8 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -163,6 +167,8 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )

@@ -40,6 +40,8 @@ from oef.agents import AsyncioCore, OEFAgent
 import pytest
 
 from aea import AEA_DIR
+from aea.cli.common import _init_cli_config
+from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -58,6 +60,7 @@ CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ign
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
+AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
 AGENT_CONFIGURATION_SCHEMA = os.path.join(
     CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json"
@@ -534,3 +537,9 @@ def get_unused_tcp_port():
     port = s.getsockname()[1]
     s.close()
     return port
+
+
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config."""
+    _init_cli_config()

@@ -19,19 +19,25 @@
 
 """This test module contains the tests for cli.common module."""
 
+from builtins import FileNotFoundError
 from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.common import (
-    PublicIdParameter,
-    _try_to_load_protocols,
-    format_items,
-    try_get_item_source_path,
-    try_get_vendorized_item_target_path,
-)
+from yaml import YAMLError
 
-from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
+from aea.cli.common import (
+    AUTHOR,
+    # AEAConfigException,
+    PublicIdParameter,
+    _format_items,
+    _format_skills,
+    _get_or_create_cli_config,
+    _init_cli_config,
+    _try_get_item_source_path,
+    _try_get_vendorized_item_target_path,
+    _update_cli_config,
+)
 
 
 class FormatItemsTestCase(TestCase):
@@ -48,13 +54,40 @@ class FormatItemsTestCase(TestCase):
                 "version": "1.0",
             }
         ]
-        result = format_items(items)
+        result = _format_items(items)
         expected_result = (
             "------------------------------\n"
             "Public ID: author/name:version\n"
             "Name: obj-name\n"
             "Description: Some description\n"
             "Author: author\n"
+            "Version: 1.0\n"
+            "------------------------------\n"
+        )
+        self.assertEqual(result, expected_result)
+
+
+class FormatSkillsTestCase(TestCase):
+    """Test case for format_skills method."""
+
+    def test_format_skills_positive(self):
+        """Test format_skills positive result."""
+        items = [
+            {
+                "public_id": "author/name:version",
+                "name": "obj-name",
+                "description": "Some description",
+                "version": "1.0",
+                "protocol_names": ["p1", "p2", "p3"],
+            }
+        ]
+        result = _format_skills(items)
+        expected_result = (
+            "------------------------------\n"
+            "Public ID: author/name:version\n"
+            "Name: obj-name\n"
+            "Description: Some description\n"
+            "Protocols: p1 | p2 | p3 | \n"
             "Version: 1.0\n"
             "------------------------------\n"
         )
@@ -68,17 +101,17 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.common.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_source_path("cwd", "author", "skills", "skill-name")
+        result = _try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("cwd", "author", "skills", "skill-name")
+        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill-name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_source_path("cwd", "author", "skills", "skill-name")
+            _try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
 
 
 @mock.patch("aea.cli.common.os.path.join", return_value="some-path")
@@ -88,13 +121,13 @@ class TryGetItemTargetPathTestCase(TestCase):
     @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_vendorized_item_target_path(
-            "packages", "author", "skills", "skill-name"
+        result = _try_get_vendorized_item_target_path(
+            "packages", AUTHOR, "skills", "skill-name"
         )
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
         join_mock.assert_called_once_with(
-            "packages", "vendor", "author", "skills", "skill-name"
+            "packages", "vendor", AUTHOR, "skills", "skill-name"
         )
         exists_mock.assert_called_once_with("some-path")
 
@@ -102,24 +135,9 @@ class TryGetItemTargetPathTestCase(TestCase):
     def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_vendorized_item_target_path(
-                "skills", "author", "skill-name", "packages_path"
+            _try_get_vendorized_item_target_path(
+                "skills", AUTHOR, "skill-name", "packages_path"
             )
-
-
-@mock.patch("aea.cli.common.Path.exists", return_value=False)
-@mock.patch("aea.cli.common.load_agent_component_package")
-@mock.patch("aea.cli.common.add_agent_component_module_to_sys_modules")
-@mock.patch("builtins.open", mock.mock_open())
-class TryToLoadProtocolsTestCase(TestCase):
-    """Test case for _try_to_load_protocols method."""
-
-    def test__try_to_load_protocols_protocol_dir_not_exists(self, *mocks):
-        """Test for _try_to_load_protocols protocols dir not exists."""
-        ctx_mock = ContextMock(protocols=[PublicIdMock()])
-        ctx_mock.protocol_loader = mock.Mock()
-        ctx_mock.protocol_loader.load = mock.Mock()
-        _try_to_load_protocols(ctx_mock)
 
 
 class PublicIdParameterTestCase(TestCase):
@@ -130,3 +148,63 @@ class PublicIdParameterTestCase(TestCase):
         result = PublicIdParameter.get_metavar("obj", "param")
         expected_result = "PUBLIC_ID"
         self.assertEqual(result, expected_result)
+
+
+@mock.patch("aea.cli.common.os.path.dirname", return_value="dir-name")
+@mock.patch("aea.cli.common.os.path.exists", return_value=False)
+@mock.patch("aea.cli.common.os.makedirs")
+class InitConfigFolderTestCase(TestCase):
+    """Test case for _init_cli_config method."""
+
+    def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
+        """Test for _init_cli_config method positive result."""
+        _init_cli_config()
+        dirname_mock.assert_called_once()
+        exists_mock.assert_called_once_with("dir-name")
+        makedirs_mock.assert_called_once_with("dir-name")
+
+
+@mock.patch("aea.cli.common._get_or_create_cli_config")
+@mock.patch("aea.cli.common.yaml.dump")
+@mock.patch("builtins.open", mock.mock_open())
+class UpdateCLIConfigTestCase(TestCase):
+    """Test case for _update_cli_config method."""
+
+    def test_update_cli_config_positive(self, dump_mock, icf_mock):
+        """Test for _update_cli_config method positive result."""
+        _update_cli_config({"some": "config"})
+        icf_mock.assert_called_once()
+        dump_mock.assert_called_once()
+
+
+def _raise_yamlerror(*args):
+    raise YAMLError()
+
+
+def _raise_file_not_found_error(*args):
+    raise FileNotFoundError()
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class GetOrCreateCLIConfigTestCase(TestCase):
+    """Test case for read_cli_config method."""
+
+    @mock.patch("aea.cli.common.yaml.safe_load", return_value={"correct": "output"})
+    def test_get_or_create_cli_config_positive(self, safe_load_mock):
+        """Test for _get_or_create_cli_config method positive result."""
+        result = _get_or_create_cli_config()
+        expected_result = {"correct": "output"}
+        self.assertEqual(result, expected_result)
+        safe_load_mock.assert_called_once()
+
+    @mock.patch("aea.cli.common.yaml.safe_load", _raise_yamlerror)
+    def test_get_or_create_cli_config_bad_yaml(self):
+        """Test for r_get_or_create_cli_config method bad yaml behavior."""
+        with self.assertRaises(ClickException):
+            _get_or_create_cli_config()
+
+    # @mock.patch("aea.cli.common.yaml.safe_load", _raise_file_not_found_error)
+    # def test_get_or_create_cli_config_file_not_found(self):
+    #     """Test for read_cli_config method bad yaml behavior."""
+    #     with self.assertRaises(AEAConfigException):
+    #         _get_or_create_cli_config()

@@ -42,6 +42,7 @@ from aea.cli import cli
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
 from ...conftest import (
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
@@ -74,6 +75,9 @@ class TestBuildSkill:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
+        cls.create_result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )

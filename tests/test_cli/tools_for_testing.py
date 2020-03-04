@@ -28,6 +28,8 @@ from aea.crypto.fetchai import FETCHAI
 
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
+from ..conftest import AUTHOR
+
 
 def raise_click_exception(*args):
     """Raise ClickException."""
@@ -44,13 +46,13 @@ class AgentConfigMock:
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
         self.agent_name: str = kwargs.get("agent_name", "agent-name")
+        self.author: str = AUTHOR
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
         self.private_key_paths.read_all = Mock(return_value=private_key_paths)
 
     registry_path = "registry"
     name = "name"
-    author = "author"
 
 
 class ContextMock:
@@ -71,7 +73,7 @@ class PublicIdMock:
 
     DEFAULT_VERSION = DEFAULT_TESTING_VERSION
 
-    def __init__(self, author="author", name="name", version=DEFAULT_TESTING_VERSION):
+    def __init__(self, author=AUTHOR, name="name", version=DEFAULT_TESTING_VERSION):
         """Init the Public ID mock object."""
         self.name = name
         self.author = author
@@ -89,7 +91,7 @@ class AEAConfMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AEAConf mock object."""
-        self.author = "author"
+        self.author = AUTHOR
         self.ledger_apis = Mock()
         ledger_apis = ((ETHEREUM, "value"), (FETCHAI, "value"))
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)

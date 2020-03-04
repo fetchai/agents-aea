@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ConnectionStatus(object):
+class ConnectionStatus:
     """The connection status class."""
 
     def __init__(self):

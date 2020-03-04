@@ -8,3 +8,6 @@ fingerprint:
   serialization.py: QmXCJDxKVDTk4CBuEHtrdXeTDpaRRH65FUtQhMEJiGmg1k
 description: "The default protocol allows for any bytes message."
 dependencies: {}
+dependencies: 
+    protobuf: {} 
+description: A protocol for exchanging any bytes message.

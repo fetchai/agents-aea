@@ -61,7 +61,7 @@ class TestListProtocols:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False
@@ -105,7 +105,7 @@ class TestListConnections:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False
@@ -149,7 +149,7 @@ class TestListSkills:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False

@@ -139,7 +139,8 @@ class EthereumCrypto(Crypto):
         )
         return addr
 
-    def _generate_private_key(self) -> Account:
+    @classmethod
+    def _generate_private_key(cls) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account

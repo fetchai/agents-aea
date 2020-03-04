@@ -27,10 +27,8 @@ import click
 
 import requests
 
-import yaml
-
-from aea.cli.common import AEAConfigException, logger
-from aea.cli.registry.settings import AUTH_TOKEN_KEY, CLI_CONFIG_PATH, REGISTRY_API_URL
+from aea.cli.common import _get_or_create_cli_config, logger
+from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.configurations.base import PublicId
 
 
@@ -51,9 +49,9 @@ def request_api(
     """
     headers = {}
     if is_auth:
-        try:
-            token = read_cli_config()[AUTH_TOKEN_KEY]
-        except AEAConfigException:
+        config = _get_or_create_cli_config()
+        token = config.get(AUTH_TOKEN_KEY, None)
+        if token is None:
             raise click.ClickException(
                 "Unable to read authentication config. "
                 'Please sign in with "aea login" command.'
@@ -202,61 +200,6 @@ def registry_login(username: str, password: str) -> str:
         "POST", "/rest-auth/login/", data={"username": username, "password": password}
     )
     return resp["key"]
-
-
-def _init_config_folder() -> None:
-    """
-    Create config folder if not exists.
-
-    :return: None
-    """
-    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
-    if not os.path.exists(conf_dir):
-        os.makedirs(conf_dir)
-
-
-def write_cli_config(dict_conf: Dict) -> None:
-    """
-    Write CLI config into yaml file.
-
-    :param dict_conf: dict config to write.
-
-    :return: None
-    """
-    _init_config_folder()
-    with open(CLI_CONFIG_PATH, "w") as f:
-        yaml.dump(dict_conf, f, default_flow_style=False)
-
-
-def load_yaml(filepath: str) -> Dict:
-    """
-    Read content from yaml file.
-
-    :param filepath: str path to yaml file.
-
-    :return: dict YAML content
-    """
-    with open(filepath, "r") as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise click.ClickException(
-                "Loading yaml config from {} failed: {}".format(filepath, e)
-            )
-
-
-def read_cli_config() -> Dict:
-    """
-    Read CLI config from yaml file.
-
-    :return: dict CLI config.
-    """
-    try:
-        return load_yaml(CLI_CONFIG_PATH)
-    except FileNotFoundError:
-        raise AEAConfigException(
-            "Unable to read config from {} - file not found.".format(CLI_CONFIG_PATH)
-        )
 
 
 def _rm_tarfiles():

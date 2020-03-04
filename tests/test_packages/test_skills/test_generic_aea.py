@@ -34,7 +34,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
-from ...conftest import CLI_LOG_OPTION
+from ...conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class TestGenericSkills:
@@ -63,6 +63,11 @@ class TestGenericSkills:
         packages_src = os.path.join(self.cwd, "packages")
         packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(

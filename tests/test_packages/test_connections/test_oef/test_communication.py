@@ -84,7 +84,13 @@ class TestDefault:
 
     def test_send_message(self):
         """Test that a default byte message can be sent correctly."""
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         self.multiplexer.put(
             Envelope(
                 to=self.crypto1.address,
