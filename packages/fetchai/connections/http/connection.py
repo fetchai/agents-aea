@@ -25,11 +25,12 @@ import logging
 from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Lock, Thread
-from typing import Dict, Optional, Set, Tuple, cast
-from urllib.parse import parse_qs, urlparse
+from typing import Dict, Optional, Set, cast
 from uuid import uuid4
 
-import yaml
+from flex.core import load, validate_api_request
+from flex.exceptions import ValidationError as FlexValidationError
+from flex.http import Request
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
@@ -44,60 +45,64 @@ logger = logging.getLogger(__name__)
 RequestId = str
 
 
-class APIVerificationHelper:
-    """API Verification Helper class to verify a request against an OpenAPI/Swagger spec."""
+class Response:
+    """Generic response object."""
+
+    def __init__(self, status_code: int, message: bytes):
+        """
+        Initialize the response.
+
+        :param status_code: the status code
+        :param message: the message
+        """
+        self._status_code = status_code
+        self._message = message
+
+    @property
+    def status_code(self) -> int:
+        """Get the status code."""
+        return self._status_code
+
+    @property
+    def message(self) -> bytes:
+        """Get the message."""
+        return self._message
+
+
+class APISpec:
+    """API Spec class to verify a request against an OpenAPI/Swagger spec."""
 
     def __init__(self, api_spec_path: Optional[str]):
         """
-        Initialize the API verification helper.
+        Initialize the API spec.
 
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         """
-        self.valid_paths = {}
-        self.is_active = api_spec_path is not None
+        self._api_spec = None  # type Optional[Dict]
         if api_spec_path is not None:
-            # TODO: the following api_spec format checks will be in their own function check_api (api_spec)
             try:
-                with open(api_spec_path, "r") as f:
-                    api_spec = yaml.safe_load(f)
-            except FileNotFoundError:
+                self._api_spec = load(api_spec_path)
+            except FlexValidationError:
                 logger.error(
-                    "API specification YAML source file not found. Please double-check filename and path."
+                    "API specification YAML source file not correctly formatted."
                 )
-                return
-            try:
-                self.valid_paths = api_spec["paths"]
-            except KeyError:
-                logger.error("Key 'paths' not found in API spec.")
-                return
 
-    def verify(self, http_method: str, url: str, param: str) -> bool:
+    def verify(self, request: Request) -> bool:
         """
         Verify a http_method, url and param against the provided API spec.
 
-        :param http_method: the http method
-        :param url: the url
-        :param param: the parameter
+        :param request: the request object
         :return: whether or not the request conforms with the API spec
         """
-        if not self.is_active:
+        if self._api_spec is None:
             logger.debug("Skipping API verification!")
             return True
-        path_key = url
-        param_dict = json.loads(param)
-        if param_dict != {}:
-            param_key, param_value = list(param_dict.items())[0]
-            param_value = param_value[0]
-            path_key += r"/{" + param_key + r"}"
-        method_key = http_method.lower()
 
         try:
-            path_reconstruction_test = self.valid_paths[path_key][method_key]
-            logger.debug("Verified path: {}".format(path_reconstruction_test))
-        except KeyError:
+            validate_api_request(self._api_spec, request)
+        except FlexValidationError:
             return False
         return True
-        # TODO investigate if there is validation libraries
 
 
 class HTTPChannel:
@@ -132,16 +137,16 @@ class HTTPChannel:
         self.thread = None  # type: Optional[Thread]
         self.lock = Lock()
         self.is_stopped = True
-        self._helper = APIVerificationHelper(api_spec_path)
+        self._api_spec = APISpec(api_spec_path)
         self.timeout_window = timeout_window
         self.http_server = None  # type: Optional[HTTPServer]
         self.dispatch_ready_envelopes = {}  # type: Dict[RequestId, Envelope]
         self.timed_out_request_ids = set()  # type: Set[RequestId]
 
     @property
-    def helper(self) -> APIVerificationHelper:
-        """Get the api verification helper."""
-        return self._helper
+    def api_spec(self) -> APISpec:
+        """Get the api spec."""
+        return self._api_spec
 
     def connect(self):
         """
@@ -208,43 +213,30 @@ class HTTPChannel:
             self.is_stopped = True
             self.thread.join()
 
-    async def process(
-        self, http_method: str, url: str, param: str, body: Optional[str] = None,
-    ) -> Tuple[int, str]:
+    async def process(self, request: Request) -> Response:
         """
         Verify the request then send the request to Agent as an envelope.
 
-        :param http_method: the http method
-        :param url: the url
-        :param param: the parameter
-        :param body: the body
+        :param request: the request object
         :return: a tuple of response code and response description
         """
         assert self.in_queue is not None, "Channel not connected!"
 
-        valid_request = self.helper.verify(http_method, url, param)
+        is_valid_request = self.api_spec.verify(request)
 
-        if valid_request:
-            envelope = self.build_envelope(http_method, url, param, body)
+        if is_valid_request:
+            # turn request into envelope
+            envelope = self.build_envelope(request)
             # send the envelope to the agent's inbox (via self.in_queue)
             self.in_queue.put_nowait(envelope)
-            # wait for response Envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
-            response = await self.get_response(envelope.sender)
-            if response is not None:
-                # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
-                resp_msg = json.loads(envelope.message.decode())
-                response_code = resp_msg["status_code"]
-                raw_response = resp_msg["response"]
-                body = resp_msg["payload"]
-            else:
-                response_code = REQUEST_TIMEOUT
-                raw_response = "Request Timeout"
+            # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
+            response_envelope = await self.get_response(envelope.sender)
+            # turn response envelope into response
+            response = self.build_response(response_envelope)
         else:
-            response_code = NOT_FOUND
-            raw_response = "Request Not Found"
+            response = Response(NOT_FOUND, b"Request Not Found")
 
-        response_desc = "\n\nResponse: {}\nStatus: ".format(raw_response)
-        return response_code, response_desc
+        return response
 
     async def get_response(
         self, request_id: RequestId, sleep: float = 0.1
@@ -268,9 +260,7 @@ class HTTPChannel:
             self.timed_out_request_ids.add(request_id)
         return envelope
 
-    def build_envelope(
-        self, http_method: str, url: str, param: str, body: Optional[str] = None
-    ) -> Envelope:
+    def build_envelope(self, request: Request) -> Envelope:
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
@@ -282,14 +272,14 @@ class HTTPChannel:
         :param body: the body
         """
         client_id = uuid4().hex
-        uri = URI("http://{}:{}{}".format(self.host, self.port, url))
+        uri = URI(request.url)
         context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
         # TODO: replace with HTTP protocol
         msg = {
-            "performative": http_method,
-            "path": url,
-            "params": param,
-            "payload": body,
+            "performative": request.method,
+            "path": request.path,
+            "query": request.query,
+            "payload": request.body,
         }
         msg_bytes = json.dumps(msg).encode()
         envelope = Envelope(
@@ -300,6 +290,15 @@ class HTTPChannel:
             message=msg_bytes,
         )
         return envelope
+
+    def build_response(self, envelope: Optional[Envelope] = None) -> Response:
+        if envelope is not None:
+            # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
+            resp_msg = json.loads(envelope.message.decode())
+            response = Response(resp_msg["status_code"], resp_msg["message"])
+        else:
+            response = Response(REQUEST_TIMEOUT, b"Request Timeout")
+        return response
 
 
 def HTTPHandlerFactory(channel: HTTPChannel):
@@ -316,49 +315,65 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             """Get the http channel."""
             return self._channel
 
+        def get_url(self) -> str:
+            """Get url."""
+            url = "http://{}:{}{}".format(*self.server.server_address, self.path)
+            return url
+
         def do_HEAD(self):
-            """Deal with ..."""
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
+            """Deal with header only requests."""
+            self.send_response(SUCCESS)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
 
         def do_GET(self):
             """Respond to a GET request."""
-            parsed_path = urlparse(self.path)
-            url = parsed_path.path
-            param = parse_qs(parsed_path.query)
-            param = json.dumps(param)
+            request = self.build_request("get")
 
-            future = asyncio.run_coroutine_threadsafe(
-                self.channel.process("GET", url, param), self.channel.loop
+            response = self.channel.loop.run_until_complete(
+                self.channel.process(request)
             )
-            response_code, response_desc = future.result()
+            # future = asyncio.run_coroutine_threadsafe(
+            #     self.channel.process("GET", url, param), self.channel.loop
+            # )
+            # response_code, response_desc = future.result()
 
-            # Wfile write: for additional response description.
-            self.wfile.write(response_desc.encode())
-            self.send_response(response_code)
-            self.send_header("Content-type", "text/html")
+            self.send_response(response.status_code)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
+            self.wfile.write(response.message)
 
         def do_POST(self):
             """Respond to a POST request."""
-            parsed_path = urlparse(self.path)
-            url = parsed_path.path
-            param = parse_qs(parsed_path.query)
-            param = json.dumps(param)
-            content_length = int(self.headers["Content-Length"])
-            body = self.rfile.read(content_length).decode()
+            request = self.build_request("post")
 
-            future = asyncio.run_coroutine_threadsafe(
-                self.channel.process("POST", url, param, body), self.channel.loop
+            response = self.channel.loop.run_until_complete(
+                self.channel.process(request)
             )
-            response_code, response_desc = future.result()
+            # future = asyncio.run_coroutine_threadsafe(
+            #     self.channel.process("POST", url, param, body), self.channel.loop
+            # )
+            # response_code, response_desc = future.result()
 
-            # Wfile write: for additional response description.
-            self.wfile.write(response_desc.encode())
-            self.send_response(response_code)
-            self.send_header("Content-type", "text/html")
+            self.send_response(response.status_code)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
+            self.wfile.write(response.message)
+
+        def build_request(self, method: str):
+            content_length = self.headers["Content-Length"]
+            body = (
+                None
+                if content_length is None
+                else self.rfile.read(int(content_length)).decode()
+            )
+            request = Request(
+                self.get_url(),
+                method,
+                content_type=self.headers.get_content_type(),
+                body=body,
+            )
+            return request
 
     return HTTPHandler
 

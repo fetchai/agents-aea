@@ -20,8 +20,13 @@
 """This module contains the tests of the gym connection module."""
 
 import asyncio
+import concurrent.futures
+import http.client
 import logging
 import os
+
+# import json
+# from typing import Tuple
 
 import pytest
 
@@ -71,7 +76,7 @@ class TestHTTPConnectionConnectDisconnect:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnection:
+class TestHTTPConnectionSend:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -119,6 +124,212 @@ class TestHTTPConnection:
         """Teardown the class."""
         loop = asyncio.get_event_loop()
         value = loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionGET:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = "127.0.0.1"
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.get_event_loop()
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+    @pytest.mark.asyncio
+    async def test_get_404(self):
+        """Test send connection error."""
+
+        def request_response_cycle():
+            conn = http.client.HTTPConnection(self.host, self.port)
+            conn.request("GET", "/")
+            response = conn.getresponse()
+            return response.status, response.read()
+
+        async def client_thread():
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(executor, request_response_cycle)
+            return result
+
+        response_code, response_body = await client_thread()
+
+        assert response_code == 404 and response_body == b"Request Not Found"
+
+    @pytest.mark.asyncio
+    async def test_get_408(self):
+        """Test get 408."""
+
+        def request_response_cycle():
+            conn = http.client.HTTPConnection(self.host, self.port)
+            conn.request("GET", "/pets")
+            response = conn.getresponse()
+            return response.status, response.read()
+
+        async def client_thread():
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(executor, request_response_cycle)
+            return result
+
+        response_code, response_body = await client_thread()
+
+        assert response_code == 408 and response_body == b"Request Timeout"
+
+        envelope = await self.http_connection.receive()
+        assert (
+            envelope is not None
+            and envelope.to == self.address
+            and len(self.http_connection.channel.timed_out_request_ids) == 1
+        )
+
+    # @pytest.mark.asyncio
+    # async def test_get_202(self):
+    #     """Test send connection error."""
+
+    #     def request_response_cycle() -> Tuple[int, bytes]:
+    #         conn = http.client.HTTPConnection(self.host, self.port)
+    #         conn.request("GET", "/pets")
+    #         response = conn.getresponse()
+    #         return response.status, response.read()
+
+    #     async def client_thread() -> Tuple[int, bytes]:
+    #         executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+    #         loop = asyncio.get_event_loop()
+    #         result = await loop.run_in_executor(executor, request_response_cycle)
+    #         return result
+
+    #     response_code, response_body = await client_thread()
+
+    #     async def agent_processing() -> None:
+    #         # we block here to give it some time for the envelope to make it to the queue
+    #         await asyncio.sleep(1)
+    #         envelope = await self.http_connection.receive()
+    #         if envelope is not None:
+    #             response_envelope = Envelope(
+    #                 to=envelope.sender,
+    #                 sender=envelope.to,
+    #                 protocol_id=envelope.protocol_id,
+    #                 context=envelope.context,
+    #                 message=json.dumps({"status_code": 200, "message": "Response"}).encode(),
+    #             )
+    #         await self.http_connection.send(response_envelope)
+
+    #     agent_processing()
+
+    #     assert response_code == 200 and b"Response"
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionPOST:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = "127.0.0.1"
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.get_event_loop()
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+    @pytest.mark.asyncio
+    async def test_post_404(self):
+        """Test post 404."""
+
+        def request_response_cycle():
+            conn = http.client.HTTPConnection(self.host, self.port)
+            body = "some body"
+            conn.request("POST", "/", body)
+            response = conn.getresponse()
+            return response.status, response.read()
+
+        async def client_thread():
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(executor, request_response_cycle)
+            return result
+
+        response_code, response_body = await client_thread()
+
+        assert response_code == 404 and response_body == b"Request Not Found"
+
+    @pytest.mark.asyncio
+    async def test_post_408(self):
+        """Test post 408."""
+
+        def request_response_cycle():
+            conn = http.client.HTTPConnection(self.host, self.port)
+            body = "some body"
+            conn.request("POST", "/pets", body)
+            response = conn.getresponse()
+            return response.status, response.read()
+
+        async def client_thread():
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(executor, request_response_cycle)
+            return result
+
+        response_code, response_body = await client_thread()
+
+        assert response_code == 408 and response_body == b"Request Timeout"
+
+        envelope = await self.http_connection.receive()
+        assert (
+            envelope is not None
+            and envelope.to == self.address
+            and len(self.http_connection.channel.timed_out_request_ids) == 1
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
         assert value is None
 
 
