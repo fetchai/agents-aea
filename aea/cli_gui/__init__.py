@@ -46,6 +46,8 @@ elements = [
     ["local", "skill", "localSkills"],
 ]
 
+DEFAULT_AUTHOR = "default_author"
+
 
 class ProcessState(Enum):
     """The state of execution of the OEF Node."""
@@ -99,7 +101,7 @@ def get_agents() -> List[Dict]:
 
     for path in file_list:
         if is_agent_dir(path):
-            head, tail = os.path.split(path)
+            _head, tail = os.path.split(path)
             agent_list.append({"id": tail, "description": "placeholder description"})
 
     return agent_list
@@ -165,7 +167,15 @@ def create_agent(agent_id: str):
     """Create a new AEA project."""
     if (
         _call_aea(
-            [sys.executable, "-m", "aea.cli", "create", agent_id],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "create",
+                agent_id,
+                "--author",
+                DEFAULT_AUTHOR,
+            ],
             app_context.agents_dir,
         )
         == 0
@@ -454,7 +464,8 @@ def start_agent(agent_id: str, connection_id: PublicId):
 
 def _read_tty(pid: subprocess.Popen, str_list: List[str]):
     for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        logging.info("stdout: " + line.replace("\n", ""))
+        out = line.replace("\n", "")
+        logging.info("stdout: {}".format(out))
         str_list.append(line)
 
     str_list.append("process terminated\n")
@@ -462,7 +473,8 @@ def _read_tty(pid: subprocess.Popen, str_list: List[str]):
 
 def _read_error(pid: subprocess.Popen, str_list: List[str]):
     for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
-        logging.error("stderr: " + line.replace("\n", ""))
+        out = line.replace("\n", "")
+        logging.error("stderr: {}".format(out))
         str_list.append(line)
 
     str_list.append("process terminated\n")

@@ -4,10 +4,10 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmbNAF1kLH1edXq8KTLkMn2g6MARRhAekjUcVJuZhjXmPZ
+  behaviours.py: QmbkWV4NE2ENVGt4DyxFcLowi6S2PySSapreEV7RKL9vPY
   dialogues.py: QmarNumFyrhnh1kcUuLxskBNGxEbfupMWW1eQ1w46PQq9a
   generic_data_model.py: QmS9F5rozAgBAQDfZDDGnxARCA7Ni46GcNHytfudey59C7
-  handlers.py: QmSC9eWU4hkhG39AZW5vLZ3TLQq5NuckPDvj7i6gaZJXMJ
+  handlers.py: QmfDGa1zh1q7vsA6qnMbKFsvQopn1pCPmY9fc3sFhjN6mc
   strategy.py: QmXr4bQ4cFrv6ykPL38xuWqUNsahDCfztoZTWCKUQ5kLNo
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:

@@ -36,6 +36,7 @@ class Task:
         self._is_executed = False
         # this is where we store the result.
         self._result = None
+        self.config = kwargs
 
     def __call__(self, *args, **kwargs):
         """

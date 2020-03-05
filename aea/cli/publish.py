@@ -27,9 +27,9 @@ import click
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
+    _try_get_item_source_path,
+    _try_get_vendorized_item_target_path,
     pass_ctx,
-    try_get_item_source_path,
-    try_get_vendorized_item_target_path,
     try_to_load_agent_config,
 )
 from aea.cli.registry.publish import publish_agent
@@ -51,7 +51,7 @@ def publish(ctx: Context, registry):
 
 def _check_is_item_in_local_registry(public_id, item_type_plural, registry_path):
     try:
-        try_get_item_source_path(
+        _try_get_item_source_path(
             registry_path, public_id.author, item_type_plural, public_id.name
         )
     except click.ClickException as e:
@@ -80,7 +80,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     item_type_plural = "agents"
 
-    target_dir = try_get_vendorized_item_target_path(
+    target_dir = _try_get_vendorized_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,

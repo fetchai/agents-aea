@@ -40,6 +40,7 @@ from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
 from ...conftest import (
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CONNECTION_CONFIGURATION_SCHEMA,
@@ -67,6 +68,9 @@ class TestScaffoldConnection:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -128,6 +132,9 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -187,6 +194,9 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -252,6 +262,9 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -316,6 +329,9 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
 
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )

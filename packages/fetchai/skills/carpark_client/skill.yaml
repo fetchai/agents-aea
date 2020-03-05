@@ -6,7 +6,7 @@ fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmRphgcX1G4qtiTKXMqcvb7x1UCx47y3hnyNL8D1XPHvtW
   dialogues.py: QmecN3nDkwtko9U4ZE83gxGiMXmM26tnHkSEACo8KSRo8F
-  handlers.py: QmPkezwF74ueQPAf8tzE55mY8oy3VSLH8WwjYmoubbxjvY
+  handlers.py: QmcRzS5sQc5s1y388AEVJk1PSKMonTHnwNEAQgfniMgJ6d
   strategy.py: QmSSjggQ5KDQkQKjqLiFf6QP7bpSd9eq7WfgrkbrHyqAbN
 description: "The carpark client skill implements the functionality to run a client for carpark data."
 behaviours:

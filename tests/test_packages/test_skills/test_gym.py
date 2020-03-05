@@ -36,7 +36,7 @@ from aea.cli import cli
 from aea.configurations.base import SkillConfig
 
 from ...common.click_testing import CliRunner
-from ...conftest import CLI_LOG_OPTION, ROOT_DIR
+from ...conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
 
 
 class TestGymSkill:
@@ -60,6 +60,11 @@ class TestGymSkill:
         packages_src = os.path.join(self.cwd, "packages")
         packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         # create agent
         result = self.runner.invoke(

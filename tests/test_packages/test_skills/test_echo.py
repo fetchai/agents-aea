@@ -39,7 +39,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from ...common.click_testing import CliRunner
-from ...conftest import CLI_LOG_OPTION
+from ...conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class TestEchoSkill:
@@ -63,6 +63,11 @@ class TestEchoSkill:
         packages_src = os.path.join(self.cwd, "packages")
         packages_dst = os.path.join(self.t, "packages")
         shutil.copytree(packages_src, packages_dst)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         # create agent
         result = self.runner.invoke(
@@ -100,7 +105,13 @@ class TestEchoSkill:
             time.sleep(2.0)
 
             # add sending and receiving envelope from input/output files
-            message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+            message = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
             expected_envelope = Envelope(
                 to=self.agent_name,
                 sender="sender",
@@ -116,15 +127,15 @@ class TestEchoSkill:
             encoded_envelope = encoded_envelope.encode("utf-8")
 
             with open(Path(self.t, self.agent_name, "input_file"), "ab+") as f:
-                f.write(encoded_envelope + b"\n")
+                f.write(encoded_envelope)
                 f.flush()
 
             time.sleep(2.0)
             with open(Path(self.t, self.agent_name, "output_file"), "rb+") as f:
                 lines = f.readlines()
 
-            assert len(lines) == 1
-            line = lines[0]
+            assert len(lines) == 2
+            line = lines[0] + lines[1]
             to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
             to = to.decode("utf-8")
             sender = sender.decode("utf-8")

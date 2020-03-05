@@ -41,7 +41,7 @@ OK = "OK"
 ERROR = "ERROR"
 
 
-class LedgerApis(object):
+class LedgerApis:
     """Store all the ledger apis we initialise."""
 
     def __init__(
@@ -61,18 +61,27 @@ class LedgerApis(object):
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                api = FetchAIApi(**config)  # type: LedgerApi
-                apis[identifier] = api
-                configs[identifier] = config
+                try:
+                    api = FetchAIApi(**config)  # type: LedgerApi
+                except Exception:
+                    logger.error(
+                        "Cannot connect to fetchai ledger with provided config."
+                    )
+                    sys.exit(1)
             elif identifier == ETHEREUM:
-                api = EthereumApi(
-                    cast(str, config["address"]), cast(str, config["gas_price"])
-                )
-                apis[identifier] = api
-                configs[identifier] = config
+                try:
+                    api = EthereumApi(
+                        cast(str, config["address"]), cast(str, config["gas_price"])
+                    )
+                except Exception:
+                    logger.error(
+                        "Cannot connect to ethereum ledger with provided config."
+                    )
+                    sys.exit(1)
             else:
                 raise ValueError("Unsupported identifier in ledger apis.")
-
+            apis[identifier] = api
+            configs[identifier] = config
         self._apis = apis
         self._configs = configs
         self._default_ledger_id = default_ledger_id
@@ -251,35 +260,3 @@ class LedgerApis(object):
             logger.warning("You didn't specify a ledger so the tx_nonce will be Empty.")
             tx_nonce = ""
         return tx_nonce
-
-
-def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:
-    """
-    Try to instantiate the fetchai ledger api.
-
-    :param kwargs: the keyword arguments
-    """
-    try:
-        from fetchai.ledger.api import LedgerApi
-
-        LedgerApi(**kwargs)
-    except Exception as e:
-        logger.error(
-            "Cannot connect to fetchai ledger with provided config:\n{}".format(e)
-        )
-        sys.exit(1)
-
-
-def _try_to_instantiate_ethereum_ledger_api(address: str) -> None:
-    """
-    Try to instantiate the ethereum ledger api.
-
-    :param addr: the address
-    """
-    try:
-        from web3 import Web3, HTTPProvider
-
-        Web3(HTTPProvider(address))
-    except Exception:
-        logger.error("Cannot connect to ethereum ledger with provided config.")
-        sys.exit(1)

@@ -34,11 +34,7 @@ import pytest
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
-from aea.crypto.ledger_apis import (
-    LedgerApis,
-    _try_to_instantiate_ethereum_ledger_api,
-    _try_to_instantiate_fetchai_ledger_api,
-)
+from aea.crypto.ledger_apis import LedgerApis
 
 from ..conftest import CUR_PATH
 
@@ -308,24 +304,6 @@ class TestLedgerApis:
             is_successful = ledger_apis._is_tx_settled(ETHEREUM, tx_digest=tx_digest)
             assert not is_successful
             assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"
-
-    def test_try_to_instantiate_fetchai_ledger_api(self):
-        """Test the instantiation of the fetchai ledger api."""
-        _try_to_instantiate_fetchai_ledger_api(**DEFAULT_FETCHAI_CONFIG)
-        from fetchai.ledger.api import LedgerApi
-
-        with mock.patch.object(LedgerApi, "__init__", side_effect=Exception):
-            with pytest.raises(SystemExit):
-                _try_to_instantiate_fetchai_ledger_api(**ALT_FETCHAI_CONFIG)
-
-    def test_try_to_instantiate_ethereum_ledger_api(self):
-        """Test the instantiation of the ethereum ledger api."""
-        _try_to_instantiate_ethereum_ledger_api(address="127.0.0.1")
-        from web3 import Web3
-
-        with mock.patch.object(Web3, "__init__", side_effect=Exception):
-            with pytest.raises(SystemExit):
-                _try_to_instantiate_ethereum_ledger_api(address="127.0.0.1")
 
     @mock.patch("time.time", mock.MagicMock(return_value=1579533928))
     def test_validate_ethereum_transaction(self):
