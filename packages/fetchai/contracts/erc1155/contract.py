@@ -52,14 +52,11 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_id, contract_config, contract_interface)
-        self.is_items_created = False
-        self.is_items_minted = False
-        self.is_trade = False
         self.item_ids = []  # type: List[int]
 
     def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
         """Populate the item_ids list."""
-        assert len(token_ids) == 0, "Item ids already created."
+        assert self.item_ids == [], "Item ids already created."
         for token_id in token_ids:
             self.item_ids.append(Helpers().generate_id(token_type, token_id))
 

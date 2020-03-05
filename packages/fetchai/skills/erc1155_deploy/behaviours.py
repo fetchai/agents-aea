@@ -45,6 +45,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
         self._registered_service_description = None  # type: Optional[Description]
+        self.is_items_created = False
+        self.is_items_minted = False
+        self.is_trade = False
 
     def setup(self) -> None:
         """
@@ -120,7 +123,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract = self.context.contracts.erc1155
         strategy = cast(Strategy, self.context.strategy)
         #  if not contract.is_deployed or strategy.contract_address is None:
-        if contract.is_deployed and not contract.is_items_created:
+        if contract.is_deployed and not self.is_items_created:
             contract.create_item_ids(
                 token_type=strategy.ft, token_ids=strategy.item_ids
             )
@@ -132,13 +135,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
-            contract.is_items_created = True
+            self.is_items_created = True
             time.sleep(10)
-        if (
-            contract.is_deployed
-            and contract.is_items_created
-            and not contract.is_items_minted
-        ):
+        if contract.is_deployed and self.is_items_created and not self.is_items_minted:
             self.context.logger.info("Minting a batch of items")
             mint_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
@@ -148,7 +147,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(mint_message)
-            contract.is_items_minted = True
+            self.is_items_minted = True
 
         self._unregister_service()
         self._register_service()
