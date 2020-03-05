@@ -86,6 +86,12 @@ class FIPAHandler(Handler):
                     contract_address=data["contract"],
                 )
                 contract.item_ids = data["item_ids"]
+                assert "from_supply" in data.keys(), "from supply is not set"
+                assert "to_supply" in data.keys(), "to supply is not set"
+                assert "value" in data.keys(), "value is not set"
+                assert "trade_nonce" in data.keys(), "trade_nonce is not set"
+                assert "item_ids" in data.keys(), "iten ids are not set"
+
                 self.context.shared_state["counterparty"] = msg.counterparty
                 tx = contract.get_hash_single_transaction(
                     from_address=msg.counterparty,
