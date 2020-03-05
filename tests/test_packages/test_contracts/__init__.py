@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the integration test for the generic buyer and seller skills."""
+"""This test module contains the integration test for the erc1155 smart contract."""
