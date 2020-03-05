@@ -111,9 +111,9 @@ def test_get_hash(w3, storage_contract):
     _from_values = [2, 0, 2, 0, 1, 2, 3, 5, 2, 3]
     _to_values = [0, 1, 0, 2, 0, 0, 0, 0, 0, 0]
     value_eth = 1
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     hashed_data = get_hash(
         from_hash,
         to_hash,
@@ -147,9 +147,9 @@ def test_get_hash_single(w3, storage_contract):
     _from_value = 0
     _to_value = 2
     value_eth = 1
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     hashed_data = get_single_hash(
         from_hash, to_hash, token_id, _from_value, _to_value, value_eth, nonce
     )
@@ -391,12 +391,12 @@ def test_create_mint_mixed(w3, storage_contract, get_logs, assert_tx_failed):
     _ids = []
     _quantities = []
     for i in range(10):
-        token_id = randrange(1, 3)
+        token_id = randrange(1, 3)  # nosec
         _ids.append(generate_id(token_id=token_id, item_id=i))
         if token_id == 1:
             _quantities.append(1)
         else:
-            _quantities.append(randrange(0, 10))
+            _quantities.append(randrange(0, 10))  # nosec
 
     storage_contract.createBatch(operator, _ids, transact={"from": owner})
 
@@ -485,9 +485,9 @@ def test_positive_trade(w3, storage_contract, get_logs):
     _from_value = 2
     _to_value = 0
     value_eth = 45
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     data = b"hello"
     hashed_data = get_single_hash(
         from_hash, to_hash, new_token_id, _from_value, _to_value, value_eth, nonce
@@ -573,9 +573,9 @@ def test_negative_trade(w3, storage_contract, get_logs):
     _from_value = 0
     _to_value = 5
     value_eth = 1
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     data = b"hello"
     hashed_data = get_single_hash(
         from_hash, to_hash, new_token_id, _from_value, _to_value, value_eth, nonce
@@ -662,9 +662,9 @@ def test_failed_single_trade(w3, storage_contract, get_logs, assert_tx_failed):
     _from_value = 2
     _to_value = 5
     value_eth = 1
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     data = b"hello"
     hashed_data = get_single_hash(
         from_hash, to_hash, new_token_id, _from_value, _to_value, value_eth, nonce
@@ -747,9 +747,9 @@ def test_tradeBatch(w3, storage_contract, get_logs):
     _from_values = [2, 0, 2, 0, 1, 2, 3, 5, 2, 3]
     _to_values = [0, 1, 0, 2, 0, 0, 0, 0, 0, 0]
     value_eth = 1
-    nonce = randrange(0, 10000000)
+    nonce = randrange(0, 10000000)  # nosec
     while storage_contract.is_nonce_used(agent1.address, nonce):
-        nonce = randrange(0, 10000000)
+        nonce = randrange(0, 10000000)  # nosec
     data = b"hello"
     hashed_data = get_hash(
         from_hash,

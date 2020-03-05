@@ -19,7 +19,7 @@
 
 """This test module contains the integration test for the erc1155 smart contract."""
 
-from eth_tester import (   # type: ignore
+from eth_tester import (  # type: ignore
     EthereumTester,
     PyEVMBackend,
 )
