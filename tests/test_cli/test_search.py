@@ -333,13 +333,6 @@ class TestSearchWithRegistryInSubfolder:
             self.result.output == 'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
-            "Public ID: fetchai/echo:0.1.0\n"
-            "Name: echo\n"
-            "Description: The echo skill implements simple echo functionality.\n"
-            "Author: fetchai\n"
-            "Version: 0.1.0\n"
-            "------------------------------\n"
-            "------------------------------\n"
             "Public ID: fetchai/error:0.1.0\n"
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"

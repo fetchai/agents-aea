@@ -71,7 +71,7 @@ def search(ctx: Context, registry):
             # agent_config = ctx.agent_loader.load(fp)
             registry_directory = ctx.agent_config.registry_path
         except Exception:
-            registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
+            registry_directory = os.path.join("..", DEFAULT_REGISTRY_PATH)
 
         ctx.set_config("registry_directory", registry_directory)
         logger.debug("Using registry {}".format(registry_directory))
