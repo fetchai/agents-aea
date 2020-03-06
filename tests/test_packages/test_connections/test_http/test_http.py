@@ -27,6 +27,7 @@ import os
 
 # import json
 # from typing import Tuple
+from threading import Thread
 
 import pytest
 
@@ -157,6 +158,9 @@ class TestHTTPConnectionGET:
         assert cls.http_connection.connection_status.is_connected
         assert not cls.http_connection.channel.is_stopped
 
+        cls.t = Thread(target=cls.loop.run_forever)
+        cls.t.start()
+
     @pytest.mark.asyncio
     async def test_get_404(self):
         """Test send connection error."""
@@ -243,6 +247,8 @@ class TestHTTPConnectionGET:
     @classmethod
     def teardown_class(cls):
         """Teardown the class."""
+        cls.loop.call_soon_threadsafe(cls.loop.stop())
+        cls.t.join()
         value = cls.loop.run_until_complete(cls.http_connection.disconnect())
         assert value is None
 
