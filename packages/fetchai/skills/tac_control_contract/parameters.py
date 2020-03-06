@@ -79,9 +79,14 @@ class Parameters(Model):
         return self._contract_address
 
     @property
+    def is_contract_deployed(self) -> bool:
+        """Check if there is a deployed instance of the contract."""
+        return self._contract_address is not None
+
+    @property
     def good_ids(self) -> List[int]:
         """The item ids of an already deployed smart-contract."""
-        assert self._contract_address is not None, "There is no deployed contract."
+        assert self.is_contract_deployed, "There is no deployed contract."
         return self._good_ids
 
     @property
