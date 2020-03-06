@@ -30,7 +30,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
-from packages.fetchai.skills.tac_control_contract.game import Game, Phase, Transaction
+from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
@@ -307,13 +307,13 @@ class TransactionHandler(Handler):
                 self.context.info(
                     "The contract did not deployed successfully aborting."
                 )
-            self.context.logger.info(
-                "The contract was successfully deployed. Contract address: {} and transaction hash: {}".format(
-                    transaction.contractAddress, transaction.transactionHash.hex()
+            else:
+                self.context.logger.info(
+                    "The contract was successfully deployed. Contract address: {} and transaction hash: {}".format(
+                        transaction.contractAddress, transaction.transactionHash.hex()
+                    )
                 )
-            )
-            contract.set_address(ledger_api, transaction.contractAddress)
-            self.context.logger.info(contract.is_deployed)
+                contract.set_address(ledger_api, transaction.contractAddress)
         elif tx_msg_response.tx_id == "contract_create_batch":
             self.context.logger.info("Sending creation transaction to the ledger!")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
@@ -329,11 +329,12 @@ class TransactionHandler(Handler):
                 self.context.info(
                     "The contract did not deployed successfully aborting."
                 )
-            self.context.logger.info(
-                "Successfully created the items. Transaction hash: {}".format(
-                    transaction.transactionHash.hex()
+            else:
+                self.context.logger.info(
+                    "Successfully created the items. Transaction hash: {}".format(
+                        transaction.transactionHash.hex()
+                    )
                 )
-            )
 
     def teardown(self) -> None:
         """

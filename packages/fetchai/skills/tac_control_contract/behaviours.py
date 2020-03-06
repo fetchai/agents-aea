@@ -34,7 +34,7 @@ from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
-from packages.fetchai.skills.tac_control_contract.game import Game, Phase, Configuration
+from packages.fetchai.skills.tac_control_contract.game import Configuration, Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel(
