@@ -22,12 +22,14 @@
 import asyncio
 import concurrent.futures
 import http.client
+import json
 import logging
 import os
 
 # import json
 # from typing import Tuple
 from threading import Thread
+from typing import Tuple
 
 import pytest
 
@@ -208,41 +210,46 @@ class TestHTTPConnectionGET:
             and len(self.http_connection.channel.timed_out_request_ids) == 1
         )
 
-    # @pytest.mark.asyncio
-    # async def test_get_202(self):
-    #     """Test send connection error."""
+    @pytest.mark.asyncio
+    async def test_get_202(self):
+        """Test send connection error."""
 
-    #     def request_response_cycle() -> Tuple[int, bytes]:
-    #         conn = http.client.HTTPConnection(self.host, self.port)
-    #         conn.request("GET", "/pets")
-    #         response = conn.getresponse()
-    #         return response.status, response.read()
+        def request_response_cycle() -> Tuple[int, bytes]:
+            conn = http.client.HTTPConnection(self.host, self.port)
+            conn.request("GET", "/pets")
+            response = conn.getresponse()
+            return response.status, response.read()
 
-    #     async def client_thread() -> Tuple[int, bytes]:
-    #         executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-    #         loop = asyncio.get_event_loop()
-    #         result = await loop.run_in_executor(executor, request_response_cycle)
-    #         return result
+        async def client_thread() -> Tuple[int, bytes]:
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(executor, request_response_cycle)
+            return result
 
-    #     response_code, response_body = await client_thread()
+        async def agent_processing() -> None:
+            # we block here to give it some time for the envelope to make it to the queue
+            await asyncio.sleep(1)
+            envelope = await self.http_connection.receive()
+            if envelope is not None:
+                response_envelope = Envelope(
+                    to=envelope.sender,
+                    sender=envelope.to,
+                    protocol_id=envelope.protocol_id,
+                    context=envelope.context,
+                    message=json.dumps({"status_code": 200, "message": "Response"}).encode(),
+                )
+                await self.http_connection.send(response_envelope)
 
-    #     async def agent_processing() -> None:
-    #         # we block here to give it some time for the envelope to make it to the queue
-    #         await asyncio.sleep(1)
-    #         envelope = await self.http_connection.receive()
-    #         if envelope is not None:
-    #             response_envelope = Envelope(
-    #                 to=envelope.sender,
-    #                 sender=envelope.to,
-    #                 protocol_id=envelope.protocol_id,
-    #                 context=envelope.context,
-    #                 message=json.dumps({"status_code": 200, "message": "Response"}).encode(),
-    #             )
-    #         await self.http_connection.send(response_envelope)
+        client_task = asyncio.create_task(client_thread())
+        agent_task = asyncio.create_task(agent_processing())
 
-    #     agent_processing()
+        await asyncio.gather(
+            client_task,
+            agent_task
+        )
+        response_code, response_body = client_task.result()
 
-    #     assert response_code == 200 and b"Response"
+        assert response_code == 200# and response_body == b"Response"
 
     @classmethod
     def teardown_class(cls):
