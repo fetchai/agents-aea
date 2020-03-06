@@ -52,22 +52,14 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_id, contract_config, contract_interface)
-        self.item_ids = []  # type: List[int]
+        self.token_ids = []  # type: List[int]
 
-    def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
+    def generate_item_ids_based_on_nb_goods(self, token_type: int, nb_goods: int) -> List[int]:
         """Populate the item_ids list."""
-        assert self.item_ids == [], "Item ids already created."
-        for token_id in token_ids:
-            self.item_ids.append(Helpers().generate_id(token_type, token_id))
-
-    def generate_item_ids_based_on_nb_goods(
-        self, token_type: int, nb_goods: int
-    ) -> List[int]:
-        """Populate the item_ids list."""
-        assert self.item_ids == [], "Item ids already created."
+        assert self.token_ids == [], "Item ids already created."
         for i in range(nb_goods):
-            self.item_ids.append(Helpers().generate_id(token_type, i))
-        return self.item_ids
+            self.token_ids.append(Helpers().generate_id(token_type, i))
+        return self.token_ids
 
     def get_deploy_transaction(
         self,
@@ -175,7 +167,7 @@ class ERC1155Contract(Contract):
         # create the items
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createBatch(
-            deployer_address, self.item_ids
+            deployer_address, self.token_ids
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -195,7 +187,7 @@ class ERC1155Contract(Contract):
         skill_callback_id: ContractId,
     ):
 
-        assert len(mint_quantities) == len(self.item_ids), "Wrong number of items."
+        assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
         tx = self._create_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
@@ -230,7 +222,7 @@ class ERC1155Contract(Contract):
         )
         nonce += 1
         tx = self.instance.functions.mintBatch(
-            recipient_address, self.item_ids, batch_mint_quantities
+            recipient_address, self.token_ids, batch_mint_quantities
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -380,7 +372,7 @@ class ERC1155Contract(Contract):
     def get_balance_of_batch(self, address):
         """Get the balance for a batch of items"""
         return self.instance.functions.balanceOfBatch(
-            [address] * 10, self.item_ids
+            [address] * 10, self.token_ids
         ).call()
 
     def get_atomic_swap_batch_transaction_proposal(
