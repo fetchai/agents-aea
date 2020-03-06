@@ -33,8 +33,9 @@ from aea.contracts.ethereum import Contract
 from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
-NFT = 1
-FT = 2
+TOKEN_TYPE = 1
+GAME_CURRENCY_TYPE = 2
+GAME_CURRENCY_ID = 555
 
 
 def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str]:
@@ -46,11 +47,23 @@ def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str
     :return: a dictionary mapping goods' ids to names.
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
-    token_ids = contract.generate_item_ids_based_on_nb_goods(NFT, nb_goods)
+    token_ids = contract.generate_item_ids_based_on_nb_goods(TOKEN_TYPE, nb_goods)
     string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
     return {
         string_format.format(token_id) + "_id": str(token_id) for token_id in token_ids
     }
+
+
+def generate_game_currency_to_name(contract: Contract) -> Dict[str, str]:
+    """
+    Generate id for currency id.
+
+    :param contract: the instance of the contract
+    :return: a dictionary mapping goods' ids to names.
+    """
+    token_id = contract.generate_single_item_id(GAME_CURRENCY_TYPE, GAME_CURRENCY_ID)
+    string_format = "tac_good_{:0" + str(GAME_CURRENCY_ID) + "}"
+    return {string_format.format(token_id) + "_id": str(token_id)}
 
 
 def determine_scaling_factor(money_endowment: int) -> float:

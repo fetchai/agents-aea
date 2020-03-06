@@ -54,12 +54,19 @@ class ERC1155Contract(Contract):
         super().__init__(contract_id, contract_config, contract_interface)
         self.token_ids = []  # type: List[int]
 
-    def generate_item_ids_based_on_nb_goods(self, token_type: int, nb_goods: int) -> List[int]:
+    def generate_item_ids_based_on_nb_goods(
+        self, token_type: int, nb_goods: int
+    ) -> List[int]:
         """Populate the item_ids list."""
         assert self.token_ids == [], "Item ids already created."
         for i in range(nb_goods):
             self.token_ids.append(Helpers().generate_id(token_type, i))
         return self.token_ids
+
+    def generate_single_item_id(self, token_type: int, nb_good: int) -> int:
+        """Create single token id"""
+        token_id = Helpers().generate_id(nb_good, token_type)
+        return token_id
 
     def get_deploy_transaction(
         self,
@@ -178,6 +185,59 @@ class ERC1155Contract(Contract):
         )
         return tx
 
+    def get_create_single_transaction(
+        self,
+        deployer_address: Address,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+        token_id: int,
+    ) -> TransactionMessage:
+
+        """
+              Create an mint a batch of items.
+
+              :params address: The address that will receive the items
+              :params mint_quantities: A list[10] of ints. The index represents the id in the item_ids list.
+              """
+        # create the items
+
+        tx = self._get_create_single_tx(
+            deployer_address=deployer_address, ledger_api=ledger_api, token_id=token_id
+        )
+
+        #  Create the transaction message for the Decision maker
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id="contract_create_batch",
+            tx_sender_addr=deployer_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload={"tx": tx},
+        )
+
+        return tx_message
+
+    def _get_create_single_tx(self, deployer_address, ledger_api, token_id) -> str:
+        """Create an item."""
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        tx = self.instance.functions.createSingle(
+            deployer_address, token_id, ""
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 300000,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+        return tx
+
     def get_mint_batch_transaction(
         self,
         deployer_address: Address,
@@ -223,6 +283,63 @@ class ERC1155Contract(Contract):
         nonce += 1
         tx = self.instance.functions.mintBatch(
             recipient_address, self.token_ids, batch_mint_quantities
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 300000,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+
+        return tx
+
+    def get_mint_single_tx(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        token_id: int,
+        mint_quantity: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+    ) -> TransactionMessage:
+
+        tx = self._create_mint_single_tx(
+            deployer_address=deployer_address,
+            recipient_address=recipient_address,
+            token_id=token_id,
+            mint_quantity=mint_quantity,
+            ledger_api=ledger_api,
+        )
+
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id="contract_mint_batch",
+            tx_sender_addr=deployer_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload={"tx": tx},
+        )
+
+        return tx_message
+
+    def _create_mint_single_tx(
+        self, deployer_address, recipient_address, token_id, mint_quantity, ledger_api,
+    ) -> str:
+        """Mint a batch of items."""
+        # mint batch
+        nonce = ledger_api.api.eth.getTransactionCount(
+            ledger_api.api.toChecksumAddress(deployer_address)
+        )
+        nonce += 1
+        tx = self.instance.functions.mint(
+            recipient_address, token_id, mint_quantity
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -554,8 +671,7 @@ class Helpers:
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
 
-    def generate_id(self, token_id, item_id):
-        token_id = token_id
-        index = item_id
-        final_id_int = (token_id << 128) + index
+    def generate_id(self, token_type, token_id):
+        """Generate a token id based on the token type and the token_id."""
+        final_id_int = (token_type << 128) + token_id
         return final_id_int
