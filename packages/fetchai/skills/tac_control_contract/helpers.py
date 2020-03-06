@@ -46,9 +46,9 @@ def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str
     :return: a dictionary mapping goods' ids to names.
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
-    token_ids = contract.create_item_ids_based_on_nb_goods(NFT, nb_goods)
+    token_ids = contract.generate_item_ids_based_on_nb_goods(NFT, nb_goods)
     string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
-    return {string_format.format(i) + "_id": token_ids[i] for i in range(nb_goods)}
+    return {string_format.format(i) + "_id": str(token_ids[i]) for i in range(nb_goods)}
 
 
 def determine_scaling_factor(money_endowment: int) -> float:

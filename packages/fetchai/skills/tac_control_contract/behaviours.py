@@ -34,7 +34,7 @@ from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
-from packages.fetchai.skills.tac_control_contract.game import Configuration, Game, Phase
+from packages.fetchai.skills.tac_control_contract.game import Game, Phase, Configuration
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel(
@@ -75,10 +75,9 @@ class TACBehaviour(Behaviour):
             )
 
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            configuration = Configuration(
+            self.context.configuration = Configuration(
                 parameters.version_id, parameters.tx_fee, parameters.nb_goods, contract,
             )
-            self.context.shared_state["configuration"] = configuration
         else:
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_instance_w_address(
@@ -202,8 +201,7 @@ class TACBehaviour(Behaviour):
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
-        configuration = cast(Configuration, self.context.shared_state["configuration"])
-        game.create(configuration)
+        game.create()
 
         self.context.logger.info(
             "[{}]: Started competition:\n{}".format(

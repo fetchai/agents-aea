@@ -130,7 +130,7 @@ class Configuration:
         assert self.version_id is not None, "A version id must be set."
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert len(self.agent_addr_to_name) >= 1, "Must have at least two agents."
-        assert len(self.agent_addr_to_name) >= 1, "Must have at least two goods."
+        assert len(self.good_id_to_name) >= 1, "Must have at least two goods."
 
 
 class Initialization:
@@ -243,7 +243,6 @@ class Initialization:
         ), "Dimensions for utility_params and endowments rows must be the same."
 
 
-# TODO: Can I delete this class since we don't accept Transactions any more.
 class Transaction:
     """Convenience representation of a transaction."""
 
@@ -844,18 +843,18 @@ class Game(Model):
         """Get the transactions."""
         return self._transactions
 
-    def create(self, configuration: Configuration):
+    def create(self):
         """Create a game."""
         assert not self.phase == Phase.GAME
         self._phase = Phase.GAME_SETUP
-        self._generate(configuration)
+        self._generate()
 
-    def _generate(self, configuration: Configuration):
+    def _generate(self):
         """Generate a TAC game."""
         parameters = cast(Parameters, self.context.parameters)
-        self._configuration = configuration
+        self._configuration = self.context.configuration
         self._configuration.agent_addr_to_name = self.registration.agent_addr_to_name
-        assert self._configuration._check_consistency()
+        self.configuration._check_consistency()
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
         agent_addr_to_money_endowments = generate_money_endowments(
             list(self.configuration.agent_addr_to_name.keys()),

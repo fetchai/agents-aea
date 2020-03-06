@@ -30,12 +30,12 @@ models:
       base_good_endowment: 2
       lower_bound_factor: 1
       upper_bound_factor: 1
-      start_time: 06 03 2020 08:50
+      start_time: 06 03 2020 12:06
       registration_timeout: 60
       competition_timeout: 180
       inactivity_timeout: 60
       whitelist: []
-      version_id: v1
+      version_id: 'v1'
   game:
     class_name: Game
     args: {}

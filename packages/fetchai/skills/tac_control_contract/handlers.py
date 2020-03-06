@@ -30,7 +30,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
-from packages.fetchai.skills.tac_control_contract.game import Game, Phase
+from packages.fetchai.skills.tac_control_contract.game import Game, Phase, Transaction
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
@@ -309,7 +309,7 @@ class TransactionHandler(Handler):
                 )
             self.context.logger.info(
                 "The contract was successfully deployed. Contract address: {} and transaction hash: {}".format(
-                    transaction.contractAddress, transaction.transactionHash
+                    transaction.contractAddress, transaction.transactionHash.hex()
                 )
             )
             contract.set_address(ledger_api, transaction.contractAddress)
@@ -331,7 +331,7 @@ class TransactionHandler(Handler):
                 )
             self.context.logger.info(
                 "Successfully created the items. Transaction hash: {}".format(
-                    transaction.transactionHash
+                    transaction.transactionHash.hex()
                 )
             )
 

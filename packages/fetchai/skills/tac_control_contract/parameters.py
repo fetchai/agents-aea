@@ -76,7 +76,6 @@ class Parameters(Model):
     @property
     def contract_address(self) -> str:
         """The contract address of an already deployed smart-contract."""
-        assert self._contract_address is not None, "There is no deployed contract."
         return self._contract_address
 
     @property
