@@ -21,7 +21,7 @@
 
 import datetime
 import logging
-from typing import Any, List, Set
+from typing import List, Optional, Set
 
 from aea.skills.base import Model
 
@@ -34,7 +34,9 @@ class Parameters(Model):
     def __init__(self, **kwargs):
         """Instantiate the search class."""
 
-        self._contract_address = kwargs.pop("contract_adress", None)  # type: Any
+        self._contract_address = kwargs.pop(
+            "contract_adress", None
+        )  # type: Optional[str]
         self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
 
         self._min_nb_agents = kwargs.pop("min_nb_agents", 5)  # type: int
@@ -74,6 +76,7 @@ class Parameters(Model):
     @property
     def contract_address(self) -> str:
         """The contract address of an already deployed smart-contract."""
+        assert self._contract_address is not None, "There is no deployed contract."
         return self._contract_address
 
     @property

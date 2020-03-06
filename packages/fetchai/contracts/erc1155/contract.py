@@ -60,6 +60,15 @@ class ERC1155Contract(Contract):
         for token_id in token_ids:
             self.item_ids.append(Helpers().generate_id(token_type, token_id))
 
+    def create_item_ids_based_on_nb_goods(
+        self, token_type: int, nb_goods: int
+    ) -> List[int]:
+        """Populate the item_ids list."""
+        assert self.item_ids == [], "Item ids already created."
+        for i in range(nb_goods):
+            self.item_ids.append(Helpers().generate_id(token_type, i))
+        return self.item_ids
+
     def get_deploy_transaction(
         self,
         deployer_address: Address,

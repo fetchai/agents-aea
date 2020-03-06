@@ -42,15 +42,13 @@ def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str
     Generate ids for things.
 
     :param nb_goods: the number of things.
+    :param contract: the instance of the contract
     :return: a dictionary mapping goods' ids to names.
     """
-
-    item_ids = contract.create_item_ids_based_on_nb_goods(
-        token_type=NFT, nb_goods=nb_goods
-    )
     max_number_of_digits = math.ceil(math.log10(nb_goods))
+    token_ids = contract.create_item_ids_based_on_nb_goods(NFT, nb_goods)
     string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
-    return {string_format.format(i) + "_id": str(item_ids[i]) for i in range(nb_goods)}
+    return {string_format.format(i) + "_id": token_ids[i] for i in range(nb_goods)}
 
 
 def determine_scaling_factor(money_endowment: int) -> float:
@@ -259,7 +257,7 @@ def _recover_uid(good_id) -> int:
     """
     Get the uid part of the good id.
 
-    :param int good_id: the good id
+    :param str good_id: the good id
     :return: the uid
     """
     uid = int(good_id.split("_")[-2])

@@ -39,7 +39,7 @@ from aea.mail.base import Address
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TACMessage
-from packages.fetchai.skills.tac_control.helpers import (
+from packages.fetchai.skills.tac_control_contract.helpers import (
     determine_scaling_factor,
     generate_equilibrium_prices_and_holdings,
     generate_good_endowments,
@@ -48,7 +48,7 @@ from packages.fetchai.skills.tac_control.helpers import (
     generate_utility_params,
     tx_hash_from_values,
 )
-from packages.fetchai.skills.tac_control.parameters import Parameters
+from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 GoodId = str
 CurrencyId = str
@@ -79,12 +79,7 @@ class Configuration:
     """Class containing the configuration of the game."""
 
     def __init__(
-        self,
-        version_id: str,
-        tx_fee: int,
-        agent_addr_to_name: Dict[Address, str],
-        nb_goods: int,
-        contract: Contract,
+        self, version_id: str, tx_fee: int, nb_goods: int, contract: Contract,
     ):
         """
         Instantiate a game configuration.
@@ -96,9 +91,9 @@ class Configuration:
         """
         self._version_id = version_id
         self._tx_fee = tx_fee
-        self._agent_addr_to_name = agent_addr_to_name
+        self._agent_addr_to_name = defaultdict()
         self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
-        self._check_consistency()
+        #  self._check_consistency()
 
     @property
     def version_id(self) -> str:
@@ -112,8 +107,13 @@ class Configuration:
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
-        """Map agent addresses to names."""
+        """Return the map agent addresses to names."""
         return self._agent_addr_to_name
+
+    @agent_addr_to_name.setter
+    def agent_addr_to_name(self, agent_addr_to_name):
+        """Map agent addresses to names"""
+        self._agent_addr_to_name = agent_addr_to_name
 
     @property
     def good_id_to_name(self) -> Dict[str, str]:
@@ -243,6 +243,7 @@ class Initialization:
         ), "Dimensions for utility_params and endowments rows must be the same."
 
 
+# TODO: Can I delete this class since we don't accept Transactions any more.
 class Transaction:
     """Convenience representation of a transaction."""
 
@@ -843,23 +844,18 @@ class Game(Model):
         """Get the transactions."""
         return self._transactions
 
-    def create(self, contract: Contract):
+    def create(self, configuration: Configuration):
         """Create a game."""
         assert not self.phase == Phase.GAME
         self._phase = Phase.GAME_SETUP
-        self._generate(contract)
+        self._generate(configuration)
 
-    def _generate(self, contract: Contract):
+    def _generate(self, configuration: Configuration):
         """Generate a TAC game."""
         parameters = cast(Parameters, self.context.parameters)
-
-        self._configuration = Configuration(
-            parameters.version_id,
-            parameters.tx_fee,
-            self.registration.agent_addr_to_name,
-            parameters.nb_goods,
-            contract,
-        )
+        self._configuration = configuration
+        self._configuration.agent_addr_to_name = self.registration.agent_addr_to_name
+        assert self._configuration._check_consistency()
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
         agent_addr_to_money_endowments = generate_money_endowments(
             list(self.configuration.agent_addr_to_name.keys()),

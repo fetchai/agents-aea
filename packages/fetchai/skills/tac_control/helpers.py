@@ -29,12 +29,13 @@ import numpy as np
 
 from web3 import Web3
 
+from aea.contracts.ethereum import Contract
 from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 
 
-def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
+def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str]:
     """
     Generate ids for things.
 

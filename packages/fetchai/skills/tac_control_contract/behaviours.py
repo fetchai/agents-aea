@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a the behaviours."""
+"""This package contains the behaviours."""
 
 import datetime
 import logging
+import time
 from typing import Optional, cast
 
 from aea.contracts.ethereum import Contract
@@ -33,7 +34,7 @@ from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
-from packages.fetchai.skills.tac_control_contract.game import Game, Phase
+from packages.fetchai.skills.tac_control_contract.game import Configuration, Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel(
@@ -52,6 +53,7 @@ class TACBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
+        self.is_items_created = False
 
     def setup(self) -> None:
         """
@@ -73,6 +75,10 @@ class TACBehaviour(Behaviour):
             )
 
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
+            configuration = Configuration(
+                parameters.version_id, parameters.tx_fee, parameters.nb_goods, contract,
+            )
+            self.context.shared_state["configuration"] = configuration
         else:
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_instance_w_address(
@@ -90,16 +96,18 @@ class TACBehaviour(Behaviour):
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
-        # contract = cast(Contract, self.context.contracts.erc1155)
+        contract = cast(Contract, self.context.contracts.erc1155)
 
-        # if (
-        #     contract.is_deployed
-        #     and game.phase.value == Phase.PRE_GAME.value
-        #     and now < parameters.registration_start_time
-        # ):
-        #     self.context.logger.info("Creating the items.")
-        #     transaction_message = self._create_items()
-        #     self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        if (
+            contract.is_deployed
+            and not self.is_items_created
+            and game.phase.value == Phase.PRE_GAME.value
+        ):
+            self.context.logger.info("Creating the items.")
+            transaction_message = self._create_items()
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+            self.is_items_created = True
+            time.sleep(10)
 
         if (
             game.phase.value == Phase.PRE_GAME.value
@@ -194,8 +202,8 @@ class TACBehaviour(Behaviour):
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
-        contract = cast(Contract, self.context.contracts.erc1155)
-        game.create(contract)
+        configuration = cast(Configuration, self.context.shared_state["configuration"])
+        game.create(configuration)
 
         self.context.logger.info(
             "[{}]: Started competition:\n{}".format(
