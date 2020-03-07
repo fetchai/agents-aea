@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package fetch.aea.Http;
+
+message HttpMessage{
+
+    // Performatives and contents
+    message Request{
+        string method = 1;
+        string url = 2;
+        string version = 3;
+        string headers = 4;
+        bytes bodyy = 5;
+    }
+
+    message Response{
+        string version = 1;
+        int32 status_code = 2;
+        string status_text = 3;
+        string headers = 4;
+        bytes bodyy = 5;
+    }
+
+
+    // Standard HttpMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Request request = 5;
+        Response response = 6;
+    }
+}

@@ -1,0 +1,20 @@
+---
+name: http
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: 'A protocol for HTTP requests and responses.'
+speech_acts:
+  request:
+    method: pt:str
+    url: pt:str
+    version: pt:str
+    headers: pt:str
+    bodyy: pt:optional[pt:bytes]
+  response:
+    version: pt:str
+    status_code: pt:int
+    status_text: pt:str
+    headers: pt:str
+    bodyy: pt:optional[pt:bytes]
+...

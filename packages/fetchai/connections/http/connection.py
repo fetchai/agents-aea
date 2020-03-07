@@ -20,7 +20,6 @@
 """HTTP connection, channel, server, and handler"""
 
 import asyncio
-import json
 import logging
 from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -42,7 +41,10 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope, EnvelopeContext  # , URI
+from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -54,6 +56,8 @@ RequestId = str
 
 
 class Request(OpenAPIRequest):
+    """Generic request object."""
+
     @property
     def id(self) -> RequestId:
         return self._id
@@ -107,22 +111,25 @@ class Request(OpenAPIRequest):
         :param param: the parameter
         :param body: the body
         """
-        # uri = URI(request.url)
-        context = EnvelopeContext(connection_id=connection_id)  # , uri=uri)
-        # TODO: replace with HTTP protocol
-        msg = {
-            "performative": self.method,
-            "path": self.parameters.path,
-            "query": dict(self.parameters.query),
-            "payload": self.body,
-        }
-        msg_bytes = json.dumps(msg).encode()
+        uri = URI(self.full_url_pattern)
+        context = EnvelopeContext(connection_id=connection_id, uri=uri)
+        http_message = HttpMessage(
+            dialogue_reference=("", ""),
+            target=0,
+            message_id=1,
+            performative=HttpMessage.Performative.REQUEST,
+            method=self.method,
+            url=self.full_url_pattern,
+            headers=self.parameters.header.as_string(),
+            bodyy=self.body,
+            version="",
+        )
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
             protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
             context=context,
-            message=msg_bytes,
+            message=HttpSerializer().encode(http_message),
         )
         return envelope
 
@@ -130,15 +137,19 @@ class Request(OpenAPIRequest):
 class Response:
     """Generic response object."""
 
-    def __init__(self, status_code: int, message: bytes):
+    def __init__(
+        self, status_code: int, status_text: str, body: Optional[bytes] = None
+    ):
         """
         Initialize the response.
 
         :param status_code: the status code
-        :param message: the message
+        :param status_text: the status text
+        :param body: the body
         """
         self._status_code = status_code
-        self._message = message
+        self._status_text = status_text
+        self._body = body
 
     @property
     def status_code(self) -> int:
@@ -146,18 +157,30 @@ class Response:
         return self._status_code
 
     @property
-    def message(self) -> bytes:
-        """Get the message."""
-        return self._message
+    def status_text(self) -> str:
+        """Get the status text."""
+        return self._status_text
+
+    @property
+    def body(self) -> Optional[bytes]:
+        """Get the body."""
+        return self._body
 
     @classmethod
     def from_envelope(cls, envelope: Optional[Envelope] = None) -> "Response":
+        """
+        Turn an envelope into a response.
+
+        :param envelope: the envelope
+        :return: the response
+        """
         if envelope is not None:
-            # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
-            resp_msg = json.loads(envelope.message.decode())
-            response = Response(resp_msg["status_code"], resp_msg["message"].encode())
+            http_message = cast(HttpMessage, HttpSerializer().decode(envelope.message))
+            response = Response(
+                http_message.status_code, http_message.status_text, http_message.bodyy
+            )
         else:
-            response = Response(REQUEST_TIMEOUT, b"Request Timeout")
+            response = Response(REQUEST_TIMEOUT, "Request Timeout")
         return response
 
 
@@ -340,7 +363,7 @@ class HTTPChannel:
             # turn response envelope into response
             response = Response.from_envelope(response_envelope)
         else:
-            response = Response(NOT_FOUND, b"Request Not Found")
+            response = Response(NOT_FOUND, "Request Not Found")
 
         return response
 
