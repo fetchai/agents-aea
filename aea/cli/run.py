@@ -35,10 +35,10 @@ from aea.cli.common import (
     ConnectionsOption,
     Context,
     _load_env_file,
-    _try_to_load_protocols,
     _verify_or_create_private_keys,
     check_aea_project,
     logger,
+    try_to_load_agent_config
 )
 from aea.cli.install import install
 from aea.configurations.base import (

@@ -32,7 +32,6 @@ from aea import AEA_DIR
 from aea.cli.common import (
     Context,
     DEFAULT_VERSION,
-    _compute_fingerprint,
     _validate_package_name,
     check_aea_project,
     logger,
@@ -130,7 +129,6 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         )
         config = loader.load(config_filepath.open())
         config.name = item_name
-        config.fingerprint = _compute_fingerprint(config_filepath.parent)
         config.author = author_name
         loader.dump(config, open(config_filepath, "w"))
 
