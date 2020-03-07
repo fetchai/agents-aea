@@ -593,7 +593,7 @@ def _validate_config_consistency(ctx: Context):
 
         try:
             # either in vendor/ or in personal packages.
-            # we give precedence to custom skills.
+            # we give precedence to custom agent components (i.e. not vendorized).
             package_directory = Path(item_type.to_plural(), public_id.name)
             is_vendor = False
             if not package_directory.exists():
