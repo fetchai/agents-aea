@@ -46,7 +46,6 @@ from aea.configurations.base import (
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
-    PackageConfiguration,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
@@ -569,30 +568,13 @@ def _compute_fingerprint(package_directory) -> Dict[str, str]:
     return fingerprints
 
 
-def _check_package_fingerprints(
-    package_configuration: PackageConfiguration, package_directory: Path
-):
-    """Given a package configuration and a package directory, check whether
-    the hash of the files in the package directory match the one in the package configurations."""
-    expected_fingerprints = package_configuration.fingerprint
-    actual_fingerprints = _compute_fingerprint(package_directory)
-
-    if expected_fingerprints != actual_fingerprints:
-        raise ValueError(
-            "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}".format(
-                package_directory,
-                pprint.pformat(expected_fingerprints),
-                pprint.pformat(actual_fingerprints),
-            )
-        )
-
-
 def _validate_config_consistency(ctx: Context):
     """
     Validate fingerprints for every agent component.
 
-    :raise ValueError: if the fingerprints do not match
-                       or if the packages are bad formatted (e.g. missing configuration file.)
+    :raise ValueError: if there is a missing configuration file.
+                       or if the configuration file is not valid.
+                       or if the fingerprints do not match
     """
 
     packages_public_ids_to_types = dict(
@@ -613,10 +595,12 @@ def _validate_config_consistency(ctx: Context):
             # either in vendor/ or in personal packages.
             # we give precedence to custom skills.
             package_directory = Path(item_type.to_plural(), public_id.name)
+            is_vendor = False
             if not package_directory.exists():
                 package_directory = Path(
                     "vendor", public_id.author, item_type.to_plural(), public_id.name
                 )
+                is_vendor = True
             # we fail if none of the two alternative works.
             assert package_directory.exists()
 
@@ -637,7 +621,36 @@ def _validate_config_consistency(ctx: Context):
                     item_type.value.capitalize(), str(e)
                 )
             )
-        _check_package_fingerprints(package_configuration, package_directory)
+
+        expected_fingerprints = package_configuration.fingerprint
+        actual_fingerprints = _compute_fingerprint(package_directory)
+        if expected_fingerprints != actual_fingerprints:
+            if is_vendor:
+                raise ValueError(
+                    (
+                        "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                        "Vendorized projects should not be tampered with, please revert any changes to {} {}"
+                    ).format(
+                        package_directory,
+                        pprint.pformat(expected_fingerprints),
+                        pprint.pformat(actual_fingerprints),
+                        str(item_type),
+                        public_id,
+                    )
+                )
+            else:
+                raise ValueError(
+                    (
+                        "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                        "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
+                    ).format(
+                        package_directory,
+                        pprint.pformat(expected_fingerprints),
+                        pprint.pformat(actual_fingerprints),
+                        str(item_type),
+                        public_id,
+                    )
+                )
 
 
 def check_aea_project(f):

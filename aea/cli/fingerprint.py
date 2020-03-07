@@ -26,7 +26,7 @@ from typing import Dict, cast
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter, check_aea_project, logger
+from aea.cli.common import Context, PublicIdParameter, logger
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -42,7 +42,6 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 @click.group()
 @click.pass_context
-@check_aea_project
 def fingerprint(click_context):
     """Fingerprint a resource."""
 

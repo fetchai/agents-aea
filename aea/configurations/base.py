@@ -79,6 +79,10 @@ class ConfigurationType(Enum):
         """
         return self.value + "s"
 
+    def __str__(self):
+        """Convert to string."""
+        return self.value
+
 
 def _get_default_configuration_file_name_from_type(
     item_type: Union[str, ConfigurationType]
