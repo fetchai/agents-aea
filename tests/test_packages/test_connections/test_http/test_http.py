@@ -443,7 +443,7 @@ class TestHTTPConnectionPOST:
         assert value is None
 
 
-def test_gym_from_config():
+def test_conn_from_config():
     """Test the Connection from config File."""
     conf = ConnectionConfig()
     conf.config["api_spec_path"] = os.path.join(

@@ -28,8 +28,6 @@ from threading import Lock, Thread
 from typing import Dict, Optional, Set, cast
 from uuid import uuid4
 
-import attr
-
 from openapi_core import create_spec
 from openapi_core.validation.request.datatypes import (
     OpenAPIRequest,
@@ -243,6 +241,7 @@ class HTTPChannel:
         self.http_server = None  # type: Optional[HTTPServer]
         self.dispatch_ready_envelopes = {}  # type: Dict[RequestId, Envelope]
         self.timed_out_request_ids = set()  # type: Set[RequestId]
+        self.pending_request_ids = set()  # type: Set[RequestId]
 
     @property
     def api_spec(self) -> APISpec:
@@ -295,8 +294,13 @@ class HTTPChannel:
                     envelope.to
                 )
             )
-        else:
+        elif envelope.to in self.pending_request_ids:
+            self.pending_request_ids.remove(envelope.to)
             self.dispatch_ready_envelopes.update({envelope.to: envelope})
+        else:
+            logger.warning(
+                "Dropping envelope for unknown request id {}.".format(envelope.to)
+            )
 
     def disconnect(self) -> None:
         """
@@ -326,6 +330,7 @@ class HTTPChannel:
         is_valid_request = self.api_spec.verify(request)
 
         if is_valid_request:
+            self.pending_request_ids.add(request.id)
             # turn request into envelope
             envelope = request.to_envelope(self.connection_id, self.address)
             # send the envelope to the agent's inbox (via self.in_queue)
