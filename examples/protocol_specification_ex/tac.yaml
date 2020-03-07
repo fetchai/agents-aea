@@ -1,3 +1,4 @@
+---
 name: tac
 author: fetchai
 version: 0.1.0
@@ -36,8 +37,8 @@ speech_acts:
   tac_error:
     error_code: ct:ErrorCode
     info: pt:dict[pt:str, ct:ErrorInfo]
----
 ...
+---
 ct:ErrorCode: |
   enum ErrorCodeEnum {
     GENERIC_ERROR = 0;

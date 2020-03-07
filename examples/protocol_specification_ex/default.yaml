@@ -21,5 +21,5 @@ ct:ErrorCode: |
       UNSUPPORTED_SKILL = 3;
       INVALID_DIALOGUE = 4;
     }
-  ErrorCodeEnum error_code_enum = 1;
+  ErrorCodeEnum error_code = 1;
 ...

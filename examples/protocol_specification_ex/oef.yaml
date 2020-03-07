@@ -1,3 +1,4 @@
+---
 name: oef
 author: fetchai
 version: 0.1.0
@@ -27,8 +28,8 @@ speech_acts:
   dialogue_error:
     dialogue_id: pt:int
     origin: pt:str
----
 ...
+---
 ct:Query: |
   message Nothing {
   }

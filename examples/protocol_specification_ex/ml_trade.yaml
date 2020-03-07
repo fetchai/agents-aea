@@ -1,3 +1,4 @@
+---
 name: ml_trade
 author: fetchai
 version: 0.1.0
@@ -14,8 +15,8 @@ speech_acts:
   data:
     terms: ct:Description
     data: ct:Data
----
 ...
+---
 ct:Query: |
   message Nothing {
   }
