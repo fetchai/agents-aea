@@ -295,7 +295,7 @@ class HTTPChannel:
         if envelope is not None:
             # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
             resp_msg = json.loads(envelope.message.decode())
-            response = Response(resp_msg["status_code"], resp_msg["message"])
+            response = Response(resp_msg["status_code"], resp_msg["message"].encode())
         else:
             response = Response(REQUEST_TIMEOUT, b"Request Timeout")
         return response
@@ -330,9 +330,6 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             """Respond to a GET request."""
             request = self.build_request("get")
 
-            # response = self.channel.loop.run_until_complete(
-            #     self.channel.process(request)
-            # )
             future = asyncio.run_coroutine_threadsafe(
                 self.channel.process(request), self.channel.loop
             )
@@ -347,13 +344,10 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             """Respond to a POST request."""
             request = self.build_request("post")
 
-            response = self.channel.loop.run_until_complete(
-                self.channel.process(request)
+            future = asyncio.run_coroutine_threadsafe(
+                self.channel.process(request), self.channel.loop
             )
-            # future = asyncio.run_coroutine_threadsafe(
-            #     self.channel.process("POST", url, param, body), self.channel.loop
-            # )
-            # response_code, response_desc = future.result()
+            response = future.result()
 
             self.send_response(response.status_code)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
