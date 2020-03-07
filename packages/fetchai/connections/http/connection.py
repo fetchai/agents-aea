@@ -28,13 +28,23 @@ from threading import Lock, Thread
 from typing import Dict, Optional, Set, cast
 from uuid import uuid4
 
-from flex.core import load, validate_api_request
-from flex.exceptions import ValidationError as FlexValidationError
-from flex.http import Request
+import attr
+
+from openapi_core import create_spec
+from openapi_core.validation.request.datatypes import (
+    OpenAPIRequest,
+    RequestParameters,
+)
+from openapi_core.validation.request.shortcuts import validate_request
+from openapi_core.validation.request.validators import RequestValidator
+
+from openapi_spec_validator.schemas import read_yaml_file
+
+from werkzeug.datastructures import ImmutableMultiDict
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope, EnvelopeContext, URI
+from aea.mail.base import Address, Envelope, EnvelopeContext  # , URI
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -43,6 +53,80 @@ REQUEST_TIMEOUT = 408
 logger = logging.getLogger(__name__)
 
 RequestId = str
+
+
+class Request(OpenAPIRequest):
+    @property
+    def id(self) -> RequestId:
+        return self._id
+
+    @id.setter
+    def id(self, id: RequestId) -> None:
+        self._id = id
+
+    @classmethod
+    def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
+        method = request_handler.command.lower()
+
+        # gets deduced by path finder against spec
+        path = {}  # type: Dict
+
+        url = "http://{}:{}{}".format(
+            *request_handler.server.server_address, request_handler.path
+        )
+
+        content_length = request_handler.headers["Content-Length"]
+        body = (
+            None
+            if content_length is None
+            else request_handler.rfile.read(int(content_length)).decode()
+        )
+
+        mimetype = request_handler.headers.get_content_type()
+        parameters = RequestParameters(
+            query=ImmutableMultiDict(request_handler.headers.get_params()),
+            header=request_handler.headers,
+            path=path,
+        )
+        request = Request(
+            full_url_pattern=url,
+            method=method,
+            parameters=parameters,
+            body=body,
+            mimetype=mimetype,
+        )
+        request.id = uuid4().hex
+        return request
+
+    def to_envelope(self, connection_id: PublicId, agent_address: str) -> Envelope:
+        """
+        Process incoming API request by packaging into Envelope and sending it in-queue.
+
+        The Envelope's message body contains the "performative", "path", "params", and "payload".
+
+        :param http_method: the http method
+        :param url: the url
+        :param param: the parameter
+        :param body: the body
+        """
+        # uri = URI(request.url)
+        context = EnvelopeContext(connection_id=connection_id)  # , uri=uri)
+        # TODO: replace with HTTP protocol
+        msg = {
+            "performative": self.method,
+            "path": self.parameters.path,
+            "query": dict(self.parameters.query),
+            "payload": self.body,
+        }
+        msg_bytes = json.dumps(msg).encode()
+        envelope = Envelope(
+            to=agent_address,
+            sender=self.id,
+            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            context=context,
+            message=msg_bytes,
+        )
+        return envelope
 
 
 class Response:
@@ -68,21 +152,37 @@ class Response:
         """Get the message."""
         return self._message
 
+    @classmethod
+    def from_envelope(cls, envelope: Optional[Envelope] = None) -> "Response":
+        if envelope is not None:
+            # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
+            resp_msg = json.loads(envelope.message.decode())
+            response = Response(resp_msg["status_code"], resp_msg["message"].encode())
+        else:
+            response = Response(REQUEST_TIMEOUT, b"Request Timeout")
+        return response
+
 
 class APISpec:
     """API Spec class to verify a request against an OpenAPI/Swagger spec."""
 
-    def __init__(self, api_spec_path: Optional[str]):
+    def __init__(
+        self, api_spec_path: Optional[str] = None, server: Optional[str] = None
+    ):
         """
         Initialize the API spec.
 
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         """
-        self._api_spec = None  # type Optional[Dict]
+        self._validator = None  # type: Optional[RequestValidator]
         if api_spec_path is not None:
             try:
-                self._api_spec = load(api_spec_path)
-            except FlexValidationError:
+                api_spec_dict = read_yaml_file(api_spec_path)
+                if server is not None:
+                    api_spec_dict["servers"] = [{"url": server}]
+                api_spec = create_spec(api_spec_dict)
+                self._validator = RequestValidator(api_spec)
+            except Exception:
                 logger.error(
                     "API specification YAML source file not correctly formatted."
                 )
@@ -94,13 +194,13 @@ class APISpec:
         :param request: the request object
         :return: whether or not the request conforms with the API spec
         """
-        if self._api_spec is None:
+        if self._validator is None:
             logger.debug("Skipping API verification!")
             return True
 
         try:
-            validate_api_request(self._api_spec, request)
-        except FlexValidationError:
+            validate_request(self._validator, request)
+        except Exception:
             return False
         return True
 
@@ -130,6 +230,7 @@ class HTTPChannel:
         self.address = address
         self.host = host
         self.port = port
+        self.server_address = "http://{}:{}".format(self.host, self.port)
         self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
         self.in_queue = None  # type: Optional[asyncio.Queue]
@@ -137,7 +238,7 @@ class HTTPChannel:
         self.thread = None  # type: Optional[Thread]
         self.lock = Lock()
         self.is_stopped = True
-        self._api_spec = APISpec(api_spec_path)
+        self._api_spec = APISpec(api_spec_path, self.server_address)
         self.timeout_window = timeout_window
         self.http_server = None  # type: Optional[HTTPServer]
         self.dispatch_ready_envelopes = {}  # type: Dict[RequestId, Envelope]
@@ -226,13 +327,13 @@ class HTTPChannel:
 
         if is_valid_request:
             # turn request into envelope
-            envelope = self.build_envelope(request)
+            envelope = request.to_envelope(self.connection_id, self.address)
             # send the envelope to the agent's inbox (via self.in_queue)
             self.in_queue.put_nowait(envelope)
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
             response_envelope = await self.get_response(envelope.sender)
             # turn response envelope into response
-            response = self.build_response(response_envelope)
+            response = Response.from_envelope(response_envelope)
         else:
             response = Response(NOT_FOUND, b"Request Not Found")
 
@@ -260,46 +361,6 @@ class HTTPChannel:
             self.timed_out_request_ids.add(request_id)
         return envelope
 
-    def build_envelope(self, request: Request) -> Envelope:
-        """
-        Process incoming API request by packaging into Envelope and sending it in-queue.
-
-        The Envelope's message body contains the "performative", "path", "params", and "payload".
-
-        :param http_method: the http method
-        :param url: the url
-        :param param: the parameter
-        :param body: the body
-        """
-        client_id = uuid4().hex
-        uri = URI(request.url)
-        context = EnvelopeContext(connection_id=self.connection_id, uri=uri)
-        # TODO: replace with HTTP protocol
-        msg = {
-            "performative": request.method,
-            "path": request.path,
-            "query": request.query,
-            "payload": request.body,
-        }
-        msg_bytes = json.dumps(msg).encode()
-        envelope = Envelope(
-            to=self.address,
-            sender=client_id,
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
-            context=context,
-            message=msg_bytes,
-        )
-        return envelope
-
-    def build_response(self, envelope: Optional[Envelope] = None) -> Response:
-        if envelope is not None:
-            # Response Envelope's msg will be a JSON with 'status_code', 'response', and 'payload' keys
-            resp_msg = json.loads(envelope.message.decode())
-            response = Response(resp_msg["status_code"], resp_msg["message"].encode())
-        else:
-            response = Response(REQUEST_TIMEOUT, b"Request Timeout")
-        return response
-
 
 def HTTPHandlerFactory(channel: HTTPChannel):
     class HTTPHandler(BaseHTTPRequestHandler):
@@ -315,11 +376,6 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             """Get the http channel."""
             return self._channel
 
-        def get_url(self) -> str:
-            """Get url."""
-            url = "http://{}:{}{}".format(*self.server.server_address, self.path)
-            return url
-
         def do_HEAD(self):
             """Deal with header only requests."""
             self.send_response(SUCCESS)
@@ -328,7 +384,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 
         def do_GET(self):
             """Respond to a GET request."""
-            request = self.build_request("get")
+            request = Request.create(self)
 
             future = asyncio.run_coroutine_threadsafe(
                 self.channel.process(request), self.channel.loop
@@ -342,7 +398,7 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 
         def do_POST(self):
             """Respond to a POST request."""
-            request = self.build_request("post")
+            request = Request.create(self)
 
             future = asyncio.run_coroutine_threadsafe(
                 self.channel.process(request), self.channel.loop
@@ -353,21 +409,6 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
             self.wfile.write(response.message)
-
-        def build_request(self, method: str):
-            content_length = self.headers["Content-Length"]
-            body = (
-                None
-                if content_length is None
-                else self.rfile.read(int(content_length)).decode()
-            )
-            request = Request(
-                self.get_url(),
-                method,
-                content_type=self.headers.get_content_type(),
-                body=body,
-            )
-            return request
 
     return HTTPHandler
 

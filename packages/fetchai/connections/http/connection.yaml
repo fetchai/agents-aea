@@ -13,5 +13,7 @@ config:
   port: ${port:8000}
   api_spec_path: ''  # put here the dotted path to your API spec YAML path.
 dependencies:
-  flex:
-    version: ==6.14.1
+  openapi-core:
+    version: ==0.13.2
+  openapi-spec-validator:
+    version: ==0.2.8
