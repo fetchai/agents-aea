@@ -25,6 +25,7 @@ import shutil
 import sys
 import time
 from pathlib import Path
+from typing import cast
 
 import click
 

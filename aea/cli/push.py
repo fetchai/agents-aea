@@ -31,8 +31,8 @@ from aea.cli.common import (
     _load_yaml,
     _try_get_item_source_path,
     _try_get_vendorized_item_target_path,
-    pass_ctx,
     check_aea_project,
+    pass_ctx,
 )
 from aea.cli.registry.push import push_item
 from aea.configurations.base import PublicId

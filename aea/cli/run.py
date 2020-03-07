@@ -38,7 +38,7 @@ from aea.cli.common import (
     _verify_or_create_private_keys,
     check_aea_project,
     logger,
-    try_to_load_agent_config
+    try_to_load_agent_config,
 )
 from aea.cli.install import install
 from aea.configurations.base import (

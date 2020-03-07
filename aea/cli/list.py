@@ -31,7 +31,6 @@ from aea.cli.common import (
     _retrieve_details,
     check_aea_project,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import (
     ConfigurationType,
