@@ -330,13 +330,13 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             """Respond to a GET request."""
             request = self.build_request("get")
 
-            response = self.channel.loop.run_until_complete(
-                self.channel.process(request)
-            )
-            # future = asyncio.run_coroutine_threadsafe(
-            #     self.channel.process("GET", url, param), self.channel.loop
+            # response = self.channel.loop.run_until_complete(
+            #     self.channel.process(request)
             # )
-            # response_code, response_desc = future.result()
+            future = asyncio.run_coroutine_threadsafe(
+                self.channel.process(request), self.channel.loop
+            )
+            response = future.result()
 
             self.send_response(response.status_code)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
