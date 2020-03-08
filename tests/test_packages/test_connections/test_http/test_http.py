@@ -266,8 +266,8 @@ class TestHTTPConnectionGET:
             )
             return is_exiting_correctly
 
-        client_task = asyncio.create_task(client_thread(self.host, self.port))
-        agent_task = asyncio.create_task(
+        client_task = asyncio.ensure_future(client_thread(self.host, self.port))
+        agent_task = asyncio.ensure_future(
             agent_processing(self.http_connection, self.address)
         )
 
@@ -333,8 +333,8 @@ class TestHTTPConnectionGET:
                 is_exiting_correctly = False
             return is_exiting_correctly
 
-        client_task = asyncio.create_task(client_thread(self.host, self.port))
-        agent_task = asyncio.create_task(agent_processing(self.http_connection))
+        client_task = asyncio.ensure_future(client_thread(self.host, self.port))
+        agent_task = asyncio.ensure_future(agent_processing(self.http_connection))
 
         await asyncio.gather(client_task, agent_task)
         response_status_code, response_status_text, response_body = client_task.result()
@@ -450,8 +450,8 @@ class TestHTTPConnectionPOST:
             )
             return is_exiting_correctly
 
-        client_task = asyncio.create_task(client_thread(self.host, self.port))
-        agent_task = asyncio.create_task(
+        client_task = asyncio.ensure_future(client_thread(self.host, self.port))
+        agent_task = asyncio.ensure_future(
             agent_processing(self.http_connection, self.address)
         )
 
@@ -517,8 +517,8 @@ class TestHTTPConnectionPOST:
                 is_exiting_correctly = False
             return is_exiting_correctly
 
-        client_task = asyncio.create_task(client_thread(self.host, self.port))
-        agent_task = asyncio.create_task(agent_processing(self.http_connection))
+        client_task = asyncio.ensure_future(client_thread(self.host, self.port))
+        agent_task = asyncio.ensure_future(agent_processing(self.http_connection))
 
         await asyncio.gather(client_task, agent_task)
         response_status_code, response_status_text, response_body = client_task.result()
