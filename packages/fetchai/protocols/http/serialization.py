@@ -57,9 +57,8 @@ class HttpSerializer(Serializer):
             performative.version = version
             headers = msg.headers
             performative.headers = headers
-            if msg.is_set("bodyy"):
-                bodyy = msg.bodyy
-                performative.bodyy = bodyy
+            bodyy = msg.bodyy
+            performative.bodyy = bodyy
             http_msg.request.CopyFrom(performative)
         elif performative_id == HttpMessage.Performative.RESPONSE:
             performative = http_pb2.HttpMessage.Response()  # type: ignore
@@ -71,9 +70,8 @@ class HttpSerializer(Serializer):
             performative.status_text = status_text
             headers = msg.headers
             performative.headers = headers
-            if msg.is_set("bodyy"):
-                bodyy = msg.bodyy
-                performative.bodyy = bodyy
+            bodyy = msg.bodyy
+            performative.bodyy = bodyy
             http_msg.response.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -109,9 +107,8 @@ class HttpSerializer(Serializer):
             performative_content["version"] = version
             headers = http_pb.request.headers
             performative_content["headers"] = headers
-            if http_pb.request.HasField("bodyy"):
-                bodyy = http_pb.request.bodyy
-                performative_content["bodyy"] = bodyy
+            bodyy = http_pb.request.bodyy
+            performative_content["bodyy"] = bodyy
         elif performative_id == HttpMessage.Performative.RESPONSE:
             version = http_pb.response.version
             performative_content["version"] = version
@@ -121,9 +118,8 @@ class HttpSerializer(Serializer):
             performative_content["status_text"] = status_text
             headers = http_pb.response.headers
             performative_content["headers"] = headers
-            if http_pb.response.HasField("bodyy"):
-                bodyy = http_pb.response.bodyy
-                performative_content["bodyy"] = bodyy
+            bodyy = http_pb.response.bodyy
+            performative_content["bodyy"] = bodyy
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

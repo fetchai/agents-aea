@@ -20,7 +20,7 @@
 """This module contains http's message definition."""
 
 from enum import Enum
-from typing import Optional, Set, Tuple, cast
+from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -101,10 +101,10 @@ class HttpMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def bodyy(self) -> Optional[bytes]:
+    def bodyy(self) -> bytes:
         """Get the 'bodyy' content from the message."""
         assert self.is_set("bodyy"), "'bodyy' content is not set."
-        return cast(Optional[bytes], self.get("bodyy"))
+        return cast(bytes, self.get("bodyy"))
 
     @property
     def headers(self) -> str:
@@ -180,10 +180,9 @@ class HttpMessage(Message):
                 assert (
                     type(self.headers) == str
                 ), "Content 'headers' is not of type 'str'."
-                if self.is_set("bodyy"):
-                    assert (
-                        type(self.bodyy) == bytes
-                    ), "Content 'bodyy' is not of type 'bytes'."
+                assert (
+                    type(self.bodyy) == bytes
+                ), "Content 'bodyy' is not of type 'bytes'."
             elif self.performative == HttpMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 5
                 assert (
@@ -198,10 +197,9 @@ class HttpMessage(Message):
                 assert (
                     type(self.headers) == str
                 ), "Content 'headers' is not of type 'str'."
-                if self.is_set("bodyy"):
-                    assert (
-                        type(self.bodyy) == bytes
-                    ), "Content 'bodyy' is not of type 'bytes'."
+                assert (
+                    type(self.bodyy) == bytes
+                ), "Content 'bodyy' is not of type 'bytes'."
 
             # Check correct content count
             assert (

@@ -23,11 +23,10 @@ import asyncio
 import concurrent.futures
 import functools
 import http.client
-import json
 import logging
 import os
 from threading import Thread
-from typing import Tuple
+from typing import Dict, Tuple, cast
 
 import pytest
 
@@ -107,15 +106,19 @@ class TestHTTPConnectionSend:
         assert cls.http_connection.connection_status.is_connected
 
     @pytest.mark.asyncio
-    async def test_send_connection(self):
+    async def test_send_connection_drop(self):
         """Test send connection error."""
         client_id = "to_key"
         message = HttpMessage(
             performative=HttpMessage.Performative.RESPONSE,
+            dialogue_reference=("", ""),
             target=1,
             message_id=2,
+            headers="",
+            version="",
             status_code=200,
-            status_text="Sucess",
+            status_text="Success",
+            bodyy=b"",
         )
         envelope = Envelope(
             to=client_id,
@@ -124,10 +127,43 @@ class TestHTTPConnectionSend:
             message=HttpSerializer().encode(message),
         )
         await self.http_connection.send(envelope)
+        # we expect the envelope to be dropped
+        assert (
+            self.http_connection.channel.dispatch_ready_envelopes.get(client_id) is None
+        )
+
+    @pytest.mark.asyncio
+    async def test_send_connection_send(self):
+        """Test send connection error."""
+        client_id = "to_key"
+        message = HttpMessage(
+            performative=HttpMessage.Performative.RESPONSE,
+            dialogue_reference=("", ""),
+            target=1,
+            message_id=2,
+            headers="",
+            version="",
+            status_code=200,
+            status_text="Success",
+            bodyy=b"",
+        )
+        envelope = Envelope(
+            to=client_id,
+            sender="from_key",
+            protocol_id=self.protocol_id,
+            message=HttpSerializer().encode(message),
+        )
+        self.http_connection.channel.pending_request_ids.add("to_key")
+        await self.http_connection.send(envelope)
         assert (
             self.http_connection.channel.dispatch_ready_envelopes.get(client_id)
             == envelope
         )
+        assert self.http_connection.channel.pending_request_ids == set()
+        # clean up:
+        self.http_connection.channel.dispatch_ready_envelopes = (
+            {}
+        )  # type: Dict[str, Envelope]
 
     @classmethod
     def teardown_class(cls):
@@ -175,13 +211,13 @@ class TestHTTPConnectionGET:
     async def test_get_404(self):
         """Test send post request w/ 404 response."""
 
-        def request_response_cycle(host, port) -> Tuple[int, bytes]:
+        def request_response_cycle(host, port) -> Tuple[int, str, bytes]:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/")
             response = conn.getresponse()
             return response.status, response.reason, response.read()
 
-        async def client_thread(host, port) -> Tuple[int, bytes]:
+        async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
             loop = asyncio.get_running_loop()
             result = await loop.run_in_executor(
@@ -190,21 +226,27 @@ class TestHTTPConnectionGET:
             )
             return result
 
-        response_status_code, response_status_text, response_body = await client_thread(self.host, self.port)
+        response_status_code, response_status_text, response_body = await client_thread(
+            self.host, self.port
+        )
 
-        assert response_status_code == 404 and response_status_text == "Request Not Found" and response_body == b""
+        assert (
+            response_status_code == 404
+            and response_status_text == "Request Not Found"
+            and response_body == b""
+        )
 
     @pytest.mark.asyncio
     async def test_get_408(self):
         """Test send get request w/ 408 response."""
 
-        def request_response_cycle(host, port) -> Tuple[int, bytes]:
+        def request_response_cycle(host, port) -> Tuple[int, str, bytes]:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/pets")
             response = conn.getresponse()
             return response.status, response.reason, response.read()
 
-        async def client_thread(host, port) -> Tuple[int, bytes]:
+        async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
             loop = asyncio.get_running_loop()
             result = await loop.run_in_executor(
@@ -233,20 +275,24 @@ class TestHTTPConnectionGET:
         response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_status_code == 408 and response_status_text == "Request Timeout" and response_body == b""
+        assert (
+            response_status_code == 408
+            and response_status_text == "Request Timeout"
+            and response_body == b""
+        )
         assert is_exiting_correctly
 
     @pytest.mark.asyncio
     async def test_get_200(self):
         """Test send get request w/ 200 response."""
 
-        def request_response_cycle(host, port) -> Tuple[int, bytes]:
+        def request_response_cycle(host, port) -> Tuple[int, str, bytes]:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/pets")
             response = conn.getresponse()
             return response.status, response.reason, response.read()
 
-        async def client_thread(host, port) -> Tuple[int, bytes]:
+        async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
             loop = asyncio.get_running_loop()
             result = await loop.run_in_executor(
@@ -260,18 +306,19 @@ class TestHTTPConnectionGET:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
-                incoming_message = HttpSerializer().decode(envelope.message)
-                print("HEADERS: " + incoming_message.headers)
+                incoming_message = cast(
+                    HttpMessage, HttpSerializer().decode(envelope.message)
+                )
                 message = HttpMessage(
                     performative=HttpMessage.Performative.RESPONSE,
-                    dialogue_reference=("",""),
+                    dialogue_reference=("", ""),
                     target=incoming_message.message_id,
                     message_id=incoming_message.message_id + 1,
                     version=incoming_message.version,
                     headers=incoming_message.headers,
                     status_code=200,
-                    status_text="Sucess",
-                    bodyy=b"Response body"
+                    status_text="Success",
+                    bodyy=b"Response body",
                 )
                 response_envelope = Envelope(
                     to=envelope.sender,
@@ -293,7 +340,11 @@ class TestHTTPConnectionGET:
         response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_status_code == 200 and response_status_text == "Success" and response_body == b"Response body"
+        assert (
+            response_status_code == 200
+            and response_status_text == "Success"
+            and response_body == b"Response body"
+        )
         assert is_exiting_correctly
 
     @classmethod
@@ -358,9 +409,15 @@ class TestHTTPConnectionPOST:
             )
             return result
 
-        response_status_code, response_status_text, response_body = await client_thread(self.host, self.port)
+        response_status_code, response_status_text, response_body = await client_thread(
+            self.host, self.port
+        )
 
-        assert response_status_code == 404 and response_status_text == "Request Not Found" and response_body == b""
+        assert (
+            response_status_code == 404
+            and response_status_text == "Request Not Found"
+            and response_body == b""
+        )
 
     @pytest.mark.asyncio
     async def test_post_408(self):
@@ -402,20 +459,24 @@ class TestHTTPConnectionPOST:
         response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_status_code == 408 and response_status_text == "Request Timeout" and response_body == b""
+        assert (
+            response_status_code == 408
+            and response_status_text == "Request Timeout"
+            and response_body == b""
+        )
         assert is_exiting_correctly
 
     @pytest.mark.asyncio
     async def test_post_201(self):
         """Test send post request w/ 201 response."""
 
-        def request_response_cycle(host, port) -> Tuple[int, bytes]:
+        def request_response_cycle(host, port) -> Tuple[int, str, bytes]:
             conn = http.client.HTTPConnection(host, port)
             conn.request("POST", "/pets")
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
-        async def client_thread(host, port) -> Tuple[int, bytes]:
+        async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
             loop = asyncio.get_running_loop()
             result = await loop.run_in_executor(
@@ -429,14 +490,26 @@ class TestHTTPConnectionPOST:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
+                incoming_message = cast(
+                    HttpMessage, HttpSerializer().decode(envelope.message)
+                )
+                message = HttpMessage(
+                    performative=HttpMessage.Performative.RESPONSE,
+                    dialogue_reference=("", ""),
+                    target=incoming_message.message_id,
+                    message_id=incoming_message.message_id + 1,
+                    version=incoming_message.version,
+                    headers=incoming_message.headers,
+                    status_code=201,
+                    status_text="Created",
+                    bodyy=b"Response body",
+                )
                 response_envelope = Envelope(
                     to=envelope.sender,
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=json.dumps(
-                        {"status_code": 201, "message": "Response"}
-                    ).encode(),
+                    message=HttpSerializer().encode(message),
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True
@@ -448,10 +521,14 @@ class TestHTTPConnectionPOST:
         agent_task = asyncio.create_task(agent_processing(self.http_connection))
 
         await asyncio.gather(client_task, agent_task)
-        response_code, response_body = client_task.result()
+        response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_code == 201 and response_body == b"Response"
+        assert (
+            response_status_code == 201
+            and response_status_text == "Created"
+            and response_body == b"Response body"
+        )
         assert is_exiting_correctly
 
     @classmethod
