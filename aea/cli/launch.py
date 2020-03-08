@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import List
 
 import click
-from click import pass_context
 
 from aea.cli.common import AgentDirectory, logger
 from aea.cli.run import run
@@ -39,7 +38,7 @@ def _run_agent(click_context, agent_directory: str):
 
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
-@pass_context
+@click.pass_context
 def launch(click_context, agents: List[str]):
     """Launch many agents."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))

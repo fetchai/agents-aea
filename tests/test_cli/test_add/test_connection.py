@@ -376,7 +376,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
 
-        The expected message is: 'Cannot find connection: '{connection_name}''
+        The expected message is: 'Connection configuration file not valid: '{connection_name}''
         """
         self.mocked_logger_error.assert_called_once_with(
             "Connection configuration file not valid: test error message"

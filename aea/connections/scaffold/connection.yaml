@@ -2,7 +2,9 @@ name: scaffold
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
+  connection.py: QmUTc6HEJ7fLrfoLQFy8915HUv78Z8YMuGggPxSPNt66Q7
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
 protocols: []

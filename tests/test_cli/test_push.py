@@ -116,7 +116,7 @@ class TestPushLocalFailsArgumentNotPublicId:
         """Tear the tests down."""
 
 
-@mock.patch("aea.cli.push.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.push._save_item_locally")
 @mock.patch("aea.cli.push.push_item")
 class PushCommandTestCase(TestCase):
@@ -166,7 +166,7 @@ class PushCommandTestCase(TestCase):
         )
 
 
-@mock.patch("aea.cli.push.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 class PushContractCommandTestCase(TestCase):
     """Test that the command 'aea push contract' works as expected."""
 
@@ -179,7 +179,13 @@ class PushContractCommandTestCase(TestCase):
         """Test push contract command positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "contract", "author/name:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "push",
+                "contract",
+                "author/name:0.1.0",
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
@@ -189,7 +195,14 @@ class PushContractCommandTestCase(TestCase):
         """Test push contract to registry command positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "contract", "author/name:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "push",
+                "--registry",
+                "contract",
+                "author/name:0.1.0",
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

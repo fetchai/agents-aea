@@ -273,7 +273,13 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         # generate protocol second time
         cls.generate_result_2 = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "generate",
+                "protocol",
+                cls.path_to_specification,
+            ],
             standalone_mode=False,
         )
 

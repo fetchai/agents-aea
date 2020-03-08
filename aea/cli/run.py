@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import List, cast
 
 import click
-from click import pass_context
 
 from aea import __version__
 from aea.aea import AEA
@@ -37,6 +36,7 @@ from aea.cli.common import (
     Context,
     _load_env_file,
     _verify_or_create_private_keys,
+    check_aea_project,
     logger,
     try_to_load_agent_config,
 )
@@ -270,7 +270,8 @@ def _build_aea(ctx: Context, connection_ids: List[PublicId]) -> AEA:
     default=False,
     help="Install all the dependencies before running the agent.",
 )
-@pass_context
+@click.pass_context
+@check_aea_project
 def run(
     click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
