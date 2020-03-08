@@ -49,6 +49,7 @@ from packages.fetchai.protocols.http.serialization import HttpSerializer
 SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
+SERVER_ERROR = 500
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +125,6 @@ class Request(OpenAPIRequest):
             bodyy=self.body.encode() if self.body is not None else b"",
             version="",
         )
-        print(self.body if self.body is not None else "")
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
@@ -177,9 +177,14 @@ class Response:
         """
         if envelope is not None:
             http_message = cast(HttpMessage, HttpSerializer().decode(envelope.message))
-            response = Response(
-                http_message.status_code, http_message.status_text, http_message.bodyy
-            )
+            if http_message.performative == HttpMessage.Performative.RESPONSE:
+                response = Response(
+                    http_message.status_code,
+                    http_message.status_text,
+                    http_message.bodyy,
+                )
+            else:
+                response = Response(SERVER_ERROR, "Server error")
         else:
             response = Response(REQUEST_TIMEOUT, "Request Timeout")
         return response
@@ -438,7 +443,8 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             self.send_response(response.status_code, response.status_text)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write(response.body)
+            if response.body is not None:
+                self.wfile.write(response.body)
 
     return HTTPHandler
 
