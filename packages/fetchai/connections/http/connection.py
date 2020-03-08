@@ -121,9 +121,10 @@ class Request(OpenAPIRequest):
             method=self.method,
             url=self.full_url_pattern,
             headers=self.parameters.header.as_string(),
-            bodyy=self.body,
+            bodyy=self.body.encode() if self.body is not None else b"",
             version="",
         )
+        print(self.body if self.body is not None else "")
         envelope = Envelope(
             to=agent_address,
             sender=self.id,
@@ -419,10 +420,11 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             )
             response = future.result()
 
-            self.send_response(response.status_code)
+            self.send_response(response.status_code, response.status_text)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write(response.message)
+            if response.body is not None:
+                self.wfile.write(response.body)
 
         def do_POST(self):
             """Respond to a POST request."""
@@ -433,10 +435,10 @@ def HTTPHandlerFactory(channel: HTTPChannel):
             )
             response = future.result()
 
-            self.send_response(response.status_code)
+            self.send_response(response.status_code, response.status_text)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write(response.message)
+            self.wfile.write(response.body)
 
     return HTTPHandler
 

@@ -35,6 +35,8 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http.connection import HTTPConnection
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import ROOT_DIR, get_unused_tcp_port
 
@@ -108,11 +110,18 @@ class TestHTTPConnectionSend:
     async def test_send_connection(self):
         """Test send connection error."""
         client_id = "to_key"
+        message = HttpMessage(
+            performative=HttpMessage.Performative.RESPONSE,
+            target=1,
+            message_id=2,
+            status_code=200,
+            status_text="Sucess",
+        )
         envelope = Envelope(
             to=client_id,
             sender="from_key",
             protocol_id=self.protocol_id,
-            message=b"some message",
+            message=HttpSerializer().encode(message),
         )
         await self.http_connection.send(envelope)
         assert (
@@ -170,7 +179,7 @@ class TestHTTPConnectionGET:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/")
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
         async def client_thread(host, port) -> Tuple[int, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -181,9 +190,9 @@ class TestHTTPConnectionGET:
             )
             return result
 
-        response_code, response_body = await client_thread(self.host, self.port)
+        response_status_code, response_status_text, response_body = await client_thread(self.host, self.port)
 
-        assert response_code == 404 and response_body == b"Request Not Found"
+        assert response_status_code == 404 and response_status_text == "Request Not Found" and response_body == b""
 
     @pytest.mark.asyncio
     async def test_get_408(self):
@@ -193,7 +202,7 @@ class TestHTTPConnectionGET:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/pets")
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
         async def client_thread(host, port) -> Tuple[int, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -221,10 +230,10 @@ class TestHTTPConnectionGET:
         )
 
         await asyncio.gather(client_task, agent_task)
-        response_code, response_body = client_task.result()
+        response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_code == 408 and response_body == b"Request Timeout"
+        assert response_status_code == 408 and response_status_text == "Request Timeout" and response_body == b""
         assert is_exiting_correctly
 
     @pytest.mark.asyncio
@@ -235,7 +244,7 @@ class TestHTTPConnectionGET:
             conn = http.client.HTTPConnection(host, port)
             conn.request("GET", "/pets")
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
         async def client_thread(host, port) -> Tuple[int, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -251,14 +260,25 @@ class TestHTTPConnectionGET:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
+                incoming_message = HttpSerializer().decode(envelope.message)
+                print("HEADERS: " + incoming_message.headers)
+                message = HttpMessage(
+                    performative=HttpMessage.Performative.RESPONSE,
+                    dialogue_reference=("",""),
+                    target=incoming_message.message_id,
+                    message_id=incoming_message.message_id + 1,
+                    version=incoming_message.version,
+                    headers=incoming_message.headers,
+                    status_code=200,
+                    status_text="Sucess",
+                    bodyy=b"Response body"
+                )
                 response_envelope = Envelope(
                     to=envelope.sender,
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=json.dumps(
-                        {"status_code": 200, "message": "Response body"}
-                    ).encode(),
+                    message=HttpSerializer().encode(message),
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True
@@ -270,10 +290,10 @@ class TestHTTPConnectionGET:
         agent_task = asyncio.create_task(agent_processing(self.http_connection))
 
         await asyncio.gather(client_task, agent_task)
-        response_code, response_body = client_task.result()
+        response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_code == 200 and response_body == b"Response body"
+        assert response_status_code == 200 and response_status_text == "Success" and response_body == b"Response body"
         assert is_exiting_correctly
 
     @classmethod
@@ -327,7 +347,7 @@ class TestHTTPConnectionPOST:
             body = "some body"
             conn.request("POST", "/", body)
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
         async def client_thread(host, port):
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -338,9 +358,9 @@ class TestHTTPConnectionPOST:
             )
             return result
 
-        response_code, response_body = await client_thread(self.host, self.port)
+        response_status_code, response_status_text, response_body = await client_thread(self.host, self.port)
 
-        assert response_code == 404 and response_body == b"Request Not Found"
+        assert response_status_code == 404 and response_status_text == "Request Not Found" and response_body == b""
 
     @pytest.mark.asyncio
     async def test_post_408(self):
@@ -351,7 +371,7 @@ class TestHTTPConnectionPOST:
             body = "some body"
             conn.request("POST", "/pets", body)
             response = conn.getresponse()
-            return response.status, response.read()
+            return response.status, response.reason, response.read()
 
         async def client_thread(host, port):
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -379,10 +399,10 @@ class TestHTTPConnectionPOST:
         )
 
         await asyncio.gather(client_task, agent_task)
-        response_code, response_body = client_task.result()
+        response_status_code, response_status_text, response_body = client_task.result()
         is_exiting_correctly = agent_task.result()
 
-        assert response_code == 408 and response_body == b"Request Timeout"
+        assert response_status_code == 408 and response_status_text == "Request Timeout" and response_body == b""
         assert is_exiting_correctly
 
     @pytest.mark.asyncio
