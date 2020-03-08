@@ -219,7 +219,7 @@ class TestHTTPConnectionGET:
 
         async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
                 executor,
                 functools.partial(request_response_cycle, host=host, port=port),
@@ -248,7 +248,7 @@ class TestHTTPConnectionGET:
 
         async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
                 executor,
                 functools.partial(request_response_cycle, host=host, port=port),
@@ -294,7 +294,7 @@ class TestHTTPConnectionGET:
 
         async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
                 executor,
                 functools.partial(request_response_cycle, host=host, port=port),
@@ -478,7 +478,7 @@ class TestHTTPConnectionPOST:
 
         async def client_thread(host, port) -> Tuple[int, str, bytes]:
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
                 executor,
                 functools.partial(request_response_cycle, host=host, port=port),
