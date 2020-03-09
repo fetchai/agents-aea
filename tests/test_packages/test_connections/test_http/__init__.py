@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,12 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the TAC package."""
-
-__title__ = "aea"
-__description__ = "Autonomous Economic Agent framework"
-__url__ = "https://github.com/fetchai/agents-aea.git"
-__version__ = "0.2.2"
-__author__ = "Fetch.AI Limited"
-__license__ = "Apache-2.0"
-__copyright__ = "2019 Fetch.AI Limited"
+"""This module contains the tests of the HTTP connection implementation."""
