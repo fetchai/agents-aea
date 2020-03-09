@@ -37,7 +37,7 @@ from packages.fetchai.connections.http.connection import HTTPConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import ROOT_DIR, get_unused_tcp_port
+from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class TestHTTPConnectionConnectDisconnect:
         """Initialise the class and test connect."""
 
         cls.address = "my_key"
-        cls.host = "127.0.0.1"
+        cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
@@ -86,7 +86,7 @@ class TestHTTPConnectionSend:
         """Initialise the class."""
 
         cls.address = "my_key"
-        cls.host = "127.0.0.1"
+        cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
@@ -182,7 +182,7 @@ class TestHTTPConnectionGET:
         """Initialise the class."""
 
         cls.address = "my_key"
-        cls.host = "127.0.0.1"
+        cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
@@ -365,7 +365,7 @@ class TestHTTPConnectionPOST:
         """Initialise the class."""
 
         cls.address = "my_key"
-        cls.host = "127.0.0.1"
+        cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
@@ -546,7 +546,7 @@ def test_conn_from_config():
     conf.config["api_spec_path"] = os.path.join(
         ROOT_DIR, "tests", "data", "petstore_sim.yaml"
     )
-    conf.config["host"] = "127.0.0.1"
+    conf.config["host"] = get_host()
     conf.config["port"] = get_unused_tcp_port()
     conf.config["restricted_to_protocols"] = set(["fetchai/http:0.1.0"])
     con = HTTPConnection.from_config(address="my_key", connection_configuration=conf)
