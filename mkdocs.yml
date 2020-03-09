@@ -47,6 +47,7 @@ nav:
         - ORM integration: 'orm-integration-to-generic.md'
         - Frontend intergration: 'connect-a-frontend.md'
         - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
+        - HTTP Connection: 'http-connection-and-skill.md'
     - Step by step guides:
         - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
     - Architecture:
