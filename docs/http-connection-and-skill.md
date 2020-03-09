@@ -19,7 +19,7 @@ aea add connection fetchai/http:0.1.0
 3. Modify the `api_spec_path`:
 
 ``` bash
-aea config set agent.api_spec_path == "examples/http_ex/petstore.yaml"
+aea config set vendor.fetchai.connections.http.config.api_spec_path "examples/http_ex/petstore.yaml"
 ```
 
 4. Install the dependencies:
