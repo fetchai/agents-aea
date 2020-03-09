@@ -234,7 +234,7 @@ class ERC1155Contract(Contract):
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 300000,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -280,16 +280,26 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Mint a batch of items."""
         # mint batch
+        for i in range(len(batch_mint_quantities)):
+            decoded_type = Helpers().decode(self.token_ids[i])
+            assert (
+                decoded_type == 1 or decoded_type == 2
+            ), "The prefix type must be 1 or 2."
+            if decoded_type == 1:
+                assert (
+                    batch_mint_quantities[i] == 1
+                ), "Cannot mint NFT with mint_quantity more than 1"
+        data = b"MintingBatch"
         nonce = ledger_api.api.eth.getTransactionCount(
             ledger_api.api.toChecksumAddress(deployer_address)
         )
         nonce += 1
         tx = self.instance.functions.mintBatch(
-            recipient_address, self.token_ids, batch_mint_quantities
+            recipient_address, self.token_ids, batch_mint_quantities, data
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 300000,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -301,7 +311,6 @@ class ERC1155Contract(Contract):
         self,
         deployer_address: Address,
         recipient_address: Address,
-        token_id: int,
         mint_quantity: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
@@ -310,11 +319,10 @@ class ERC1155Contract(Contract):
         tx = self._create_mint_single_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
-            token_id=token_id,
+            token_id=self.game_currency_id,
             mint_quantity=mint_quantity,
             ledger_api=ledger_api,
         )
-
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
@@ -340,13 +348,20 @@ class ERC1155Contract(Contract):
         nonce = ledger_api.api.eth.getTransactionCount(
             ledger_api.api.toChecksumAddress(deployer_address)
         )
-        nonce += 1
+        assert recipient_address is not None
+        decoded_type = Helpers().decode(token_id)
+        assert (
+            decoded_type == 1 or decoded_type == 2
+        ), "The token prefix must be 1 or 2."
+        if decoded_type == 1:
+            assert mint_quantity == 1, "Cannot mint NFT with mint_quantity more than 1"
+        data = b"MintingSingle"
         tx = self.instance.functions.mint(
-            recipient_address, token_id, mint_quantity
+            recipient_address, token_id, mint_quantity, data
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 300000,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -678,3 +693,7 @@ class Helpers:
         """Generate a token id based on the token type and the token_id."""
         final_id_int = (token_type << 128) + token_id
         return final_id_int
+
+    def decode(self, token_id):
+        decoded_type = token_id % 2 ** 128
+        return decoded_type

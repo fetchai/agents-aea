@@ -29,9 +29,9 @@ import numpy as np
 from aea.contracts.ethereum import Contract
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
-TOKEN_TYPE = 1
+TOKEN_TYPE = 2
 GAME_CURRENCY_TYPE = 2
-GAME_CURRENCY_ID = 555
+GAME_CURRENCY_ID = 2
 
 
 def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str]:

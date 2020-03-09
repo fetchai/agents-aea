@@ -294,7 +294,7 @@ def decode_id(id: uint256) -> int128:
     """
     decoded_token_id: int128 = convert(shift(id, -128), int128)
     decoded_index: int128 = convert(id % 2 ** 128, int128)
-    return decoded_token_id
+    return decoded_index
 
 ########################END-PRIVATE-FUNCTIONS################################
 ########################PUBLIC-FUNCTIONS#####################################

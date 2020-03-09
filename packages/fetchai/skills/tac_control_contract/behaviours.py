@@ -112,7 +112,6 @@ class TACBehaviour(Behaviour):
             transaction_message = self._create_items()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
-
         if (
             contract.is_deployed
             and self.context.shared_state["is_items_created"]
@@ -120,7 +119,7 @@ class TACBehaviour(Behaviour):
             and game.phase.value == Phase.PRE_GAME.value
         ):
             self.context.logger.info("Creating the game currency.")
-            transaction_message = self._create_items()
+            transaction_message = self._create_game_currency()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             self.context.shared_state["is_game_currency_created"] = True
         if (
@@ -144,10 +143,19 @@ class TACBehaviour(Behaviour):
                 game.phase = Phase.POST_GAME
                 self._unregister_tac()
             else:
+                self.context.logger.info("Setting Up the TAC game.")
                 game.phase = Phase.GAME_SETUP
-                self._start_tac()
+                # self._start_tac()
+                game.create()
                 self._unregister_tac()
                 game.phase = Phase.GAME
+        elif (
+            game.phase.value == Phase.GAME
+            and parameters.start_time < now < parameters.end_time
+            and self.context.shared_state["can_start"]
+        ):
+            self.context.logger.info("Starting the TAC game.")
+            self._start_tac()
         elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
             self._cancel_tac()
             game.phase = Phase.POST_GAME
@@ -216,7 +224,7 @@ class TACBehaviour(Behaviour):
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
-        game.create()
+        # game.create()
 
         self.context.logger.info(
             "[{}]: Started competition:\n{}".format(

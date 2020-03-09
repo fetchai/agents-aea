@@ -801,13 +801,15 @@ class Game(Model):
         self._configuration.agent_addr_to_name = self.registration.agent_addr_to_name
         self.configuration._check_consistency()
 
-        # MINT items and game currency before generate anything else?
-
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
+
+        # Gives me game currency per address.
         agent_addr_to_money_endowments = generate_money_endowments(
             list(self.configuration.agent_addr_to_name.keys()),
             parameters.money_endowment,
         )
+
+        # Gives me game stock per good id.
         agent_addr_to_good_endowments = generate_good_endowments(
             list(self.configuration.agent_addr_to_name.keys()),
             list(self.configuration.good_id_to_name.keys()),
@@ -815,6 +817,7 @@ class Game(Model):
             parameters.lower_bound_factor,
             parameters.upper_bound_factor,
         )
+
         agent_addr_to_utility_params = generate_utility_params(
             list(self.configuration.agent_addr_to_name.keys()),
             list(self.configuration.good_id_to_name.keys()),

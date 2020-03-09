@@ -335,6 +335,36 @@ class TransactionHandler(Handler):
                 if tx_msg_response.tx_id == "contract_create_currency":
                     self.context.logger.info("Created the currency.")
                     self.context.shared_state["is_game_currency_created"] = True
+                    self._mint_objects()
+                self.context.logger.info(
+                    "Successfully created the items. Transaction hash: {}".format(
+                        transaction.transactionHash.hex()
+                    )
+                )
+        elif tx_msg_response.tx_id == "contract_mint_batch":
+            self.context.logger.info("Sending minting transaction to the ledger!")
+            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+            tx_digest = ledger_api.send_signed_transaction(
+                is_waiting_for_confirmation=True, tx_signed=tx_signed
+            )
+            transaction = ledger_api.get_transaction_status(  # type: ignore
+                tx_digest=tx_digest
+            )
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "The mint command wasn't successful. Aborting."
+                )
+                self.context.logger.info(transaction)
+            else:
+                if (
+                    self.context.shared_state["agents_total_participants"]
+                    == self.context.shared_state["agents_participants_counter"]
+                ):
+                    self.context.logger.info("Can start the game.!")
+                    self.context.shared_state["can_start"] = True
+
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
@@ -348,3 +378,27 @@ class TransactionHandler(Handler):
         :return: None
         """
         pass
+
+    def _mint_objects(self):
+        self.context.logger.info("Minting the items")
+        contract = self.context.contracts.erc1155
+        transaction_message = contract.get_mint_batch_transaction(
+            deployer_address=self.context.agent_address,
+            recipient_address=self.context.agent_address,
+            mint_quantities=[4] * 10,
+            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            skill_callback_id=self.context.skill_id,
+        )
+        self.context.decision_maker_message_queue.put_nowait(transaction_message)
+
+    def _mint_game_currency(self):
+        self.context.logger.info("Minting the game currency")
+        contract = self.context.contracts.erc1155
+        transaction_message = contract.get_mint_single_tx(
+            deployer_address=self.context.agent_address,
+            recipient_address=self.context.agent_address,
+            mint_quantity=200000,
+            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            skill_callback_id=self.context.skill_id,
+        )
+        self.context.decision_maker_message_queue.put_nowait(transaction_message)
