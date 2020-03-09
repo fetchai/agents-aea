@@ -18,11 +18,8 @@
 # ------------------------------------------------------------------------------
 """Settings for operating Registry with CLI."""
 
-import os
-
 
 REGISTRY_API_URL = "http://localhost:8000"
-CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 # we ignore issue B105 because this is not an hard-coded authentication token,
 # but the name of the field in the configuration file.
 AUTH_TOKEN_KEY = "auth_token"  # nosec

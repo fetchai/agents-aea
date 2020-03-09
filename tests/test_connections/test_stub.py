@@ -20,6 +20,7 @@
 """This test module contains the tests for the stub connection."""
 
 import base64
+import os
 import shutil
 import tempfile
 import time
@@ -36,12 +37,13 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 
-class TestStubConnection:
+class TestStubConnectionReception:
     """Test that the stub connection is implemented correctly."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
+        cls.cwd = os.getcwd()
         cls.tmpdir = Path(tempfile.mkdtemp())
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
@@ -54,17 +56,23 @@ class TestStubConnection:
         )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
+        os.chdir(cls.tmpdir)
 
     def test_reception(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         expected_envelope = Envelope(
             to="any",
             sender="any",
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(msg),
         )
-
         encoded_envelope = "{},{},{},{}".format(
             expected_envelope.to,
             expected_envelope.sender,
@@ -72,11 +80,12 @@ class TestStubConnection:
             expected_envelope.message.decode("utf-8"),
         )
         encoded_envelope = encoded_envelope.encode("utf-8")
+
         with open(self.input_file_path, "ab+") as f:
-            f.write(encoded_envelope + b"\n")
+            f.write(encoded_envelope)
             f.flush()
 
-        actual_envelope = self.multiplexer.get(block=True, timeout=2.0)
+        actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope == actual_envelope
 
     def test_reception_fails(self):
@@ -94,10 +103,48 @@ class TestStubConnection:
 
         patch.__exit__()
 
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        except (OSError, IOError):
+            pass
+        cls.multiplexer.disconnect()
+
+
+class TestStubConnectionSending:
+    """Test that the stub connection is implemented correctly."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.tmpdir = Path(tempfile.mkdtemp())
+        d = cls.tmpdir / "test_stub"
+        d.mkdir(parents=True)
+        cls.input_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "input_file.csv"
+
+        connection_id = PublicId("fetchai", "stub", "0.1.0")
+        cls.connection = StubConnection(
+            cls.input_file_path, cls.output_file_path, connection_id=connection_id
+        )
+        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer.connect()
+        os.chdir(cls.tmpdir)
+
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
         assert self.connection.connection_status.is_connected
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         encoded_envelope = "{},{},{},{}".format(
             "any",
             "any",
@@ -120,7 +167,13 @@ class TestStubConnection:
 
     def test_send_message(self):
         """Test that the messages in the outbox are posted on the output file."""
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         expected_envelope = Envelope(
             to="any",
             sender="any",
@@ -134,8 +187,8 @@ class TestStubConnection:
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
 
-        assert len(lines) == 1
-        line = lines[0]
+        assert len(lines) == 2
+        line = lines[0] + lines[1]
         to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
@@ -149,7 +202,11 @@ class TestStubConnection:
     @classmethod
     def teardown_class(cls):
         """Tear down the test."""
-        shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+        except (OSError, IOError):
+            pass
         cls.multiplexer.disconnect()
 
 

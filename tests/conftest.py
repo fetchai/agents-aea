@@ -40,6 +40,8 @@ from oef.agents import AsyncioCore, OEFAgent
 import pytest
 
 from aea import AEA_DIR
+from aea.cli.common import _init_cli_config
+from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -57,6 +59,7 @@ CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ign
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
+AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
 AGENT_CONFIGURATION_SCHEMA = os.path.join(
     CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json"
@@ -78,7 +81,7 @@ UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
-P2P_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p", "0.1.0")
+P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = PublicId("fetchai", "stub", "0.1.0")
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -528,3 +531,23 @@ def get_unused_tcp_port():
     port = s.getsockname()[1]
     s.close()
     return port
+
+
+def get_host():
+    """Get the host."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(("10.255.255.255", 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = "127.0.0.1"
+    finally:
+        s.close()
+    return IP
+
+
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config."""
+    _init_cli_config()

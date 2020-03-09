@@ -91,7 +91,13 @@ class TestTCPCommunication:
 
     def test_communication_client_server(self):
         """Test that envelopes can be sent from a client to a server."""
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         msg_bytes = DefaultSerializer().encode(msg)
         expected_envelope = Envelope(
             to=self.server_addr,
@@ -106,7 +112,13 @@ class TestTCPCommunication:
 
     def test_communication_server_client(self):
         """Test that envelopes can be sent from a server to a client."""
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
         msg_bytes = DefaultSerializer().encode(msg)
 
         expected_envelope = Envelope(

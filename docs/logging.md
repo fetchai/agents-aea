@@ -13,7 +13,7 @@ cd my_aea
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.2.1
+aea_version: 0.2.2
 agent_name: my_aea
 author: ''
 connections:
@@ -45,7 +45,7 @@ you'll find the definition of the configuration dictionary schema.
 
 Below is an example of the `logging_config` value.
 
-```yaml
+``` yaml
 logging_config:
   version: 1
   disable_existing_loggers: False

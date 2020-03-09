@@ -143,13 +143,11 @@ class StubConnection(Connection):
         """Receive new envelopes, if any."""
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
+        lines = b""
         while len(line) > 0:
-            # If the line is the last line of the file, then it doesn't have a \n on the end
-            if line[-1:] == b"\n":
-                self._process_line(line[:-1])
-            else:
-                self._process_line(line)  # pragma: no cover
+            lines += line
             line = self.input_file.readline()
+        self._process_line(lines)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
@@ -221,7 +219,7 @@ class StubConnection(Connection):
         """
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
-        self.output_file.write(encoded_envelope + b"\n")
+        self.output_file.write(encoded_envelope)
         self.output_file.flush()
 
     @classmethod

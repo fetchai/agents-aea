@@ -30,7 +30,7 @@ import aea.cli.common
 from aea.cli import cli
 
 from ..common.click_testing import CliRunner
-from ..conftest import CLI_LOG_OPTION
+from ..conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class TestDelete:
@@ -44,6 +44,7 @@ class TestDelete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
 
         cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
@@ -117,6 +118,9 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -181,7 +185,7 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
 
         The expected message is: 'Directory already exist. Aborting...'
         """
-        s = "The name provided is not an AEA project."
+        s = "The name provided is not a path to an AEA project."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

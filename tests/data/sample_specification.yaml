@@ -19,3 +19,10 @@ speech_acts:
   accept: {}
   decline: {}
   match_accept: {}
+---
+ct:DataModel: |
+  bytes data_model = 1;
+ct:IOTApp7: |
+  bytes iot_app_7 = 1;
+ct:Unit: |
+  bytes unit = 1;

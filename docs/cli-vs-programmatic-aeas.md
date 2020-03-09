@@ -11,7 +11,7 @@ The buyer of weather data (managed programmatically).
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-##Discussion
+## Discussion
 
 The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
 to achieve this we are going to use the weather station skills. 
@@ -26,7 +26,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for the entire demo.
 
-## Demo instructions:
+## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>
 
@@ -64,24 +64,18 @@ import time
 from threading import Thread
 from typing import cast
 
-import yaml
-
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig, PublicId
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.serialization import OEFSerializer
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
 HOST = "127.0.0.1"
@@ -112,67 +106,20 @@ def run():
     )
 
     # Add the default protocol (which is part of the AEA distribution)
-    default_protocol_configuration = ProtocolConfig.from_json(
-        yaml.safe_load(
-            open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))
-        )
-    )
-    default_protocol = Protocol(
-        PublicId.from_str("fetchai/default:0.1.0"),
-        DefaultSerializer(),
-        default_protocol_configuration,
-    )
-    resources.protocol_registry.register(
-        PublicId.from_str("fetchai/default:0.1.0"), default_protocol
-    )
+    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
+    resources.add_protocol(default_protocol)
 
     # Add the oef protocol (which is a package)
-    oef_protocol_configuration = ProtocolConfig.from_json(
-        yaml.safe_load(
-            open(
-                os.path.join(
-                    os.getcwd(),
-                    "packages",
-                    "fetchai",
-                    "protocols",
-                    "oef",
-                    "protocol.yaml",
-                )
-            )
-        )
+    oef_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef",)
     )
-    oef_protocol = Protocol(
-        PublicId.from_str("fetchai/oef:0.1.0"),
-        OEFSerializer(),
-        oef_protocol_configuration,
-    )
-    resources.protocol_registry.register(
-        PublicId.from_str("fetchai/oef:0.1.0"), oef_protocol
-    )
+    resources.add_protocol(oef_protocol)
 
     # Add the fipa protocol (which is a package)
-    fipa_protocol_configuration = ProtocolConfig.from_json(
-        yaml.safe_load(
-            open(
-                os.path.join(
-                    ROOT_DIR,
-                    "packages",
-                    "fetchai",
-                    "protocols",
-                    "fipa",
-                    "protocol.yaml",
-                )
-            )
-        )
+    fipa_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
     )
-    fipa_protocol = Protocol(
-        PublicId.from_str("fetchai/fipa:0.1.0"),
-        FIPASerializer(),
-        fipa_protocol_configuration,
-    )
-    resources.protocol_registry.register(
-        PublicId.from_str("fetchai/fipa:0.1.0"), fipa_protocol
-    )
+    resources.add_protocol(fipa_protocol)
 
     # Add the error and weather_station skills
     error_skill = Skill.from_dir(

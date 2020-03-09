@@ -36,7 +36,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 from ...common.click_testing import CliRunner
-from ...conftest import CLI_LOG_OPTION
+from ...conftest import AUTHOR, CLI_LOG_OPTION
 
 
 def _read_tty(pid: subprocess.Popen):
@@ -79,6 +79,11 @@ class TestWeatherSkillsFetchaiLedger:
         scripts_src = os.path.join(self.cwd, "scripts")
         scripts_dst = os.path.join(self.t, "scripts")
         shutil.copytree(scripts_src, scripts_dst)
+
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(

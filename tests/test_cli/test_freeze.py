@@ -21,6 +21,8 @@
 
 import json
 import os
+import shutil
+import tempfile
 from pathlib import Path
 
 import jsonschema
@@ -49,10 +51,12 @@ class TestFreeze:
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "freeze"], standalone_mode=False
         )
@@ -69,3 +73,7 @@ class TestFreeze:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

@@ -20,6 +20,7 @@
 """This test module contains the tests for the `aea install` sub-command."""
 
 import os
+import shutil
 import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
@@ -32,7 +33,7 @@ from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 
 from ..common.click_testing import CliRunner
-from ..conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
 class TestInstall:
@@ -41,9 +42,12 @@ class TestInstall:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
         )
@@ -56,6 +60,10 @@ class TestInstall:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestInstallFromRequirementFile:
@@ -64,9 +72,12 @@ class TestInstallFromRequirementFile:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
 
         cls.result = cls.runner.invoke(
             cli,
@@ -82,6 +93,10 @@ class TestInstallFromRequirementFile:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestInstallFailsWhenDependencyDoesNotExist:
@@ -99,6 +114,9 @@ class TestInstallFailsWhenDependencyDoesNotExist:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -138,6 +156,10 @@ class TestInstallFailsWhenDependencyDoesNotExist:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestInstallWithRequirementFailsWhenFileIsBad:
@@ -146,9 +168,12 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        cls.runner = CliRunner()
+        os.chdir(Path(cls.t, "dummy_aea"))
 
         cls.result = cls.runner.invoke(
             cli,
@@ -164,6 +189,10 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 @mock.patch("aea.cli.install.subprocess.Popen")

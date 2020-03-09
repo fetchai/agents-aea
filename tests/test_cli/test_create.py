@@ -45,6 +45,7 @@ from aea.configurations.loader import ConfigLoader
 from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
+    AUTHOR,
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
@@ -68,6 +69,9 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -118,7 +122,7 @@ class TestCreate:
 
     def test_authors_field_is_empty_string(self):
         """Check that the 'authors' field in the config file is the empty string."""
-        assert self.agent_config["author"] == aea.cli.common.DEFAULT_AUTHOR
+        assert self.agent_config["author"] == AUTHOR
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
@@ -271,6 +275,9 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -317,6 +324,9 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
@@ -356,6 +366,8 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
@@ -395,6 +407,9 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        assert result.exit_code == 0
+
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )

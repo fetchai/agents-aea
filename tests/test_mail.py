@@ -58,6 +58,13 @@ def test_uri():
     assert uri.password == "pwd"
 
 
+def test_uri_eq():
+    """Testing the uri __eq__ function."""
+    uri_raw = "http://user:pwd@NetLoc:80/path;param?query=arg#frag"
+    uri = URI(uri_raw=uri_raw)
+    assert uri == uri
+
+
 def test_envelope_initialisation():
     """Testing the envelope initialisation."""
     msg = Message(content="hello")
@@ -87,6 +94,7 @@ def test_envelope_initialisation():
         envelope.protocol_id == "my_changed_protocol"
     ), "Cannot set protocol_id on Envelope "
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
+    assert envelope.context.uri_raw is not None
 
 
 def test_inbox_empty():
@@ -163,7 +171,13 @@ def test_inbox_get_nowait_returns_none():
 
 def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
         [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
@@ -185,7 +199,13 @@ def test_outbox_put():
 
 def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg = DefaultMessage(
+        dialogue_reference=("", ""),
+        message_id=1,
+        target=0,
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"hello",
+    )
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
         [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]

@@ -153,9 +153,9 @@ class TrainHandler(Handler):
                     ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
                 )
             )
-            # training_task = MLTrainTask(data, self.context.model)
+            # training_task = MLTrainTask(data, self.context.ml_model)
             # self.context.task_manager.enqueue_task(training_task)
-            self.context.model.update(data[0], data[1], 5)
+            self.context.ml_model.update(data[0], data[1], 5)
             self.context.strategy.is_searching = True
 
     def teardown(self) -> None:

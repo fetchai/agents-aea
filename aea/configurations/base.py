@@ -583,6 +583,19 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["disable_existing_loggers"] = False
 
     @property
+    def private_key_paths_dict(self) -> Dict[str, str]:
+        """Dictionary version of private key paths."""
+        return {key: path for key, path in self.private_key_paths.read_all()}
+
+    @property
+    def ledger_apis_dict(self) -> Dict[str, Dict[str, Union[str, int]]]:
+        """Dictionary version of ledger apis."""
+        return {
+            cast(str, key): cast(Dict[str, Union[str, int]], config)
+            for key, config in self.ledger_apis.read_all()
+        }
+
+    @property
     def default_connection(self) -> str:
         """Get the default connection."""
         assert self._default_connection is not None, "Default connection not set yet."
@@ -631,10 +644,8 @@ class AgentConfig(PackageConfiguration):
             "fingerprint": self.fingerprint,
             "registry_path": self.registry_path,
             "description": self.description,
-            "private_key_paths": {
-                key: path for key, path in self.private_key_paths.read_all()
-            },
-            "ledger_apis": {key: config for key, config in self.ledger_apis.read_all()},
+            "private_key_paths": self.private_key_paths_dict,
+            "ledger_apis": self.ledger_apis_dict,
             "logging_config": self.logging_config,
             "default_ledger": self.default_ledger,
             "default_connection": self.default_connection,
@@ -732,6 +743,17 @@ class ProtocolSpecification(ProtocolConfig):
         """Initialize a protocol specification configuration object."""
         super().__init__(name, author, version, license, description=description)
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
+        self._protobuf_snippets = None  # type: Optional[Dict]
+
+    @property
+    def protobuf_snippets(self) -> Optional[Dict]:
+        """Get the protobuf snippets."""
+        return self._protobuf_snippets
+
+    @protobuf_snippets.setter
+    def protobuf_snippets(self, protobuf_snippets: Optional[Dict]):
+        """Set the protobuf snippets."""
+        self._protobuf_snippets = protobuf_snippets
 
     @property
     def json(self) -> Dict:

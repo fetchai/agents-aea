@@ -11,11 +11,13 @@
 | `fetch PUBLIC_ID`                           | Fetch an aea project with `[public_id]`. `fetch --registry` to fetch from remote registry. |
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
 | `gui`                                       | Run the GUI.                                                                 |
-| `generate-key fetchai/ethereum/all`         | Generate private keys.                                                       |
+| `generate-key fetchai/ethereum/all`         | Generate private keys. The AEA uses a private key to derive the associated public key and address. |
 | `generate-wealth fetchai/ethereum`          | Generate wealth for address on test network.                                 |
 | `get-address fetchai/ethereum`              | Get the address associated with the private key.                             |
 | `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
+| `init`                                      | Initialize your AEA configurations. (With `--author` to define author.)      |
+| `launch [path_to_agent_project]...`         | Launch many agents.                                                          |
 | `list protocols/connections/skills`         | List the installed resources.                                                |
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --registry` to publish to remote registry. |
