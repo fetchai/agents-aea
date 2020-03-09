@@ -69,6 +69,7 @@ class TwoPartyNegotiationSerializer(Serializer):
             query = msg.query
             performative.query = query
             if msg.is_set("proposal"):
+                performative.proposal_is_set = True
                 proposal = msg.proposal
                 performative.proposal.update(proposal)
             rounds = msg.rounds
@@ -76,19 +77,23 @@ class TwoPartyNegotiationSerializer(Serializer):
             items = msg.items
             performative.items.extend(items)
             if msg.is_set("conditions_type_str"):
+                performative.conditions_type_str_is_set = True
                 conditions_type_str = msg.conditions_type_str
                 performative.conditions_type_str = conditions_type_str
             if msg.is_set("conditions_type_dict_of_str_int"):
+                performative.conditions_type_dict_of_str_int_is_set = True
                 conditions_type_dict_of_str_int = msg.conditions_type_dict_of_str_int
                 performative.conditions_type_dict_of_str_int.update(
                     conditions_type_dict_of_str_int
                 )
-            if msg.is_set("conditions_type_set_of_DataModel"):
-                conditions_type_set_of_DataModel = msg.conditions_type_set_of_DataModel
-                performative.conditions_type_set_of_DataModel.extend(
-                    conditions_type_set_of_DataModel
+            if msg.is_set("conditions_type_set_of_str"):
+                performative.conditions_type_set_of_str_is_set = True
+                conditions_type_set_of_str = msg.conditions_type_set_of_str
+                performative.conditions_type_set_of_str.extend(
+                    conditions_type_set_of_str
                 )
             if msg.is_set("conditions_type_dict_of_str_float"):
+                performative.conditions_type_dict_of_str_float_is_set = True
                 conditions_type_dict_of_str_float = (
                     msg.conditions_type_dict_of_str_float
                 )
@@ -96,6 +101,21 @@ class TwoPartyNegotiationSerializer(Serializer):
                     conditions_type_dict_of_str_float
                 )
             two_party_negotiation_msg.propose.CopyFrom(performative)
+        elif performative_id == TwoPartyNegotiationMessage.Performative.REQUEST:
+            performative = two_party_negotiation_pb2.TwoPartyNegotiationMessage.Request()  # type: ignore
+            method = msg.method
+            performative.method = method
+            url = msg.url
+            performative.url = url
+            version = msg.version
+            performative.version = version
+            headers = msg.headers
+            performative.headers = headers
+            if msg.is_set("bodyy"):
+                performative.bodyy_is_set = True
+                bodyy = msg.bodyy
+                performative.bodyy = bodyy
+            two_party_negotiation_msg.request.CopyFrom(performative)
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             performative = two_party_negotiation_pb2.TwoPartyNegotiationMessage.Accept()  # type: ignore
             two_party_negotiation_msg.accept.CopyFrom(performative)
@@ -156,7 +176,7 @@ class TwoPartyNegotiationSerializer(Serializer):
             performative_content["flag"] = flag
             query = two_party_negotiation_pb.propose.query
             performative_content["query"] = query
-            if two_party_negotiation_pb.propose.HasField("proposal"):
+            if two_party_negotiation_pb.propose.proposal_is_set:
                 proposal = two_party_negotiation_pb.propose.proposal
                 proposal_dict = dict(proposal)
                 performative_content["proposal"] = proposal_dict
@@ -166,27 +186,35 @@ class TwoPartyNegotiationSerializer(Serializer):
             items = two_party_negotiation_pb.propose.items
             items_tuple = tuple(items)
             performative_content["items"] = items_tuple
-            if two_party_negotiation_pb.propose.HasField("conditions_type_str"):
+            if two_party_negotiation_pb.propose.conditions_type_str_is_set:
                 conditions = two_party_negotiation_pb.propose.conditions_type_str
                 performative_content["conditions"] = conditions
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_int"
-            ):
+            if two_party_negotiation_pb.propose.conditions_type_dict_of_str_int_is_set:
                 conditions = two_party_negotiation_pb.propose.conditions
                 conditions_dict = dict(conditions)
                 performative_content["conditions"] = conditions_dict
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_set_of_DataModel"
-            ):
+            if two_party_negotiation_pb.propose.conditions_type_set_of_str_is_set:
                 conditions = two_party_negotiation_pb.propose.conditions
                 conditions_frozenset = frozenset(conditions)
                 performative_content["conditions"] = conditions_frozenset
-            if two_party_negotiation_pb.propose.HasField(
-                "conditions_type_dict_of_str_float"
+            if (
+                two_party_negotiation_pb.propose.conditions_type_dict_of_str_float_is_set
             ):
                 conditions = two_party_negotiation_pb.propose.conditions
                 conditions_dict = dict(conditions)
                 performative_content["conditions"] = conditions_dict
+        elif performative_id == TwoPartyNegotiationMessage.Performative.REQUEST:
+            method = two_party_negotiation_pb.request.method
+            performative_content["method"] = method
+            url = two_party_negotiation_pb.request.url
+            performative_content["url"] = url
+            version = two_party_negotiation_pb.request.version
+            performative_content["version"] = version
+            headers = two_party_negotiation_pb.request.headers
+            performative_content["headers"] = headers
+            if two_party_negotiation_pb.request.bodyy_is_set:
+                bodyy = two_party_negotiation_pb.request.bodyy
+                performative_content["bodyy"] = bodyy
         elif performative_id == TwoPartyNegotiationMessage.Performative.ACCEPT:
             pass
         elif performative_id == TwoPartyNegotiationMessage.Performative.INFORM:

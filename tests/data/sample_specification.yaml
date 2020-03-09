@@ -16,6 +16,16 @@ speech_acts:
     rounds: pt:set[pt:int]
     items: pt:list[ct:Unit]
     conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:str, pt:float]]]
+  request:
+    method: pt:str
+    url: pt:str
+    version: pt:str
+    headers: pt:str
+    bodyy: pt:optional[pt:bytes]
+  inform:
+      inform_number: pt:list[pt:int]
+  inform_reply:
+      reply_message: pt:dict[pt:int, pt:str]
   accept: {}
   decline: {}
   match_accept: {}

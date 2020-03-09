@@ -25,12 +25,6 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from tests.data.generator.two_party_negotiation.models import (
-    DataModel,
-    IOTApp7,
-    Unit,
-)
-
 DEFAULT_BODY_SIZE = 4
 
 
@@ -49,6 +43,7 @@ class TwoPartyNegotiationMessage(Message):
         INFORM_REPLY = "inform_reply"
         MATCH_ACCEPT = "match_accept"
         PROPOSE = "propose"
+        REQUEST = "request"
 
         def __str__(self):
             """Get the string representation."""
@@ -85,6 +80,7 @@ class TwoPartyNegotiationMessage(Message):
             "inform_reply",
             "match_accept",
             "propose",
+            "request",
         }
         assert (
             self._is_consistent()
@@ -120,15 +116,19 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
+    def bodyy(self) -> Optional[bytes]:
+        """Get the 'bodyy' content from the message."""
+        assert self.is_set("bodyy"), "'bodyy' content is not set."
+        return cast(Optional[bytes], self.get("bodyy"))
+
+    @property
     def conditions(
         self,
-    ) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]]:
+    ) -> Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]]:
         """Get the 'conditions' content from the message."""
         assert self.is_set("conditions"), "'conditions' content is not set."
         return cast(
-            Optional[
-                Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]
-            ],
+            Optional[Union[str, Dict[str, int], FrozenSet[str], Dict[str, float]]],
             self.get("conditions"),
         )
 
@@ -145,16 +145,28 @@ class TwoPartyNegotiationMessage(Message):
         return cast(bool, self.get("flag"))
 
     @property
+    def headers(self) -> str:
+        """Get the 'headers' content from the message."""
+        assert self.is_set("headers"), "'headers' content is not set."
+        return cast(str, self.get("headers"))
+
+    @property
     def inform_number(self) -> Tuple[int, ...]:
         """Get the 'inform_number' content from the message."""
         assert self.is_set("inform_number"), "'inform_number' content is not set."
         return cast(Tuple[int, ...], self.get("inform_number"))
 
     @property
-    def items(self) -> Tuple[Unit, ...]:
+    def items(self) -> Tuple[str, ...]:
         """Get the 'items' content from the message."""
         assert self.is_set("items"), "'items' content is not set."
-        return cast(Tuple[Unit, ...], self.get("items"))
+        return cast(Tuple[str, ...], self.get("items"))
+
+    @property
+    def method(self) -> str:
+        """Get the 'method' content from the message."""
+        assert self.is_set("method"), "'method' content is not set."
+        return cast(str, self.get("method"))
 
     @property
     def number(self) -> int:
@@ -169,16 +181,16 @@ class TwoPartyNegotiationMessage(Message):
         return cast(float, self.get("price"))
 
     @property
-    def proposal(self) -> Optional[Dict[str, IOTApp7]]:
+    def proposal(self) -> Optional[Dict[str, str]]:
         """Get the 'proposal' content from the message."""
         assert self.is_set("proposal"), "'proposal' content is not set."
-        return cast(Optional[Dict[str, IOTApp7]], self.get("proposal"))
+        return cast(Optional[Dict[str, str]], self.get("proposal"))
 
     @property
-    def query(self) -> DataModel:
+    def query(self) -> str:
         """Get the 'query' content from the message."""
         assert self.is_set("query"), "'query' content is not set."
-        return cast(DataModel, self.get("query"))
+        return cast(str, self.get("query"))
 
     @property
     def reply_message(self) -> Dict[int, str]:
@@ -191,6 +203,18 @@ class TwoPartyNegotiationMessage(Message):
         """Get the 'rounds' content from the message."""
         assert self.is_set("rounds"), "'rounds' content is not set."
         return cast(FrozenSet[int], self.get("rounds"))
+
+    @property
+    def url(self) -> str:
+        """Get the 'url' content from the message."""
+        assert self.is_set("url"), "'url' content is not set."
+        return cast(str, self.get("url"))
+
+    @property
+    def version(self) -> str:
+        """Get the 'version' content from the message."""
+        assert self.is_set("version"), "'version' content is not set."
+        return cast(str, self.get("version"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
@@ -220,11 +244,9 @@ class TwoPartyNegotiationMessage(Message):
             expected_nb_of_contents = 0
             if self.performative == TwoPartyNegotiationMessage.Performative.CFP:
                 expected_nb_of_contents = 1
-                assert (
-                    type(self.query) == DataModel
-                ), "Content 'query' is not of type 'DataModel'."
+                assert type(self.query) == str, "Content 'query' is not of type 'str'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.PROPOSE:
-                expected_nb_of_contents = 9
+                expected_nb_of_contents = 7
                 assert (
                     type(self.number) == int
                 ), "Content 'number' is not of type 'int'."
@@ -235,10 +257,9 @@ class TwoPartyNegotiationMessage(Message):
                     type(self.description) == str
                 ), "Content 'description' is not of type 'str'."
                 assert type(self.flag) == bool, "Content 'flag' is not of type 'bool'."
-                assert (
-                    type(self.query) == DataModel
-                ), "Content 'query' is not of type 'DataModel'."
+                assert type(self.query) == str, "Content 'query' is not of type 'str'."
                 if self.is_set("proposal"):
+                    expected_nb_of_contents += 1
                     assert (
                         type(self.proposal) == dict
                     ), "Content 'proposal' is not of type 'dict'."
@@ -247,8 +268,8 @@ class TwoPartyNegotiationMessage(Message):
                             type(key) == str
                         ), "Keys of 'proposal' dictionary are not of type 'str'."
                         assert (
-                            type(value) == IOTApp7
-                        ), "Values of 'proposal' dictionary are not of type 'IOTApp7'."
+                            type(value) == str
+                        ), "Values of 'proposal' dictionary are not of type 'str'."
                 assert (
                     type(self.rounds) == frozenset
                 ), "Content 'rounds' is not of type 'frozenset'."
@@ -259,9 +280,10 @@ class TwoPartyNegotiationMessage(Message):
                     type(self.items) == tuple
                 ), "Content 'items' is not of type 'tuple'."
                 assert all(
-                    type(element) == Unit for element in self.items
-                ), "Elements of the content 'items' are not of type 'Unit'."
+                    type(element) == str for element in self.items
+                ), "Elements of the content 'items' are not of type 'str'."
                 if self.is_set("conditions"):
+                    expected_nb_of_contents += 1
                     assert (
                         type(self.conditions) == dict
                         or type(self.conditions) == frozenset
@@ -269,13 +291,30 @@ class TwoPartyNegotiationMessage(Message):
                     ), "Content 'conditions' should be either of the following types: ['dict', 'frozenset', 'str']."
                     if type(self.conditions) == frozenset:
                         assert all(
-                            type(element) == DataModel for element in self.conditions
-                        ), "Elements of the content 'conditions' should be of type 'DataModel'."
+                            type(element) == str for element in self.conditions
+                        ), "Elements of the content 'conditions' should be of type 'str'."
                     if type(self.conditions) == dict:
                         for key, value in self.conditions.items():
                             assert (
                                 type(key) == str and type(value) == float
                             ), "The type of keys and values of 'conditions' dictionary must be 'str' and 'float' respectively."
+            elif self.performative == TwoPartyNegotiationMessage.Performative.REQUEST:
+                expected_nb_of_contents = 4
+                assert (
+                    type(self.method) == str
+                ), "Content 'method' is not of type 'str'."
+                assert type(self.url) == str, "Content 'url' is not of type 'str'."
+                assert (
+                    type(self.version) == str
+                ), "Content 'version' is not of type 'str'."
+                assert (
+                    type(self.headers) == str
+                ), "Content 'headers' is not of type 'str'."
+                if self.is_set("bodyy"):
+                    expected_nb_of_contents += 1
+                    assert (
+                        type(self.bodyy) == bytes
+                    ), "Content 'bodyy' is not of type 'bytes'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.INFORM:
