@@ -20,17 +20,13 @@
 
 """This module contains the helpers methods for the controller agent."""
 
-import collections
 import math
 import random
 from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
-from web3 import Web3
-
 from aea.contracts.ethereum import Contract
-from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 TOKEN_TYPE = 1
@@ -277,99 +273,3 @@ def _recover_uid(good_id) -> int:
     """
     uid = int(good_id.split("_")[-2])
     return uid
-
-
-def _get_hash(
-    tx_sender_addr: Address,
-    tx_counterparty_addr: Address,
-    good_ids: List[int],
-    sender_supplied_quantities: List[int],
-    counterparty_supplied_quantities: List[int],
-    tx_amount: int,
-    tx_nonce: int,
-) -> bytes:
-    """
-    Generate a hash from transaction information.
-
-    :param tx_sender_addr: the sender address
-    :param tx_counterparty_addr: the counterparty address
-    :param good_ids: the list of good ids
-    :param sender_supplied_quantities: the quantities supplied by the sender (must all be positive)
-    :param counterparty_supplied_quantities: the quantities supplied by the counterparty (must all be positive)
-    :param tx_amount: the amount of the transaction
-    :param tx_nonce: the nonce of the transaction
-    :return: the hash
-    """
-    aggregate_hash = Web3.keccak(
-        b"".join(
-            [
-                good_ids[0].to_bytes(32, "big"),
-                sender_supplied_quantities[0].to_bytes(32, "big"),
-                counterparty_supplied_quantities[0].to_bytes(32, "big"),
-            ]
-        )
-    )
-    for i in range(len(good_ids)):
-        if not i == 0:
-            aggregate_hash = Web3.keccak(
-                b"".join(
-                    [
-                        aggregate_hash,
-                        good_ids[i].to_bytes(32, "big"),
-                        sender_supplied_quantities[i].to_bytes(32, "big"),
-                        counterparty_supplied_quantities[i].to_bytes(32, "big"),
-                    ]
-                )
-            )
-
-    m_list = []  # type: List[bytes]
-    m_list.append(tx_sender_addr.encode("utf-8"))
-    m_list.append(tx_counterparty_addr.encode("utf-8"))
-    m_list.append(aggregate_hash)
-    m_list.append(tx_amount.to_bytes(32, "big"))
-    m_list.append(tx_nonce.to_bytes(32, "big"))
-    return Web3.keccak(b"".join(m_list))
-
-
-def tx_hash_from_values(
-    tx_sender_addr: str,
-    tx_counterparty_addr: str,
-    tx_quantities_by_good_id: Dict[str, int],
-    tx_amount_by_currency_id: Dict[str, int],
-    tx_nonce: int,
-) -> bytes:
-    """
-    Get the hash for a transaction based on the transaction message.
-
-    :param tx_message: the transaction message
-    :return: the hash
-    """
-    converted = {
-        _recover_uid(good_id): quantity
-        for good_id, quantity in tx_quantities_by_good_id.items()
-    }
-    ordered = collections.OrderedDict(sorted(converted.items()))
-    good_uids = []  # type: List[int]
-    sender_supplied_quantities = []  # type: List[int]
-    counterparty_supplied_quantities = []  # type: List[int]
-    for good_uid, quantity in ordered.items():
-        good_uids.append(good_uid)
-        if quantity >= 0:
-            sender_supplied_quantities.append(quantity)
-            counterparty_supplied_quantities.append(0)
-        else:
-            sender_supplied_quantities.append(0)
-            counterparty_supplied_quantities.append(-quantity)
-    assert len(tx_amount_by_currency_id) == 1
-    for amount in tx_amount_by_currency_id.values():
-        tx_amount = amount if amount >= 0 else 0
-    tx_hash = _get_hash(
-        tx_sender_addr=tx_sender_addr,
-        tx_counterparty_addr=tx_counterparty_addr,
-        good_ids=good_uids,
-        sender_supplied_quantities=sender_supplied_quantities,
-        counterparty_supplied_quantities=counterparty_supplied_quantities,
-        tx_amount=tx_amount,
-        tx_nonce=tx_nonce,
-    )
-    return tx_hash

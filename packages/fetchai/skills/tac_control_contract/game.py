@@ -26,11 +26,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
-from eth_account.messages import encode_defunct
-
 from aea.contracts.ethereum import Contract
-from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import ETHEREUM
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
@@ -47,7 +43,6 @@ from packages.fetchai.skills.tac_control_contract.helpers import (
     generate_good_id_to_name,
     generate_money_endowments,
     generate_utility_params,
-    tx_hash_from_values,
 )
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
@@ -349,34 +344,6 @@ class Transaction:
         return self._sender_addr if self.is_sender_buyer else self._counterparty_addr
 
     @property
-    def sender_hash(self) -> bytes:
-        """Get the sender hash."""
-        return tx_hash_from_values(
-            tx_sender_addr=self.sender_addr,
-            tx_counterparty_addr=self.counterparty_addr,
-            tx_quantities_by_good_id=self.quantities_by_good_id,
-            tx_amount_by_currency_id=self.amount_by_currency_id,
-            tx_nonce=self.nonce,
-        )
-
-    @property
-    def counterparty_hash(self) -> bytes:
-        """Get the sender hash."""
-        return tx_hash_from_values(
-            tx_sender_addr=self.counterparty_addr,
-            tx_counterparty_addr=self.sender_addr,
-            tx_quantities_by_good_id={
-                good_id: -quantity
-                for good_id, quantity in self.quantities_by_good_id.items()
-            },
-            tx_amount_by_currency_id={
-                currency_id: -amount
-                for currency_id, amount in self.amount_by_currency_id.items()
-            },
-            tx_nonce=self.nonce,
-        )
-
-    @property
     def amount(self) -> int:
         """Get the amount."""
         return list(self.amount_by_currency_id.values())[0]
@@ -427,30 +394,6 @@ class Transaction:
             assert (
                 self.counterparty_amount >= 0
             ), "Counterparty_amount must be positive when the counterpary is the payment receiver."
-
-    def has_matching_signatures(self, api: LedgerApi) -> bool:
-        """
-        Check that the signatures match the terms of trade.
-
-        :return: True if the transaction has been signed by both parties
-        """
-        singable_message = encode_defunct(primitive=self.sender_hash)
-        result = (
-            api.api.eth.account.recover_message(
-                signable_message=singable_message, signature=self.sender_signature
-            )
-            == self.sender_addr
-        )
-        counterparty_signable_message = encode_defunct(primitive=self.counterparty_hash)
-        result = (
-            result
-            and api.api.eth.account.recover_message(
-                signable_message=counterparty_signable_message,
-                signature=self.counterparty_signature,
-            )
-            == self.counterparty_addr
-        )
-        return result
 
     @classmethod
     def from_message(cls, message: TACMessage) -> "Transaction":
@@ -857,6 +800,9 @@ class Game(Model):
         self._configuration = self.context.configuration
         self._configuration.agent_addr_to_name = self.registration.agent_addr_to_name
         self.configuration._check_consistency()
+
+        # MINT items and game currency before generate anything else?
+
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
         agent_addr_to_money_endowments = generate_money_endowments(
             list(self.configuration.agent_addr_to_name.keys()),
@@ -984,42 +930,3 @@ class Game(Model):
             )
         result = result + "\n"
         return result
-
-    def is_transaction_valid(self, tx: Transaction) -> bool:
-        """
-        Check whether the transaction is signed correctly and valid given the state of the game.
-
-        :param tx: the transaction.
-        :return: True if the transaction is valid, False otherwise.
-        :raises: AssertionError: if the data in the transaction are not allowed (e.g. negative amount).
-        """
-        sender_state = self.current_agent_states[tx.sender_addr]
-        counterparty_state = self.current_agent_states[tx.counterparty_addr]
-        result = tx.has_matching_signatures(self.context.ledger_apis.apis[ETHEREUM])
-        result = result and sender_state.is_consistent_transaction(tx)
-        result = result and counterparty_state.is_consistent_transaction(tx)
-        return result
-
-    def settle_transaction(self, tx: Transaction) -> None:
-        """
-        Settle a valid transaction.
-
-        :param tx: the game transaction.
-        :return: None
-        :raises: AssertionError if the transaction is not valid.
-        """
-        assert (
-            self._current_agent_states is not None
-        ), "Call create before calling current_agent_states."
-        assert self.is_transaction_valid(tx), "Transaction is not valid."
-        sender_state = self.current_agent_states[tx.sender_addr]
-        counterparty_state = self.current_agent_states[tx.counterparty_addr]
-
-        new_sender_state = sender_state.apply([tx])
-        new_counterparty_state = counterparty_state.apply([tx])
-
-        self.transactions.add(tx)
-        self._current_agent_states.update({tx.sender_addr: new_sender_state})
-        self._current_agent_states.update(
-            {tx.counterparty_addr: new_counterparty_state}
-        )
