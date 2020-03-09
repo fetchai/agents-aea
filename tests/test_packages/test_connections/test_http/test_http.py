@@ -174,7 +174,7 @@ class TestHTTPConnectionSend:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionGET:
+class TestHTTPConnectionGET404:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -236,6 +236,49 @@ class TestHTTPConnectionGET:
             and response_body == b""
         )
 
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        cls.loop.call_soon_threadsafe(cls.loop.stop)
+        cls.t.join()
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionGET408:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = get_host()
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.new_event_loop()
+        # cls.loop.set_debug(enabled=True)
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+        cls.t = Thread(target=cls.loop.run_forever)
+        cls.t.start()
+
     @pytest.mark.asyncio
     async def test_get_408(self):
         """Test send get request w/ 408 response."""
@@ -281,6 +324,49 @@ class TestHTTPConnectionGET:
             and response_body == b""
         )
         assert is_exiting_correctly
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        cls.loop.call_soon_threadsafe(cls.loop.stop)
+        cls.t.join()
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionGET200:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = get_host()
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.new_event_loop()
+        # cls.loop.set_debug(enabled=True)
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+        cls.t = Thread(target=cls.loop.run_forever)
+        cls.t.start()
 
     @pytest.mark.asyncio
     async def test_get_200(self):
@@ -357,7 +443,7 @@ class TestHTTPConnectionGET:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionPOST:
+class TestHTTPConnectionPOST404:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -419,6 +505,48 @@ class TestHTTPConnectionPOST:
             and response_body == b""
         )
 
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        cls.loop.call_soon_threadsafe(cls.loop.stop)
+        cls.t.join()
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionPOST408:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = get_host()
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.new_event_loop()
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+        cls.t = Thread(target=cls.loop.run_forever)
+        cls.t.start()
+
     @pytest.mark.asyncio
     async def test_post_408(self):
         """Test send post request w/ 408 response."""
@@ -465,6 +593,48 @@ class TestHTTPConnectionPOST:
             and response_body == b""
         )
         assert is_exiting_correctly
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the class."""
+        cls.loop.call_soon_threadsafe(cls.loop.stop)
+        cls.t.join()
+        value = cls.loop.run_until_complete(cls.http_connection.disconnect())
+        assert value is None
+
+
+@pytest.mark.asyncio
+class TestHTTPConnectionPOST201:
+    """Test the packages/fetchai/connection/http/connection.py."""
+
+    @classmethod
+    def setup_class(cls):
+        """Initialise the class."""
+
+        cls.address = "my_key"
+        cls.host = get_host()
+        cls.port = get_unused_tcp_port()
+        cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
+        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
+
+        cls.http_connection = HTTPConnection(
+            address=cls.address,
+            host=cls.host,
+            port=cls.port,
+            api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
+        )
+        cls.loop = asyncio.new_event_loop()
+        cls.http_connection.loop = cls.loop
+        value = cls.loop.run_until_complete(cls.http_connection.connect())
+        assert value is None
+        assert cls.http_connection.connection_status.is_connected
+        assert not cls.http_connection.channel.is_stopped
+
+        cls.t = Thread(target=cls.loop.run_forever)
+        cls.t.start()
 
     @pytest.mark.asyncio
     async def test_post_201(self):
