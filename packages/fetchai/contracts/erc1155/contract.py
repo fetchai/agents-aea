@@ -53,6 +53,7 @@ class ERC1155Contract(Contract):
         """
         super().__init__(contract_id, contract_config, contract_interface)
         self.token_ids = []  # type: List[int]
+        self.game_currency_id = 0  # type: int
 
     def generate_item_ids_based_on_nb_goods(
         self, token_type: int, nb_goods: int
@@ -65,8 +66,9 @@ class ERC1155Contract(Contract):
 
     def generate_single_item_id(self, token_type: int, nb_good: int) -> int:
         """Create single token id"""
-        token_id = Helpers().generate_id(nb_good, token_type)
-        return token_id
+        self.game_currency_id = Helpers().generate_id(nb_good, token_type)
+
+        return self.game_currency_id
 
     def get_deploy_transaction(
         self,
@@ -190,7 +192,6 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
-        token_id: int,
     ) -> TransactionMessage:
 
         """
@@ -202,14 +203,16 @@ class ERC1155Contract(Contract):
         # create the items
 
         tx = self._get_create_single_tx(
-            deployer_address=deployer_address, ledger_api=ledger_api, token_id=token_id
+            deployer_address=deployer_address,
+            ledger_api=ledger_api,
+            token_id=self.game_currency_id,
         )
 
         #  Create the transaction message for the Decision maker
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_create_batch",
+            tx_id="contract_create_currency",
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},

@@ -74,7 +74,7 @@ class Parameters(Model):
             )
 
     @property
-    def contract_address(self) -> str:
+    def contract_address(self) -> Optional[str]:
         """The contract address of an already deployed smart-contract."""
         return self._contract_address
 

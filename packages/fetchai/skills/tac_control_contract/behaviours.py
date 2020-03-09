@@ -25,6 +25,7 @@ import time
 from typing import Optional, cast
 
 from aea.contracts.ethereum import Contract
+from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
@@ -54,6 +55,11 @@ class TACBehaviour(Behaviour):
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
         self.is_items_created = False
+        self.is_game_currency_created = False
+        self.context.shared_state["is_items_created"] = self.is_items_created
+        self.context.shared_state[
+            "is_game_currency_created"
+        ] = self.is_game_currency_created
 
     def setup(self) -> None:
         """
@@ -68,14 +74,14 @@ class TACBehaviour(Behaviour):
         #  Deploy the contract if there is no address in the parameters
         if parameters.contract_address is None:
             contract.set_instance(ledger_api)
-            transaction_message = contract.get_deploy_transaction(
+            transaction_message = contract.get_deploy_transaction(  # type: ignore
                 deployer_address=self.context.agent_address,
                 ledger_api=ledger_api,
                 skill_callback_id=self.context.skill_id,
             )
 
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            self.context.configuration = Configuration(
+            self.context.configuration = Configuration(  # type: ignore
                 parameters.version_id, parameters.tx_fee, parameters.nb_goods, contract,
             )
         else:
@@ -84,7 +90,7 @@ class TACBehaviour(Behaviour):
                 ledger_api=ledger_api,
                 contract_address=str(parameters.contract_address),
             )
-            contract.item_ids = parameters.good_ids
+            contract.item_ids = parameters.good_ids  # type: ignore
 
     def act(self) -> None:
         """
@@ -99,15 +105,24 @@ class TACBehaviour(Behaviour):
 
         if (
             contract.is_deployed
-            and not self.is_items_created
+            and not self.context.shared_state["is_items_created"]
             and game.phase.value == Phase.PRE_GAME.value
         ):
             self.context.logger.info("Creating the items.")
             transaction_message = self._create_items()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            self.is_items_created = True
             time.sleep(10)
 
+        if (
+            contract.is_deployed
+            and self.context.shared_state["is_items_created"]
+            and not self.context.shared_state["is_game_currency_created"]
+            and game.phase.value == Phase.PRE_GAME.value
+        ):
+            self.context.logger.info("Creating the game currency.")
+            transaction_message = self._create_items()
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+            self.context.shared_state["is_game_currency_created"] = True
         if (
             game.phase.value == Phase.PRE_GAME.value
             and parameters.registration_start_time < now < parameters.start_time
@@ -270,8 +285,18 @@ class TACBehaviour(Behaviour):
 
     def _create_items(self) -> TransactionMessage:
         contract = cast(Contract, self.context.contracts.erc1155)
-        return contract.get_create_batch_transaction(
+        ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+        return contract.get_create_batch_transaction(  # type: ignore
             deployer_address=self.context.agent_address,
-            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            ledger_api=ledger_api,
+            skill_callback_id=self.context.skill_id,
+        )
+
+    def _create_game_currency(self) -> TransactionMessage:
+        contract = cast(Contract, self.context.contracts.erc1155)
+        ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+        return contract.get_create_single_transaction(  # type: ignore
+            deployer_address=self.context.agent_address,
+            ledger_api=ledger_api,
             skill_callback_id=self.context.skill_id,
         )

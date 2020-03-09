@@ -30,7 +30,7 @@ models:
       base_good_endowment: 2
       lower_bound_factor: 1
       upper_bound_factor: 1
-      start_time: 06 03 2020 12:06
+      start_time: 09 03 2020 09:40
       registration_timeout: 60
       competition_timeout: 180
       inactivity_timeout: 60

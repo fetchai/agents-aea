@@ -314,7 +314,10 @@ class TransactionHandler(Handler):
                     )
                 )
                 contract.set_address(ledger_api, transaction.contractAddress)
-        elif tx_msg_response.tx_id == "contract_create_batch":
+        elif (
+            tx_msg_response.tx_id == "contract_create_batch"
+            or tx_msg_response.tx_id == "contract_create_currency"
+        ):
             self.context.logger.info("Sending creation transaction to the ledger!")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
@@ -326,10 +329,12 @@ class TransactionHandler(Handler):
             )
             if transaction.status != 1:
                 self.context.is_active = False
-                self.context.info(
-                    "The contract did not deployed successfully aborting."
-                )
+                self.context.info("The creation command wasn't successful. Aborting.")
             else:
+                self.context.shared_state["is_items_created"] = True
+                if tx_msg_response.tx_id == "contract_create_currency":
+                    self.context.logger.info("Created the currency.")
+                    self.context.shared_state["is_game_currency_created"] = True
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
