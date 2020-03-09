@@ -92,7 +92,6 @@ class TestGenerateProtocol:
     def test_generated_protocol_serialisation(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message
-        reply_message = {1: "number one", 2: "number two", 7: "number seven"}
         # message 1
         message = TwoPartyNegotiationMessage(
             message_id=1,
@@ -200,14 +199,6 @@ class TestGenerateProtocol:
             version="some version",
             headers="some headers",
         )
-        # inform_number = tuple((1370, 1991, 1, 4, 17, 6))
-        # message = TwoPartyNegotiationMessage(
-        #     message_id=1,
-        #     dialogue_reference=(str(0), ""),
-        #     target=0,
-        #     performative=TwoPartyNegotiationMessage.Performative.INFORM,
-        #     inform_number=inform_number,
-        # )
         encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
         envelope = Envelope(
             to=identity_2.address,
@@ -227,14 +218,6 @@ class TestGenerateProtocol:
             version="some version",
             headers="some headers",
         )
-        # reply_message = {1: "number one", 2: "number two", 7: "number seven"}
-        # message_2 = TwoPartyNegotiationMessage(
-        #     message_id=2,
-        #     dialogue_reference=(str(0), ""),
-        #     target=1,
-        #     performative=TwoPartyNegotiationMessage.Performative.INFORM_REPLY,
-        #     reply_message=reply_message,
-        # )
         encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(message_2)
 
         # add handlers to AEA resources

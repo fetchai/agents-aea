@@ -516,7 +516,7 @@ class ProtocolGenerator:
             # check if the content exists then...
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
             indents += "    "
-            check_str += indents + "expected_nb_of_contents += 1\n".format(content_name)
+            check_str += indents + "expected_nb_of_contents += 1\n"
             content_type = _get_sub_types_of_compositional_types(content_type)[0]
         if content_type.startswith("Union["):
             element_types = _get_sub_types_of_compositional_types(content_type)
@@ -1023,7 +1023,7 @@ class ProtocolGenerator:
                     self.protocol_specification_in_camel_case, performative.upper(),
                 )
             nb_of_non_optional_contents = 0
-            for content_name, content_type in contents.items():
+            for content_type in contents.values():
                 if not content_type.startswith("Optional"):
                     nb_of_non_optional_contents += 1
 
