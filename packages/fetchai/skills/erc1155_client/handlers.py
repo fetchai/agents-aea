@@ -85,18 +85,18 @@ class FIPAHandler(Handler):
                     ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                     contract_address=data["contract"],
                 )
-                contract.item_ids = data["item_ids"]
+                contract.token_ids = data["token_ids"]
                 assert "from_supply" in data.keys(), "from supply is not set"
                 assert "to_supply" in data.keys(), "to supply is not set"
                 assert "value" in data.keys(), "value is not set"
                 assert "trade_nonce" in data.keys(), "trade_nonce is not set"
-                assert "item_ids" in data.keys(), "iten ids are not set"
+                assert "token_ids" in data.keys(), "iten ids are not set"
 
                 self.context.shared_state["counterparty"] = msg.counterparty
                 tx = contract.get_hash_single_transaction(
                     from_address=msg.counterparty,
                     to_address=self.context.agent_address,
-                    item_id=contract.item_ids[0],
+                    item_id=contract.token_ids[0],
                     from_supply=data["from_supply"],
                     to_supply=data["to_supply"],
                     value=data["value"],

@@ -90,7 +90,7 @@ class FIPAHandler(Handler):
             performative=FIPAMessage.Performative.INFORM,
             info={
                 "contract": contract.instance.address,
-                "item_ids": contract.item_ids,
+                "token_ids": contract.token_ids,
                 "trade_nonce": contract_nonce,
                 "from_supply": strategy.from_supply,
                 "to_supply": strategy.to_supply,
@@ -127,7 +127,7 @@ class FIPAHandler(Handler):
         tx = contract.get_atomic_swap_single_proposal(
             from_address=self.context.agent_address,
             to_address=msg.counterparty,
-            item_id=contract.item_ids[0],
+            item_id=contract.token_ids[0],
             from_supply=strategy.from_supply,
             to_supply=strategy.to_supply,
             value=strategy.value,

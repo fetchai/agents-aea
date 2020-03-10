@@ -65,8 +65,8 @@ class ERC1155Contract(Contract):
         super().__init__(contract_id, contract_config, contract_interface)
         self.token_ids = {}  # type: Dict[int, int]
 
-    def create_item_ids(self, token_type: int, nb_goods: int) -> Dict[int, int]:
-        """Populate the item_ids list."""
+    def create_token_ids(self, token_type: int, nb_goods: int) -> Dict[int, int]:
+        """Populate the token_ids dictionary."""
         assert self.token_ids == [], "Item ids already created."
         for i in range(nb_goods):
             print(self.instance.functions.is_token_id_exists(i).call())
@@ -146,7 +146,7 @@ class ERC1155Contract(Contract):
         Create an mint a batch of items.
 
         :params address: The address that will receive the items
-        :params mint_quantities: A list[10] of ints. The index represents the id in the item_ids list.
+        :params mint_quantities: A list[10] of ints. The index represents the id in the token_ids dict.
         """
         # create the items
 
@@ -297,7 +297,7 @@ class ERC1155Contract(Contract):
         self,
         from_address: Address,
         to_address: Address,
-        item_ids: List[int],
+        token_ids: List[int],
         from_supplies: List[int],
         to_supplies: List[int],
         value: int,
@@ -317,7 +317,7 @@ class ERC1155Contract(Contract):
         tx = self.instance.functions.tradeBatch(
             from_address,
             to_address,
-            item_ids,
+            token_ids,
             from_supplies,
             to_supplies,
             value_eth_wei,
@@ -396,7 +396,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         from_address: Address,
         to_address: Address,
-        item_ids: List[int],
+        token_ids: List[int],
         from_supplies: List[int],
         to_supplies: List[int],
         value: int,
@@ -410,7 +410,7 @@ class ERC1155Contract(Contract):
         tx = self._create_trade_batch_tx(
             from_address=from_address,
             to_address=to_address,
-            item_ids=item_ids,
+            token_ids=token_ids,
             from_supplies=from_supplies,
             to_supplies=to_supplies,
             value=value,
@@ -484,7 +484,7 @@ class ERC1155Contract(Contract):
         self,
         from_address: Address,
         to_address: Address,
-        item_ids: List[int],
+        token_ids: List[int],
         from_supplies: List[int],
         to_supplies: List[int],
         value: int,
@@ -498,7 +498,7 @@ class ERC1155Contract(Contract):
         tx_hash = Helpers().get_hash(
             _from=from_address_hash,
             _to=to_address_hash,
-            _ids=item_ids,
+            _ids=token_ids,
             _from_values=from_supplies,
             _to_values=to_supplies,
             _value_eth=value_eth_wei,
