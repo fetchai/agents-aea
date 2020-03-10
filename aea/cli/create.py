@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import cast
 
 import click
-from click import pass_context
 
 from jsonschema import ValidationError
 
@@ -65,12 +64,12 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
         current = current.parent.resolve()
 
 
-def _setup_package_folder(ctx, item_type_plural):
+def _setup_package_folder(path: Path):
     """Set a package folder up."""
-    Path(ctx.cwd, item_type_plural).mkdir()
-    connections_init_module = os.path.join(ctx.cwd, item_type_plural, "__init__.py")
-    logger.debug("Creating {}".format(connections_init_module))
-    Path(connections_init_module).touch(exist_ok=True)
+    path.mkdir(exist_ok=False)
+    init_module = path / "__init__.py"
+    logger.debug("Creating {}".format(init_module))
+    Path(init_module).touch(exist_ok=False)
 
 
 @click.command()
@@ -81,7 +80,7 @@ def _setup_package_folder(ctx, item_type_plural):
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
-@pass_context
+@click.pass_context
 def create(click_context, agent_name, author):
     """Create an agent."""
     try:
@@ -113,6 +112,15 @@ def create(click_context, agent_name, author):
     try:
         path.mkdir(exist_ok=False)
 
+        # set up packages directories.
+        _setup_package_folder(Path(agent_name, "protocols"))
+        _setup_package_folder(Path(agent_name, "connections"))
+        _setup_package_folder(Path(agent_name, "skills"))
+
+        # set up a vendor directory
+        Path(agent_name, "vendor").mkdir(exist_ok=False)
+        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
+
         # create a config file inside it
         click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
@@ -132,15 +140,6 @@ def create(click_context, agent_name, author):
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
-
-        # set up packages directories.
-        _setup_package_folder(ctx, "protocols")
-        _setup_package_folder(ctx, "connections")
-        _setup_package_folder(ctx, "skills")
-
-        # set up a vendor directory
-        Path(ctx.cwd, "vendor").mkdir()
-        Path(ctx.cwd, "vendor", "__init__.py").touch()
 
         click.echo("Adding default packages ...")
         click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)

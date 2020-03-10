@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,33 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
-from aea.skills.tasks import Task
-
-
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def execute(self, *args, **kwargs) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+"""This module contains the tests of the HTTP connection implementation."""
