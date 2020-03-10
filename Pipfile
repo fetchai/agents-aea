@@ -39,8 +39,6 @@ pytest-randomly = "==3.2.1"
 safety = "==1.8.5"
 tox = "==3.14.5"
 vyper = "==0.1.0b12"
-eth-tester = "==0.3.0b1"
-py-evm = "==0.3.0a8"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
