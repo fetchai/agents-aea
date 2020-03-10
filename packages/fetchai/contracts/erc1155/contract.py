@@ -52,13 +52,15 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_id, contract_config, contract_interface)
-        self.item_ids = []  # type: List[int]
+        self.token_ids = {}  # type: Dict[int, int]
 
-    def create_item_ids(self, token_type: int, token_ids: List[int]) -> None:
+    def create_item_ids(self, token_type: int, nb_goods: int) -> Dict[int, int]:
         """Populate the item_ids list."""
-        assert self.item_ids == [], "Item ids already created."
-        for token_id in token_ids:
-            self.item_ids.append(Helpers().generate_id(token_type, token_id))
+        assert self.token_ids == [], "Item ids already created."
+        for i in range(nb_goods):
+            print(self.instance.functions.is_token_id_exists(i).call())
+            self.token_ids[Helpers().generate_id(token_type, i)] = 0
+        return self.token_ids
 
     def get_deploy_transaction(
         self,
@@ -166,7 +168,7 @@ class ERC1155Contract(Contract):
         # create the items
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createBatch(
-            deployer_address, self.item_ids
+            deployer_address, self.token_ids
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -186,7 +188,7 @@ class ERC1155Contract(Contract):
         skill_callback_id: ContractId,
     ):
 
-        assert len(mint_quantities) == len(self.item_ids), "Wrong number of items."
+        assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
         tx = self._create_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
@@ -212,7 +214,11 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _create_mint_batch_tx(
-        self, deployer_address, recipient_address, batch_mint_quantities, ledger_api,
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        batch_mint_quantities: List[int],
+        ledger_api: LedgerApi,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
@@ -221,7 +227,7 @@ class ERC1155Contract(Contract):
         )
         nonce += 1
         tx = self.instance.functions.mintBatch(
-            recipient_address, self.item_ids, batch_mint_quantities
+            recipient_address, self.token_ids, batch_mint_quantities
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -235,14 +241,14 @@ class ERC1155Contract(Contract):
 
     def _create_trade_tx(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value_eth_wei,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value_eth_wei: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
@@ -278,14 +284,14 @@ class ERC1155Contract(Contract):
 
     def _create_trade_batch_tx(
         self,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        item_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
@@ -325,14 +331,14 @@ class ERC1155Contract(Contract):
 
     def get_atomic_swap_single_proposal(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
     ) -> TransactionMessage:
@@ -368,29 +374,29 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_balance_of_batch(self, address):
+    def get_balance_of_batch(self, address: Address):
         """Get the balance for a batch of items"""
         return self.instance.functions.balanceOfBatch(
-            [address] * 10, self.item_ids
+            [address] * 10, self.token_ids
         ).call()
 
     def get_atomic_swap_batch_transaction_proposal(
         self,
-        deployer_address,
-        contract,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        signature,
-        skill_callback_id,
+        deployer_address: Address,
+        from_address: Address,
+        to_address: Address,
+        item_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        signature: str,
+        skill_callback_id: ContractId,
+        ledger_api: LedgerApi,
     ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == from_address, "Wrong 'from' address"
-        tx = contract._create_trade_batch_tx(
+        tx = self._create_trade_batch_tx(
             from_address=from_address,
             to_address=to_address,
             item_ids=item_ids,
@@ -399,6 +405,7 @@ class ERC1155Contract(Contract):
             value=value,
             trade_nonce=trade_nonce,
             signature=signature,
+            ledger_api=ledger_api,
         )
 
         tx_message = TransactionMessage(
@@ -420,15 +427,15 @@ class ERC1155Contract(Contract):
 
     def get_hash_single_transaction(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value,
-        trade_nonce,
-        ledger_api,
-        skill_callback_id,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -464,14 +471,14 @@ class ERC1155Contract(Contract):
 
     def get_hash_batch_transaction(
         self,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        ledger_api,
+        from_address: Address,
+        to_address: Address,
+        item_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
     ):
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -490,7 +497,7 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
-    def generate_trade_nonce(self, address):  # nosec
+    def generate_trade_nonce(self, address: Address):  # nosec
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():
@@ -502,7 +509,14 @@ class Helpers:
     """Helper functions for hashing."""
 
     def get_single_hash(
-        self, _from, _to, _id, _from_value, _to_value, _value_eth, _nonce
+        self,
+        _from: bytes,
+        _to: bytes,
+        _id: int,
+        _from_value: int,
+        _to_value: int,
+        _value_eth: int,
+        _nonce: int,
     ) -> bytes:
         """Generate a hash mirroring the way we are creating this in the contract."""
         return keccak256(
@@ -520,7 +534,14 @@ class Helpers:
         )
 
     def get_hash(
-        self, _from, _to, _ids, _from_values, _to_values, _value_eth, _nonce
+        self,
+        _from: bytes,
+        _to: bytes,
+        _ids: List[int],
+        _from_values: List[int],
+        _to_values: List[int],
+        _value_eth: int,
+        _nonce: int,
     ) -> bytes:
         """Generate a hash mirroring the way we are creating this in the contract."""
         aggregate_hash = keccak256(
@@ -553,7 +574,7 @@ class Helpers:
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
 
-    def generate_id(self, token_id, item_id):
+    def generate_id(self, token_id: int, item_id: int):
         token_id = token_id
         index = item_id
         final_id_int = (token_id << 128) + index

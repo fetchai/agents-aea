@@ -14,6 +14,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 The scope of the specific demo is to demonstrate how to deploy a smart contract and interact with it. For the specific use-case, we create two AEAs one that deploys and creates tokens inside the smart contract and the other that signs a transaction so we can complete an atomic swap. The smart contract we are using is an ERC1155 smart contract
 with a one-step atomic swap functionality. That means the trade between the two AEAs can be trustless.
 
+####Note:
+This demo serves demonstrative purposes only. Since the AEA deploying the contract also has the ability to mint tokens, 
+in reality the transfer of tokens from the AEA signing the transaction is worthless.
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -59,14 +63,6 @@ aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/erc1155_client:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
-```
-
-Additionally, create the private key for the client AEA.
-
-Generate and add a key for Ethereum use:
-```bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
 ```
 
 ### Update the AEA configs
@@ -141,7 +137,7 @@ The `search_schema` and the `search_data` are used to register the service in th
 
 ### Fund the deployer AEA
 
-To create some wealth for your deployer AEA for the Ethereum `ropsten` network:
+To create some wealth for your deployer AEA for the Ethereum `ropsten` network. Note that this needs to be executed from deployer AEA folder:
 
 ``` bash
 aea generate-wealth ethereum
@@ -194,8 +190,8 @@ This diagram shows the communication between the various entities as data is suc
         activate Blockchain
         
         Deployer_AEA->>Blockchain: deployes smart contract
-        Deployer_AEA->>Erc1155_contract: creates tokens
-        Deployer_AEA->>Erc1155_contract: mint tokens       
+        Deployer_AEA->>ERC1155_contract: creates tokens
+        Deployer_AEA->>ERC1155_contract: mint tokens       
         Deployer_AEA->>Search: register_service
         Client_AEA->>Search: search
         Search-->>Client_AEA: list_of_agents
@@ -203,12 +199,12 @@ This diagram shows the communication between the various entities as data is suc
         Deployer_AEA->>Client_AEA: inform_message
         Client_AEA->>Deployer_AEA: signature
         Deployer_AEA->>Blockchain: send_transaction
-        Client_AEA->>Erc1155_contract: asks_balance
+        Client_AEA->>ERC1155_contract: asks_balance
         
         deactivate Deployer_AEA
         deactivate Search
         deactivate Client_AEA
-        deactivate Erc1155_contract
+        deactivate ERC1155_contract
         deactivate Blockchain
        
 </div>

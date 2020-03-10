@@ -94,6 +94,7 @@ balancesOf: map(address, map(uint256, uint256))
 noncesOf: map(address, map(uint256, bool))
 uri: map(uint256, string[256])
 operators: map(address, map(address, bool))
+token_ids: map(uint256, bool)
 
 # This is to be set before contract migration!
 BATCH_SIZE: constant(uint256) = 10
@@ -318,6 +319,17 @@ def is_nonce_used(addr: address, nonce: uint256) -> bool:
     @param address: the address that want to transact.
     """
     return self.noncesOf[addr][nonce]
+
+@public
+@constant
+def is_token_id_exists(token_id: uint256) -> bool:
+    """
+    @notice Checks if the given token_id is already created.
+    @param token_id: uint256 the id of the token.
+    """
+    if self.token_ids[token_id]:
+        return True
+    return False
 
 @public
 def safeTransferFrom(_from: address, _to: address, _id: uint256, _value: uint256, _data: bytes[256]):
