@@ -20,6 +20,7 @@
 """This module contains the erc1155 contract definition."""
 import logging
 import random
+from enum import Enum
 from typing import Any, Dict, List
 
 from vyper.utils import keccak256
@@ -35,6 +36,16 @@ logger = logging.getLogger(__name__)
 
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
+
+    class Performative(Enum):
+        """The ERC1155 performatives."""
+
+        CONTRACT_DEPLOY = "contract_deploy"
+        CONTRACT_CREATE_BATCH = "contract_create_batch"
+        CONTRACT_MINT_BATCH = "contract_mint_batch"
+        CONTRACT_ATOMIC_SWAP_SINGLE = "contract_atomic_swap_single"
+        CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
+        CONTRACT_SIGN_HASH = "contract_sign_hash"
 
     def __init__(
         self,
@@ -82,7 +93,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_deploy",
+            tx_id=ERC1155Contract.Performative.CONTRACT_DEPLOY.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -147,7 +158,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_create_batch",
+            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_BATCH.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -199,7 +210,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_mint_batch",
+            tx_id=ERC1155Contract.Performative.CONTRACT_MINT_BATCH.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -360,7 +371,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_atomic_swap_single",
+            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -411,7 +422,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_deployment",
+            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -455,7 +466,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract-sign-hash",
+            tx_id=ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -481,7 +492,6 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
     ):
         """Sign the transaction before send them to agent1."""
-        # assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(from_address).call()
         to_address_hash = self.instance.functions.getAddress(to_address).call()
         value_eth_wei = ledger_api.api.toWei(value, "ether")

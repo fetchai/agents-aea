@@ -81,7 +81,6 @@ class FIPAHandler(Handler):
         )
         strategy = cast(Strategy, self.context.strategy)
         contract = self.context.contracts.erc1155
-        self.context.logger.info(contract.item_ids)
         contract_nonce = contract.generate_trade_nonce(self.context.agent_address)
         self.context.shared_state["contract_nonce"] = contract_nonce
         info_msg = FIPAMessage(
@@ -160,8 +159,7 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         contract = self.context.contracts.erc1155
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        tx_digest = ""
-        if tx_msg_response.tx_id == "contract_deploy":
+        if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = ledger_api.send_signed_transaction(
                 is_waiting_for_confirmation=True, tx_signed=tx_signed
@@ -172,7 +170,7 @@ class TransactionHandler(Handler):
             self.context.logger.info(transaction)
             contract.set_address(ledger_api, transaction.contractAddress)
             self.context.logger.info(contract.is_deployed)
-        elif tx_msg_response.tx_id == "contract_create_batch":
+        elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
             tx_digest = ledger_api.send_signed_transaction(
@@ -181,7 +179,7 @@ class TransactionHandler(Handler):
             self.context.logger.info(
                 "Transaction digest for creating items: {}".format(tx_digest)
             )
-        elif tx_msg_response.tx_id == "contract_mint_batch":
+        elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
             tx_digest = ledger_api.send_signed_transaction(
@@ -193,7 +191,10 @@ class TransactionHandler(Handler):
             self.context.logger.info("Ask the contract about my balances:")
             result = contract.get_balance_of_batch(address=self.context.agent_address)
             self.context.logger.info(result)
-        elif tx_msg_response.tx_id == "contract_atomic_swap_single":
+        elif (
+            tx_msg_response.tx_id
+            == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
+        ):
             self.context.logger.info("Sending the trade transaction.")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
