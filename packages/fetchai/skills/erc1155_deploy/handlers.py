@@ -167,30 +167,50 @@ class TransactionHandler(Handler):
             transaction = ledger_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
-            self.context.logger.info(transaction)
-            contract.set_address(ledger_api, transaction.contractAddress)
-            self.context.logger.info(contract.is_deployed)
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.logger.info("Failed to deploy. Aborting.")
+            else:
+                contract.set_address(ledger_api, transaction.contractAddress)
+                self.context.logger.info("Successfully deployed the contract.")
+
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
             tx_digest = ledger_api.send_signed_transaction(
                 is_waiting_for_confirmation=True, tx_signed=tx_signed
             )
-            self.context.logger.info(
-                "Transaction digest for creating items: {}".format(tx_digest)
+            transaction = ledger_api.get_transaction_status(  # type: ignore
+                tx_digest=tx_digest
             )
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.logger.info("Failed to create items. Aborting.")
+            else:
+                self.context.logger.info(
+                    "Transaction digest for creating items: {}".format(tx_digest)
+                )
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
             tx_digest = ledger_api.send_signed_transaction(
                 is_waiting_for_confirmation=True, tx_signed=tx_signed
             )
-            self.context.logger.info(
-                "Transaction digest for minting objects: {}".format(tx_digest)
+            transaction = ledger_api.get_transaction_status(  # type: ignore
+                tx_digest=tx_digest
             )
-            self.context.logger.info("Ask the contract about my balances:")
-            result = contract.get_balance_of_batch(address=self.context.agent_address)
-            self.context.logger.info(result)
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.logger.info("Failed to create items. Aborting.")
+            else:
+                self.context.logger.info(
+                    "Transaction digest for minting objects: {}".format(tx_digest)
+                )
+                self.context.logger.info("Ask the contract about my balances:")
+                result = contract.get_balance_of_batch(
+                    address=self.context.agent_address
+                )
+                self.context.logger.info(result)
         elif (
             tx_msg_response.tx_id
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
@@ -201,12 +221,21 @@ class TransactionHandler(Handler):
             tx_digest = ledger_api.send_signed_transaction(
                 is_waiting_for_confirmation=True, tx_signed=tx_signed
             )
-            self.context.logger.info(
-                "Transaction digest for atomic_swap: {}".format(tx_digest)
+            transaction = ledger_api.get_transaction_status(  # type: ignore
+                tx_digest=tx_digest
             )
-            self.context.logger.info("Ask the contract about my balances:")
-            result = contract.get_balance_of_batch(address=self.context.agent_address)
-            self.context.logger.info(result)
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.logger.info("Failed to create items. Aborting.")
+            else:
+                self.context.logger.info(
+                    "Transaction digest for atomic_swap: {}".format(tx_digest)
+                )
+                self.context.logger.info("Ask the contract about my balances:")
+                result = contract.get_balance_of_batch(
+                    address=self.context.agent_address
+                )
+                self.context.logger.info(result)
 
     def teardown(self) -> None:
         """
