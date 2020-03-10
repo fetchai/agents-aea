@@ -48,8 +48,8 @@ from aea.configurations.base import (
 
 @click.group()
 @click.option("--registry", is_flag=True, help="For Registry search.")
-@pass_ctx
-def search(ctx: Context, registry):
+@click.pass_context
+def search(click_context, registry):
     """Search for components in the registry.
 
     If called from an agent directory, it will check
@@ -59,6 +59,7 @@ def search(ctx: Context, registry):
         aea search connections
         aea search --registry skills
     """
+    ctx = cast(Context, click_context.obj)
     if registry:
         ctx.set_config("is_registry", True)
     else:

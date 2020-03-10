@@ -1,5 +1,19 @@
 # Release History
 
+## 0.2.2 (2020-03-09)
+
+- Fixes registry to only load registered packages
+- Migrates default protocol to generator produced version
+- Adds http connection and http protocol
+- Adds cli init command for easier setting of author
+- Refactoring and behind the scenes improvements to CLI
+- Multiple docs updates
+- Protocol generator improvements and fixes
+- Adds cli launch command to launch multiple agents
+- Increases test coverage for aea package and tests package
+- Make project comply with PEP 518
+- Multiple additional minor fixes and changes
+
 ## 0.2.1 (2020-02-21)
 
 - Add minimal aea install

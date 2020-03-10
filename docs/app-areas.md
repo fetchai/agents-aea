@@ -8,6 +8,17 @@ There are five general application areas for AEAs:
 * **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="../ml-skills">here</a>.
 * **Representative**: an agent which represents an individual's activities on the Fetch.ai network. An example can be found <a href="../tac-skills">here</a>.
 
+## Likely short-term applications
+
+In the short-term we see AEAs primarily deployed in three areas:
+
+* Off-load repetitive tasks: AEAs can automate well defined processes in supply chain, transport and finance.
+
+* Micro transactions: AEAs make it economically viable to execute trades which reference only small values. This is particularly relevant in areas where there is a (data) supply side constituted of many small actors and a single demand side.
+
+* Wallet agents: AEAs can simplify the interactions with blockchains for end users.
+
+
 ## Multi-agent system versus agent-based modelling
 
 The Fetch.ai multi agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behavioural observation rather than practical economic gain.

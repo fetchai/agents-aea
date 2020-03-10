@@ -29,8 +29,8 @@ from aea.cli.common import (
     Context,
     _format_items,
     _retrieve_details,
+    check_aea_project,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import (
     ConfigurationType,
@@ -41,10 +41,10 @@ from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
-@pass_ctx
-def list(ctx: Context):
+@click.pass_context
+@check_aea_project
+def list(click_context):
     """List the installed resources."""
-    try_to_load_agent_config(ctx)
 
 
 def _get_item_details(ctx, item_type) -> List[Dict]:
