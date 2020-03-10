@@ -1,38 +1,54 @@
-name: two_party_negotiation
+name: test_protocol
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
+description: 'A protocol for testing purposes.'
 speech_acts:
-  cfp:
-    query: ct:DataModel
-  propose:
-    number: pt:int
-    price: pt:float
-    description: pt:str
-    flag: pt:bool
-    query: ct:DataModel
-    proposal: pt:optional[pt:dict[pt:str, ct:IOTApp7]]
-    rounds: pt:set[pt:int]
-    items: pt:list[ct:Unit]
-    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:str, pt:float]]]
-  request:
-    method: pt:str
-    url: pt:str
-    version: pt:str
-    headers: pt:str
-    bodyy: pt:optional[pt:bytes]
-  inform:
-      inform_number: pt:list[pt:int]
-  inform_reply:
-      reply_message: pt:dict[pt:int, pt:str]
-  accept: {}
-  decline: {}
-  match_accept: {}
+  performative_ct:
+    content_ct: ct:DataModel
+  performative_pt:
+    content_bytes: pt:bytes
+    content_int: pt:int
+    content_float: pt:float
+    content_bool: pt:bool
+    content_str: pt:str
+  performative_pct:
+    content_set_ct: pt:set[ct:DataModel]
+    content_set_bytes: pt:set[pt:bytes]
+    content_set_int: pt:set[pt:int]
+    content_set_float: pt:set[pt:float]
+    content_set_bool: pt:set[pt:bool]
+    content_set_str: pt:set[pt:str]
+    content_list_ct: pt:list[ct:DataModel]
+    content_list_bytes: pt:list[pt:bytes]
+    content_list_int: pt:list[pt:int]
+    content_list_float: pt:list[pt:float]
+    content_list_bool: pt:list[pt:bool]
+    content_list_str: pt:list[pt:str]
+  performative_pmt:
+    content_dict_int_ct: pt:dict[pt:int, ct:DataModel]
+    content_dict_bool_int: pt:dict[pt:bool, pt:bytes]
+    content_dict_str_float: pt:dict[pt:str, pt:float]
+#    content_dict_ct_ct: pt:dict[ct:DataModel, ct:DataModel] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
+#    content_dict_bytes_int: pt:dict[pt:bytes, pt:int] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
+#    content_dict_float_int: pt:dict[pt:float, pt:int] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
+  performative_mt:
+    content_union: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:int], pt:list[ct:DataModel], pt:dict[pt:str, ct:DataModel]]
+  performative_o:
+    content_o_ct: pt:optional[ct:DataModel]
+    content_o_bool: pt:optional[pt:bool]
+    content_o_set_float: pt:optional[pt:set[pt:float]]
+    content_o_list_bytes: pt:optional[pt:list[pt:bytes]]
+    content_o_dict_str_int: pt:optional[pt:dict[pt:str, ct:int]]
+    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:str, pt:float]]]
+  performative_empty_contents: {}
 ---
 ct:DataModel: |
-  bytes data_model = 1;
-ct:IOTApp7: |
-  bytes iot_app_7 = 1;
-ct:Unit: |
-  bytes unit = 1;
+  bytes bytes_field = 1;
+  int32 int_field = 2;
+  float float_field = 3;
+  bool bool_field = 4;
+  string str_field = 5;
+  repeated int32 set_field = 6;
+  repeated string list_field = 7;
+  map<int32, bool> dict_field = 8;

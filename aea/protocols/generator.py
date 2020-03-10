@@ -186,6 +186,19 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
                     inside_union = rest_of_inside_union[
                         rest_of_inside_union.index(",") + 1 :
                     ].strip()
+            elif inside_union.startswith("Tuple"):
+                sub_type = inside_union[: inside_union.index("]") + 1].strip()
+                rest_of_inside_union = inside_union[
+                    inside_union.index("]") + 1 :
+                ].strip()
+                if rest_of_inside_union.find(",") == -1:
+                    # it is the last sub-type
+                    inside_union = rest_of_inside_union.strip()
+                else:
+                    # it is not the last sub-type
+                    inside_union = rest_of_inside_union[
+                        rest_of_inside_union.index(",") + 1 :
+                    ].strip()
             else:
                 if inside_union.find(",") == -1:
                     # it is the last sub-type
@@ -1251,13 +1264,6 @@ class ProtocolGenerator:
                     content_name, content_name
                 )
             )
-        # else:
-        #     decoding_str += (
-        #         indents
-        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-        #             content_name, content_type
-        #         )
-        #     )
         elif content_type.startswith("Tuple"):
             # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
@@ -1272,13 +1278,6 @@ class ProtocolGenerator:
             decoding_str += indents + 'performative_content["{}"] = {}_tuple\n'.format(
                 content_name, content_name
             )
-        # else:
-        #     decoding_str += (
-        #         indents
-        #         + "raise NotImplementedError(\"The decoding of content '{}' of type '{}' is missing.\")\n".format(
-        #             content_name, content_type
-        #         )
-        #     )
         elif content_type.startswith("Dict"):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
@@ -1321,9 +1320,8 @@ class ProtocolGenerator:
                 performative, content_name, sub_type, no_indents
             )
         else:
-
-            decoding_str += indents + "pb2_{} = default_pb.{}.{}\n".format(
-                variable_name, performative, variable_name,
+            decoding_str += indents + "pb2_{} = {}_pb.{}.{}\n".format(
+                variable_name, self.protocol_specification.name, performative, variable_name,
             )
             decoding_str += indents + "{} = {}.decode(pb2_{})\n".format(
                 content_name, content_type, variable_name,
