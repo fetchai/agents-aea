@@ -1321,7 +1321,10 @@ class ProtocolGenerator:
             )
         else:
             decoding_str += indents + "pb2_{} = {}_pb.{}.{}\n".format(
-                variable_name, self.protocol_specification.name, performative, variable_name,
+                variable_name,
+                self.protocol_specification.name,
+                performative,
+                variable_name,
             )
             decoding_str += indents + "{} = {}.decode(pb2_{})\n".format(
                 content_name, content_type, variable_name,

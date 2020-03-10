@@ -75,7 +75,15 @@ class TestProtocolMessage(Message):
             performative=TestProtocolMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"performative_ct", "performative_empty_contents", "performative_mt", "performative_o", "performative_pct", "performative_pmt", "performative_pt"}
+        self._performatives = {
+            "performative_ct",
+            "performative_empty_contents",
+            "performative_mt",
+            "performative_o",
+            "performative_pct",
+            "performative_pmt",
+            "performative_pt",
+        }
         assert (
             self._is_consistent()
         ), "This message is invalid according to the 'test_protocol' protocol."
@@ -130,19 +138,25 @@ class TestProtocolMessage(Message):
     @property
     def content_dict_bool_int(self) -> Dict[bool, bytes]:
         """Get the 'content_dict_bool_int' content from the message."""
-        assert self.is_set("content_dict_bool_int"), "'content_dict_bool_int' content is not set."
+        assert self.is_set(
+            "content_dict_bool_int"
+        ), "'content_dict_bool_int' content is not set."
         return cast(Dict[bool, bytes], self.get("content_dict_bool_int"))
 
     @property
     def content_dict_int_ct(self) -> Dict[int, DataModel]:
         """Get the 'content_dict_int_ct' content from the message."""
-        assert self.is_set("content_dict_int_ct"), "'content_dict_int_ct' content is not set."
+        assert self.is_set(
+            "content_dict_int_ct"
+        ), "'content_dict_int_ct' content is not set."
         return cast(Dict[int, DataModel], self.get("content_dict_int_ct"))
 
     @property
     def content_dict_str_float(self) -> Dict[str, float]:
         """Get the 'content_dict_str_float' content from the message."""
-        assert self.is_set("content_dict_str_float"), "'content_dict_str_float' content is not set."
+        assert self.is_set(
+            "content_dict_str_float"
+        ), "'content_dict_str_float' content is not set."
         return cast(Dict[str, float], self.get("content_dict_str_float"))
 
     @property
@@ -160,13 +174,17 @@ class TestProtocolMessage(Message):
     @property
     def content_list_bool(self) -> Tuple[bool, ...]:
         """Get the 'content_list_bool' content from the message."""
-        assert self.is_set("content_list_bool"), "'content_list_bool' content is not set."
+        assert self.is_set(
+            "content_list_bool"
+        ), "'content_list_bool' content is not set."
         return cast(Tuple[bool, ...], self.get("content_list_bool"))
 
     @property
     def content_list_bytes(self) -> Tuple[bytes, ...]:
         """Get the 'content_list_bytes' content from the message."""
-        assert self.is_set("content_list_bytes"), "'content_list_bytes' content is not set."
+        assert self.is_set(
+            "content_list_bytes"
+        ), "'content_list_bytes' content is not set."
         return cast(Tuple[bytes, ...], self.get("content_list_bytes"))
 
     @property
@@ -178,7 +196,9 @@ class TestProtocolMessage(Message):
     @property
     def content_list_float(self) -> Tuple[float, ...]:
         """Get the 'content_list_float' content from the message."""
-        assert self.is_set("content_list_float"), "'content_list_float' content is not set."
+        assert self.is_set(
+            "content_list_float"
+        ), "'content_list_float' content is not set."
         return cast(Tuple[float, ...], self.get("content_list_float"))
 
     @property
@@ -208,26 +228,39 @@ class TestProtocolMessage(Message):
     @property
     def content_o_dict_str_int(self) -> Optional[Dict[str, int]]:
         """Get the 'content_o_dict_str_int' content from the message."""
-        assert self.is_set("content_o_dict_str_int"), "'content_o_dict_str_int' content is not set."
+        assert self.is_set(
+            "content_o_dict_str_int"
+        ), "'content_o_dict_str_int' content is not set."
         return cast(Optional[Dict[str, int]], self.get("content_o_dict_str_int"))
 
     @property
     def content_o_list_bytes(self) -> Optional[Tuple[bytes, ...]]:
         """Get the 'content_o_list_bytes' content from the message."""
-        assert self.is_set("content_o_list_bytes"), "'content_o_list_bytes' content is not set."
+        assert self.is_set(
+            "content_o_list_bytes"
+        ), "'content_o_list_bytes' content is not set."
         return cast(Optional[Tuple[bytes, ...]], self.get("content_o_list_bytes"))
 
     @property
     def content_o_set_float(self) -> Optional[FrozenSet[float]]:
         """Get the 'content_o_set_float' content from the message."""
-        assert self.is_set("content_o_set_float"), "'content_o_set_float' content is not set."
+        assert self.is_set(
+            "content_o_set_float"
+        ), "'content_o_set_float' content is not set."
         return cast(Optional[FrozenSet[float]], self.get("content_o_set_float"))
 
     @property
-    def content_o_union(self) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]]:
+    def content_o_union(
+        self,
+    ) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]]:
         """Get the 'content_o_union' content from the message."""
         assert self.is_set("content_o_union"), "'content_o_union' content is not set."
-        return cast(Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]], self.get("content_o_union"))
+        return cast(
+            Optional[
+                Union[str, Dict[str, int], FrozenSet[DataModel], Dict[str, float]]
+            ],
+            self.get("content_o_union"),
+        )
 
     @property
     def content_set_bool(self) -> FrozenSet[bool]:
@@ -238,7 +271,9 @@ class TestProtocolMessage(Message):
     @property
     def content_set_bytes(self) -> FrozenSet[bytes]:
         """Get the 'content_set_bytes' content from the message."""
-        assert self.is_set("content_set_bytes"), "'content_set_bytes' content is not set."
+        assert self.is_set(
+            "content_set_bytes"
+        ), "'content_set_bytes' content is not set."
         return cast(FrozenSet[bytes], self.get("content_set_bytes"))
 
     @property
@@ -250,7 +285,9 @@ class TestProtocolMessage(Message):
     @property
     def content_set_float(self) -> FrozenSet[float]:
         """Get the 'content_set_float' content from the message."""
-        assert self.is_set("content_set_float"), "'content_set_float' content is not set."
+        assert self.is_set(
+            "content_set_float"
+        ), "'content_set_float' content is not set."
         return cast(FrozenSet[float], self.get("content_set_float"))
 
     @property
@@ -272,10 +309,35 @@ class TestProtocolMessage(Message):
         return cast(str, self.get("content_str"))
 
     @property
-    def content_union(self) -> Union[DataModel, bytes, int, float, bool, str, FrozenSet[int], Tuple[DataModel, ...], Dict[str, DataModel]]:
+    def content_union(
+        self,
+    ) -> Union[
+        DataModel,
+        bytes,
+        int,
+        float,
+        bool,
+        str,
+        FrozenSet[int],
+        Tuple[DataModel, ...],
+        Dict[str, DataModel],
+    ]:
         """Get the 'content_union' content from the message."""
         assert self.is_set("content_union"), "'content_union' content is not set."
-        return cast(Union[DataModel, bytes, int, float, bool, str, FrozenSet[int], Tuple[DataModel, ...], Dict[str, DataModel]], self.get("content_union"))
+        return cast(
+            Union[
+                DataModel,
+                bytes,
+                int,
+                float,
+                bool,
+                str,
+                FrozenSet[int],
+                Tuple[DataModel, ...],
+                Dict[str, DataModel],
+            ],
+            self.get("content_union"),
+        )
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the test_protocol protocol."""
@@ -305,67 +367,105 @@ class TestProtocolMessage(Message):
             expected_nb_of_contents = 0
             if self.performative == TestProtocolMessage.Performative.PERFORMATIVE_CT:
                 expected_nb_of_contents = 1
-                assert type(self.content_ct) == DataModel, "Content 'content_ct' is not of type 'DataModel'."
+                assert (
+                    type(self.content_ct) == DataModel
+                ), "Content 'content_ct' is not of type 'DataModel'."
             elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PT:
                 expected_nb_of_contents = 5
-                assert type(self.content_bytes) == bytes, "Content 'content_bytes' is not of type 'bytes'."
-                assert type(self.content_int) == int, "Content 'content_int' is not of type 'int'."
-                assert type(self.content_float) == float, "Content 'content_float' is not of type 'float'."
-                assert type(self.content_bool) == bool, "Content 'content_bool' is not of type 'bool'."
-                assert type(self.content_str) == str, "Content 'content_str' is not of type 'str'."
+                assert (
+                    type(self.content_bytes) == bytes
+                ), "Content 'content_bytes' is not of type 'bytes'."
+                assert (
+                    type(self.content_int) == int
+                ), "Content 'content_int' is not of type 'int'."
+                assert (
+                    type(self.content_float) == float
+                ), "Content 'content_float' is not of type 'float'."
+                assert (
+                    type(self.content_bool) == bool
+                ), "Content 'content_bool' is not of type 'bool'."
+                assert (
+                    type(self.content_str) == str
+                ), "Content 'content_str' is not of type 'str'."
             elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PCT:
                 expected_nb_of_contents = 12
-                assert type(self.content_set_ct) == frozenset, "Content 'content_set_ct' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_ct) == frozenset
+                ), "Content 'content_set_ct' is not of type 'frozenset'."
                 assert all(
                     type(element) == DataModel for element in self.content_set_ct
                 ), "Elements of the content 'content_set_ct' are not of type 'DataModel'."
-                assert type(self.content_set_bytes) == frozenset, "Content 'content_set_bytes' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_bytes) == frozenset
+                ), "Content 'content_set_bytes' is not of type 'frozenset'."
                 assert all(
                     type(element) == bytes for element in self.content_set_bytes
                 ), "Elements of the content 'content_set_bytes' are not of type 'bytes'."
-                assert type(self.content_set_int) == frozenset, "Content 'content_set_int' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_int) == frozenset
+                ), "Content 'content_set_int' is not of type 'frozenset'."
                 assert all(
                     type(element) == int for element in self.content_set_int
                 ), "Elements of the content 'content_set_int' are not of type 'int'."
-                assert type(self.content_set_float) == frozenset, "Content 'content_set_float' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_float) == frozenset
+                ), "Content 'content_set_float' is not of type 'frozenset'."
                 assert all(
                     type(element) == float for element in self.content_set_float
                 ), "Elements of the content 'content_set_float' are not of type 'float'."
-                assert type(self.content_set_bool) == frozenset, "Content 'content_set_bool' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_bool) == frozenset
+                ), "Content 'content_set_bool' is not of type 'frozenset'."
                 assert all(
                     type(element) == bool for element in self.content_set_bool
                 ), "Elements of the content 'content_set_bool' are not of type 'bool'."
-                assert type(self.content_set_str) == frozenset, "Content 'content_set_str' is not of type 'frozenset'."
+                assert (
+                    type(self.content_set_str) == frozenset
+                ), "Content 'content_set_str' is not of type 'frozenset'."
                 assert all(
                     type(element) == str for element in self.content_set_str
                 ), "Elements of the content 'content_set_str' are not of type 'str'."
-                assert type(self.content_list_ct) == tuple, "Content 'content_list_ct' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_ct) == tuple
+                ), "Content 'content_list_ct' is not of type 'tuple'."
                 assert all(
                     type(element) == DataModel for element in self.content_list_ct
                 ), "Elements of the content 'content_list_ct' are not of type 'DataModel'."
-                assert type(self.content_list_bytes) == tuple, "Content 'content_list_bytes' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_bytes) == tuple
+                ), "Content 'content_list_bytes' is not of type 'tuple'."
                 assert all(
                     type(element) == bytes for element in self.content_list_bytes
                 ), "Elements of the content 'content_list_bytes' are not of type 'bytes'."
-                assert type(self.content_list_int) == tuple, "Content 'content_list_int' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_int) == tuple
+                ), "Content 'content_list_int' is not of type 'tuple'."
                 assert all(
                     type(element) == int for element in self.content_list_int
                 ), "Elements of the content 'content_list_int' are not of type 'int'."
-                assert type(self.content_list_float) == tuple, "Content 'content_list_float' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_float) == tuple
+                ), "Content 'content_list_float' is not of type 'tuple'."
                 assert all(
                     type(element) == float for element in self.content_list_float
                 ), "Elements of the content 'content_list_float' are not of type 'float'."
-                assert type(self.content_list_bool) == tuple, "Content 'content_list_bool' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_bool) == tuple
+                ), "Content 'content_list_bool' is not of type 'tuple'."
                 assert all(
                     type(element) == bool for element in self.content_list_bool
                 ), "Elements of the content 'content_list_bool' are not of type 'bool'."
-                assert type(self.content_list_str) == tuple, "Content 'content_list_str' is not of type 'tuple'."
+                assert (
+                    type(self.content_list_str) == tuple
+                ), "Content 'content_list_str' is not of type 'tuple'."
                 assert all(
                     type(element) == str for element in self.content_list_str
                 ), "Elements of the content 'content_list_str' are not of type 'str'."
             elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PMT:
                 expected_nb_of_contents = 3
-                assert type(self.content_dict_int_ct) == dict, "Content 'content_dict_int_ct' is not of type 'dict'."
+                assert (
+                    type(self.content_dict_int_ct) == dict
+                ), "Content 'content_dict_int_ct' is not of type 'dict'."
                 for key, value in self.content_dict_int_ct.items():
                     assert (
                         type(key) == int
@@ -373,7 +473,9 @@ class TestProtocolMessage(Message):
                     assert (
                         type(value) == DataModel
                     ), "Values of 'content_dict_int_ct' dictionary are not of type 'DataModel'."
-                assert type(self.content_dict_bool_int) == dict, "Content 'content_dict_bool_int' is not of type 'dict'."
+                assert (
+                    type(self.content_dict_bool_int) == dict
+                ), "Content 'content_dict_bool_int' is not of type 'dict'."
                 for key, value in self.content_dict_bool_int.items():
                     assert (
                         type(key) == bool
@@ -381,7 +483,9 @@ class TestProtocolMessage(Message):
                     assert (
                         type(value) == bytes
                     ), "Values of 'content_dict_bool_int' dictionary are not of type 'bytes'."
-                assert type(self.content_dict_str_float) == dict, "Content 'content_dict_str_float' is not of type 'dict'."
+                assert (
+                    type(self.content_dict_str_float) == dict
+                ), "Content 'content_dict_str_float' is not of type 'dict'."
                 for key, value in self.content_dict_str_float.items():
                     assert (
                         type(key) == str
@@ -391,43 +495,63 @@ class TestProtocolMessage(Message):
                     ), "Values of 'content_dict_str_float' dictionary are not of type 'float'."
             elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 1
-                assert type(self.content_union) == DataModel or type(self.content_union) == bool or type(self.content_union) == bytes or type(self.content_union) == dict or type(self.content_union) == float or type(self.content_union) == frozenset or type(self.content_union) == int or type(self.content_union) == str or type(self.content_union) == tuple, "Content 'content_union' should be either of the following types: ['DataModel', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']."
+                assert (
+                    type(self.content_union) == DataModel
+                    or type(self.content_union) == bool
+                    or type(self.content_union) == bytes
+                    or type(self.content_union) == dict
+                    or type(self.content_union) == float
+                    or type(self.content_union) == frozenset
+                    or type(self.content_union) == int
+                    or type(self.content_union) == str
+                    or type(self.content_union) == tuple
+                ), "Content 'content_union' should be either of the following types: ['DataModel', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']."
                 if type(self.content_union) == frozenset:
-                    assert (
-                        all(type(element) == int for element in self.content_union)
+                    assert all(
+                        type(element) == int for element in self.content_union
                     ), "Elements of the content 'content_union' should be of type 'int'."
                 if type(self.content_union) == tuple:
-                    assert (
-                        all(type(element) == DataModel for element in self.content_union)
+                    assert all(
+                        type(element) == DataModel for element in self.content_union
                     ), "Elements of the content 'content_union' should be of type 'CustomDataModel'."
                 if type(self.content_union) == dict:
                     for key, value in self.content_union.items():
                         assert (
-                                (type(key) == str and type(value) == DataModel)
-                    ), "The type of keys and values of 'content_union' dictionary must be 'str' and 'DataModel' respectively."
+                            type(key) == str and type(value) == DataModel
+                        ), "The type of keys and values of 'content_union' dictionary must be 'str' and 'DataModel' respectively."
             elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_ct) == DataModel, "Content 'content_o_ct' is not of type 'DataModel'."
+                    assert (
+                        type(self.content_o_ct) == DataModel
+                    ), "Content 'content_o_ct' is not of type 'DataModel'."
                 if self.is_set("content_o_bool"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_bool) == bool, "Content 'content_o_bool' is not of type 'bool'."
+                    assert (
+                        type(self.content_o_bool) == bool
+                    ), "Content 'content_o_bool' is not of type 'bool'."
                 if self.is_set("content_o_set_float"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_set_float) == frozenset, "Content 'content_o_set_float' is not of type 'frozenset'."
+                    assert (
+                        type(self.content_o_set_float) == frozenset
+                    ), "Content 'content_o_set_float' is not of type 'frozenset'."
                     assert all(
                         type(element) == float for element in self.content_o_set_float
                     ), "Elements of the content 'content_o_set_float' are not of type 'float'."
                 if self.is_set("content_o_list_bytes"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_list_bytes) == tuple, "Content 'content_o_list_bytes' is not of type 'tuple'."
+                    assert (
+                        type(self.content_o_list_bytes) == tuple
+                    ), "Content 'content_o_list_bytes' is not of type 'tuple'."
                     assert all(
                         type(element) == bytes for element in self.content_o_list_bytes
                     ), "Elements of the content 'content_o_list_bytes' are not of type 'bytes'."
                 if self.is_set("content_o_dict_str_int"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_dict_str_int) == dict, "Content 'content_o_dict_str_int' is not of type 'dict'."
+                    assert (
+                        type(self.content_o_dict_str_int) == dict
+                    ), "Content 'content_o_dict_str_int' is not of type 'dict'."
                     for key, value in self.content_o_dict_str_int.items():
                         assert (
                             type(key) == str
@@ -437,17 +561,25 @@ class TestProtocolMessage(Message):
                         ), "Values of 'content_o_dict_str_int' dictionary are not of type 'int'."
                 if self.is_set("content_o_union"):
                     expected_nb_of_contents += 1
-                    assert type(self.content_o_union) == dict or type(self.content_o_union) == frozenset or type(self.content_o_union) == str, "Content 'content_o_union' should be either of the following types: ['dict', 'frozenset', 'str']."
+                    assert (
+                        type(self.content_o_union) == dict
+                        or type(self.content_o_union) == frozenset
+                        or type(self.content_o_union) == str
+                    ), "Content 'content_o_union' should be either of the following types: ['dict', 'frozenset', 'str']."
                     if type(self.content_o_union) == frozenset:
-                        assert (
-                            all(type(element) == DataModel for element in self.content_o_union)
+                        assert all(
+                            type(element) == DataModel
+                            for element in self.content_o_union
                         ), "Elements of the content 'content_o_union' should be of type 'CustomDataModel'."
                     if type(self.content_o_union) == dict:
                         for key, value in self.content_o_union.items():
                             assert (
-                                    (type(key) == str and type(value) == float)
-                        ), "The type of keys and values of 'content_o_union' dictionary must be 'str' and 'float' respectively."
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS:
+                                type(key) == str and type(value) == float
+                            ), "The type of keys and values of 'content_o_union' dictionary must be 'str' and 'float' respectively."
+            elif (
+                self.performative
+                == TestProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
+            ):
                 expected_nb_of_contents = 0
 
             # Check correct content count

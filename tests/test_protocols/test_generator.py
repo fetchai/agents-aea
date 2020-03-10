@@ -92,21 +92,16 @@ class TestGenerateProtocol:
     def test_generated_protocol_serialisation_ct(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message with pt content
-        some_dict = {
-            1: True,
-            2: False,
-            3: True,
-            4: False
-        }
+        some_dict = {1: True, 2: False, 3: True, 4: False}
         data_model = TestProtocolMessage.DataModel(
-            bytes_field=b'some bytes',
+            bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
             bool_field=True,
             str_field="some string",
             set_field={1, 2, 3, 4, 5},
             list_field=["some string 1", "some string 2"],
-            dict_field=some_dict
+            dict_field=some_dict,
         )
         message = TestProtocolMessage(
             message_id=1,
@@ -120,9 +115,7 @@ class TestGenerateProtocol:
         encoded_message_in_bytes = TestProtocolSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TestProtocolSerializer().decode(
-            encoded_message_in_bytes
-        )
+        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -152,9 +145,7 @@ class TestGenerateProtocol:
         encoded_message_in_bytes = TestProtocolSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TestProtocolSerializer().decode(
-            encoded_message_in_bytes
-        )
+        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -329,13 +320,20 @@ class TestGenerateProtocol:
             assert (
                 agent_2_handler.handled_message.performative == message.performative
             ), "Message from Agent 1 to 2: performatives do not match"
-            assert agent_2_handler.handled_message.content_bytes == message.content_bytes, "Message from Agent 1 to 2: content_bytes do not match"
-            assert agent_2_handler.handled_message.content_int == message.content_int, "Message from Agent 1 to 2: content_int do not match"
+            assert (
+                agent_2_handler.handled_message.content_bytes == message.content_bytes
+            ), "Message from Agent 1 to 2: content_bytes do not match"
+            assert (
+                agent_2_handler.handled_message.content_int == message.content_int
+            ), "Message from Agent 1 to 2: content_int do not match"
             # floats do not seem to lose some precision when serialised then deserialised using protobuf
             # assert agent_2_handler.handled_message.content_float == message.content_float, "Message from Agent 1 to 2: content_float do not match"
-            assert agent_2_handler.handled_message.content_bool == message.content_bool, "Message from Agent 1 to 2: content_bool do not match"
-            assert agent_2_handler.handled_message.content_str == message.content_str, "Message from Agent 1 to 2: content_str do not match"
-
+            assert (
+                agent_2_handler.handled_message.content_bool == message.content_bool
+            ), "Message from Agent 1 to 2: content_bool do not match"
+            assert (
+                agent_2_handler.handled_message.content_str == message.content_str
+            ), "Message from Agent 1 to 2: content_str do not match"
 
             assert (
                 agent_1_handler.handled_message.message_id == message_2.message_id
@@ -358,12 +356,20 @@ class TestGenerateProtocol:
             assert (
                 agent_1_handler.handled_message.performative == message_2.performative
             ), "Message from Agent 2 to 1: performatives do not match"
-            assert agent_1_handler.handled_message.content_bytes == message_2.content_bytes, "Message from Agent 2 to 1: content_bytes do not match"
-            assert agent_1_handler.handled_message.content_int == message_2.content_int, "Message from Agent 2 to 1: content_int do not match"
+            assert (
+                agent_1_handler.handled_message.content_bytes == message_2.content_bytes
+            ), "Message from Agent 2 to 1: content_bytes do not match"
+            assert (
+                agent_1_handler.handled_message.content_int == message_2.content_int
+            ), "Message from Agent 2 to 1: content_int do not match"
             # floats do not seem to lose some precision when serialised then deserialised using protobuf
             # assert agent_1_handler.handled_message.content_float == message_2.content_float, "Message from Agent 2 to 1: content_float do not match"
-            assert agent_1_handler.handled_message.content_bool == message_2.content_bool, "Message from Agent 2 to 1: content_bool do not match"
-            assert agent_1_handler.handled_message.content_str == message_2.content_str, "Message from Agent 2 to 1: content_str do not match"
+            assert (
+                agent_1_handler.handled_message.content_bool == message_2.content_bool
+            ), "Message from Agent 2 to 1: content_bool do not match"
+            assert (
+                agent_1_handler.handled_message.content_str == message_2.content_str
+            ), "Message from Agent 2 to 1: content_str do not match"
             time.sleep(2.0)
         finally:
             aea_1.stop()
@@ -446,9 +452,7 @@ class ProtocolGeneratorTestCase(TestCase):
 class Agent1Handler(Handler):
     """The handler for agent 1."""
 
-    SUPPORTED_PROTOCOL = (
-        TestProtocolMessage.protocol_id
-    )  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -480,9 +484,7 @@ class Agent1Handler(Handler):
 class Agent2Handler(Handler):
     """The handler for agent 2."""
 
-    SUPPORTED_PROTOCOL = (
-        TestProtocolMessage.protocol_id
-    )  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, encoded_messsage, **kwargs):
         """Initialize the handler."""

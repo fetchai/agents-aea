@@ -19,7 +19,7 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-from typing import Set, List, Dict
+from typing import Dict, List, Set
 
 
 class DataModel:
@@ -78,8 +78,6 @@ class DataModel:
         :param data_model_from_pb2: the protocol buffer content object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'data_model_from_pb2' argument.
         """
-        set_field = set(data_model_from_pb2.set_field)
-
         return DataModel(
             bytes_field=data_model_from_pb2.bytes_field,
             int_field=data_model_from_pb2.int_field,
