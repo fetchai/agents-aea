@@ -89,15 +89,16 @@ class Contract(BaseContract):
             address=contract_address, abi=self.abi
         )
 
-    def set_instance_w_address(
+    def set_deployed_instance(
         self, ledger_api: EthereumApi, contract_address: str
     ) -> None:
         """
-                Set the contract address.
+        Set the contract address.
 
-                :param ledger_api: the ledger_api we are using.
-                :param contract_address: the contract address
-                """
+        :param ledger_api: the ledger_api we are using.
+        :param contract_address: the contract address
+        """
+        assert self._instance is None, "Instance already set!"
         self._instance = ledger_api.api.eth.contract(
-            address=contract_address, abi=self.abi
+            address=contract_address, abi=self._abi, bytecode=self.bytecode
         )

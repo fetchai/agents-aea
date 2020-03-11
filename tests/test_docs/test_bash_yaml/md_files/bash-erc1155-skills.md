@@ -51,8 +51,12 @@ name: erc1155_deploy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
-description: "The erc1155 deploy skill implements the functionality to depoly and interact with a smart contract."
+fingerprint:
+  __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
+  behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
+  handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
+  strategy.py: QmWpc8aMte2vJ4akiKn6qTfXWavfE1vBtJqX1E7CFuLYaC
+description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   service_registration:
@@ -74,23 +78,17 @@ models:
       is_ledger_tx: True
       nft: 1
       ft: 2
-      item_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      mint_stock: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+      nb_tokens: 10
       from_supply: 10
       to_supply: 0
       value: 0
       search_schema:
         attribute_one:
-          name: country
-          type: str
-          is_required: True
-        attribute_two:
-          name: city
-          type: str
+          name: has_erc1155_contract
+          type: bool
           is_required: True
       search_data:
-        country: UK
-        city: Cambridge
+        has_erc1155_contract: True
 protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:

@@ -2,5 +2,8 @@ name: scaffold
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: Qmay9PmfeHqqVa3rdgiJYJnzZzTStboQEfpwXDpcgJMHTJ
+  message.py: QmdvAdYSHNdZyUMrK3ue7quHAuSNwgZZSHqxYXyvh8Nie4
+  serialization.py: QmVUzwaSMErJgNFYQZkzsDhuuT2Ht4EdbGJ443usHmPxVv
 description: "The scaffold protocol scaffolds a protocol to be implemented by the developer."

@@ -25,16 +25,14 @@ from pathlib import Path
 from typing import Collection, cast
 
 import click
-from click import pass_context
 
 from aea.cli.common import (
     Context,
     PublicIdParameter,
     _copy_package_directory,
     _find_item_locally,
+    check_aea_project,
     logger,
-    pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.cli.registry.utils import fetch_package
 from aea.configurations.base import (
@@ -53,12 +51,13 @@ from aea.configurations.loader import ConfigLoader
 
 @click.group()
 @click.option("--registry", is_flag=True, help="For adding from Registry.")
-@pass_ctx
-def add(ctx: Context, registry):
+@click.pass_context
+@check_aea_project
+def add(click_context, registry):
     """Add a resource to the agent."""
+    ctx = cast(Context, click_context.obj)
     if registry:
         ctx.set_config("is_registry", True)
-    try_to_load_agent_config(ctx)
 
 
 def _is_item_present(item_type, item_public_id, ctx):
@@ -155,7 +154,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
 @add.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def connection(click_context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
     _add_item(click_context, "connection", connection_public_id)
@@ -163,7 +162,7 @@ def connection(click_context, connection_public_id: PublicId):
 
 @add.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def contract(click_context, contract_public_id: PublicId):
     """Add a contract to the configuration file."""
     _add_item(click_context, "contract", contract_public_id)
@@ -171,7 +170,7 @@ def contract(click_context, contract_public_id: PublicId):
 
 @add.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def protocol(click_context, protocol_public_id):
     """Add a protocol to the agent."""
     _add_item(click_context, "protocol", protocol_public_id)
@@ -179,7 +178,7 @@ def protocol(click_context, protocol_public_id):
 
 @add.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def skill(click_context, skill_public_id: PublicId):
     """Add a skill to the agent."""
     _add_item(click_context, "skill", skill_public_id)
