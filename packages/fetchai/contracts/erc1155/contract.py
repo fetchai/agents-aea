@@ -65,12 +65,17 @@ class ERC1155Contract(Contract):
         super().__init__(contract_id, contract_config, contract_interface)
         self.token_ids = {}  # type: Dict[int, int]
 
-    def create_token_ids(self, token_type: int, nb_goods: int) -> Dict[int, int]:
+    def create_token_ids(self, token_type: int, nb_tokens: int) -> Dict[int, int]:
         """Populate the token_ids dictionary."""
         assert self.token_ids == [], "Item ids already created."
-        for i in range(nb_goods):
-            print(self.instance.functions.is_token_id_exists(i).call())
-            self.token_ids[Helpers().generate_id(token_type, i)] = 0
+        lowest_valid_integer = 0
+        token_id = self.instance.functions.is_token_id_exists(lowest_valid_integer).call()
+        for i in range(nb_tokens):
+            while self.instance.functions.is_token_id_exists(i).call():
+                self.token_ids[Helpers().generate_id(token_type, i)] = token_type
+                lowest_valid_integer += 1
+                token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+                self.token_ids[token_id] = token_type
         return self.token_ids
 
     def get_deploy_transaction(

@@ -29,7 +29,7 @@ DEFAULT_LEDGER_ID = "ethereum"
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_NFT = 1
 DEFAULT_FT = 2
-DEFAULT_TOKEN_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+DEFAULT_NB_TOKENS = 10
 DEFAULT_MINT_STOCK = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
 DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
@@ -52,7 +52,7 @@ class Strategy(Model):
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self.nft = kwargs.pop("nft", DEFAULT_NFT)
         self.ft = kwargs.pop("ft", DEFAULT_NFT)
-        self.token_ids = kwargs.pop("token_ids", DEFAULT_TOKEN_IDS)
+        self.nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
         self.mint_stock = kwargs.pop("mint_stock", DEFAULT_MINT_STOCK)
         self.contract_address = kwargs.pop("contract_address", None)
         self.from_supply = kwargs.pop("from_supply", DEFAULT_FROM_SUPPLY)
