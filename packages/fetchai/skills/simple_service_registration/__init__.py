@@ -17,34 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
-
-from aea.skills.tasks import Task
-
-
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def execute(self, *args, **kwargs) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+"""This module contains the implementation of the default skill."""

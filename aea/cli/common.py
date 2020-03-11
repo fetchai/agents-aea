@@ -431,7 +431,7 @@ def _is_validate_author_handle(author: str) -> bool:
 
 
 def _try_get_item_source_path(
-    path: str, author_name: str, item_type_plural: str, item_name: str
+    path: str, author_name: Optional[str], item_type_plural: str, item_name: str
 ) -> str:
     """
     Get the item source path.
@@ -443,7 +443,10 @@ def _try_get_item_source_path(
 
     :return: the item source path
     """
-    source_path = os.path.join(path, author_name, item_type_plural, item_name)
+    if author_name is None:
+        source_path = os.path.join(path, item_type_plural, item_name)
+    else:
+        source_path = os.path.join(path, author_name, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
             'Item "{}" not found in source folder.'.format(item_name)
@@ -464,7 +467,7 @@ def _try_get_vendorized_item_target_path(
 
     :return: the item target path
     """
-    target_path = os.path.join(path, "vendor", author_name, item_type_plural, item_name)
+    target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)

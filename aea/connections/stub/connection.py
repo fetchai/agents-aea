@@ -70,7 +70,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    message = split[3]
+    message = split[3].decode("unicode_escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
@@ -145,9 +145,13 @@ class StubConnection(Connection):
         logger.debug("read line: {!r}".format(line))
         lines = b""
         while len(line) > 0:
-            lines += line
+            if line[-1:] == b"\n":
+                lines += line[:-1]
+            else:
+                lines += line
             line = self.input_file.readline()
-        self._process_line(lines)
+        if lines != b"":
+            self._process_line(lines)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
