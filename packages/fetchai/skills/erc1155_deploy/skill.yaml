@@ -2,7 +2,12 @@ name: erc1155_deploy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
+  behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
+  generic_data_model.py: QmP6QRQVWLP4ucEHY9TCjvskNmoS8zZviu69MziMG2XskU
+  handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
+  strategy.py: QmabvPsL1kqsjLoMjsvCz2oEx9on816Hpu2xNPvX7ei9fU
 description: "The weather station skill implements the functionality to sell weather data."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:

@@ -3,8 +3,8 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  __init__.py: QmaJqZLGPNaAKtuUGpDf285eBrewqCToYxDus1UdPkJgya
-  contract.py: QmUgvNANpWC5vgw8E5vbpbgDfXrUAUy5ZbFVv6NQMGqmB1
+  __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
+  contract.py: QmXCaZUSrEqSNhBRJMk2ehPfVEFt8u3xM7HuuoZAxQfy3V
 description: "The erc1155 contract implements an ERC1155 contract package."
 path_to_contract_interface: "build/erc1155.json"
 dependencies:
