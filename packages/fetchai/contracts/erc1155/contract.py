@@ -63,7 +63,18 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_id, contract_config, contract_interface)
-        self.token_ids = {}  # type: Dict[int, int]
+        self._token_ids = {}  # type: Dict[int, int]
+        self._game_currency_id = 0  # type: int
+
+    @property
+    def token_ids(self) -> Dict[int, int]:
+        """The generated token ids."""
+        return self._token_ids
+
+    @property
+    def game_currency_id(self) -> int:
+        """The generated game currency id."""
+        return self._game_currency_id
 
     def create_token_ids(self, token_type: int, nb_tokens: int) -> Dict[int, int]:
         """Populate the token_ids dictionary."""
@@ -78,6 +89,13 @@ class ERC1155Contract(Contract):
             self.token_ids[token_id] = token_type
 
         return self.token_ids
+
+    def generate_single_item_id(self, token_type: int, game_currency: int) -> int:
+        """Create single token id"""
+        if self.instance.functions.is_token_id_exists(game_currency).call():
+            self._game_currency_id = Helpers().generate_id(token_type, game_currency)
+        self._game_currency_id = game_currency
+        return self.game_currency_id
 
     def get_deploy_transaction(
         self,
@@ -196,6 +214,60 @@ class ERC1155Contract(Contract):
         )
         return tx
 
+    def get_create_single_transaction(
+        self,
+        deployer_address: Address,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+    ) -> TransactionMessage:
+
+        """
+              Create an mint a batch of items.
+
+              :params address: The address that will receive the items
+              :params mint_quantities: A list[10] of ints. The index represents the id in the item_ids list.
+              """
+        # create the items
+
+        tx = self._get_create_single_tx(
+            deployer_address=deployer_address, ledger_api=ledger_api,
+        )
+
+        #  Create the transaction message for the Decision maker
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id="contract_create_currency",
+            tx_sender_addr=deployer_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload={"tx": tx},
+        )
+
+        return tx_message
+
+    def _get_create_single_tx(
+        self, deployer_address: Address, ledger_api: LedgerApi
+    ) -> str:
+        """Create an item."""
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        tx = self.instance.functions.createSingle(
+            deployer_address, self._game_currency_id, ""
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 500000,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+        return tx
+
     def get_mint_batch_transaction(
         self,
         deployer_address: Address,
@@ -249,6 +321,73 @@ class ERC1155Contract(Contract):
             {
                 "chainId": 3,
                 "gas": 300000,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+
+        return tx
+
+    def get_mint_single_tx(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        mint_quantity: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+    ) -> TransactionMessage:
+
+        tx = self._create_mint_single_tx(
+            deployer_address=deployer_address,
+            recipient_address=recipient_address,
+            token_id=self.game_currency_id,
+            mint_quantity=mint_quantity,
+            ledger_api=ledger_api,
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id="contract_mint_batch",
+            tx_sender_addr=deployer_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload={"tx": tx},
+        )
+
+        return tx_message
+
+    def _create_mint_single_tx(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        token_id: int,
+        mint_quantity: int,
+        ledger_api: LedgerApi,
+    ) -> str:
+        """Mint a batch of items."""
+        # mint batch
+        nonce = ledger_api.api.eth.getTransactionCount(
+            ledger_api.api.toChecksumAddress(deployer_address)
+        )
+        assert recipient_address is not None
+        decoded_type = Helpers().decode_id(token_id)
+        assert (
+            decoded_type == 1 or decoded_type == 2
+        ), "The token prefix must be 1 or 2."
+        if decoded_type == 1:
+            assert mint_quantity == 1, "Cannot mint NFT with mint_quantity more than 1"
+        data = b"MintingSingle"
+        tx = self.instance.functions.mint(
+            recipient_address, token_id, mint_quantity, data
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -591,5 +730,11 @@ class Helpers:
         return keccak256(b"".join(m_list))
 
     def generate_id(self, index: int, token_type: int):
+        """Generate a token_id"""
         final_id_int = (token_type << 128) + index
         return final_id_int
+
+    def decode_id(self, token_id: int):
+        """Decode a give token id."""
+        decoded_type = token_id >> 128
+        return decoded_type
