@@ -19,7 +19,6 @@
 
 """This test module contains the tests for the `aea generate protocol` sub-command."""
 
-# import filecmp
 import json
 import os
 import shutil
@@ -88,11 +87,6 @@ class TestGenerateProtocol:
             standalone_mode=False,
         )
 
-    # def test_protoc_exists(self):
-    #     """Test that the exit code is equal to 0 when creating the agent."""
-    #     res = shutil.which("protoc")
-    #     assert res is not None
-
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
         assert self.create_result.exit_code == 0
@@ -101,49 +95,13 @@ class TestGenerateProtocol:
         """Test that the exit code is equal to 0 when generating a protocol."""
         assert self.result.exit_code == 0
 
-    # def test_resource_folder_contains_module_message(self):
-    #     """Test that the protocol folder contains message.py module."""
-    #     p = Path(
-    #         self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py"
-    #     )
-    #     original = Path(
-    #         CUR_PATH,
-    #         "..",
-    #         "examples",
-    #         "protocol_specification_ex",
-    #         "output",
-    #         "two_party_negotiation",
-    #         "message.py",
-    #     )
-    #     assert filecmp.cmp(p, original)
-
-    # def test_resource_folder_contains_module_serialization(self):
-    #     """Test that the protocol folder contains serialization.py module."""
-    #     p = Path(
-    #         self.t,
-    #         self.agent_name,
-    #         "protocols",
-    #         "two_party_negotiation",
-    #         "serialization.py",
-    #     )
-    #     original = Path(
-    #         CUR_PATH,
-    #         "..",
-    #         "examples",
-    #         "protocol_specification_ex",
-    #         "output",
-    #         "two_party_negotiation",
-    #         "serialization.py",
-    #     )
-    #     assert filecmp.cmp(p, original)
-
     def test_resource_folder_contains_configuration_file(self):
         """Test that the protocol folder contains a structurally valid configuration file."""
         p = Path(
             self.t,
             self.agent_name,
             "protocols",
-            "two_party_negotiation",
+            "test_protocol",
             DEFAULT_PROTOCOL_CONFIG_FILE,
         )
         config_file = yaml.safe_load(open(p))
@@ -167,7 +125,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.protocol_name = "two_party_negotiation"
+        cls.protocol_name = "test_protocol"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         shutil.copyfile(
@@ -294,7 +252,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name 'two_party_negotiation' already exists. Aborting..."
+        s = "A protocol with name 'test_protocol' already exists. Aborting..."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
@@ -302,9 +260,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert Path(
-            self.t, self.agent_name, "protocols", "two_party_negotiation"
-        ).exists()
+        assert Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -365,21 +321,12 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         """Test that the exit code is equal to 1 when config file is non-compliant (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
-    # def test_configuration_file_not_valid(self):
-    #     """Test that the log error message is fixed.
-    #
-    #     The expected message is: 'Cannot find protocol: '{protocol_name}'
-    #     """
-    #     self.mocked_logger_error.assert_called_once_with("test error message")
-
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(
-            self.t, self.agent_name, "protocols", "two_party_negotiation"
-        ).exists()
+        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -440,9 +387,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(
-            self.t, self.agent_name, "protocols", "two_party_negotiation"
-        ).exists()
+        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package fetch.aea.TestProtocol;
+
+message TestProtocolMessage{
+
+    // Custom Types
+    message DataModel{
+        bytes bytes_field = 1;
+        int32 int_field = 2;
+        float float_field = 3;
+        bool bool_field = 4;
+        string str_field = 5;
+        repeated int32 set_field = 6;
+        repeated string list_field = 7;
+        map<int32, bool> dict_field = 8;
+    }
+
+
+    // Performatives and contents
+    message Performative_Ct{
+        DataModel content_ct = 1;
+    }
+
+    message Performative_Pt{
+        bytes content_bytes = 1;
+        int32 content_int = 2;
+        float content_float = 3;
+        bool content_bool = 4;
+        string content_str = 5;
+    }
+
+    message Performative_Pct{
+        repeated DataModel content_set_ct = 1;
+        repeated bytes content_set_bytes = 2;
+        repeated int32 content_set_int = 3;
+        repeated float content_set_float = 4;
+        repeated bool content_set_bool = 5;
+        repeated string content_set_str = 6;
+        repeated DataModel content_list_ct = 7;
+        repeated bytes content_list_bytes = 8;
+        repeated int32 content_list_int = 9;
+        repeated float content_list_float = 10;
+        repeated bool content_list_bool = 11;
+        repeated string content_list_str = 12;
+    }
+
+    message Performative_Pmt{
+        map<int32, DataModel> content_dict_int_ct = 1;
+        map<bool, bytes> content_dict_bool_int = 2;
+        map<string, float> content_dict_str_float = 3;
+    }
+
+    message Performative_Mt{
+        DataModel content_union_type_DataModel = 1;
+        bytes content_union_type_bytes = 2;
+        int32 content_union_type_int = 3;
+        float content_union_type_float = 4;
+        bool content_union_type_bool = 5;
+        string content_union_type_str = 6;
+        repeated int32 content_union_type_set_of_int = 7;
+        repeated DataModel content_union_type_list_of_DataModel = 8;
+        map<string, DataModel> content_union_type_dict_of_str_DataModel = 9;
+    }
+
+    message Performative_O{
+        DataModel content_o_ct = 1;
+        bool content_o_ct_is_set = 2;
+        bool content_o_bool = 3;
+        bool content_o_bool_is_set = 4;
+        repeated float content_o_set_float = 5;
+        bool content_o_set_float_is_set = 6;
+        repeated bytes content_o_list_bytes = 7;
+        bool content_o_list_bytes_is_set = 8;
+        map<string, int32> content_o_dict_str_int = 9;
+        bool content_o_dict_str_int_is_set = 10;
+        string content_o_union_type_str = 11;
+        map<string, int32> content_o_union_type_dict_of_str_int = 12;
+        repeated DataModel content_o_union_type_set_of_DataModel = 13;
+        map<string, float> content_o_union_type_dict_of_str_float = 14;
+        bool content_o_union_is_set = 15;
+    }
+
+    message Performative_Empty_Contents{}
+
+
+    // Standard TestProtocolMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Performative_Ct performative_ct = 5;
+        Performative_Empty_Contents performative_empty_contents = 6;
+        Performative_Mt performative_mt = 7;
+        Performative_O performative_o = 8;
+        Performative_Pct performative_pct = 9;
+        Performative_Pmt performative_pmt = 10;
+        Performative_Pt performative_pt = 11;
+    }
+}
