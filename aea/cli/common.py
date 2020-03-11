@@ -71,10 +71,9 @@ AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\
 AUTHOR = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_CONNECTION = PublicId.from_str(
-    "fetchai/stub:" + DEFAULT_VERSION
-)  # type: PublicId
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
+DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
@@ -454,7 +453,7 @@ def _try_get_item_source_path(
     return source_path
 
 
-def _try_get_vendorized_item_target_path(
+def _try_get_item_target_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
