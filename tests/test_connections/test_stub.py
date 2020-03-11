@@ -48,7 +48,7 @@ class TestStubConnectionReception:
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
-        cls.output_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "output_file.csv"
 
         connection_id = PublicId("fetchai", "stub", "0.1.0")
         cls.connection = StubConnection(
@@ -125,7 +125,7 @@ class TestStubConnectionSending:
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
-        cls.output_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "output_file.csv"
 
         connection_id = PublicId("fetchai", "stub", "0.1.0")
         cls.connection = StubConnection(
@@ -217,7 +217,7 @@ def test_connection_from_config():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection.from_config(
         address="pk",
         connection_configuration=ConnectionConfig(
@@ -235,7 +235,7 @@ async def test_disconnection_when_already_disconnected():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
@@ -254,7 +254,7 @@ async def test_connection_when_already_connected():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
@@ -275,7 +275,7 @@ async def test_receiving_returns_none_when_error_occurs():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
