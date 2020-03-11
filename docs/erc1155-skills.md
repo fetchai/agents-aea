@@ -14,6 +14,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 The scope of the specific demo is to demonstrate how to deploy a smart contract and interact with it. For the specific use-case, we create two AEAs one that deploys and creates tokens inside the smart contract and the other that signs a transaction so we can complete an atomic swap. The smart contract we are using is an ERC1155 smart contract
 with a one-step atomic swap functionality. That means the trade between the two AEAs can be trustless.
 
+####Note:
+This demo serves demonstrative purposes only. Since the AEA deploying the contract also has the ability to mint tokens, 
+in reality the transfer of tokens from the AEA signing the transaction is worthless.
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -61,14 +65,6 @@ aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 
-Additionally, create the private key for the client AEA.
-
-Generate and add a key for Ethereum use:
-```bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
 ### Update the AEA configs
 
 Both in `my_erc1155_deploy/aea-config.yaml` and
@@ -91,8 +87,12 @@ name: erc1155_deploy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
-description: "The erc1155 deploy skill implements the functionality to depoly and interact with a smart contract."
+fingerprint:
+  __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
+  behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
+  handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
+  strategy.py: QmWpc8aMte2vJ4akiKn6qTfXWavfE1vBtJqX1E7CFuLYaC
+description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   service_registration:
@@ -114,23 +114,17 @@ models:
       is_ledger_tx: True
       nft: 1
       ft: 2
-      item_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      mint_stock: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+      nb_tokens: 10
       from_supply: 10
       to_supply: 0
       value: 0
       search_schema:
         attribute_one:
-          name: country
-          type: str
-          is_required: True
-        attribute_two:
-          name: city
-          type: str
+          name: has_erc1155_contract
+          type: bool
           is_required: True
       search_data:
-        country: UK
-        city: Cambridge
+        has_erc1155_contract: True
 protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
@@ -141,7 +135,7 @@ The `search_schema` and the `search_data` are used to register the service in th
 
 ### Fund the deployer AEA
 
-To create some wealth for your deployer AEA for the Ethereum `ropsten` network:
+To create some wealth for your deployer AEA for the Ethereum `ropsten` network. Note that this needs to be executed from deployer AEA folder:
 
 ``` bash
 aea generate-wealth ethereum
@@ -194,8 +188,8 @@ This diagram shows the communication between the various entities as data is suc
         activate Blockchain
         
         Deployer_AEA->>Blockchain: deployes smart contract
-        Deployer_AEA->>Erc1155_contract: creates tokens
-        Deployer_AEA->>Erc1155_contract: mint tokens       
+        Deployer_AEA->>ERC1155_contract: creates tokens
+        Deployer_AEA->>ERC1155_contract: mint tokens       
         Deployer_AEA->>Search: register_service
         Client_AEA->>Search: search
         Search-->>Client_AEA: list_of_agents
@@ -203,12 +197,12 @@ This diagram shows the communication between the various entities as data is suc
         Deployer_AEA->>Client_AEA: inform_message
         Client_AEA->>Deployer_AEA: signature
         Deployer_AEA->>Blockchain: send_transaction
-        Client_AEA->>Erc1155_contract: asks_balance
+        Client_AEA->>ERC1155_contract: asks_balance
         
         deactivate Deployer_AEA
         deactivate Search
         deactivate Client_AEA
-        deactivate Erc1155_contract
+        deactivate ERC1155_contract
         deactivate Blockchain
        
 </div>

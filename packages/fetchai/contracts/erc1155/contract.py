@@ -20,6 +20,7 @@
 """This module contains the erc1155 contract definition."""
 import logging
 import random
+from enum import Enum
 from typing import Any, Dict, List
 
 from vyper.utils import keccak256
@@ -35,6 +36,16 @@ logger = logging.getLogger(__name__)
 
 class ERC1155Contract(Contract):
     """The ERC1155 contract class."""
+
+    class Performative(Enum):
+        """The ERC1155 performatives."""
+
+        CONTRACT_DEPLOY = "contract_deploy"
+        CONTRACT_CREATE_BATCH = "contract_create_batch"
+        CONTRACT_MINT_BATCH = "contract_mint_batch"
+        CONTRACT_ATOMIC_SWAP_SINGLE = "contract_atomic_swap_single"
+        CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
+        CONTRACT_SIGN_HASH = "contract_sign_hash"
 
     def __init__(
         self,
@@ -52,23 +63,28 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_id, contract_config, contract_interface)
-        self.token_ids = []  # type: List[int]
-        self.game_currency_id = 0  # type: int
+        self._token_ids = {}  # type: Dict[int, int]
 
-    def generate_item_ids_based_on_nb_goods(
-        self, token_type: int, nb_goods: int
-    ) -> List[int]:
-        """Populate the item_ids list."""
+    @property
+    def token_ids(self) -> Dict[int, int]:
+        """The generated token ids."""
+        return self._token_ids
+
+    def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
+        """Populate the token_ids dictionary."""
         assert self.token_ids == [], "Item ids already created."
-        for i in range(nb_goods):
-            self.token_ids.append(Helpers().generate_id(token_type, i))
-        return self.token_ids
+        lowest_valid_integer = 0
+        token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        token_id_list = []
+        for _i in range(nb_tokens):
+            while self.instance.functions.is_token_id_exists(token_id).call():
+                # id already taken
+                lowest_valid_integer += 1
+                token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+            token_id_list.append(token_id)
+            self.token_ids[token_id] = token_type
 
-    def generate_single_item_id(self, token_type: int, nb_good: int) -> int:
-        """Create single token id"""
-        self.game_currency_id = Helpers().generate_id(nb_good, token_type)
-
-        return self.game_currency_id
+        return token_id_list
 
     def get_deploy_transaction(
         self,
@@ -90,7 +106,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_deploy",
+            tx_id=ERC1155Contract.Performative.CONTRACT_DEPLOY.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -143,7 +159,7 @@ class ERC1155Contract(Contract):
         Create an mint a batch of items.
 
         :params address: The address that will receive the items
-        :params mint_quantities: A list[10] of ints. The index represents the id in the item_ids list.
+        :params mint_quantities: A list[10] of ints. The index represents the id in the token_ids dict.
         """
         # create the items
 
@@ -155,7 +171,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_create_batch",
+            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_BATCH.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -192,6 +208,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_id: int,
     ) -> TransactionMessage:
 
         """
@@ -203,9 +220,7 @@ class ERC1155Contract(Contract):
         # create the items
 
         tx = self._get_create_single_tx(
-            deployer_address=deployer_address,
-            ledger_api=ledger_api,
-            token_id=self.game_currency_id,
+            deployer_address=deployer_address, ledger_api=ledger_api, token_id=token_id
         )
 
         #  Create the transaction message for the Decision maker
@@ -226,7 +241,9 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def _get_create_single_tx(self, deployer_address, ledger_api, token_id) -> str:
+    def _get_create_single_tx(
+        self, deployer_address: Address, ledger_api: LedgerApi, token_id: int
+    ) -> str:
         """Create an item."""
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createSingle(
@@ -261,7 +278,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_mint_batch",
+            tx_id=ERC1155Contract.Performative.CONTRACT_MINT_BATCH.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -276,7 +293,11 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _create_mint_batch_tx(
-        self, deployer_address, recipient_address, batch_mint_quantities, ledger_api,
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        batch_mint_quantities: List[int],
+        ledger_api: LedgerApi,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
@@ -369,16 +390,84 @@ class ERC1155Contract(Contract):
 
         return tx
 
+    def get_mint_single_tx(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        mint_quantity: int,
+        token_id: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+    ) -> TransactionMessage:
+
+        tx = self._create_mint_single_tx(
+            deployer_address=deployer_address,
+            recipient_address=recipient_address,
+            token_id=token_id,
+            mint_quantity=mint_quantity,
+            ledger_api=ledger_api,
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id="contract_mint_batch",
+            tx_sender_addr=deployer_address,
+            tx_counterparty_addr="",
+            tx_amount_by_currency_id={"ETH": 0},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={},
+            info={},
+            ledger_id="ethereum",
+            signing_payload={"tx": tx},
+        )
+
+        return tx_message
+
+    def _create_mint_single_tx(
+        self,
+        deployer_address: Address,
+        recipient_address: Address,
+        token_id: int,
+        mint_quantity: int,
+        ledger_api: LedgerApi,
+    ) -> str:
+        """Mint a batch of items."""
+        # mint batch
+        nonce = ledger_api.api.eth.getTransactionCount(
+            ledger_api.api.toChecksumAddress(deployer_address)
+        )
+        assert recipient_address is not None
+        decoded_type = Helpers().decode_id(token_id)
+        assert (
+            decoded_type == 1 or decoded_type == 2
+        ), "The token prefix must be 1 or 2."
+        if decoded_type == 1:
+            assert mint_quantity == 1, "Cannot mint NFT with mint_quantity more than 1"
+        data = b"MintingSingle"
+        tx = self.instance.functions.mint(
+            recipient_address, token_id, mint_quantity, data
+        ).buildTransaction(
+            {
+                "chainId": 3,
+                "gas": 500000,
+                "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                "nonce": nonce,
+            }
+        )
+
+        return tx
+
     def _create_trade_tx(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value_eth_wei,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value_eth_wei: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
@@ -414,14 +503,14 @@ class ERC1155Contract(Contract):
 
     def _create_trade_batch_tx(
         self,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        token_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
@@ -436,7 +525,7 @@ class ERC1155Contract(Contract):
         tx = self.instance.functions.tradeBatch(
             from_address,
             to_address,
-            item_ids,
+            token_ids,
             from_supplies,
             to_supplies,
             value_eth_wei,
@@ -461,14 +550,14 @@ class ERC1155Contract(Contract):
 
     def get_atomic_swap_single_proposal(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value,
-        trade_nonce,
-        signature,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value: int,
+        trade_nonce: int,
+        signature: str,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
     ) -> TransactionMessage:
@@ -490,7 +579,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_atomic_swap_single",
+            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -504,7 +593,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_balance_of_batch(self, address):
+    def get_balance_of_batch(self, address: Address):
         """Get the balance for a batch of items"""
         return self.instance.functions.balanceOfBatch(
             [address] * 10, self.token_ids
@@ -512,35 +601,36 @@ class ERC1155Contract(Contract):
 
     def get_atomic_swap_batch_transaction_proposal(
         self,
-        deployer_address,
-        contract,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        signature,
-        skill_callback_id,
+        deployer_address: Address,
+        from_address: Address,
+        to_address: Address,
+        token_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        signature: str,
+        skill_callback_id: ContractId,
+        ledger_api: LedgerApi,
     ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == from_address, "Wrong 'from' address"
-        tx = contract._create_trade_batch_tx(
+        tx = self._create_trade_batch_tx(
             from_address=from_address,
             to_address=to_address,
-            item_ids=item_ids,
+            token_ids=token_ids,
             from_supplies=from_supplies,
             to_supplies=to_supplies,
             value=value,
             trade_nonce=trade_nonce,
             signature=signature,
+            ledger_api=ledger_api,
         )
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_deployment",
+            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -556,15 +646,15 @@ class ERC1155Contract(Contract):
 
     def get_hash_single_transaction(
         self,
-        from_address,
-        to_address,
-        item_id,
-        from_supply,
-        to_supply,
-        value,
-        trade_nonce,
-        ledger_api,
-        skill_callback_id,
+        from_address: Address,
+        to_address: Address,
+        item_id: int,
+        from_supply: int,
+        to_supply: int,
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
     ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -584,7 +674,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract-sign-hash",
+            tx_id=ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value,
             tx_sender_addr=from_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -600,24 +690,23 @@ class ERC1155Contract(Contract):
 
     def get_hash_batch_transaction(
         self,
-        from_address,
-        to_address,
-        item_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-        ledger_api,
+        from_address: Address,
+        to_address: Address,
+        token_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
     ):
         """Sign the transaction before send them to agent1."""
-        # assert self.address == terms.to_address
         from_address_hash = self.instance.functions.getAddress(from_address).call()
         to_address_hash = self.instance.functions.getAddress(to_address).call()
         value_eth_wei = ledger_api.api.toWei(value, "ether")
         tx_hash = Helpers().get_hash(
             _from=from_address_hash,
             _to=to_address_hash,
-            _ids=item_ids,
+            _ids=token_ids,
             _from_values=from_supplies,
             _to_values=to_supplies,
             _value_eth=value_eth_wei,
@@ -626,7 +715,7 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
-    def generate_trade_nonce(self, address):  # nosec
+    def generate_trade_nonce(self, address: Address):  # nosec
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():
@@ -638,7 +727,14 @@ class Helpers:
     """Helper functions for hashing."""
 
     def get_single_hash(
-        self, _from, _to, _id, _from_value, _to_value, _value_eth, _nonce
+        self,
+        _from: bytes,
+        _to: bytes,
+        _id: int,
+        _from_value: int,
+        _to_value: int,
+        _value_eth: int,
+        _nonce: int,
     ) -> bytes:
         """Generate a hash mirroring the way we are creating this in the contract."""
         return keccak256(
@@ -656,7 +752,14 @@ class Helpers:
         )
 
     def get_hash(
-        self, _from, _to, _ids, _from_values, _to_values, _value_eth, _nonce
+        self,
+        _from: bytes,
+        _to: bytes,
+        _ids: List[int],
+        _from_values: List[int],
+        _to_values: List[int],
+        _value_eth: int,
+        _nonce: int,
     ) -> bytes:
         """Generate a hash mirroring the way we are creating this in the contract."""
         aggregate_hash = keccak256(
@@ -689,11 +792,12 @@ class Helpers:
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
 
-    def generate_id(self, token_type, token_id):
-        """Generate a token id based on the token type and the token_id."""
-        final_id_int = (token_type << 128) + token_id
+    def generate_id(self, index: int, token_type: int):
+        """Generate a token_id"""
+        final_id_int = (token_type << 128) + index
         return final_id_int
 
-    def decode(self, token_id):
-        decoded_type = token_id % 2 ** 128
+    def decode_id(self, token_id: int):
+        """Decode a give token id."""
+        decoded_type = token_id >> 128
         return decoded_type

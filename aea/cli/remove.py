@@ -28,18 +28,18 @@ import click
 from aea.cli.common import (
     Context,
     PublicIdParameter,
+    check_aea_project,
     logger,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @click.group()
-@pass_ctx
-def remove(ctx: Context):
+@click.pass_context
+@check_aea_project
+def remove(click_context):
     """Remove a resource from the agent."""
-    try_to_load_agent_config(ctx)
 
 
 def _remove_item(ctx: Context, item_type, item_id: PublicId):

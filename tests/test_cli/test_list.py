@@ -174,7 +174,7 @@ class TestListSkills:
             pass
 
 
-@mock.patch("aea.cli.list.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 class ListContractsCommandTestCase(TestCase):
     """Test that the command 'aea list contracts' works as expected."""
 
@@ -183,7 +183,8 @@ class ListContractsCommandTestCase(TestCase):
         self.runner = CliRunner()
 
     @mock.patch("aea.cli.list._get_item_details")
-    @mock.patch("aea.cli.list._format_items")
+    @mock.patch("aea.cli.common._validate_config_consistency")
+    @mock.patch("aea.cli.common._format_items")
     def test_list_contracts_positive(self, *mocks):
         """Test list contracts command positive result."""
         result = self.runner.invoke(

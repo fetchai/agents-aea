@@ -94,6 +94,7 @@ balancesOf: map(address, map(uint256, uint256))
 noncesOf: map(address, map(uint256, bool))
 uri: map(uint256, string[256])
 operators: map(address, map(address, bool))
+token_ids: map(uint256, bool)
 
 # This is to be set before contract migration!
 BATCH_SIZE: constant(uint256) = 10
@@ -320,6 +321,15 @@ def is_nonce_used(addr: address, nonce: uint256) -> bool:
     return self.noncesOf[addr][nonce]
 
 @public
+@constant
+def is_token_id_exists(token_id: uint256) -> bool:
+    """
+    @notice Checks if the given token_id is already created.
+    @param token_id: uint256 the id of the token.
+    """
+    return self.token_ids[token_id]
+
+@public
 def safeTransferFrom(_from: address, _to: address, _id: uint256, _value: uint256, _data: bytes[256]):
     """
     @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
@@ -452,6 +462,7 @@ def createSingle(_item_owner: address, _id: uint256, _path: string[256]):
     assert self.owner == msg.sender, "Owner only can create item."
     self.balancesOf[_item_owner][_id] = 0
     self.tokensIdCount += 1
+    self.token_ids[_id] = True
     self.uri[_id] = _path
     log.URI(_path, _id)
     log.TransferSingle(msg.sender, ZERO_ADDRESS, _item_owner, _id, 0)
@@ -471,6 +482,7 @@ def createBatch(_items_owner: address, _ids: uint256[BATCH_SIZE]):
         id: uint256 = _ids[i]
         self.balancesOf[_items_owner][id] = 0
         self.tokensIdCount += 1
+        self.token_ids[id] = True
     zero_supply: uint256[BATCH_SIZE] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     log.TransferBatch(msg.sender, ZERO_ADDRESS, _items_owner, _ids, zero_supply)
 

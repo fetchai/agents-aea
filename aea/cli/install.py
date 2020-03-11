@@ -22,11 +22,11 @@
 import pprint
 import subprocess  # nosec
 import sys
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import click
 
-from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
+from aea.cli.common import Context, check_aea_project, logger
 from aea.configurations.base import Dependency
 
 
@@ -107,10 +107,11 @@ def _install_from_requirement(file: str):
     default=None,
     help="Install from the given requirements file.",
 )
-@pass_ctx
-def install(ctx: Context, requirement: Optional[str]):
+@click.pass_context
+@check_aea_project
+def install(click_context, requirement: Optional[str]):
     """Install the dependencies."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
 
     if requirement:
         logger.debug("Installing the dependencies in '{}'...".format(requirement))

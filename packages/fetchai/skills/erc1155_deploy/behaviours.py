@@ -110,8 +110,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 contract_address=str(strategy.contract_address),
             )
-            contract.create_item_ids(
-                token_type=strategy.ft, token_ids=strategy.item_ids
+            contract.create_token_ids(
+                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
 
     def act(self) -> None:
@@ -122,10 +122,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         contract = self.context.contracts.erc1155
         strategy = cast(Strategy, self.context.strategy)
-        #  if not contract.is_deployed or strategy.contract_address is None:
         if contract.is_deployed and not self.is_items_created:
-            contract.create_item_ids(
-                token_type=strategy.ft, token_ids=strategy.item_ids
+            contract.create_token_ids(
+                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
 
             self.context.logger.info("Creating a batch of items")
