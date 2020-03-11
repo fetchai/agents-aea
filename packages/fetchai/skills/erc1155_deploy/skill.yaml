@@ -7,7 +7,7 @@ fingerprint:
   behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
   handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
   strategy.py: QmWpc8aMte2vJ4akiKn6qTfXWavfE1vBtJqX1E7CFuLYaC
-description: "The weather station skill implements the functionality to sell weather data."
+description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   service_registration:
