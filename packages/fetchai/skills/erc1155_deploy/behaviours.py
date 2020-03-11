@@ -111,7 +111,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 contract_address=str(strategy.contract_address),
             )
             contract.create_token_ids(
-                token_type=strategy.ft, token_ids=strategy.token_ids
+                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
 
     def act(self) -> None:
@@ -124,7 +124,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         strategy = cast(Strategy, self.context.strategy)
         if contract.is_deployed and not self.is_items_created:
             contract.create_token_ids(
-                token_type=strategy.ft, token_ids=strategy.token_ids
+                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
 
             self.context.logger.info("Creating a batch of items")
