@@ -31,8 +31,8 @@ models:
       ledger_id: 'ethereum'
       is_ledger_tx: True
       search_query:
-        search_term: country
-        search_value: UK
+        search_term: has_erc1155_contract
+        search_value: True
         constraint_type: '=='
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
 ledgers: ['fetchai']
