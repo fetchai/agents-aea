@@ -1,0 +1,38 @@
+name: erc1155_client
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+fingerprint:
+  __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
+  behaviours.py: Qmadg8ZdZgBY6JjwstbLCkyZDejKWWzvbGkG63DLZ2QqDF
+  handlers.py: QmYYsiZ5yJHDvtdD3yye2QKmNLxcQNdP798caF6NvnWfwg
+  strategy.py: Qmf4pcqNZ3HRVtribUgNyAHvRk8gyzDbUYD6iFpJizRtsq
+description: "The weather client skill implements the skill to purchase weather data."
+contracts: ['fetchai/erc1155:0.1.0']
+behaviours:
+  search:
+    class_name: MySearchBehaviour
+    args:
+      search_interval: 5
+handlers:
+  fipa:
+    class_name: FIPAHandler
+    args: {}
+  oef:
+    class_name: OEFHandler
+    args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
+models:
+  strategy:
+    class_name: Strategy
+    args:
+      ledger_id: 'ethereum'
+      is_ledger_tx: True
+      search_query:
+        search_term: has_erc1155_contract
+        search_value: True
+        constraint_type: '=='
+protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
+ledgers: ['fetchai']

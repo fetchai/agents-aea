@@ -73,7 +73,7 @@ class Contract(BaseContract):
         :param ledger_api: the ethereum ledger api
         """
         assert self._instance is None, "Instance already set!"
-        self._instance = ledger_api.api.web3.Contract(
+        self._instance = ledger_api.api.eth.contract(
             abi=self.abi, bytecode=self.bytecode
         )
 
@@ -81,9 +81,24 @@ class Contract(BaseContract):
         """
         Set the contract address.
 
+        :param ledger_api: the ledger_api we are using.
         :param contract_address: the contract address
         """
         assert self.instance.address is None, "Address already set!"
-        self._instance = ledger_api.api.web3.Contract(
+        self._instance = ledger_api.api.eth.contract(
             address=contract_address, abi=self.abi
+        )
+
+    def set_deployed_instance(
+        self, ledger_api: EthereumApi, contract_address: str
+    ) -> None:
+        """
+        Set the contract address.
+
+        :param ledger_api: the ledger_api we are using.
+        :param contract_address: the contract address
+        """
+        assert self._instance is None, "Instance already set!"
+        self._instance = ledger_api.api.eth.contract(
+            address=contract_address, abi=self._abi, bytecode=self.bytecode
         )
