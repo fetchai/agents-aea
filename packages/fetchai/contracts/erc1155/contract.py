@@ -590,8 +590,6 @@ class Helpers:
         m_list.append(_nonce.to_bytes(32, "big"))
         return keccak256(b"".join(m_list))
 
-    def generate_id(self, token_id: int, item_id: int):
-        token_id = token_id
-        index = item_id
-        final_id_int = (token_id << 128) + index
+    def generate_id(self, index: int, token_type: int):
+        final_id_int = (token_type << 128) + index
         return final_id_int
