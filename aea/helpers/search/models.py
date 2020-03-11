@@ -87,7 +87,11 @@ class DataModel:
 class GenericDataModel(DataModel):
     """Data model for the the erc1155 deploy skill aea."""
 
-    def __init__(self, data_model_attributes: Dict[str, Dict[str, Union[str, bool]]], data_model_name: str):
+    def __init__(
+        self,
+        data_model_attributes: Dict[str, Dict[str, Union[str, bool]]],
+        data_model_name: str,
+    ):
         """Initialise the dataModel."""
         self.attributes = []
         for values in data_model_attributes.values():
