@@ -260,9 +260,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert Path(
-            self.t, self.agent_name, "protocols", "test_protocol"
-        ).exists()
+        assert Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -328,9 +326,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(
-            self.t, self.agent_name, "protocols", "test_protocol"
-        ).exists()
+        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -391,9 +387,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(
-            self.t, self.agent_name, "protocols", "test_protocol"
-        ).exists()
+        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
