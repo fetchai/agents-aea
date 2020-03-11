@@ -76,26 +76,21 @@ class ERC1155Contract(Contract):
         """The generated game currency id."""
         return self._game_currency_id
 
-    def create_token_ids(self, token_type: int, nb_tokens: int) -> Dict[int, int]:
+    def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
         assert self.token_ids == [], "Item ids already created."
         lowest_valid_integer = 0
         token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        token_id_list = []
         for _i in range(nb_tokens):
             while self.instance.functions.is_token_id_exists(token_id).call():
                 # id already taken
                 lowest_valid_integer += 1
                 token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+            token_id_list.append(token_id)
             self.token_ids[token_id] = token_type
 
-        return self.token_ids
-
-    def generate_single_item_id(self, token_type: int, game_currency: int) -> int:
-        """Create single token id"""
-        if self.instance.functions.is_token_id_exists(game_currency).call():
-            self._game_currency_id = Helpers().generate_id(token_type, game_currency)
-        self._game_currency_id = game_currency
-        return self.game_currency_id
+        return token_id_list
 
     def get_deploy_transaction(
         self,
