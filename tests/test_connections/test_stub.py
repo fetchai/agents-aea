@@ -73,7 +73,7 @@ class TestStubConnectionReception:
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(msg),
         )
-        encoded_envelope = "{},{},{},{}".format(
+        encoded_envelope = "{},{},{},{},".format(
             expected_envelope.to,
             expected_envelope.sender,
             expected_envelope.protocol_id,
@@ -145,7 +145,7 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        encoded_envelope = "{},{},{},{}".format(
+        encoded_envelope = "{},{},{},{},".format(
             "any",
             "any",
             DefaultMessage.protocol_id,
@@ -187,6 +187,8 @@ class TestStubConnectionSending:
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
 
+        for line in lines:
+            print(b"HERE:" + line)
         assert len(lines) == 2
         line = lines[0] + lines[1]
         to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)

@@ -129,16 +129,16 @@ A stub connection provides an I/O reader and writer. It uses two files for commu
 
 The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
 
-The format of each line is the following:
+The format of each envelope is the following:
 
 ``` bash
-TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello
+recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 ```
 
 ## Run the AEA
@@ -186,7 +186,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.

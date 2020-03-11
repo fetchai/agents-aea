@@ -124,9 +124,7 @@ class TryGetItemTargetPathTestCase(TestCase):
         result = _try_get_item_target_path("packages", AUTHOR, "skills", "skill-name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with(
-            "packages", "vendor", AUTHOR, "skills", "skill-name"
-        )
+        join_mock.assert_called_once_with("packages", AUTHOR, "skills", "skill-name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.common.os.path.exists", return_value=True)
