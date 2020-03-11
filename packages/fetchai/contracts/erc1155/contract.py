@@ -64,17 +64,11 @@ class ERC1155Contract(Contract):
         """
         super().__init__(contract_id, contract_config, contract_interface)
         self._token_ids = {}  # type: Dict[int, int]
-        self._game_currency_id = 0  # type: int
 
     @property
     def token_ids(self) -> Dict[int, int]:
         """The generated token ids."""
         return self._token_ids
-
-    @property
-    def game_currency_id(self) -> int:
-        """The generated game currency id."""
-        return self._game_currency_id
 
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
@@ -214,6 +208,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_id: int,
     ) -> TransactionMessage:
 
         """
@@ -225,7 +220,7 @@ class ERC1155Contract(Contract):
         # create the items
 
         tx = self._get_create_single_tx(
-            deployer_address=deployer_address, ledger_api=ledger_api,
+            deployer_address=deployer_address, ledger_api=ledger_api, token_id=token_id
         )
 
         #  Create the transaction message for the Decision maker
@@ -247,12 +242,12 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _get_create_single_tx(
-        self, deployer_address: Address, ledger_api: LedgerApi
+        self, deployer_address: Address, ledger_api: LedgerApi, token_id: int
     ) -> str:
         """Create an item."""
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createSingle(
-            deployer_address, self._game_currency_id, ""
+            deployer_address, token_id, ""
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -328,6 +323,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         recipient_address: Address,
         mint_quantity: int,
+        token_id: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
     ) -> TransactionMessage:
@@ -335,7 +331,7 @@ class ERC1155Contract(Contract):
         tx = self._create_mint_single_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
-            token_id=self.game_currency_id,
+            token_id=token_id,
             mint_quantity=mint_quantity,
             ledger_api=ledger_api,
         )
