@@ -327,9 +327,7 @@ def is_token_id_exists(token_id: uint256) -> bool:
     @notice Checks if the given token_id is already created.
     @param token_id: uint256 the id of the token.
     """
-    if self.token_ids[token_id]:
-        return True
-    return False
+    return self.token_ids[token_id]
 
 @public
 def safeTransferFrom(_from: address, _to: address, _id: uint256, _value: uint256, _data: bytes[256]):
