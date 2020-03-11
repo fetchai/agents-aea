@@ -462,6 +462,7 @@ def createSingle(_item_owner: address, _id: uint256, _path: string[256]):
     assert self.owner == msg.sender, "Owner only can create item."
     self.balancesOf[_item_owner][_id] = 0
     self.tokensIdCount += 1
+    self.token_ids[_id] = True
     self.uri[_id] = _path
     log.URI(_path, _id)
     log.TransferSingle(msg.sender, ZERO_ADDRESS, _item_owner, _id, 0)

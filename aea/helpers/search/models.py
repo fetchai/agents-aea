@@ -104,7 +104,7 @@ class GenericDataModel(DataModel):
             self.attributes.append(
                 Attribute(
                     name=values["name"],  # type: ignore
-                    type=SUPPORTED_TYPES[values["type"]],
+                    type=SUPPORTED_TYPES[values["type"]],  # type: ignore
                     is_required=values["is_required"],
                 )
             )
