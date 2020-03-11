@@ -2,7 +2,13 @@ name: 'tac_control_contract'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: {}
+fingerprint:
+  __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
+  behaviours.py: QmUnDQSLatK9t9R76pSg4kG2EeiU2UdG5HnaNiArBaaLDM
+  game.py: QmNhbJ63xzLYURgU2F5nX4q79cpfNfEoHjX95u4n6jmY1y
+  handlers.py: QmcG4zktwrdoxjafndcdnbsvVYa6UVKhp7zbApJKJuaUCw
+  helpers.py: QmbhNPUD2oQ42Ai8ugcfX9uyH8KxJBmFv1RkyCX5vWvcwg
+  parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
