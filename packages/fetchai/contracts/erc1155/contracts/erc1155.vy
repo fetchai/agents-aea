@@ -481,6 +481,7 @@ def createBatch(_items_owner: address, _ids: uint256[BATCH_SIZE]):
         id: uint256 = _ids[i]
         self.balancesOf[_items_owner][id] = 0
         self.tokensIdCount += 1
+        self.token_ids[id] = True
     zero_supply: uint256[BATCH_SIZE] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     log.TransferBatch(msg.sender, ZERO_ADDRESS, _items_owner, _ids, zero_supply)
 
