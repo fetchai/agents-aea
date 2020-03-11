@@ -154,7 +154,7 @@ class StubConnection(Connection):
             line = self.input_file.readline()
         if lines != b"":
             self._process_line(lines)
-        self.input_file.truncate(0)
+            self.input_file.truncate(0)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.

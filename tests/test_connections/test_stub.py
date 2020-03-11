@@ -187,14 +187,13 @@ class TestStubConnectionSending:
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
 
-        for line in lines:
-            print(b"HERE:" + line)
         assert len(lines) == 2
         line = lines[0] + lines[1]
-        to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
+        to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
         protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+        assert end in [b"", b"\n"]
 
         actual_envelope = Envelope(
             to=to, sender=sender, protocol_id=protocol_id, message=message
