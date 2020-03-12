@@ -549,12 +549,13 @@ class ProtocolGenerator:
             for unique_type in unique_standard_types_list:
                 check_str += "type(self.{}) == {} or ".format(content_name, unique_type)
             check_str = check_str[:-4]
-            check_str += ", \"Content '{}' should be either of the following types: {}.\"\n".format(
+            check_str += ", \"Type Error on content '{}': Expected either of the following types '{}'. Found '{{}}'.\".format(type(self.{}))\n".format(
                 content_name,
                 [
                     unique_standard_type
                     for unique_standard_type in unique_standard_types_list
                 ],
+                content_name,
             )
             if "frozenset" in unique_standard_types_list:
                 check_str += indents + "if type(self.{}) == frozenset:\n".format(
@@ -587,6 +588,7 @@ class ProtocolGenerator:
                 if len(frozen_set_element_types) == 1:
                     check_str += (
                         indents
+                        # \"Type Error on content '{}': Expected either of the following types '{}'. Found '{{}}'.\".format(type(self.{}))
                         + "    ), \"Elements of the content '{}' should be of type ".format(
                             content_name
                         )
@@ -996,19 +998,19 @@ class ProtocolGenerator:
         cls_str += "            assert (\n"
         cls_str += "                type(self.dialogue_reference) == tuple\n"
         cls_str += (
-            "            ), \"dialogue_reference must be 'tuple' but it is not.\"\n"
+            "            ), \"Type Error on 'dialogue_reference': Expected 'tuple'. Found '{}'.\".format(type(self.dialogue_reference))\n"
         )
         cls_str += "            assert (\n"
         cls_str += "                type(self.dialogue_reference[0]) == str\n"
-        cls_str += "            ), \"The first element of dialogue_reference must be 'str' but it is not.\"\n"
+        cls_str += "            ), \"Type Error on 'dialogue_reference[0]': Expected 'str'. Found '{}'.\".format(type(self.dialogue_reference[0]))\n"
         cls_str += "            assert (\n"
         cls_str += "                type(self.dialogue_reference[1]) == str\n"
-        cls_str += "            ), \"The second element of dialogue_reference must be 'str' but it is not.\"\n"
+        cls_str += "            ), \"Type Error on 'dialogue_reference[1]': Expected 'str'. Found '{}'.\".format(type(self.dialogue_reference[1]))\n"
         cls_str += (
-            '            assert type(self.message_id) == int, "message_id is not int"\n'
+            '            assert type(self.message_id) == int, "Type Error on \'message_id\': Expected \'int\'. Found \'{}\'.".format(type(self.message_id))\n'
         )
         cls_str += (
-            '            assert type(self.target) == int, "target is not int"\n\n'
+            '            assert type(self.target) == int, "Type Error on \'target\': Expected \'int\'. Found \'{}\'.".format(type(self.target))\n\n'
         )
 
         cls_str += "            # Light Protocol Rule 2\n"
@@ -1017,7 +1019,7 @@ class ProtocolGenerator:
         cls_str += "                type(self.performative) == {}Message.Performative\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += "            ), \"'{}' is not in the list of valid performatives: {}\".format(\n"
+        cls_str += "            ), \"Performative '{}' is not in the list of valid performatives: {}\".format(\n"
         cls_str += "                self.performative, self.valid_performatives\n"
         cls_str += "            )\n\n"
         cls_str += "            # Check correct contents\n"
