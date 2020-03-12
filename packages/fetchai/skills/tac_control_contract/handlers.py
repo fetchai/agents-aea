@@ -392,10 +392,11 @@ class TransactionHandler(Handler):
     def _mint_game_currency(self):
         self.context.logger.info("Minting the game currency")
         contract = self.context.contracts.erc1155
+        parameters = cast(Parameters, self.context.parameters)
         transaction_message = contract.get_mint_single_tx(
             deployer_address=self.context.agent_address,
             recipient_address=self.context.agent_address,
-            mint_quantity=200000,
+            mint_quantity=parameters.money_endowment,
             ledger_api=self.context.ledger_apis.apis.get("ethereum"),
             skill_callback_id=self.context.skill_id,
         )
