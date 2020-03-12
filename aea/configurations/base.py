@@ -697,6 +697,7 @@ class AgentConfig(PackageConfiguration):
             "connections": sorted(map(str, self.connections)),
             "protocols": sorted(map(str, self.protocols)),
             "skills": sorted(map(str, self.skills)),
+            "contracts": sorted(map(str, self.contracts)),
         }
 
     @classmethod
