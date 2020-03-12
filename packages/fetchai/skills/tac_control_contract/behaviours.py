@@ -55,11 +55,7 @@ class TACBehaviour(Behaviour):
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
         self.is_items_created = False
-        self.is_game_currency_created = False
         self.context.shared_state["is_items_created"] = self.is_items_created
-        self.context.shared_state[
-            "is_game_currency_created"
-        ] = self.is_game_currency_created
 
     def setup(self) -> None:
         """
@@ -86,11 +82,11 @@ class TACBehaviour(Behaviour):
             )
         else:
             self.context.logger.info("Setting the address of the deployed contract")
-            contract.set_instance_w_address(
+            contract.set_deployed_instance(
                 ledger_api=ledger_api,
                 contract_address=str(parameters.contract_address),
             )
-            contract.item_ids = parameters.good_ids  # type: ignore
+            contract.token_ids = parameters.good_ids  # type: ignore
 
     def act(self) -> None:
         """
@@ -112,16 +108,6 @@ class TACBehaviour(Behaviour):
             transaction_message = self._create_items()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
-        if (
-            contract.is_deployed
-            and self.context.shared_state["is_items_created"]
-            and not self.context.shared_state["is_game_currency_created"]
-            and game.phase.value == Phase.PRE_GAME.value
-        ):
-            self.context.logger.info("Creating the game currency.")
-            transaction_message = self._create_game_currency()
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            self.context.shared_state["is_game_currency_created"] = True
         if (
             game.phase.value == Phase.PRE_GAME.value
             and parameters.registration_start_time < now < parameters.start_time

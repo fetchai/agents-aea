@@ -325,7 +325,7 @@ class ERC1155Contract(Contract):
         mint_quantity: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
-        token_id: int
+        token_id: int,
     ) -> TransactionMessage:
 
         tx = self._create_mint_single_tx(
@@ -380,7 +380,6 @@ class ERC1155Contract(Contract):
         )
 
         return tx
-
 
     def _create_trade_tx(
         self,

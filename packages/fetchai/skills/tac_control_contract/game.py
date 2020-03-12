@@ -38,7 +38,6 @@ from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.skills.tac_control_contract.helpers import (
     determine_scaling_factor,
     generate_equilibrium_prices_and_holdings,
-    generate_game_currency_to_name,
     generate_good_endowments,
     generate_good_id_to_name,
     generate_money_endowments,
@@ -89,7 +88,6 @@ class Configuration:
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
         self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
-        self._game_currency_to_name = generate_game_currency_to_name(contract)
         #  self._check_consistency()
 
     @property

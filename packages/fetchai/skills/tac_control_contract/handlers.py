@@ -333,8 +333,6 @@ class TransactionHandler(Handler):
             else:
                 self.context.shared_state["is_items_created"] = True
                 if tx_msg_response.tx_id == "contract_create_currency":
-                    self.context.logger.info("Created the currency.")
-                    self.context.shared_state["is_game_currency_created"] = True
                     self._mint_objects()
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
