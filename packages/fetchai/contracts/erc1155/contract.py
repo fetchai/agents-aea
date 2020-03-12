@@ -310,7 +310,7 @@ class ERC1155Contract(Contract):
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 300000,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -323,9 +323,9 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         recipient_address: Address,
         mint_quantity: int,
-        token_id: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_id: int
     ) -> TransactionMessage:
 
         tx = self._create_mint_single_tx(
@@ -353,12 +353,7 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _create_mint_single_tx(
-        self,
-        deployer_address: Address,
-        recipient_address: Address,
-        token_id: int,
-        mint_quantity: int,
-        ledger_api: LedgerApi,
+        self, deployer_address, recipient_address, token_id, mint_quantity, ledger_api,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
@@ -378,13 +373,14 @@ class ERC1155Contract(Contract):
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 500000,
+                "gas": 300000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
         )
 
         return tx
+
 
     def _create_trade_tx(
         self,
