@@ -466,8 +466,6 @@ class Multiplexer:
         self._out_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
-        pending = asyncio.Task.all_tasks()
-        self._loop.run_until_complete(asyncio.wait(*pending))
 
     def _start_loop_threaded_if_not_running(self):
         """Start the multiplexer."""
@@ -492,8 +490,13 @@ class Multiplexer:
         if self._disconnect_all_task is not None:
             self._disconnect_all_task.cancel()
 
+        for connection in [c for c in self.connections
+                           if c.connection_status.is_connected or c.connection_status.is_connecting]:
+            asyncio.run_coroutine_threadsafe(connection.disconnect(), self._loop).result()
+
         if self._loop.is_running() and not self._thread.is_alive():
             self._loop.call_soon_threadsafe(self._loop.stop)
+            self._loop.stop()
         elif self._loop.is_running() and self._thread.is_alive():
             self._loop.call_soon_threadsafe(self._loop.stop)
             self._thread.join()

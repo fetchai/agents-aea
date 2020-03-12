@@ -22,9 +22,7 @@
 import asyncio
 import logging
 import pickle  # nosec
-import time
-from asyncio import AbstractEventLoop, CancelledError
-from threading import Thread
+from asyncio import AbstractEventLoop, CancelledError, Task
 from typing import List, Optional, Set, cast
 
 import oef
@@ -122,7 +120,7 @@ class OEFObjectTranslator:
 
     @classmethod
     def to_oef_constraint_expr(
-        cls, constraint_expr: ConstraintExpr
+            cls, constraint_expr: ConstraintExpr
     ) -> OEFConstraintExpr:
         """From our constraint expression to the OEF constraint expression."""
         if isinstance(constraint_expr, And):
@@ -145,7 +143,7 @@ class OEFObjectTranslator:
 
     @classmethod
     def to_oef_constraint_type(
-        cls, constraint_type: ConstraintType
+            cls, constraint_type: ConstraintType
     ) -> OEFConstraintType:
         """From our constraint type to OEF constraint type."""
         value = constraint_type.value
@@ -212,7 +210,7 @@ class OEFObjectTranslator:
 
     @classmethod
     def from_oef_constraint_expr(
-        cls, oef_constraint_expr: OEFConstraintExpr
+            cls, oef_constraint_expr: OEFConstraintExpr
     ) -> ConstraintExpr:
         """From our query to OEF query."""
         if isinstance(oef_constraint_expr, OEFAnd):
@@ -241,7 +239,7 @@ class OEFObjectTranslator:
 
     @classmethod
     def from_oef_constraint_type(
-        cls, constraint_type: OEFConstraintType
+            cls, constraint_type: OEFConstraintType
     ) -> ConstraintType:
         """From OEF constraint type to our constraint type."""
         if isinstance(constraint_type, Eq):
@@ -272,12 +270,12 @@ class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
     def __init__(
-        self,
-        address: Address,
-        oef_addr: str,
-        oef_port: int,
-        core: AsyncioCore,
-        excluded_protocols: Optional[Set[str]] = None,
+            self,
+            address: Address,
+            oef_addr: str,
+            oef_port: int,
+            core: AsyncioCore,
+            excluded_protocols: Optional[Set[str]] = None,
     ):
         """
         Initialize.
@@ -300,7 +298,7 @@ class OEFChannel(OEFAgent):
         self.excluded_protocols = excluded_protocols
 
     def on_message(
-        self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
+            self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
     ) -> None:
         """
         On message event handler.
@@ -321,12 +319,12 @@ class OEFChannel(OEFAgent):
         ).result()
 
     def on_cfp(
-        self,
-        msg_id: int,
-        dialogue_id: int,
-        origin: Address,
-        target: int,
-        query: CFP_TYPES,
+            self,
+            msg_id: int,
+            dialogue_id: int,
+            origin: Address,
+            target: int,
+            query: CFP_TYPES,
     ) -> None:
         """
         On cfp event handler.
@@ -372,12 +370,12 @@ class OEFChannel(OEFAgent):
         ).result()
 
     def on_propose(
-        self,
-        msg_id: int,
-        dialogue_id: int,
-        origin: Address,
-        target: int,
-        b_proposals: PROPOSE_TYPES,
+            self,
+            msg_id: int,
+            dialogue_id: int,
+            origin: Address,
+            target: int,
+            b_proposals: PROPOSE_TYPES,
     ) -> None:
         """
         On propose event handler.
@@ -398,7 +396,7 @@ class OEFChannel(OEFAgent):
         )
 
     def on_accept(
-        self, msg_id: int, dialogue_id: int, origin: Address, target: int
+            self, msg_id: int, dialogue_id: int, origin: Address, target: int
     ) -> None:
         """
         On accept event handler.
@@ -418,7 +416,7 @@ class OEFChannel(OEFAgent):
         )
 
     def on_decline(
-        self, msg_id: int, dialogue_id: int, origin: Address, target: int
+            self, msg_id: int, dialogue_id: int, origin: Address, target: int
     ) -> None:
         """
         On decline event handler.
@@ -462,7 +460,7 @@ class OEFChannel(OEFAgent):
         ).result()
 
     def on_oef_error(
-        self, answer_id: int, operation: oef.messages.OEFErrorOperation
+            self, answer_id: int, operation: oef.messages.OEFErrorOperation
     ) -> None:
         """
         On oef error event handler.
@@ -493,7 +491,7 @@ class OEFChannel(OEFAgent):
         ).result()
 
     def on_dialogue_error(
-        self, answer_id: int, dialogue_id: int, origin: Address
+            self, answer_id: int, dialogue_id: int, origin: Address
     ) -> None:
         """
         On dialogue error event handler.
@@ -589,7 +587,7 @@ class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
     def __init__(
-        self, address: Address, oef_addr: str, oef_port: int = 10000, *args, **kwargs
+            self, address: Address, oef_addr: str, oef_port: int = 10000, *args, **kwargs
     ):
         """
         Initialize.
@@ -610,7 +608,7 @@ class OEFConnection(Connection):
             address, oef_addr, oef_port, core=self._core,
         )  # type: ignore
 
-        self._connection_check_thread = None  # type: Optional[Thread]
+        self._connection_check_task = None  # type: Optional[Task]
 
     async def connect(self) -> None:
         """
@@ -622,15 +620,16 @@ class OEFConnection(Connection):
         if self.connection_status.is_connected:
             return
         try:
+            self.connection_status.is_connecting = True
             self._core.run_threaded()
             loop = asyncio.get_event_loop()
             self.in_queue = asyncio.Queue()
             await self._try_connect()
+            self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
             self.channel.loop = loop
             self.channel.in_queue = self.in_queue
-            self._connection_check_thread = Thread(target=self._connection_check)
-            self._connection_check_thread.start()
+            self._connection_check_task = asyncio.ensure_future(self._connection_check(), loop=self._loop)
         except (CancelledError, Exception) as e:  # pragma: no cover
             self._core.stop()
             self.connection_status.is_connected = False
@@ -650,7 +649,7 @@ class OEFConnection(Connection):
             else:
                 break
 
-    def _connection_check(self) -> None:
+    async def _connection_check(self) -> None:
         """
         Check for connection to the channel.
 
@@ -658,16 +657,15 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         while self.connection_status.is_connected:
-            time.sleep(2.0)
+            await asyncio.sleep(2.0)
             if not self.channel.get_state() == "connected":  # pragma: no cover
                 self.connection_status.is_connected = False
+                self.connection_status.is_connecting = True
                 logger.warning(
                     "Lost connection to OEFChannel. Retrying to connect soon ..."
                 )
-                loop.run_until_complete(self._try_connect())
+                await self._try_connect()
                 self.connection_status.is_connected = True
                 logger.warning("Successfully re-established connection to OEFChannel.")
 
@@ -678,12 +676,14 @@ class OEFConnection(Connection):
         :return: None
         """
         assert (
-            self._connection_check_thread is not None
+                self._connection_check_task is not None
         ), "Call connect before disconnect."
         assert self.in_queue is not None
         self.connection_status.is_connected = False
-        self._connection_check_thread.join()
-        self._connection_check_thread = None
+        self.connection_status.is_connecting = False
+        if self._connection_check_task is not None:
+            self._connection_check_task.cancel()
+            self._connection_check_task = None
         self.channel.disconnect()
         await self.in_queue.put(None)
         self._core.stop()
@@ -721,7 +721,7 @@ class OEFConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+            cls, address: Address, connection_configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the OEF connection from the connection configuration.
