@@ -22,9 +22,8 @@
 import asyncio
 import logging
 import queue
-import time
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, CancelledError, Task
+from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
 from typing import Dict, List, Optional, Sequence, Tuple, cast
@@ -490,9 +489,14 @@ class Multiplexer:
         if self._disconnect_all_task is not None:
             self._disconnect_all_task.cancel()
 
-        for connection in [c for c in self.connections
-                           if c.connection_status.is_connected or c.connection_status.is_connecting]:
-            asyncio.run_coroutine_threadsafe(connection.disconnect(), self._loop).result()
+        for connection in [
+            c
+            for c in self.connections
+            if c.connection_status.is_connected or c.connection_status.is_connecting
+        ]:
+            asyncio.run_coroutine_threadsafe(
+                connection.disconnect(), self._loop
+            ).result()
 
         if self._loop.is_running() and not self._thread.is_alive():
             self._loop.call_soon_threadsafe(self._loop.stop)
