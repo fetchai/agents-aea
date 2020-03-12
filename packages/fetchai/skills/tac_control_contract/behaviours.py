@@ -66,10 +66,9 @@ class TACBehaviour(Behaviour):
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(EthereumApi, self.context.ledger_apis.apis.get("ethereum"))
-
+        contract.set_instance(ledger_api)
         #  Deploy the contract if there is no address in the parameters
         if parameters.contract_address is None:
-            contract.set_instance(ledger_api)
             transaction_message = contract.get_deploy_transaction(  # type: ignore
                 deployer_address=self.context.agent_address,
                 ledger_api=ledger_api,

@@ -72,7 +72,7 @@ class ERC1155Contract(Contract):
 
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
-        assert self.token_ids == [], "Item ids already created."
+        assert self.token_ids == {}, "Item ids already created."
         lowest_valid_integer = 0
         token_id = Helpers().generate_id(token_type, lowest_valid_integer)
         token_id_list = []
