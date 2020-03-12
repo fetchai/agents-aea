@@ -85,6 +85,24 @@ class AppContext:
 app_context = AppContext()
 
 
+def _call_subprocess(*args, **kwargs):
+    """
+    Call subprocess.call, but with error handling.
+
+    :return the exit code, or -1 if the call raises exception.
+    """
+    try:
+        ret = subprocess.call(*args, **kwargs)  # nosec
+    except BaseException:
+        logging.exception(
+            "An exception occurred when calling with args={} and kwargs={}".format(
+                args, kwargs
+            )
+        )
+        return -1
+    return ret
+
+
 def is_agent_dir(dir_name: str) -> bool:
     """Return true if this directory contains an AEA project (an agent)."""
     if not os.path.isdir(dir_name):
@@ -289,7 +307,7 @@ def _call_aea(param_list: List[str], dir_arg: str) -> int:
     with lock:
         old_cwd = os.getcwd()
         os.chdir(dir_arg)
-        ret = subprocess.call(param_list)  # nosec
+        ret = _call_subprocess(param_list)  # nosec
         os.chdir(old_cwd)
     return ret
 
@@ -554,7 +572,7 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
 
 def _kill_running_oef_nodes():
     logging.info("Kill off any existing OEF nodes which are running...")
-    subprocess.call(["docker", "kill", oef_node_name])  # nosec
+    _call_subprocess(["docker", "kill", oef_node_name], timeout=30.0)
 
 
 def create_app():
