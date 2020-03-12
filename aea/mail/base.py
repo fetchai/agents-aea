@@ -22,8 +22,9 @@
 import asyncio
 import logging
 import queue
+import time
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, CancelledError
+from asyncio import AbstractEventLoop, CancelledError, Task
 from concurrent.futures import Future
 from threading import Lock, Thread
 from typing import Dict, List, Optional, Sequence, Tuple, cast
@@ -374,6 +375,8 @@ class Multiplexer:
         self._in_queue = queue.Queue()  # type: queue.Queue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
+        self._connect_all_task = None  # type: Optional[Future]
+        self._disconnect_all_task = None  # type: Optional[Future]
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
 
@@ -415,9 +418,11 @@ class Multiplexer:
                 return
             self._start_loop_threaded_if_not_running()
             try:
-                asyncio.run_coroutine_threadsafe(
+                self._connect_all_task = asyncio.run_coroutine_threadsafe(
                     self._connect_all(), loop=self._loop
-                ).result()
+                )
+                self._connect_all_task.result()
+                self._connect_all_task = None
                 assert self.is_connected
                 self._connection_status.is_connected = True
                 self._recv_loop_task = asyncio.run_coroutine_threadsafe(
@@ -436,12 +441,15 @@ class Multiplexer:
         with self._lock:
             if not self.connection_status.is_connected:
                 logger.debug("Multiplexer already disconnected.")
+                self._stop()
                 return
             try:
                 logger.debug("Disconnecting the multiplexer...")
-                asyncio.run_coroutine_threadsafe(
+                self._disconnect_all_task = asyncio.run_coroutine_threadsafe(
                     self._disconnect_all(), loop=self._loop
-                ).result()
+                )
+                self._disconnect_all_task.result()
+                self._disconnect_all_task = None
                 self._stop()
                 self._connection_status.is_connected = False
             except (CancelledError, Exception):
@@ -458,6 +466,8 @@ class Multiplexer:
         self._out_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
+        pending = asyncio.Task.all_tasks()
+        self._loop.run_until_complete(asyncio.wait(*pending))
 
     def _start_loop_threaded_if_not_running(self):
         """Start the multiplexer."""
@@ -466,7 +476,7 @@ class Multiplexer:
         logger.debug("Multiplexer started.")
 
     def _stop(self):
-        """Start the multiplexer."""
+        """Stop the multiplexer."""
         if self._recv_loop_task is not None and not self._recv_loop_task.done():
             self._recv_loop_task.cancel()
 
@@ -477,9 +487,14 @@ class Multiplexer:
             ).result()
             self._send_loop_task.cancel()
 
-        if self._loop.is_running():
+        if self._connect_all_task is not None:
+            self._connect_all_task.cancel()
+        if self._disconnect_all_task is not None:
+            self._disconnect_all_task.cancel()
+
+        if self._loop.is_running() and not self._thread.is_alive():
             self._loop.call_soon_threadsafe(self._loop.stop)
-        if self._thread.is_alive():
+        elif self._loop.is_running() and self._thread.is_alive():
             self._loop.call_soon_threadsafe(self._loop.stop)
             self._thread.join()
         logger.debug("Multiplexer stopped.")

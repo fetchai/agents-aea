@@ -206,8 +206,7 @@ class Agent(ABC):
         self.teardown()
 
         logger.debug("[{}]: Stopping message processing...".format(self.name))
-        if self.multiplexer.connection_status.is_connected:
-            self.multiplexer.disconnect()
+        self.multiplexer.disconnect()
 
     @abstractmethod
     def setup(self) -> None:
