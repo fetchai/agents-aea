@@ -29,7 +29,15 @@ import os
 def run(cmd):
     print(" ".join(cmd))
     c = subprocess.Popen(cmd)  # nosec
-    c.wait()
+    try:
+        c.wait()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        poll = c.poll()
+        if poll is None:
+            c.terminate()
+            c.wait(2)
     return c.returncode
 
 

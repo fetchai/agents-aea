@@ -28,7 +28,7 @@ import sys
 import threading
 import time
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import connexion
 
@@ -47,6 +47,8 @@ elements = [
 ]
 
 DEFAULT_AUTHOR = "default_author"
+
+_processes = set()  # type: Set[subprocess.Popen]
 
 
 class ProcessState(Enum):
@@ -85,21 +87,27 @@ class AppContext:
 app_context = AppContext()
 
 
-def _call_subprocess(*args, **kwargs):
+def _call_subprocess(*args, timeout=None, **kwargs):
     """
-    Call subprocess.call, but with error handling.
+    Create a subprocess.Popen, but with error handling.
 
     :return the exit code, or -1 if the call raises exception.
     """
+    process = subprocess.Popen(*args)
+    ret = -1
     try:
-        ret = subprocess.call(*args, **kwargs)  # nosec
+        ret = process.wait(timeout=timeout)
     except BaseException:
         logging.exception(
             "An exception occurred when calling with args={} and kwargs={}".format(
                 args, kwargs
             )
         )
-        return -1
+    finally:
+        poll = process.poll()
+        if poll is None:  # pragma: no cover
+            process.terminate()
+            process.wait(2)
     return ret
 
 
@@ -323,6 +331,7 @@ def _call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
         ret = subprocess.Popen(  # nosec
             param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
         )
+        _processes.add(ret)
         os.chdir(old_cwd)
     return ret
 
@@ -572,7 +581,29 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
 
 def _kill_running_oef_nodes():
     logging.info("Kill off any existing OEF nodes which are running...")
-    _call_subprocess(["docker", "kill", oef_node_name], timeout=30.0)
+    # find already running images
+    image_ids = set()
+
+    process = subprocess.Popen(
+        ["docker", "ps", "-q", "--filter", "ancestor=fetchai/oef-search:0.7"],
+        stdout=subprocess.PIPE,
+    )
+    process.wait(2.0)
+    (stdout, stderr) = process.communicate()
+    image_ids.update(stdout.decode("utf-8").splitlines())
+
+    process = subprocess.Popen(
+        ["docker", "ps", "-q", "--filter", "name=" + oef_node_name],
+        stdout=subprocess.PIPE,
+    )
+    process.wait(2.0)
+    (stdout, stderr) = process.communicate()
+    image_ids.update(stdout.decode("utf-8").splitlines())
+
+    if stdout != b"":
+        _call_subprocess(
+            ["docker", "kill", *list(image_ids)], timeout=30.0, stdout=subprocess.PIPE
+        )
 
 
 def create_app():
@@ -620,12 +651,27 @@ def create_app():
     return app
 
 
+def _terminate_processes():
+    """Terminate all the (async) processes."""
+    logging.info("Cleaning up...")
+    for process in _processes:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
+
+
 def run(port: int, host: str = "127.0.0.1"):
     """Run the GUI."""
     _kill_running_oef_nodes()
 
     app = create_app()
-    app.run(host=host, port=port, debug=False)
+    try:
+        app.run(host=host, port=port, debug=False)
+    finally:
+        print("Cleaning up")
+        _terminate_processes()
+        stop_oef_node()
 
     return app
 
