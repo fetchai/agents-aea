@@ -22,7 +22,7 @@
 import asyncio
 import logging
 import pickle  # nosec
-from asyncio import AbstractEventLoop, CancelledError, Task
+from asyncio import AbstractEventLoop, CancelledError
 from typing import List, Optional, Set, cast
 
 import oef
