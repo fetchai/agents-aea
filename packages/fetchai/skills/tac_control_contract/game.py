@@ -74,21 +74,18 @@ class Configuration:
     """Class containing the configuration of the game."""
 
     def __init__(
-        self, version_id: str, tx_fee: int, nb_goods: int, contract: Contract,
+        self, version_id: str, tx_fee: int
     ):
         """
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
         :param tx_fee: the fee for a transaction.
-        :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
-        :param nb_goods: the number of goods.
         """
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
-        # The next  line creates a problem when we are trying to generate ids due to the fact that we haven't initialise the contract.
-        self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
+        self._good_id_to_name = None
         # self._check_consistency()
 
     @property
@@ -115,6 +112,11 @@ class Configuration:
     def good_id_to_name(self) -> Dict[str, str]:
         """Map good ids to names."""
         return self._good_id_to_name
+
+    def set_good_id_to_name(self, nb_goods, contract) -> None:
+        """Generate the good ids for the game."""
+        self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
+
 
     def _check_consistency(self):
         """

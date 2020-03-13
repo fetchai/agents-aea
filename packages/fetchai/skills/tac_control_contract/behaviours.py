@@ -76,9 +76,6 @@ class TACBehaviour(Behaviour):
             )
 
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            self.context.configuration = Configuration(  # type: ignore
-                parameters.version_id, parameters.tx_fee, parameters.nb_goods, contract,
-            )
         else:
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_deployed_instance(
@@ -103,6 +100,10 @@ class TACBehaviour(Behaviour):
             and not self.context.shared_state["is_items_created"]
             and game.phase.value == Phase.PRE_GAME.value
         ):
+            self.context.configuration = Configuration(  # type: ignore
+                parameters.version_id, parameters.tx_fee,
+            )
+            self.context.configuration.set_good_id_to_name(parameters.nb_goods, contract)
             self.context.logger.info("Creating the items.")
             transaction_message = self._create_items()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
