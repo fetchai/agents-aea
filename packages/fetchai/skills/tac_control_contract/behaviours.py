@@ -103,7 +103,9 @@ class TACBehaviour(Behaviour):
             self.context.configuration = Configuration(  # type: ignore
                 parameters.version_id, parameters.tx_fee,
             )
-            self.context.configuration.set_good_id_to_name(parameters.nb_goods, contract)
+            self.context.configuration.set_good_id_to_name(
+                parameters.nb_goods, contract
+            )
             self.context.logger.info("Creating the items.")
             transaction_message = self._create_items()
             self.context.decision_maker_message_queue.put_nowait(transaction_message)

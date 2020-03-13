@@ -73,9 +73,7 @@ class Phase(Enum):
 class Configuration:
     """Class containing the configuration of the game."""
 
-    def __init__(
-        self, version_id: str, tx_fee: int
-    ):
+    def __init__(self, version_id: str, tx_fee: int):
         """
         Instantiate a game configuration.
 
@@ -85,7 +83,7 @@ class Configuration:
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
-        self._good_id_to_name = None
+        self._good_id_to_name = None  # type: Optional[Dict[str, str]]
         # self._check_consistency()
 
     @property
@@ -109,14 +107,13 @@ class Configuration:
         self._agent_addr_to_name = agent_addr_to_name
 
     @property
-    def good_id_to_name(self) -> Dict[str, str]:
+    def good_id_to_name(self) -> Optional[Dict[str, str]]:
         """Map good ids to names."""
         return self._good_id_to_name
 
-    def set_good_id_to_name(self, nb_goods, contract) -> None:
+    def set_good_id_to_name(self, nb_goods: int, contract: Contract) -> None:
         """Generate the good ids for the game."""
         self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
-
 
     def _check_consistency(self):
         """
