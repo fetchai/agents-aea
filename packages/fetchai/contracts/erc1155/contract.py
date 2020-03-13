@@ -136,7 +136,7 @@ class ERC1155Contract(Contract):
             "from": deployer_address,  # Only 'from' address, don't insert 'to' address
             "value": 0,  # Add how many ethers you'll transfer during the deploy
             "gas": 0,  # Trying to make it dynamic ..
-            "gasPrice": ledger_api.api.toWei("50", "gwei"),  # Get Gas Price
+            "gasPrice": ledger_api.api.eth.gasPrice,  # Get Gas Price
             "nonce": ledger_api.api.eth.getTransactionCount(
                 deployer_address
             ),  # Get Nonce

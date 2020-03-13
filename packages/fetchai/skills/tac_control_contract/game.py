@@ -87,8 +87,9 @@ class Configuration:
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
+        # The next  line creates a problem when we are trying to generate ids due to the fact that we haven't initialise the contract.
         self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
-        #  self._check_consistency()
+        # self._check_consistency()
 
     @property
     def version_id(self) -> str:

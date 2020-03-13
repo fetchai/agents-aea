@@ -4,8 +4,8 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmREeK3XC3Nw6LqL8BWhx2gydKHXtaVa8Ei8J8maMtR4Rk
-  game.py: QmVsha8wYnYtLfJKuhKL5FUdDrRLj5FWpf7n1MNwYXYMou
+  behaviours.py: QmNjpAcRhqfNgysr3Xy2p47ZmbtQMFmfuGLUDrxTP5vdyG
+  game.py: QmZwDdU7Tna9ME8WLCmRMb6sWRG1115oiHovu3kJbPDfC8
   handlers.py: QmSYMgezsT9WzKo7WnW6RSTnozFjaQjdDGqdvUkUC6ZmxN
   helpers.py: QmRWqjnLikL3Ru1qbV4hGqDtZnyR5fSNy4Py6uos52mWit
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
