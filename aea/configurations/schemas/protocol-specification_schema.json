@@ -8,6 +8,7 @@
     "author",
     "version",
     "license",
+    "aea_version",
     "speech_acts"
   ],
   "properties": {
@@ -22,6 +23,9 @@
     },
     "license": {
       "type": "string"
+    },
+    "aea_version": {
+      "$ref": "definitions.json#/definitions/aea_version"
     },
     "speech_acts": {
       "type": "object",
