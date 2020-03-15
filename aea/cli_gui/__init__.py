@@ -588,17 +588,30 @@ def _kill_running_oef_nodes():
         ["docker", "ps", "-q", "--filter", "ancestor=fetchai/oef-search:0.7"],
         stdout=subprocess.PIPE,
     )
-    process.wait(2.0)
-    (stdout, stderr) = process.communicate()
-    image_ids.update(stdout.decode("utf-8").splitlines())
+    stdout = b""
+    try:
+        process.wait(2.0)
+        (stdout, stderr) = process.communicate()
+        image_ids.update(stdout.decode("utf-8").splitlines())
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
 
     process = subprocess.Popen(  # nosec
         ["docker", "ps", "-q", "--filter", "name=" + oef_node_name],
         stdout=subprocess.PIPE,
     )
-    process.wait(2.0)
-    (stdout, stderr) = process.communicate()
-    image_ids.update(stdout.decode("utf-8").splitlines())
+    try:
+        process.wait(2.0)
+        (stdout, stderr) = process.communicate()
+        image_ids.update(stdout.decode("utf-8").splitlines())
+    finally:
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
 
     if stdout != b"":
         _call_subprocess(
