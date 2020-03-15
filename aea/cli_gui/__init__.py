@@ -93,7 +93,7 @@ def _call_subprocess(*args, timeout=None, **kwargs):
 
     :return the exit code, or -1 if the call raises exception.
     """
-    process = subprocess.Popen(*args)
+    process = subprocess.Popen(*args)  # nosec
     ret = -1
     try:
         ret = process.wait(timeout=timeout)
@@ -584,7 +584,7 @@ def _kill_running_oef_nodes():
     # find already running images
     image_ids = set()
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         ["docker", "ps", "-q", "--filter", "ancestor=fetchai/oef-search:0.7"],
         stdout=subprocess.PIPE,
     )
@@ -592,7 +592,7 @@ def _kill_running_oef_nodes():
     (stdout, stderr) = process.communicate()
     image_ids.update(stdout.decode("utf-8").splitlines())
 
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # nosec
         ["docker", "ps", "-q", "--filter", "name=" + oef_node_name],
         stdout=subprocess.PIPE,
     )
