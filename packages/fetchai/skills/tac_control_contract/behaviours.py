@@ -283,10 +283,12 @@ class TACBehaviour(Behaviour):
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
         token_ids_dictionary = self.context.configuration.good_id_to_name
-        token_ids = [*token_ids_dictionary.values()]
+        self.context.shared_state["token_ids"] = [
+            int(token_id) for token_id in token_ids_dictionary.values()
+        ]
         return contract.get_create_batch_transaction(  # type: ignore
             deployer_address=self.context.agent_address,
             ledger_api=ledger_api,
             skill_callback_id=self.context.skill_id,
-            token_ids=token_ids,
+            token_ids=self.context.shared_state["token_ids"],
         )

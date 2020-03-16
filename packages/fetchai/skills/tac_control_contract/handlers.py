@@ -314,10 +314,7 @@ class TransactionHandler(Handler):
                     )
                 )
                 contract.set_address(ledger_api, transaction.contractAddress)
-        elif (
-            tx_msg_response.tx_id == "contract_create_batch"
-            or tx_msg_response.tx_id == "contract_create_currency"
-        ):
+        elif tx_msg_response.tx_id == "contract_create_batch":
             self.context.logger.info("Sending creation transaction to the ledger!")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
@@ -332,8 +329,8 @@ class TransactionHandler(Handler):
                 self.context.info("The creation command wasn't successful. Aborting.")
             else:
                 self.context.shared_state["is_items_created"] = True
-                if tx_msg_response.tx_id == "contract_create_currency":
-                    self._mint_objects()
+                self.context.logger.info(tx_msg_response.tx_id)
+                self._mint_objects()
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
@@ -386,6 +383,7 @@ class TransactionHandler(Handler):
             mint_quantities=[4] * 10,
             ledger_api=self.context.ledger_apis.apis.get("ethereum"),
             skill_callback_id=self.context.skill_id,
+            token_ids=self.context.shared_state["token_ids"],
         )
         self.context.decision_maker_message_queue.put_nowait(transaction_message)
 

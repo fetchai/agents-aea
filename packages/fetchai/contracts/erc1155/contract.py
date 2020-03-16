@@ -265,6 +265,7 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_ids: List[int],
     ):
 
         assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
@@ -273,6 +274,7 @@ class ERC1155Contract(Contract):
             recipient_address=recipient_address,
             batch_mint_quantities=mint_quantities,
             ledger_api=ledger_api,
+            token_ids=token_ids,
         )
 
         tx_message = TransactionMessage(
@@ -298,6 +300,7 @@ class ERC1155Contract(Contract):
         recipient_address: Address,
         batch_mint_quantities: List[int],
         ledger_api: LedgerApi,
+        token_ids: List[int],
     ) -> str:
         """Mint a batch of items."""
         # mint batch
@@ -306,7 +309,7 @@ class ERC1155Contract(Contract):
         )
         nonce += 1
         tx = self.instance.functions.mintBatch(
-            recipient_address, self.token_ids, batch_mint_quantities
+            recipient_address, token_ids, batch_mint_quantities
         ).buildTransaction(
             {
                 "chainId": 3,
