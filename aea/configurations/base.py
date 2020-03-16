@@ -23,6 +23,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
+from packaging.specifiers import SpecifierSet
+
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
@@ -301,9 +303,19 @@ class PackageConfiguration(Configuration, ABC):
         author: str,
         version: str,
         license: str,
+        # aea_version_specifiers: SpecifierSet,
         fingerprint: Optional[Dict[str, str]] = None,
     ):
-        """Initialize a package configuration."""
+        """
+        Initialize a package configuration.
+
+        :param name: the name of the package.
+        :param author: the author of the package.
+        :param version: the version of the package (SemVer format).
+        :param license: the license
+        :param aea_version_specifiers: a list of specifiers for
+        :param fingerprint: the fingerprint.
+        """
         self.name = name
         self.author = author
         self.version = version

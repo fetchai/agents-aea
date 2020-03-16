@@ -38,7 +38,9 @@ import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
 import yaml
+from packaging.version import Version
 
+import aea
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
@@ -48,7 +50,7 @@ from aea.configurations.base import (
     Dependencies,
     PublicId,
     _get_default_configuration_file_name_from_type,
-)
+    PackageConfiguration)
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -568,6 +570,57 @@ def _compute_fingerprint(package_directory) -> Dict[str, str]:
     return fingerprints
 
 
+def _compare_fingerprints(package_configuration: PackageConfiguration,
+                          package_directory: Path,
+                          is_vendor: bool,
+                          item_type: ConfigurationType):
+    """
+    Check fingerprints of a package directory against the fingerprints declared in the configuration file.
+
+    :param package_configuration: the package configuration object.
+    :param package_directory: the directory of the package.
+    :param is_vendor: whether the package is vendorized or not.
+    :param item_type: the type of the item.
+    :return: None
+    :raises ValueError: if the fingerprints do not match.
+    """
+    expected_fingerprints = package_configuration.fingerprint
+    actual_fingerprints = _compute_fingerprint(package_directory)
+    if expected_fingerprints != actual_fingerprints:
+        if is_vendor:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Vendorized projects should not be tampered with, please revert any changes to {} {}"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
+                    str(item_type),
+                    package_configuration.public_id,
+                )
+            )
+        else:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
+                    str(item_type),
+                    package_configuration.public_id,
+                )
+            )
+
+
+# def _check_aea_version(package_configuration: PackageConfiguration):
+#     """Check the package configuration version against the version of the framework."""
+#     current_aea_version = Version(aea.__version__)
+#     version_specifiers = package_configuration.aea_version
+
+
 def _validate_config_consistency(ctx: Context):
     """
     Validate fingerprints for every agent component.
@@ -591,6 +644,7 @@ def _validate_config_consistency(ctx: Context):
 
     for public_id, item_type in packages_public_ids_to_types.items():
 
+        # find the configuration file.
         try:
             # either in vendor/ or in personal packages.
             # we give precedence to custom agent components (i.e. not vendorized).
@@ -613,6 +667,7 @@ def _validate_config_consistency(ctx: Context):
                 "Cannot find {}: '{}'".format(item_type.value, public_id.name)
             )
 
+        # load the configuration file.
         try:
             package_configuration = loader.load(configuration_file_path.open("r"))
         except ValidationError as e:
@@ -622,35 +677,9 @@ def _validate_config_consistency(ctx: Context):
                 )
             )
 
-        expected_fingerprints = package_configuration.fingerprint
-        actual_fingerprints = _compute_fingerprint(package_directory)
-        if expected_fingerprints != actual_fingerprints:
-            if is_vendor:
-                raise ValueError(
-                    (
-                        "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                        "Vendorized projects should not be tampered with, please revert any changes to {} {}"
-                    ).format(
-                        package_directory,
-                        pprint.pformat(expected_fingerprints),
-                        pprint.pformat(actual_fingerprints),
-                        str(item_type),
-                        public_id,
-                    )
-                )
-            else:
-                raise ValueError(
-                    (
-                        "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                        "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
-                    ).format(
-                        package_directory,
-                        pprint.pformat(expected_fingerprints),
-                        pprint.pformat(actual_fingerprints),
-                        str(item_type),
-                        public_id,
-                    )
-                )
+
+        # _check_aea_version(package_configuration)
+        _compare_fingerprints(package_configuration, package_directory, is_vendor, item_type)
 
 
 def check_aea_project(f):
