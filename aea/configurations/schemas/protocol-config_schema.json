@@ -22,6 +22,9 @@
     "license": {
       "type": "string"
     },
+    "aea_version": {
+      "$ref": "definitions.json#/definitions/aea_version"
+    },
     "fingerprint": {
       "type": "string"
     },
