@@ -23,6 +23,9 @@
     "license": {
       "$ref": "definitions.json#/definitions/license"
     },
+    "aea_version": {
+      "$ref": "definitions.json#/definitions/aea_version"
+    },
     "speech_acts": {
       "type": "object",
       "additionalProperties": false,
