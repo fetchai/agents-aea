@@ -48,7 +48,7 @@ class TestStubConnectionReception:
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
-        cls.output_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "output_file.csv"
 
         connection_id = PublicId("fetchai", "stub", "0.1.0")
         cls.connection = StubConnection(
@@ -73,7 +73,7 @@ class TestStubConnectionReception:
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(msg),
         )
-        encoded_envelope = "{},{},{},{}".format(
+        encoded_envelope = "{},{},{},{},".format(
             expected_envelope.to,
             expected_envelope.sender,
             expected_envelope.protocol_id,
@@ -125,7 +125,7 @@ class TestStubConnectionSending:
         d = cls.tmpdir / "test_stub"
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
-        cls.output_file_path = d / "input_file.csv"
+        cls.output_file_path = d / "output_file.csv"
 
         connection_id = PublicId("fetchai", "stub", "0.1.0")
         cls.connection = StubConnection(
@@ -145,7 +145,7 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        encoded_envelope = "{},{},{},{}".format(
+        encoded_envelope = "{},{},{},{},".format(
             "any",
             "any",
             DefaultMessage.protocol_id,
@@ -189,10 +189,11 @@ class TestStubConnectionSending:
 
         assert len(lines) == 2
         line = lines[0] + lines[1]
-        to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
+        to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
         protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+        assert end in [b"", b"\n"]
 
         actual_envelope = Envelope(
             to=to, sender=sender, protocol_id=protocol_id, message=message
@@ -216,7 +217,7 @@ def test_connection_from_config():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection.from_config(
         address="pk",
         connection_configuration=ConnectionConfig(
@@ -234,7 +235,7 @@ async def test_disconnection_when_already_disconnected():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
@@ -253,7 +254,7 @@ async def test_connection_when_already_connected():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
@@ -274,7 +275,7 @@ async def test_receiving_returns_none_when_error_occurs():
     d = tmpdir / "test_stub"
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    output_file_path = d / "output_file.csv"
     stub_con = StubConnection(
         input_file_path,
         output_file_path,
