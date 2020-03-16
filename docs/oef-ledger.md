@@ -9,12 +9,12 @@ The 'Open Economic Framework' (OEF) consists of protocols, languages and market 
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>The OEF is under development. Expect frequent changes. What follows is a description of the current implementation. <a href="https://github.com/fetchai/agents-aea" target="_blank">here</a>.</p>
+  <p>The OEF is under development. Expect frequent changes. What follows is a description of the current implementation.</p>
 </div>
 
 At present, the term OEF is also used to refer to a node that enables agents to search, discover and communicate with other agents.
 
-For two agents to be able to find each other, at least one must register as a service and the other must query the OEF node for this service. For an example of such an interaction see <a href="../build-aea-step-by-step">this guide</a>.</p>
+For two agents to be able to find each other, at least one must register as a service and the other must query the OEF node for this service. For an example of such an interaction see <a href="../skill-guide" target="_blank">this guide</a>.
 
 Currently, you need to run your own OEF node for local development and testing. To start an OEF node follow the <a href="../quickstart/#preliminaries">Preliminaries</a> sections from the AEA quick start. Then run:
 
@@ -24,7 +24,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>In the current implementation agents act as clients to the OEF node. We are working on a fully decentralized peer-to-peer implementation which will remove the need for a central entity.<a href="https://github.com/fetchai/agents-aea" target="_blank">here</a>.</p>
+  <p>In the current implementation agents act as clients to the OEF node. We are working on a fully decentralized peer-to-peer implementation which will remove the need for a central entity.</p>
 </div>
 
 
