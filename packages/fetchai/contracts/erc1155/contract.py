@@ -72,7 +72,7 @@ class ERC1155Contract(Contract):
 
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
-        assert self.token_ids == [], "Item ids already created."
+        assert self.token_ids == {}, "Item ids already created."
         lowest_valid_integer = 0
         token_id = Helpers().generate_id(token_type, lowest_valid_integer)
         token_id_list = []
@@ -136,7 +136,7 @@ class ERC1155Contract(Contract):
             "from": deployer_address,  # Only 'from' address, don't insert 'to' address
             "value": 0,  # Add how many ethers you'll transfer during the deploy
             "gas": 0,  # Trying to make it dynamic ..
-            "gasPrice": ledger_api.api.toWei("50", "gwei"),  # Get Gas Price
+            "gasPrice": ledger_api.api.eth.gasPrice,  # Get Gas Price
             "nonce": ledger_api.api.eth.getTransactionCount(
                 deployer_address
             ),  # Get Nonce
@@ -310,7 +310,7 @@ class ERC1155Contract(Contract):
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 300000,
+                "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
@@ -323,9 +323,9 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         recipient_address: Address,
         mint_quantity: int,
-        token_id: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_id: int,
     ) -> TransactionMessage:
 
         tx = self._create_mint_single_tx(
@@ -353,12 +353,7 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _create_mint_single_tx(
-        self,
-        deployer_address: Address,
-        recipient_address: Address,
-        token_id: int,
-        mint_quantity: int,
-        ledger_api: LedgerApi,
+        self, deployer_address, recipient_address, token_id, mint_quantity, ledger_api,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
@@ -378,7 +373,7 @@ class ERC1155Contract(Contract):
         ).buildTransaction(
             {
                 "chainId": 3,
-                "gas": 500000,
+                "gas": 300000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
                 "nonce": nonce,
             }
