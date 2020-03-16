@@ -2,6 +2,7 @@ name: carpark_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmRphgcX1G4qtiTKXMqcvb7x1UCx47y3hnyNL8D1XPHvtW

@@ -2,6 +2,7 @@ name: tcp
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
   base.py: QmVEjJEEUcKeqbB1xc2rkZn4nPv3Yuiti8KNN6yeES9Q4h

@@ -615,10 +615,10 @@ def _compare_fingerprints(package_configuration: PackageConfiguration,
             )
 
 
-# def _check_aea_version(package_configuration: PackageConfiguration):
-#     """Check the package configuration version against the version of the framework."""
-#     current_aea_version = Version(aea.__version__)
-#     version_specifiers = package_configuration.aea_version
+def _check_aea_version(package_configuration: PackageConfiguration):
+    """Check the package configuration version against the version of the framework."""
+    current_aea_version = Version(aea.__version__)
+    version_specifiers = package_configuration.aea_version
 
 
 def _validate_config_consistency(ctx: Context):
@@ -678,7 +678,7 @@ def _validate_config_consistency(ctx: Context):
             )
 
 
-        # _check_aea_version(package_configuration)
+        _check_aea_version(package_configuration)
         _compare_fingerprints(package_configuration, package_directory, is_vendor, item_type)
 
 

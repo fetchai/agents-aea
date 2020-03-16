@@ -2,6 +2,7 @@ name: carpark_detection
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
   behaviours.py: QmYN3W6myYNmrMViKwAuMRp9Nsp1Fn2VRHDCjThPbMiRfd

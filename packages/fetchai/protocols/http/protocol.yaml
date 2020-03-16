@@ -2,6 +2,7 @@ name: http
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmRdY1QzpEXg7bX78QTpCTmMKRRR1DcyfpyvkL8xHnoY5C
   http_pb2.py: QmSjUjZrYH1yyVsi6aGzJSYmd2SqccGJ9wJugj1o8mmdQT

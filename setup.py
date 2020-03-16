@@ -74,7 +74,6 @@ def get_all_extras() -> Dict:
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
         "python-dotenv",
-        "packaging>=20.3",
         *crypto_deps,
     ]
 
@@ -102,6 +101,7 @@ base_deps = [
     "jsonschema>=3.0.0",
     "protobuf",
     "watchdog",
+    "packaging>=20.3",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

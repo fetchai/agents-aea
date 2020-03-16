@@ -8,6 +8,7 @@
     "author",
     "version",
     "license",
+    "aea_version",
     "speech_acts"
   ],
   "properties": {

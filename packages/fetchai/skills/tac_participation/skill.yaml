@@ -2,6 +2,7 @@ name: tac_participation
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmanQQo7ns3Ui2oijVxhMW3sfMdEaYrDuFBfovw32cxSgm

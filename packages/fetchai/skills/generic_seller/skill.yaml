@@ -2,6 +2,7 @@ name: generic_seller
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
   behaviours.py: QmbkWV4NE2ENVGt4DyxFcLowi6S2PySSapreEV7RKL9vPY

@@ -2,6 +2,7 @@ name: 'tac_negotiation'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmRrF3jm7h6EmnQoM2T4Z8yrmAgSVckNp8eCWvSBBCsctS
