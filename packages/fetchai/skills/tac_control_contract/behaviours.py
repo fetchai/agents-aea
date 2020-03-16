@@ -54,7 +54,7 @@ class TACBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
-        self.is_items_created = False
+        self.context.shared_state["is_items_created"] = False
 
     def setup(self) -> None:
         """
@@ -282,17 +282,11 @@ class TACBehaviour(Behaviour):
     def _create_items(self) -> TransactionMessage:
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+        token_ids_dictionary = self.context.configuration.good_id_to_name
+        token_ids = [*token_ids_dictionary.values()]
         return contract.get_create_batch_transaction(  # type: ignore
             deployer_address=self.context.agent_address,
             ledger_api=ledger_api,
             skill_callback_id=self.context.skill_id,
-        )
-
-    def _create_game_currency(self) -> TransactionMessage:
-        contract = cast(Contract, self.context.contracts.erc1155)
-        ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        return contract.get_create_single_transaction(  # type: ignore
-            deployer_address=self.context.agent_address,
-            ledger_api=ledger_api,
-            skill_callback_id=self.context.skill_id,
+            token_ids=token_ids,
         )

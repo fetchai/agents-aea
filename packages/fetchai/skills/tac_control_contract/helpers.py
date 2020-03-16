@@ -43,9 +43,10 @@ def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str
     max_number_of_digits = math.ceil(math.log10(nb_goods))
     token_ids = contract.create_token_ids(TOKEN_TYPE, nb_goods)  # type: ignore
     string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
-    return {
+    token_ids_dict = {
         string_format.format(token_id) + "_id": str(token_id) for token_id in token_ids
     }
+    return token_ids_dict
 
 
 def determine_scaling_factor(money_endowment: int) -> float:

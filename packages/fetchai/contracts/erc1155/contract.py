@@ -73,14 +73,11 @@ class ERC1155Contract(Contract):
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
         assert self.token_ids == {}, "Item ids already created."
-        lowest_valid_integer = 0
-        token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        lowest_valid_integer = 1
         token_id_list = []
-        for _i in range(nb_tokens):
-            while self.instance.functions.is_token_id_exists(token_id).call():
-                # id already taken
-                lowest_valid_integer += 1
-                token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        for _i in range(lowest_valid_integer, nb_tokens + 1):
+            # id already taken
+            token_id = Helpers().generate_id(token_type, _i)
             token_id_list.append(token_id)
             self.token_ids[token_id] = token_type
 
@@ -154,6 +151,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_ids: List[int],
     ) -> TransactionMessage:
         """
         Create an mint a batch of items.
@@ -164,7 +162,9 @@ class ERC1155Contract(Contract):
         # create the items
 
         tx = self._get_create_batch_tx(
-            deployer_address=deployer_address, ledger_api=ledger_api
+            deployer_address=deployer_address,
+            ledger_api=ledger_api,
+            token_ids=token_ids,
         )
 
         #  Create the transaction message for the Decision maker
@@ -186,13 +186,13 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _get_create_batch_tx(
-        self, deployer_address: Address, ledger_api: LedgerApi
+        self, deployer_address: Address, ledger_api: LedgerApi, token_ids: List[int]
     ) -> str:
         """Create a batch of items."""
         # create the items
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createBatch(
-            deployer_address, self.token_ids
+            deployer_address, token_ids
         ).buildTransaction(
             {
                 "chainId": 3,
