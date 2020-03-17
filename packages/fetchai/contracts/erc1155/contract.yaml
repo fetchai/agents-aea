@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
-  contract.py: QmYzVmAdvEATnEP39qtRPRD7dW378DxSWBkNrgKEMk8Bn2
+  contract.py: QmQ9Xk6DsbLUkrTg1JYQV93Yu3fW8i1K9YuenN96juTTgk
 description: "The erc1155 contract implements an ERC1155 contract package."
 path_to_contract_interface: "build/erc1155.json"
 dependencies:

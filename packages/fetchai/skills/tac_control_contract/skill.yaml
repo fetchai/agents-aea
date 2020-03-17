@@ -6,7 +6,7 @@ fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
   behaviours.py: QmdgCWLXzQxonkymptGGVzUeng5Mqn8rZWMbXJQrdcaa6N
   game.py: QmRejiniiy7ZCNckon5MWMo3GssnhG2d22X8YRVinANJKh
-  handlers.py: QmcmTqX5GXvt6p3CHB1854nsxjfpsYZ4UhmxFsXSuJtUvS
+  handlers.py: QmX9oDSvHms1bBj9sg2jcuk5c7aTTsUdZ7EAKoWCz5Aj22
   helpers.py: QmcTTfJBZVcCqWB3SfwwLkfydptvERARuSrBhsbuimTv15
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
