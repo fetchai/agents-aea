@@ -37,8 +37,9 @@ from dotenv import load_dotenv
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
-import yaml
 from packaging.version import Version
+
+import yaml
 
 import aea
 from aea import AEA_DIR
@@ -48,9 +49,10 @@ from aea.configurations.base import (
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageConfiguration,
     PublicId,
     _get_default_configuration_file_name_from_type,
-    PackageConfiguration)
+)
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -570,10 +572,12 @@ def _compute_fingerprint(package_directory) -> Dict[str, str]:
     return fingerprints
 
 
-def _compare_fingerprints(package_configuration: PackageConfiguration,
-                          package_directory: Path,
-                          is_vendor: bool,
-                          item_type: ConfigurationType):
+def _compare_fingerprints(
+    package_configuration: PackageConfiguration,
+    package_directory: Path,
+    is_vendor: bool,
+    item_type: ConfigurationType,
+):
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.
 
@@ -618,7 +622,15 @@ def _compare_fingerprints(package_configuration: PackageConfiguration,
 def _check_aea_version(package_configuration: PackageConfiguration):
     """Check the package configuration version against the version of the framework."""
     current_aea_version = Version(aea.__version__)
-    version_specifiers = package_configuration.aea_version
+    version_specifiers = package_configuration.aea_version_specifiers
+    if current_aea_version not in version_specifiers:
+        raise ValueError(
+            "The CLI version is {}, but package {} requires version {}".format(
+                current_aea_version,
+                package_configuration.public_id,
+                package_configuration.aea_version_specifiers,
+            )
+        )
 
 
 def _validate_config_consistency(ctx: Context):
@@ -677,9 +689,10 @@ def _validate_config_consistency(ctx: Context):
                 )
             )
 
-
         _check_aea_version(package_configuration)
-        _compare_fingerprints(package_configuration, package_directory, is_vendor, item_type)
+        _compare_fingerprints(
+            package_configuration, package_directory, is_vendor, item_type
+        )
 
 
 def check_aea_project(f):

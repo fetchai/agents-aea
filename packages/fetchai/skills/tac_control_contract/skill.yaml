@@ -5,8 +5,8 @@ license: Apache-2.0
 aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmanDmviTbdZH7JdcbjXNmLh8JsjfB2dJrDZ99dpsdfEtc
-  game.py: QmZxQsujtw6NxjzrZU7rTyyz7Gw4wcmMrwjfxmgJvD32p4
+  behaviours.py: QmdHBq3hAE3wtLRbGb8Ban5N8Xge8SNJjGTYQ2nonygZrA
+  game.py: QmRgE2WP9yr51BkcFqTYHiRgKjKegPhGUs7WsARKKn9JMK
   handlers.py: QmSYMgezsT9WzKo7WnW6RSTnozFjaQjdDGqdvUkUC6ZmxN
   helpers.py: QmRWqjnLikL3Ru1qbV4hGqDtZnyR5fSNy4Py6uos52mWit
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z

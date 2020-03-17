@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 aea_version: ">=0.2.2"
-fingerprint: ''
+fingerprint: {}
 dependencies: 
     protobuf: {} 
 description: A protocol for negotiation over a fixed set of resources involving two parties.

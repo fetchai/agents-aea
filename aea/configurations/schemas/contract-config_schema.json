@@ -23,6 +23,9 @@
     "license": {
       "$ref": "definitions.json#/definitions/license"
     },
+    "aea_version": {
+      "$ref": "definitions.json#/definitions/aea_version"
+    },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },

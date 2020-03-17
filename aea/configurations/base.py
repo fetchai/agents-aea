@@ -27,6 +27,8 @@ import packaging
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+import aea
+
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
@@ -326,7 +328,7 @@ class PackageConfiguration(Configuration, ABC):
         self.version = version
         self.license = license
         self.fingerprint = fingerprint if fingerprint is not None else {}
-        self.aea_version = aea_version
+        self.aea_version = aea_version if aea_version != "" else aea.__version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
     def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
@@ -834,8 +836,14 @@ class ProtocolSpecification(ProtocolConfig):
         description: str = "",
     ):
         """Initialize a protocol specification configuration object."""
-        super().__init__(name, author, version, license, aea_version=aea_version,
-                         description=description)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version=aea_version,
+            description=description,
+        )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = None  # type: Optional[Dict]
 

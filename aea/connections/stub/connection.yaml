@@ -2,7 +2,7 @@ name: stub
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.3"
+aea_version: ">=0.2.2"
 fingerprint:
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
   connection.py: Qmewjo1cUNEH1vFLqPwH1fs5yNELUAvKXSrwCugpci2cbB
