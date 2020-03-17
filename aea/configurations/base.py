@@ -21,6 +21,7 @@
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
+from pathlib import Path
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
 
@@ -52,6 +53,7 @@ We cannot have two items with the same package name since the keys of a YAML obj
 Dependencies = Dict[str, Dependency]
 
 
+# TODO rename this to "PackageType"
 class ConfigurationType(Enum):
     """Configuration types."""
 
@@ -59,6 +61,7 @@ class ConfigurationType(Enum):
     PROTOCOL = "protocol"
     CONNECTION = "connection"
     SKILL = "skill"
+    CONTRACT = "contract"
 
 
 def _get_default_configuration_file_name_from_type(
@@ -78,6 +81,16 @@ def _get_default_configuration_file_name_from_type(
         raise ValueError(
             "Item type not valid: {}".format(str(item_type))
         )  # pragma: no cover
+
+
+class ComponentType(Enum):
+    PROTOCOL = "protocol"
+    CONNECTION = "connection"
+    SKILL = "skill"
+    CONTRACT = "contract"
+
+    def to_configuration_type(self) -> ConfigurationType:
+        return ConfigurationType(self.value)
 
 
 class ProtocolSpecificationParseError(Exception):
@@ -262,12 +275,92 @@ class PublicId(JSONSerializable):
         return str(self) < str(other)
 
 
+class PackageId:
+    """A component identifier."""
+
+    def __init__(self, package_type: ConfigurationType, public_id: PublicId):
+        """
+        Initialize the package id.
+
+        :param package_type: the package type.
+        :param public_id: the public id.
+        """
+        self._package_type = package_type
+        self._public_id = public_id
+
+    @property
+    def package_type(self) -> ConfigurationType:
+        """Get the package type."""
+        return self._package_type
+
+    @property
+    def public_id(self) -> PublicId:
+        """Get the public id."""
+        return self._public_id
+
+    def __hash__(self):
+        """Get the hash."""
+        return hash((self.package_type, self.public_id))
+
+    def __str__(self):
+        """Get the string representation."""
+        return "({package_type}, {public_id})".format(
+            package_type=self.package_type.value, public_id=self.public_id,
+        )
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return (
+            isinstance(other, PackageId)
+            and self.package_type == other.package_type
+            and self.public_id == other.public_id
+        )
+
+    def __lt__(self, other):
+        """Compare two public ids."""
+        return str(self) < str(other)
+
+
+class ComponentId(PackageId):
+    """
+    Class to represent a component identifier.
+
+    A component id is a package id, but excludes the case when the package is an agent.
+    >>> component_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    >>> component_id = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    >>> component_id == component_id
+    True
+
+    >>> component_id2 = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.1"))
+    >>> component_id == component_id2
+    False
+    """
+
+    def __init__(self, component_type: ComponentType, public_id: PublicId):
+        """
+        Initialize the component id.
+
+        :param component_type: the component type.
+        :param public_id: the public id.
+        """
+        super().__init__(component_type.to_configuration_type(), public_id)
+
+
 ProtocolId = PublicId
 SkillId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):
-    """This class represent a package configuration."""
+    """
+    This class represent a package configuration.
+
+    A package can be one of:
+    - agents
+    - protocols
+    - connections
+    - skills
+    - contracts
+    """
 
     def __init__(
         self,
@@ -291,8 +384,66 @@ class PackageConfiguration(Configuration, ABC):
         """Get the public id."""
         return PublicId(self.author, self.name, self.version)
 
+    @property
+    @abstractmethod
+    def default_configuration_filename(self) -> str:
+        """Get the default configuration filename."""
 
-class ConnectionConfig(PackageConfiguration):
+    @property
+    def package_dependencies(self) -> Set[ComponentId]:
+        """Get the package dependencies."""
+        return set()
+
+
+class ComponentConfiguration(PackageConfiguration, ABC):
+    """Class to represent an agent component configuration."""
+
+    @staticmethod
+    def load(
+        component_type: ComponentType, directory: Path
+    ) -> "ComponentConfiguration":
+        """
+        Load configuration.
+
+        :param component_type: the component type.
+        :param directory: the root of the package
+        :return: the configuration object.
+        """
+        from aea.configurations.loader import ConfigLoader
+
+        configuration_loader = ConfigLoader.from_configuration_type(
+            component_type.to_configuration_type()
+        )
+        configuration_filename = (
+            configuration_loader.configuration_class.default_configuration_filename
+        )
+        configuration_filepath = directory / configuration_filename
+        configuration_object = configuration_loader.load(open(configuration_filepath))
+        return configuration_object
+
+    def check_fingerprint(self, directory: Path) -> None:
+        """
+        Check that the fingerprint are correct against a directory path.
+
+        :raises ValueError if:
+            - the argument is not a valid package directory
+            - the fingerprint do not match.
+        """
+        if not directory.exists() or not directory.is_dir():
+            raise ValueError("Directory {} is not valid.".format(directory))
+
+        # TODO take from release/v0.3 branch.
+
+    def check_aea_version(self):
+        """
+        Check that the AEA version matches the specifier set.
+
+        :raises ValueError if the version of the aea framework falls within a specifier.
+        """
+        # TODO take from release/v0.3 branch, use 'packaging' package.
+
+
+class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
 
     def __init__(
@@ -324,6 +475,19 @@ class ConnectionConfig(PackageConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config
+
+    @property
+    def default_configuration_filename(self):
+        """Get the default configuration filename."""
+        return DEFAULT_CONNECTION_CONFIG_FILE
+
+    @property
+    def package_dependencies(self) -> Set[PackageId]:
+        """Get the connection dependencies."""
+        return set(
+            PackageId(ConfigurationType.PROTOCOL, protocol_id)
+            for protocol_id in self.protocols
+        )
 
     @property
     def json(self) -> Dict:
@@ -360,7 +524,7 @@ class ConnectionConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
@@ -372,7 +536,7 @@ class ConnectionConfig(PackageConfiguration):
         )
 
 
-class ProtocolConfig(PackageConfiguration):
+class ProtocolConfig(ComponentConfiguration):
     """Handle protocol configuration."""
 
     def __init__(
@@ -390,6 +554,11 @@ class ProtocolConfig(PackageConfiguration):
         super().__init__(name, author, version, license, aea_version, fingerprint)
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
+
+    @property
+    def default_configuration_filename(self):
+        """Get the default configuration filename."""
+        return DEFAULT_PROTOCOL_CONFIG_FILE
 
     @property
     def json(self) -> Dict:
@@ -414,7 +583,7 @@ class ProtocolConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
@@ -481,7 +650,7 @@ class ModelConfig(Configuration):
         return ModelConfig(class_name=class_name, **obj.get("args", {}))
 
 
-class SkillConfig(PackageConfiguration):
+class SkillConfig(ComponentConfiguration):
     """Class to represent a skill configuration file."""
 
     def __init__(
@@ -508,6 +677,19 @@ class SkillConfig(PackageConfiguration):
         self.models = CRUDCollection[ModelConfig]()
 
     @property
+    def default_configuration_filename(self):
+        """Get the default configuration filename."""
+        return DEFAULT_SKILL_CONFIG_FILE
+
+    @property
+    def package_dependencies(self) -> Set[PackageId]:
+        """Get the connection dependencies."""
+        return {
+            PackageId(ConfigurationType.PROTOCOL, protocol_id)
+            for protocol_id in self.protocols
+        }
+
+    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
@@ -532,7 +714,7 @@ class SkillConfig(PackageConfiguration):
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
-        aea_version = cast(str, obj.get("aea_version"))
+        aea_version = cast(str, obj.get("aea_version", ""))
         fingerprint = cast(Dict[str, str], obj.get("fingerprint", {}))
         protocols = cast(
             List[PublicId],
@@ -600,6 +782,28 @@ class AgentConfig(PackageConfiguration):
         if self.logging_config == {}:
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
+
+    @property
+    def default_configuration_filename(self):
+        """Get the default configuration filename."""
+        return DEFAULT_AEA_CONFIG_FILE
+
+    @property
+    def package_dependencies(self) -> Set[PackageId]:
+        """Get the package dependencies."""
+        protocols = set(
+            PackageId(ConfigurationType.PROTOCOL, public_id)
+            for public_id in self.protocols
+        )
+        connections = set(
+            PackageId(ConfigurationType.CONNECTION, public_id)
+            for public_id in self.connections
+        )
+        skills = set(
+            PackageId(ConfigurationType.CONNECTION, public_id)
+            for public_id in self.skills
+        )
+        return set.union(protocols, connections, skills)
 
     @property
     def private_key_paths_dict(self) -> Dict[str, str]:
@@ -678,7 +882,7 @@ class AgentConfig(PackageConfiguration):
         """Initialize from a JSON object."""
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
@@ -809,7 +1013,7 @@ class ProtocolSpecification(ProtocolConfig):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             description=cast(str, obj.get("description", "")),
         )

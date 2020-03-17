@@ -25,7 +25,10 @@ import logging
 import os
 import sys
 import types
+from contextlib import contextmanager
 from pathlib import Path
+from threading import RLock
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,26 @@ def locate(path):
         except AttributeError:
             return None
     return object
+
+
+class _SysModules:
+    """Helper class that load modules to sys.modules."""
+
+    __rlock = RLock()
+
+    @staticmethod
+    @contextmanager
+    def load_modules(modules: List[Tuple[str, types.ModuleType]]):
+        """Load modules."""
+        with _SysModules.__rlock:
+            try:
+                for import_path, module_obj in modules:
+                    assert import_path not in sys.modules
+                    sys.modules[import_path] = module_obj
+                yield
+            finally:
+                for import_path, _ in modules:
+                    sys.modules.pop(import_path, None)
 
 
 def load_module(dotted_path: str, filepath: os.PathLike):
