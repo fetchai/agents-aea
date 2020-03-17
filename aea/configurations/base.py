@@ -269,11 +269,20 @@ SkillId = PublicId
 class PackageConfiguration(Configuration, ABC):
     """This class represent a package configuration."""
 
-    def __init__(self, name: str, author: str, version: str):
+    def __init__(
+        self,
+        name: str,
+        author: str,
+        version: str,
+        license: str,
+        fingerprint: Optional[Dict[str, str]] = None,
+    ):
         """Initialize a package configuration."""
         self.name = name
         self.author = author
         self.version = version
+        self.license = license
+        self.fingerprint = fingerprint if fingerprint is not None else {}
 
     @property
     def public_id(self) -> PublicId:
@@ -290,6 +299,7 @@ class ConnectionConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -299,7 +309,7 @@ class ConnectionConfig(PackageConfiguration):
         **config
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version)
+        super().__init__(name, author, version, license, fingerprint)
         self.license = license
         self.fingerprint = ""
         self.class_name = class_name
@@ -367,11 +377,12 @@ class ProtocolConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version)
+        super().__init__(name, author, version, license, fingerprint)
         self.license = license
         self.fingerprint = ""
         self.dependencies = dependencies if dependencies is not None else {}
@@ -473,14 +484,14 @@ class SkillConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         protocols: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
         """Initialize a skill configuration."""
-        super().__init__(name, author, version)
+        super().__init__(name, author, version, license, fingerprint)
         self.license = license
-        self.fingerprint = ""
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]
@@ -514,6 +525,7 @@ class SkillConfig(PackageConfiguration):
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
+        fingerprint = cast(Dict[str, str], obj.get("fingerprint", {}))
         protocols = cast(
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
@@ -525,6 +537,7 @@ class SkillConfig(PackageConfiguration):
             author=author,
             version=version,
             license=license,
+            fingerprint=fingerprint,
             protocols=protocols,
             dependencies=dependencies,
             description=description,
@@ -555,13 +568,13 @@ class AgentConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
-        fingerprint: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         registry_path: str = "",
         description: str = "",
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
-        super().__init__(agent_name, author, version)
+        super().__init__(agent_name, author, version, license, fingerprint)
         self.agent_name = agent_name
         self.aea_version = aea_version
         self.license = license
@@ -663,6 +676,7 @@ class AgentConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            fingerprint=cast(Dict, obj.get("fingerprint")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
@@ -738,10 +752,11 @@ class ProtocolSpecification(ProtocolConfig):
         author: str = "",
         version: str = "",
         license: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         description: str = "",
     ):
         """Initialize a protocol specification configuration object."""
-        super().__init__(name, author, version, license, description=description)
+        super().__init__(name, author, version, license, fingerprint, description=description)
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = None  # type: Optional[Dict]
 
@@ -763,6 +778,7 @@ class ProtocolSpecification(ProtocolConfig):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "description": self.description,
             "speech_acts": {
                 key: speech_act.json for key, speech_act in self.speech_acts.read_all()
@@ -777,6 +793,7 @@ class ProtocolSpecification(ProtocolConfig):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            fingerprint=cast(Dict, obj.get("fingerprint")),
             description=cast(str, obj.get("description", "")),
         )
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
