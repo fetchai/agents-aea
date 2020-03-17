@@ -57,20 +57,25 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += str(e.protocol_id).encode("utf-8")
     result += separator
     result += e.message
+    result += separator
 
     return result
 
 
 def _decode(e: bytes, separator: bytes = SEPARATOR):
-    split = e.split(separator, maxsplit=3)
+    split = e.split(separator, maxsplit=4)
 
-    if len(split) != 4:
-        raise ValueError("Expected 4 values, got {}".format(len(split)))
+    if len(split) != 5 or split[4] not in [b"", b"\n"]:
+        raise ValueError(
+            "Expected 5 values separated by commas and last value being empty or a new line, got {}".format(
+                len(split)
+            )
+        )
 
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    message = split[3]
+    message = split[3].decode("unicode_escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
@@ -147,7 +152,9 @@ class StubConnection(Connection):
         while len(line) > 0:
             lines += line
             line = self.input_file.readline()
-        self._process_line(lines)
+        if lines != b"":
+            self._process_line(lines)
+            self.input_file.truncate(0)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
@@ -159,8 +166,8 @@ class StubConnection(Connection):
             assert self.in_queue is not None, "Input queue not initialized."
             assert self._loop is not None, "Loop not initialized."
             asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
-        except ValueError:
-            logger.error("Bad formatted line: {}".format(line))
+        except ValueError as e:
+            logger.error("Bad formatted line: {}. {}".format(line, e))
         except Exception as e:
             logger.error("Error when processing a line. Message: {}".format(str(e)))
 

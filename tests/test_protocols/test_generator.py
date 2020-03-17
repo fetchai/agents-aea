@@ -56,11 +56,11 @@ from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from tests.data.generator.two_party_negotiation.message import (  # type: ignore
-    TwoPartyNegotiationMessage,
+from tests.data.generator.test_protocol.message import (  # type: ignore
+    TestProtocolMessage,
 )
-from tests.data.generator.two_party_negotiation.serialization import (  # type: ignore
-    TwoPartyNegotiationSerializer,
+from tests.data.generator.test_protocol.serialization import (  # type: ignore
+    TestProtocolSerializer,
 )
 
 from ..common.click_testing import CliRunner
@@ -89,26 +89,33 @@ class TestGenerateProtocol:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_generated_protocol_serialisation(self):
+    def test_generated_protocol_serialisation_ct(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
-        # create a message
-        reply_message = {1: "number one", 2: "number two", 7: "number seven"}
-        # message 1
-        message = TwoPartyNegotiationMessage(
+        # create a message with pt content
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TestProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
+        message = TestProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TwoPartyNegotiationMessage.Performative.INFORM_REPLY,
-            reply_message=reply_message,
+            performative=TestProtocolMessage.Performative.PERFORMATIVE_CT,
+            content_ct=data_model,
         )
 
         # serialise the message
-        encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TwoPartyNegotiationSerializer().decode(
-            encoded_message_in_bytes
-        )
+        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -117,7 +124,42 @@ class TestGenerateProtocol:
         assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
         assert decoded_message.target == message.target
         assert decoded_message.performative == message.performative
-        assert decoded_message.reply_message == message.reply_message
+        assert decoded_message.content_ct == message.content_ct
+
+    def test_generated_protocol_serialisation_pt(self):
+        """Test that a generated protocol's serialisation + deserialisation work correctly."""
+        # create a message with pt content
+        message = TestProtocolMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            content_bytes=b"some bytes",
+            content_int=42,
+            content_float=42.7,
+            content_bool=True,
+            content_str="some string",
+        )
+
+        # serialise the message
+        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
+
+        # deserialise the message
+        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
+
+        # Compare the original message with the serialised+deserialised message
+        assert decoded_message.message_id == message.message_id
+        assert decoded_message.dialogue_reference == message.dialogue_reference
+        assert decoded_message.dialogue_reference[0] == message.dialogue_reference[0]
+        assert decoded_message.dialogue_reference[1] == message.dialogue_reference[1]
+        assert decoded_message.target == message.target
+        assert decoded_message.performative == message.performative
+        assert decoded_message.content_bytes == message.content_bytes
+        assert decoded_message.content_int == message.content_int
+        # floats do not seem to lose some precision when serialised then deserialised using protobuf
+        # assert decoded_message.content_float == message.content_float
+        assert decoded_message.content_bool == message.content_bool
+        assert decoded_message.content_str == message.content_str
 
     def test_generated_protocol_end_to_end(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
@@ -164,47 +206,54 @@ class TestGenerateProtocol:
             )
         )
         generated_protocol = Protocol(
-            TwoPartyNegotiationMessage.protocol_id,
-            TwoPartyNegotiationSerializer(),
+            TestProtocolMessage.protocol_id,
+            TestProtocolSerializer(),
             generated_protocol_configuration,
         )
         resources_1.protocol_registry.register(
-            TwoPartyNegotiationMessage.protocol_id, generated_protocol
+            TestProtocolMessage.protocol_id, generated_protocol
         )
         resources_2.protocol_registry.register(
-            TwoPartyNegotiationMessage.protocol_id, generated_protocol
+            TestProtocolMessage.protocol_id, generated_protocol
         )
 
         # create AEAs
         aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
         aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
 
-        inform_number = tuple((1370, 1991, 1, 4, 17, 6))
         # message 1
-        message = TwoPartyNegotiationMessage(
+        message = TestProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TwoPartyNegotiationMessage.Performative.INFORM,
-            inform_number=inform_number,
+            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            content_bytes=b"some bytes",
+            content_int=42,
+            content_float=42.7,
+            content_bool=True,
+            content_str="some string",
         )
-        encoded_message_in_bytes = TwoPartyNegotiationSerializer().encode(message)
+        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
         envelope = Envelope(
             to=identity_2.address,
             sender=identity_1.address,
-            protocol_id=TwoPartyNegotiationMessage.protocol_id,
+            protocol_id=TestProtocolMessage.protocol_id,
             message=encoded_message_in_bytes,
         )
+
         # message 2
-        reply_message = {1: "number one", 2: "number two", 7: "number seven"}
-        message_2 = TwoPartyNegotiationMessage(
+        message_2 = TestProtocolMessage(
             message_id=2,
             dialogue_reference=(str(0), ""),
             target=1,
-            performative=TwoPartyNegotiationMessage.Performative.INFORM_REPLY,
-            reply_message=reply_message,
+            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            content_bytes=b"some other bytes",
+            content_int=43,
+            content_float=43.7,
+            content_bool=False,
+            content_str="some other string",
         )
-        encoded_message_2_in_bytes = TwoPartyNegotiationSerializer().encode(message_2)
+        encoded_message_2_in_bytes = TestProtocolSerializer().encode(message_2)
 
         # add handlers to AEA resources
         agent_1_handler = Agent1Handler(
@@ -213,7 +262,7 @@ class TestGenerateProtocol:
         resources_1.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
+                TestProtocolMessage.protocol_id,
             ),
             agent_1_handler,
         )
@@ -225,7 +274,7 @@ class TestGenerateProtocol:
         resources_2.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TwoPartyNegotiationMessage.protocol_id,
+                TestProtocolMessage.protocol_id,
             ),
             agent_2_handler,
         )
@@ -272,8 +321,19 @@ class TestGenerateProtocol:
                 agent_2_handler.handled_message.performative == message.performative
             ), "Message from Agent 1 to 2: performatives do not match"
             assert (
-                agent_2_handler.handled_message.inform_number == message.inform_number
-            ), "Message from Agent 1 to 2: inform_numbers do not match"
+                agent_2_handler.handled_message.content_bytes == message.content_bytes
+            ), "Message from Agent 1 to 2: content_bytes do not match"
+            assert (
+                agent_2_handler.handled_message.content_int == message.content_int
+            ), "Message from Agent 1 to 2: content_int do not match"
+            # floats do not seem to lose some precision when serialised then deserialised using protobuf
+            # assert agent_2_handler.handled_message.content_float == message.content_float, "Message from Agent 1 to 2: content_float do not match"
+            assert (
+                agent_2_handler.handled_message.content_bool == message.content_bool
+            ), "Message from Agent 1 to 2: content_bool do not match"
+            assert (
+                agent_2_handler.handled_message.content_str == message.content_str
+            ), "Message from Agent 1 to 2: content_str do not match"
 
             assert (
                 agent_1_handler.handled_message.message_id == message_2.message_id
@@ -297,8 +357,19 @@ class TestGenerateProtocol:
                 agent_1_handler.handled_message.performative == message_2.performative
             ), "Message from Agent 2 to 1: performatives do not match"
             assert (
-                agent_1_handler.handled_message.reply_message == message_2.reply_message
-            ), "Message from Agent 1 to 2: reply_messages do not match"
+                agent_1_handler.handled_message.content_bytes == message_2.content_bytes
+            ), "Message from Agent 2 to 1: content_bytes do not match"
+            assert (
+                agent_1_handler.handled_message.content_int == message_2.content_int
+            ), "Message from Agent 2 to 1: content_int do not match"
+            # floats do not seem to lose some precision when serialised then deserialised using protobuf
+            # assert agent_1_handler.handled_message.content_float == message_2.content_float, "Message from Agent 2 to 1: content_float do not match"
+            assert (
+                agent_1_handler.handled_message.content_bool == message_2.content_bool
+            ), "Message from Agent 2 to 1: content_bool do not match"
+            assert (
+                agent_1_handler.handled_message.content_str == message_2.content_str
+            ), "Message from Agent 2 to 1: content_str do not match"
             time.sleep(2.0)
         finally:
             aea_1.stop()
@@ -381,9 +452,7 @@ class ProtocolGeneratorTestCase(TestCase):
 class Agent1Handler(Handler):
     """The handler for agent 1."""
 
-    SUPPORTED_PROTOCOL = (
-        TwoPartyNegotiationMessage.protocol_id
-    )  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -415,9 +484,7 @@ class Agent1Handler(Handler):
 class Agent2Handler(Handler):
     """The handler for agent 2."""
 
-    SUPPORTED_PROTOCOL = (
-        TwoPartyNegotiationMessage.protocol_id
-    )  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, encoded_messsage, **kwargs):
         """Initialize the handler."""
@@ -442,7 +509,7 @@ class Agent2Handler(Handler):
         envelope = Envelope(
             to=message.counterparty,
             sender=self.context.agent_address,
-            protocol_id=TwoPartyNegotiationMessage.protocol_id,
+            protocol_id=TestProtocolMessage.protocol_id,
             message=self.encoded_message_2_in_bytes,
         )
         self.context.outbox.put(envelope)

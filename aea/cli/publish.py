@@ -27,8 +27,11 @@ import click
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
     _try_get_item_source_path,
-    _try_get_vendorized_item_target_path,
+    _try_get_item_target_path,
     pass_ctx,
     try_to_load_agent_config,
 )
@@ -43,9 +46,9 @@ def publish(ctx: Context, registry):
     """Publish Agent to Registry."""
     try_to_load_agent_config(ctx)
     if not registry:
-        # TODO: check agent dependencies are available in local packages dir.
         _save_agent_locally(ctx)
     else:
+        # TODO: check agent dependencies are available in local packages dir.
         publish_agent(ctx)
 
 
@@ -72,6 +75,8 @@ def _save_agent_locally(ctx: Context) -> None:
     for item_type_plural in ("connections", "protocols", "skills"):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
+            if public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
+                continue
             _check_is_item_in_local_registry(
                 PublicId.from_str(str(public_id)),
                 item_type_plural,
@@ -80,7 +85,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     item_type_plural = "agents"
 
-    target_dir = _try_get_vendorized_item_target_path(
+    target_dir = _try_get_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,

@@ -18,7 +18,3 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the protocol registry for the AEA framework."""
-from typing import List
-
-gym_dependencies = []  # type: List[str]
-tac_dependencies = ["protobuf"]  # type: List[str]

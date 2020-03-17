@@ -1,0 +1,31 @@
+author: fetchai
+behaviours:
+  service:
+    args:
+      services_interval: 30
+    class_name: ServiceRegistrationBehaviour
+dependencies: {}
+description: The scaffold skill is a scaffold for your own skill implementation.
+fingerprint: ''
+handlers: {}
+license: Apache-2.0
+models:
+  strategy:
+    class_name: Strategy
+    args:
+      data_model_name: location
+      data_model:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      service_data:
+        country: UK
+        city: Cambridge
+name: simple_service_registration
+protocols: []
+version: 0.1.0

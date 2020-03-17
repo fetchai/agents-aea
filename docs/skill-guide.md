@@ -249,7 +249,17 @@ We also need to add the oef connection:
 aea add connection fetchai/oef:0.1.0
 ```
 
-## Step 7: Run the AEA
+## Step 7: Run a service provider AEA
+
+In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
+```
+aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registration
+aea run
+```
+
+This AEA will simply register a location service on the OEF so we can search for it.
+
+## Step 8: Run the Search AEA
 
 We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
 

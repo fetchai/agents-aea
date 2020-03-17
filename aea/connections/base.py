@@ -32,12 +32,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+# TODO refactoring: this should be an enum
+#      but beware of backward-compatibility.
 class ConnectionStatus:
     """The connection status class."""
 
     def __init__(self):
         """Initialize the connection status."""
-        self.is_connected = False
+        self.is_connected = False  # type: bool
+        self.is_connecting = False  # type: bool
 
 
 class Connection(ABC):
