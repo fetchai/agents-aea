@@ -360,7 +360,7 @@ class ConnectionConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
@@ -414,7 +414,7 @@ class ProtocolConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
@@ -532,7 +532,7 @@ class SkillConfig(PackageConfiguration):
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
-        aea_version = cast(str, obj.get("aea_version"))
+        aea_version = cast(str, obj.get("aea_version", ""))
         fingerprint = cast(Dict[str, str], obj.get("fingerprint", {}))
         protocols = cast(
             List[PublicId],
@@ -678,7 +678,7 @@ class AgentConfig(PackageConfiguration):
         """Initialize from a JSON object."""
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
@@ -809,7 +809,7 @@ class ProtocolSpecification(ProtocolConfig):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            aea_version=cast(str, obj.get("aea_version")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict, obj.get("fingerprint")),
             description=cast(str, obj.get("description", "")),
         )
