@@ -84,7 +84,6 @@ class Configuration:
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
         self._good_id_to_name = None  # type: Optional[Dict[str, str]]
-        # self._check_consistency()
 
     @property
     def version_id(self) -> str:

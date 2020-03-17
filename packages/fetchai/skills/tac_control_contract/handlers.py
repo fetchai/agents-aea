@@ -377,10 +377,12 @@ class TransactionHandler(Handler):
     def _mint_objects(self):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
+        parameters = cast(Parameters, self.context.parameters)
+        minting = [parameters.base_good_endowment] * parameters.nb_goods
         transaction_message = contract.get_mint_batch_transaction(
             deployer_address=self.context.agent_address,
             recipient_address=self.context.agent_address,
-            mint_quantities=[4] * 10,
+            mint_quantities=minting,
             ledger_api=self.context.ledger_apis.apis.get("ethereum"),
             skill_callback_id=self.context.skill_id,
             token_ids=self.context.shared_state["token_ids"],
