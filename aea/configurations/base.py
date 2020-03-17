@@ -284,7 +284,7 @@ class PackageConfiguration(Configuration, ABC):
         self.version = version
         self.license = license
         self.fingerprint = fingerprint if fingerprint is not None else {}
-        self.aea_version = ""
+        self.aea_version = aea_version
 
     @property
     def public_id(self) -> PublicId:
