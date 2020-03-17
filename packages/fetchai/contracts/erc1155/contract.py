@@ -42,6 +42,7 @@ class ERC1155Contract(Contract):
 
         CONTRACT_DEPLOY = "contract_deploy"
         CONTRACT_CREATE_BATCH = "contract_create_batch"
+        CONTRACT_CREATE_SINGLE = "contract_create_single"
         CONTRACT_MINT_BATCH = "contract_mint_batch"
         CONTRACT_ATOMIC_SWAP_SINGLE = "contract_atomic_swap_single"
         CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
@@ -77,7 +78,7 @@ class ERC1155Contract(Contract):
         token_id_list = []
         for _i in range(lowest_valid_integer, nb_tokens + 1):
             # id already taken
-            token_id = Helpers().generate_id(token_type, _i)
+            token_id = Helpers().generate_id(_i, token_type)
             token_id_list.append(token_id)
             self.token_ids[token_id] = token_type
 
@@ -227,7 +228,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_create_currency",
+            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_SINGLE.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -307,7 +308,15 @@ class ERC1155Contract(Contract):
         nonce = ledger_api.api.eth.getTransactionCount(
             ledger_api.api.toChecksumAddress(deployer_address)
         )
-        nonce += 1
+        for i in range(len(token_ids)):
+            decoded_type = Helpers().decode_id(token_ids[i])
+            assert (
+                decoded_type == 1 or decoded_type == 2
+            ), "The token prefix must be 1 or 2."
+            if decoded_type == 1:
+                assert (
+                    batch_mint_quantities[i] == 1
+                ), "Cannot mint NFT with mint_quantity more than 1"
         tx = self.instance.functions.mintBatch(
             recipient_address, token_ids, batch_mint_quantities
         ).buildTransaction(

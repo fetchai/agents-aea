@@ -314,7 +314,10 @@ class TransactionHandler(Handler):
                     )
                 )
                 contract.set_address(ledger_api, transaction.contractAddress)
-        elif tx_msg_response.tx_id == "contract_create_batch":
+        elif (
+            tx_msg_response.tx_id == "contract_create_batch"
+            or tx_msg_response.tx_id == "contract_create_single"
+        ):
             self.context.logger.info("Sending creation transaction to the ledger!")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
@@ -353,18 +356,19 @@ class TransactionHandler(Handler):
                 )
                 self.context.logger.info(transaction)
             else:
+
+                self.context.logger.info(
+                    "Successfully minted the items. Transaction hash: {}".format(
+                        transaction.transactionHash.hex()
+                    )
+                )
+
                 if (
                     self.context.shared_state["agents_total_participants"]
                     == self.context.shared_state["agents_participants_counter"]
                 ):
                     self.context.logger.info("Can start the game.!")
                     self.context.shared_state["can_start"] = True
-
-                self.context.logger.info(
-                    "Successfully created the items. Transaction hash: {}".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
 
     def teardown(self) -> None:
         """
@@ -374,7 +378,7 @@ class TransactionHandler(Handler):
         """
         pass
 
-    def _mint_objects(self, is_batch: bool):
+    def _mint_objects(self, is_batch: bool, token_id: int = None):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
@@ -399,5 +403,6 @@ class TransactionHandler(Handler):
                 mint_quantity=parameters.money_endowment,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
+                token_id=self.context.shared_state["token_ids"][0],
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
