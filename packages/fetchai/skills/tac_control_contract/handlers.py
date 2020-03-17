@@ -330,7 +330,7 @@ class TransactionHandler(Handler):
             else:
                 self.context.shared_state["is_items_created"] = True
                 self.context.logger.info(tx_msg_response.tx_id)
-                self._mint_objects()
+                self._mint_objects(is_batch=True)
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
@@ -374,30 +374,30 @@ class TransactionHandler(Handler):
         """
         pass
 
-    def _mint_objects(self):
+    def _mint_objects(self, is_batch: bool):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
-        minting = [parameters.base_good_endowment] * parameters.nb_goods
-        transaction_message = contract.get_mint_batch_transaction(
-            deployer_address=self.context.agent_address,
-            recipient_address=self.context.agent_address,
-            mint_quantities=minting,
-            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-            skill_callback_id=self.context.skill_id,
-            token_ids=self.context.shared_state["token_ids"],
-        )
-        self.context.decision_maker_message_queue.put_nowait(transaction_message)
-
-    def _mint_game_currency(self):
-        self.context.logger.info("Minting the game currency")
-        contract = self.context.contracts.erc1155
-        parameters = cast(Parameters, self.context.parameters)
-        transaction_message = contract.get_mint_single_tx(
-            deployer_address=self.context.agent_address,
-            recipient_address=self.context.agent_address,
-            mint_quantity=parameters.money_endowment,
-            ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-            skill_callback_id=self.context.skill_id,
-        )
-        self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        if is_batch:
+            minting = [parameters.base_good_endowment] * parameters.nb_goods
+            transaction_message = contract.get_mint_batch_transaction(
+                deployer_address=self.context.agent_address,
+                recipient_address=self.context.agent_address,
+                mint_quantities=minting,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+                token_ids=self.context.shared_state["token_ids"],
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        else:
+            self.context.logger.info("Minting the game currency")
+            contract = self.context.contracts.erc1155
+            parameters = cast(Parameters, self.context.parameters)
+            transaction_message = contract.get_mint_single_tx(
+                deployer_address=self.context.agent_address,
+                recipient_address=self.context.agent_address,
+                mint_quantity=parameters.money_endowment,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)

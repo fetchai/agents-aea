@@ -22,7 +22,7 @@
 import datetime
 import logging
 import time
-from typing import Optional, cast
+from typing import Dict, List, Optional, Union, cast
 
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
@@ -106,8 +106,16 @@ class TACBehaviour(Behaviour):
             self.context.configuration.set_good_id_to_name(
                 parameters.nb_goods, contract
             )
+            token_ids_dictionary = cast(
+                Dict[str, str], self.context.configuration.good_id_to_name
+            )
+            self.context.shared_state["token_ids"] = [
+                int(token_id) for token_id in token_ids_dictionary.values()
+            ]
             self.context.logger.info("Creating the items.")
-            transaction_message = self._create_items()
+            transaction_message = self._create_items(
+                self.context.shared_state["token_ids"]
+            )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
         if (
@@ -279,16 +287,20 @@ class TACBehaviour(Behaviour):
 
             self.context.is_active = False
 
-    def _create_items(self) -> TransactionMessage:
+    def _create_items(self, token_ids: Union[List[int], int]) -> TransactionMessage:
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        token_ids_dictionary = self.context.configuration.good_id_to_name
-        self.context.shared_state["token_ids"] = [
-            int(token_id) for token_id in token_ids_dictionary.values()
-        ]
-        return contract.get_create_batch_transaction(  # type: ignore
-            deployer_address=self.context.agent_address,
-            ledger_api=ledger_api,
-            skill_callback_id=self.context.skill_id,
-            token_ids=self.context.shared_state["token_ids"],
-        )
+        if type(token_ids) == list:
+            return contract.get_create_batch_transaction(  # type: ignore
+                deployer_address=self.context.agent_address,
+                ledger_api=ledger_api,
+                skill_callback_id=self.context.skill_id,
+                token_ids=token_ids,
+            )
+        else:
+            return contract.get_create_single_transaction(  # type: ignore
+                deployer_address=self.context.agent_address,
+                ledger_api=ledger_api,
+                skill_callback_id=self.context.skill_id,
+                token_id=token_ids,
+            )

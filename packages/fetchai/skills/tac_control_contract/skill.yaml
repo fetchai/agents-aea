@@ -4,9 +4,9 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmQwmey7PRMQrQshsxtyA3Gsz9arEfx3npxMbtLfofKfT6
+  behaviours.py: QmdgCWLXzQxonkymptGGVzUeng5Mqn8rZWMbXJQrdcaa6N
   game.py: QmRejiniiy7ZCNckon5MWMo3GssnhG2d22X8YRVinANJKh
-  handlers.py: QmVwKDr8qxtJt8oRVrGPDTV4iZ242dSvmFXXJeRUfVQkyZ
+  handlers.py: QmWL1ukQwXwRgT6Xeq32XtrHygfAs7UdmyMRVPegZ6trnM
   helpers.py: QmcTTfJBZVcCqWB3SfwwLkfydptvERARuSrBhsbuimTv15
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
