@@ -18,35 +18,88 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
-from typing import Dict, Any, Tuple, Set
+from enum import Enum
+from pathlib import Path
+from typing import Dict, Set
 
 from aea.aea import AEA
-from aea.configurations.base import PublicId, PackageConfiguration, AgentConfig, ConfigurationType
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import (
+    AgentConfig,
+    PackageConfiguration,
+    PublicId,
+)
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Address
-from aea.protocols.base import Protocol
 from aea.registries.base import Resources
 
-PackageId = Tuple[AgentComponentType, PublicId]
+
+class PackageType(Enum):
+    PROTOCOL = "protocol"
+    CONNECTION = "connection"
+    SKILL = "skill"
+    CONTRACT = "contract"
+
+
+class PackageId:
+    """A package identifier."""
+
+    def __init__(self, package_type: PackageType, public_id: PublicId):
+        """
+        Initialize the package id.
+
+        :param package_type: the package type.
+        :param public_id: the public id.
+        """
+        self._package_type = package_type
+        self._public_id = public_id
+
+    @property
+    def package_type(self) -> PackageType:
+        """Get the package type."""
+        return self._package_type
+
+    @property
+    def public_id(self) -> PublicId:
+        """Get the public id."""
+        return self._public_id
 
 
 class _Package:
+    def __init__(
+        self, package_type: PackageType, package_configuration: PackageConfiguration
+    ):
+        """
+        Initialize a package.
 
-    def __init__(self, package_type, package_configuration):
-        """"""
-
+        :param package_type: the type of the package.
+        :param package_configuration: the package configuration.
+        """
         self._package_type = package_type  # one of protocol, skill, connection etc.
         self._package_config = package_configuration
-        self._modules = {}
+        self._modules = {}  # type: Dict
+
+        self._package_id = PackageId(package_type, self._package_config.public_id)
+
+    @property
+    def package_id(self) -> PackageId:
+        """Ge the package id."""
+        return self._package_id
 
     @classmethod
-    def load(self, package_type) -> "_Package":
+    def load(cls, package_type) -> "_Package":
         """Load package from dir"""
         # read config file
         # load modules
+
+
+class _DependencyGraph:
+    """Class to handle a dependency graph for agent packages."""
+
+    def __init__(self):
+        """Initialize the dependency graph."""
+        self._dependency_relation = {}  # type: Dict[PackageId, Set[_Package]]
 
 
 class AEABuilder:
@@ -82,8 +135,14 @@ class AEABuilder:
     def remove_address(self, identifier: str):
         self._addresses.pop(identifier, None)
 
-    def add_package(self, package_type, directory):
-        """Load a package, given its type and the directory."""
+    def add_package(self, package_type: PackageType, directory: Path) -> None:
+        """
+        Load a package, given its type and the directory.
+
+        :param package_type: the package type.
+        :param directory: the directory path.
+        :return: None
+        """
         # load config, check fingerprint, handle errors
         # from config, check package dependencies
         # visit dependency graph, load modules in sys.modules when going backward
@@ -94,19 +153,21 @@ class AEABuilder:
         # update dependency graph
         # register new package in resources
 
-    def remove_package(self, package_type, directory):
+    def remove_package(self, package_id: PackageId):
         """Remove a package"""
         # check dependency graph for pending packages
         # remove package
         # remove modules of package in internal indexes.
 
-    def add_protocol(self, path):
+    def add_protocol(self, directory: Path):
         """Add a protocol to the agent."""
         # call add_package
+        self.add_package(PackageType.PROTOCOL, directory)
 
-    def remove_protocol(self):
+    def remove_protocol(self, public_id: PublicId):
         """Remove protocol"""
         # call remove_package
+        self.remove_package(PackageId(PackageType.PROTOCOL, public_id))
 
     # def add_connection(self, path):
     # def remove_connection(self):
@@ -147,14 +208,18 @@ class AEAProject:
         self.agent_config = AgentConfig()
 
         self.package_configurations = {}  # type: Dict[PublicId, PackageConfiguration]
-        self.vendor_package_configurations = {}  # type: Dict[PublicId, PackageConfiguration]
+        self.vendor_package_configurations = (
+            {}
+        )  # type: Dict[PublicId, PackageConfiguration]
         # dependency graph also here?
         self._dependency_graph = {}
 
     @classmethod
     def from_directory(cls, directory):
         """Load agent project from directory"""
-        agent_configuration = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        # agent_configuration = ConfigLoader.from_configuration_type(
+        #     ConfigurationType.AGENT
+        # )
         # iterate over all the packages, do fingerprint checks etc. etc.
 
     def run(self):
