@@ -104,10 +104,7 @@ def _call_subprocess(*args, timeout=None, **kwargs):
             )
         )
     finally:
-        poll = process.poll()
-        if poll is None:  # pragma: no cover
-            process.terminate()
-            process.wait(2)
+        _terminate_process(process)
     return ret
 
 
@@ -590,28 +587,22 @@ def _kill_running_oef_nodes():
     )
     stdout = b""
     try:
-        process.wait(2.0)
+        process.wait(5.0)
         (stdout, stderr) = process.communicate()
         image_ids.update(stdout.decode("utf-8").splitlines())
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        _terminate_process(process)
 
     process = subprocess.Popen(  # nosec
         ["docker", "ps", "-q", "--filter", "name=" + oef_node_name],
         stdout=subprocess.PIPE,
     )
     try:
-        process.wait(2.0)
+        process.wait(5.0)
         (stdout, stderr) = process.communicate()
         image_ids.update(stdout.decode("utf-8").splitlines())
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        _terminate_process(process)
 
     if stdout != b"":
         _call_subprocess(
@@ -664,14 +655,25 @@ def create_app():
     return app
 
 
+def _terminate_process(process: subprocess.Popen):
+    """Try to process gracefully."""
+    poll = process.poll()
+    if poll is None:
+        # send SIGTERM
+        process.terminate()
+        try:
+            # wait for termination
+            process.wait(3)
+        except subprocess.TimeoutExpired:
+            # send SIGKILL
+            process.kill()
+
+
 def _terminate_processes():
-    """Terminate all the (async) processes."""
+    """Terminate all the (async) processes instantiated by the GUI."""
     logging.info("Cleaning up...")
     for process in _processes:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        _terminate_process(process)
 
 
 def run(port: int, host: str = "127.0.0.1"):
@@ -682,7 +684,6 @@ def run(port: int, host: str = "127.0.0.1"):
     try:
         app.run(host=host, port=port, debug=False)
     finally:
-        print("Cleaning up")
         _terminate_processes()
         stop_oef_node()
 
