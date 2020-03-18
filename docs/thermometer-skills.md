@@ -132,7 +132,7 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_i
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 
-NOTE: If you are not using a Raspberry Pi make sure you make the `has_sensor`  setted to `False`
+NOTE: If you are not using a Raspberry Pi make sure you set the `has_sensor` attribute to `False`
 
 In the thermometer client skill config (`my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
