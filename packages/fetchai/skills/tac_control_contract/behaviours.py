@@ -110,7 +110,7 @@ class TACBehaviour(Behaviour):
                 Dict[str, str], self.context.configuration.good_id_to_name
             )
             self.context.shared_state["token_ids"] = [
-                int(token_id) for token_id in token_ids_dictionary.values()
+                int(token_id) for token_id in token_ids_dictionary.keys()
             ]
             self.context.logger.info("Creating the items.")
             transaction_message = self._create_items(

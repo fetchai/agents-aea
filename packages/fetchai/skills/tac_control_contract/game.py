@@ -83,7 +83,7 @@ class Configuration:
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
-        self._good_id_to_name = None  # type: Optional[Dict[str, str]]
+        self._good_id_to_name = None  # type: Optional[Dict[int, str]]
 
     @property
     def version_id(self) -> str:
@@ -106,7 +106,7 @@ class Configuration:
         self._agent_addr_to_name = agent_addr_to_name
 
     @property
-    def good_id_to_name(self) -> Optional[Dict[str, str]]:
+    def good_id_to_name(self) -> Optional[Dict[int, str]]:
         """Map good ids to names."""
         return self._good_id_to_name
 
