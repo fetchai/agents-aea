@@ -26,7 +26,7 @@ from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from packages.fetchai.skills.weather_station.strategy import Strategy
+from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
