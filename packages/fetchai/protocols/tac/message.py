@@ -227,7 +227,7 @@ class TACMessage(Message):
                 assert isinstance(self.tx_counterparty_addr, str)
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert len(self.amount_by_currency_id.keys()) == len(
                     set(self.amount_by_currency_id.keys())
                 )
@@ -237,7 +237,7 @@ class TACMessage(Message):
                 assert self.tx_counterparty_fee >= 0
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert len(self.quantities_by_good_id.keys()) == len(
                     set(self.quantities_by_good_id.keys())
                 )
@@ -252,20 +252,20 @@ class TACMessage(Message):
             elif self.type == TACMessage.Type.GAME_DATA:
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert isinstance(self.exchange_params_by_currency_id, dict)
                 for key, float_value in self.exchange_params_by_currency_id.items():
-                    assert type(key) == str and type(float_value) == float
+                    assert type(key) == int and type(float_value) == float
                 assert (
                     self.amount_by_currency_id.keys()
                     == self.exchange_params_by_currency_id.keys()
                 )
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert isinstance(self.utility_params_by_good_id, dict)
                 for key, float_value in self.utility_params_by_good_id.items():
-                    assert type(key) == str and type(float_value) == float
+                    assert type(key) == int and type(float_value) == float
                 assert (
                     self.quantities_by_good_id.keys()
                     == self.utility_params_by_good_id.keys()
@@ -274,20 +274,20 @@ class TACMessage(Message):
                 assert type(self.agent_addr_to_name) in [dict, defaultdict]
                 assert type(self.good_id_to_name) in [dict, defaultdict]
                 for good_id, name in self.good_id_to_name.items():
-                    assert isinstance(good_id, str) and isinstance(name, str)
+                    assert isinstance(good_id, int) and isinstance(name, str)
                 assert isinstance(self.version_id, str)
                 assert len(self.body) == 9
             elif self.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
                 assert isinstance(self.tx_id, str)
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert len(self.amount_by_currency_id.keys()) == len(
                     set(self.amount_by_currency_id.keys())
                 )
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
-                    assert type(key) == str and type(int_value) == int
+                    assert type(key) == int and type(int_value) == int
                 assert len(self.quantities_by_good_id.keys()) == len(
                     set(self.quantities_by_good_id.keys())
                 )

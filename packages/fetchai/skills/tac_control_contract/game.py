@@ -889,7 +889,7 @@ class Game(Model):
                 + "\n"
             )
             for good_id, quantity in agent_state.quantities_by_good_id.items():
-                result += "    " + good_id + ": " + str(quantity) + "\n"
+                result += "    " + str(good_id) + ": " + str(quantity) + "\n"
             for currency_id, amount in agent_state.amount_by_currency_id.items():
                 result += "    " + currency_id + ": " + str(amount) + "\n"
             result += "    score: " + str(round(agent_state.get_score(), 2)) + "\n"
@@ -901,7 +901,7 @@ class Game(Model):
         """Get equilibrium summary."""
         result = "\n" + "Equilibrium prices: \n"
         for good_id, eq_price in self.initialization.good_id_to_eq_prices.items():
-            result = result + good_id + " " + str(eq_price) + "\n"
+            result = result + str(good_id) + " " + str(eq_price) + "\n"
         result = result + "\n"
         result = result + "Equilibrium good allocation: \n"
         for (
@@ -915,7 +915,7 @@ class Game(Model):
                 + ":\n"
             )
             for good_id, quantity in eq_allocations.items():
-                result = result + "    " + good_id + ": " + str(quantity) + "\n"
+                result = result + "    " + str(good_id) + ": " + str(quantity) + "\n"
         result = result + "\n"
         result = result + "Equilibrium money allocation: \n"
         for (

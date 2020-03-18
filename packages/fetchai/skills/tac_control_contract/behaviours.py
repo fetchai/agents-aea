@@ -56,6 +56,7 @@ class TACBehaviour(Behaviour):
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
         self.context.shared_state["is_items_created"] = False
+        self.context.shared_state["can_start"] = False
 
     def setup(self) -> None:
         """
@@ -153,8 +154,9 @@ class TACBehaviour(Behaviour):
                         nonce_index=self.context.shared_state["agent_counter"],
                     )
                     self.context.shared_state["agent_counter"] += 1
+                game.phase = Phase.GAME
         elif (
-            game.phase.value == Phase.GAME
+            game.phase.value == Phase.GAME.value
             and parameters.start_time < now < parameters.end_time
             and self.context.shared_state["can_start"]
         ):
