@@ -25,7 +25,7 @@ import re
 from datetime import date
 from os import path
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from aea.configurations.base import ProtocolSpecification
 
@@ -1527,13 +1527,8 @@ class ProtocolGenerator:
         return cls_str
 
     def _content_to_proto_field_str(
-        self,
-        content_name: str,
-        content_type: str,
-        tag_no: int,
-        no_of_indents: int,
-        optional: Optional[bool] = False,
-    ) -> str:
+        self, content_name: str, content_type: str, tag_no: int, no_of_indents: int,
+    ) -> Tuple[str, int]:
         """
         Convert a message content to its representation in a protocol buffer schema.
 
@@ -1546,21 +1541,16 @@ class ProtocolGenerator:
         indents = _get_indent_str(no_of_indents)
         entry = ""
 
-        if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():  # it is a <PT>
-            # content_type content_name = tag;
-            proto_type = _python_pt_or_ct_type_to_proto_type(content_type)
-            entry = indents + "{} {} = {};\n".format(proto_type, content_name, tag_no)
-        elif content_type.startswith("FrozenSet") or content_type.startswith(
+        if content_type.startswith("FrozenSet") or content_type.startswith(
             "Tuple"
         ):  # it is a <PCT>
-            # repeated element_type content_name = tag;
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             proto_type = _python_pt_or_ct_type_to_proto_type(element_type)
             entry = indents + "repeated {} {} = {};\n".format(
                 proto_type, content_name, tag_no
             )
+            tag_no += 1
         elif content_type.startswith("Dict"):  # it is a <PMT>
-            # map<key_type, value_type> content_name = tag;
             key_type = _get_sub_types_of_compositional_types(content_type)[0]
             value_type = _get_sub_types_of_compositional_types(content_type)[1]
             proto_key_type = _python_pt_or_ct_type_to_proto_type(key_type)
@@ -1568,42 +1558,30 @@ class ProtocolGenerator:
             entry = indents + "map<{}, {}> {} = {};\n".format(
                 proto_key_type, proto_value_type, content_name, tag_no
             )
+            tag_no += 1
         elif content_type.startswith("Union"):  # it is an <MT>
-            sub_type_name_counter = 1
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
                 sub_type_name = _union_sub_type_to_protobuf_variable_name(
                     content_name, sub_type
                 )
-                entry += "{}".format(
-                    self._content_to_proto_field_str(
-                        sub_type_name, sub_type, tag_no, no_of_indents
-                    )
+                content_to_proto_field_str, tag_no = self._content_to_proto_field_str(
+                    sub_type_name, sub_type, tag_no, no_of_indents
                 )
-                if optional:
-                    tag_no += 2
-                else:
-                    tag_no += 1
-                sub_type_name_counter += 1
-            # entry = entry[:-1]
+                entry += content_to_proto_field_str
         elif content_type.startswith("Optional"):  # it is an <O>
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            entry = self._content_to_proto_field_str(
+            content_to_proto_field_str, tag_no = self._content_to_proto_field_str(
                 content_name, sub_type, tag_no, no_of_indents
             )
-            if sub_type.startswith("Union"):
-                union_sub_type = _get_sub_types_of_compositional_types(sub_type)
-                new_tag_no = tag_no + len(union_sub_type)
-            else:
-                new_tag_no = tag_no + 1
-            entry += indents + "bool {}_is_set = {};\n".format(content_name, new_tag_no)
-        else:  # it is a <CT>
+            entry = content_to_proto_field_str
+            entry += indents + "bool {}_is_set = {};\n".format(content_name, tag_no)
+            tag_no += 1
+        else:  # it is a <CT> or <PT>
             proto_type = _python_pt_or_ct_type_to_proto_type(content_type)
             entry = indents + "{} {} = {};\n".format(proto_type, content_name, tag_no)
-        if optional:
             tag_no += 1
-            entry += indents + "bool {}_is_set = {};\n".format(content_name, tag_no)
-        return entry
+        return entry, tag_no
 
     def _protocol_buffer_schema_str(self) -> str:
         """
@@ -1663,22 +1641,13 @@ class ProtocolGenerator:
             else:
                 proto_buff_schema_str += "\n"
                 for content_name, content_type in contents.items():
-                    proto_buff_schema_str += self._content_to_proto_field_str(
+                    (
+                        content_to_proto_field_str,
+                        tag_no,
+                    ) = self._content_to_proto_field_str(
                         content_name, content_type, tag_no, 2
                     )
-                    if content_type.startswith("Optional"):
-                        element_type = _get_sub_types_of_compositional_types(
-                            content_type
-                        )[0]
-                        if not element_type.startswith("Union"):
-                            tag_no += 2
-                        else:
-                            union_sub_types = _get_sub_types_of_compositional_types(
-                                element_type
-                            )
-                            tag_no += len(union_sub_types) + 1
-                    else:
-                        tag_no += 1
+                    proto_buff_schema_str += content_to_proto_field_str
                 proto_buff_schema_str += indents + "}\n\n"
         proto_buff_schema_str += "\n"
 

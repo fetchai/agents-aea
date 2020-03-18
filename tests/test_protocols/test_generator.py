@@ -199,7 +199,7 @@ class TestGenerateProtocol:
                         "tests",
                         "data",
                         "generator",
-                        "two_party_negotiation",
+                        "test_protocol",
                         "protocol.yaml",
                     )
                 )
