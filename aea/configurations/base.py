@@ -23,6 +23,12 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
+import packaging
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
+
+import aea
+
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
@@ -301,14 +307,42 @@ class PackageConfiguration(Configuration, ABC):
         author: str,
         version: str,
         license: str,
+        aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
     ):
-        """Initialize a package configuration."""
+        """
+        Initialize a package configuration.
+
+        :param name: the name of the package.
+        :param author: the author of the package.
+        :param version: the version of the package (SemVer format).
+        :param license: the license.
+        :param aea_version: either a fixed version, or a set of specifiers
+           describing the AEA versions allowed.
+           (default: empty string - no constraint).
+           The fixed version is interpreted with the specifier '=='.
+        :param fingerprint: the fingerprint.
+        """
         self.name = name
         self.author = author
         self.version = version
         self.license = license
         self.fingerprint = fingerprint if fingerprint is not None else {}
+        self.aea_version = aea_version if aea_version != "" else aea.__version__
+        self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
+
+    def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
+        try:
+            Version(aea_version_specifiers)
+            return SpecifierSet("==" + aea_version_specifiers)
+        except packaging.version.InvalidVersion:
+            pass
+        return SpecifierSet(aea_version_specifiers)
+
+    @property
+    def aea_version_specifiers(self) -> SpecifierSet:
+        """Get the AEA version set specifier."""
+        return self._aea_version_specifiers
 
     @property
     def public_id(self) -> PublicId:
@@ -325,6 +359,7 @@ class ConnectionConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
@@ -335,7 +370,7 @@ class ConnectionConfig(PackageConfiguration):
         **config
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version, license, fingerprint)
+        super().__init__(name, author, version, license, aea_version, fingerprint)
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = (
@@ -356,6 +391,7 @@ class ConnectionConfig(PackageConfiguration):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
             "class_name": self.class_name,
             "protocols": sorted(map(str, self.protocols)),
@@ -382,6 +418,7 @@ class ConnectionConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
@@ -403,11 +440,12 @@ class ProtocolConfig(PackageConfiguration):
         version: str = "",
         license: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version, license, fingerprint)
+        super().__init__(name, author, version, license, aea_version, fingerprint)
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
@@ -419,6 +457,7 @@ class ProtocolConfig(PackageConfiguration):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
             "dependencies": self.dependencies,
             "description": self.description,
@@ -433,6 +472,7 @@ class ProtocolConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
@@ -508,6 +548,7 @@ class SkillConfig(PackageConfiguration):
         author: str = "",
         version: str = "",
         license: str = "",
+        aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         protocols: List[PublicId] = None,
         contracts: List[PublicId] = None,
@@ -515,7 +556,7 @@ class SkillConfig(PackageConfiguration):
         description: str = "",
     ):
         """Initialize a skill configuration."""
-        super().__init__(name, author, version, license, fingerprint)
+        super().__init__(name, author, version, license, aea_version, fingerprint)
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]
@@ -536,6 +577,7 @@ class SkillConfig(PackageConfiguration):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
             "protocols": sorted(map(str, self.protocols)),
             "contracts": sorted(map(str, self.contracts)),
@@ -552,8 +594,9 @@ class SkillConfig(PackageConfiguration):
         name = cast(str, obj.get("name"))
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
-        fingerprint = cast(Dict[str, str], obj.get("fingerprint"))
         license = cast(str, obj.get("license"))
+        aea_version_specifiers = cast(str, obj.get("aea_version", ""))
+        fingerprint = cast(Dict[str, str], obj.get("fingerprint"))
         protocols = cast(
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
@@ -569,6 +612,7 @@ class SkillConfig(PackageConfiguration):
             author=author,
             version=version,
             license=license,
+            aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
             protocols=protocols,
             contracts=contracts,
@@ -597,19 +641,18 @@ class AgentConfig(PackageConfiguration):
     def __init__(
         self,
         agent_name: str = "",
-        aea_version: str = "",
         author: str = "",
         version: str = "",
         license: str = "",
+        aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         registry_path: str = "",
         description: str = "",
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
-        super().__init__(agent_name, author, version, license, fingerprint)
+        super().__init__(agent_name, author, version, license, aea_version, fingerprint)
         self.agent_name = agent_name
-        self.aea_version = aea_version
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
@@ -682,10 +725,10 @@ class AgentConfig(PackageConfiguration):
         """Return the JSON representation."""
         return {
             "agent_name": self.agent_name,
-            "aea_version": self.aea_version,
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
             "registry_path": self.registry_path,
             "description": self.description,
@@ -705,10 +748,10 @@ class AgentConfig(PackageConfiguration):
         """Initialize from a JSON object."""
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
-            aea_version=cast(str, obj.get("aea_version")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
@@ -789,10 +832,18 @@ class ProtocolSpecification(ProtocolConfig):
         author: str = "",
         version: str = "",
         license: str = "",
+        aea_version: str = "",
         description: str = "",
     ):
         """Initialize a protocol specification configuration object."""
-        super().__init__(name, author, version, license, description=description)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version=aea_version,
+            description=description,
+        )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = None  # type: Optional[Dict]
 
@@ -814,6 +865,7 @@ class ProtocolSpecification(ProtocolConfig):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "description": self.description,
             "speech_acts": {
                 key: speech_act.json for key, speech_act in self.speech_acts.read_all()
@@ -828,6 +880,7 @@ class ProtocolSpecification(ProtocolConfig):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             description=cast(str, obj.get("description", "")),
         )
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
@@ -875,14 +928,15 @@ class ContractConfig(PackageConfiguration):
         name: str = "",
         author: str = "",
         version: str = "",
-        fingerprint: Optional[Dict[str, str]] = None,
         license: str = "",
+        aea_version: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         path_to_contract_interface: str = "",
     ):
         """Initialize a protocol configuration object."""
-        super().__init__(name, author, version, license, fingerprint)
+        super().__init__(name, author, version, license, aea_version, fingerprint)
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.path_to_contract_interface = path_to_contract_interface
@@ -895,6 +949,7 @@ class ContractConfig(PackageConfiguration):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
             "dependencies": self.dependencies,
             "description": self.description,
@@ -910,6 +965,7 @@ class ContractConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),

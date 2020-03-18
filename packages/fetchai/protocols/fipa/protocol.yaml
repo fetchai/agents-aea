@@ -2,6 +2,7 @@ name: 'fipa'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.2
 fingerprint:
   __init__.py: Qmc3EFAp16MJiRXU8hgSh2ApPnRTpmgAnxfEKi52r7MmUa
   dialogues.py: QmUHyyQmYyuE6G2o3q6HnhniHba74ye9sgc1VywyRtT4kX

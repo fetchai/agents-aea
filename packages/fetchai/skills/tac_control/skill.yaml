@@ -2,6 +2,7 @@ name: 'tac_control'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.2
 fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmSmYEgESyDMSemqdw2zkM2djAdLwoTsEfGk3Sr5Wb6X4h

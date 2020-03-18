@@ -8,6 +8,7 @@
     "author",
     "version",
     "license",
+    "aea_version",
     "class_name",
     "config",
     "protocols"
@@ -24,6 +25,9 @@
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
+    },
+    "aea_version": {
+      "$ref": "definitions.json#/definitions/aea_version"
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"

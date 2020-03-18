@@ -2,6 +2,7 @@ name: echo
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
   behaviours.py: QmRbCupz7fM4rFVYEwQKRKsnXePSvQSFsKwCBVkTzqoPMy
