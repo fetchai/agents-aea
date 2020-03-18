@@ -22,13 +22,14 @@
 import datetime
 import logging
 import time
-from typing import Optional, cast
+from typing import Dict, List, Optional, Union, cast
 
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
+from aea.mail.base import Address
 from aea.skills.base import Behaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -54,7 +55,7 @@ class TACBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
-        self.is_items_created = False
+        self.context.shared_state["is_items_created"] = False
 
     def setup(self) -> None:
         """
@@ -65,7 +66,7 @@ class TACBehaviour(Behaviour):
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(EthereumApi, self.context.ledger_apis.apis.get("ethereum"))
-
+        self.context.shared_state["agent_counter"] = 0
         #  Deploy the contract if there is no address in the parameters
         if parameters.contract_address is None:
             contract.set_instance(ledger_api)
@@ -106,8 +107,16 @@ class TACBehaviour(Behaviour):
             self.context.configuration.set_good_id_to_name(
                 parameters.nb_goods, contract
             )
+            token_ids_dictionary = cast(
+                Dict[str, str], self.context.configuration.good_id_to_name
+            )
+            self.context.shared_state["token_ids"] = [
+                int(token_id) for token_id in token_ids_dictionary.keys()
+            ]
             self.context.logger.info("Creating the items.")
-            transaction_message = self._create_items()
+            transaction_message = self._create_items(
+                self.context.shared_state["token_ids"]
+            )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
         if (
@@ -136,7 +145,14 @@ class TACBehaviour(Behaviour):
                 # self._start_tac()
                 game.create()
                 self._unregister_tac()
-                game.phase = Phase.GAME
+                self.context.logger.info("Mint objects after registration.")
+                for agent in self.context.configuration.agent_addr_to_name.keys():
+                    self._mint_objects(
+                        is_batch=True,
+                        address=agent,
+                        nonce_index=self.context.shared_state["agent_counter"],
+                    )
+                    self.context.shared_state["agent_counter"] += 1
         elif (
             game.phase.value == Phase.GAME
             and parameters.start_time < now < parameters.end_time
@@ -279,20 +295,52 @@ class TACBehaviour(Behaviour):
 
             self.context.is_active = False
 
-    def _create_items(self) -> TransactionMessage:
+    def _create_items(self, token_ids: Union[List[int], int]) -> TransactionMessage:
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        return contract.get_create_batch_transaction(  # type: ignore
-            deployer_address=self.context.agent_address,
-            ledger_api=ledger_api,
-            skill_callback_id=self.context.skill_id,
-        )
+        if type(token_ids) == list:
+            return contract.get_create_batch_transaction(  # type: ignore
+                deployer_address=self.context.agent_address,
+                ledger_api=ledger_api,
+                skill_callback_id=self.context.skill_id,
+                token_ids=token_ids,
+            )
+        else:
+            return contract.get_create_single_transaction(  # type: ignore
+                deployer_address=self.context.agent_address,
+                ledger_api=ledger_api,
+                skill_callback_id=self.context.skill_id,
+                token_id=token_ids,
+            )
 
-    def _create_game_currency(self) -> TransactionMessage:
-        contract = cast(Contract, self.context.contracts.erc1155)
-        ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        return contract.get_create_single_transaction(  # type: ignore
-            deployer_address=self.context.agent_address,
-            ledger_api=ledger_api,
-            skill_callback_id=self.context.skill_id,
-        )
+    def _mint_objects(
+        self, is_batch: bool, address: Address, nonce_index: int, token_id: int = None
+    ):
+        self.context.logger.info("Minting the items")
+        contract = self.context.contracts.erc1155
+        parameters = cast(Parameters, self.context.parameters)
+        if is_batch:
+            minting = [parameters.base_good_endowment] * parameters.nb_goods
+            transaction_message = contract.get_mint_batch_transaction(
+                deployer_address=self.context.agent_address,
+                recipient_address=address,
+                mint_quantities=minting,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+                token_ids=self.context.shared_state["token_ids"],
+                nonce_index=nonce_index,
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        else:
+            self.context.logger.info("Minting the game currency")
+            contract = self.context.contracts.erc1155
+            parameters = cast(Parameters, self.context.parameters)
+            transaction_message = contract.get_mint_single_tx(
+                deployer_address=self.context.agent_address,
+                recipient_address=self.context.agent_address,
+                mint_quantity=parameters.money_endowment,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+                token_id=self.context.shared_state["token_ids"][0],
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
