@@ -75,17 +75,17 @@ class ERC1155Contract(Contract):
         """Populate the token_ids dictionary."""
         assert self.token_ids == {}, "Item ids already created."
         lowest_valid_integer = 1
-        token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        token_id = Helpers().generate_id(lowest_valid_integer, token_type)
         token_id_list = []
         for _i in range(nb_tokens):
             while self.instance.functions.is_token_id_exists(token_id).call():
                 # token_id already taken
                 lowest_valid_integer += 1
-                token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+                token_id = Helpers().generate_id(lowest_valid_integer, token_type)
             token_id_list.append(token_id)
             self.token_ids[token_id] = token_type
             lowest_valid_integer += 1
-            token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+            token_id = Helpers().generate_id(lowest_valid_integer, token_type)
         return token_id_list
 
     def get_deploy_transaction(
