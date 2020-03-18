@@ -42,6 +42,7 @@ class ERC1155Contract(Contract):
 
         CONTRACT_DEPLOY = "contract_deploy"
         CONTRACT_CREATE_BATCH = "contract_create_batch"
+        CONTRACT_CREATE_SINGLE = "contract_create_single"
         CONTRACT_MINT_BATCH = "contract_mint_batch"
         CONTRACT_ATOMIC_SWAP_SINGLE = "contract_atomic_swap_single"
         CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
@@ -73,17 +74,18 @@ class ERC1155Contract(Contract):
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """Populate the token_ids dictionary."""
         assert self.token_ids == {}, "Item ids already created."
-        lowest_valid_integer = 0
-        token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+        lowest_valid_integer = 1
+        token_id = Helpers().generate_id(lowest_valid_integer, token_type)
         token_id_list = []
         for _i in range(nb_tokens):
             while self.instance.functions.is_token_id_exists(token_id).call():
-                # id already taken
+                # token_id already taken
                 lowest_valid_integer += 1
-                token_id = Helpers().generate_id(token_type, lowest_valid_integer)
+                token_id = Helpers().generate_id(lowest_valid_integer, token_type)
             token_id_list.append(token_id)
             self.token_ids[token_id] = token_type
-
+            lowest_valid_integer += 1
+            token_id = Helpers().generate_id(lowest_valid_integer, token_type)
         return token_id_list
 
     def get_deploy_transaction(
@@ -154,6 +156,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_ids: List[int],
     ) -> TransactionMessage:
         """
         Create an mint a batch of items.
@@ -164,7 +167,9 @@ class ERC1155Contract(Contract):
         # create the items
 
         tx = self._get_create_batch_tx(
-            deployer_address=deployer_address, ledger_api=ledger_api
+            deployer_address=deployer_address,
+            ledger_api=ledger_api,
+            token_ids=token_ids,
         )
 
         #  Create the transaction message for the Decision maker
@@ -186,13 +191,13 @@ class ERC1155Contract(Contract):
         return tx_message
 
     def _get_create_batch_tx(
-        self, deployer_address: Address, ledger_api: LedgerApi
+        self, deployer_address: Address, ledger_api: LedgerApi, token_ids: List[int]
     ) -> str:
         """Create a batch of items."""
         # create the items
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx = self.instance.functions.createBatch(
-            deployer_address, self.token_ids
+            deployer_address, token_ids
         ).buildTransaction(
             {
                 "chainId": 3,
@@ -227,7 +232,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_create_currency",
+            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_SINGLE.value,
             tx_sender_addr=deployer_address,
             tx_counterparty_addr="",
             tx_amount_by_currency_id={"ETH": 0},
@@ -265,6 +270,8 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        token_ids: List[int],
+        nonce_index: int,
     ):
 
         assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
@@ -273,6 +280,8 @@ class ERC1155Contract(Contract):
             recipient_address=recipient_address,
             batch_mint_quantities=mint_quantities,
             ledger_api=ledger_api,
+            token_ids=token_ids,
+            nonce_index=nonce_index,
         )
 
         tx_message = TransactionMessage(
@@ -298,15 +307,28 @@ class ERC1155Contract(Contract):
         recipient_address: Address,
         batch_mint_quantities: List[int],
         ledger_api: LedgerApi,
+        token_ids: List[int],
+        nonce_index: int,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
-        nonce = ledger_api.api.eth.getTransactionCount(
-            ledger_api.api.toChecksumAddress(deployer_address)
+        nonce = (
+            ledger_api.api.eth.getTransactionCount(
+                ledger_api.api.toChecksumAddress(deployer_address)
+            )
+            + nonce_index
         )
-        nonce += 1
+        for i in range(len(token_ids)):
+            decoded_type = Helpers().decode_id(token_ids[i])
+            assert (
+                decoded_type == 1 or decoded_type == 2
+            ), "The token prefix must be 1 or 2."
+            if decoded_type == 1:
+                assert (
+                    batch_mint_quantities[i] == 1
+                ), "Cannot mint NFT with mint_quantity more than 1"
         tx = self.instance.functions.mintBatch(
-            recipient_address, self.token_ids, batch_mint_quantities
+            recipient_address, token_ids, batch_mint_quantities
         ).buildTransaction(
             {
                 "chainId": 3,
