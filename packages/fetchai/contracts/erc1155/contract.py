@@ -271,6 +271,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_ids: List[int],
+        nonce_index: int,
     ):
 
         assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
@@ -280,6 +281,7 @@ class ERC1155Contract(Contract):
             batch_mint_quantities=mint_quantities,
             ledger_api=ledger_api,
             token_ids=token_ids,
+            nonce_index=nonce_index,
         )
 
         tx_message = TransactionMessage(
@@ -306,11 +308,15 @@ class ERC1155Contract(Contract):
         batch_mint_quantities: List[int],
         ledger_api: LedgerApi,
         token_ids: List[int],
+        nonce_index: int,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
-        nonce = ledger_api.api.eth.getTransactionCount(
-            ledger_api.api.toChecksumAddress(deployer_address)
+        nonce = (
+            ledger_api.api.eth.getTransactionCount(
+                ledger_api.api.toChecksumAddress(deployer_address)
+            )
+            + nonce_index
         )
         for i in range(len(token_ids)):
             decoded_type = Helpers().decode_id(token_ids[i])

@@ -108,7 +108,7 @@ class Configuration:
     @property
     def good_id_to_name(self) -> Dict[int, str]:
         """Map good ids to names."""
-        assert self.good_id_to_name is not None, "Good_id_to_name not set yet!"
+        assert self._good_id_to_name is not None, "Good_id_to_name not set yet!"
         return self._good_id_to_name
 
     def set_good_id_to_name(self, nb_goods: int, contract: Contract) -> None:

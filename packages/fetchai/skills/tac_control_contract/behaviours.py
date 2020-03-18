@@ -29,6 +29,7 @@ from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
+from aea.mail.base import Address
 from aea.skills.base import Behaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -65,7 +66,7 @@ class TACBehaviour(Behaviour):
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(EthereumApi, self.context.ledger_apis.apis.get("ethereum"))
-
+        self.context.shared_state["agent_counter"] = 0
         #  Deploy the contract if there is no address in the parameters
         if parameters.contract_address is None:
             contract.set_instance(ledger_api)
@@ -144,7 +145,14 @@ class TACBehaviour(Behaviour):
                 # self._start_tac()
                 game.create()
                 self._unregister_tac()
-                game.phase = Phase.GAME
+                self.context.logger.info("Mint objects after registration.")
+                for agent in self.context.configuration.agent_addr_to_name.keys():
+                    self._mint_objects(
+                        is_batch=True,
+                        address=agent,
+                        nonce_index=self.context.shared_state["agent_counter"],
+                    )
+                    self.context.shared_state["agent_counter"] += 1
         elif (
             game.phase.value == Phase.GAME
             and parameters.start_time < now < parameters.end_time
@@ -304,3 +312,35 @@ class TACBehaviour(Behaviour):
                 skill_callback_id=self.context.skill_id,
                 token_id=token_ids,
             )
+
+    def _mint_objects(
+        self, is_batch: bool, address: Address, nonce_index: int, token_id: int = None
+    ):
+        self.context.logger.info("Minting the items")
+        contract = self.context.contracts.erc1155
+        parameters = cast(Parameters, self.context.parameters)
+        if is_batch:
+            minting = [parameters.base_good_endowment] * parameters.nb_goods
+            transaction_message = contract.get_mint_batch_transaction(
+                deployer_address=self.context.agent_address,
+                recipient_address=address,
+                mint_quantities=minting,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+                token_ids=self.context.shared_state["token_ids"],
+                nonce_index=nonce_index,
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        else:
+            self.context.logger.info("Minting the game currency")
+            contract = self.context.contracts.erc1155
+            parameters = cast(Parameters, self.context.parameters)
+            transaction_message = contract.get_mint_single_tx(
+                deployer_address=self.context.agent_address,
+                recipient_address=self.context.agent_address,
+                mint_quantity=parameters.money_endowment,
+                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                skill_callback_id=self.context.skill_id,
+                token_id=self.context.shared_state["token_ids"][0],
+            )
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)

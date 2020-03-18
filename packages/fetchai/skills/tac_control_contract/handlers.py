@@ -147,7 +147,7 @@ class TACHandler(Handler):
                 protocol_id=TACMessage.protocol_id,
                 message=TACSerializer().encode(tac_msg),
             )
-
+        self.context.shared_state["agents_participants_counter"] += 1
         game.registration.register_agent(message.counterparty, agent_name)
         self.context.logger.info(
             "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
@@ -279,9 +279,14 @@ class TransactionHandler(Handler):
 
     SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
 
+    def __init__(self, **kwargs):
+        """Instantiate the handler."""
+        super().__init__(**kwargs)
+        self.counter = 0
+
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
+        self.context.shared_state["agents_participants_counter"] = 0
 
     def handle(self, message: Message) -> None:
         """
@@ -292,6 +297,7 @@ class TransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         contract = self.context.contracts.erc1155
+        game = cast(Game, self.context.game)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
         if tx_msg_response.tx_id == "contract_deploy":
             self.context.logger.info("Sending deployment transaction to the ledger!")
@@ -332,8 +338,6 @@ class TransactionHandler(Handler):
                 self.context.info("The creation command wasn't successful. Aborting.")
             else:
                 self.context.shared_state["is_items_created"] = True
-                self.context.logger.info(tx_msg_response.tx_id)
-                self._mint_objects(is_batch=True)
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
@@ -356,19 +360,16 @@ class TransactionHandler(Handler):
                 )
                 self.context.logger.info(transaction)
             else:
-
+                self.counter += 1
                 self.context.logger.info(
                     "Successfully minted the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
                     )
                 )
-
-                if (
-                    self.context.shared_state["agents_total_participants"]
-                    == self.context.shared_state["agents_participants_counter"]
-                ):
-                    self.context.logger.info("Can start the game.!")
+                self.context.logger.info("Can start the game.!")
+                if self.context.shared_state["agent_counter"] == self.counter:
                     self.context.shared_state["can_start"] = True
+                    game.phase = Phase.GAME
 
     def teardown(self) -> None:
         """
@@ -377,32 +378,3 @@ class TransactionHandler(Handler):
         :return: None
         """
         pass
-
-    def _mint_objects(self, is_batch: bool, token_id: int = None):
-        self.context.logger.info("Minting the items")
-        contract = self.context.contracts.erc1155
-        parameters = cast(Parameters, self.context.parameters)
-        if is_batch:
-            minting = [parameters.base_good_endowment] * parameters.nb_goods
-            transaction_message = contract.get_mint_batch_transaction(
-                deployer_address=self.context.agent_address,
-                recipient_address=self.context.agent_address,
-                mint_quantities=minting,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                skill_callback_id=self.context.skill_id,
-                token_ids=self.context.shared_state["token_ids"],
-            )
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
-        else:
-            self.context.logger.info("Minting the game currency")
-            contract = self.context.contracts.erc1155
-            parameters = cast(Parameters, self.context.parameters)
-            transaction_message = contract.get_mint_single_tx(
-                deployer_address=self.context.agent_address,
-                recipient_address=self.context.agent_address,
-                mint_quantity=parameters.money_endowment,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                skill_callback_id=self.context.skill_id,
-                token_id=self.context.shared_state["token_ids"][0],
-            )
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
