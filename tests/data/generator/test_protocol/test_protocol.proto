@@ -47,20 +47,29 @@ message TestProtocolMessage{
 
     message Performative_Pmt{
         map<int32, DataModel> content_dict_int_ct = 1;
-        map<bool, bytes> content_dict_bool_int = 2;
+        map<bool, bytes> content_dict_bool_bytes = 2;
         map<string, float> content_dict_str_float = 3;
     }
 
     message Performative_Mt{
-        DataModel content_union_type_DataModel = 1;
-        bytes content_union_type_bytes = 2;
-        int32 content_union_type_int = 3;
-        float content_union_type_float = 4;
-        bool content_union_type_bool = 5;
-        string content_union_type_str = 6;
-        repeated int32 content_union_type_set_of_int = 7;
-        repeated DataModel content_union_type_list_of_DataModel = 8;
-        map<string, DataModel> content_union_type_dict_of_str_DataModel = 9;
+        DataModel content_union_1_type_DataModel = 1;
+        bytes content_union_1_type_bytes = 2;
+        int32 content_union_1_type_int = 3;
+        float content_union_1_type_float = 4;
+        bool content_union_1_type_bool = 5;
+        string content_union_1_type_str = 6;
+        repeated int32 content_union_1_type_set_of_int = 7;
+        repeated DataModel content_union_1_type_list_of_DataModel = 8;
+        map<string, DataModel> content_union_1_type_dict_of_str_DataModel = 9;
+        repeated int32 content_union_2_type_set_of_int = 10;
+        repeated DataModel content_union_2_type_set_of_DataModel = 11;
+        repeated string content_union_2_type_set_of_str = 12;
+        repeated DataModel content_union_2_type_list_of_DataModel = 13;
+        repeated bool content_union_2_type_list_of_bool = 14;
+        repeated bytes content_union_2_type_list_of_bytes = 15;
+        map<string, DataModel> content_union_2_type_dict_of_str_DataModel = 16;
+        map<int32, float> content_union_2_type_dict_of_int_float = 17;
+        map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 18;
     }
 
     message Performative_O{
@@ -77,8 +86,10 @@ message TestProtocolMessage{
         string content_o_union_type_str = 11;
         map<string, int32> content_o_union_type_dict_of_str_int = 12;
         repeated DataModel content_o_union_type_set_of_DataModel = 13;
-        map<string, float> content_o_union_type_dict_of_str_float = 14;
-        bool content_o_union_is_set = 15;
+        repeated bytes content_o_union_type_set_of_bytes = 14;
+        repeated bool content_o_union_type_list_of_bool = 15;
+        map<string, float> content_o_union_type_dict_of_str_float = 16;
+        bool content_o_union_is_set = 17;
     }
 
     message Performative_Empty_Contents{}
