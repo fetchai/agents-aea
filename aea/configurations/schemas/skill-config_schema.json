@@ -27,7 +27,7 @@
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "protocols": {
       "type": "array",

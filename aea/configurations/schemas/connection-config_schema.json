@@ -29,7 +29,7 @@
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "class_name": {
       "type": "string"

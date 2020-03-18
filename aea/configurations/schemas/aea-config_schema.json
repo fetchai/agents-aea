@@ -33,7 +33,7 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/fingerprint"
     },
     "registry_path": {
       "type": "string"
