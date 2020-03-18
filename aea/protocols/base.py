@@ -36,6 +36,7 @@ from aea.configurations.base import (
     ProtocolId,
     PublicId,
 )
+from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
@@ -225,7 +226,7 @@ class JSONSerializer(Serializer):
         return Message(json_msg)
 
 
-class Protocol(ABC):
+class Protocol(Component):
     """
     This class implements a specifications for a protocol.
 
@@ -242,8 +243,10 @@ class Protocol(ABC):
         :param serializer: the serializer.
         :param config: the protocol configurations.
         """
-        self._protocol_id = protocol_id
+        super().__init__(config)
         self._serializer = serializer
+        # TODO to be removed, since now they are included in superclass.
+        self._protocol_id = protocol_id
         self._config = config
 
     @property
@@ -267,7 +270,6 @@ class Protocol(ABC):
         Load a protocol from a directory.
 
         :param directory: the skill directory.
-        :param agent_context: the agent's context
         :return: the Protocol object.
         :raises Exception: if the parsing failed.
         """
@@ -292,3 +294,10 @@ class Protocol(ABC):
         )
         protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
+
+    @classmethod
+    def load_from_directory(cls, directory: Path) -> "Component":
+        """Load a protocol from the directory."""
+        # TODO like Protocol.from_dir, but without adding modules
+        #      to sys.modules permanently. Instead, use SysModules
+        #      context manager to load them temporarily.

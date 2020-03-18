@@ -83,8 +83,13 @@ class _SysModules:
 
     @staticmethod
     @contextmanager
-    def load_modules(modules: List[Tuple[str, types.ModuleType]]):
-        """Load modules."""
+    def load_modules(modules: List[Tuple[str, types.ModuleType]]) -> None:
+        """
+        Load modules as a context manager.
+
+        :param modules: a list of pairs (import path, module object).
+        :return: None.
+        """
         with _SysModules.__rlock:
             try:
                 for import_path, module_obj in modules:

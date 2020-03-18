@@ -24,6 +24,7 @@ from asyncio import AbstractEventLoop
 from typing import Optional, Set, TYPE_CHECKING
 
 from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.components import Component
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
@@ -43,11 +44,12 @@ class ConnectionStatus:
         self.is_connecting = False  # type: bool
 
 
-class Connection(ABC):
+class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
         self,
+        connection_configuration: ConnectionConfig,
         connection_id: Optional[PublicId] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
@@ -59,6 +61,8 @@ class Connection(ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
+        super().__init__(connection_configuration)
+        # TODO connection id can be removed -
         if connection_id is None:
             raise ValueError("Connection public id is a mandatory argument.")
         self._connection_id = connection_id

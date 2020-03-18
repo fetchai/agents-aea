@@ -40,6 +40,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
+from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
@@ -530,7 +531,7 @@ class Model(SkillComponent):
         return instances
 
 
-class Skill:
+class Skill(Component):
     """This class implements a skill."""
 
     def __init__(
@@ -549,6 +550,7 @@ class Skill:
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
         :param models: the list of models shared across tasks, behaviours and
         """
+        super().__init__(config)
         self.config = config
         self.skill_context = skill_context
         self.handlers = handlers if handlers is not None else {}
@@ -608,6 +610,11 @@ class Skill:
         skill_context._skill = skill
 
         return skill
+
+    @classmethod
+    def load_from_directory(cls, directory: Path) -> "Component":
+        """Load a skill from the directory."""
+        # TODO do like Skill.from_dir, but cleaning sys.modules when finished.
 
 
 def _print_warning_message_for_non_declared_skill_components(

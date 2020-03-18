@@ -326,13 +326,13 @@ class ComponentId(PackageId):
     Class to represent a component identifier.
 
     A component id is a package id, but excludes the case when the package is an agent.
-    >>> component_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    >>> pacakge_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
     >>> component_id = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0"))
-    >>> component_id == component_id
+    >>> pacakge_id == component_id
     True
 
     >>> component_id2 = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.1"))
-    >>> component_id == component_id2
+    >>> pacakge_id == component_id2
     False
     """
 
@@ -397,6 +397,16 @@ class PackageConfiguration(Configuration, ABC):
 
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
+
+    @abstractmethod
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+
+    @property
+    def component_id(self) -> ComponentId:
+        """Get the component id."""
+        return ComponentId(self.component_type, self.public_id)
 
     @staticmethod
     def load(
@@ -477,6 +487,11 @@ class ConnectionConfig(ComponentConfiguration):
         self.config = config
 
     @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType.CONNECTION
+
+    @property
     def default_configuration_filename(self):
         """Get the default configuration filename."""
         return DEFAULT_CONNECTION_CONFIG_FILE
@@ -554,6 +569,11 @@ class ProtocolConfig(ComponentConfiguration):
         super().__init__(name, author, version, license, aea_version, fingerprint)
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
+
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType.PROTOCOL
 
     @property
     def default_configuration_filename(self):
@@ -675,6 +695,11 @@ class SkillConfig(ComponentConfiguration):
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.models = CRUDCollection[ModelConfig]()
+
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType.SKILL
 
     @property
     def default_configuration_filename(self):

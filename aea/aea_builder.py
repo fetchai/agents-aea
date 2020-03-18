@@ -21,7 +21,7 @@
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Set, Tuple, List, cast
+from typing import Dict, Set, Tuple, List, cast, Type
 
 from aea.aea import AEA
 from aea.configurations.base import (
@@ -33,46 +33,16 @@ from aea.configurations.base import (
     PublicId,
     PackageId,
 )
+from aea.configurations.components import Component
+from aea.connections.base import Connection
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import _SysModules
 from aea.identity.base import Identity
 from aea.mail.base import Address
+from aea.protocols.base import Protocol
 from aea.registries.base import Resources
-
-
-class _Component:
-    def __init__(
-        self,
-        component_type: ComponentType,
-        component_configuration: ComponentConfiguration,
-    ):
-        """
-        Initialize a package.
-
-        :param component_type: the type of the package.
-        :param component_configuration: the package configuration.
-        """
-        self._component_type = component_type  # one of protocol, skill, connection etc.
-        self._component_config = component_configuration
-
-        # mapping from import path to module object
-        self.importpath_to_module = {}  # type: Dict[str, types.ModuleType]
-
-        self._component_id = ComponentId(
-            component_type, self._component_config.public_id
-        )
-
-    @property
-    def component_id(self) -> ComponentId:
-        """Ge the package id."""
-        return self._component_id
-
-    @classmethod
-    def load(cls, component_type: ComponentType, directory: Path) -> "_Component":
-        """Load package from dir"""
-        configuration = ComponentConfiguration.load(component_type, directory)
-        # load modules
+from aea.skills.base import Skill
 
 
 class _DependenciesManager:
@@ -82,15 +52,13 @@ class _DependenciesManager:
         """Initialize the dependency graph."""
         # adjacency list of the dependency DAG
         # an arc means "depends on"
-        self.protocols = {}  # type: Dict[ComponentId, _Component]
-        self.connections = {}  # type: Dict[ComponentId, _Component]
-        self.skills = {}  # type: Dict[ComponentId, _Component]
-        self.contracts = {}  # type: Dict[ComponentId, _Component]
-
-        self._all_dependencies = {}  # type: Dict[ComponentId, _Component]
+        self.protocols = {}  # type: Dict[ComponentId, Component]
+        self.connections = {}  # type: Dict[ComponentId, Component]
+        self.skills = {}  # type: Dict[ComponentId, Component]
+        self.contracts = {}  # type: Dict[ComponentId, Component]
 
     @property
-    def all_dependencies(self) -> Set:
+    def all_dependencies(self) -> Set[ComponentId]:
         """Get all dependencies."""
         result = set(
             *self.protocols.keys(),
@@ -99,6 +67,23 @@ class _DependenciesManager:
             *self.contracts.keys(),
         )
         return result
+
+    def get_components_from_type(self, component_type: ComponentType) -> Dict[ComponentId, Component]:
+        """Get components from type."""
+        if component_type == ComponentType.PROTOCOL:
+            return self.protocols
+        elif component_type == ComponentType.CONNECTION:
+            return self.connections
+        elif component_type == ComponentType.SKILL:
+            return self.skills
+        elif component_type == ComponentType.CONTRACT:
+            raise NotImplementedError
+        else:
+            raise ValueError
+
+    def add_component(self, component: Component) -> None:
+        """Add a component."""
+        self.get_components_from_type(component.component_type)[component.component_id] = component
 
     def check_package_dependencies(
         self, component_configuration: ComponentConfiguration
@@ -114,13 +99,10 @@ class _DependenciesManager:
         return len(not_supported_packages) == 0
 
     @contextmanager
-    def load_dependencies(
-        self, component_configuration: ComponentConfiguration
-    ) -> None:
+    def load_dependencies(self) -> None:
         """
         Load dependencies of a component, so its modules can be loaded.
 
-        :param component_configuration: the component configuration
         :return: None
         """
         modules = self._get_import_order()
@@ -160,13 +142,25 @@ class _DependenciesManager:
         )
 
 
+def component_class_from_type(component_type: ComponentType) -> Type["Component"]:
+    """Get component class from component type."""
+    if component_type == ComponentType.PROTOCOL:
+        return Protocol
+    elif component_type == ComponentType.CONNECTION:
+        return Connection
+    elif component_type == ComponentType.SKILL:
+        return Skill
+    elif component_type == ComponentType.CONTRACT:
+        # TODO
+        raise NotImplementedError
+    else:
+        raise ValueError
+
+
 class AEABuilder:
     """This class helps to build an AEA."""
 
     def __init__(self):
-        self._wallet = Wallet({})  # TODO make Wallet mutable (add/remove_private_key)
-        self._ledger_apis = LedgerApis({}, "")  # TODO make it mutable (add/remove api)
-
         self._resources = Resources()
         self._connections = []
 
@@ -208,13 +202,15 @@ class AEABuilder:
         self._package_dependency_graph.check_package_dependencies(configuration)
 
         # visit dependency graph, load modules in sys.modules when going backward
-        with self._package_dependency_graph.load_dependencies(configuration):
+        with self._package_dependency_graph.load_dependencies():
             # try to load the package (e.g. the same we do for Skill.from_dir, but for any type
-            _Component.load(component_type, directory)
+            component_class = component_class_from_type(component_type)
+            component = component_class.load_from_directory(directory)
 
-        # add the loaded modules in self._agent_modules
         # update dependency graph
+        self._package_dependency_graph.add_component(component)
         # register new package in resources
+        # TODO handle the case when the component is a connection - it should not be added to resources.
 
     def remove_package(self, package_id: PackageId):
         """Remove a package"""
@@ -242,8 +238,8 @@ class AEABuilder:
         aea = AEA(
             Identity(self._name, addresses=self._addresses),
             self._connections,
-            self._wallet,
-            self._ledger_apis,
+            Wallet({}),
+            LedgerApis({}, ""),
             self._resources,
             loop=None,
             timeout=0.0,
