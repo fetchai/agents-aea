@@ -2,6 +2,7 @@ name: oef
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
   connection.py: QmTnQf62NzV7Vfy85LVPKhWB9wx5aFUaffUcWAJ2mcJJPi

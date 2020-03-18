@@ -18,7 +18,7 @@
   ],
   "properties": {
     "aea_version": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/aea_version"
     },
     "agent_name": {
       "type": "string"

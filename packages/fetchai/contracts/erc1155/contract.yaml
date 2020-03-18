@@ -2,6 +2,7 @@ name: erc1155
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
   contract.py: QmTn1vfcWdgX9ZL6KtsDB3YdxcFNY8ADujWgvbLmDikrq8
