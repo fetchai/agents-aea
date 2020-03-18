@@ -366,7 +366,10 @@ class TransactionHandler(Handler):
                         transaction.transactionHash.hex()
                     )
                 )
-                if self.context.shared_state["agent_counter"] == game.registration.nb_agents:
+                if (
+                    self.context.shared_state["agent_counter"]
+                    == game.registration.nb_agents
+                ):
                     self.context.logger.info("Can start the game.!")
                     self.context.shared_state["can_start"] = True
 
