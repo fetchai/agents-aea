@@ -2,7 +2,7 @@ name: 'ml_train'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmSadTxFrhupj6y2RfuMTNHTZDPgcSkyRMGjtPrzttxZ7e

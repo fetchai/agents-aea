@@ -2,7 +2,7 @@ name: local
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
   connection.py: QmeRxoK4LfosY9wtbnF3f5F4veaMMkTaUWAVncMsPC5wG7

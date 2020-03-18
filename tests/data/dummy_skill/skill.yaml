@@ -2,7 +2,7 @@ name: dummy
 author: dummy_author
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: Qmd3mY5TSBA632qYRixRVELXkmBWMZtvnxJyQC1oHDTuEm
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C

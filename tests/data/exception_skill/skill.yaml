@@ -2,7 +2,7 @@ name: exception
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
   behaviours.py: QmSXH168c4LK8h68eeAbykL6gV7VPsFPhYzJrhtj73SCux

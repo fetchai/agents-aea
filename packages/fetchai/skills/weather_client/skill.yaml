@@ -2,7 +2,7 @@ name: weather_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: Qmb1vEo8j7FRguNRzTkFCK9M3pBNx7SSntnBw3pu3dNrCi

@@ -2,7 +2,7 @@ name: p2p_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmdwnPo8iC2uqf9CmB4ocbh6HP2jcgCtuFdS4djuajp6Li
   connection.py: Qmdxqs842kEsqrbkAYAmjdhSGAurcMNTb3K4T9fBBthCxJ

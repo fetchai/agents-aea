@@ -2,7 +2,7 @@ name: scaffold
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: ">=0.2.2"
+aea_version: 0.2.2
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   connection.py: QmUTc6HEJ7fLrfoLQFy8915HUv78Z8YMuGggPxSPNt66Q7
