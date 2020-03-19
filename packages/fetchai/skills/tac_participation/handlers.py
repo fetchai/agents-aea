@@ -329,12 +329,26 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
+        amount_by_currency_id = {
+            str(key): value for key, value in tac_message.amount_by_currency_id.items()
+        }
+        quantities_by_good_id = {
+            str(key): value for key, value in tac_message.quantities_by_good_id.items()
+        }
+        exchange_params_by_currency_id = {
+            str(key): value
+            for key, value in tac_message.exchange_params_by_currency_id.items()
+        }
+        utility_params_by_good_id = {
+            str(key): value
+            for key, value in tac_message.utility_params_by_good_id.items()
+        }
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=tac_message.amount_by_currency_id,
-            quantities_by_good_id=tac_message.quantities_by_good_id,
-            exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
-            utility_params_by_good_id=tac_message.utility_params_by_good_id,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+            exchange_params_by_currency_id=exchange_params_by_currency_id,
+            utility_params_by_good_id=utility_params_by_good_id,
             tx_fee=tac_message.tx_fee,
         )
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
