@@ -13,7 +13,7 @@ bandit = "==1.6.2"
 black = "==19.10b0"
 bs4 = "==0.0.1"
 colorlog = "==4.1.0"
-docker = "*"
+docker = "==4.2.0"
 fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.2"}
 flake8 = "==3.7.9"
 flake8-bugbear = "==20.1.4"
