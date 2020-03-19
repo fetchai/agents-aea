@@ -1,5 +1,12 @@
 # Release History
 
+## 0.2.3 (2020-03-19)
+
+- Fixes stub connection
+- Improves skill guide by adding a service provider agent
+- Multiple docs updates and restructuring
+- Multiple additional minor fixes and changes
+
 ## 0.2.2 (2020-03-09)
 
 - Fixes registry to only load registered packages
