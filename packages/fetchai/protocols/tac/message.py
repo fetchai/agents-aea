@@ -227,7 +227,7 @@ class TACMessage(Message):
                 assert isinstance(self.tx_counterparty_addr, str)
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == int and type(int_value) == int
+                    assert type(key) == str and type(int_value) == int
                 assert len(self.amount_by_currency_id.keys()) == len(
                     set(self.amount_by_currency_id.keys())
                 )
@@ -252,10 +252,10 @@ class TACMessage(Message):
             elif self.type == TACMessage.Type.GAME_DATA:
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == int and type(int_value) == int
+                    assert type(key) == str and type(int_value) == int
                 assert isinstance(self.exchange_params_by_currency_id, dict)
                 for key, float_value in self.exchange_params_by_currency_id.items():
-                    assert type(key) == int and type(float_value) == float
+                    assert type(key) == str and type(float_value) == float
                 assert (
                     self.amount_by_currency_id.keys()
                     == self.exchange_params_by_currency_id.keys()
@@ -281,7 +281,7 @@ class TACMessage(Message):
                 assert isinstance(self.tx_id, str)
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
-                    assert type(key) == int and type(int_value) == int
+                    assert type(key) == str and type(int_value) == int
                 assert len(self.amount_by_currency_id.keys()) == len(
                     set(self.amount_by_currency_id.keys())
                 )
