@@ -56,11 +56,11 @@ from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
-from tests.data.generator.test_protocol.message import (  # type: ignore
-    TestProtocolMessage,
+from tests.data.generator.t_protocol.message import (  # type: ignore
+    TProtocolMessage,
 )
-from tests.data.generator.test_protocol.serialization import (  # type: ignore
-    TestProtocolSerializer,
+from tests.data.generator.t_protocol.serialization import (  # type: ignore
+    TProtocolSerializer,
 )
 
 from ..common.click_testing import CliRunner
@@ -93,7 +93,7 @@ class TestGenerateProtocol:
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message with pt content
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TestProtocolMessage.DataModel(
+        data_model = TProtocolMessage.DataModel(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
@@ -103,19 +103,19 @@ class TestGenerateProtocol:
             list_field=["some string 1", "some string 2"],
             dict_field=some_dict,
         )
-        message = TestProtocolMessage(
+        message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TestProtocolMessage.Performative.PERFORMATIVE_CT,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_CT,
             content_ct=data_model,
         )
 
         # serialise the message
-        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
+        encoded_message_in_bytes = TProtocolSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
+        decoded_message = TProtocolSerializer().decode(encoded_message_in_bytes)
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -129,11 +129,11 @@ class TestGenerateProtocol:
     def test_generated_protocol_serialisation_pt(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
         # create a message with pt content
-        message = TestProtocolMessage(
+        message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some bytes",
             content_int=42,
             content_float=42.7,
@@ -142,10 +142,10 @@ class TestGenerateProtocol:
         )
 
         # serialise the message
-        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
+        encoded_message_in_bytes = TProtocolSerializer().encode(message)
 
         # deserialise the message
-        decoded_message = TestProtocolSerializer().decode(encoded_message_in_bytes)
+        decoded_message = TProtocolSerializer().decode(encoded_message_in_bytes)
 
         # Compare the original message with the serialised+deserialised message
         assert decoded_message.message_id == message.message_id
@@ -199,22 +199,22 @@ class TestGenerateProtocol:
                         "tests",
                         "data",
                         "generator",
-                        "test_protocol",
+                        "t_protocol",
                         "protocol.yaml",
                     )
                 )
             )
         )
         generated_protocol = Protocol(
-            TestProtocolMessage.protocol_id,
-            TestProtocolSerializer(),
+            TProtocolMessage.protocol_id,
+            TProtocolSerializer(),
             generated_protocol_configuration,
         )
         resources_1.protocol_registry.register(
-            TestProtocolMessage.protocol_id, generated_protocol
+            TProtocolMessage.protocol_id, generated_protocol
         )
         resources_2.protocol_registry.register(
-            TestProtocolMessage.protocol_id, generated_protocol
+            TProtocolMessage.protocol_id, generated_protocol
         )
 
         # create AEAs
@@ -222,38 +222,38 @@ class TestGenerateProtocol:
         aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
 
         # message 1
-        message = TestProtocolMessage(
+        message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some bytes",
             content_int=42,
             content_float=42.7,
             content_bool=True,
             content_str="some string",
         )
-        encoded_message_in_bytes = TestProtocolSerializer().encode(message)
+        encoded_message_in_bytes = TProtocolSerializer().encode(message)
         envelope = Envelope(
             to=identity_2.address,
             sender=identity_1.address,
-            protocol_id=TestProtocolMessage.protocol_id,
+            protocol_id=TProtocolMessage.protocol_id,
             message=encoded_message_in_bytes,
         )
 
         # message 2
-        message_2 = TestProtocolMessage(
+        message_2 = TProtocolMessage(
             message_id=2,
             dialogue_reference=(str(0), ""),
             target=1,
-            performative=TestProtocolMessage.Performative.PERFORMATIVE_PT,
+            performative=TProtocolMessage.Performative.PERFORMATIVE_PT,
             content_bytes=b"some other bytes",
             content_int=43,
             content_float=43.7,
             content_bool=False,
             content_str="some other string",
         )
-        encoded_message_2_in_bytes = TestProtocolSerializer().encode(message_2)
+        encoded_message_2_in_bytes = TProtocolSerializer().encode(message_2)
 
         # add handlers to AEA resources
         agent_1_handler = Agent1Handler(
@@ -262,7 +262,7 @@ class TestGenerateProtocol:
         resources_1.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TestProtocolMessage.protocol_id,
+                TProtocolMessage.protocol_id,
             ),
             agent_1_handler,
         )
@@ -274,7 +274,7 @@ class TestGenerateProtocol:
         resources_2.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                TestProtocolMessage.protocol_id,
+                TProtocolMessage.protocol_id,
             ),
             agent_2_handler,
         )
@@ -452,7 +452,7 @@ class ProtocolGeneratorTestCase(TestCase):
 class Agent1Handler(Handler):
     """The handler for agent 1."""
 
-    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -484,7 +484,7 @@ class Agent1Handler(Handler):
 class Agent2Handler(Handler):
     """The handler for agent 2."""
 
-    SUPPORTED_PROTOCOL = TestProtocolMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = TProtocolMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, encoded_messsage, **kwargs):
         """Initialize the handler."""
@@ -509,7 +509,7 @@ class Agent2Handler(Handler):
         envelope = Envelope(
             to=message.counterparty,
             sender=self.context.agent_address,
-            protocol_id=TestProtocolMessage.protocol_id,
+            protocol_id=TProtocolMessage.protocol_id,
             message=self.encoded_message_2_in_bytes,
         )
         self.context.outbox.put(envelope)
