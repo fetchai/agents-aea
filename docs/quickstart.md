@@ -97,7 +97,7 @@ Please enter the author handle you would like to use: fetchai
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.2
+v0.2.3
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -164,7 +164,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.2
+v0.2.3
 
 my_first_aea starting ...
 info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}

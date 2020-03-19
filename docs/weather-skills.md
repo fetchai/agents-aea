@@ -1,21 +1,21 @@
 The AEA weather skills demonstrate an interaction between two AEAs.
 
-* The provider of weather data (the weather station).
-* The buyer of weather data (the weather client).
+* The provider of weather data (the `weather_station`).
+* The buyer of weather data (the `weather_client`).
 
-## Preparation instructions
-
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
+### Discussion
 
 The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The weather_station AEA
 will read data from the database, that is populated with readings from a weather station, based on the requested dates and will deliver the data to the client upon payment.
 This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
 
 You can use this AEA as an example of how to read data from a database and advertise these to possible clients.  
+
+## Preparation instructions
+
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Launch an OEF node
 

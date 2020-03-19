@@ -29,7 +29,7 @@ To get started developing your own AEA, check out the <a href="quickstart">quick
 
 To learn more about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
 
-AEAs achieve their goals with the help of the OEF - a search and discovery platform for agents by Fetch.ai - and using Fetch.ai's blockchain as a financial settlement layer. Third-party blockchains, such as Ethereum, may also allow AEA integration.
+AEAs achieve their goals with the help of the <a href="oef-ledger">OEF</a> - a search and discovery platform for agents by Fetch.ai - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement layer. Third-party blockchains, such as Ethereum, may also allow AEA integration.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
