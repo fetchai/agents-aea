@@ -42,7 +42,7 @@ def test_tac_message_instantiation():
         amount_by_currency_id={"FET": 10},
         tx_sender_fee=10,
         tx_counterparty_fee=10,
-        quantities_by_good_id={123: 0, 1234: 10},
+        quantities_by_good_id={"123": 0, "1234": 10},
         tx_nonce=1,
         tx_sender_signature=b"some_signature",
         tx_counterparty_signature=b"some_other_signature",
@@ -53,18 +53,18 @@ def test_tac_message_instantiation():
         type=TACMessage.Type.GAME_DATA,
         amount_by_currency_id={"FET": 10},
         exchange_params_by_currency_id={"FET": 10.0},
-        quantities_by_good_id={123: 20, 1234: 15},
-        utility_params_by_good_id={123: 30.0, 1234: 50.0},
+        quantities_by_good_id={"123": 20, "1234": 15},
+        utility_params_by_good_id={"123": 30.0, "1234": 50.0},
         tx_fee=20,
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
-        good_id_to_name={123: "First good", 1234: "Second good"},
+        good_id_to_name={"123": "First good", "1234": "Second good"},
         version_id="game_version_1",
     )
     assert TACMessage(
         type=TACMessage.Type.TRANSACTION_CONFIRMATION,
         tx_id="some_id",
         amount_by_currency_id={"FET": 10},
-        quantities_by_good_id={123: 20, 1234: 15},
+        quantities_by_good_id={"123": 20, "1234": 15},
     )
     assert TACMessage(
         type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.GENERIC_ERROR
@@ -94,7 +94,7 @@ def test_tac_serialization():
         amount_by_currency_id={"FET": -10},
         tx_sender_fee=10,
         tx_counterparty_fee=10,
-        quantities_by_good_id={123: 0, 1234: 10},
+        quantities_by_good_id={"123": 0, "1234": 10},
         tx_nonce=1,
         tx_sender_signature=b"some_signature",
         tx_counterparty_signature=b"some_other_signature",
@@ -120,11 +120,11 @@ def test_tac_serialization():
         type=TACMessage.Type.GAME_DATA,
         amount_by_currency_id={"FET": 10},
         exchange_params_by_currency_id={"FET": 10.0},
-        quantities_by_good_id={123: 20, 1234: 15},
-        utility_params_by_good_id={123: 30.0, 1234: 50.0},
+        quantities_by_good_id={"123": 20, "1234": 15},
+        utility_params_by_good_id={"123": 30.0, "1234": 50.0},
         tx_fee=20,
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
-        good_id_to_name={123: "First good", 1234: "Second good"},
+        good_id_to_name={"123": "First good", "1234": "Second good"},
         version_id="game_version_1",
     )
     msg_bytes = TACSerializer().encode(msg)
@@ -136,7 +136,7 @@ def test_tac_serialization():
         type=TACMessage.Type.TRANSACTION_CONFIRMATION,
         tx_id="some_id",
         amount_by_currency_id={"FET": 10},
-        quantities_by_good_id={123: 20, 1234: 15},
+        quantities_by_good_id={"123": 20, "1234": 15},
     )
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)

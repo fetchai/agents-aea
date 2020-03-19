@@ -287,7 +287,7 @@ class TACMessage(Message):
                 )
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
-                    assert type(key) == int and type(int_value) == int
+                    assert type(key) == str and type(int_value) == int
                 assert len(self.quantities_by_good_id.keys()) == len(
                     set(self.quantities_by_good_id.keys())
                 )
