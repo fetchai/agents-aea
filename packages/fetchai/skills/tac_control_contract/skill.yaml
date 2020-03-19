@@ -6,9 +6,9 @@ aea_version: 0.2.2
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
   behaviours.py: QmQkswp6t8wLRfKTEXAZuMV82SR2NU8Mndce1WKsvG4R4N
-  game.py: QmdCVeTn3PJxYHqVLQ73qDWJrR3hMN5czxfuhgDkXtTTLn
+  game.py: Qmcjf9abaL12nDHLcKyCqAvz3sTDPTCFbyJJGfsui8jKho
   handlers.py: QmTEAuutdkZ8dKTM9BshKYjMk4i3XSh3PvvvW6HcQk2uc8
-  helpers.py: QmdUiuMgz6mwxcaFqfzJq1A9MQheLFGYSa6RS22mgjgsvU
+  helpers.py: QmbzyW7ESVSg4NFCi1DVG2StzKdKEgc8g6w1t57GPF8bq9
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
 contracts: ['fetchai/erc1155:0.1.0']
