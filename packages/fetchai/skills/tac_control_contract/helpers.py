@@ -31,7 +31,7 @@ QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 TOKEN_TYPE = 2
 
 
-def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[int, str]:
+def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str]:
     """
     Generate ids for things.
 
@@ -40,7 +40,9 @@ def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[int, str
     :return: a dictionary mapping goods' ids to names.
     """
     token_ids = contract.create_token_ids(TOKEN_TYPE, nb_goods)  # type: ignore
-    token_ids_dict = {token_id: "NFT_{}".format(token_id) for token_id in token_ids}
+    token_ids_dict = {
+        str(token_id): "NFT_{}".format(token_id) for token_id in token_ids
+    }
     return token_ids_dict
 
 
