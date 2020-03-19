@@ -1,17 +1,11 @@
-The AEA ml skills demonstrate an interaction between two AEAs trading data.
+The AEA ML (machine learning) skills demonstrate an interaction between two AEAs trading data.
 
 There are two types of AEAs:
 
-* The ml data provider which sells training data.
-* The ml model trainer which trains a model
+* The `ml_data_provider` which sells training data.
+* The `ml_model_trainer` which trains a model
 
-## Preparation instructions
-
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
+### Discussion
 
 The scope of the specific demo is to demonstrate how to create a simple AEA with integration of machine learning, and the usage of the AEA framework. The ml_data_provider AEA
 will provide some sample data and will deliver to the client upon payment. Once the client gets the data, it will train the model. The process can be found in the `tasks.py` file.
@@ -19,6 +13,12 @@ This demo does not utilize a smart contract. As a result, we interact with a led
 
 Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+
+## Preparation instructions
+
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).

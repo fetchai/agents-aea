@@ -1,20 +1,19 @@
 The AEA car-park skills demonstrate an interaction between two AEAs.
 
-* The carpark_detection AEA provides information on the number of car parking spaces available in a given vicinity.
-* The carpark_client AEA is interested in purchasing information on available car parking spaces in the same vicinity.
+* The `carpark_detection` AEA provides information on the number of car parking spaces available in a given vicinity.
+* The `carpark_client` AEA is interested in purchasing information on available car parking spaces in the same vicinity.
+
+### Discussion
+The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
+
+It demonstrates how the AEAs trade car park information.
 
 ## Preparation instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
-The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
-This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
-
-It demonstrates how the AEAs trade car park information.
-
 
 ### Launch the OEF
 

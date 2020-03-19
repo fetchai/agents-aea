@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains test_protocol's message definition."""
+"""This module contains t_protocol's message definition."""
 
 from enum import Enum
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
@@ -25,20 +25,20 @@ from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from tests.data.generator.test_protocol.custom_types import DataModel as CustomDataModel
+from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
 
 DEFAULT_BODY_SIZE = 4
 
 
-class TestProtocolMessage(Message):
+class TProtocolMessage(Message):
     """A protocol for testing purposes."""
 
-    protocol_id = ProtocolId("fetchai", "test_protocol", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "t_protocol", "0.1.0")
 
     DataModel = CustomDataModel
 
     class Performative(Enum):
-        """Performatives for the test_protocol protocol."""
+        """Performatives for the t_protocol protocol."""
 
         PERFORMATIVE_CT = "performative_ct"
         PERFORMATIVE_EMPTY_CONTENTS = "performative_empty_contents"
@@ -61,7 +61,7 @@ class TestProtocolMessage(Message):
         **kwargs,
     ):
         """
-        Initialise an instance of TestProtocolMessage.
+        Initialise an instance of TProtocolMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -72,7 +72,7 @@ class TestProtocolMessage(Message):
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=TestProtocolMessage.Performative(performative),
+            performative=TProtocolMessage.Performative(performative),
             **kwargs,
         )
         self._performatives = {
@@ -86,7 +86,7 @@ class TestProtocolMessage(Message):
         }
         assert (
             self._is_consistent()
-        ), "This message is invalid according to the 'test_protocol' protocol."
+        ), "This message is invalid according to the 't_protocol' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -109,7 +109,7 @@ class TestProtocolMessage(Message):
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(TestProtocolMessage.Performative, self.get("performative"))
+        return cast(TProtocolMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -387,7 +387,7 @@ class TestProtocolMessage(Message):
         )
 
     def _is_consistent(self) -> bool:
-        """Check that the message follows the test_protocol protocol."""
+        """Check that the message follows the t_protocol protocol."""
         try:
             assert (
                 type(self.dialogue_reference) == tuple
@@ -418,7 +418,7 @@ class TestProtocolMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             assert (
-                type(self.performative) == TestProtocolMessage.Performative
+                type(self.performative) == TProtocolMessage.Performative
             ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                 self.valid_performatives, self.performative
             )
@@ -426,14 +426,14 @@ class TestProtocolMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == TestProtocolMessage.Performative.PERFORMATIVE_CT:
+            if self.performative == TProtocolMessage.Performative.PERFORMATIVE_CT:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.content_ct) == CustomDataModel
                 ), "Invalid type for content 'content_ct'. Expected 'DataModel'. Found '{}'.".format(
                     type(self.content_ct)
                 )
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PT:
+            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PT:
                 expected_nb_of_contents = 5
                 assert (
                     type(self.content_bytes) == bytes
@@ -460,7 +460,7 @@ class TestProtocolMessage(Message):
                 ), "Invalid type for content 'content_str'. Expected 'str'. Found '{}'.".format(
                     type(self.content_str)
                 )
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PCT:
+            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PCT:
                 expected_nb_of_contents = 12
                 assert (
                     type(self.content_set_ct) == frozenset
@@ -558,7 +558,7 @@ class TestProtocolMessage(Message):
                 assert all(
                     type(element) == str for element in self.content_list_str
                 ), "Invalid type for tuple elements in content 'content_list_str'. Expected 'str'."
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_PMT:
+            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PMT:
                 expected_nb_of_contents = 3
                 assert (
                     type(self.content_dict_int_ct) == dict
@@ -617,7 +617,7 @@ class TestProtocolMessage(Message):
                     ), "Invalid type for dictionary values in content 'content_dict_str_float'. Expected 'float'. Found '{}'.".format(
                         type(value_of_content_dict_str_float)
                     )
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_MT:
+            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 2
                 assert (
                     type(self.content_union_1) == CustomDataModel
@@ -696,7 +696,7 @@ class TestProtocolMessage(Message):
                                 and type(value_of_content_union_2) == bytes
                             )
                         ), "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'str','DataModel' or 'int','float' or 'bool','bytes'."
-            elif self.performative == TestProtocolMessage.Performative.PERFORMATIVE_O:
+            elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):
                     expected_nb_of_contents += 1
@@ -785,7 +785,7 @@ class TestProtocolMessage(Message):
                             ), "Invalid type for dictionary key, value in content 'content_o_union'. Expected 'str', 'float'."
             elif (
                 self.performative
-                == TestProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
+                == TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
             ):
                 expected_nb_of_contents = 0
 
