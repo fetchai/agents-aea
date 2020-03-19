@@ -5,6 +5,7 @@
 - Fixes stub connection file I/O
 - Fixes OEF connection teardown
 - Fixes CLI GUI subprocesses issues
+- Adds support for URI based routing of envelopes
 - Improves skill guide by adding a service provider agent
 - Protocol generator bug fixes
 - Add aea_version field to package yaml files for version management
