@@ -39,8 +39,8 @@ docker = "*"
 mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 markdown = ">=3.2.1"
 pytest-randomly = "==3.2.1"
+requests = "==2.23.0"
+aries-py = "==0.4.5"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
-requests = "*"
-aries-py = "*"

@@ -20,6 +20,7 @@
 """HTTP client connection and channel"""
 
 import asyncio
+import json
 import logging
 from asyncio import CancelledError
 from typing import Optional, Set, cast
@@ -28,7 +29,7 @@ import requests
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address, Envelope, EnvelopeContext
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
@@ -51,6 +52,7 @@ class HTTPClientChannel:
         agent_address: Address,
         address: str,
         port: int,
+        connection_id: PublicId,
         excluded_protocols: Optional[Set[PublicId]] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
     ):
@@ -66,6 +68,7 @@ class HTTPClientChannel:
         self.agent_address = agent_address
         self.address = address
         self.port = port
+        self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
@@ -76,77 +79,78 @@ class HTTPClientChannel:
     def connect(self):
         """Connect."""
         if self.is_stopped:
-            self.is_stopped = False
             try:
                 logger.info(self.address)
                 response = requests.request(
-                    method="GET", url=f"http://{self.address}:{self.port}/status"
+                    method="GET", url="http://{}:{}/status".format(self.address, self.port)
                 )
                 logger.debug("Status code is: {}".format(response.status_code))
                 assert response.status_code == 200, "Connection failed."
+                self.is_stopped = False
             except Exception as e:  # pragma: no cover
-                logger.warning(str(e))
+                logger.warning("Could not connect to the server: {}".format(e))
                 raise
 
-    def send(self, envelope: Envelope) -> None:
+    def send(self, request_envelope: Envelope) -> None:
         """
-        Send the envelope as a HTTP request, wait for its response, translate the response into an envelop, and sent it back to the agent.
+        Convert an http envelope into an http request, send the http request, wait for and receive its response, translate the response into a response envelop,
+        and send the response envelope to the in-queue.
 
-        :param envelope: the envelope
+        :param request_envelope: the envelope containing an http request
         :return: None
         """
         if self.excluded_protocols is not None:
-            if envelope.protocol_id in self.excluded_protocols:
+            if request_envelope.protocol_id in self.excluded_protocols:
                 logger.error(
                     "This envelope cannot be sent with the oef connection: protocol_id={}".format(
-                        envelope.protocol_id
+                        request_envelope.protocol_id
                     )
                 )
                 raise ValueError("Cannot send message.")
 
-            if envelope is not None:
-                http_message = cast(
-                    HttpMessage, HttpSerializer().decode(envelope.message)
+            if request_envelope is not None:
+                request_http_message = cast(
+                    HttpMessage, HttpSerializer().decode(request_envelope.message)
                 )
-                if http_message.performative == HttpMessage.Performative.REQUEST:
+                if request_http_message.performative == HttpMessage.Performative.REQUEST:
                     response = requests.request(
-                        method=http_message.method,
-                        url=http_message.url,
-                        headers=http_message.headers,
-                        data=http_message.bodyy,
+                        method=request_http_message.method,
+                        url=request_http_message.url,
+                        headers=request_http_message.headers,
+                        data=request_http_message.bodyy,
                     )
-                    envelope = self.to_envelope(response)
-                    self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
+                    # import pdb;pdb.set_trace()
+                    response_envelope = self.to_envelope(self.connection_id, request_http_message, response)
+                    self.in_queue.put_nowait(response_envelope)
                 else:
-                    raise ValueError("The HTTPMessage performative must be a REQUEST.")
-            else:
-                raise ValueError("The Envelop object to be sent is None.")
+                    logger.warning("The HTTPMessage performative must be a REQUEST. Envelop dropped.")
 
-    def to_envelope(self, http_response: requests.models.Response) -> Envelope:
+    def to_envelope(self, connection_id: PublicId, http_request_message: HttpMessage, http_response: requests.models.Response) -> Envelope:
         """
-        Process HTTP response by packaging it into an Envelope and sending it to in-queue.
+        Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
+        :param connection_id: the connection id
+        :param http_request_message: the http message of the request
         :param http_response: the http response object
         """
 
-        # uri = URI(self.full_url_pattern)
-        # context = EnvelopeContext(connection_id=connection_id, uri=uri)
+        context = EnvelopeContext(connection_id=connection_id)
         http_message = HttpMessage(
-            dialogue_reference=("", ""),
-            target=0,
-            message_id=1,
+            dialogue_reference=http_request_message.dialogue_reference,
+            target=http_request_message.target,
+            message_id=http_request_message.message_id,
             performative=HttpMessage.Performative.RESPONSE,
             status_code=http_response.status_code,
-            headers=http_response.headers,
+            headers=json.dumps(dict(http_response.headers)),
             status_text=http_response.reason,
             bodyy=http_response.content if http_response.content is not None else b"",
             version="",
         )
         envelope = Envelope(
             to=self.agent_address,
-            sender="HTTP server",
+            sender="HTTP Server",
             protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
-            # context=context,
+            context=context,
             message=HttpSerializer().encode(http_message),
         )
         return envelope
@@ -158,7 +162,7 @@ class HTTPClientChannel:
         Join the thread, then stop the channel.
         """
         if not self.is_stopped:
-            logger.info(f"HTTP Client has shutdown on port: {self.port}.")
+            logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
 
 
@@ -190,6 +194,7 @@ class HTTPClientConnection(Connection):
             agent_address,
             provider_address,
             provider_port,
+            connection_id=self.connection_id,
             excluded_protocols=self.excluded_protocols,
             restricted_to_protocols=kwargs.get("restricted_to_protocols", {}),
         )
@@ -271,6 +276,7 @@ class HTTPClientConnection(Connection):
             agent_address,
             address,
             port,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )
