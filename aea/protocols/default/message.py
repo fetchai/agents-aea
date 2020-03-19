@@ -132,22 +132,36 @@ class DefaultMessage(Message):
         try:
             assert (
                 type(self.dialogue_reference) == tuple
-            ), "dialogue_reference must be 'tuple' but it is not."
+            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                type(self.dialogue_reference)
+            )
             assert (
                 type(self.dialogue_reference[0]) == str
-            ), "The first element of dialogue_reference must be 'str' but it is not."
+            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[0])
+            )
             assert (
                 type(self.dialogue_reference[1]) == str
-            ), "The second element of dialogue_reference must be 'str' but it is not."
-            assert type(self.message_id) == int, "message_id is not int"
-            assert type(self.target) == int, "target is not int"
+            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[1])
+            )
+            assert (
+                type(self.message_id) == int
+            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                type(self.message_id)
+            )
+            assert (
+                type(self.target) == int
+            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                type(self.target)
+            )
 
             # Light Protocol Rule 2
             # Check correct performative
             assert (
                 type(self.performative) == DefaultMessage.Performative
-            ), "'{}' is not in the list of valid performatives: {}".format(
-                self.performative, self.valid_performatives
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                self.valid_performatives, self.performative
             )
 
             # Check correct contents
@@ -157,30 +171,42 @@ class DefaultMessage(Message):
                 expected_nb_of_contents = 1
                 assert (
                     type(self.content) == bytes
-                ), "Content 'content' is not of type 'bytes'."
+                ), "Invalid type for content 'content'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.content)
+                )
             elif self.performative == DefaultMessage.Performative.ERROR:
                 expected_nb_of_contents = 3
                 assert (
                     type(self.error_code) == CustomErrorCode
-                ), "Content 'error_code' is not of type 'ErrorCode'."
+                ), "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
+                    type(self.error_code)
+                )
                 assert (
                     type(self.error_msg) == str
-                ), "Content 'error_msg' is not of type 'str'."
+                ), "Invalid type for content 'error_msg'. Expected 'str'. Found '{}'.".format(
+                    type(self.error_msg)
+                )
                 assert (
                     type(self.error_data) == dict
-                ), "Content 'error_data' is not of type 'dict'."
-                for key, value in self.error_data.items():
+                ), "Invalid type for content 'error_data'. Expected 'dict'. Found '{}'.".format(
+                    type(self.error_data)
+                )
+                for key_of_error_data, value_of_error_data in self.error_data.items():
                     assert (
-                        type(key) == str
-                    ), "Keys of 'error_data' dictionary are not of type 'str'."
+                        type(key_of_error_data) == str
+                    ), "Invalid type for dictionary keys in content 'error_data'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_error_data)
+                    )
                     assert (
-                        type(value) == bytes
-                    ), "Values of 'error_data' dictionary are not of type 'bytes'."
+                        type(value_of_error_data) == bytes
+                    ), "Invalid type for dictionary values in content 'error_data'. Expected 'bytes'. Found '{}'.".format(
+                        type(value_of_error_data)
+                    )
 
             # Check correct content count
             assert (
                 expected_nb_of_contents == actual_nb_of_contents
-            ), "Incorrect number of contents. Expected {} contents. Found {}".format(
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
                 expected_nb_of_contents, actual_nb_of_contents
             )
 
@@ -188,14 +214,14 @@ class DefaultMessage(Message):
             if self.message_id == 1:
                 assert (
                     self.target == 0
-                ), "Expected target to be 0 when message_id is 1. Found {}.".format(
+                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                     self.target
                 )
             else:
                 assert (
                     0 < self.target < self.message_id
-                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(
-                    self.target
+                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                    self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
             print(str(e))

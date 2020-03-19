@@ -5,7 +5,6 @@ site_description: Everything you need to know about Fetch.AI.
 #repo_name: 'GitHub'
 site_author: diarmid.campbell@fetch.ai
 
-
 theme:
   name: 'material'
   logo:
@@ -13,28 +12,19 @@ theme:
   feature:
     tabs: true  
 
-
-
 nav:
   - AEA Framework:
     - Welcome: 'index.md'
-    - Getting started:
-      - Ways to build an AEA: 'steps.md'
-      - AEA quick start: 'quickstart.md'
-      - AEA and web frameworks: 'aea-vs-mvc.md'
-      - Build an AEA with the CLI: 'build-aea-step-by-step.md'
-      - Build a skill for an AEA: 'skill-guide.md'
-      - Build an AEA programmatically: 'build-aea-programmatically.md'
-      - AEAs vs agents: 'agent-vs-aea.md'
-    - The AEA universe:
+    - Concepts:
       - Agent-oriented development: 'agent-oriented-development.md'
       - Vision: 'vision.md'
       - Application areas: 'app-areas.md'
       - Relation to OEF and Ledger: 'oef-ledger.md'
       - Identity: 'identity.md'
       - Trust issues: 'trust.md'
-    - Demo guides:
+    - Demos:
       - Car park skills: 'car-park-skills.md'
+      - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
@@ -42,41 +32,49 @@ nav:
       - TAC external app: 'tac.md'
       - Weather skills: 'weather-skills.md'
       - Thermometer skills: 'thermometer-skills.md'
-    - Use cases:
+    - Development:
+      - Getting started:
+        - Ways to build an AEA: 'steps.md'
+        - AEA quick start: 'quickstart.md'
+        - AEA and web frameworks: 'aea-vs-mvc.md'
+        - Build an AEA with the CLI: 'build-aea-step-by-step.md'
+        - Build a skill for an AEA: 'skill-guide.md'
+        - Build an AEA programmatically: 'build-aea-programmatically.md'
+        - AEAs vs agents: 'agent-vs-aea.md'
+      - Step by step guides:
+        - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
+      - Use case components:
         - Generic skills: 'generic-skills.md'
         - ORM integration: 'orm-integration-to-generic.md'
         - Frontend intergration: 'connect-a-frontend.md'
-        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
         - HTTP Connection: 'http-connection-and-skill.md'
-    - Step by step guides:
-        - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
-    - Architecture:
-      - Design principles: 'design-principles.md'
-      - Architectural diagram: 'diagram.md'
-      - Core components: 'core-components.md'
-      - File structure: 'file-structure.md'
-    - CLI:
-       - Installation: 'cli-how-to.md'
-       - Commands: 'cli-commands.md'
-       - Package structure: 'package-imports.md'
-       - GUI: 'cli-gui.md'
-       - Generating wealth: 'wealth.md'
-    - Developer guides:
-      - Version: 'version.md'
-      - Skill: 'skill.md'
-      - Protocol: 'protocol.md'
-      - Connection: 'connection.md'
-      - Scaffolding packages: 'scaffolding.md'
-      - Generating protocols: 'generator.md'
-      - Logging: 'logging.md'
-      - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
-      - Using public ledgers: 'integration.md'
-      - Use multiplexer stand-alone: 'multiplexer-standalone.md'
-      - Create stand-alone transaction: 'standalone-transaction.md'
-      - Create decision-maker transaction: 'decision-maker-transaction.md'
-      - Deployment: 'deployment.md'
+      - Architecture:
+        - Design principles: 'design-principles.md'
+        - Architectural diagram: 'diagram.md'
+        - Core components: 'core-components.md'
+        - File structure: 'file-structure.md'
+      - CLI:
+        - Installation: 'cli-how-to.md'
+        - Commands: 'cli-commands.md'
+        - Package structure: 'package-imports.md'
+        - GUI: 'cli-gui.md'
+        - Generating wealth: 'wealth.md'
+      - Developer guides:
+        - Version: 'version.md'
+        - Skill: 'skill.md'
+        - Protocol: 'protocol.md'
+        - Connection: 'connection.md'
+        - Scaffolding packages: 'scaffolding.md'
+        - Generating protocols: 'generator.md'
+        - Logging: 'logging.md'
+        - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
+        - Using public ledgers: 'integration.md'
+        - Use multiplexer stand-alone: 'multiplexer-standalone.md'
+        - Create stand-alone transaction: 'standalone-transaction.md'
+        - Create decision-maker transaction: 'decision-maker-transaction.md'
+        - Deployment: 'deployment.md'
     - Q&A: 'questions-and-answers.md'
-
 
 plugins:
     - markdownmermaid

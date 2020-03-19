@@ -24,7 +24,7 @@ from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-from packages.fetchai.skills.generic_seller.generic_data_model import Generic_Data_Model
+from packages.fetchai.skills.generic_seller.data_model import GenericDataModel
 
 
 DEFAULT_SELLER_TX_FEE = 0
@@ -34,6 +34,12 @@ DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
+DEFAULT_DATA_MODEL_NAME = "location"
+DEFAULT_DATA_MODEL = {
+    "attribute_one": {"name": "country", "type": "str", "is_required": "True"},
+    "attribute_two": {"name": "city", "type": "str", "is_required": "True"},
+}  # type: Optional[Dict[str, Any]]
+DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 
 
 class Strategy(Model):
@@ -65,8 +71,9 @@ class Strategy(Model):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
 
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -83,7 +90,10 @@ class Strategy(Model):
 
         :return: a description of the offered services
         """
-        desc = Description(self._scheme, data_model=Generic_Data_Model(self._datamodel))
+        desc = Description(
+            self._service_data,
+            data_model=GenericDataModel(self._data_model_name, self._data_model),
+        )
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:

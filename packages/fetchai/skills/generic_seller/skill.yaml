@@ -27,7 +27,8 @@ models:
         wind: 10
         pressure: 20
         temperature: 26
-      search_schema:
+      data_model_name: "location"
+      data_model:
         attribute_one:
           name: country
           type: str
@@ -36,7 +37,7 @@ models:
           name: city
           type: str
           is_required: True
-      search_data:
+      service_data:
         country: UK
         city: Cambridge
   dialogues:
