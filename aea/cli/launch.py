@@ -19,11 +19,11 @@
 
 """Implementation of the 'aea launch' subcommand."""
 import os
-import subprocess
+import subprocess  # nosec
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from subprocess import Popen
+from subprocess import Popen  # nosec
 from typing import List
 
 import click
@@ -48,7 +48,7 @@ def _launch_subprocesses(agents: List[Path]):
     processes = []
     failed = 0
     for agent_directory in agents:
-        process = Popen(
+        process = Popen(  # nosec
             [sys.executable, "-m", "aea.cli", "run"], cwd=str(agent_directory)
         )
         logger.info("Agent {} started...".format(agent_directory.name))
