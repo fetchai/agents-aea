@@ -21,19 +21,21 @@
 
 import asyncio
 import logging
-import requests
 from unittest import mock
 from unittest.mock import Mock
 
 import pytest
 
+import requests
+
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
-from ...conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
+
+from ...conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +69,7 @@ class TestHTTPClientConnect:
         connection_response_mock.status_code = 200
 
         with mock.patch.object(
-                requests, "request", return_value=connection_response_mock
+            requests, "request", return_value=connection_response_mock
         ):
             await self.http_client_connection.connect()
             assert self.http_client_connection.connection_status.is_connected is True
@@ -97,7 +99,7 @@ class TestHTTPClientDisconnection:
         connection_response_mock.status_code = 200
 
         with mock.patch.object(
-                requests, "request", return_value=connection_response_mock
+            requests, "request", return_value=connection_response_mock
         ):
             await self.http_client_connection.connect()
             assert self.http_client_connection.connection_status.is_connected is True
@@ -114,9 +116,7 @@ async def test_http_send():
     agent_address = "some agent address"
 
     http_client_connection = HTTPClientConnection(
-        agent_address=agent_address,
-        provider_address=address,
-        provider_port=port,
+        agent_address=agent_address, provider_address=address, provider_port=port,
     )
     http_client_connection.loop = asyncio.get_event_loop()
 
@@ -141,9 +141,7 @@ async def test_http_send():
     connection_response_mock = Mock()
     connection_response_mock.status_code = 200
 
-    with mock.patch.object(
-        requests, "request", return_value=connection_response_mock
-    ):
+    with mock.patch.object(requests, "request", return_value=connection_response_mock):
         await http_client_connection.connect()
         assert http_client_connection.connection_status.is_connected is True
 
@@ -153,9 +151,7 @@ async def test_http_send():
     send_response_mock.reason = "OK"
     send_response_mock.content = b"Some content"
 
-    with mock.patch.object(
-        requests, "request", return_value=send_response_mock
-    ):
+    with mock.patch.object(requests, "request", return_value=send_response_mock):
         await http_client_connection.send(envelope=request_envelope)
         # TODO: Consider returning the response from the server in order to be able to assert that the message send!
         assert True

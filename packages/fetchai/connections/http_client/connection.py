@@ -71,7 +71,9 @@ class HTTPClientChannel:
         self.connection_id = connection_id
         self.restricted_to_protocols = restricted_to_protocols
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
-        self.loop = None  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
+        self.loop = (
+            None
+        )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
         self.excluded_protocols = excluded_protocols
         self.is_stopped = True
         logger.info("Initialised the HTTP client channel")
@@ -82,7 +84,8 @@ class HTTPClientChannel:
             try:
                 logger.info(self.address)
                 response = requests.request(
-                    method="GET", url="http://{}:{}/status".format(self.address, self.port)
+                    method="GET",
+                    url="http://{}:{}/status".format(self.address, self.port),
                 )
                 logger.debug("Status code is: {}".format(response.status_code))
                 assert response.status_code == 200, "Connection failed."
@@ -112,20 +115,31 @@ class HTTPClientChannel:
                 request_http_message = cast(
                     HttpMessage, HttpSerializer().decode(request_envelope.message)
                 )
-                if request_http_message.performative == HttpMessage.Performative.REQUEST:
+                if (
+                    request_http_message.performative
+                    == HttpMessage.Performative.REQUEST
+                ):
                     response = requests.request(
                         method=request_http_message.method,
                         url=request_http_message.url,
                         headers=request_http_message.headers,
                         data=request_http_message.bodyy,
                     )
-                    # import pdb;pdb.set_trace()
-                    response_envelope = self.to_envelope(self.connection_id, request_http_message, response)
-                    self.in_queue.put_nowait(response_envelope)
+                    response_envelope = self.to_envelope(
+                        self.connection_id, request_http_message, response
+                    )
+                    self.in_queue.put_nowait(response_envelope)  # type: ignore
                 else:
-                    logger.warning("The HTTPMessage performative must be a REQUEST. Envelop dropped.")
+                    logger.warning(
+                        "The HTTPMessage performative must be a REQUEST. Envelop dropped."
+                    )
 
-    def to_envelope(self, connection_id: PublicId, http_request_message: HttpMessage, http_response: requests.models.Response) -> Envelope:
+    def to_envelope(
+        self,
+        connection_id: PublicId,
+        http_request_message: HttpMessage,
+        http_response: requests.models.Response,
+    ) -> Envelope:
         """
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 

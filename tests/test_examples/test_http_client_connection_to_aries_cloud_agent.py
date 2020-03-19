@@ -26,15 +26,17 @@ import shutil
 import sys
 import time
 from threading import Thread
-
-import yaml
+from typing import Optional
 
 import pytest
+
+import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
     ProtocolConfig,
+    ProtocolId,
     PublicId,
 )
 from aea.crypto.fetchai import FETCHAI
@@ -44,7 +46,6 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
-
 from aea.registries.base import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
@@ -96,7 +97,9 @@ class TestAEAToACA:
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
             method="GET",
-            url="http://{}:{}/status".format(self.aca_admin_address, self.aca_admin_port),
+            url="http://{}:{}/status".format(
+                self.aca_admin_address, self.aca_admin_port
+            ),
             headers="",
             version="",
             bodyy=b"",
@@ -120,7 +123,10 @@ class TestAEAToACA:
             assert response_envelop.sender == "HTTP Server"
             assert response_envelop.protocol_id == HTTP_PROTOCOL_PUBLIC_ID
             decoded_response_message = HttpSerializer().decode(response_envelop.message)
-            assert decoded_response_message.performative == HttpMessage.Performative.RESPONSE
+            assert (
+                decoded_response_message.performative
+                == HttpMessage.Performative.RESPONSE
+            )
             assert decoded_response_message.version == ""
             assert decoded_response_message.status_code == 200
             assert decoded_response_message.status_text == "OK"
@@ -168,13 +174,9 @@ class TestAEAToACA:
             )
         )
         http_protocol = Protocol(
-            HttpMessage.protocol_id,
-            HttpSerializer(),
-            http_protocol_configuration,
+            HttpMessage.protocol_id, HttpSerializer(), http_protocol_configuration,
         )
-        resources.protocol_registry.register(
-            HttpMessage.protocol_id, http_protocol
-        )
+        resources.protocol_registry.register(HttpMessage.protocol_id, http_protocol)
 
         # Request messages
         request_http_message = HttpMessage(
@@ -183,7 +185,9 @@ class TestAEAToACA:
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
             method="GET",
-            url="http://{}:{}/status".format(self.aca_admin_address, self.aca_admin_port),
+            url="http://{}:{}/status".format(
+                self.aca_admin_address, self.aca_admin_port
+            ),
             headers="",
             version="",
             bodyy=b"",
@@ -200,10 +204,7 @@ class TestAEAToACA:
             skill_context=SkillContext(aea.context), name="fake_skill"
         )
         resources.handler_registry.register(
-            (
-                PublicId.from_str("fetchai/fake_skill:0.1.0"),
-                HttpMessage.protocol_id,
-            ),
+            (PublicId.from_str("fetchai/fake_skill:0.1.0"), HttpMessage.protocol_id,),
             aea_handler,
         )
 
@@ -220,7 +221,10 @@ class TestAEAToACA:
             time.sleep(1.0)
             aea.outbox.put(request_envelope)
             time.sleep(5.0)
-            assert aea_handler.handled_message.performative == HttpMessage.Performative.RESPONSE
+            assert (
+                aea_handler.handled_message.performative
+                == HttpMessage.Performative.RESPONSE
+            )
             assert aea_handler.handled_message.version == ""
             assert aea_handler.handled_message.status_code == 200
             assert aea_handler.handled_message.status_text == "OK"
