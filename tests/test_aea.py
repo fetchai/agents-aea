@@ -195,48 +195,45 @@ async def test_handle():
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        msg.counterparty = agent_name
-        message_bytes = DefaultSerializer().encode(msg)
-
-        envelope = Envelope(
-            to=identity.address,
-            sender=identity.address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message_bytes,
-        )
-
-        agent = AEA(
+        aea = AEA(
             identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
-        t = Thread(target=agent.start)
+        t = Thread(target=aea.start)
         try:
             t.start()
             time.sleep(2.0)
-            dummy_skill = agent.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
+            dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.handlers["dummy"]
 
-            expected_envelope = envelope
-            agent.outbox.put(expected_envelope)
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            message_bytes = DefaultSerializer().encode(msg)
+
+            envelope = Envelope(
+                to=identity.address,
+                sender=identity.address,
+                protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+                message=message_bytes,
+            )
+            # send envelope via localnode back to agent
+            aea.outbox.put(envelope)
             time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
-            msg = "hello".encode("utf-8")
             envelope = Envelope(
                 to=identity.address,
                 sender=identity.address,
                 protocol_id=DefaultMessage.protocol_id,
-                message=msg,
+                message=b"",
             )
-            expected_envelope = envelope
-            agent.outbox.put(expected_envelope)
+            # send envelope via localnode back to agent
+            aea.outbox.put(envelope)
             time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 2
 
@@ -255,13 +252,13 @@ async def test_handle():
                 protocol_id=FIPAMessage.protocol_id,
                 message=msg,
             )
-            expected_envelope = envelope
-            agent.outbox.put(expected_envelope)
+            # send envelope via localnode back to agent
+            aea.outbox.put(envelope)
             time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
-            agent.stop()
+            aea.stop()
             t.join()
 
 
