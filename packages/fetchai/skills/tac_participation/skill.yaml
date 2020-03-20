@@ -11,6 +11,7 @@ fingerprint:
   parameters.py: QmTV1pYCTMen281fYmec4h9FJqx8faecAJTARR6gGQYZNT
   search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
+contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   tac:
     class_name: TACBehaviour

@@ -6,6 +6,6 @@ aea_version: 0.2.2
 fingerprint:
   __init__.py: QmdcwmmqBak2tEDnG4LJwjJA1GzhVcrN9gZ9fL1x8yhdJU
   message.py: Qmbpki5vZVgAoATuqv55kd5soiBNiNG7a1VDruDVdYNHrS
-  serialization.py: QmcDo8r376NGaFkonLnrwrrnwsXzN3pyL5i6oq4RTDmzkU
-  tac_pb2.py: QmToG73UgCvc7diVC1Sb4yhm7gvovK6UXRYcaZbQwAegxF
+  serialization.py: QmcYfo38a3RUeutX7xoc1DrkrgVysCzZNCibh5eWQ1CyJW
+  tac_pb2.py: Qmb2Yf8DtZrkfPnWgM5J3sohWSR2ocCCm7qq44njQeCdJ1
 description: "The tac protocol implements the messages an AEA needs to participate in the TAC."
