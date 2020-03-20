@@ -11,12 +11,12 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 We will first create an AEA and add a scaffold skill, which we call `my_search`.
 
-```bash
+``` bash
 aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF](../oef-ledger) and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF](../oef-ledger) and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 
@@ -24,7 +24,7 @@ A `Behaviour` class contains the business logic specific to initial actions init
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
 
-```python
+``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
@@ -97,7 +97,7 @@ So far, we have tasked the AEA with sending search requests to the OEF. However,
 
 Let us now implement a handler to deal with the incoming search responses.
 
-```python
+``` python
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -134,6 +134,13 @@ class MySearchHandler(Handler):
                     self.context.agent_name, nb_agents_found, self.received_search_count
                 )
             )
+        self.context.logger.info(
+            "[{}]: number of search requests sent={} vs. number of search responses received={}".format(
+                self.context.agent_name,
+                self.context.behaviours.my_search_behaviour.sent_search_count,
+                self.received_search_count,
+            )
+        )
 
     def teardown(self) -> None:
         """
@@ -148,67 +155,25 @@ class MySearchHandler(Handler):
 
 We create a handler which is registered for the `oef` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
 
+We also implement a trivial check on the difference between the amount of search requests sent and responses received.
+
 Note, how the handler simply reacts to incoming events (i.e. messages). It could initiate further actions, however, they are still reactions to the upstream search event.
+
+Also note, how we have access to other objects in the skill via `self.context`.
 
 We place this code in `my_aea/skills/my_search/handlers.py`.
 
-## Step 4: Develop a Task
+## Step 4: Remove unused Task and Model
 
-We have implemented a behaviour and a handler. We conclude by implementing a task. Here we can implement background logic. We will implement a trivial check on the difference between the amount of search requests sent and responses received.
+We have implemented a behaviour and a handler. We could also implement a `task` and a `model`, but instead we delete these files in this case, to keep it simple.
 
-```python
-import logging
-import time
-
-from aea.skills.tasks import Task
-
-logger = logging.getLogger("aea.my_search_skill")
-
-
-class MySearchTask(Task):
-    """This class scaffolds a task."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        logger.info("[{}]: setting up MySearchTask".format(self.context.agent_name))
-
-    def execute(self) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
-        time.sleep(1)  # to slow down the AEA
-        logger.info(
-            "[{}]: number of search requests sent={} vs. number of search responses received={}".format(
-                self.context.agent_name,
-                self.context.behaviours.my_search_behaviour.sent_search_count,
-                self.context.handlers.my_search_handler.received_search_count,
-            )
-        )
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        logger.info("[{}]: tearing down MySearchTask".format(self.context.agent_name))
-```
-
-Note, how we have access to other objects in the skill via `self.context`.
-
-We place this code in `my_aea/skills/my_search/tasks.py`.
+We remove the files `my_aea/skills/my_search/tasks.py` and `my_aea/skills/my_search/my_model.py`.
 
 ## Step 5: Create the config file
 
 Based on our skill components above, we create the following config file.
 
-```yaml
+``` yaml
 name: my_search
 author: fetchai
 version: 0.1.0
@@ -223,39 +188,48 @@ handlers:
   my_search_handler:
     class_name: MySearchHandler
     args: {}
-  my_search_task:
-    class_name: MySearchTask
-    args: {}
 models: {}
 protocols: ['fetchai/oef:0.1.0']
 dependencies: {}
 ```
 
-Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in the above task to access these skill components at runtime. We also set the `tick_interval` of the `TickerBehaviour` to `5` seconds.
+Ensure, you replace the author field with your author name! (Run `aea init` to set or check the author name.)
+
+Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in the above handler to access these skill components at runtime via the context. We also set the `tick_interval` of the `TickerBehaviour` to `5` seconds.
 
 We place this code in `my_aea/skills/my_search/skill.yaml`.
 
 ## Step 6: Add the oef protocol and connection
 
 Our AEA does not have the oef protocol yet so let's add it.
-```bash
+``` bash
 aea add protocol fetchai/oef:0.1.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the oef connection:
-```bash
+``` bash
 aea add connection fetchai/oef:0.1.0
 ```
 
-## Step 7: Run the AEA
+## Step 7: Run a service provider AEA
 
 We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
 
-```bash
+``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
+
+In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
+```
+aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registration
+aea run
+```
+
+This AEA will simply register a location service on the OEF so we can search for it.
+
+## Step 8: Run the Search AEA
 
 We can then launch our AEA.
 
@@ -263,7 +237,7 @@ We can then launch our AEA.
 aea run --connections fetchai/oef:0.1.0
 ```
 
-We can see that the AEA sends search requests to the OEF and receives search responses from the OEF. Since our AEA is only searching on the OEF - and not registered on the OEF - the search response returns an empty list of agents.
+We can see that the AEA sends search requests to the OEF and receives search responses from the OEF. Since our AEA is only searching on the OEF - and not registered on the OEF - the search response returns a single agent (the service provider).
 
 We stop the AEA with `CTRL + C`.
 

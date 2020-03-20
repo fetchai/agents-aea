@@ -3,13 +3,7 @@ The AEA generic seller with ORM integration demonstrate how to interact with a d
 * The provider of a service in the form of data retrieved from a database.
 * The buyer of a service.
 
-## Preparation instructions
- 
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
+### Discussion
 
 Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language.
 The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs. 
@@ -21,6 +15,12 @@ This demo will not use any smart contract, because these would be out of the sco
 
 Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
 The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+
+## Preparation instructions
+ 
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
    
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).

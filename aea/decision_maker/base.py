@@ -529,7 +529,8 @@ class DecisionMaker:
         with self._lock:
             self._stopped = True
             self.message_in_queue.put(None)
-            self._thread.join()
+            if self._thread is not None:
+                self._thread.join()
             logger.debug("Decision Maker stopped.")
             self._thread = None
 

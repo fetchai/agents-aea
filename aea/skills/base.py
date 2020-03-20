@@ -19,7 +19,6 @@
 
 """This module contains the base classes for the skills."""
 
-import importlib.util
 import inspect
 import logging
 import os
@@ -388,9 +387,7 @@ class Handler(SkillComponent):
         handlers = {}  # type: Dict[str, "Handler"]
         if handler_configs == {}:
             return handlers
-        handler_spec = importlib.util.spec_from_file_location("handlers", location=path)
-        handler_module = importlib.util.module_from_spec(handler_spec)
-        handler_spec.loader.exec_module(handler_module)  # type: ignore
+        handler_module = load_module("handlers", Path(path))
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(
             filter(
