@@ -23,8 +23,8 @@ import asyncio
 import logging
 import os
 import shutil
-import sys
 import time
+import subprocess
 from threading import Thread
 from typing import Optional
 
@@ -73,13 +73,30 @@ class TestAEAToACA:
 
         cls.cwd = os.getcwd()
 
-        # check Aries Cloud Agents is installed
+        # check Aries Cloud Agents (ACA) is installed
         res = shutil.which("aca-py")
         if res is None:
-            print(
+            pytest.skip(
                 "Please install Aries Cloud Agents first! See the following link: https://github.com/hyperledger/aries-cloudagent-python"
             )
-            sys.exit(1)
+
+        # run an ACA
+        cls.process = subprocess.Popen(
+            [
+                "aca-py",
+                "start",
+                "--admin",
+                cls.aca_admin_address,
+                str(cls.aca_admin_port),
+                "--admin-insecure-mode",
+                "--inbound-transport",
+                "http",
+                "0.0.0.0",
+                "8000",
+                "--outbound-transport",
+                "http",
+            ]
+        )
 
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
@@ -112,13 +129,17 @@ class TestAEAToACA:
         )
 
         try:
+            # connect to ACA
             await http_client_connection.connect()
             assert http_client_connection.connection_status.is_connected is True
 
+            # send request to ACA
             await http_client_connection.send(envelope=request_envelope)
 
+            # receive response from ACA
             response_envelop = await http_client_connection.receive()
 
+            # check the response
             assert response_envelop.to == self.aea_address
             assert response_envelop.sender == "HTTP Server"
             assert response_envelop.protocol_id == HTTP_PROTOCOL_PUBLIC_ID
@@ -134,11 +155,12 @@ class TestAEAToACA:
             assert decoded_response_message.version is not None
 
         finally:
+            # disconnect from ACA
             await http_client_connection.disconnect()
             assert http_client_connection.connection_status.is_connected is False
 
     @pytest.mark.asyncio
-    async def test_connection(self):
+    async def test_end_to_end_aea_aca(self):
         # AEA components
         ledger_apis = LedgerApis({}, FETCHAI)
         wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
@@ -152,13 +174,12 @@ class TestAEAToACA:
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
-
         resources = Resources()
 
         # create AEA
         aea = AEA(identity, [http_client_connection], wallet, ledger_apis, resources)
 
-        # Add http protocol to resources
+        # Add http protocol to AEA resources
         http_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(
                 open(
@@ -178,7 +199,7 @@ class TestAEAToACA:
         )
         resources.protocol_registry.register(HttpMessage.protocol_id, http_protocol)
 
-        # Request messages
+        # Request message & envelope
         request_http_message = HttpMessage(
             dialogue_reference=("", ""),
             target=0,
@@ -214,7 +235,7 @@ class TestAEAToACA:
         )
         resources.add_skill(error_skill)
 
-        # Start threads
+        # start AEA thread
         t_aea = Thread(target=aea.start)
         try:
             t_aea.start()
@@ -234,9 +255,14 @@ class TestAEAToACA:
             aea.stop()
             t_aea.join()
 
+    @classmethod
+    def teardown_class(cls):
+        # terminate the ACA
+        cls.process.terminate()
+
 
 class AEAHandler(Handler):
-    """The handler for the aea."""
+    """The handler for the AEA."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
 

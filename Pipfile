@@ -9,18 +9,23 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
+aries-py = "==0.4.5"
 bandit = "==1.6.2"
 black = "==19.10b0"
 bs4 = "==0.0.1"
 colorlog = "==4.1.0"
+docker = "*"
 fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.2"}
 flake8 = "==3.7.9"
 flake8-bugbear = "==20.1.4"
 flake8-docstrings = "==1.5.0"
 flake8-import-order = "==0.18.1"
 gym = "==0.15.6"
+liccheck = "==0.4.0"
+markdown = ">=3.2.1"
 mkdocs = "==1.1"
 mkdocs-material = "==4.6.3"
+mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 mypy = "==0.761"
 numpy = "==1.18.1"
 oef = "==0.8.1"
@@ -32,15 +37,10 @@ pymdown-extensions = "==6.3"
 pytest = "==5.3.5"
 pytest-asyncio = "==0.10.0"
 pytest-cov = "==2.8.1"
-tox = "==3.14.5"
-safety = "==1.8.5"
-liccheck = "==0.4.0"
-docker = "*"
-mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
-markdown = ">=3.2.1"
 pytest-randomly = "==3.2.1"
 requests = "==2.23.0"
-aries-py = "==0.4.5"
+safety = "==1.8.5"
+tox = "==3.14.5"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy

@@ -35,7 +35,7 @@ from packages.fetchai.connections.http_client.connection import HTTPClientConnec
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ...conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
+from ....conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 

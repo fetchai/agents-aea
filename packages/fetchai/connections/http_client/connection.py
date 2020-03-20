@@ -23,7 +23,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Optional, Set, cast
+from typing import cast, Optional, Set, Union
 
 import requests
 
@@ -57,7 +57,7 @@ class HTTPClientChannel:
         restricted_to_protocols: Optional[Set[PublicId]] = None,
     ):
         """
-        Initialize a channel and process the initial API specification from the file path (if given).
+        Initialize an http client channel.
 
         :param agent_address: the address of the agent.
         :param address: RESTful API hostname / IP address
@@ -80,19 +80,7 @@ class HTTPClientChannel:
 
     def connect(self):
         """Connect."""
-        if self.is_stopped:
-            try:
-                logger.info(self.address)
-                response = requests.request(
-                    method="GET",
-                    url="http://{}:{}/status".format(self.address, self.port),
-                )
-                logger.debug("Status code is: {}".format(response.status_code))
-                assert response.status_code == 200, "Connection failed."
-                self.is_stopped = False
-            except Exception as e:  # pragma: no cover
-                logger.warning("Could not connect to the server: {}".format(e))
-                raise
+        pass
 
     def send(self, request_envelope: Envelope) -> None:
         """
@@ -105,7 +93,7 @@ class HTTPClientChannel:
         if self.excluded_protocols is not None:
             if request_envelope.protocol_id in self.excluded_protocols:
                 logger.error(
-                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(
+                    "This envelope cannot be sent with the http client connection: protocol_id={}".format(
                         request_envelope.protocol_id
                     )
                 )
@@ -144,7 +132,7 @@ class HTTPClientChannel:
         Convert an HTTP response object (from the 'requests' library) into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
         :param connection_id: the connection id
-        :param http_request_message: the http message of the request
+        :param http_request_message: the message of the http request envelop
         :param http_response: the http response object
         """
 
@@ -170,11 +158,7 @@ class HTTPClientChannel:
         return envelope
 
     def disconnect(self) -> None:
-        """
-        Disconnect.
-
-        Join the thread, then stop the channel.
-        """
+        """Disconnect."""
         if not self.is_stopped:
             logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
             self.is_stopped = True
@@ -248,7 +232,7 @@ class HTTPClientConnection(Connection):
             )  # pragma: no cover
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 
@@ -272,7 +256,7 @@ class HTTPClientConnection(Connection):
         cls, agent_address: Address, connection_configuration: ConnectionConfig
     ) -> "Connection":
         """
-        Get the HTTP connection from the connection configuration.
+        Get the HTTP connection from a connection configuration.
 
         :param agent_address: the address of the agent.
         :param connection_configuration: the connection configuration object.
