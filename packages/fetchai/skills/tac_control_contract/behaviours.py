@@ -325,7 +325,6 @@ class TACBehaviour(Behaviour):
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
                 token_ids=self.token_ids,
-                nonce_index=nonce_index,
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
         else:
