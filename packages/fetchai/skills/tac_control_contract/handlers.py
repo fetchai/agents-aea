@@ -299,6 +299,7 @@ class TransactionHandler(Handler):
         contract = self.context.contracts.erc1155
         game = cast(Game, self.context.game)
         ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+        tac_behaviour = self.context.behaviours.tac
         if tx_msg_response.tx_id == "contract_deploy":
             self.context.logger.info("Sending deployment transaction to the ledger!")
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
@@ -337,7 +338,7 @@ class TransactionHandler(Handler):
                 self.context.is_active = False
                 self.context.info("The creation command wasn't successful. Aborting.")
             else:
-                self.context.shared_state["is_items_created"] = True
+                tac_behaviour.is_items_created = True
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
@@ -366,12 +367,9 @@ class TransactionHandler(Handler):
                         transaction.transactionHash.hex()
                     )
                 )
-                if (
-                    self.context.shared_state["agent_counter"]
-                    == game.registration.nb_agents
-                ):
+                if tac_behaviour.agent_counter == game.registration.nb_agents:
                     self.context.logger.info("Can start the game.!")
-                    self.context.shared_state["can_start"] = True
+                    tac_behaviour.can_start = True
 
     def teardown(self) -> None:
         """
