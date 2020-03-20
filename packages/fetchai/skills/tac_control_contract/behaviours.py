@@ -55,8 +55,10 @@ class TACBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
-        self.context.shared_state["is_items_created"] = False
-        self.context.shared_state["can_start"] = False
+        self.is_items_created = False
+        self.can_start = False
+        self.agent_counter = 0
+        self.token_ids = []
 
     def setup(self) -> None:
         """
@@ -67,7 +69,6 @@ class TACBehaviour(Behaviour):
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(Contract, self.context.contracts.erc1155)
         ledger_api = cast(EthereumApi, self.context.ledger_apis.apis.get("ethereum"))
-        self.context.shared_state["agent_counter"] = 0
         #  Deploy the contract if there is no address in the parameters
         if parameters.contract_address is None:
             contract.set_instance(ledger_api)
@@ -99,7 +100,7 @@ class TACBehaviour(Behaviour):
 
         if (
             contract.is_deployed
-            and not self.context.shared_state["is_items_created"]
+            and not self.is_items_created
             and game.phase.value == Phase.PRE_GAME.value
         ):
             self.context.configuration = Configuration(  # type: ignore
@@ -111,13 +112,9 @@ class TACBehaviour(Behaviour):
             token_ids_dictionary = cast(
                 Dict[str, str], self.context.configuration.good_id_to_name
             )
-            self.context.shared_state["token_ids"] = [
-                int(token_id) for token_id in token_ids_dictionary.keys()
-            ]
+            self.token_ids = [int(token_id) for token_id in token_ids_dictionary.keys()]
             self.context.logger.info("Creating the items.")
-            transaction_message = self._create_items(
-                self.context.shared_state["token_ids"]
-            )
+            transaction_message = self._create_items(self.token_ids)
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
         if (
@@ -149,16 +146,14 @@ class TACBehaviour(Behaviour):
                 self.context.logger.info("Mint objects after registration.")
                 for agent in self.context.configuration.agent_addr_to_name.keys():
                     self._mint_objects(
-                        is_batch=True,
-                        address=agent,
-                        nonce_index=self.context.shared_state["agent_counter"],
+                        is_batch=True, address=agent, nonce_index=self.agent_counter,
                     )
-                    self.context.shared_state["agent_counter"] += 1
+                    self.agent_counter += 1
                 game.phase = Phase.GAME
         elif (
             game.phase.value == Phase.GAME.value
             and parameters.start_time < now < parameters.end_time
-            and self.context.shared_state["can_start"]
+            and self.can_start
         ):
             self.context.logger.info("Starting the TAC game.")
             self._start_tac()
@@ -329,7 +324,7 @@ class TACBehaviour(Behaviour):
                 mint_quantities=minting,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
-                token_ids=self.context.shared_state["token_ids"],
+                token_ids=self.token_ids,
                 nonce_index=nonce_index,
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
@@ -343,6 +338,6 @@ class TACBehaviour(Behaviour):
                 mint_quantity=parameters.money_endowment,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
-                token_id=self.context.shared_state["token_ids"][0],
+                token_id=token_id,
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
