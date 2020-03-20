@@ -125,6 +125,8 @@ class TACSerializer(Serializer):
 
             if msg.get("contract_address") is not None:
                 tac_msg.contract_address = msg.get("contract_address")
+            else:
+                tac_msg.contract_address = ""
 
             tac_container.game_data.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
@@ -245,7 +247,7 @@ class TACSerializer(Serializer):
             )
             new_body["version_id"] = tac_container.game_data.version_id
 
-            if tac_container.contract_address is not None:
+            if tac_container.game_data.contract_address != "":
                 new_body["contract_address"] = tac_container.game_data.contract_address
         elif tac_type == "transaction_confirmation":
             new_body["type"] = TACMessage.Type.TRANSACTION_CONFIRMATION
