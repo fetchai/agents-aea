@@ -310,9 +310,7 @@ class TACBehaviour(Behaviour):
                 token_id=token_ids,
             )
 
-    def _mint_objects(
-        self, is_batch: bool, address: Address, token_id: int = None
-    ):
+    def _mint_objects(self, is_batch: bool, address: Address, token_id: int = None):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
