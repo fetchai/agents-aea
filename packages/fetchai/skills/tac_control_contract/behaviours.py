@@ -85,7 +85,6 @@ class TACBehaviour(Behaviour):
                 ledger_api=ledger_api,
                 contract_address=str(parameters.contract_address),
             )
-            contract.token_ids = parameters.good_ids  # type: ignore
 
     def act(self) -> None:
         """
