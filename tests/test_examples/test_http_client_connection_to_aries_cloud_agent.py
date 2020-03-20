@@ -23,7 +23,7 @@ import asyncio
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec
 import time
 from threading import Thread
 from typing import Optional
@@ -81,7 +81,7 @@ class TestAEAToACA:
             )
 
         # run an ACA
-        cls.process = subprocess.Popen(
+        cls.process = subprocess.Popen(  # nosec
             [
                 "aca-py",
                 "start",
@@ -97,6 +97,7 @@ class TestAEAToACA:
                 "http",
             ]
         )
+        time.sleep(4.0)
 
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):

@@ -9,7 +9,7 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
-aries-py = "==0.4.5"
+aries-cloudagent = "==0.4.5"
 bandit = "==1.6.2"
 black = "==19.10b0"
 bs4 = "==0.0.1"
@@ -44,3 +44,4 @@ tox = "==3.14.5"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
+aries-cloudagent = "==0.4.5"
