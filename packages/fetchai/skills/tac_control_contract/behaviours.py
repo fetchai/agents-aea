@@ -249,6 +249,7 @@ class TACBehaviour(Behaviour):
                 agent_addr_to_name=game.configuration.agent_addr_to_name,
                 good_id_to_name=game.configuration.good_id_to_name,
                 version_id=game.configuration.version_id,
+                contract_address=self.context.contracts.erc1155.instance.address,
             )
             self.context.logger.debug(
                 "[{}]: sending game data to '{}': {}".format(
@@ -318,6 +319,7 @@ class TACBehaviour(Behaviour):
         parameters = cast(Parameters, self.context.parameters)
         if is_batch:
             minting = [parameters.base_good_endowment] * parameters.nb_goods
+            # Store the nonce in the contract. Each time we get a tx we add one.
             transaction_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
                 recipient_address=address,

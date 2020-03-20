@@ -122,6 +122,10 @@ class TACSerializer(Serializer):
             )
             tac_msg.good_id_to_name.extend(_from_dict_to_pairs(msg.good_id_to_name))
             tac_msg.version_id = msg.version_id
+
+            if msg.get("contract_address") is not None:
+                tac_msg.contract_address = msg.get("contract_address")
+
             tac_container.game_data.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
             tac_msg = tac_pb2.TACController.TransactionConfirmation()  # type: ignore
@@ -240,6 +244,9 @@ class TACSerializer(Serializer):
                 tac_container.game_data.good_id_to_name
             )
             new_body["version_id"] = tac_container.game_data.version_id
+
+            if tac_container.contract_address is not None:
+                new_body["contract_address"] = tac_container.game_data.contract_address
         elif tac_type == "transaction_confirmation":
             new_body["type"] = TACMessage.Type.TRANSACTION_CONFIRMATION
             new_body["tx_id"] = tac_container.transaction_confirmation.tx_id

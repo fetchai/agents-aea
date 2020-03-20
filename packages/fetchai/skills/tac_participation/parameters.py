@@ -17,4 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the tac participation skill."""
+"""This package contains a class representing the game parameters."""
+
+from aea.skills.base import Model
+
+
+class Parameters(Model):
+    """This class contains the parameters of the game."""
+
+    def __init__(self, **kwargs):
+        """Instantiate the search class."""
+        super().__init__(**kwargs)
+        self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
+
+    @property
+    def is_using_contract(self) -> bool:
+        """Returns the is_using_contract."""
+        return self._is_using_contract
