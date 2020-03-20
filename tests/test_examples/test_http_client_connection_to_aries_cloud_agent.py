@@ -23,8 +23,8 @@ import asyncio
 import logging
 import os
 import shutil
-import time
 import subprocess
+import time
 from threading import Thread
 from typing import Optional
 

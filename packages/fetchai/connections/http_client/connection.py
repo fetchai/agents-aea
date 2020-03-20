@@ -23,7 +23,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import cast, Optional, Set, Union
+from typing import Optional, Set, Union, cast
 
 import requests
 
