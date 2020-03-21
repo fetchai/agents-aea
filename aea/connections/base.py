@@ -55,7 +55,7 @@ class Connection(Component, ABC):
 
     def __init__(
         self,
-        configuration: ConnectionConfig,
+        configuration: Optional[ConnectionConfig] = None,
         connection_id: Optional[PublicId] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
@@ -140,16 +140,20 @@ class Connection(Component, ABC):
     def restricted_to_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
         # TODO refactor __init__
-        # return self._restricted_to_protocols
-        connection_configuration = cast(ConnectionConfig, self.configuration)
-        return connection_configuration.restricted_to_protocols
+        if self.configuration is None:
+            return self._restricted_to_protocols
+        else:
+            connection_configuration = cast(ConnectionConfig, self.configuration)
+            return connection_configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
-        # return self._excluded_protocols
-        connection_configuration = cast(ConnectionConfig, self.configuration)
-        return connection_configuration.excluded_protocols
+        if self.configuration is None:
+            return self._excluded_protocols
+        else:
+            connection_configuration = cast(ConnectionConfig, self.configuration)
+            return connection_configuration.excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

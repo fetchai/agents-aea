@@ -58,6 +58,8 @@ def component_class_from_type(component_type: ComponentType) -> Type["Component"
 
 
 class Component(ABC):
+    """Abstract class for an agent component."""
+
     def __init__(self, configuration: ComponentConfiguration, is_vendor: bool = False):
         """
         Initialize a package.
@@ -149,6 +151,7 @@ class Component(ABC):
         connection = connection_class.from_config(
             "address", connection_configuration=configuration
         )
+        connection._configuration = configuration
         return connection
 
     @classmethod
@@ -170,10 +173,6 @@ class Component(ABC):
         component_object._directory = directory
         init_modules = load_init_modules(directory)
         component_object.importpath_to_module.update(init_modules)
-        # TODO this should be the way to do it. However,
-        #      due to many different ways we load components
-        #      (e.g. a Skill requires the SkillContext which in turn requires an AgentContext)
-        #      we are not ready to do it now.
         with _SysModules.load_modules(list(init_modules.items())):
             component_object.setup()
         return component_object

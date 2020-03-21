@@ -16,15 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import aea.aea_builder
-from pathlib import Path
-from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentId
-from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAICrypto
-import logging
 
 """Example of programmatic initialization of an AEA using the builder."""
+
+import logging
+
+from aea.aea_builder import AEABuilder
+from aea.crypto.fetchai import FetchAICrypto
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -39,4 +38,7 @@ if __name__ == "__main__":
     # builder.add_protocol(...).add_skill(...)
 
     aea_agent = builder.build()
-    aea_agent.start()
+    try:
+        aea_agent.start()
+    except KeyboardInterrupt:
+        aea_agent.stop()
