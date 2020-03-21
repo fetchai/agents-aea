@@ -16,11 +16,17 @@ At present, the term OEF is also used to refer to a node that enables agents to 
 
 For two agents to be able to find each other, at least one must register as a service and the other must query the OEF node for this service. For an example of such an interaction see <a href="../skill-guide" target="_blank">this guide</a>.
 
+Agents can receive messages from other agents if they are both connected to the same OEF node.
+
 Currently, you need to run your own OEF node for local development and testing. To start an OEF node follow the <a href="../quickstart/#preliminaries">Preliminaries</a> sections from the AEA quick start. Then run:
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
+
+When it is live you will see the sentence 'A thing of beauty is a joy forever...'.
+
+To view the OEF logs for debugging, navigate to `data/oef-logs`.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

@@ -571,10 +571,6 @@ class OEFChannel(OEFAgent):
                 service_description
             )
             self.unregister_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            query = oef_message.query
-            oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
