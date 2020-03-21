@@ -1,0 +1,16 @@
+name: http_client
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+fingerprint: ""
+description: "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
+class_name: HTTPConnection
+protocols: ["fetchai/http:0.1.0"]
+restricted_to_protocols: ["fetchai/http:0.1.0"]
+excluded_protocols: []
+config:
+  host: ${addr:127.0.0.1}
+  port: ${port:8000}
+dependencies:
+  requests:
+    version: ==2.23.0
