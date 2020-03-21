@@ -431,7 +431,7 @@ class PackageConfiguration(Configuration, ABC):
     - contracts
     """
 
-    default_configuration_filename = None
+    default_configuration_filename: str
 
     def __init__(
         self,
@@ -574,10 +574,10 @@ class ConnectionConfig(ComponentConfiguration):
         return ComponentType.CONNECTION
 
     @property
-    def package_dependencies(self) -> Set[PackageId]:
+    def package_dependencies(self) -> Set[ComponentId]:
         """Get the connection dependencies."""
         return set(
-            PackageId(ConfigurationType.PROTOCOL, protocol_id)
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
             for protocol_id in self.protocols
         )
 
@@ -778,10 +778,10 @@ class SkillConfig(ComponentConfiguration):
         return ComponentType.SKILL
 
     @property
-    def package_dependencies(self) -> Set[PackageId]:
+    def package_dependencies(self) -> Set[ComponentId]:
         """Get the connection dependencies."""
         return {
-            PackageId(ConfigurationType.PROTOCOL, protocol_id)
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
             for protocol_id in self.protocols
         }
 
@@ -882,18 +882,18 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["disable_existing_loggers"] = False
 
     @property
-    def package_dependencies(self) -> Set[PackageId]:
+    def package_dependencies(self) -> Set[ComponentId]:
         """Get the package dependencies."""
         protocols = set(
-            PackageId(ConfigurationType.PROTOCOL, public_id)
+            ComponentId(ComponentType.PROTOCOL, public_id)
             for public_id in self.protocols
         )
         connections = set(
-            PackageId(ConfigurationType.CONNECTION, public_id)
+            ComponentId(ComponentType.CONNECTION, public_id)
             for public_id in self.connections
         )
         skills = set(
-            PackageId(ConfigurationType.CONNECTION, public_id)
+            ComponentId(ComponentType.CONNECTION, public_id)
             for public_id in self.skills
         )
         return set.union(protocols, connections, skills)

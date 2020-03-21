@@ -23,7 +23,7 @@ import os
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Set, Tuple, List, cast, Type, Any, Union
+from typing import Any, Dict, List, Set, Tuple, Union, cast
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -32,7 +32,6 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    PackageId,
     PublicId,
 )
 from aea.configurations.components import Component
@@ -45,7 +44,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.base import Resources
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Skill
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -72,22 +71,34 @@ class _DependenciesManager:
     @property
     def protocols(self) -> Dict[ComponentId, Protocol]:
         """Get the protocols."""
-        return self._all_dependencies_by_type.get(ComponentType.PROTOCOL, {})
+        return cast(
+            Dict[ComponentId, Protocol],
+            self._all_dependencies_by_type.get(ComponentType.PROTOCOL, {}),
+        )
 
     @property
     def connections(self) -> Dict[ComponentId, Connection]:
         """Get the connections."""
-        return self._all_dependencies_by_type.get(ComponentType.CONNECTION, {})
+        return cast(
+            Dict[ComponentId, Connection],
+            self._all_dependencies_by_type.get(ComponentType.CONNECTION, {}),
+        )
 
     @property
     def skills(self) -> Dict[ComponentId, Skill]:
         """Get the skills."""
-        return self._all_dependencies_by_type.get(ComponentType.SKILL, {})
+        return cast(
+            Dict[ComponentId, Skill],
+            self._all_dependencies_by_type.get(ComponentType.SKILL, {}),
+        )
 
     @property
     def contracts(self) -> Dict[ComponentId, Any]:
         """Get the contracts."""
-        return self._all_dependencies_by_type.get(ComponentType.CONTRACT, {})
+        return cast(
+            Dict[ComponentId, Any],
+            self._all_dependencies_by_type.get(ComponentType.CONTRACT, {}),
+        )
 
     def add_component(self, component: Component) -> None:
         """Add a component."""
@@ -145,7 +156,7 @@ class _DependenciesManager:
         return len(not_supported_packages) == 0
 
     @contextmanager
-    def load_dependencies(self) -> None:
+    def load_dependencies(self):
         """
         Load dependencies of a component, so its modules can be loaded.
 

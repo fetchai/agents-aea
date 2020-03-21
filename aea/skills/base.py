@@ -67,7 +67,7 @@ class SkillContext:
 
         :param agent_context: the agent's context
         """
-        self._agent_context = agent_context
+        self._agent_context = cast(AgentContext, agent_context)
         self._in_queue = Queue()  # type: Queue
         self._skill = None  # type: Optional[Skill]
 
@@ -552,7 +552,8 @@ class Skill(Component):
         """
         super().__init__(configuration)
         self.config = configuration
-        self._skill_context = skill_context
+        # TODO this is to make the mypy checks to pass, a refactoring of arguments is needed
+        self._skill_context = cast(SkillContext, skill_context)
         self._handlers = handlers if handlers is not None else {}
         self._behaviours = behaviours if behaviours is not None else {}
         self._models = models if models is not None else {}

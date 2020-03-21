@@ -26,7 +26,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -246,10 +246,12 @@ class Protocol(Component):
         :param serializer: the serializer.
         :param configuration: the protocol configurations.
         """
-        super().__init__(configuration)
-        self._serializer = serializer
+        # TODO to remove the cast by refactoring the arguments in the __init__
+        #      since they can be accessed by using self.configuration
+        super().__init__(cast(ProtocolConfig, configuration))
+        self._serializer = cast(Serializer, serializer)
         # TODO to be removed, since now they are included in superclass.
-        self._protocol_id = protocol_id
+        self._protocol_id = cast(ProtocolId, protocol_id)
         self._config = configuration
 
     @property
@@ -265,7 +267,7 @@ class Protocol(Component):
     @property
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
-        return self._configuration
+        return cast(ProtocolConfig, self._configuration)
 
     @classmethod
     def from_dir(cls, directory: str) -> "Protocol":

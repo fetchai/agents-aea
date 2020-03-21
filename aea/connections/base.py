@@ -25,10 +25,10 @@ from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ConnectionConfig,
     PublicId,
-    ComponentType,
-    DEFAULT_CONNECTION_CONFIG_FILE,
 )
 from aea.configurations.components import Component
 
@@ -55,7 +55,6 @@ class Connection(Component, ABC):
 
     def __init__(
         self,
-        configuration: Optional[ConnectionConfig] = None,
         connection_id: Optional[PublicId] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
@@ -67,7 +66,8 @@ class Connection(Component, ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(configuration)
+        # TODO for backward compatibility, the configuration attribute will be set after initialization
+        super().__init__(cast(ComponentConfiguration, None))
         # TODO connection id can be removed
         if connection_id is None:
             raise ValueError("Connection public id is a mandatory argument.")

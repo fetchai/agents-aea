@@ -28,7 +28,7 @@ import types
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ class _SysModules:
 
     @staticmethod
     @contextmanager
-    def load_modules(modules: List[Tuple[str, types.ModuleType]]) -> None:
+    def load_modules(modules: List[Tuple[str, types.ModuleType]]):
         """
         Load modules as a context manager.
 
