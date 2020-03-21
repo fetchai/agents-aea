@@ -662,6 +662,10 @@ class Resources:
         """Add a protocol to the set of resources."""
         self.protocol_registry.register(protocol.id, protocol)
 
+    def remove_protocol(self, protocol_id: ProtocolId):
+        """Add a protocol to the set of resources."""
+        self.protocol_registry.unregister(protocol_id)
+
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
         return self._skills.get(skill_id, None)

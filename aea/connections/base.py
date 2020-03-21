@@ -21,9 +21,10 @@
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import Optional, Set, TYPE_CHECKING
+from pathlib import Path
+from typing import Optional, Set, TYPE_CHECKING, cast
 
-from aea.configurations.base import ConnectionConfig, PublicId, ComponentType
+from aea.configurations.base import ConnectionConfig, PublicId, ComponentType, DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.components import Component
 
 if TYPE_CHECKING:
@@ -49,7 +50,7 @@ class Connection(Component, ABC):
 
     def __init__(
         self,
-        connection_configuration: ConnectionConfig,
+        configuration: ConnectionConfig,
         connection_id: Optional[PublicId] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
@@ -61,8 +62,8 @@ class Connection(Component, ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(connection_configuration)
-        # TODO connection id can be removed -
+        super().__init__(configuration)
+        # TODO connection id can be removed
         if connection_id is None:
             raise ValueError("Connection public id is a mandatory argument.")
         self._connection_id = connection_id
@@ -133,12 +134,17 @@ class Connection(Component, ABC):
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
-        return self._restricted_to_protocols
+        # TODO refactor __init__
+        # return self._restricted_to_protocols
+        connection_configuration = cast(ConnectionConfig, self.configuration)
+        return connection_configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
-        return self._excluded_protocols
+        # return self._excluded_protocols
+        connection_configuration = cast(ConnectionConfig, self.configuration)
+        return connection_configuration.excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:
@@ -182,3 +188,7 @@ class Connection(Component, ABC):
         :param connection_configuration: the connection configuration.
         :return: an instance of the concrete connection class.
         """
+
+    @classmethod
+    def load_from_directory(cls, component_type: ComponentType, directory: Path) -> "Component":
+        pass

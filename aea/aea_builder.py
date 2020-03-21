@@ -18,23 +18,25 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
+import logging
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Set, Tuple, List, cast, Type
+from typing import Dict, Set, Tuple, List, cast, Type, Any
 
+from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    PackageConfiguration,
-    PublicId,
     PackageId,
+    PublicId,
 )
 from aea.configurations.components import Component
 from aea.connections.base import Connection
+from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import _SysModules
@@ -42,7 +44,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.base import Resources
-from aea.skills.base import Skill
+from aea.skills.base import Skill, SkillContext
 
 
 class _DependenciesManager:
@@ -52,38 +54,65 @@ class _DependenciesManager:
         """Initialize the dependency graph."""
         # adjacency list of the dependency DAG
         # an arc means "depends on"
-        self.protocols = {}  # type: Dict[ComponentId, Component]
-        self.connections = {}  # type: Dict[ComponentId, Component]
-        self.skills = {}  # type: Dict[ComponentId, Component]
-        self.contracts = {}  # type: Dict[ComponentId, Component]
+        self._dependencies = {}  # type: Dict[ComponentId, Component]
+        self._all_dependencies_by_type = {}  # type: Dict[ComponentType, Dict[ComponentId, Component]]
+        self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
     @property
     def all_dependencies(self) -> Set[ComponentId]:
         """Get all dependencies."""
-        result = set(
-            *self.protocols.keys(),
-            *self.connections.keys(),
-            *self.skills.keys(),
-            *self.contracts.keys(),
-        )
+        result = set(self._dependencies.keys())
         return result
 
-    def get_components_from_type(self, component_type: ComponentType) -> Dict[ComponentId, Component]:
-        """Get components from type."""
-        if component_type == ComponentType.PROTOCOL:
-            return self.protocols
-        elif component_type == ComponentType.CONNECTION:
-            return self.connections
-        elif component_type == ComponentType.SKILL:
-            return self.skills
-        elif component_type == ComponentType.CONTRACT:
-            raise NotImplementedError
-        else:
-            raise ValueError
+    @property
+    def protocols(self) -> Dict[ComponentId, Protocol]:
+        """Get the protocols."""
+        return self._all_dependencies_by_type.get(ComponentType.PROTOCOL, {})
+
+    @property
+    def connections(self) -> Dict[ComponentId, Connection]:
+        """Get the connections."""
+        return self._all_dependencies_by_type.get(ComponentType.CONNECTION, {})
+
+    @property
+    def skills(self) -> Dict[ComponentId, Skill]:
+        """Get the skills."""
+        return self._all_dependencies_by_type.get(ComponentType.SKILL, {})
+
+    @property
+    def contracts(self) -> Dict[ComponentId, Any]:
+        """Get the contracts."""
+        return self._all_dependencies_by_type.get(ComponentType.CONTRACT, {})
 
     def add_component(self, component: Component) -> None:
         """Add a component."""
-        self.get_components_from_type(component.component_type)[component.component_id] = component
+        self._dependencies[component.component_id] = component
+        self._all_dependencies_by_type.setdefault(component.component_type, {})[component.component_id] = component
+        for dependency in component.configuration.package_dependencies:
+            self._inverse_dependency_graph.setdefault(dependency, set()).add(component.component_id)
+
+    def remove_component(self, component_id: ComponentId):
+        """
+        Remove a component.
+
+        :return None
+        :raises ValueError: if some component depends on this package.
+        """
+        if component_id not in self.all_dependencies:
+            raise ValueError("Component {} of type {} not present.".format(component_id.public_id, component_id.component_type))
+        dependencies = self._inverse_dependency_graph.get(component_id, set())
+        if len(dependencies) != 0:
+            raise ValueError("Cannot remove component {} of type {}. Other components depends on it: {}".format(component_id.public_id, component_id.component_type, dependencies))
+
+        # remove from the index of all dependencies
+        component = self._dependencies.pop(component_id)
+        # remove from the index of all dependencies grouped by type
+        self._all_dependencies_by_type[component_id.component_type].pop(component_id)
+        if len(self._all_dependencies_by_type[component_id.component_type]) == 0:
+            self._all_dependencies_by_type.pop(component_id.component_type)
+        # update inverse dependency graph
+        for dependency in component.configuration.package_dependencies:
+            self._inverse_dependency_graph[dependency].discard(component_id)
 
     def check_package_dependencies(
         self, component_configuration: ComponentConfiguration
@@ -123,38 +152,30 @@ class _DependenciesManager:
         """
         # get protocols first
         protocols = [
-            (import_path, module_obj)
+            (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.protocols.values()
-            for (import_path, module_obj) in component.importpath_to_module
+            for (relative_import_path, module_obj) in component.importpath_to_module.items()
         ]
         connections = [
-            (import_path, module_obj)
+            (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.connections.values()
-            for (import_path, module_obj) in component.importpath_to_module
+            for (relative_import_path, module_obj) in component.importpath_to_module.items()
         ]
         skills = [
-            (import_path, module_obj)
+            (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.skills.values()
-            for (import_path, module_obj) in component.importpath_to_module
+            for (relative_import_path, module_obj) in component.importpath_to_module.items()
         ]
         return cast(
             List[Tuple[str, types.ModuleType]], protocols + connections + skills
         )
 
-
-def component_class_from_type(component_type: ComponentType) -> Type["Component"]:
-    """Get component class from component type."""
-    if component_type == ComponentType.PROTOCOL:
-        return Protocol
-    elif component_type == ComponentType.CONNECTION:
-        return Connection
-    elif component_type == ComponentType.SKILL:
-        return Skill
-    elif component_type == ComponentType.CONTRACT:
-        # TODO
-        raise NotImplementedError
-    else:
-        raise ValueError
+    def build_dotted_part(self, component, relative_import_path) -> str:
+        """Given a component, build a dotted path for import."""
+        if relative_import_path == "":
+            return component.prefix_import_path
+        else:
+            return component.prefix_import_path + "." + relative_import_path
 
 
 class AEABuilder:
@@ -162,7 +183,6 @@ class AEABuilder:
 
     def __init__(self):
         self._resources = Resources()
-        self._connections = []
 
         # identity
         self._name = None
@@ -172,62 +192,118 @@ class AEABuilder:
         self._package_dependency_graph = _DependenciesManager()
 
         # add default protocol
-        # self.add_protocol()
+        self.add_protocol(Path(AEA_DIR, "protocols", "default"))
+        # add stub connection
+        self.add_connection(Path(AEA_DIR, "connections", "stub"))
         # add error skill
-        # self.add_skill()
+        self.add_skill(Path(AEA_DIR, "skills", "error"))
 
-    def set_name(self, name: str):
+    def set_name(self, name: str) -> "AEABuilder":
         self._name = name
+        return self
 
-    def add_address(self, identifier: str, address: Address):
+    def add_address(self, identifier: str, address: Address) -> "AEABuilder":
         self._addresses[identifier] = address
+        return self
 
-    def remove_address(self, identifier: str):
+    def remove_address(self, identifier: str) -> "AEABuilder":
         self._addresses.pop(identifier, None)
+        return self
 
-    def add_component(self, component_type: ComponentType, directory: Path) -> None:
+    def add_component(self, component_type: ComponentType, directory: Path) -> "AEABuilder":
         """
         Add a component, given its type and the directory.
 
         :param component_type: the component type.
         :param directory: the directory path.
         :return: None
+        :raises ValueError: if a component is already registered with the same component id.
         """
+        configuration = ComponentConfiguration.load(component_type, directory)
+        if configuration.component_id in self._package_dependency_graph.all_dependencies:
+            raise ValueError("Component {} of type {} already added.".format(configuration.public_id, configuration.component_type))
+
         with self._package_dependency_graph.load_dependencies():
             component = Component.load_from_directory(component_type, directory)
-            self._package_dependency_graph.check_package_dependencies(component.configuration)
+
+        self._package_dependency_graph.check_package_dependencies(component.configuration)
 
         # update dependency graph
         self._package_dependency_graph.add_component(component)
         # register new package in resources
-        # TODO handle the case when the component is a connection - it should not be added to resources.
+        self._add_component_to_resources(component)
 
-    def remove_package(self, package_id: PackageId):
+        return self
+
+    def _add_component_to_resources(self, component: Component):
+        """Add component to the resources."""
+        if component.component_type == ComponentType.CONNECTION:
+            # Do nothing - we don't add connections to resources.
+            return
+
+        if component.component_type == ComponentType.PROTOCOL:
+            protocol = cast(Protocol, component)
+            self._resources.add_protocol(protocol)
+        elif component.component_type == ComponentType.SKILL:
+            skill = cast(Skill, component)
+            self._resources.add_skill(skill)
+
+    def _remove_component_from_resources(self, component_id: ComponentId):
+        """Remove a component from the resources."""
+        if component_id.component_type == ComponentType.CONNECTION:
+            return
+
+        if component_id.component_type == ComponentType.PROTOCOL:
+            self._resources.remove_protocol(component_id.public_id)
+        elif component_id.component_type == ComponentType.SKILL:
+            self._resources.remove_skill(component_id.public_id)
+
+    def remove_component(self, component_id: ComponentId) -> "AEABuilder":
         """Remove a package"""
-        # check dependency graph for pending packages
-        # remove package
-        # remove modules of package in internal indexes.
+        if component_id not in self._package_dependency_graph.all_dependencies:
+            raise ValueError("Component {} of type {} not present.".format(component_id.public_id, component_id.component_type))
 
-    def add_protocol(self, directory: Path):
+        self._package_dependency_graph.remove_component(component_id)
+        self._remove_component_from_resources(component_id)
+
+        return self
+
+    def add_protocol(self, directory: Path) -> "AEABuilder":
         """Add a protocol to the agent."""
-        # call add_package
         self.add_component(ComponentType.PROTOCOL, directory)
+        return self
 
-    def remove_protocol(self, public_id: PublicId):
+    def remove_protocol(self, public_id: PublicId) -> "AEABuilder":
         """Remove protocol"""
-        # call remove_package
-        self.remove_package(ComponentId(ComponentType.PROTOCOL, public_id))
+        self.remove_component(ComponentId(ComponentType.PROTOCOL, public_id))
+        return self
 
-    # def add_connection(self, path):
-    # def remove_connection(self):
-    # def add_skill(self, path):
-    # def remove_skill(self):
+    def add_connection(self, directory: Path) -> "AEABuilder":
+        """Add a protocol to the agent."""
+        self.add_component(ComponentType.CONNECTION, directory)
+        return self
+
+    def remove_connection(self, public_id: PublicId) -> "AEABuilder":
+        """Remove protocol"""
+        self.remove_component(ComponentId(ComponentType.CONNECTION, public_id))
+        return self
+
+    def add_skill(self, directory: Path) -> "AEABuilder":
+        """Add a protocol to the agent."""
+        self.add_component(ComponentType.SKILL, directory)
+        return self
+
+    def remove_skill(self, public_id: PublicId) -> "AEABuilder":
+        """Remove protocol"""
+        self.remove_component(ComponentId(ComponentType.SKILL, public_id))
+        return self
 
     def build(self) -> AEA:
         """Get the AEA."""
+        connections = list(self._package_dependency_graph.connections.values())
         aea = AEA(
             Identity(self._name, addresses=self._addresses),
-            self._connections,
+            connections,
             Wallet({}),
             LedgerApis({}, ""),
             self._resources,
@@ -237,6 +313,7 @@ class AEABuilder:
             is_programmatic=True,
             max_reactions=20,
         )
+        self._set_context_to_all_skills(aea.context)
         return aea
 
     def dump_config(self) -> AgentConfig:
@@ -244,6 +321,15 @@ class AEABuilder:
 
     def dump(self, directory):
         """Dump agent project."""
+
+    def _set_context_to_all_skills(self, context: AgentContext):
+        """Set a skill context to all skills"""
+        for skill in self._resources.get_all_skills():
+            logger_name = "aea.{}.skills.{}.{}".format(
+                context.agent_name, skill.configuration.author, skill.configuration.name
+            )
+            skill.skill_context._agent_context = context
+            skill.skill_context._logger = logging.getLogger(logger_name)
 
 #
 # class AEAProject:

@@ -46,6 +46,7 @@ class Identity:
         Instantiate the identity.
 
         :param name: the name of the agent.
+        :param address: the address of the agent.
         :param addresses: the addresses of the agent.
         :param default_address_key: the key for the default address
         """

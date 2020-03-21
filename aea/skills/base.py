@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 class SkillContext:
     """This class implements the context of a skill."""
 
-    def __init__(self, agent_context: AgentContext):
+    def __init__(self, agent_context: Optional[AgentContext] = None):
         """
         Initialize a skill context.
 
@@ -536,26 +536,46 @@ class Skill(Component):
 
     def __init__(
         self,
-        config: SkillConfig,
-        skill_context: SkillContext,
-        handlers: Optional[Dict[str, Handler]],
-        behaviours: Optional[Dict[str, Behaviour]],
-        models: Optional[Dict[str, Model]],
+        configuration: SkillConfig,
+        skill_context: Optional[SkillContext] = None,
+        handlers: Optional[Dict[str, Handler]] = None,
+        behaviours: Optional[Dict[str, Behaviour]] = None,
+        models: Optional[Dict[str, Model]] = None,
     ):
         """
         Initialize a skill.
 
-        :param config: the skill configuration.
+        :param configuration: the skill configuration.
         :param handlers: the list of handlers to handle incoming envelopes.
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
         :param models: the list of models shared across tasks, behaviours and
         """
-        super().__init__(config)
-        self.config = config
-        self.skill_context = skill_context
-        self.handlers = handlers if handlers is not None else {}
-        self.behaviours = behaviours if behaviours is not None else {}
-        self.models = models if models is not None else {}
+        super().__init__(configuration)
+        self.config = configuration
+        self._skill_context = skill_context
+        self._handlers = handlers if handlers is not None else {}
+        self._behaviours = behaviours if behaviours is not None else {}
+        self._models = models if models is not None else {}
+
+    @property
+    def skill_context(self) -> SkillContext:
+        """Get the skill context."""
+        return self._skill_context
+
+    @property
+    def handlers(self) -> Dict[str, Handler]:
+        """Get the handlers."""
+        return self._handlers
+
+    @property
+    def behaviours(self) -> Dict[str, Behaviour]:
+        """Get the handlers."""
+        return self._behaviours
+
+    @property
+    def models(self) -> Dict[str, Model]:
+        """Get the handlers."""
+        return self._models
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
@@ -610,6 +630,36 @@ class Skill(Component):
         skill_context._skill = skill
 
         return skill
+
+    def setup(self, *args, **kwargs):
+        """
+        Set the component up.
+
+        In the case of a skill, we load the 'serialization.py' module
+        to instantiate an instance of the Serializer.
+        """
+        skill_context = SkillContext(None)
+        skill_context._logger = logging.getLogger()
+        skill_configuration = cast(SkillConfig, self.configuration)
+        handlers_by_id = dict(skill_configuration.handlers.read_all())
+        handlers = Handler.parse_module(
+            str(self.directory / "handlers.py"), handlers_by_id, skill_context
+        )
+
+        behaviours_by_id = dict(skill_configuration.behaviours.read_all())
+        behaviours = Behaviour.parse_module(
+            str(self.directory / "behaviours.py"), behaviours_by_id, skill_context,
+        )
+
+        models_by_id = dict(skill_configuration.models.read_all())
+        model_instances = Model.parse_module(str(self.directory), models_by_id, skill_context)
+
+        # update skill attributes
+        self._handlers = handlers
+        self._behaviours = behaviours
+        self._models = model_instances
+        self._skill_context = skill_context
+        skill_context._skill = self
 
 
 def _print_warning_message_for_non_declared_skill_components(

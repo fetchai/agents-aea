@@ -234,20 +234,20 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, protocol_id: Optional[ProtocolId] = None, serializer: Optional[Serializer] = None, config: Optional[ProtocolConfig] = None
+        self, protocol_id: Optional[ProtocolId] = None, serializer: Optional[Serializer] = None, configuration: Optional[ProtocolConfig] = None
     ):
         """
         Initialize the protocol manager.
 
         :param protocol_id: the protocol id.
         :param serializer: the serializer.
-        :param config: the protocol configurations.
+        :param configuration: the protocol configurations.
         """
-        super().__init__(config)
+        super().__init__(configuration)
         self._serializer = serializer
         # TODO to be removed, since now they are included in superclass.
         self._protocol_id = protocol_id
-        self._config = config
+        self._config = configuration
 
     @property
     def id(self) -> ProtocolId:
@@ -295,11 +295,11 @@ class Protocol(Component):
         protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
 
-    def _load_component_modules(self):
+    def setup(self, *args, **kwargs):
         """
-        Load other modules needed by the component.
+        Set the component up.
 
-        In the case of the protocol, we load the 'serialization.py' module
+        In the case of a protocol, we load the 'serialization.py' module
         to instantiate an instance of the Serializer.
         """
         serialization_module = load_module("protocols", Path(self.directory, "serialization.py"))

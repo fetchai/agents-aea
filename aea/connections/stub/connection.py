@@ -229,6 +229,9 @@ class StubConnection(Connection):
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
 
+    def setup(self, *args, **kwargs):
+        """"""
+
     @classmethod
     def from_config(
         cls, address: Address, connection_configuration: ConnectionConfig
@@ -258,4 +261,5 @@ class StubConnection(Connection):
             connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
+            configuration=connection_configuration
         )

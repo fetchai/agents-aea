@@ -92,6 +92,25 @@ class ComponentType(Enum):
     def to_configuration_type(self) -> ConfigurationType:
         return ConfigurationType(self.value)
 
+    def to_plural(self) -> str:
+        """
+        Get the plural version of the component type.
+
+        >>> ComponentType.PROTOCOL.to_plural()
+        'protocols'
+        >>> ComponentType.CONNECTION.to_plural()
+        'connections'
+        >>> ComponentType.SKILL.to_plural()
+        'skills'
+        >>> ComponentType.CONTRACT.to_plural()
+        'contracts'
+        """
+        return self.value + "s"
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return self.value
+
 
 class ProtocolSpecificationParseError(Exception):
     """Exception for parsing a protocol specification file."""
@@ -320,14 +339,14 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A component identifier."""
 
-    def __init__(self, package_type: ConfigurationType, public_id: PublicId):
+    def __init__(self, package_type: Union[ConfigurationType, str], public_id: PublicId):
         """
         Initialize the package id.
 
         :param package_type: the package type.
         :param public_id: the public id.
         """
-        self._package_type = package_type
+        self._package_type = ConfigurationType(package_type)
         self._public_id = public_id
 
     @property
@@ -378,15 +397,20 @@ class ComponentId(PackageId):
     False
     """
 
-    def __init__(self, component_type: ComponentType, public_id: PublicId):
+    def __init__(self, component_type: Union[ComponentType, str], public_id: PublicId):
         """
         Initialize the component id.
 
         :param component_type: the component type.
         :param public_id: the public id.
         """
+        component_type = ComponentType(component_type)
         super().__init__(component_type.to_configuration_type(), public_id)
 
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType(self.package_type.value)
 
 ProtocolId = PublicId
 SkillId = PublicId
@@ -459,7 +483,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :return: the configuration object.
         """
         configuration_object = ComponentConfiguration._load_configuration_object(component_type, directory)
-        configuration_object._check_consistency(directory)
+        configuration_object._check_configuration_consistency(directory)
         return configuration_object
 
     @staticmethod
@@ -477,7 +501,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         configuration_object = configuration_loader.load(open(configuration_filepath))
         return configuration_object
 
-    def _check_consistency(self, directory: Path):
+    def _check_configuration_consistency(self, directory: Path):
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
@@ -718,6 +742,8 @@ class ModelConfig(Configuration):
 class SkillConfig(ComponentConfiguration):
     """Class to represent a skill configuration file."""
 
+    default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
+
     def __init__(
         self,
         name: str = "",
@@ -745,11 +771,6 @@ class SkillConfig(ComponentConfiguration):
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType.SKILL
-
-    @property
-    def default_configuration_filename(self):
-        """Get the default configuration filename."""
-        return DEFAULT_SKILL_CONFIG_FILE
 
     @property
     def package_dependencies(self) -> Set[PackageId]:
