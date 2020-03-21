@@ -48,7 +48,6 @@ class LocalNode:
 
         :param loop: the event loop. If None, a new event loop is instantiated.
         """
-        self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = asyncio.Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
@@ -202,17 +201,6 @@ class LocalNode:
         async with self._lock:
             self.services[address].append(service_description)
 
-    async def _register_agent(self, address: Address, agent_description: Description):
-        """
-        Register a service agent in the service directory of the node.
-
-        :param address: the address of the service agent to be registered.
-        :param agent_description: the description of the service agent to be registered.
-        :return: None
-        """
-        async with self._lock:
-            self.agents[address].append(agent_description)
-
     async def _register_service_wide(
         self, address: Address, service_description: Description
     ):
@@ -302,7 +290,6 @@ class LocalNode:
         async with self._lock:
             self._out_queues.pop(address, None)
             self.services.pop(address, None)
-            self.agents.pop(address, None)
 
 
 class OEFLocalConnection(Connection):

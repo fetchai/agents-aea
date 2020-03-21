@@ -771,7 +771,9 @@ class TestFIPA:
         oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
 
-        oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_SERVICES)
+        oef_channel.on_oef_error(
+            answer_id=0, operation=OEFErrorOperation.SEARCH_SERVICES
+        )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert (

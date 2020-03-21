@@ -158,9 +158,7 @@ class OEFMessage(Message):
                     self.service_id, str
                 ), "service_id must be of type str."
                 assert len(self.body) == 4
-            elif (
-                self.type == OEFMessage.Type.SEARCH_SERVICES
-            ):
+            elif self.type == OEFMessage.Type.SEARCH_SERVICES:
                 assert isinstance(self.query, Query), "query must be of type Query."
                 assert len(self.body) == 3
             elif self.type == OEFMessage.Type.SEARCH_RESULT:

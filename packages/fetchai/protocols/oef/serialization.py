@@ -58,9 +58,7 @@ class OEFSerializer(Serializer):
                 pickle.dumps(service_description)  # nosec
             ).decode("utf-8")
             new_body["service_description"] = service_description_bytes
-        elif msg.type in {
-            OEFMessage.Type.SEARCH_SERVICES
-        }:
+        elif msg.type in {OEFMessage.Type.SEARCH_SERVICES}:
             query = msg.query
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")  # nosec
             new_body["query"] = query_bytes
