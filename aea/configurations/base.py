@@ -404,6 +404,8 @@ class PackageConfiguration(Configuration, ABC):
     - contracts
     """
 
+    default_configuration_filename = None
+
     def __init__(
         self,
         name: str,
@@ -427,11 +429,6 @@ class PackageConfiguration(Configuration, ABC):
         return PublicId(self.author, self.name, self.version)
 
     @property
-    @abstractmethod
-    def default_configuration_filename(self) -> str:
-        """Get the default configuration filename."""
-
-    @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the package dependencies."""
         return set()
@@ -440,8 +437,8 @@ class PackageConfiguration(Configuration, ABC):
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
-    @abstractmethod
     @property
+    @abstractmethod
     def component_type(self) -> ComponentType:
         """Get the component type."""
 
@@ -455,12 +452,19 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         component_type: ComponentType, directory: Path
     ) -> "ComponentConfiguration":
         """
-        Load configuration.
+        Load configuration and check that it is consistent against the directory.
 
         :param component_type: the component type.
         :param directory: the root of the package
         :return: the configuration object.
         """
+        configuration_object = ComponentConfiguration._load_configuration_object(component_type, directory)
+        configuration_object._check_consistency(directory)
+        return configuration_object
+
+    @staticmethod
+    def _load_configuration_object(component_type: ComponentType, directory: Path):
+        """Load the configuration object, without consistency checks."""
         from aea.configurations.loader import ConfigLoader
 
         configuration_loader = ConfigLoader.from_configuration_type(
@@ -472,6 +476,11 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         configuration_filepath = directory / configuration_filename
         configuration_object = configuration_loader.load(open(configuration_filepath))
         return configuration_object
+
+    def _check_consistency(self, directory: Path):
+        """Check that the configuration file is consistent against a directory."""
+        self.check_fingerprint(directory)
+        self.check_aea_version()
 
     def check_fingerprint(self, directory: Path) -> None:
         """
@@ -497,6 +506,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
 class ConnectionConfig(ComponentConfiguration):
     """Handle connection configuration."""
+
+    default_configuration_filename = DEFAULT_CONNECTION_CONFIG_FILE
 
     def __init__(
         self,
@@ -532,11 +543,6 @@ class ConnectionConfig(ComponentConfiguration):
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType.CONNECTION
-
-    @property
-    def default_configuration_filename(self):
-        """Get the default configuration filename."""
-        return DEFAULT_CONNECTION_CONFIG_FILE
 
     @property
     def package_dependencies(self) -> Set[PackageId]:
@@ -596,6 +602,8 @@ class ConnectionConfig(ComponentConfiguration):
 class ProtocolConfig(ComponentConfiguration):
     """Handle protocol configuration."""
 
+    default_configuration_filename = DEFAULT_PROTOCOL_CONFIG_FILE
+
     def __init__(
         self,
         name: str = "",
@@ -616,11 +624,6 @@ class ProtocolConfig(ComponentConfiguration):
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType.PROTOCOL
-
-    @property
-    def default_configuration_filename(self):
-        """Get the default configuration filename."""
-        return DEFAULT_PROTOCOL_CONFIG_FILE
 
     @property
     def json(self) -> Dict:
@@ -819,6 +822,8 @@ class SkillConfig(ComponentConfiguration):
 class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
 
+    default_configuration_filename = DEFAULT_AEA_CONFIG_FILE
+
     def __init__(
         self,
         agent_name: str = "",
@@ -849,11 +854,6 @@ class AgentConfig(PackageConfiguration):
         if self.logging_config == {}:
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
-
-    @property
-    def default_configuration_filename(self):
-        """Get the default configuration filename."""
-        return DEFAULT_AEA_CONFIG_FILE
 
     @property
     def package_dependencies(self) -> Set[PackageId]:

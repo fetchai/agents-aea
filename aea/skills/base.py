@@ -611,11 +611,6 @@ class Skill(Component):
 
         return skill
 
-    @classmethod
-    def load_from_directory(cls, directory: Path) -> "Component":
-        """Load a skill from the directory."""
-        # TODO do like Skill.from_dir, but cleaning sys.modules when finished.
-
 
 def _print_warning_message_for_non_declared_skill_components(
     classes: Set[str], config_components: Set[str], item_type, skill_path

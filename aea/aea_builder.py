@@ -193,19 +193,9 @@ class AEABuilder:
         :param directory: the directory path.
         :return: None
         """
-        # load config, check fingerprint, handle errors
-        configuration = ComponentConfiguration.load(component_type, directory)
-        configuration.check_fingerprint(directory)
-        configuration.check_aea_version()
-
-        # from config, check package dependencies
-        self._package_dependency_graph.check_package_dependencies(configuration)
-
-        # visit dependency graph, load modules in sys.modules when going backward
         with self._package_dependency_graph.load_dependencies():
-            # try to load the package (e.g. the same we do for Skill.from_dir, but for any type
-            component_class = component_class_from_type(component_type)
-            component = component_class.load_from_directory(directory)
+            component = Component.load_from_directory(component_type, directory)
+            self._package_dependency_graph.check_package_dependencies(component.configuration)
 
         # update dependency graph
         self._package_dependency_graph.add_component(component)
@@ -255,34 +245,34 @@ class AEABuilder:
     def dump(self, directory):
         """Dump agent project."""
 
-
-class AEAProject:
-    """
-    A kind of ORM for an AEA project. Ideally,
-    it would support all the operations done with `aea`.
-    """
-
-    def __init__(self):
-
-        self.agent_config = AgentConfig()
-
-        self.package_configurations = {}  # type: Dict[PublicId, PackageConfiguration]
-        self.vendor_package_configurations = (
-            {}
-        )  # type: Dict[PublicId, PackageConfiguration]
-        # dependency graph also here?
-        self._dependency_graph = {}
-
-    @classmethod
-    def from_directory(cls, directory):
-        """Load agent project from directory"""
-        # agent_configuration = ConfigLoader.from_configuration_type(
-        #     ConfigurationType.AGENT
-        # )
-        # iterate over all the packages, do fingerprint checks etc. etc.
-
-    def run(self):
-        """Run the agent project"""
-        # instantiate the builder
-        # add protocols, then connections, then skills,
-        #     in the order specified by the dependency graph (built from configs)
+#
+# class AEAProject:
+#     """
+#     A kind of ORM for an AEA project. Ideally,
+#     it would support all the operations done with `aea`.
+#     """
+#
+#     def __init__(self):
+#
+#         self.agent_config = AgentConfig()
+#
+#         self.package_configurations = {}  # type: Dict[PublicId, PackageConfiguration]
+#         self.vendor_package_configurations = (
+#             {}
+#         )  # type: Dict[PublicId, PackageConfiguration]
+#         # dependency graph also here?
+#         self._dependency_graph = {}
+#
+#     @classmethod
+#     def from_directory(cls, directory):
+#         """Load agent project from directory"""
+#         # agent_configuration = ConfigLoader.from_configuration_type(
+#         #     ConfigurationType.AGENT
+#         # )
+#         # iterate over all the packages, do fingerprint checks etc. etc.
+#
+#     def run(self):
+#         """Run the agent project"""
+#         # instantiate the builder
+#         # add protocols, then connections, then skills,
+#         #     in the order specified by the dependency graph (built from configs)

@@ -28,7 +28,7 @@ import types
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +76,21 @@ def locate(path):
     return object
 
 
+def load_init_modules(directory: Path) -> Dict[str, types.ModuleType]:
+    """Load __init__.py modules of a directory, recursively."""
+    if not directory.exists() or not directory.is_dir():
+        raise ValueError("The provided path does not exists or it is not a directory.")
+    result = {}  # type: Dict[str, types.ModuleType]
+    root_package_dir = directory
+    for init_module_path in directory.rglob("__init__.py"):
+        relative_path = init_module_path.relative_to(root_package_dir)
+        relative_dotted_path = str(relative_path).replace(os.path.sep, ".")
+        init_module = load_module(relative_dotted_path, init_module_path)
+        result[relative_dotted_path] = init_module
+
+    return result
+
+
 class _SysModules:
     """Helper class that load modules to sys.modules."""
 
@@ -101,7 +116,7 @@ class _SysModules:
                     sys.modules.pop(import_path, None)
 
 
-def load_module(dotted_path: str, filepath: os.PathLike):
+def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     """
     Load a module.
 
@@ -111,7 +126,7 @@ def load_module(dotted_path: str, filepath: os.PathLike):
     :raises ValueError: if the filepath provided is not a module.
     :raises Exception: if the execution of the module raises exception.
     """
-    spec = importlib.util.spec_from_file_location(dotted_path, filepath)
+    spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore
     return module

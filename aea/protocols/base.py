@@ -234,7 +234,7 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig
+        self, protocol_id: Optional[ProtocolId] = None, serializer: Optional[Serializer] = None, config: Optional[ProtocolConfig] = None
     ):
         """
         Initialize the protocol manager.
@@ -252,7 +252,7 @@ class Protocol(Component):
     @property
     def id(self) -> ProtocolId:
         """Get the name."""
-        return self._protocol_id
+        return self._configuration.public_id
 
     @property
     def serializer(self) -> Serializer:
@@ -262,7 +262,7 @@ class Protocol(Component):
     @property
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
-        return self._config
+        return self._configuration
 
     @classmethod
     def from_dir(cls, directory: str) -> "Protocol":
@@ -295,9 +295,21 @@ class Protocol(Component):
         protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
 
-    @classmethod
-    def load_from_directory(cls, directory: Path) -> "Component":
-        """Load a protocol from the directory."""
-        # TODO like Protocol.from_dir, but without adding modules
-        #      to sys.modules permanently. Instead, use SysModules
-        #      context manager to load them temporarily.
+    def _load_component_modules(self):
+        """
+        Load other modules needed by the component.
+
+        In the case of the protocol, we load the 'serialization.py' module
+        to instantiate an instance of the Serializer.
+        """
+        serialization_module = load_module("protocols", Path(self.directory, "serialization.py"))
+        classes = inspect.getmembers(serialization_module, inspect.isclass)
+        serializer_classes = list(
+            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+        )
+        assert len(serializer_classes) == 1, "Not exactly one serializer detected."
+        serializer_class = serializer_classes[0][1]
+
+        # update attributes.
+        self._serializer = serializer_class()
+

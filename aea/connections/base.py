@@ -23,7 +23,7 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from typing import Optional, Set, TYPE_CHECKING
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig, PublicId, ComponentType
 from aea.configurations.components import Component
 
 if TYPE_CHECKING:
@@ -119,6 +119,11 @@ class Connection(Component, ABC):
             self._loop is None or not self._loop.is_running()
         ), "Cannot set the loop while it is running."
         self._loop = loop
+
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType.CONNECTION
 
     @property
     def connection_id(self) -> PublicId:
