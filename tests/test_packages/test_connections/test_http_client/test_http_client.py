@@ -147,7 +147,7 @@ async def test_http_send():
 
     send_response_mock = Mock()
     send_response_mock.status_code = 200
-    send_response_mock.headers = "some header"
+    send_response_mock.headers = {"headers": "some header"}
     send_response_mock.reason = "OK"
     send_response_mock.content = b"Some content"
 

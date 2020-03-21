@@ -11,11 +11,6 @@ excluded_protocols: []
 config:
   host: ${addr:127.0.0.1}
   port: ${port:8000}
-  api_spec_path: ''  # put here the dotted path to your API spec YAML path.
 dependencies:
   requests:
     version: ==2.23.0
-  aca-py:
-    version: ==0.4.5
-  openapi-spec-validator:
-    version: ==0.2.8
