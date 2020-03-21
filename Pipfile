@@ -44,4 +44,3 @@ tox = "==3.14.5"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
-aries-cloudagent = "==0.4.5"
