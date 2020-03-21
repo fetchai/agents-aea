@@ -771,7 +771,7 @@ class TestFIPA:
         oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
 
-        oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_AGENTS)
+        oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_SERVICES)
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert (
@@ -988,7 +988,7 @@ async def test_send_oef_message(network_node):
     msg = OEFMessage(
         type=OEFMessage.Type.OEF_ERROR,
         id=0,
-        operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS,
+        operation=OEFMessage.OEFErrorOperation.SEARCH_SERVICES,
     )
     msg_bytes = OEFSerializer().encode(msg)
     envelope = Envelope(
@@ -1003,7 +1003,7 @@ async def test_send_oef_message(network_node):
     data_model = DataModel("foobar", attributes=[])
     query = Query(constraints=[], model=data_model)
 
-    msg = OEFMessage(type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+    msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
     envelope = Envelope(
         to=DEFAULT_OEF,

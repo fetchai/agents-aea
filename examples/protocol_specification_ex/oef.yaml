@@ -8,18 +8,9 @@ speech_acts:
   register_service:
     service_description: ct:Description
     service_id: pt:str
-  register_agent:
-    agent_description: ct:Description
-    agent_id: pt:str
   unregister_service:
     service_description: ct:Description
-    service_id: pt:str
-  unregister_agent:
-    agent_description: ct:Description
-    agent_id: pt:str
   search_services:
-    query: ct:Query
-  search_agents:
     query: ct:Query
   search_result:
     agents: pt:list[pt:str]
@@ -46,10 +37,7 @@ ct:OEFErrorOperation: |
         UNREGISTER_SERVICE = 1;
         SEARCH_SERVICES = 2;
         SEARCH_SERVICES_WIDE = 3;
-        SEARCH_AGENTS = 4;
-        SEND_MESSAGE = 5;
-        REGISTER_AGENT = 6;
-        UNREGISTER_AGENT = 7;
+        SEND_MESSAGE = 4;
       }
     OEFError oef_error = 1;
 ...
