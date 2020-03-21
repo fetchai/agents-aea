@@ -83,7 +83,7 @@ class Configuration:
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name: Dict[str, str] = defaultdict()
-        self._good_id_to_name = defaultdict()  # type: Dict[int, str]
+        self._good_id_to_name = defaultdict()  # type: Dict[str, str]
 
     @property
     def version_id(self) -> str:
@@ -106,7 +106,7 @@ class Configuration:
         self._agent_addr_to_name = agent_addr_to_name
 
     @property
-    def good_id_to_name(self) -> Dict[int, str]:
+    def good_id_to_name(self) -> Dict[str, str]:
         """Map good ids to names."""
         assert self._good_id_to_name is not None, "Good_id_to_name not set yet!"
         return self._good_id_to_name
