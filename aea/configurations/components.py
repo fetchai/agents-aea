@@ -26,8 +26,13 @@ from abc import ABC
 from pathlib import Path
 from typing import Dict, cast, Optional, Type
 
-from aea.configurations.base import ComponentType, ComponentConfiguration, ComponentId, PublicId, \
-    ConnectionConfig
+from aea.configurations.base import (
+    ComponentType,
+    ComponentConfiguration,
+    ComponentId,
+    PublicId,
+    ConnectionConfig,
+)
 from aea.helpers.base import load_module, load_init_modules, _SysModules
 
 logger = logging.getLogger(__name__)
@@ -38,6 +43,7 @@ def component_class_from_type(component_type: ComponentType) -> Type["Component"
     from aea.protocols.base import Protocol
     from aea.connections.base import Connection
     from aea.skills.base import Skill
+
     if component_type == ComponentType.PROTOCOL:
         return Protocol
     elif component_type == ComponentType.CONNECTION:
@@ -52,12 +58,7 @@ def component_class_from_type(component_type: ComponentType) -> Type["Component"
 
 
 class Component(ABC):
-
-    def __init__(
-        self,
-        configuration: ComponentConfiguration,
-        is_vendor: bool = False
-    ):
+    def __init__(self, configuration: ComponentConfiguration, is_vendor: bool = False):
         """
         Initialize a package.
 
@@ -86,9 +87,15 @@ class Component(ABC):
     def prefix_import_path(self):
         """Get the prefix import path for this component."""
         if self.is_vendor:
-            return "packages.{}.{}.{}".format(self.public_id.author, self.component_type.to_plural(), self.public_id.name)
+            return "packages.{}.{}.{}".format(
+                self.public_id.author,
+                self.component_type.to_plural(),
+                self.public_id.name,
+            )
         else:
-            return "packages.{}.{}".format(self.component_type.to_plural(), self.public_id.name)
+            return "packages.{}.{}".format(
+                self.component_type.to_plural(), self.public_id.name
+            )
 
     @property
     def component_id(self) -> ComponentId:
@@ -139,11 +146,15 @@ class Component(ABC):
             )
 
         # TODO address?
-        connection = connection_class.from_config("address", connection_configuration=configuration)
+        connection = connection_class.from_config(
+            "address", connection_configuration=configuration
+        )
         return connection
 
     @classmethod
-    def load_from_directory(cls, component_type: ComponentType, directory: Path) -> "Component":
+    def load_from_directory(
+        cls, component_type: ComponentType, directory: Path
+    ) -> "Component":
         """Load a component from the directory."""
         configuration = ComponentConfiguration.load(component_type, directory)
         if component_type == ComponentType.CONNECTION:

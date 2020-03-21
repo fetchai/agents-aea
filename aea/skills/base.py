@@ -652,7 +652,9 @@ class Skill(Component):
         )
 
         models_by_id = dict(skill_configuration.models.read_all())
-        model_instances = Model.parse_module(str(self.directory), models_by_id, skill_context)
+        model_instances = Model.parse_module(
+            str(self.directory), models_by_id, skill_context
+        )
 
         # update skill attributes
         self._handlers = handlers

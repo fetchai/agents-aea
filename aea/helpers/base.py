@@ -83,10 +83,16 @@ def load_init_modules(directory: Path) -> Dict[str, types.ModuleType]:
     result = {}  # type: Dict[str, types.ModuleType]
     package_root_directory = directory
     for init_module_path in directory.rglob("__init__.py"):
-        relative_path_directory = init_module_path.relative_to(package_root_directory).parent
+        relative_path_directory = init_module_path.relative_to(
+            package_root_directory
+        ).parent
         # relative_path_directory is "." if __init__.py is in the root of the package directory,
         # and a path when it is a subpackage. We handle these cases separately.
-        relative_dotted_path = str(relative_path_directory).replace(os.path.sep, ".") if str(relative_path_directory) != "." else ""
+        relative_dotted_path = (
+            str(relative_path_directory).replace(os.path.sep, ".")
+            if str(relative_path_directory) != "."
+            else ""
+        )
         init_module = load_module(relative_dotted_path, init_module_path)
         result[relative_dotted_path] = init_module
 

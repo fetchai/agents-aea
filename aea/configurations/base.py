@@ -339,7 +339,9 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A component identifier."""
 
-    def __init__(self, package_type: Union[ConfigurationType, str], public_id: PublicId):
+    def __init__(
+        self, package_type: Union[ConfigurationType, str], public_id: PublicId
+    ):
         """
         Initialize the package id.
 
@@ -412,6 +414,7 @@ class ComponentId(PackageId):
         """Get the component type."""
         return ComponentType(self.package_type.value)
 
+
 ProtocolId = PublicId
 SkillId = PublicId
 
@@ -482,7 +485,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         :param directory: the root of the package
         :return: the configuration object.
         """
-        configuration_object = ComponentConfiguration._load_configuration_object(component_type, directory)
+        configuration_object = ComponentConfiguration._load_configuration_object(
+            component_type, directory
+        )
         configuration_object._check_configuration_consistency(directory)
         return configuration_object
 

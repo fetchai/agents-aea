@@ -55,7 +55,9 @@ class _DependenciesManager:
         # adjacency list of the dependency DAG
         # an arc means "depends on"
         self._dependencies = {}  # type: Dict[ComponentId, Component]
-        self._all_dependencies_by_type = {}  # type: Dict[ComponentType, Dict[ComponentId, Component]]
+        self._all_dependencies_by_type = (
+            {}
+        )  # type: Dict[ComponentType, Dict[ComponentId, Component]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
     @property
@@ -87,9 +89,13 @@ class _DependenciesManager:
     def add_component(self, component: Component) -> None:
         """Add a component."""
         self._dependencies[component.component_id] = component
-        self._all_dependencies_by_type.setdefault(component.component_type, {})[component.component_id] = component
+        self._all_dependencies_by_type.setdefault(component.component_type, {})[
+            component.component_id
+        ] = component
         for dependency in component.configuration.package_dependencies:
-            self._inverse_dependency_graph.setdefault(dependency, set()).add(component.component_id)
+            self._inverse_dependency_graph.setdefault(dependency, set()).add(
+                component.component_id
+            )
 
     def remove_component(self, component_id: ComponentId):
         """
@@ -99,10 +105,18 @@ class _DependenciesManager:
         :raises ValueError: if some component depends on this package.
         """
         if component_id not in self.all_dependencies:
-            raise ValueError("Component {} of type {} not present.".format(component_id.public_id, component_id.component_type))
+            raise ValueError(
+                "Component {} of type {} not present.".format(
+                    component_id.public_id, component_id.component_type
+                )
+            )
         dependencies = self._inverse_dependency_graph.get(component_id, set())
         if len(dependencies) != 0:
-            raise ValueError("Cannot remove component {} of type {}. Other components depends on it: {}".format(component_id.public_id, component_id.component_type, dependencies))
+            raise ValueError(
+                "Cannot remove component {} of type {}. Other components depends on it: {}".format(
+                    component_id.public_id, component_id.component_type, dependencies
+                )
+            )
 
         # remove from the index of all dependencies
         component = self._dependencies.pop(component_id)
@@ -154,17 +168,26 @@ class _DependenciesManager:
         protocols = [
             (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.protocols.values()
-            for (relative_import_path, module_obj) in component.importpath_to_module.items()
+            for (
+                relative_import_path,
+                module_obj,
+            ) in component.importpath_to_module.items()
         ]
         connections = [
             (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.connections.values()
-            for (relative_import_path, module_obj) in component.importpath_to_module.items()
+            for (
+                relative_import_path,
+                module_obj,
+            ) in component.importpath_to_module.items()
         ]
         skills = [
             (self.build_dotted_part(component, relative_import_path), module_obj)
             for component in self.skills.values()
-            for (relative_import_path, module_obj) in component.importpath_to_module.items()
+            for (
+                relative_import_path,
+                module_obj,
+            ) in component.importpath_to_module.items()
         ]
         return cast(
             List[Tuple[str, types.ModuleType]], protocols + connections + skills
@@ -210,7 +233,9 @@ class AEABuilder:
         self._addresses.pop(identifier, None)
         return self
 
-    def add_component(self, component_type: ComponentType, directory: Path) -> "AEABuilder":
+    def add_component(
+        self, component_type: ComponentType, directory: Path
+    ) -> "AEABuilder":
         """
         Add a component, given its type and the directory.
 
@@ -220,13 +245,22 @@ class AEABuilder:
         :raises ValueError: if a component is already registered with the same component id.
         """
         configuration = ComponentConfiguration.load(component_type, directory)
-        if configuration.component_id in self._package_dependency_graph.all_dependencies:
-            raise ValueError("Component {} of type {} already added.".format(configuration.public_id, configuration.component_type))
+        if (
+            configuration.component_id
+            in self._package_dependency_graph.all_dependencies
+        ):
+            raise ValueError(
+                "Component {} of type {} already added.".format(
+                    configuration.public_id, configuration.component_type
+                )
+            )
 
         with self._package_dependency_graph.load_dependencies():
             component = Component.load_from_directory(component_type, directory)
 
-        self._package_dependency_graph.check_package_dependencies(component.configuration)
+        self._package_dependency_graph.check_package_dependencies(
+            component.configuration
+        )
 
         # update dependency graph
         self._package_dependency_graph.add_component(component)
@@ -261,7 +295,11 @@ class AEABuilder:
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
         """Remove a package"""
         if component_id not in self._package_dependency_graph.all_dependencies:
-            raise ValueError("Component {} of type {} not present.".format(component_id.public_id, component_id.component_type))
+            raise ValueError(
+                "Component {} of type {} not present.".format(
+                    component_id.public_id, component_id.component_type
+                )
+            )
 
         self._package_dependency_graph.remove_component(component_id)
         self._remove_component_from_resources(component_id)
@@ -330,6 +368,7 @@ class AEABuilder:
             )
             skill.skill_context._agent_context = context
             skill.skill_context._logger = logging.getLogger(logger_name)
+
 
 #
 # class AEAProject:

@@ -261,5 +261,5 @@ class StubConnection(Connection):
             connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
-            configuration=connection_configuration
+            configuration=connection_configuration,
         )

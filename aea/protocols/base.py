@@ -234,7 +234,10 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, protocol_id: Optional[ProtocolId] = None, serializer: Optional[Serializer] = None, configuration: Optional[ProtocolConfig] = None
+        self,
+        protocol_id: Optional[ProtocolId] = None,
+        serializer: Optional[Serializer] = None,
+        configuration: Optional[ProtocolConfig] = None,
     ):
         """
         Initialize the protocol manager.
@@ -302,7 +305,9 @@ class Protocol(Component):
         In the case of a protocol, we load the 'serialization.py' module
         to instantiate an instance of the Serializer.
         """
-        serialization_module = load_module("protocols", Path(self.directory, "serialization.py"))
+        serialization_module = load_module(
+            "protocols", Path(self.directory, "serialization.py")
+        )
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
@@ -312,4 +317,3 @@ class Protocol(Component):
 
         # update attributes.
         self._serializer = serializer_class()
-

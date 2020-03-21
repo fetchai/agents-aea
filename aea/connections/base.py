@@ -24,7 +24,12 @@ from asyncio import AbstractEventLoop
 from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
-from aea.configurations.base import ConnectionConfig, PublicId, ComponentType, DEFAULT_CONNECTION_CONFIG_FILE
+from aea.configurations.base import (
+    ConnectionConfig,
+    PublicId,
+    ComponentType,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+)
 from aea.configurations.components import Component
 
 if TYPE_CHECKING:
@@ -190,5 +195,7 @@ class Connection(Component, ABC):
         """
 
     @classmethod
-    def load_from_directory(cls, component_type: ComponentType, directory: Path) -> "Component":
+    def load_from_directory(
+        cls, component_type: ComponentType, directory: Path
+    ) -> "Component":
         pass
