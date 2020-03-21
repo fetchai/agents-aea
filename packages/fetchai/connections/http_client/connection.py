@@ -45,7 +45,7 @@ RequestId = str
 
 
 class HTTPClientChannel:
-    """A wrapper for a HTTPClient for a RESTful API."""
+    """A wrapper for a HTTPClient."""
 
     def __init__(
         self,
@@ -60,8 +60,8 @@ class HTTPClientChannel:
         Initialize an http client channel.
 
         :param agent_address: the address of the agent.
-        :param address: RESTful API hostname / IP address
-        :param port: RESTful API port number
+        :param address: server hostname / IP address
+        :param port: server port number
         :param excluded_protocols: this connection cannot handle messages adhering to any of the protocols in this set
         :param restricted_to_protocols: this connection can only handle messages adhering to protocols in this set
         """
@@ -165,7 +165,7 @@ class HTTPClientChannel:
 
 
 class HTTPClientConnection(Connection):
-    """Proxy to the functionality of the web RESTful API."""
+    """Proxy to the functionality of the web client."""
 
     def __init__(
         self,
@@ -176,11 +176,11 @@ class HTTPClientConnection(Connection):
         **kwargs,
     ):
         """
-        Initialize a connection to a RESTful API.
+        Initialize a connection.
 
         :param agent_address: the address of the agent.
-        :param provider_address: RESTful API hostname / IP address
-        :param provider_port: RESTful API port number
+        :param provider_address: server hostname / IP address
+        :param provider_port: server port number
         """
 
         if kwargs.get("connection_id") is None:
