@@ -19,10 +19,11 @@
 
 """This module contains utilities for building an AEA."""
 import logging
+import os
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Set, Tuple, List, cast, Type, Any
+from typing import Dict, Set, Tuple, List, cast, Type, Any, Union
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -45,6 +46,8 @@ from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.base import Resources
 from aea.skills.base import Skill, SkillContext
+
+PathLike = Union[os.PathLike, Path, str]
 
 
 class _DependenciesManager:
@@ -234,7 +237,7 @@ class AEABuilder:
         return self
 
     def add_component(
-        self, component_type: ComponentType, directory: Path
+        self, component_type: ComponentType, directory: PathLike
     ) -> "AEABuilder":
         """
         Add a component, given its type and the directory.
@@ -244,6 +247,7 @@ class AEABuilder:
         :return: None
         :raises ValueError: if a component is already registered with the same component id.
         """
+        directory = Path(directory)
         configuration = ComponentConfiguration.load(component_type, directory)
         if (
             configuration.component_id
@@ -306,7 +310,7 @@ class AEABuilder:
 
         return self
 
-    def add_protocol(self, directory: Path) -> "AEABuilder":
+    def add_protocol(self, directory: PathLike) -> "AEABuilder":
         """Add a protocol to the agent."""
         self.add_component(ComponentType.PROTOCOL, directory)
         return self
@@ -316,7 +320,7 @@ class AEABuilder:
         self.remove_component(ComponentId(ComponentType.PROTOCOL, public_id))
         return self
 
-    def add_connection(self, directory: Path) -> "AEABuilder":
+    def add_connection(self, directory: PathLike) -> "AEABuilder":
         """Add a protocol to the agent."""
         self.add_component(ComponentType.CONNECTION, directory)
         return self
@@ -326,7 +330,7 @@ class AEABuilder:
         self.remove_component(ComponentId(ComponentType.CONNECTION, public_id))
         return self
 
-    def add_skill(self, directory: Path) -> "AEABuilder":
+    def add_skill(self, directory: PathLike) -> "AEABuilder":
         """Add a protocol to the agent."""
         self.add_component(ComponentType.SKILL, directory)
         return self
