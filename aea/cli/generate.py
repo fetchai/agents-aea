@@ -21,7 +21,7 @@
 
 import os
 import shutil
-import subprocess
+import subprocess  # nosec
 import sys
 
 import click
@@ -147,7 +147,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
 
     # Run black code formatting
     try:
-        subp = subprocess.Popen(
+        subp = subprocess.Popen(  # nosec
             [
                 sys.executable,
                 "-m",
@@ -155,7 +155,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
                 os.path.join(item_type_plural, protocol_spec.name),
                 "--quiet",
             ]
-        )  # nosec
+        )
         subp.wait(5.0)
     finally:
         poll = subp.poll()
