@@ -273,6 +273,18 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "ci: mark test as not for ci")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--ci"):
+        skip_ci = pytest.mark.skip(reason="need no --ci to run")
+        for item in items:
+            if "ci" in item.keywords:
+                item.add_marker(skip_ci)
+
+
 @pytest.fixture(scope="session")
 def oef_addr() -> str:
     """IP address pointing to the OEF Node to use during the tests."""
