@@ -2,6 +2,7 @@ name: simple_service_registration
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.3
 description: The scaffold skill is a scaffold for your own skill implementation.
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta

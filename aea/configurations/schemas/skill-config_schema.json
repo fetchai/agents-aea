@@ -27,9 +27,6 @@
     "aea_version": {
       "$ref": "definitions.json#/definitions/aea_version"
     },
-    "aea_version": {
-      "$ref": "definitions.json#/definitions/aea_version"
-    },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },
