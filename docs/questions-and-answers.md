@@ -81,3 +81,8 @@ You can find more details about the file structure <a href="/file-structure/">he
 Currently, the private keys are stored in `.txt` files. This is temporary and will be improved soon.
 </details>
 
+<details><summary>How to use the same protocol in different skills?</summary>
+By default, envelopes of a given protocol get routed to all skills which have a handler supporting that protocol.
+
+The `URI` in the `EnvelopeContext` can be used to route envelopes of a given protocol to a specific skill. The `URI` path needs to be set to the skill's `public_id.to_uri_path`.
+</details>

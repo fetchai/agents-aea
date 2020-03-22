@@ -2,7 +2,7 @@ name: 'tac_control_contract'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.2
+aea_version: 0.2.3
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
   behaviours.py: QmXy3F4EvLyVHoiJNWz7vxBfvpYqNwvq6fNG1YDm48N68r

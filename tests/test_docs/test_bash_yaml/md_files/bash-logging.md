@@ -3,7 +3,7 @@ aea create my_aea
 cd my_aea
 ```
 ``` yaml
-aea_version: 0.2.2
+aea_version: 0.2.3
 agent_name: my_aea
 author: ''
 connections:

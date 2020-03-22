@@ -36,16 +36,14 @@ from ..conftest import AUTHOR
 class SaveItemLocallyTestCase(TestCase):
     """Test case for save_item_locally method."""
 
-    @mock.patch(
-        "aea.cli.push._try_get_vendorized_item_target_path", return_value="target"
-    )
+    @mock.patch("aea.cli.push._try_get_item_target_path", return_value="target")
     @mock.patch("aea.cli.push._try_get_item_source_path", return_value="source")
     @mock.patch("aea.cli.push._check_package_public_id", return_value=None)
     def test_save_item_locally_positive(
         self,
         _check_package_public_id_mock,
         _try_get_item_source_path_mock,
-        _try_get_vendorized_item_target_path_mock,
+        _try_get_item_target_path_mock,
         copy_tree_mock,
     ):
         """Test for save_item_locally positive result."""
@@ -54,9 +52,9 @@ class SaveItemLocallyTestCase(TestCase):
         ctx_mock = ContextMock()
         _save_item_locally(ctx_mock, item_type, item_id)
         _try_get_item_source_path_mock.assert_called_once_with(
-            "cwd", item_id.author, "skills", item_id.name
+            "cwd", None, "skills", item_id.name
         )
-        _try_get_vendorized_item_target_path_mock.assert_called_once_with(
+        _try_get_item_target_path_mock.assert_called_once_with(
             ctx_mock.agent_config.registry_path,
             item_id.author,
             item_type + "s",

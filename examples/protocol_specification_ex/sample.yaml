@@ -6,17 +6,23 @@ license: Apache-2.0
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
-    query: ct:DataModel
+    query: pt:str
   propose:
     number: pt:int
     price: pt:float
     description: pt:str
     flag: pt:bool
-    query: ct:DataModel
-    proposal: pt:optional[pt:dict[pt:str, ct:IOTApp7]]
+    query: pt:str
+    proposal: pt:optional[pt:dict[pt:str, pt:str]]
     rounds: pt:set[pt:int]
-    items: pt:list[ct:Unit]
-    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:str, pt:float]]]
+    items: pt:list[pt:str]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:str], pt:dict[pt:str, pt:float]]]
+  request:
+    method: pt:str
+    url: pt:str
+    version: pt:str
+    headers: pt:str
+    bodyy: pt:optional[pt:bytes]
   accept: {}
   inform:
     inform_number: pt:list[pt:int]
@@ -24,12 +30,4 @@ speech_acts:
     reply_message: pt:dict[pt:int, pt:str]
   decline: {}
   match_accept: {}
-...
----
-ct:DataModel: |
-  bytes data_model = 1;
-ct:IOTApp7: |
-  bytes iot_app_7 = 1;
-ct:Unit: |
-  bytes unit = 1;
 ...

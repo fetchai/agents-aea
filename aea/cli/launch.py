@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea launch' subcommand."""
+
 import os
+import subprocess  # nosec
 import sys
 from collections import OrderedDict
-from multiprocessing.context import Process
 from pathlib import Path
+from subprocess import Popen  # nosec
 from typing import List
 
 import click
@@ -36,50 +38,51 @@ def _run_agent(click_context, agent_directory: str):
     click_context.invoke(run)
 
 
+def _launch_subprocesses(agents: List[Path]):
+    """
+    Launch many agents using subprocesses.
+
+    :param agents: list of paths to agent projects.
+    :return: None
+    """
+    processes = []
+    failed = 0
+    for agent_directory in agents:
+        process = Popen(  # nosec
+            [sys.executable, "-m", "aea.cli", "run"], cwd=str(agent_directory)
+        )
+        logger.info("Agent {} started...".format(agent_directory.name))
+        processes.append(process)
+
+    try:
+        for process in processes:
+            process.wait()
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt detected.")
+    finally:
+        for agent_directory, process in zip(agents, processes):
+            result = process.poll()
+            if result is None:
+                try:
+                    process.wait()
+                except (subprocess.TimeoutExpired, KeyboardInterrupt):
+                    logger.info("Force shutdown {}...".format(agent_directory.name))
+                    process.kill()
+
+            logger.info(
+                "Agent {} terminated with exit code {}".format(
+                    agent_directory.name, process.returncode
+                )
+            )
+            failed |= process.returncode if process.returncode is not None else -1
+
+    sys.exit(failed)
+
+
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
 @click.pass_context
 def launch(click_context, agents: List[str]):
     """Launch many agents."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    agent_processes = [
-        Process(target=_run_agent, args=(click_context, agent_directory))
-        for agent_directory in agents_directories
-    ]
-
-    failed = 0
-    try:
-        for agent_directory, agent_process in zip(agents_directories, agent_processes):
-            agent_process.start()
-            logger.info("Agent {} started...".format(agent_directory.name))
-        for agent_process in agent_processes:
-            agent_process.join()
-            failed |= (
-                agent_process.exitcode if agent_process.exitcode is not None else 1
-            )
-    except KeyboardInterrupt:
-        # at this point, the keyboard interrupt has been propagated
-        # to all the child process, hence we just need to 'join' the processes.
-        for agent_directory, agent_process in zip(agents_directories, agent_processes):
-            logger.info(
-                "Waiting for agent {} to shut down...".format(agent_directory.name)
-            )
-            agent_process.join(5.0)
-            if agent_process.is_alive():
-                logger.info("Killing agent {}...".format(agent_directory.name))
-                agent_process.kill()
-                failed = 1
-            else:
-                logger.info(
-                    "Agent {} terminated with exit code {}".format(
-                        agent_directory.name, agent_process.exitcode
-                    )
-                )
-                failed |= (
-                    agent_process.exitcode if agent_process.exitcode is not None else 1
-                )
-    except Exception as e:
-        logger.exception(e)
-        sys.exit(1)
-
-    sys.exit(1) if failed else sys.exit(0)
+    _launch_subprocesses(agents_directories)

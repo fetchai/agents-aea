@@ -76,7 +76,7 @@ The `_run_main_loop()` function in the `Agent` class performs a series of activi
 
 * `act()`: this function calls the `act()` function of all active registered Behaviours.
 * `react()`: this function grabs all Envelopes waiting in the `InBox` queue and calls the `handle()` function for the Handlers currently registered against the protocol of the `Envelope`.
-* `update()`: this function loops through all the Tasks and executes them.
+* `update()`: this function dispatches the internal messages from the decision maker to the handler in the relevant skill.
 
 
 ## Decision maker

@@ -118,7 +118,7 @@ class TestEchoSkill:
                 protocol_id=DefaultMessage.protocol_id,
                 message=DefaultSerializer().encode(message),
             )
-            encoded_envelope = "{},{},{},{}".format(
+            encoded_envelope = "{},{},{},{},".format(
                 expected_envelope.to,
                 expected_envelope.sender,
                 expected_envelope.protocol_id,
@@ -136,10 +136,11 @@ class TestEchoSkill:
 
             assert len(lines) == 2
             line = lines[0] + lines[1]
-            to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
+            to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
             to = to.decode("utf-8")
             sender = sender.decode("utf-8")
             protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+            assert end in [b"", b"\n"]
 
             actual_envelope = Envelope(
                 to=to, sender=sender, protocol_id=protocol_id, message=message

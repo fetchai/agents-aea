@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,20 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the dataModel for the generic seller aea."""
-from typing import Any, Dict
+"""This package contains a simple behaviour to register a service."""
+
+from typing import Any, Dict, List
 
 from aea.helpers.search.models import Attribute, DataModel
 
 SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
-class Generic_Data_Model(DataModel):
-    """Data model for the generic seller aea."""
+class GenericDataModel(DataModel):
+    """Data model for the service."""
 
-    def __init__(self, data_model_attributes: Dict[str, Any]):
-        """Initialise the dataModel."""
-        self.attributes = []
+    def __init__(self, datamodel_name: str, data_model_attributes: Dict[str, Any]):
+        """Initialise the data model."""
+        self.attributes = []  # type: List[Attribute]
         for values in data_model_attributes.values():
             assert (
                 values["type"] in SUPPORTED_TYPES.keys()
@@ -49,4 +50,4 @@ class Generic_Data_Model(DataModel):
                 )
             )
 
-        super().__init__("weather_station_datamodel", self.attributes)
+        super().__init__(datamodel_name, self.attributes)
