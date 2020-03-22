@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package fetch.aea.Oef;
+
+message OefMessage{
+
+    // Custom Types
+    message Description{
+        bytes description = 1;
+    }
+
+    message OEFErrorOperation{
+        enum OEFError {
+              REGISTER_SERVICE = 0;
+              UNREGISTER_SERVICE = 1;
+              SEARCH_SERVICES = 2;
+              SEARCH_SERVICES_WIDE = 3;
+              SEND_MESSAGE = 4;
+            }
+          OEFError oef_error = 1;
+    }
+
+    message Query{
+        message Nothing {
+        }
+        oneof query{
+            bytes bytes = 1;
+            Nothing nothing = 2;
+            bytes query_bytes = 3;
+        }
+    }
+
+
+    // Performatives and contents
+    message Register_Service{
+        Description service_description = 1;
+        string service_id = 2;
+    }
+
+    message Unregister_Service{
+        Description service_description = 1;
+    }
+
+    message Search_Services{
+        Query query = 1;
+    }
+
+    message Search_Result{
+        repeated string agents = 1;
+    }
+
+    message Oef_Error{
+        OEFErrorOperation operation = 1;
+    }
+
+
+    // Standard OefMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Oef_Error oef_error = 5;
+        Register_Service register_service = 6;
+        Search_Result search_result = 7;
+        Search_Services search_services = 8;
+        Unregister_Service unregister_service = 9;
+    }
+}

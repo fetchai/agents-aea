@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,169 +17,248 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the default message definition."""
+"""This module contains oef's message definition."""
 
 from enum import Enum
-from typing import List, cast
+from typing import Set, Tuple, cast
 
-from aea.configurations.base import PublicId
-from aea.helpers.search.models import Description, Query
+from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from packages.fetchai.protocols.oef.custom_types import Description as CustomDescription
+from packages.fetchai.protocols.oef.custom_types import (
+    OEFErrorOperation as CustomOEFErrorOperation,
+)
+from packages.fetchai.protocols.oef.custom_types import Query as CustomQuery
 
-class OEFMessage(Message):
-    """The OEF message class."""
+DEFAULT_BODY_SIZE = 4
 
-    protocol_id = PublicId("fetchai", "oef", "0.1.0")
 
-    class Type(Enum):
-        """OEF Message types."""
+class OefMessage(Message):
+    """A protocol for interacting with an OEF service."""
 
-        REGISTER_SERVICE = "register_service"
-        UNREGISTER_SERVICE = "unregister_service"
-        SEARCH_SERVICES = "search_services"
+    protocol_id = ProtocolId("fetchai", "oef", "0.1.0")
+
+    Description = CustomDescription
+
+    OEFErrorOperation = CustomOEFErrorOperation
+
+    Query = CustomQuery
+
+    class Performative(Enum):
+        """Performatives for the oef protocol."""
+
         OEF_ERROR = "oef_error"
-        DIALOGUE_ERROR = "dialogue_error"
+        REGISTER_SERVICE = "register_service"
         SEARCH_RESULT = "search_result"
+        SEARCH_SERVICES = "search_services"
+        UNREGISTER_SERVICE = "unregister_service"
 
         def __str__(self):
-            """Get string representation."""
+            """Get the string representation."""
             return self.value
 
-    class OEFErrorOperation(Enum):
-        """Operation code for the OEF. It is returned in the OEF Error messages."""
-
-        REGISTER_SERVICE = 0
-        UNREGISTER_SERVICE = 1
-        SEARCH_SERVICES = 2
-        SEARCH_SERVICES_WIDE = 3
-        SEND_MESSAGE = 4
-
-        OTHER = 10000
-
-        def __str__(self):
-            """Get string representation."""
-            return str(self.value)
-
-    def __init__(self, type: Type, id: int, **kwargs):
+    def __init__(
+        self,
+        dialogue_reference: Tuple[str, str],
+        message_id: int,
+        target: int,
+        performative: Performative,
+        **kwargs,
+    ):
         """
-        Initialize.
+        Initialise an instance of OefMessage.
 
-        :param type: the type of OEF message.
-        :param id: the message id.
+        :param message_id: the message id.
+        :param dialogue_reference: the dialogue reference.
+        :param target: the message target.
+        :param performative: the message performative.
         """
-        super().__init__(type=type, id=id, **kwargs)
-        assert self._is_consistent(), "OEFMessage initialization inconsistent."
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=OefMessage.Performative(performative),
+            **kwargs,
+        )
+        self._performatives = {
+            "oef_error",
+            "register_service",
+            "search_result",
+            "search_services",
+            "unregister_service",
+        }
+        assert (
+            self._is_consistent()
+        ), "This message is invalid according to the 'oef' protocol."
 
     @property
-    def type(self) -> Type:  # noqa: F821
-        """Get the type of the oef_message."""
-        assert self.is_set("type"), "type is not set."
-        return OEFMessage.Type(self.get("type"))
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
 
     @property
-    def id(self) -> int:
-        """Get the id of the oef_message."""
-        assert self.is_set("id"), "id is not set."
-        return cast(int, self.get("id"))
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
-    def service_description(self) -> Description:
-        """Get the service_description from the message."""
-        assert self.is_set("service_description"), "service_description is not set"
-        return cast(Description, self.get("service_description"))
+    def message_id(self) -> int:
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set."
+        return cast(int, self.get("message_id"))
+
+    @property
+    def performative(self) -> Performative:  # noqa: F821
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set."
+        return cast(OefMessage.Performative, self.get("performative"))
+
+    @property
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
+
+    @property
+    def agents(self) -> Tuple[str, ...]:
+        """Get the 'agents' content from the message."""
+        assert self.is_set("agents"), "'agents' content is not set."
+        return cast(Tuple[str, ...], self.get("agents"))
+
+    @property
+    def operation(self) -> CustomOEFErrorOperation:
+        """Get the 'operation' content from the message."""
+        assert self.is_set("operation"), "'operation' content is not set."
+        return cast(CustomOEFErrorOperation, self.get("operation"))
+
+    @property
+    def query(self) -> CustomQuery:
+        """Get the 'query' content from the message."""
+        assert self.is_set("query"), "'query' content is not set."
+        return cast(CustomQuery, self.get("query"))
+
+    @property
+    def service_description(self) -> CustomDescription:
+        """Get the 'service_description' content from the message."""
+        assert self.is_set(
+            "service_description"
+        ), "'service_description' content is not set."
+        return cast(CustomDescription, self.get("service_description"))
 
     @property
     def service_id(self) -> str:
-        """Get the service_id from the message."""
-        assert self.is_set("service_id"), "service_id is not set."
+        """Get the 'service_id' content from the message."""
+        assert self.is_set("service_id"), "'service_id' content is not set."
         return cast(str, self.get("service_id"))
 
-    @property
-    def agent_description(self) -> Description:
-        """Get the agent_description from the message."""
-        assert self.is_set("agent_description"), "agent_description is not set."
-        return cast(Description, self.get("agent_description"))
-
-    @property
-    def agent_id(self) -> str:
-        """Get the agent_id from the message."""
-        assert self.is_set("agent_id"), "agent_id is not set."
-        return cast(str, self.get("agent_id"))
-
-    @property
-    def query(self) -> Query:
-        """Get the query from the message."""
-        assert self.is_set("query"), "query is not set."
-        return cast(Query, self.get("query"))
-
-    @property
-    def agents(self) -> List[str]:
-        """Get the agents from the message."""
-        assert self.is_set("agents"), "list of agents is not set."
-        return cast(List[str], self.get("agents"))
-
-    @property
-    def operation(self) -> OEFErrorOperation:  # noqa: F821
-        """Get the error_operation code from the message."""
-        assert self.is_set("operation"), "operation is not set."
-        return OEFMessage.OEFErrorOperation(self.get("operation"))
-
-    @property
-    def dialogue_id(self) -> int:
-        """Get the dialogue_id from the message."""
-        assert self.is_set("dialogue_id"), "dialogue_id is not set."
-        return cast(int, self.get("dialogue_id"))
-
-    @property
-    def origin(self) -> str:
-        """Get the origin from the message."""
-        assert self.is_set("origin"), "origin is not set."
-        return cast(str, self.get("origin"))
-
     def _is_consistent(self) -> bool:
-        """Check that the data is consistent."""
+        """Check that the message follows the oef protocol."""
         try:
-            assert isinstance(self.type, OEFMessage.Type), "type not of correct type."
-            assert isinstance(self.id, int), "id must be int."
-            if self.type == OEFMessage.Type.REGISTER_SERVICE:
-                assert isinstance(
-                    self.service_description, Description
-                ), "service_description must be of type Description."
-                assert isinstance(
-                    self.service_id, str
-                ), "service_id must be of type str."
-                assert len(self.body) == 4
-            elif self.type == OEFMessage.Type.UNREGISTER_SERVICE:
-                assert isinstance(
-                    self.service_description, Description
-                ), "service_description must be of type Description."
-                assert isinstance(
-                    self.service_id, str
-                ), "service_id must be of type str."
-                assert len(self.body) == 4
-            elif self.type == OEFMessage.Type.SEARCH_SERVICES:
-                assert isinstance(self.query, Query), "query must be of type Query."
-                assert len(self.body) == 3
-            elif self.type == OEFMessage.Type.SEARCH_RESULT:
-                assert type(self.agents) == list and all(
-                    type(a) == str for a in self.agents
+            assert (
+                type(self.dialogue_reference) == tuple
+            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                type(self.dialogue_reference)
+            )
+            assert (
+                type(self.dialogue_reference[0]) == str
+            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[0])
+            )
+            assert (
+                type(self.dialogue_reference[1]) == str
+            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[1])
+            )
+            assert (
+                type(self.message_id) == int
+            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                type(self.message_id)
+            )
+            assert (
+                type(self.target) == int
+            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                type(self.target)
+            )
+
+            # Light Protocol Rule 2
+            # Check correct performative
+            assert (
+                type(self.performative) == OefMessage.Performative
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                self.valid_performatives, self.performative
+            )
+
+            # Check correct contents
+            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            expected_nb_of_contents = 0
+            if self.performative == OefMessage.Performative.REGISTER_SERVICE:
+                expected_nb_of_contents = 2
+                assert (
+                    type(self.service_description) == CustomDescription
+                ), "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
+                    type(self.service_description)
                 )
-                assert len(self.body) == 3
-            elif self.type == OEFMessage.Type.OEF_ERROR:
-                assert isinstance(
-                    self.operation, OEFMessage.OEFErrorOperation
-                ), "operation must be type of OEFErrorOperation"
-                assert len(self.body) == 3
-            elif self.type == OEFMessage.Type.DIALOGUE_ERROR:
-                assert isinstance(
-                    self.dialogue_id, int
-                ), "dialogue_id must be of type int."
-                assert isinstance(self.origin, str), "origin must be of type str."
-                assert len(self.body) == 4
+                assert (
+                    type(self.service_id) == str
+                ), "Invalid type for content 'service_id'. Expected 'str'. Found '{}'.".format(
+                    type(self.service_id)
+                )
+            elif self.performative == OefMessage.Performative.UNREGISTER_SERVICE:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.service_description) == CustomDescription
+                ), "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
+                    type(self.service_description)
+                )
+            elif self.performative == OefMessage.Performative.SEARCH_SERVICES:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.query) == CustomQuery
+                ), "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
+                    type(self.query)
+                )
+            elif self.performative == OefMessage.Performative.SEARCH_RESULT:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.agents) == tuple
+                ), "Invalid type for content 'agents'. Expected 'tuple'. Found '{}'.".format(
+                    type(self.agents)
+                )
+                assert all(
+                    type(element) == str for element in self.agents
+                ), "Invalid type for tuple elements in content 'agents'. Expected 'str'."
+            elif self.performative == OefMessage.Performative.OEF_ERROR:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.operation) == CustomOEFErrorOperation
+                ), "Invalid type for content 'operation'. Expected 'OEFErrorOperation'. Found '{}'.".format(
+                    type(self.operation)
+                )
+
+            # Check correct content count
+            assert (
+                expected_nb_of_contents == actual_nb_of_contents
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
+                expected_nb_of_contents, actual_nb_of_contents
+            )
+
+            # Light Protocol Rule 3
+            if self.message_id == 1:
+                assert (
+                    self.target == 0
+                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
+                    self.target
+                )
             else:
-                raise ValueError("Type not recognized.")
-        except (AssertionError, ValueError):
+                assert (
+                    0 < self.target < self.message_id
+                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                    self.message_id - 1, self.target,
+                )
+        except (AssertionError, ValueError, KeyError) as e:
+            print(str(e))
             return False
 
         return True

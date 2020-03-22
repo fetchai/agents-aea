@@ -16,9 +16,6 @@ speech_acts:
     agents: pt:list[pt:str]
   oef_error:
     operation: ct:OEFErrorOperation
-  dialogue_error:
-    dialogue_id: pt:int
-    origin: pt:str
 ...
 ---
 ct:Query: |
