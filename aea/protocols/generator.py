@@ -853,10 +853,10 @@ class ProtocolGenerator:
         # __init__
         cls_str += "    def __init__(\n"
         cls_str += "        self,\n"
-        cls_str += "        dialogue_reference: Tuple[str, str],\n"
-        cls_str += "        message_id: int,\n"
-        cls_str += "        target: int,\n"
         cls_str += "        performative: Performative,\n"
+        cls_str += '        dialogue_reference: Tuple[str, str] = ("", ""),\n'
+        cls_str += "        message_id: int = 1,\n"
+        cls_str += "        target: int = 0,\n"
         cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
         cls_str += '        """\n'
@@ -1009,7 +1009,7 @@ class ProtocolGenerator:
         cls_str += "                assert (\n"
         cls_str += "                    0 < self.target < self.message_id\n"
         cls_str += "                ), \"Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.\".format(\n"
-        cls_str += "                    self.message_id-1,\n"
+        cls_str += "                    self.message_id - 1,\n"
         cls_str += "                    self.target,\n"
         cls_str += "                )\n"
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"

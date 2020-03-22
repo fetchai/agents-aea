@@ -21,6 +21,7 @@
 
 import os
 import shutil
+import subprocess
 import sys
 
 import click
@@ -50,13 +51,21 @@ def generate(ctx: Context):
 
 def _generate_item(ctx: Context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
-    # # check protocol buffer compiler is installed
-    # res = shutil.which("protoc")
-    # if res is None:
-    #     print(
-    #         "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
-    #     )
-    #     sys.exit(1)
+    # check protocol buffer compiler is installed
+    res = shutil.which("protoc")
+    if res is None:
+        print(
+            "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
+        )
+        sys.exit(1)
+
+    # check black code formatter is installed
+    res = shutil.which("black")
+    if res is None:
+        print(
+            "Please install black code formater first! See the following link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
+        )
+        sys.exit(1)
 
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
@@ -135,6 +144,24 @@ def _generate_item(ctx: Context, item_type, specification_path):
             os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
         )
         sys.exit(1)
+
+    # Run black code formatting
+    try:
+        subp = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "black",
+                os.path.join(item_type_plural, protocol_spec.name),
+                "--quiet"
+            ]
+        )  # nosec
+        subp.wait(5.0)
+    finally:
+        poll = subp.poll()
+        if poll is None:  # pragma: no cover
+            subp.terminate()
+            subp.wait(2)
 
 
 @generate.command()
