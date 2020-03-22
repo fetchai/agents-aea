@@ -3,7 +3,7 @@ name: tac
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: 'A protocol for participating in a TAC.'
+description: The tac protocol implements the messages an AEA needs to participate in the TAC
 speech_acts:
   register:
     agent_name: pt:str
