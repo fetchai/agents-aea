@@ -29,8 +29,8 @@ from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 from packages.fetchai.skills.carpark_detection.strategy import Strategy
 
 REGISTER_ID = 1
@@ -224,17 +224,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             desc = strategy.get_service_description()
             self._registered_service_description = desc
             self._oef_msf_id += 1
-            msg = OEFMessage(
-                type=OEFMessage.Type.REGISTER_SERVICE,
+            msg = OefMessage(
+                performative=OefMessage.Performative.REGISTER_SERVICE,
                 id=self._oef_msf_id,
                 service_description=desc,
                 service_id=SERVICE_ID,
             )
             self.context.outbox.put_message(
-                to=DEFAULT_OEF,
+                to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OEFMessage.protocol_id,
-                message=OEFSerializer().encode(msg),
+                protocol_id=OefMessage.protocol_id,
+                message=OefSerializer().encode(msg),
             )
             self.context.logger.info(
                 "[{}]: updating car park detection services on OEF.".format(
@@ -250,17 +250,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         if self._registered_service_description is not None:
             self._oef_msf_id += 1
-            msg = OEFMessage(
-                type=OEFMessage.Type.UNREGISTER_SERVICE,
+            msg = OefMessage(
+                performative=OefMessage.Performative.UNREGISTER_SERVICE,
                 id=self._oef_msf_id,
                 service_description=self._registered_service_description,
                 service_id=SERVICE_ID,
             )
             self.context.outbox.put_message(
-                to=DEFAULT_OEF,
+                to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OEFMessage.protocol_id,
-                message=OEFSerializer().encode(msg),
+                protocol_id=OefMessage.protocol_id,
+                message=OefSerializer().encode(msg),
             )
             self.context.logger.info(
                 "[{}]: unregistering car park detection services from OEF.".format(

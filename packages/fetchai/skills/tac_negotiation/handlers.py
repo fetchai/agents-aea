@@ -34,7 +34,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogue as Dialogue
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OefMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogues
 from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
 from packages.fetchai.skills.tac_negotiation.search import Search
@@ -544,7 +544,7 @@ class TransactionHandler(Handler):
 class OEFSearchHandler(Handler):
     """This class implements the oef search handler."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """
@@ -562,11 +562,11 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OEFMessage, message)
+        oef_msg = cast(OefMessage, message)
 
-        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+        if oef_msg.performative is OefMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
-            search_id = oef_msg.id
+            search_id = oef_msg.message_id
             search = cast(Search, self.context.search)
             if self.context.agent_address in agents:
                 agents.remove(self.context.agent_address)

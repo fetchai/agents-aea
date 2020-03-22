@@ -68,7 +68,7 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OefMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
@@ -177,8 +177,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_SERVICE,
+        msg = OefMessage(
+            performative=OefMessage.Type.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
@@ -186,7 +186,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=DEFAULT_OEF,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
         self.context.logger.info(
@@ -203,8 +203,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_SERVICE,
+        msg = OefMessage(
+            performative=OefMessage.Type.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
@@ -212,7 +212,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=DEFAULT_OEF,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefMessage.protocol_id,
             message=OEFSerializer().encode(msg),
         )
         self.context.logger.info(
@@ -364,7 +364,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
    """
    self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
    default_msg = DefaultMessage(
-       type=DefaultMessage.Type.ERROR,
+       performative=DefaultMessage.Type.ERROR,
        error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
        error_msg="Invalid dialogue.",
        error_data="fipa_message",
@@ -953,7 +953,7 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OefMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -1016,13 +1016,13 @@ class MySearchBehaviour(TickerBehaviour):
        if strategy.is_searching:
            query = strategy.get_service_query()
            search_id = strategy.get_next_search_id()
-           oef_msg = OEFMessage(
-               type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+           oef_msg = OefMessage(
+               performative=OefMessage.Type.SEARCH_SERVICES, id=search_id, query=query
            )
            self.context.outbox.put_message(
                to=DEFAULT_OEF,
                sender=self.context.agent_address,
-               protocol_id=OEFMessage.protocol_id,
+               protocol_id=OefMessage.protocol_id,
                message=OEFSerializer().encode(oef_msg),
            )
 
@@ -1077,7 +1077,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OefMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -1148,7 +1148,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
     """
     self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
     default_msg = DefaultMessage(
-        type=DefaultMessage.Type.ERROR,
+        performative=DefaultMessage.Type.ERROR,
         error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
         error_msg="Invalid dialogue.",
         error_data="fipa_message",
@@ -1378,7 +1378,7 @@ To handle the OEF response on our search request adds the following code in the 
 class OEFHandler(Handler):
     """This class scaffolds a handler."""
  
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
  
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1392,8 +1392,8 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OEFMessage, message)
-        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+        oef_msg = cast(OefMessage, message)
+        if oef_msg.type is OefMessage.Type.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
  

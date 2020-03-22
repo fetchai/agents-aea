@@ -27,56 +27,56 @@ from aea.helpers.search.models import (
     Description,
 )
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer
+from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 
 
 def test_oef_type_string_value():
     """Test the string value of the type."""
     assert (
-        str(OEFMessage.Type.REGISTER_SERVICE) == "register_service"
+        str(OefMessage.Performative.REGISTER_SERVICE) == "register_service"
     ), "The string representation must be register_service"
     assert (
-        str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service"
+        str(OefMessage.Performative.UNREGISTER_SERVICE) == "unregister_service"
     ), "The string representation must be unregister_service"
     assert (
-        str(OEFMessage.Type.SEARCH_SERVICES) == "search_services"
+        str(OefMessage.Performative.SEARCH_SERVICES) == "search_services"
     ), "The string representation must be search_services"
     assert (
-        str(OEFMessage.Type.OEF_ERROR) == "oef_error"
+        str(OefMessage.Performative.OEF_ERROR) == "oef_error"
     ), "The string representation must be oef_error"
     assert (
-        str(OEFMessage.Type.DIALOGUE_ERROR) == "dialogue_error"
+        str(OefMessage.Performative.DIALOGUE_ERROR) == "dialogue_error"
     ), "The string representation must be dialogue_error"
     assert (
-        str(OEFMessage.Type.SEARCH_RESULT) == "search_result"
+        str(OefMessage.Performative.SEARCH_RESULT) == "search_result"
     ), "The string representation must be search_result"
 
 
 def test_oef_error_operation():
     """Test the string value of the error operation."""
     assert (
-        str(OEFMessage.OEFErrorOperation.REGISTER_SERVICE) == "0"
+        str(OefMessage.OEFErrorOperation.REGISTER_SERVICE) == "0"
     ), "The string representation must be 0"
     assert (
-        str(OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE) == "1"
+        str(OefMessage.OEFErrorOperation.UNREGISTER_SERVICE) == "1"
     ), "The string representation must be 1"
     assert (
-        str(OEFMessage.OEFErrorOperation.SEARCH_SERVICES) == "2"
+        str(OefMessage.OEFErrorOperation.SEARCH_SERVICES) == "2"
     ), "The string representation must be 2"
     assert (
-        str(OEFMessage.OEFErrorOperation.SEARCH_SERVICES_WIDE) == "3"
+        str(OefMessage.OEFErrorOperation.SEARCH_SERVICES_WIDE) == "3"
     ), "The string representation must be 3"
     assert (
-        str(OEFMessage.OEFErrorOperation.SEND_MESSAGE) == "4"
+        str(OefMessage.OEFErrorOperation.SEND_MESSAGE) == "4"
     ), "The string representation must be 4"
     assert (
-        str(OEFMessage.OEFErrorOperation.OTHER) == "10000"
+        str(OefMessage.OEFErrorOperation.OTHER) == "10000"
     ), "The string representation must be 10000"
 
 
 def test_oef_message_consistency():
-    """Tests the consistency of an OEFMessage."""
+    """Tests the consistency of an OefMessage."""
 
     attribute_foo = Attribute("foo", int, True, "a foo attribute.")
     attribute_bar = Attribute("bar", str, True, "a bar attribute.")
@@ -86,37 +86,40 @@ def test_oef_message_consistency():
     description_foobar = Description(
         {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
     )
-    msg = OEFMessage(
-        type=OEFMessage.Type.REGISTER_SERVICE,
+    msg = OefMessage(
+        performative=OefMessage.Performative.REGISTER_SERVICE,
         id=0,
         service_description=description_foobar,
         service_id="address",
     )
 
-    with mock.patch.object(OEFMessage.Type, "__eq__", return_value=False):
+    with mock.patch.object(OefMessage.Performative, "__eq__", return_value=False):
         assert not msg._is_consistent()
 
 
 def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
-    msg = OEFMessage(
-        type=OEFMessage.Type.OEF_ERROR,
+    msg = OefMessage(
+        performative=OefMessage.Performative.OEF_ERROR,
         id=0,
-        operation=OEFMessage.OEFErrorOperation.SEARCH_SERVICES,
+        operation=OefMessage.OEFErrorOperation.SEARCH_SERVICES,
     )
-    assert OEFMessage(
-        type=OEFMessage.Type.OEF_ERROR,
+    assert OefMessage(
+        performative=OefMessage.Performative.OEF_ERROR,
         id=0,
-        operation=OEFMessage.OEFErrorOperation.SEARCH_SERVICES,
+        operation=OefMessage.OEFErrorOperation.SEARCH_SERVICES,
     ), "Expects an oef message Error!"
-    msg_bytes = OEFSerializer().encode(msg)
+    msg_bytes = OefSerializer().encode(msg)
     assert len(msg_bytes) > 0, "Expects the length of bytes not to be Empty"
-    deserialized_msg = OEFSerializer().decode(msg_bytes)
+    deserialized_msg = OefSerializer().decode(msg_bytes)
     assert msg == deserialized_msg, "Expected the deserialized_msg to me equals to msg"
 
 
 def test_oef_message_dialoge_error():
     """Tests the OEFMEssage of type DialogueError."""
-    assert OEFMessage(
-        type=OEFMessage.Type.DIALOGUE_ERROR, id=0, dialogue_id=1, origin="myKey"
+    assert OefMessage(
+        performative=OefMessage.Performative.DIALOGUE_ERROR,
+        id=0,
+        dialogue_id=1,
+        origin="myKey",
     ), "Could not create the message of type DialogueError"

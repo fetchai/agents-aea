@@ -15,7 +15,7 @@ speech_acts:
   search_result:
     agents: pt:list[pt:str]
   oef_error:
-    operation: ct:OEFErrorOperation
+    operation: ct:OefErrorOperation
 ...
 ---
 ct:Query: |
@@ -28,13 +28,13 @@ ct:Query: |
   }
 ct:Description: |
   bytes description = 1;
-ct:OEFErrorOperation: |
-  enum OEFError {
+ct:OefErrorOperation: |
+  enum OefError {
         REGISTER_SERVICE = 0;
         UNREGISTER_SERVICE = 1;
         SEARCH_SERVICES = 2;
         SEARCH_SERVICES_WIDE = 3;
         SEND_MESSAGE = 4;
       }
-    OEFError oef_error = 1;
+    OefError oef_error = 1;
 ...

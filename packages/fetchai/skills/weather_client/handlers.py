@@ -33,7 +33,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OefMessage
 from packages.fetchai.skills.weather_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
@@ -305,7 +305,7 @@ class FIPAHandler(Handler):
 class OEFHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -319,8 +319,8 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OEFMessage, message)
-        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+        oef_msg = cast(OefMessage, message)
+        if oef_msg.performative is OefMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
 

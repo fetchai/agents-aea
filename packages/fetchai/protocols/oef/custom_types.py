@@ -20,7 +20,6 @@
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
 import base64
-import json
 import pickle  # nosec
 from enum import Enum
 
@@ -58,9 +57,7 @@ class Description(BaseDescription):
         :param description_from_pb2: the protocol buffer content object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'description_from_pb2' argument.
         """
-        service_description_bytes = base64.b64decode(
-            description_from_pb2
-        )
+        service_description_bytes = base64.b64decode(description_from_pb2)
         service_description = pickle.loads(service_description_bytes)  # nosec
         return service_description
 
@@ -81,7 +78,9 @@ class OEFErrorOperation(Enum):
         return str(self.value)
 
     @classmethod
-    def encode(cls, performative, o_e_f_error_operation_from_message: "OEFErrorOperation"):
+    def encode(
+        cls, performative, o_e_f_error_operation_from_message: "OEFErrorOperation"
+    ):
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -122,7 +121,9 @@ class Query(BaseQuery):
         :param query_from_message: the message content to be encoded in the protocol buffer object.
         :return: the 'performative' protocol buffer object encoded with the message content in the 'query_from_message' argument.
         """
-        query_bytes = base64.b64encode(pickle.dumps(query_from_message)).decode("utf-8")  # nosec
+        query_bytes = base64.b64encode(pickle.dumps(query_from_message)).decode(
+            "utf-8"
+        )  # nosec
         performative.query.query_bytes = query_bytes
         return performative
 
