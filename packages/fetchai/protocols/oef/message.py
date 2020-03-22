@@ -27,7 +27,7 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.oef.custom_types import Description as CustomDescription
 from packages.fetchai.protocols.oef.custom_types import (
-    OEFErrorOperation as CustomOEFErrorOperation,
+    OefErrorOperation as CustomOefErrorOperation,
 )
 from packages.fetchai.protocols.oef.custom_types import Query as CustomQuery
 
@@ -41,7 +41,7 @@ class OefMessage(Message):
 
     Description = CustomDescription
 
-    OEFErrorOperation = CustomOEFErrorOperation
+    OefErrorOperation = CustomOefErrorOperation
 
     Query = CustomQuery
 
@@ -128,10 +128,10 @@ class OefMessage(Message):
         return cast(Tuple[str, ...], self.get("agents"))
 
     @property
-    def operation(self) -> CustomOEFErrorOperation:
+    def operation(self) -> CustomOefErrorOperation:
         """Get the 'operation' content from the message."""
         assert self.is_set("operation"), "'operation' content is not set."
-        return cast(CustomOEFErrorOperation, self.get("operation"))
+        return cast(CustomOefErrorOperation, self.get("operation"))
 
     @property
     def query(self) -> CustomQuery:
@@ -232,8 +232,8 @@ class OefMessage(Message):
             elif self.performative == OefMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.operation) == CustomOEFErrorOperation
-                ), "Invalid type for content 'operation'. Expected 'OEFErrorOperation'. Found '{}'.".format(
+                    type(self.operation) == CustomOefErrorOperation
+                ), "Invalid type for content 'operation'. Expected 'OefErrorOperation'. Found '{}'.".format(
                     type(self.operation)
                 )
 

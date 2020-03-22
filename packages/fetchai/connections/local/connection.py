@@ -149,7 +149,7 @@ class LocalNode:
         oef_message = OefSerializer().decode(envelope.message)
         oef_message = cast(OefMessage, oef_message)
         sender = envelope.sender
-        request_id = oef_message.id
+        request_id = oef_message.message_id
         if oef_message.performative == OefMessage.Performative.REGISTER_SERVICE:
             await self._register_service(sender, oef_message.service_description)
         elif oef_message.performative == OefMessage.Performative.UNREGISTER_SERVICE:
@@ -228,7 +228,7 @@ class LocalNode:
                 msg = OefMessage(
                     performative=OefMessage.Performative.OEF_ERROR,
                     id=msg_id,
-                    operation=OefMessage.OEFErrorOperation.UNREGISTER_SERVICE,
+                    operation=OefMessage.OefErrorOperation.UNREGISTER_SERVICE,
                 )
                 msg_bytes = OefSerializer().encode(msg)
                 envelope = Envelope(

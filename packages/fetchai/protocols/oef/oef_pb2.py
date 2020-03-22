@@ -21,14 +21,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\x17protocols/oef/oef.proto\x12\rfetch.aea.Oef"\xd6\t\n\nOefMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x38\n\toef_error\x18\x05 \x01(\x0b\x32#.fetch.aea.Oef.OefMessage.Oef_ErrorH\x00\x12\x46\n\x10register_service\x18\x06 \x01(\x0b\x32*.fetch.aea.Oef.OefMessage.Register_ServiceH\x00\x12@\n\rsearch_result\x18\x07 \x01(\x0b\x32\'.fetch.aea.Oef.OefMessage.Search_ResultH\x00\x12\x44\n\x0fsearch_services\x18\x08 \x01(\x0b\x32).fetch.aea.Oef.OefMessage.Search_ServicesH\x00\x12J\n\x12unregister_service\x18\t \x01(\x0b\x32,.fetch.aea.Oef.OefMessage.Unregister_ServiceH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\xd7\x01\n\x11OEFErrorOperation\x12G\n\toef_error\x18\x01 \x01(\x0e\x32\x34.fetch.aea.Oef.OefMessage.OEFErrorOperation.OEFError"y\n\x08OEFError\x12\x14\n\x10REGISTER_SERVICE\x10\x00\x12\x16\n\x12UNREGISTER_SERVICE\x10\x01\x12\x13\n\x0fSEARCH_SERVICES\x10\x02\x12\x18\n\x14SEARCH_SERVICES_WIDE\x10\x03\x12\x10\n\x0cSEND_MESSAGE\x10\x04\x1a\x7f\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x02 \x01(\x0b\x32\'.fetch.aea.Oef.OefMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1aj\n\x10Register_Service\x12\x42\n\x13service_description\x18\x01 \x01(\x0b\x32%.fetch.aea.Oef.OefMessage.Description\x12\x12\n\nservice_id\x18\x02 \x01(\t\x1aX\n\x12Unregister_Service\x12\x42\n\x13service_description\x18\x01 \x01(\x0b\x32%.fetch.aea.Oef.OefMessage.Description\x1a\x41\n\x0fSearch_Services\x12.\n\x05query\x18\x01 \x01(\x0b\x32\x1f.fetch.aea.Oef.OefMessage.Query\x1a\x1f\n\rSearch_Result\x12\x0e\n\x06\x61gents\x18\x01 \x03(\t\x1aK\n\tOef_Error\x12>\n\toperation\x18\x01 \x01(\x0b\x32+.fetch.aea.Oef.OefMessage.OEFErrorOperationB\x0e\n\x0cperformativeb\x06proto3'
+        '\n\x17protocols/oef/oef.proto\x12\rfetch.aea.Oef"\xd6\t\n\nOefMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x38\n\toef_error\x18\x05 \x01(\x0b\x32#.fetch.aea.Oef.OefMessage.Oef_ErrorH\x00\x12\x46\n\x10register_service\x18\x06 \x01(\x0b\x32*.fetch.aea.Oef.OefMessage.Register_ServiceH\x00\x12@\n\rsearch_result\x18\x07 \x01(\x0b\x32\'.fetch.aea.Oef.OefMessage.Search_ResultH\x00\x12\x44\n\x0fsearch_services\x18\x08 \x01(\x0b\x32).fetch.aea.Oef.OefMessage.Search_ServicesH\x00\x12J\n\x12unregister_service\x18\t \x01(\x0b\x32,.fetch.aea.Oef.OefMessage.Unregister_ServiceH\x00\x1a"\n\x0b\x44\x65scription\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\x0c\x1a\xd7\x01\n\x11OefErrorOperation\x12G\n\toef_error\x18\x01 \x01(\x0e\x32\x34.fetch.aea.Oef.OefMessage.OefErrorOperation.OefError"y\n\x08OefError\x12\x14\n\x10REGISTER_SERVICE\x10\x00\x12\x16\n\x12UNREGISTER_SERVICE\x10\x01\x12\x13\n\x0fSEARCH_SERVICES\x10\x02\x12\x18\n\x14SEARCH_SERVICES_WIDE\x10\x03\x12\x10\n\x0cSEND_MESSAGE\x10\x04\x1a\x7f\n\x05Query\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x02 \x01(\x0b\x32\'.fetch.aea.Oef.OefMessage.Query.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1aj\n\x10Register_Service\x12\x42\n\x13service_description\x18\x01 \x01(\x0b\x32%.fetch.aea.Oef.OefMessage.Description\x12\x12\n\nservice_id\x18\x02 \x01(\t\x1aX\n\x12Unregister_Service\x12\x42\n\x13service_description\x18\x01 \x01(\x0b\x32%.fetch.aea.Oef.OefMessage.Description\x1a\x41\n\x0fSearch_Services\x12.\n\x05query\x18\x01 \x01(\x0b\x32\x1f.fetch.aea.Oef.OefMessage.Query\x1a\x1f\n\rSearch_Result\x12\x0e\n\x06\x61gents\x18\x01 \x03(\t\x1aK\n\tOef_Error\x12>\n\toperation\x18\x01 \x01(\x0b\x32+.fetch.aea.Oef.OefMessage.OefErrorOperationB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
 
 _OEFMESSAGE_OEFERROROPERATION_OEFERROR = _descriptor.EnumDescriptor(
-    name="OEFError",
-    full_name="fetch.aea.Oef.OefMessage.OEFErrorOperation.OEFError",
+    name="OefError",
+    full_name="fetch.aea.Oef.OefMessage.OefErrorOperation.OefError",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -111,15 +111,15 @@ _OEFMESSAGE_DESCRIPTION = _descriptor.Descriptor(
 )
 
 _OEFMESSAGE_OEFERROROPERATION = _descriptor.Descriptor(
-    name="OEFErrorOperation",
-    full_name="fetch.aea.Oef.OefMessage.OEFErrorOperation",
+    name="OefErrorOperation",
+    full_name="fetch.aea.Oef.OefMessage.OefErrorOperation",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="oef_error",
-            full_name="fetch.aea.Oef.OefMessage.OEFErrorOperation.oef_error",
+            full_name="fetch.aea.Oef.OefMessage.OefErrorOperation.oef_error",
             index=0,
             number=1,
             type=14,
@@ -753,13 +753,13 @@ OefMessage = _reflection.GeneratedProtocolMessageType(
                 # @@protoc_insertion_point(class_scope:fetch.aea.Oef.OefMessage.Description)
             ),
         ),
-        OEFErrorOperation=_reflection.GeneratedProtocolMessageType(
-            "OEFErrorOperation",
+        OefErrorOperation=_reflection.GeneratedProtocolMessageType(
+            "OefErrorOperation",
             (_message.Message,),
             dict(
                 DESCRIPTOR=_OEFMESSAGE_OEFERROROPERATION,
                 __module__="protocols.oef.oef_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.Oef.OefMessage.OEFErrorOperation)
+                # @@protoc_insertion_point(class_scope:fetch.aea.Oef.OefMessage.OefErrorOperation)
             ),
         ),
         Query=_reflection.GeneratedProtocolMessageType(
@@ -832,7 +832,7 @@ OefMessage = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(OefMessage)
 _sym_db.RegisterMessage(OefMessage.Description)
-_sym_db.RegisterMessage(OefMessage.OEFErrorOperation)
+_sym_db.RegisterMessage(OefMessage.OefErrorOperation)
 _sym_db.RegisterMessage(OefMessage.Query)
 _sym_db.RegisterMessage(OefMessage.Query.Nothing)
 _sym_db.RegisterMessage(OefMessage.Register_Service)

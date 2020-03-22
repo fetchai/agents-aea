@@ -62,8 +62,8 @@ class Description(BaseDescription):
         return service_description
 
 
-class OEFErrorOperation(Enum):
-    """This class represents an instance of OEFErrorOperation."""
+class OefErrorOperation(Enum):
+    """This class represents an instance of OefErrorOperation."""
 
     REGISTER_SERVICE = 0
     UNREGISTER_SERVICE = 1
@@ -79,32 +79,32 @@ class OEFErrorOperation(Enum):
 
     @classmethod
     def encode(
-        cls, performative, o_e_f_error_operation_from_message: "OEFErrorOperation"
+        cls, performative, oef_error_operation_from_message: "OefErrorOperation"
     ):
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'o_e_f_error_operation_from_message' argument.
+        The content in the 'performative' argument must be matched with the message content in the 'oef_error_operation_from_message' argument.
 
         :param performative: the performative protocol buffer object containing a content whose type is this class.
-        :param o_e_f_error_operation_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'o_e_f_error_operation_from_message' argument.
+        :param oef_error_operation_from_message: the message content to be encoded in the protocol buffer object.
+        :return: the 'performative' protocol buffer object encoded with the message content in the 'oef_error_operation_from_message' argument.
         """
-        performative.operation.oef_error = error_code_from_message.value
+        performative.operation.oef_error = oef_error_operation_from_message.value
         return performative
 
     @classmethod
-    def decode(cls, o_e_f_error_operation_from_pb2) -> "OEFErrorOperation":
+    def decode(cls, oef_error_operation_from_pb2) -> "OefErrorOperation":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'o_e_f_error_operation_from_pb2' argument.
+        A new instance of this class must be created that matches the content in the 'oef_error_operation_from_pb2' argument.
 
-        :param o_e_f_error_operation_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'o_e_f_error_operation_from_pb2' argument.
+        :param oef_error_operation_from_pb2: the protocol buffer content object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'oef_error_operation_from_pb2' argument.
         """
         enum_value_from_pb2 = oef_error_operation_from_pb2.oef_error
-        return OEFErrorOperation(enum_value_from_pb2)
+        return OefErrorOperation(enum_value_from_pb2)
 
 
 class Query(BaseQuery):
@@ -138,5 +138,5 @@ class Query(BaseQuery):
         :return: A new instance of this class that matches the protocol buffer object in the 'query_from_pb2' argument.
         """
         query_bytes = base64.b64decode(query_from_pb2)
-        query = pickle.loads(query)  # nosec type: BaseQuery
+        query = pickle.loads(query_bytes)  # nosec type: BaseQuery
         return query

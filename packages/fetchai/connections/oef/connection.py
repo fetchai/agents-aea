@@ -477,9 +477,9 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
         try:
-            operation = OefMessage.OEFErrorOperation(operation)
+            operation = OefMessage.OefErrorOperation(operation)
         except ValueError:
-            operation = OefMessage.OEFErrorOperation.OTHER
+            operation = OefMessage.OefErrorOperation.OTHER
 
         msg = OefMessage(
             performative=OefMessage.Performative.OEF_ERROR,

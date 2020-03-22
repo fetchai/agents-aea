@@ -9,15 +9,15 @@ message OefMessage{
         bytes description = 1;
     }
 
-    message OEFErrorOperation{
-        enum OEFError {
+    message OefErrorOperation{
+        enum OefError {
               REGISTER_SERVICE = 0;
               UNREGISTER_SERVICE = 1;
               SEARCH_SERVICES = 2;
               SEARCH_SERVICES_WIDE = 3;
               SEND_MESSAGE = 4;
             }
-          OEFError oef_error = 1;
+          OefError oef_error = 1;
     }
 
     message Query{
@@ -50,7 +50,7 @@ message OefMessage{
     }
 
     message Oef_Error{
-        OEFErrorOperation operation = 1;
+        OefErrorOperation operation = 1;
     }
 
 

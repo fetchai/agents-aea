@@ -26,7 +26,7 @@ from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.oef import oef_pb2
 from packages.fetchai.protocols.oef.custom_types import Description
-from packages.fetchai.protocols.oef.custom_types import OEFErrorOperation
+from packages.fetchai.protocols.oef.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef.custom_types import Query
 from packages.fetchai.protocols.oef.message import OefMessage
 
@@ -75,7 +75,7 @@ class OefSerializer(Serializer):
         elif performative_id == OefMessage.Performative.OEF_ERROR:
             performative = oef_pb2.OefMessage.Oef_Error()  # type: ignore
             operation = msg.operation
-            performative = OEFErrorOperation.encode(performative, operation)
+            performative = OefErrorOperation.encode(performative, operation)
             oef_msg.oef_error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -122,7 +122,7 @@ class OefSerializer(Serializer):
             performative_content["agents"] = agents_tuple
         elif performative_id == OefMessage.Performative.OEF_ERROR:
             pb2_operation = oef_pb.oef_error.operation
-            operation = OEFErrorOperation.decode(pb2_operation)
+            operation = OefErrorOperation.decode(pb2_operation)
             performative_content["operation"] = operation
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))

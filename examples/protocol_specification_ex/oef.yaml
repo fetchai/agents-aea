@@ -36,5 +36,5 @@ ct:OefErrorOperation: |
         SEARCH_SERVICES_WIDE = 3;
         SEND_MESSAGE = 4;
       }
-    OefError oef_error = 1;
+  OefError oef_error = 1;
 ...
