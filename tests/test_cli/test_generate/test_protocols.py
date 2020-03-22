@@ -29,8 +29,6 @@ from pathlib import Path
 import jsonschema
 from jsonschema import Draft4Validator, ValidationError
 
-import pytest
-
 import yaml
 
 import aea.cli.common
@@ -48,7 +46,6 @@ from ...conftest import (
 )
 
 
-@pytest.mark.ci
 class TestGenerateProtocol:
     """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
 
@@ -120,7 +117,6 @@ class TestGenerateProtocol:
             pass
 
 
-@pytest.mark.ci
 class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
     """Test that the command 'aea generate protocol' fails when a directory with the same name as the name of the protocol being generated already exists."""
 
@@ -197,7 +193,6 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-@pytest.mark.ci
 class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
     """Test that the command 'aea add protocol' fails when the protocol already exists."""
 
@@ -277,7 +272,6 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
             pass
 
 
-@pytest.mark.ci
 class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
 
@@ -345,7 +339,6 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
             pass
 
 
-@pytest.mark.ci
 class TestGenerateProtocolFailsWhenExceptionOccurs:
     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
 
