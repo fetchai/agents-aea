@@ -153,7 +153,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
                 "-m",
                 "black",
                 os.path.join(item_type_plural, protocol_spec.name),
-                "--quiet"
+                "--quiet",
             ]
         )  # nosec
         subp.wait(5.0)
