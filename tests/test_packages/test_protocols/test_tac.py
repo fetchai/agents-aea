@@ -24,9 +24,7 @@ from unittest import mock
 import pytest
 
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import (
-    TacSerializer
-)
+from packages.fetchai.protocols.tac.serialization import TacSerializer
 
 
 def test_tac_message_instantiation():
@@ -66,7 +64,8 @@ def test_tac_message_instantiation():
         quantities_by_good_id={"good_1": 20, "good_2": 15},
     )
     assert TacMessage(
-        type=TacMessage.Performative.TAC_ERROR, error_code=TacMessage.ErrorCode.GENERIC_ERROR
+        type=TacMessage.Performative.TAC_ERROR,
+        error_code=TacMessage.ErrorCode.GENERIC_ERROR,
     )
     assert str(TacMessage.Performative.REGISTER) == "register"
 

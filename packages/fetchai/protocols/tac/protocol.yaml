@@ -5,4 +5,4 @@ license: Apache-2.0
 fingerprint: ''
 dependencies: 
     protobuf: {} 
-description: The tac protocol implements the messages an AEA needs to participate in the TAC.
+description: The tac protocol implements the messages an AEA needs to participate in the TAC

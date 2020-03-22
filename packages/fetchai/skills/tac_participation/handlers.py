@@ -29,8 +29,8 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.tac.message import TACMessage
-from packages.fetchai.protocols.tac.serialization import TACSerializer
+from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
@@ -192,14 +192,15 @@ class OEFHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
-        tac_msg = TACMessage(
-            type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name
+        tac_msg = TacMessage(
+            performative=TacMessage.Performative.REGISTER,
+            agent_name=self.context.agent_name,
         )
-        tac_bytes = TACSerializer().encode(tac_msg)
+        tac_bytes = TacSerializer().encode(tac_msg)
         self.context.outbox.put_message(
             to=controller_addr,
             sender=self.context.agent_address,
-            protocol_id=TACMessage.protocol_id,
+            protocol_id=TacMessage.protocol_id,
             message=tac_bytes,
         )
 
@@ -214,15 +215,15 @@ class OEFHandler(Handler):
     #     game = cast(Game, self.context.game)
     #     game.update_expected_controller_addr(controller_addr)
     #     game.update_game_phase(Phase.GAME_SETUP)
-    #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-    #     tac_bytes = TACSerializer().encode(tac_msg)
-    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     tac_msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
+    #     tac_bytes = TacSerializer().encode(tac_msg)
+    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TacMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = TACMessage.protocol_id
+    SUPPORTED_PROTOCOL = TacMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -239,12 +240,11 @@ class TACHandler(Handler):
         :param message: the message
         :return: None
         """
-        tac_msg = cast(TACMessage, message)
-        tac_msg_type = tac_msg.type
+        tac_msg = cast(TacMessage, message)
         game = cast(Game, self.context.game)
         self.context.logger.debug(
-            "[{}]: Handling controller response. type={}".format(
-                self.context.agent_name, tac_msg_type
+            "[{}]: Handling controller response. performative={}".format(
+                self.context.agent_name, tac_msg.performative
             )
         )
         try:
@@ -253,23 +253,26 @@ class TACHandler(Handler):
                     "The sender of the message is not the controller agent we registered with."
                 )
 
-            if tac_msg_type == TACMessage.Type.TAC_ERROR:
+            if tac_msg.performative == TacMessage.Performative.TAC_ERROR:
                 self._on_tac_error(tac_msg)
             elif game.phase.value == Phase.PRE_GAME.value:
                 raise ValueError(
                     "We do not expect a controller agent message in the pre game phase."
                 )
             elif game.phase.value == Phase.GAME_REGISTRATION.value:
-                if tac_msg_type == TACMessage.Type.GAME_DATA:
+                if tac_msg.performative == TacMessage.Performative.GAME_DATA:
                     self._on_start(tac_msg)
-                elif tac_msg_type == TACMessage.Type.CANCELLED:
+                elif tac_msg.performative == TacMessage.Performative.CANCELLED:
                     self._on_cancelled()
             elif game.phase.value == Phase.GAME.value:
-                if tac_msg_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
+                if (
+                    tac_msg.performative
+                    == TacMessage.Performative.TRANSACTION_CONFIRMATION
+                ):
                     self._on_transaction_confirmed(tac_msg)
-                elif tac_msg_type == TACMessage.Type.CANCELLED:
+                elif tac_msg.performative == TacMessage.Performative.CANCELLED:
                     self._on_cancelled()
-                # elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
+                # elif tac_msg.performative == TacMessage.Performative.STATE_UPDATE:
                 #     self._on_state_update(tac_msg, sender)
             elif game.phase.value == Phase.POST_GAME.value:
                 raise ValueError(
@@ -286,7 +289,7 @@ class TACHandler(Handler):
         """
         pass
 
-    def _on_tac_error(self, tac_message: TACMessage) -> None:
+    def _on_tac_error(self, tac_message: TacMessage) -> None:
         """
         Handle 'on tac error' event emitted by the controller.
 
@@ -297,10 +300,10 @@ class TACHandler(Handler):
         error_code = tac_message.error_code
         self.context.logger.error(
             "[{}]: Received error from the controller. error_msg={}".format(
-                self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)
+                self.context.agent_name, TacMessage.ErrorCode.to_msg(error_code.value)
             )
         )
-        if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
+        if error_code == TacMessage.ErrorCode.TRANSACTION_NOT_VALID:
             info = tac_message.info
             transaction_id = (
                 cast(str, info.get("transaction_id"))
@@ -313,7 +316,7 @@ class TACHandler(Handler):
                 )
             )
 
-    def _on_start(self, tac_message: TACMessage) -> None:
+    def _on_start(self, tac_message: TacMessage) -> None:
         """
         Handle the 'start' event emitted by the controller.
 
@@ -355,11 +358,11 @@ class TACHandler(Handler):
         self.context.is_active = False
         self.context.shared_state["is_game_finished"] = True
 
-    def _on_transaction_confirmed(self, message: TACMessage) -> None:
+    def _on_transaction_confirmed(self, message: TacMessage) -> None:
         """
         Handle 'on transaction confirmed' event emitted by the controller.
 
-        :param message: the TACMessage.
+        :param message: the TacMessage.
 
         :return: None
         """
@@ -378,7 +381,7 @@ class TACHandler(Handler):
             self.context.shared_state["confirmed_tx_ids"] = []
         self.context.shared_state["confirmed_tx_ids"].append(message.tx_id)
 
-    # def _on_state_update(self, tac_message: TACMessage, controller_addr: Address) -> None:
+    # def _on_state_update(self, tac_message: TacMessage, controller_addr: Address) -> None:
     #     """
     #     Update the game instance with a State Update from the controller.
 
@@ -400,7 +403,7 @@ class TACHandler(Handler):
     #     #     opponent_addrs.remove(agent_addr)
     #     #     self._world_state = WorldState(opponent_addrs, self.game_configuration.good_addrs, self.initial_agent_state)
 
-    # def _on_dialogue_error(self, tac_message: TACMessage) -> None:
+    # def _on_dialogue_error(self, tac_message: TacMessage) -> None:
     #     """
     #     Handle dialogue error event emitted by the controller.
 
@@ -417,10 +420,10 @@ class TACHandler(Handler):
 
     #     :return: None
     #     """
-    #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-    #     tac_bytes = TACSerializer().encode(tac_msg)
+    #     tac_msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
+    #     tac_bytes = TacSerializer().encode(tac_msg)
     #     game = cast(Game, self.context.game)
-    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_address, protocol_id=TacMessage.protocol_id, message=tac_bytes)
 
 
 class TransactionHandler(Handler):
@@ -462,8 +465,8 @@ class TransactionHandler(Handler):
                 tx_counterparty_id is not None
             ):
                 tx_id = tx_message.tx_id + "_" + tx_counterparty_id
-                msg = TACMessage(
-                    type=TACMessage.Type.TRANSACTION,
+                msg = TacMessage(
+                    performative=TacMessage.Performative.TRANSACTION,
                     tx_id=tx_id,
                     tx_sender_addr=tx_message.tx_sender_addr,
                     tx_counterparty_addr=tx_message.tx_counterparty_addr,
@@ -480,8 +483,8 @@ class TransactionHandler(Handler):
                 self.context.outbox.put_message(
                     to=game.configuration.controller_addr,
                     sender=self.context.agent_address,
-                    protocol_id=TACMessage.protocol_id,
-                    message=TACSerializer().encode(msg),
+                    protocol_id=TacMessage.protocol_id,
+                    message=TacSerializer().encode(msg),
                 )
             else:
                 self.context.logger.warning(

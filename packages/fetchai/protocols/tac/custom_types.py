@@ -23,6 +23,20 @@ from enum import Enum
 from typing import Dict
 
 
+CODE_TO_MSG = {
+    0: "Unexpected error.",
+    1: "Request not recognized",
+    2: "Agent addr already registered.",
+    3: "Agent name already registered.",
+    4: "Agent not registered.",
+    5: "Error in checking transaction",
+    6: "The transaction request does not match with a previous transaction request with the same id.",
+    7: "Agent name not in whitelist.",
+    8: "The competition is not running yet.",
+    9: "The message is inconsistent with the dialogue.",
+}  # type: Dict[int, str]
+
+
 class ErrorCode(Enum):
     """This class defines the error codes."""
 
@@ -37,18 +51,11 @@ class ErrorCode(Enum):
     COMPETITION_NOT_RUNNING = 8
     DIALOGUE_INCONSISTENT = 9
 
-    to_msg = {
-        GENERIC_ERROR: "Unexpected error.",
-        REQUEST_NOT_VALID: "Request not recognized",
-        AGENT_ADDR_ALREADY_REGISTERED: "Agent addr already registered.",
-        AGENT_NAME_ALREADY_REGISTERED: "Agent name already registered.",
-        AGENT_NOT_REGISTERED: "Agent not registered.",
-        TRANSACTION_NOT_VALID: "Error in checking transaction",
-        TRANSACTION_NOT_MATCHING: "The transaction request does not match with a previous transaction request with the same id.",
-        AGENT_NAME_NOT_IN_WHITELIST: "Agent name not in whitelist.",
-        COMPETITION_NOT_RUNNING: "The competition is not running yet.",
-        DIALOGUE_INCONSISTENT: "The message is inconsistent with the dialogue.",
-    }  # type: Dict[int, str]
+    @property
+    @staticmethod
+    def to_msg(error_code: int) -> str:
+        """Get the error code."""
+        return CODE_TO_MSG[error_code]
 
     @classmethod
     def encode(cls, performative, error_code_from_message: "ErrorCode"):
