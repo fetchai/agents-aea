@@ -74,10 +74,9 @@ AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\
 AUTHOR = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_CONNECTION = PublicId.from_str(
-    "fetchai/stub:" + DEFAULT_VERSION
-)  # type: PublicId
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
+DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
@@ -431,7 +430,7 @@ def _is_validate_author_handle(author: str) -> bool:
 
 
 def _try_get_item_source_path(
-    path: str, author_name: str, item_type_plural: str, item_name: str
+    path: str, author_name: Optional[str], item_type_plural: str, item_name: str
 ) -> str:
     """
     Get the item source path.
@@ -443,7 +442,10 @@ def _try_get_item_source_path(
 
     :return: the item source path
     """
-    source_path = os.path.join(path, author_name, item_type_plural, item_name)
+    if author_name is None:
+        source_path = os.path.join(path, item_type_plural, item_name)
+    else:
+        source_path = os.path.join(path, author_name, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
             'Item "{}" not found in source folder.'.format(item_name)
@@ -451,7 +453,7 @@ def _try_get_item_source_path(
     return source_path
 
 
-def _try_get_vendorized_item_target_path(
+def _try_get_item_target_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -464,7 +466,7 @@ def _try_get_vendorized_item_target_path(
 
     :return: the item target path
     """
-    target_path = os.path.join(path, "vendor", author_name, item_type_plural, item_name)
+    target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)

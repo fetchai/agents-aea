@@ -39,9 +39,7 @@ from tests.test_cli.tools_for_testing import (
 @mock.patch("aea.cli.publish.copyfile")
 @mock.patch("aea.cli.publish.os.makedirs")
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
-@mock.patch(
-    "aea.cli.publish._try_get_vendorized_item_target_path", return_value="target-dir"
-)
+@mock.patch("aea.cli.publish._try_get_item_target_path", return_value="target-dir")
 @mock.patch("aea.cli.publish.os.path.join", return_value="joined-path")
 class SaveAgentLocallyTestCase(TestCase):
     """Test case for _save_agent_locally method."""
@@ -49,7 +47,7 @@ class SaveAgentLocallyTestCase(TestCase):
     def test_save_agent_locally_positive(
         self,
         path_join_mock,
-        _try_get_vendorized_item_target_path_mock,
+        _try_get_item_target_path_mock,
         path_exists_mock,
         makedirs_mock,
         copyfile_mock,

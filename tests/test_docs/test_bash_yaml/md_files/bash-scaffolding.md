@@ -1,5 +1,5 @@
 ``` bash
-aea create my_aea
+aea create my_aea --author "fetchai"
 cd my_aea
 ```
 ``` bash

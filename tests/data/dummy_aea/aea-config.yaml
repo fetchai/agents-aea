@@ -1,4 +1,4 @@
-aea_version: ">=0.2.2, <0.3.0"
+aea_version: ">=0.2.3, <0.3.0"
 agent_name: Agent0
 author: dummy_author
 connections:

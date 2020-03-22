@@ -2,8 +2,8 @@ The AEA TAC - trading agent competition - skills demonstrate an interaction betw
 
 There are two types of AEAs:
 
-* The tac controller which coordinates the game.
-* The participant AEAs which compete in the game.
+* The `tac_controller` which coordinates the game.
+* The `tac_participant` AEAs which compete in the game. The `tac_participant` AEAs trade tokens with each other to maximize their utility.
 
 ### Discussion
 
