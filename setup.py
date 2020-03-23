@@ -100,7 +100,7 @@ base_deps = [
     "base58>=1.0.3",
     "jsonschema>=3.0.0",
     "packaging>=20.3",
-    "semver",
+    "semver>=2.9.1",
     "protobuf",
     "pyyaml>=4.2b1",
     "watchdog",
