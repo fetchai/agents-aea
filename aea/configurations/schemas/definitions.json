@@ -75,6 +75,16 @@
         {"$ref":  "#/definitions/version_specifier"},
         {"$ref":  "#/definitions/version"}
       ]
+    },
+    "fingerprint_ignore_list": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ignore_pattern"
+      }
+    },
+    "ignore_pattern": {
+      "type": "string"
     }
   }
 }

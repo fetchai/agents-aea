@@ -32,6 +32,9 @@
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },
+    "fingerprint_ignore": {
+      "$ref": "definitions.json#/definitions/fingerprint_ignore_list"
+    },
     "class_name": {
       "type": "string"
     },

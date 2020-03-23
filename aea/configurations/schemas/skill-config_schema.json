@@ -30,6 +30,9 @@
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },
+    "fingerprint_ignore": {
+      "$ref": "definitions.json#/definitions/fingerprint_ignore_list"
+    },
     "protocols": {
       "type": "array",
       "additionalProperties": false,
