@@ -894,7 +894,7 @@ We are going to modify this file later on before we run the aea but for now make
 
 
 ```
-aea_version: 0.2.2
+aea_version: 0.2.3
 agent_name: my_aea
 author: author
 connections:
@@ -1739,7 +1739,7 @@ We are going to modify this file later on before we run the aea but for now, mak
 
 ``` yaml
 
-aea_version: 0.2.2
+aea_version: 0.2.3
 agent_name: m_client
 author: author
 connections:

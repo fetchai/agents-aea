@@ -123,7 +123,7 @@ ledgers: ['fetchai']
 ```
 ``` yaml
 
-aea_version: 0.2.2
+aea_version: 0.2.3
 agent_name: m_client
 author: author
 connections:

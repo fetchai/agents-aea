@@ -1,4 +1,4 @@
-aea_version: 0.2.2
+aea_version: 0.2.3
 agent_name: car_detector
 author: fetchai
 connections:

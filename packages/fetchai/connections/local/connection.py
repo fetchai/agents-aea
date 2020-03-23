@@ -48,7 +48,6 @@ class LocalNode:
 
         :param loop: the event loop. If None, a new event loop is instantiated.
         """
-        self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = asyncio.Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
@@ -151,18 +150,10 @@ class LocalNode:
         oef_type = oef_message.type
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
             await self._register_service(sender, oef_message.service_description)
-        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            await self._register_agent(sender, oef_message.agent_description)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             await self._unregister_service(
                 sender, request_id, oef_message.service_description
             )
-        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            await self._unregister_agent(
-                sender, request_id, oef_message.agent_description
-            )
-        elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            await self._search_agents(sender, request_id, oef_message.query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             await self._search_services(sender, request_id, oef_message.query)
         else:
@@ -210,17 +201,6 @@ class LocalNode:
         async with self._lock:
             self.services[address].append(service_description)
 
-    async def _register_agent(self, address: Address, agent_description: Description):
-        """
-        Register a service agent in the service directory of the node.
-
-        :param address: the address of the service agent to be registered.
-        :param agent_description: the description of the service agent to be registered.
-        :return: None
-        """
-        async with self._lock:
-            self.agents[address].append(agent_description)
-
     async def _register_service_wide(
         self, address: Address, service_description: Description
     ):
@@ -257,72 +237,6 @@ class LocalNode:
                 self.services[address].remove(service_description)
                 if len(self.services[address]) == 0:
                     self.services.pop(address)
-
-    async def _unregister_agent(
-        self, address: Address, msg_id: int, agent_description: Description
-    ) -> None:
-        """
-        Unregister an agent.
-
-        :param agent_description:
-        :param address: the address of the service agent to be unregistered.
-        :param msg_id: the message id of the request.
-        :return: None
-        """
-        async with self._lock:
-            if address not in self.agents:
-                msg = OEFMessage(
-                    type=OEFMessage.Type.OEF_ERROR,
-                    id=msg_id,
-                    operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT,
-                )
-                msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(
-                    to=address,
-                    sender=DEFAULT_OEF,
-                    protocol_id=OEFMessage.protocol_id,
-                    message=msg_bytes,
-                )
-                await self._send(envelope)
-            else:
-                self.agents[address].remove(agent_description)
-                if len(self.agents[address]) == 0:
-                    self.agents.pop(address)
-
-    async def _search_agents(
-        self, address: Address, search_id: int, query: Query
-    ) -> None:
-        """
-        Search the agents in the local Agent Directory, and send back the result.
-
-        This is actually a dummy search, it will return all the registered agents with the specified data model.
-        If the data model is not specified, it will return all the agents.
-
-        :param address: the source of the search request.
-        :param search_id: the search identifier associated with the search request.
-        :param query: the query that constitutes the search.
-        :return: None
-        """
-        result = []  # type: List[str]
-        if query.model is None:
-            result = list(set(self.services.keys()))
-        else:
-            for agent_address, descriptions in self.agents.items():
-                for description in descriptions:
-                    if query.model == description.data_model:
-                        result.append(agent_address)
-
-        msg = OEFMessage(
-            type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result))
-        )
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(
-            to=address,
-            sender=DEFAULT_OEF,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        await self._send(envelope)
 
     async def _search_services(
         self, address: Address, search_id: int, query: Query
@@ -376,7 +290,6 @@ class LocalNode:
         async with self._lock:
             self._out_queues.pop(address, None)
             self.services.pop(address, None)
-            self.agents.pop(address, None)
 
 
 class OEFLocalConnection(Connection):

@@ -74,7 +74,7 @@ Follows an example of a custom behaviour:
 
 ```python
 
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import OneShotBehaviour
 
 class HelloWorldBehaviour(OneShotBehaviour):
         

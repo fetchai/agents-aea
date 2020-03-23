@@ -24,7 +24,7 @@ which pipenv
 
 If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
 
-Once installed, create a new environment and open it.
+Once installed, create a new environment and open it (here we use Python 3.7 but the AEA framework supports any Python >= 3.6).
 
 ``` bash
 touch Pipfile && pipenv --python 3.7 && pipenv shell
@@ -34,6 +34,11 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
 (e.g. to run an OEF Node).
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
+</div>
  
 ### Download the scripts and packages directories
 
@@ -44,6 +49,11 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>We will soon make packages available on our agent registry. For now you still have to download them manually.</p>
+</div>
 
 ## Installation
 
@@ -78,6 +88,25 @@ You can now setup your author name:
 aea init
 ```
 
+You should see a similar output:
+``` bash
+Please enter the author handle you would like to use: fetchai
+    _     _____     _    
+   / \   | ____|   / \   
+  / _ \  |  _|    / _ \  
+ / ___ \ | |___  / ___ \ 
+/_/   \_\|_____|/_/   \_\
+                         
+v0.2.3
+
+AEA configurations successfully initialized: {'author': 'fetchai'}
+```
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Once our agent registry becomes available you will have a unique author name in the Fetch.ai ecosystem.</p>
+</div>
+
 ## Echo skill demo
 
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA. 
@@ -92,24 +121,24 @@ cd my_first_aea
 
 ## Usage of the stub connection	
 
-AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.		
-		
+AEAs use envelopes containing messages for communication. We use a stub connection to send envelopes to and receive envelopes from the AEA.		
+
 The stub connection is already added to the AEA by default.		
-		
-A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.		
-		
-The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
-		
-The format of each line is the following:		
-		
-``` bash		
-TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE		
+
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
+
+The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.		
+
+The format of each envelope is the following:
+
+``` bash
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
-         		
-For example:		
-		
-``` bash		
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello
+
+For example:
+
+``` bash
+recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 ```
 
 ## Run the AEA
@@ -129,9 +158,23 @@ aea run --connections fetchai/stub:0.1.0
 You will see the echo skill running in the terminal window.
 
 ``` bash
+    _     _____     _    
+   / \   | ____|   / \   
+  / _ \  |  _|    / _ \  
+ / ___ \ | |___  / ___ \ 
+/_/   \_\|_____|/_/   \_\
+                         
+v0.2.3
+
+my_first_aea starting ...
+info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}
+info: EchoBehaviour.__init__: arguments: {'tick_interval': 1.0, 'skill_context': ..., 'name': 'echo'}
+info: Echo Handler: setup method called.
+info: Echo Behaviour: setup method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
+...
 ```
 
 The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method act. This is the main agent loop in action.
@@ -143,14 +186,14 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
 
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_aea
+info: Echo Handler: message=Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
@@ -169,13 +212,13 @@ aea delete my_first_aea
 
 For more detailed analysis of the core components of the framework, please check the following:
 
-- <a href="/aea/core-components/">Core components</a>
+- <a href="../core-components/">Core components</a>
 
 For more demos, use cases or step by step guides, please check the following:
 
-- <a href="/aea/generic-skills">Generic skill use case</a>
-- <a href='/aea/weather-skills/'>Weather skill demo</a> 
-- <a href='/aea/thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
+- <a href="../generic-skills">Generic skill use case</a>
+- <a href='../weather-skills/'>Weather skill demo</a> 
+- <a href='../thermometer-skills-step-by-step/'> Thermometer step by step guide </a>
 
 <br />
 

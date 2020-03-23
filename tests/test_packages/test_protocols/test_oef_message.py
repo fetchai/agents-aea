@@ -40,17 +40,8 @@ def test_oef_type_string_value():
         str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service"
     ), "The string representation must be unregister_service"
     assert (
-        str(OEFMessage.Type.REGISTER_AGENT) == "register_agent"
-    ), "The string representation must be register_agent"
-    assert (
-        str(OEFMessage.Type.UNREGISTER_AGENT) == "unregister_agent"
-    ), "The string representation must be unregister_agent"
-    assert (
         str(OEFMessage.Type.SEARCH_SERVICES) == "search_services"
     ), "The string representation must be search_services"
-    assert (
-        str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents"
-    ), "The string representation must be search_agents"
     assert (
         str(OEFMessage.Type.OEF_ERROR) == "oef_error"
     ), "The string representation must be oef_error"
@@ -77,17 +68,8 @@ def test_oef_error_operation():
         str(OEFMessage.OEFErrorOperation.SEARCH_SERVICES_WIDE) == "3"
     ), "The string representation must be 3"
     assert (
-        str(OEFMessage.OEFErrorOperation.SEARCH_AGENTS) == "4"
+        str(OEFMessage.OEFErrorOperation.SEND_MESSAGE) == "4"
     ), "The string representation must be 4"
-    assert (
-        str(OEFMessage.OEFErrorOperation.SEND_MESSAGE) == "5"
-    ), "The string representation must be 5"
-    assert (
-        str(OEFMessage.OEFErrorOperation.REGISTER_AGENT) == "6"
-    ), "The string representation must be 6"
-    assert (
-        str(OEFMessage.OEFErrorOperation.UNREGISTER_AGENT) == "7"
-    ), "The string representation must be 7"
     assert (
         str(OEFMessage.OEFErrorOperation.OTHER) == "10000"
     ), "The string representation must be 10000"
@@ -105,10 +87,10 @@ def test_oef_message_consistency():
         {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
     )
     msg = OEFMessage(
-        type=OEFMessage.Type.REGISTER_AGENT,
+        type=OEFMessage.Type.REGISTER_SERVICE,
         id=0,
-        agent_description=description_foobar,
-        agent_id="address",
+        service_description=description_foobar,
+        service_id="address",
     )
 
     with mock.patch.object(OEFMessage.Type, "__eq__", return_value=False):
@@ -120,12 +102,12 @@ def test_oef_message_oef_error():
     msg = OEFMessage(
         type=OEFMessage.Type.OEF_ERROR,
         id=0,
-        operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS,
+        operation=OEFMessage.OEFErrorOperation.SEARCH_SERVICES,
     )
     assert OEFMessage(
         type=OEFMessage.Type.OEF_ERROR,
         id=0,
-        operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS,
+        operation=OEFMessage.OEFErrorOperation.SEARCH_SERVICES,
     ), "Expects an oef message Error!"
     msg_bytes = OEFSerializer().encode(msg)
     assert len(msg_bytes) > 0, "Expects the length of bytes not to be Empty"

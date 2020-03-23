@@ -68,14 +68,7 @@ class TestAgentVsAEA:
         assert os.path.exists(Path(self.t, "input.txt"))
 
         message_text = (
-            "my_agent,other_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
-        )
-        path = os.path.join(self.t, "input.txt")
-        with open(path, "r") as file:
-            msg = file.read()
-        assert msg == message_text, "The messages must be identical."
-        message_text = (
-            "other_agent,my_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello"
+            "other_agent,my_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
         )
         path = os.path.join(self.t, "output.txt")
         with open(path, "r") as file:

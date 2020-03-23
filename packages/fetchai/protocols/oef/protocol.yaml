@@ -2,11 +2,11 @@ name: 'oef'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.2
+aea_version: 0.2.3
 fingerprint:
   __init__.py: QmeTvhzfcfWGa6FRXfBbg7f6o6QXix9sxJ5ZRz5BMyAsTd
-  message.py: QmajfBM7fw98mtHvfm2xX9BkySzQbu65RMetjC2hbRZReE
-  serialization.py: QmcpGwm47YG59UjDDparmhRLTpV59Y1ADMfdPHPAA5mZyi
+  message.py: QmVZN9NftqbyPD7uTCNcrkUbsv9r21a1Nh41PT6Wy6daT4
+  serialization.py: QmWWm6N71TikZBzs67r29jzGWS524xwYxfZDr9LFRfQXD2
 dependencies:
   colorlog: {}
   oef: {}

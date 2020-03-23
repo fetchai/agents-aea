@@ -1,5 +1,17 @@
 # Release History
 
+## 0.2.3 (2020-03-19)
+
+- Fixes stub connection file I/O
+- Fixes OEF connection teardown
+- Fixes CLI GUI subprocesses issues
+- Adds support for URI based routing of envelopes
+- Improves skill guide by adding a service provider agent
+- Protocol generator bug fixes
+- Add aea_version field to package yaml files for version management
+- Multiple docs updates and restructuring
+- Multiple additional minor fixes and changes
+
 ## 0.2.2 (2020-03-09)
 
 - Fixes registry to only load registered packages

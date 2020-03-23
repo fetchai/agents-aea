@@ -50,6 +50,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.contracts.base import Contract
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message, Protocol
 from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
@@ -921,16 +922,36 @@ class Filter:
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
-    def get_active_handlers(self, protocol_id: PublicId) -> List[Handler]:
+    def get_active_handlers(
+        self, protocol_id: PublicId, envelope_context: Optional[EnvelopeContext]
+    ) -> List[Handler]:
         """
         Get active handlers.
 
         :param protocol_id: the protocol id
+        :param envelope context: the envelope context
         :return: the list of handlers currently active
         """
-        # TODO naive implementation
-        handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
-        active_handlers = list(filter(lambda h: h.context.is_active, handlers))
+        skill_id = None  # Optional[PublicId]
+        if envelope_context is not None and envelope_context.uri is not None:
+            uri_path = envelope_context.uri.path
+            try:
+                skill_id = PublicId.from_uri_path(uri_path)
+            except ValueError:
+                logger.warning("URI - {} - not a valid skill id.".format(uri_path))
+
+        if skill_id is not None:
+            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+                protocol_id, skill_id
+            )
+            active_handlers = (
+                [] if handler is None or not handler.context.is_active else [handler]
+            )
+        else:
+            handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
+            active_handlers = list(
+                filter(lambda handler: handler.context.is_active, handlers)
+            )
         return active_handlers
 
     def get_active_behaviours(self) -> List[Behaviour]:
@@ -939,7 +960,6 @@ class Filter:
 
         :return: the list of behaviours currently active
         """
-        # TODO naive implementation
         behaviours = self.resources.behaviour_registry.fetch_all()
         active_behaviour = list(
             filter(lambda b: b.context.is_active and not b.is_done(), behaviours,)

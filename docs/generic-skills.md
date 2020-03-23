@@ -3,13 +3,7 @@ The AEA generic buyer and seller skills demonstrate an interaction between two A
 * The provider of a service in the form of data for sale.
 * The buyer of a service.
 
-## Preparation instructions
- 
-### Dependencies
-
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
-
-##Discussion
+### Discussion
 
 The scope of the specific demo is to demonstrate how to create an easy configurable AEA. The seller AEA
 will sell the service specified in the `skill.yaml` file and deliver it upon payment by the buyer. Adding a database or hardware sensor for loading the data is out of the scope of this demo.
@@ -18,6 +12,12 @@ This demo does not utilize a smart contract. We interact with a ledger only to c
 
 Moreover, this example provides a way to customise the skill code and connect a database or sensor. 
 You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file. 
+
+## Preparation instructions
+ 
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).

@@ -97,11 +97,12 @@ all_extras = get_all_extras()
 
 base_deps = [
     *all_extras.get("crypto", []),
-    "pyyaml>=4.2b1",
+    "base58>=1.0.3",
     "jsonschema>=3.0.0",
-    "protobuf",
-    "watchdog",
     "packaging>=20.3",
+    "protobuf",
+    "pyyaml>=4.2b1",
+    "watchdog",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

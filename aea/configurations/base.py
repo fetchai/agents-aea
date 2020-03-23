@@ -209,6 +209,9 @@ class PublicId(JSONSerializable):
     PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
+    PUBLIC_ID_URI_REGEX = r"^({})/({})/({})$".format(
+        AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
+    )
 
     def __init__(self, author: str, name: str, version: str):
         """Initialize the public identifier."""
@@ -258,6 +261,45 @@ class PublicId(JSONSerializable):
                 cls.PUBLIC_ID_REGEX, public_id_string
             )[0][:3]
             return PublicId(username, package_name, version)
+
+    @classmethod
+    def from_uri_path(cls, public_id_uri_path: str) -> "PublicId":
+        """
+        Initialize the public id from the string.
+
+        >>> str(PublicId.from_uri_path("author/package_name/0.1.0"))
+        'author/package_name:0.1.0'
+
+        A bad formatted input raises value error:
+        >>> PublicId.from_uri_path("bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:input' is not well formatted.
+
+        :param public_id_uri_path: the public id in uri path string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
+        if not re.match(cls.PUBLIC_ID_URI_REGEX, public_id_uri_path):
+            raise ValueError(
+                "Input '{}' is not well formatted.".format(public_id_uri_path)
+            )
+        else:
+            username, package_name, version = re.findall(
+                cls.PUBLIC_ID_URI_REGEX, public_id_uri_path
+            )[0][:3]
+            return PublicId(username, package_name, version)
+
+    @property
+    def to_uri_path(self) -> str:
+        """
+        Turn the public id into a uri path string.
+
+        :return: uri path string
+        """
+        return "{author}/{name}/{version}".format(
+            author=self.author, name=self.name, version=self.version
+        )
 
     @property
     def json(self) -> Dict:

@@ -2,7 +2,7 @@ name: thermometer_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.2
+aea_version: 0.2.3
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmQjZ59XR2CxSxcqWboq7vZvaA7UtmBhox6aws9Tndp9Vc
