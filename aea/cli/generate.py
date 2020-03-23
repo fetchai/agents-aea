@@ -150,6 +150,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
         subp = subprocess.Popen(  # nosec
             [
                 sys.executable,
+                "-m",
                 "black",
                 os.path.join(item_type_plural, protocol_spec.name),
                 "--quiet",
