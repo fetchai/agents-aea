@@ -18,15 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea add' subcommand."""
-
+import itertools
 import os
 import sys
 from pathlib import Path
-from typing import Dict, cast
+from typing import Dict, cast, Sequence, Iterator
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter, logger
+from aea.cli.common import Context, PublicIdParameter, logger, _compute_fingerprint
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -64,20 +64,7 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
     )
 
     # create fingerprints
-    fingerprints_dict = {}  # type: Dict[str, str]
     package_dir = Path(ctx.cwd, item_type_plural, item_public_id.name)
-    if not package_dir.exists():
-        # we only permit non-vendorized packages to be fingerprinted
-        logger.error("Package not found at path {}".format(package_dir))
-        sys.exit(1)
-
-    for file in os.listdir(package_dir):
-        if file.endswith(".py"):
-            file_path = os.path.join(package_dir, file)
-            ipfs_hash = ipfs_hash_only.get(file_path)
-            fingerprints_dict[file] = ipfs_hash
-
-    # Load item specification yaml file and add fingerprints
     try:
         default_config_file_name = _get_default_configuration_file_name_from_type(
             item_type
@@ -85,6 +72,17 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
         config_loader = ConfigLoader.from_configuration_type(item_type)
         config_file_path = Path(package_dir, default_config_file_name)
         config = config_loader.load(config_file_path.open())
+
+        if not package_dir.exists():
+            # we only permit non-vendorized packages to be fingerprinted
+            logger.error("Package not found at path {}".format(package_dir))
+            sys.exit(1)
+
+        fingerprints_dict = _compute_fingerprint(
+            package_dir, ignore_patterns=config.fingerprint_ignore_patterns
+        )  # type: Dict[str, str]
+
+        # Load item specification yaml file and add fingerprints
         config.fingerprint = fingerprints_dict
         config_loader.dump(config, open(config_file_path, "w"))
     except Exception as e:

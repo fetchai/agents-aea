@@ -28,7 +28,7 @@ import sys
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast, Collection
 
 import click
 
@@ -80,6 +80,17 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+
+DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
+    "*__pycache__/*",
+    "*.pyc",
+    "aea-config.yaml",
+    "protocol.yaml",
+    "connection.yaml",
+    "skill.yaml",
+    "contract.yaml",
+]
+
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
@@ -555,14 +566,21 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def _compute_fingerprint(package_directory) -> Dict[str, str]:
+def _compute_fingerprint(
+    package_directory, ignore_patterns: Optional[Collection[str]] = None
+) -> Dict[str, str]:
+    ignore_patterns = ignore_patterns if ignore_patterns is not None else []
+    ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
     hasher = IPFSHashOnly()
     fingerprints = {}  # type: Dict[str, str]
     # find all valid files of the package
     all_files = [
         x
         for x in package_directory.glob("**/*")
-        if x.is_file() and not x.match("*__pycache__/*") and x.match("*.py")
+        if x.is_file()
+        and (
+            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
+        )
     ]
 
     for file in all_files:
