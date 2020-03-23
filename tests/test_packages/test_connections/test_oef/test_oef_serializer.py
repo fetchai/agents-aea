@@ -19,20 +19,43 @@
 
 """This test module contains the tests for the OEF serializer."""
 
-from aea.helpers.search.models import Attribute, DataModel, Description
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+    Query,
+)
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
-def test_oef_serialization():
+def test_oef_serialization_description():
     """Testing the serialization of the OEF."""
     foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
     desc = Description({"bar": 1}, data_model=foo_datamodel)
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-        id=1,
+        dialogue_reference=(str(1), ""),
         service_description=desc,
     )
     msg_bytes = OefSearchSerializer().encode(msg)
     assert len(msg_bytes) > 0
+    recovered_msg = OefSearchSerializer().decode(msg_bytes)
+    assert recovered_msg == msg
+
+
+def test_oef_serialization_query():
+    """Testing the serialization of the OEF."""
+    query = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+        dialogue_reference=(str(1), ""),
+        query=query,
+    )
+    msg_bytes = OefSearchSerializer().encode(msg)
+    assert len(msg_bytes) > 0
+    recovered_msg = OefSearchSerializer().decode(msg_bytes)
+    assert recovered_msg == msg

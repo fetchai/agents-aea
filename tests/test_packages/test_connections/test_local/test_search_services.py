@@ -73,7 +73,7 @@ class TestEmptySearch:
         # build and send the request
         search_services_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             query=query,
         )
         msg_bytes = OefSearchSerializer().encode(search_services_request)
@@ -91,8 +91,8 @@ class TestEmptySearch:
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
         search_result = OefSearchSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-        assert search_result.get("agents") == []
+        assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert search_result.agents == ()
 
     @classmethod
     def teardown_class(cls):
@@ -125,16 +125,14 @@ class TestSimpleSearchResult:
 
         # register a service.
         request_id = 1
-        service_id = ""
         cls.data_model = DataModel("foobar", attributes=[])
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model
         )
         register_service_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             service_description=service_description,
-            service_id=service_id,
         )
         msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
@@ -153,7 +151,7 @@ class TestSimpleSearchResult:
         # build and send the request
         search_services_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             query=query,
         )
         msg_bytes = OefSearchSerializer().encode(search_services_request)
@@ -171,8 +169,8 @@ class TestSimpleSearchResult:
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
         search_result = OefSearchSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-        assert search_result.get("agents") == [self.address_1]
+        assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert search_result.agents == (self.address_1,)
 
     @classmethod
     def teardown_class(cls):
@@ -221,9 +219,8 @@ class TestUnregister:
         )
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=0,
+            dialogue_reference=(str(1), ""),
             service_description=service_description,
-            service_id="Test_service",
         )
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
@@ -239,13 +236,12 @@ class TestUnregister:
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OefSearchSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefSearchMessage.Performative.OEF_ERROR
+        assert result.performative == OefSearchMessage.Performative.OEF_ERROR
 
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=0,
+            dialogue_reference=(str(1), ""),
             service_description=service_description,
-            service_id="Test_Service",
         )
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
@@ -259,7 +255,7 @@ class TestUnregister:
         # Search for the registered service
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=0,
+            dialogue_reference=(str(1), ""),
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
         msg_bytes = OefSearchSerializer().encode(msg)
@@ -275,8 +271,8 @@ class TestUnregister:
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OefSearchSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(result.get("agents")) == 1
+        assert result.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert len(result.agents) == 1
 
         # unregister the service
         data_model = DataModel("foobar", attributes=[])
@@ -285,9 +281,8 @@ class TestUnregister:
         )
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=0,
+            dialogue_reference=(str(1), ""),
             service_description=service_description,
-            service_id="Test_service",
         )
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
@@ -302,7 +297,7 @@ class TestUnregister:
         # Search for the register agent
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=0,
+            dialogue_reference=(str(1), ""),
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
         msg_bytes = OefSearchSerializer().encode(msg)
@@ -318,8 +313,8 @@ class TestUnregister:
         assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OefSearchSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-        assert len(result.get("agents")) == 0
+        assert result.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert result.agents == ()
 
     @classmethod
     def teardown_class(cls):
@@ -382,10 +377,10 @@ class TestAgentMessage:
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert response_envelope.protocol_id == DefaultMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = DefaultSerializer().decode(response_envelope.message)
-        assert result.get("type") == DefaultMessage.Performative.ERROR
+        assert result.performative == DefaultMessage.Performative.ERROR
 
     @classmethod
     def teardown_class(cls):
@@ -451,16 +446,14 @@ class TestFilteredSearchResult:
 
         # register 'multiplexer1' as a service 'foobar'.
         request_id = 1
-        service_id = ""
         cls.data_model_foobar = DataModel("foobar", attributes=[])
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar
         )
         register_service_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             service_description=service_description,
-            service_id=service_id,
         )
         msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
@@ -480,9 +473,8 @@ class TestFilteredSearchResult:
         )
         register_service_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             service_description=service_description,
-            service_id=service_id,
         )
         msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
@@ -500,9 +492,8 @@ class TestFilteredSearchResult:
         )
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=0,
+            dialogue_reference=(str(1), ""),
             service_description=service_description,
-            service_id="Test_service",
         )
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
@@ -521,7 +512,7 @@ class TestFilteredSearchResult:
         # build and send the request
         search_services_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=request_id,
+            dialogue_reference=(str(request_id), ""),
             query=query,
         )
         msg_bytes = OefSearchSerializer().encode(search_services_request)
@@ -539,8 +530,8 @@ class TestFilteredSearchResult:
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
         search_result = OefSearchSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-        assert search_result.get("agents") == [self.address_2]
+        assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
+        assert search_result.agents == (self.address_2,)
 
     @classmethod
     def teardown_class(cls):

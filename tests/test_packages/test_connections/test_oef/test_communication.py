@@ -143,7 +143,7 @@ class TestOEF:
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=request_id,
+                dialogue_reference=(str(request_id), ""),
                 query=search_query_empty_model,
             )
             self.multiplexer.put(
@@ -161,22 +161,22 @@ class TestOEF:
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
-            assert search_result.message_id == request_id
-            assert request_id and search_result.agents == []
+            assert search_result.dialogue_reference[0] == str(request_id)
+            assert request_id and search_result.agents == ()
 
         def test_search_services_with_query_with_model(self):
             """Test that a search services request can be sent correctly.
 
             In this test, the query has a simple data model.
             """
-            request_id = 2
+            request_id = 1
             data_model = DataModel("foobar", [Attribute("foo", str, True)])
             search_query = Query(
                 [Constraint("foo", ConstraintType("==", "bar"))], model=data_model
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=request_id,
+                dialogue_reference=(str(request_id), ""),
                 query=search_query,
             )
             self.multiplexer.put(
@@ -194,8 +194,8 @@ class TestOEF:
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
-            assert search_result.message_id == request_id
-            assert search_result.agents == []
+            assert search_result.dialogue_reference[0] == str(request_id)
+            assert search_result.agents == ()
 
         @classmethod
         def teardown_class(cls):
@@ -224,9 +224,10 @@ class TestOEF:
                 "foo", [Attribute("bar", int, True, "A bar attribute.")]
             )
             desc = Description({"bar": 1}, data_model=foo_datamodel)
+            request_id = 1
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                message_id=1,
+                dialogue_reference=(str(request_id), ""),
                 service_description=desc,
             )
             msg_bytes = OefSearchSerializer().encode(msg)
@@ -240,9 +241,10 @@ class TestOEF:
             )
             time.sleep(0.5)
 
+            request_id += 1
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=2,
+                dialogue_reference=(str(request_id), ""),
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel
                 ),
@@ -261,7 +263,7 @@ class TestOEF:
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
-            assert search_result.message_id == 2
+            assert search_result.dialogue_reference[0] == str(request_id)
             if search_result.agents != [self.crypto1.address]:
                 logger.warning(
                     "search_result.agents != [self.crypto1.address] FAILED in test_oef/test_communication.py"
@@ -301,7 +303,7 @@ class TestOEF:
             cls.desc = Description({"bar": 1}, data_model=cls.foo_datamodel)
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                message_id=cls.request_id,
+                dialogue_reference=(str(cls.request_id), ""),
                 service_description=cls.desc,
             )
             msg_bytes = OefSearchSerializer().encode(msg)
@@ -319,7 +321,7 @@ class TestOEF:
             cls.request_id += 1
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=cls.request_id,
+                dialogue_reference=(str(cls.request_id), ""),
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))],
                     model=cls.foo_datamodel,
@@ -356,7 +358,7 @@ class TestOEF:
             self.request_id += 1
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                message_id=self.request_id,
+                dialogue_reference=(str(self.request_id), ""),
                 service_description=self.desc,
             )
             msg_bytes = OefSearchSerializer().encode(msg)
@@ -374,7 +376,7 @@ class TestOEF:
             self.request_id += 1
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=self.request_id,
+                dialogue_reference=(str(self.request_id), ""),
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))],
                     model=self.foo_datamodel,
@@ -395,8 +397,8 @@ class TestOEF:
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
-            assert search_result.message_id == self.request_id
-            assert search_result.agents == []
+            assert search_result.dialogue_reference[0] == str(self.request_id)
+            assert search_result.agents == ()
 
         @classmethod
         def teardown_class(cls):
@@ -429,7 +431,7 @@ class TestOEF:
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                message_id=request_id,
+                dialogue_reference=(str(request_id), ""),
                 query=search_query_empty_model,
             )
             self.multiplexer.put(
@@ -447,8 +449,8 @@ class TestOEF:
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
-            assert search_result.message_id == request_id
-            assert request_id and search_result.agents == []
+            assert search_result.dialogue_reference[0] == str(request_id)
+            assert request_id and search_result.agents == ()
 
         @classmethod
         def teardown_class(cls):
@@ -787,11 +789,15 @@ class TestFIPA:
         oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
 
+        oef_channel.oef_msg_id += 1
+        dialogue_reference = ("1", str(oef_channel.oef_msg_id))
+        oef_channel.oef_msg_it_to_dialogue_reference[oef_channel.oef_msg_id] = dialogue_reference
         oef_channel.on_oef_error(
-            answer_id=1, operation=OEFErrorOperation.SEARCH_SERVICES
+            answer_id=oef_channel.oef_msg_id, operation=OEFErrorOperation.SEARCH_SERVICES
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OefSearchSerializer().decode(envelope.message)
+        assert dec_msg.dialogue_reference == ("1", str(oef_channel.oef_msg_id))
         assert (
             dec_msg.performative is OefSearchMessage.Performative.OEF_ERROR
         ), "It should be an error message"
@@ -988,12 +994,13 @@ async def test_send_oef_message(network_node):
         oef_port=10000,
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
+    request_id = 1
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.OEF_ERROR,
-        message_id=1,
-        operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+        dialogue_reference=(str(request_id), ""),
+        oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
     )
     msg_bytes = OefSearchSerializer().encode(msg)
     envelope = Envelope(
@@ -1008,9 +1015,10 @@ async def test_send_oef_message(network_node):
     data_model = DataModel("foobar", attributes=[])
     query = Query(constraints=[], model=data_model)
 
+    request_id += 1
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-        message_id=1,
+        dialogue_reference=(str(request_id), ""),
         query=query,
     )
     msg_bytes = OefSearchSerializer().encode(msg)

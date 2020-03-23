@@ -80,7 +80,7 @@ class TACBehaviour(Behaviour):
         )
         oef_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=search_id,
+            dialogue_reference=(str(search_id), ""),
             query=query,
         )
         self.context.outbox.put_message(

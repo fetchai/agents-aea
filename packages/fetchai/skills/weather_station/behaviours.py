@@ -135,7 +135,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            message_id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
         self.context.outbox.put_message(
@@ -160,7 +160,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            message_id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
         )
         self.context.outbox.put_message(

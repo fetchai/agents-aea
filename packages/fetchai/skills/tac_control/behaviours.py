@@ -122,9 +122,8 @@ class TACBehaviour(Behaviour):
         )
         oef_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=self._oef_msg_id,
+            dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
-            service_id="",
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,
@@ -146,7 +145,7 @@ class TACBehaviour(Behaviour):
         )
         oef_msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=self._oef_msg_id,
+            dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=self._registered_desc,
             service_id="",
         )

@@ -85,9 +85,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if registration.registered_goods_demanded_description is not None:
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                id=registration.get_next_id(),
+                dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=registration.registered_goods_demanded_description,
-                service_id="",
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
@@ -100,9 +99,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if registration.registered_goods_supplied_description is not None:
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                id=registration.get_next_id(),
+                dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=registration.registered_goods_supplied_description,
-                service_id="",
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
@@ -140,9 +138,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             )
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                id=registration.get_next_id(),
+                dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=goods_supplied_description,
-                service_id="",
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
@@ -165,9 +162,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             )
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                id=registration.get_next_id(),
+                dialogue_reference=(str(registration.get_next_id()), ""),
                 service_description=goods_demanded_description,
-                service_id="",
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
@@ -208,7 +204,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 )
                 oef_msg = OefSearchMessage(
                     performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                    id=search_id,
+                    dialogue_reference=(str(search_id), ""),
                     query=query,
                 )
                 self.context.outbox.put_message(
@@ -236,7 +232,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 )
                 oef_msg = OefSearchMessage(
                     performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                    id=search_id,
+                    dialogue_reference=(str(search_id), ""),
                     query=query,
                 )
                 self.context.outbox.put_message(
