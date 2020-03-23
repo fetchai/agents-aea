@@ -349,6 +349,16 @@ class TACHandler(Handler):
                 str(key): value
                 for key, value in tac_message.utility_params_by_good_id.items()
             }
+
+            contract = self.context.contracts.erc1155
+            contract.set_deployed_instance(
+                self.context.ledger_apis.apis.get("ethereum"),
+                tac_message.get("contract_address"),
+            )
+
+            self.context.logger.info(
+                "We received a contract address: {}".format(contract.instance.address)
+            )
         else:
             amount_by_currency_id = tac_message.amount_by_currency_id
             quantities_by_good_id = tac_message.quantities_by_good_id
@@ -356,11 +366,6 @@ class TACHandler(Handler):
 
             utility_params_by_good_id = tac_message.utility_params_by_good_id
 
-        contract = self.context.contracts.erc1155
-        contract.set_deployed_instance(
-            self.context.ledger_apis.apis.get("ethereum"),
-            tac_message.get("contract_address"),
-        )
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=amount_by_currency_id,

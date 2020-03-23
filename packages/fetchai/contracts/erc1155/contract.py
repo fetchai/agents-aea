@@ -196,9 +196,6 @@ class ERC1155Contract(Contract):
         """Create a batch of items."""
         # create the items
         self.nonce += 1
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        if self.nonce != nonce:
-            self.nonce = nonce
         tx = self.instance.functions.createBatch(
             deployer_address, token_ids
         ).buildTransaction(
@@ -254,9 +251,6 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Create an item."""
         self.nonce += 1
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
-        if self.nonce != nonce:
-            self.nonce = nonce
         tx = self.instance.functions.createSingle(
             deployer_address, token_id, ""
         ).buildTransaction(
@@ -278,8 +272,7 @@ class ERC1155Contract(Contract):
         skill_callback_id: ContractId,
         token_ids: List[int],
     ):
-
-        assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
+        assert len(mint_quantities) == len(token_ids), "Wrong number of items."
         tx = self._create_mint_batch_tx(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
@@ -378,11 +371,6 @@ class ERC1155Contract(Contract):
         """Mint a batch of items."""
         # mint batch
         self.nonce += 1
-        nonce = ledger_api.api.eth.getTransactionCount(
-            ledger_api.api.toChecksumAddress(deployer_address)
-        )
-        if self.nonce != nonce:
-            self.nonce = nonce
         assert recipient_address is not None
         decoded_type = Helpers().decode_id(token_id)
         assert (

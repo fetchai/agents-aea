@@ -5,9 +5,9 @@ license: Apache-2.0
 aea_version: 0.2.3
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmNcbHFVwaKJbwnaGCwSpMr8gyUVuHz71rmCTZXVo5kWeG
+  behaviours.py: Qmf6bcAYXs9irzPETGEv4GzeverkKkaZqZ5x3HNH8Jgn6E
   game.py: QmRNNP3wAwYbB1YeWtsCk4VdkbUYG1Bo2AVCV8pUimAjic
-  handlers.py: Qmda7w5iKp9thsBo5F4VWntTQP2aMVR2gLnvfJUnt2UGFH
+  handlers.py: QmPnARbLHMbp5EAUKQmmszrfjWAGAQWwp3HDV9bGeUiYBW
   helpers.py: QmbzyW7ESVSg4NFCi1DVG2StzKdKEgc8g6w1t57GPF8bq9
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
@@ -32,7 +32,7 @@ models:
     args:
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 10
+      nb_goods: 11
       tx_fee: 1
       base_good_endowment: 4
       lower_bound_factor: 1
