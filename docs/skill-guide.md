@@ -28,8 +28,8 @@ In this example, we implement a simple search behaviour. Each time, `act()` gets
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -59,8 +59,8 @@ class MySearchBehaviour(TickerBehaviour):
         self.sent_search_count += 1
         search_constraints = [Constraint("country", ConstraintType("==", "UK"))]
         search_query_w_empty_model = Query(search_constraints, model=None)
-        search_request = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        search_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=self.sent_search_count,
             query=search_query_w_empty_model,
         )
@@ -72,8 +72,8 @@ class MySearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(search_request),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(search_request),
         )
 
     def teardown(self) -> None:
@@ -100,13 +100,13 @@ Let us now implement a handler to deal with the incoming search responses.
 ``` python
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 
 
 class MySearchHandler(Handler):
     """This class provides a simple search handler."""
 
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -117,16 +117,16 @@ class MySearchHandler(Handler):
         """Set up the handler."""
         self.context.logger.info("[{}]: setting up MySearchHandler".format(self.context.agent_name))
 
-    def handle(self, message: OefMessage) -> None:
+    def handle(self, message: OefSearchMessage) -> None:
         """
         Handle the message.
 
         :param message: the message.
         :return: None
         """
-        msg_type = OefMessage.Performative(message.get("type"))
+        msg_type = OefSearchMessage.Performative(message.get("type"))
 
-        if msg_type is OefMessage.Performative.SEARCH_RESULT:
+        if msg_type is OefSearchMessage.Performative.SEARCH_RESULT:
             self.received_search_count += 1
             nb_agents_found = len(message.get("agents"))
             self.context.logger.info(
@@ -242,8 +242,8 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 SERVICE_ID = ""
@@ -296,8 +296,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
@@ -305,8 +305,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: updating services on OEF.".format(self.context.agent_name)
@@ -320,8 +320,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
@@ -329,8 +329,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: unregistering services from OEF.".format(self.context.agent_name)

@@ -34,7 +34,7 @@ from packages.fetchai.protocols.oef.custom_types import Query as CustomQuery
 DEFAULT_BODY_SIZE = 4
 
 
-class OefMessage(Message):
+class OefSearchMessage(Message):
     """A protocol for interacting with an OEF service."""
 
     protocol_id = ProtocolId("fetchai", "oef", "0.1.0")
@@ -67,7 +67,7 @@ class OefMessage(Message):
         **kwargs,
     ):
         """
-        Initialise an instance of OefMessage.
+        Initialise an instance of OefSearchMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -78,7 +78,7 @@ class OefMessage(Message):
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=OefMessage.Performative(performative),
+            performative=OefSearchMessage.Performative(performative),
             **kwargs,
         )
         self._performatives = {
@@ -113,7 +113,7 @@ class OefMessage(Message):
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(OefMessage.Performative, self.get("performative"))
+        return cast(OefSearchMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -185,7 +185,7 @@ class OefMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             assert (
-                type(self.performative) == OefMessage.Performative
+                type(self.performative) == OefSearchMessage.Performative
             ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                 self.valid_performatives, self.performative
             )
@@ -193,7 +193,7 @@ class OefMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == OefMessage.Performative.REGISTER_SERVICE:
+            if self.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
                 expected_nb_of_contents = 2
                 assert (
                     type(self.service_description) == CustomDescription
@@ -205,21 +205,21 @@ class OefMessage(Message):
                 ), "Invalid type for content 'service_id'. Expected 'str'. Found '{}'.".format(
                     type(self.service_id)
                 )
-            elif self.performative == OefMessage.Performative.UNREGISTER_SERVICE:
+            elif self.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.service_description) == CustomDescription
                 ), "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
                     type(self.service_description)
                 )
-            elif self.performative == OefMessage.Performative.SEARCH_SERVICES:
+            elif self.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.query) == CustomQuery
                 ), "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
                     type(self.query)
                 )
-            elif self.performative == OefMessage.Performative.SEARCH_RESULT:
+            elif self.performative == OefSearchMessage.Performative.SEARCH_RESULT:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.agents) == tuple
@@ -229,7 +229,7 @@ class OefMessage(Message):
                 assert all(
                     type(element) == str for element in self.agents
                 ), "Invalid type for tuple elements in content 'agents'. Expected 'str'."
-            elif self.performative == OefMessage.Performative.OEF_ERROR:
+            elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.operation) == CustomOefErrorOperation

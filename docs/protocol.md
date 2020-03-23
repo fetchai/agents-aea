@@ -29,7 +29,7 @@ The `fetchai/oef:0.1.0` protocol is used by AEAs to register and unregister thei
   <p>In future, the framework will support peer to peer communications.</p>
 </div>
 
-The `oef` protocol definition includes an `OefMessage` with the following message types:
+The `oef` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ```python
 class Type(Enum):

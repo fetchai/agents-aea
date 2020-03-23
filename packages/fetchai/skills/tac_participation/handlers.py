@@ -28,7 +28,7 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
@@ -38,7 +38,7 @@ from packages.fetchai.skills.tac_participation.search import Search
 class OEFHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
@@ -60,16 +60,16 @@ class OEFHandler(Handler):
         :param message: the message
         :return: None
         """
-        oef_message = cast(OefMessage, message)
+        oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
             "[{}]: Handling OEF message. performative={}".format(
                 self.context.agent_name, oef_message.performative
             )
         )
-        if oef_message.performative == OefMessage.Performative.SEARCH_RESULT:
+        if oef_message.performative == OefSearchMessage.Performative.SEARCH_RESULT:
             self._on_search_result(oef_message)
-        elif oef_message.performative == OefMessage.Performative.OEF_ERROR:
+        elif oef_message.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
 
     def teardown(self) -> None:
@@ -80,7 +80,7 @@ class OEFHandler(Handler):
         """
         pass
 
-    def _on_oef_error(self, oef_error: OefMessage) -> None:
+    def _on_oef_error(self, oef_error: OefSearchMessage) -> None:
         """
         Handle an OEF error message.
 
@@ -94,7 +94,7 @@ class OEFHandler(Handler):
             )
         )
 
-    def _on_search_result(self, search_result: OefMessage) -> None:
+    def _on_search_result(self, search_result: OefSearchMessage) -> None:
         """
         Split the search results from the OEF.
 

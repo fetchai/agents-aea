@@ -266,7 +266,7 @@ The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing
 
 The `TransactionHandler` deals with `TransactionMessage`s received from the decision maker component. The decision maker component is responsible for cryptoeconomic security.
 
-The `OEFSearchHandler` deals with `OefMessage` types returned from the OEF search nodes.
+The `OEFSearchHandler` deals with `OefSearchMessage` types returned from the OEF search nodes.
 
 The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 

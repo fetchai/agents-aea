@@ -28,7 +28,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
 
@@ -170,7 +170,7 @@ class TrainHandler(Handler):
 class OEFHandler(Handler):
     """The OEF handler."""
 
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -184,9 +184,9 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OefMessage, message)
+        oef_msg = cast(OefSearchMessage, message)
 
-        if oef_msg.performative is OefMessage.Performative.SEARCH_RESULT:
+        if oef_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
 

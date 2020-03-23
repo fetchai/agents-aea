@@ -37,8 +37,8 @@ from aea.protocols.default.serialization import DefaultSerializer
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 
 DEFAULT_OEF = "default_oef"
 
@@ -71,27 +71,27 @@ class TestEmptySearch:
         query = Query(constraints=[], model=None)
 
         # build and send the request
-        search_services_request = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        search_services_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=request_id,
             query=query,
         )
-        msg_bytes = OefSerializer().encode(search_services_request)
+        msg_bytes = OefSearchSerializer().encode(search_services_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
-        search_result = OefSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefMessage.Performative.SEARCH_RESULT
+        search_result = OefSearchSerializer().decode(response_envelope.message)
+        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
         assert search_result.get("agents") == []
 
     @classmethod
@@ -130,17 +130,17 @@ class TestSimpleSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model
         )
-        register_service_request = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        register_service_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=request_id,
             service_description=service_description,
             service_id=service_id,
         )
-        msg_bytes = OefSerializer().encode(register_service_request)
+        msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=cls.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         cls.multiplexer.put(envelope)
@@ -151,27 +151,27 @@ class TestSimpleSearchResult:
         query = Query(constraints=[], model=self.data_model)
 
         # build and send the request
-        search_services_request = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        search_services_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=request_id,
             query=query,
         )
-        msg_bytes = OefSerializer().encode(search_services_request)
+        msg_bytes = OefSearchSerializer().encode(search_services_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
-        search_result = OefSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefMessage.Performative.SEARCH_RESULT
+        search_result = OefSearchSerializer().decode(response_envelope.message)
+        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
         assert search_result.get("agents") == [self.address_1]
 
     @classmethod
@@ -219,63 +219,63 @@ class TestUnregister:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=0,
             service_description=service_description,
             service_id="Test_service",
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
-        result = OefSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefMessage.Performative.OEF_ERROR
+        result = OefSearchSerializer().decode(response_envelope.message)
+        assert result.get("type") == OefSearchMessage.Performative.OEF_ERROR
 
-        msg = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=0,
             service_description=service_description,
             service_id="Test_Service",
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
 
         # Search for the registered service
-        msg = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=0,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
-        result = OefSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefMessage.Performative.SEARCH_RESULT
+        result = OefSearchSerializer().decode(response_envelope.message)
+        assert result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
         assert len(result.get("agents")) == 1
 
         # unregister the service
@@ -283,42 +283,42 @@ class TestUnregister:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=0,
             service_description=service_description,
             service_id="Test_service",
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
 
         # the same query returns empty
         # Search for the register agent
-        msg = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=0,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
-        result = OefSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefMessage.Performative.SEARCH_RESULT
+        result = OefSearchSerializer().decode(response_envelope.message)
+        assert result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
         assert len(result.get("agents")) == 0
 
     @classmethod
@@ -382,7 +382,7 @@ class TestAgentMessage:
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = DefaultSerializer().decode(response_envelope.message)
         assert result.get("type") == DefaultMessage.Performative.ERROR
@@ -456,17 +456,17 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar
         )
-        register_service_request = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        register_service_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=request_id,
             service_description=service_description,
             service_id=service_id,
         )
-        msg_bytes = OefSerializer().encode(register_service_request)
+        msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=cls.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         cls.multiplexer1.put(envelope)
@@ -478,17 +478,17 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo
         )
-        register_service_request = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        register_service_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=request_id,
             service_description=service_description,
             service_id=service_id,
         )
-        msg_bytes = OefSerializer().encode(register_service_request)
+        msg_bytes = OefSearchSerializer().encode(register_service_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=cls.address_2,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         cls.multiplexer2.put(envelope)
@@ -498,17 +498,17 @@ class TestFilteredSearchResult:
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=0,
             service_description=service_description,
             service_id="Test_service",
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=cls.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         cls.multiplexer1.put(envelope)
@@ -519,27 +519,27 @@ class TestFilteredSearchResult:
         query = Query(constraints=[], model=self.data_model_barfoo)
 
         # build and send the request
-        search_services_request = OefMessage(
-            performative=OefMessage.Performative.SEARCH_SERVICES,
+        search_services_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             id=request_id,
             query=query,
         )
-        msg_bytes = OefSerializer().encode(search_services_request)
+        msg_bytes = OefSearchSerializer().encode(search_services_request)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = InBox(self.multiplexer1).get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefMessage.protocol_id
+        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
         assert response_envelope.to == self.address_1
         assert response_envelope.sender == DEFAULT_OEF
-        search_result = OefSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OefMessage.Performative.SEARCH_RESULT
+        search_result = OefSearchSerializer().decode(response_envelope.message)
+        assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
         assert search_result.get("agents") == [self.address_2]
 
     @classmethod

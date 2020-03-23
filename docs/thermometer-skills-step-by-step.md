@@ -68,8 +68,8 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
@@ -177,8 +177,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
@@ -186,8 +186,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: updating thermometer services on OEF.".format(
@@ -203,8 +203,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
@@ -212,8 +212,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: unregistering thermometer station services from OEF.".format(
@@ -953,8 +953,8 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -1016,14 +1016,14 @@ class MySearchBehaviour(TickerBehaviour):
        if strategy.is_searching:
            query = strategy.get_service_query()
            search_id = strategy.get_next_search_id()
-           oef_msg = OefMessage(
-               performative=OefMessage.Performative.SEARCH_SERVICES, id=search_id, query=query
+           oef_msg = OefSearchMessage(
+               performative=OefSearchMessage.Performative.SEARCH_SERVICES, id=search_id, query=query
            )
            self.context.outbox.put_message(
                to=self.context.search_service_address,
                sender=self.context.agent_address,
-               protocol_id=OefMessage.protocol_id,
-               message=OefSerializer().encode(oef_msg),
+               protocol_id=OefSearchMessage.protocol_id,
+               message=OefSearchSerializer().encode(oef_msg),
            )
 
    def teardown(self) -> None:
@@ -1077,7 +1077,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -1378,7 +1378,7 @@ To handle the OEF response on our search request adds the following code in the 
 class OEFHandler(Handler):
     """This class scaffolds a handler."""
  
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
  
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1392,8 +1392,8 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OefMessage, message)
-        if oef_msg.type is OefMessage.Performative.SEARCH_RESULT:
+        oef_msg = cast(OefSearchMessage, message)
+        if oef_msg.type is OefSearchMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
  

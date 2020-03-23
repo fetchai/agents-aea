@@ -26,8 +26,8 @@ from typing import Optional, cast
 from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase
@@ -120,8 +120,8 @@ class TACBehaviour(Behaviour):
         self.context.logger.info(
             "[{}]: Registering TAC data model".format(self.context.agent_name)
         )
-        oef_msg = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=self._oef_msg_id,
             service_description=desc,
             service_id="",
@@ -129,8 +129,8 @@ class TACBehaviour(Behaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(oef_msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(oef_msg),
         )
         self._registered_desc = desc
 
@@ -144,8 +144,8 @@ class TACBehaviour(Behaviour):
         self.context.logger.info(
             "[{}]: Unregistering TAC data model".format(self.context.agent_name)
         )
-        oef_msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=self._oef_msg_id,
             service_description=self._registered_desc,
             service_id="",
@@ -153,8 +153,8 @@ class TACBehaviour(Behaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(oef_msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(oef_msg),
         )
         self._registered_desc = None
 

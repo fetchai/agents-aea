@@ -24,7 +24,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase, Transaction
@@ -301,7 +301,7 @@ class TACHandler(Handler):
 class OEFRegistrationHandler(Handler):
     """Handle the message exchange with the OEF."""
 
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -318,21 +318,21 @@ class OEFRegistrationHandler(Handler):
         :param message: the message
         :return: None
         """
-        oef_message = cast(OefMessage, message)
+        oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
             "[{}]: Handling OEF message. performative={}".format(
                 self.context.agent_name, oef_message.performative
             )
         )
-        if oef_message.performative == OefMessage.Performative.OEF_ERROR:
+        if oef_message.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
         else:
             self.context.logger.warning(
                 "[{}]: OEF Message type not recognized.".format(self.context.agent_name)
             )
 
-    def _on_oef_error(self, oef_error: OefMessage) -> None:
+    def _on_oef_error(self, oef_error: OefSearchMessage) -> None:
         """
         Handle an OEF error message.
 

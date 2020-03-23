@@ -24,8 +24,8 @@ from typing import cast
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.skills.tac_negotiation.registration import Registration
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
@@ -83,8 +83,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         registration = cast(Registration, self.context.registration)
 
         if registration.registered_goods_demanded_description is not None:
-            oef_msg = OefMessage(
-                performative=OefMessage.Performative.UNREGISTER_SERVICE,
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
                 id=registration.get_next_id(),
                 service_description=registration.registered_goods_demanded_description,
                 service_id="",
@@ -92,14 +92,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OefMessage.protocol_id,
-                message=OefSerializer().encode(oef_msg),
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(oef_msg),
             )
             registration.registered_goods_demanded_description = None
 
         if registration.registered_goods_supplied_description is not None:
-            oef_msg = OefMessage(
-                performative=OefMessage.Performative.UNREGISTER_SERVICE,
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
                 id=registration.get_next_id(),
                 service_description=registration.registered_goods_supplied_description,
                 service_id="",
@@ -107,8 +107,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OefMessage.protocol_id,
-                message=OefSerializer().encode(oef_msg),
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(oef_msg),
             )
             registration.registered_goods_supplied_description = None
 
@@ -138,8 +138,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             registration.registered_goods_supplied_description = (
                 goods_supplied_description
             )
-            oef_msg = OefMessage(
-                performative=OefMessage.Performative.REGISTER_SERVICE,
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 id=registration.get_next_id(),
                 service_description=goods_supplied_description,
                 service_id="",
@@ -147,8 +147,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OefMessage.protocol_id,
-                message=OefSerializer().encode(oef_msg),
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(oef_msg),
             )
 
         if strategy.is_registering_as_buyer:
@@ -163,8 +163,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             registration.registered_goods_demanded_description = (
                 goods_demanded_description
             )
-            oef_msg = OefMessage(
-                performative=OefMessage.Performative.REGISTER_SERVICE,
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
                 id=registration.get_next_id(),
                 service_description=goods_demanded_description,
                 service_id="",
@@ -172,8 +172,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OefMessage.protocol_id,
-                message=OefSerializer().encode(oef_msg),
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(oef_msg),
             )
 
     def _search_services(self) -> None:
@@ -206,16 +206,16 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                         self.context.agent_name, search_id
                     )
                 )
-                oef_msg = OefMessage(
-                    performative=OefMessage.Performative.SEARCH_SERVICES,
+                oef_msg = OefSearchMessage(
+                    performative=OefSearchMessage.Performative.SEARCH_SERVICES,
                     id=search_id,
                     query=query,
                 )
                 self.context.outbox.put_message(
                     to=self.context.search_service_address,
                     sender=self.context.agent_address,
-                    protocol_id=OefMessage.protocol_id,
-                    message=OefSerializer().encode(oef_msg),
+                    protocol_id=OefSearchMessage.protocol_id,
+                    message=OefSearchSerializer().encode(oef_msg),
                 )
 
         if strategy.is_searching_for_buyers:
@@ -234,16 +234,16 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                         self.context.agent_name, search_id
                     )
                 )
-                oef_msg = OefMessage(
-                    performative=OefMessage.Performative.SEARCH_SERVICES,
+                oef_msg = OefSearchMessage(
+                    performative=OefSearchMessage.Performative.SEARCH_SERVICES,
                     id=search_id,
                     query=query,
                 )
                 self.context.outbox.put_message(
                     to=self.context.search_service_address,
                     sender=self.context.agent_address,
-                    protocol_id=OefMessage.protocol_id,
-                    message=OefSerializer().encode(oef_msg),
+                    protocol_id=OefSearchMessage.protocol_id,
+                    message=OefSearchSerializer().encode(oef_msg),
                 )
 
 

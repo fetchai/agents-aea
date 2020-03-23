@@ -74,8 +74,8 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -448,16 +448,16 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OefMessage(
-            performative=OefMessage.Performative.SEARCH_RESULT,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
             id=search_id,
             agents=agents,
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -477,20 +477,20 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
         try:
-            operation = OefMessage.OefErrorOperation(operation)
+            operation = OefSearchMessage.OefErrorOperation(operation)
         except ValueError:
-            operation = OefMessage.OefErrorOperation.OTHER
+            operation = OefSearchMessage.OefErrorOperation.OTHER
 
-        msg = OefMessage(
-            performative=OefMessage.Performative.OEF_ERROR,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.OEF_ERROR,
             id=answer_id,
             operation=operation,
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -523,7 +523,7 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -563,24 +563,24 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        oef_message = OefSerializer().decode(envelope.message)
-        oef_message = cast(OefMessage, oef_message)
+        oef_message = OefSearchSerializer().decode(envelope.message)
+        oef_message = cast(OefSearchMessage, oef_message)
         oef_msg_id = oef_message.message_id
-        if oef_message.performative == OefMessage.Performative.REGISTER_SERVICE:
+        if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
             service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
             self.register_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_message.performative == OefMessage.Performative.UNREGISTER_SERVICE:
+        elif oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
             service_description = oef_message.service_description
             service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
             self.unregister_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_message.performative == OefMessage.Performative.SEARCH_SERVICES:
+        elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(oef_msg_id, oef_query)

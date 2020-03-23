@@ -28,10 +28,10 @@ from packages.fetchai.protocols.oef import oef_pb2
 from packages.fetchai.protocols.oef.custom_types import Description
 from packages.fetchai.protocols.oef.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef.custom_types import Query
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 
 
-class OefSerializer(Serializer):
+class OefSearchSerializer(Serializer):
     """Serialization for the 'oef' protocol."""
 
     def encode(self, msg: Message) -> bytes:
@@ -41,8 +41,8 @@ class OefSerializer(Serializer):
         :param msg: the message object.
         :return: the bytes.
         """
-        msg = cast(OefMessage, msg)
-        oef_msg = oef_pb2.OefMessage()
+        msg = cast(OefSearchMessage, msg)
+        oef_msg = oef_pb2.OefSearchMessage()
         oef_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
         oef_msg.dialogue_starter_reference = dialogue_reference[0]
@@ -50,30 +50,30 @@ class OefSerializer(Serializer):
         oef_msg.target = msg.target
 
         performative_id = msg.performative
-        if performative_id == OefMessage.Performative.REGISTER_SERVICE:
-            performative = oef_pb2.OefMessage.Register_Service()  # type: ignore
+        if performative_id == OefSearchMessage.Performative.REGISTER_SERVICE:
+            performative = oef_pb2.OefSearchMessage.Register_Service()  # type: ignore
             service_description = msg.service_description
             performative = Description.encode(performative, service_description)
             service_id = msg.service_id
             performative.service_id = service_id
             oef_msg.register_service.CopyFrom(performative)
-        elif performative_id == OefMessage.Performative.UNREGISTER_SERVICE:
-            performative = oef_pb2.OefMessage.Unregister_Service()  # type: ignore
+        elif performative_id == OefSearchMessage.Performative.UNREGISTER_SERVICE:
+            performative = oef_pb2.OefSearchMessage.Unregister_Service()  # type: ignore
             service_description = msg.service_description
             performative = Description.encode(performative, service_description)
             oef_msg.unregister_service.CopyFrom(performative)
-        elif performative_id == OefMessage.Performative.SEARCH_SERVICES:
-            performative = oef_pb2.OefMessage.Search_Services()  # type: ignore
+        elif performative_id == OefSearchMessage.Performative.SEARCH_SERVICES:
+            performative = oef_pb2.OefSearchMessage.Search_Services()  # type: ignore
             query = msg.query
             performative = Query.encode(performative, query)
             oef_msg.search_services.CopyFrom(performative)
-        elif performative_id == OefMessage.Performative.SEARCH_RESULT:
-            performative = oef_pb2.OefMessage.Search_Result()  # type: ignore
+        elif performative_id == OefSearchMessage.Performative.SEARCH_RESULT:
+            performative = oef_pb2.OefSearchMessage.Search_Result()  # type: ignore
             agents = msg.agents
             performative.agents.extend(agents)
             oef_msg.search_result.CopyFrom(performative)
-        elif performative_id == OefMessage.Performative.OEF_ERROR:
-            performative = oef_pb2.OefMessage.Oef_Error()  # type: ignore
+        elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
+            performative = oef_pb2.OefSearchMessage.Oef_Error()  # type: ignore
             operation = msg.operation
             performative = OefErrorOperation.encode(performative, operation)
             oef_msg.oef_error.CopyFrom(performative)
@@ -90,7 +90,7 @@ class OefSerializer(Serializer):
         :param obj: the bytes object.
         :return: the 'Oef' message.
         """
-        oef_pb = oef_pb2.OefMessage()
+        oef_pb = oef_pb2.OefSearchMessage()
         oef_pb.ParseFromString(obj)
         message_id = oef_pb.message_id
         dialogue_reference = (
@@ -100,34 +100,34 @@ class OefSerializer(Serializer):
         target = oef_pb.target
 
         performative = oef_pb.WhichOneof("performative")
-        performative_id = OefMessage.Performative(str(performative))
+        performative_id = OefSearchMessage.Performative(str(performative))
         performative_content = dict()
-        if performative_id == OefMessage.Performative.REGISTER_SERVICE:
+        if performative_id == OefSearchMessage.Performative.REGISTER_SERVICE:
             pb2_service_description = oef_pb.register_service.service_description
             service_description = Description.decode(pb2_service_description)
             performative_content["service_description"] = service_description
             service_id = oef_pb.register_service.service_id
             performative_content["service_id"] = service_id
-        elif performative_id == OefMessage.Performative.UNREGISTER_SERVICE:
+        elif performative_id == OefSearchMessage.Performative.UNREGISTER_SERVICE:
             pb2_service_description = oef_pb.unregister_service.service_description
             service_description = Description.decode(pb2_service_description)
             performative_content["service_description"] = service_description
-        elif performative_id == OefMessage.Performative.SEARCH_SERVICES:
+        elif performative_id == OefSearchMessage.Performative.SEARCH_SERVICES:
             pb2_query = oef_pb.search_services.query
             query = Query.decode(pb2_query)
             performative_content["query"] = query
-        elif performative_id == OefMessage.Performative.SEARCH_RESULT:
+        elif performative_id == OefSearchMessage.Performative.SEARCH_RESULT:
             agents = oef_pb.search_result.agents
             agents_tuple = tuple(agents)
             performative_content["agents"] = agents_tuple
-        elif performative_id == OefMessage.Performative.OEF_ERROR:
+        elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             pb2_operation = oef_pb.oef_error.operation
             operation = OefErrorOperation.decode(pb2_operation)
             performative_content["operation"] = operation
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 
-        return OefMessage(
+        return OefSearchMessage(
             message_id=message_id,
             dialogue_reference=dialogue_reference,
             target=target,

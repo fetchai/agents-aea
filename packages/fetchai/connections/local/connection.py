@@ -33,8 +33,8 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -146,17 +146,17 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        oef_message = OefSerializer().decode(envelope.message)
-        oef_message = cast(OefMessage, oef_message)
+        oef_message = OefSearchSerializer().decode(envelope.message)
+        oef_message = cast(OefSearchMessage, oef_message)
         sender = envelope.sender
         request_id = oef_message.message_id
-        if oef_message.performative == OefMessage.Performative.REGISTER_SERVICE:
+        if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             await self._register_service(sender, oef_message.service_description)
-        elif oef_message.performative == OefMessage.Performative.UNREGISTER_SERVICE:
+        elif oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
             await self._unregister_service(
                 sender, request_id, oef_message.service_description
             )
-        elif oef_message.performative == OefMessage.Performative.SEARCH_SERVICES:
+        elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             await self._search_services(sender, request_id, oef_message.query)
         else:
             # request not recognized
@@ -225,16 +225,16 @@ class LocalNode:
         """
         async with self._lock:
             if address not in self.services:
-                msg = OefMessage(
-                    performative=OefMessage.Performative.OEF_ERROR,
+                msg = OefSearchMessage(
+                    performative=OefSearchMessage.Performative.OEF_ERROR,
                     id=msg_id,
-                    operation=OefMessage.OefErrorOperation.UNREGISTER_SERVICE,
+                    operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                 )
-                msg_bytes = OefSerializer().encode(msg)
+                msg_bytes = OefSearchSerializer().encode(msg)
                 envelope = Envelope(
                     to=address,
                     sender=DEFAULT_OEF,
-                    protocol_id=OefMessage.protocol_id,
+                    protocol_id=OefSearchMessage.protocol_id,
                     message=msg_bytes,
                 )
                 await self._send(envelope)
@@ -266,16 +266,16 @@ class LocalNode:
                     if description.data_model == query.model:
                         result.append(agent_address)
 
-        msg = OefMessage(
-            performative=OefMessage.Performative.SEARCH_RESULT,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
             id=search_id,
             agents=sorted(set(result)),
         )
-        msg_bytes = OefSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=address,
             sender=DEFAULT_OEF,
-            protocol_id=OefMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         await self._send(envelope)

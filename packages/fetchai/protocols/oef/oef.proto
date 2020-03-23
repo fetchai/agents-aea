@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package fetch.aea.Oef;
 
-message OefMessage{
+message OefSearchMessage{
 
     // Custom Types
     message Description{
@@ -54,7 +54,7 @@ message OefMessage{
     }
 
 
-    // Standard OefMessage fields
+    // Standard OefSearchMessage fields
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
     string dialogue_responder_reference = 3;

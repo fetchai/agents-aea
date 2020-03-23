@@ -26,8 +26,8 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 from packages.fetchai.skills.generic_seller.strategy import Strategy
 
 
@@ -135,8 +135,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.REGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
@@ -144,8 +144,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: updating generic seller services on OEF.".format(
@@ -161,8 +161,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefMessage(
-            performative=OefMessage.Performative.UNREGISTER_SERVICE,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
@@ -170,8 +170,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(
             to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OefMessage.protocol_id,
-            message=OefSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: unregistering generic seller services from OEF.".format(

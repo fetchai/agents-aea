@@ -33,7 +33,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefMessage
+from packages.fetchai.protocols.oef.message import OefSearchMessage
 from packages.fetchai.skills.carpark_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.carpark_client.strategy import Strategy
 
@@ -299,7 +299,7 @@ class FIPAHandler(Handler):
 class OEFHandler(Handler):
     """This class handles search related messages from the OEF."""
 
-    SUPPORTED_PROTOCOL = OefMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialise the oef handler."""
@@ -317,9 +317,9 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OefMessage, message)
+        oef_msg = cast(OefSearchMessage, message)
 
-        if oef_msg.performative is OefMessage.Performative.SEARCH_RESULT:
+        if oef_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
             self._handle_search(oef_msg.agents)
 
     def teardown(self) -> None:

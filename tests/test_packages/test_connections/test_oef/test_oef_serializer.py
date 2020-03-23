@@ -21,19 +21,19 @@
 
 from aea.helpers.search.models import Attribute, DataModel, Description
 
-from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import OefSerializer
+from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
 
 
 def test_oef_serialization():
     """Testing the serialization of the OEF."""
     foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
     desc = Description({"bar": 1}, data_model=foo_datamodel)
-    msg = OefMessage(
-        performative=OefMessage.Performative.REGISTER_SERVICE,
+    msg = OefSearchMessage(
+        performative=OefSearchMessage.Performative.REGISTER_SERVICE,
         id=1,
         service_description=desc,
         service_id="",
     )
-    msg_bytes = OefSerializer().encode(msg)
+    msg_bytes = OefSearchSerializer().encode(msg)
     assert len(msg_bytes) > 0
