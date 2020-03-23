@@ -54,7 +54,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
     # check protocol buffer compiler is installed
     res = shutil.which("protoc")
     if res is None:
-        print(
+        logger.error(
             "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
         )
         sys.exit(1)
@@ -62,7 +62,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
     # check black code formatter is installed
     res = shutil.which("black")
     if res is None:
-        print(
+        logger.error(
             "Please install black code formater first! See the following link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
         )
         sys.exit(1)
