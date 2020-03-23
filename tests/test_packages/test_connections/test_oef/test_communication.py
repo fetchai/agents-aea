@@ -791,9 +791,12 @@ class TestFIPA:
 
         oef_channel.oef_msg_id += 1
         dialogue_reference = ("1", str(oef_channel.oef_msg_id))
-        oef_channel.oef_msg_it_to_dialogue_reference[oef_channel.oef_msg_id] = dialogue_reference
+        oef_channel.oef_msg_it_to_dialogue_reference[
+            oef_channel.oef_msg_id
+        ] = dialogue_reference
         oef_channel.on_oef_error(
-            answer_id=oef_channel.oef_msg_id, operation=OEFErrorOperation.SEARCH_SERVICES
+            answer_id=oef_channel.oef_msg_id,
+            operation=OEFErrorOperation.SEARCH_SERVICES,
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OefSearchSerializer().decode(envelope.message)

@@ -92,7 +92,7 @@ class MySearchBehaviour(TickerBehaviour):
             search_id = strategy.get_next_search_id()
             oef_msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=search_id,
+                dialogue_reference=(str(search_id), ""),
                 query=query,
             )
             self.context.outbox.put_message(
