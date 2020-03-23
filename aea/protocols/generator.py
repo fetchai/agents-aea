@@ -1746,6 +1746,7 @@ class ProtocolGenerator:
 
         :return: None
         """
+        # Create the output folder
         output_folder = Path(self.output_folder_path)
         if not output_folder.exists():
             os.mkdir(output_folder)
