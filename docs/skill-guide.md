@@ -29,7 +29,7 @@ from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -60,7 +60,7 @@ class MySearchBehaviour(TickerBehaviour):
         search_constraints = [Constraint("country", ConstraintType("==", "UK"))]
         search_query_w_empty_model = Query(search_constraints, model=None)
         search_request = OefMessage(
-            performative=OefMessage.Type.SEARCH_SERVICES,
+            performative=OefMessage.Performative.SEARCH_SERVICES,
             id=self.sent_search_count,
             query=search_query_w_empty_model,
         )
@@ -70,10 +70,10 @@ class MySearchBehaviour(TickerBehaviour):
             )
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefMessage.protocol_id,
-            message=OEFSerializer().encode(search_request),
+            message=OefSerializer().encode(search_request),
         )
 
     def teardown(self) -> None:
@@ -124,9 +124,9 @@ class MySearchHandler(Handler):
         :param message: the message.
         :return: None
         """
-        msg_type = OefMessage.Type(message.get("type"))
+        msg_type = OefMessage.Performative(message.get("type"))
 
-        if msg_type is OefMessage.Type.SEARCH_RESULT:
+        if msg_type is OefMessage.Performative.SEARCH_RESULT:
             self.received_search_count += 1
             nb_agents_found = len(message.get("agents"))
             self.context.logger.info(
@@ -243,7 +243,7 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 SERVICE_ID = ""
@@ -297,16 +297,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefMessage(
-            performative=OefMessage.Type.REGISTER_SERVICE,
+            performative=OefMessage.Performative.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            message=OefSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: updating services on OEF.".format(self.context.agent_name)
@@ -321,16 +321,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefMessage(
-            performative=OefMessage.Type.UNREGISTER_SERVICE,
+            performative=OefMessage.Performative.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            message=OefSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: unregistering services from OEF.".format(self.context.agent_name)

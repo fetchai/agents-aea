@@ -60,10 +60,10 @@ class OefMessage(Message):
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
         **kwargs,
     ):
         """

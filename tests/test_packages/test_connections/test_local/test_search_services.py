@@ -31,6 +31,8 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import AEAConnectionError, Envelope, InBox, Multiplexer
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FIPAMessage
@@ -382,8 +384,8 @@ class TestAgentMessage:
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OefMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
-        result = OefSerializer().decode(response_envelope.message)
-        assert result.get("type") == OefMessage.Performative.DIALOGUE_ERROR
+        result = DefaultSerializer().decode(response_envelope.message)
+        assert result.get("type") == DefaultMessage.Performative.ERROR
 
     @classmethod
     def teardown_class(cls):

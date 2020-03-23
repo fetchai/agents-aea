@@ -69,7 +69,7 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
@@ -178,16 +178,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefMessage(
-            performative=OefMessage.Type.REGISTER_SERVICE,
+            performative=OefMessage.Performative.REGISTER_SERVICE,
             id=oef_msg_id,
             service_description=desc,
             service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            message=OefSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: updating thermometer services on OEF.".format(
@@ -204,16 +204,16 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefMessage(
-            performative=OefMessage.Type.UNREGISTER_SERVICE,
+            performative=OefMessage.Performative.UNREGISTER_SERVICE,
             id=oef_msg_id,
             service_description=self._registered_service_description,
             service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            message=OefSerializer().encode(msg),
         )
         self.context.logger.info(
             "[{}]: unregistering thermometer station services from OEF.".format(
@@ -364,7 +364,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
    """
    self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
    default_msg = DefaultMessage(
-       performative=DefaultMessage.Type.ERROR,
+       performative=DefaultMessage.Performative.ERROR,
        error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
        error_msg="Invalid dialogue.",
        error_data="fipa_message",
@@ -954,7 +954,7 @@ from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OefMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef.serialization import OefSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -1017,13 +1017,13 @@ class MySearchBehaviour(TickerBehaviour):
            query = strategy.get_service_query()
            search_id = strategy.get_next_search_id()
            oef_msg = OefMessage(
-               performative=OefMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+               performative=OefMessage.Performative.SEARCH_SERVICES, id=search_id, query=query
            )
            self.context.outbox.put_message(
-               to=DEFAULT_OEF,
+               to=self.context.search_service_address,
                sender=self.context.agent_address,
                protocol_id=OefMessage.protocol_id,
-               message=OEFSerializer().encode(oef_msg),
+               message=OefSerializer().encode(oef_msg),
            )
 
    def teardown(self) -> None:
@@ -1148,7 +1148,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
     """
     self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
     default_msg = DefaultMessage(
-        performative=DefaultMessage.Type.ERROR,
+        performative=DefaultMessage.Performative.ERROR,
         error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
         error_msg="Invalid dialogue.",
         error_data="fipa_message",
@@ -1393,7 +1393,7 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OefMessage, message)
-        if oef_msg.type is OefMessage.Type.SEARCH_RESULT:
+        if oef_msg.type is OefMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
  

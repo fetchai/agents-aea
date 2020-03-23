@@ -39,7 +39,6 @@ class Type(Enum):
     UNREGISTER_SERVICE = "unregister_service"
     SEARCH_SERVICES = "search_services"
     OEF_ERROR = "oef_error"
-    DIALOGUE_ERROR = "dialogue_error"
     SEARCH_RESULT = "search_result"
 
     def __str__(self):
@@ -50,7 +49,7 @@ class Type(Enum):
 It also provides error codes.
 
 ```python
-class OEFErrorOperation(Enum):
+class OefErrorOperation(Enum):
 
 	"""Operation code for the OEF. It is returned in the OEF Error messages."""
 	REGISTER_SERVICE = 0

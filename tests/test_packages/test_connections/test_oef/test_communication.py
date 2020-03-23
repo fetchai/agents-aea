@@ -27,7 +27,7 @@ import unittest
 from typing import Dict, cast
 from unittest import mock
 
-from oef.messages import OEFErrorOperation
+from oef.messages import OefErrorOperation
 from oef.query import ConstraintExpr
 
 import pytest
@@ -775,26 +775,13 @@ class TestFIPA:
         oef_channel = oef_connection.channel
 
         oef_channel.on_oef_error(
-            answer_id=0, operation=OEFErrorOperation.SEARCH_SERVICES
+            answer_id=0, operation=OefErrorOperation.SEARCH_SERVICES
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OefSerializer().decode(envelope.message)
         assert (
             dec_msg.get("type") is OefMessage.Performative.OEF_ERROR
         ), "It should be an error message"
-
-    def test_on_dialogue_error(self):
-        """Test the dialogue error."""
-        oef_connection = self.multiplexer1.connections[0]
-        oef_connection = cast(OEFConnection, oef_connection)
-        oef_channel = oef_connection.channel
-
-        oef_channel.on_dialogue_error(answer_id=0, dialogue_id=0, origin="me")
-        envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        dec_msg = OefSerializer().decode(envelope.message)
-        assert (
-            dec_msg.get("type") is OefMessage.Performative.DIALOGUE_ERROR
-        ), "It should be a dialogue error"
 
     def test_send(self):
         """Test the send method."""
@@ -993,7 +980,7 @@ async def test_send_oef_message(network_node):
     msg = OefMessage(
         performative=OefMessage.Performative.OEF_ERROR,
         id=0,
-        operation=OefMessage.OEFErrorOperation.SEARCH_SERVICES,
+        operation=OefMessage.OefErrorOperation.SEARCH_SERVICES,
     )
     msg_bytes = OefSerializer().encode(msg)
     envelope = Envelope(
