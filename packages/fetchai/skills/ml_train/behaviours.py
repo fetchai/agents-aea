@@ -25,11 +25,10 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
-SERVICE_ID = ""
 DEFAULT_SEARCH_INTERVAL = 5.0
 
 

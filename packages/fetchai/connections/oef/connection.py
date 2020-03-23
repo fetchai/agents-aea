@@ -74,8 +74,8 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -545,7 +545,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.1.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -568,18 +568,18 @@ class OEFChannel(OEFAgent):
         oef_msg_id = oef_message.message_id
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
-            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
-            self.register_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
+            self.register_service(oef_msg_id, oef_service_description)
+        elif (
+            oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
+        ):
             service_description = oef_message.service_description
-            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
-            self.unregister_service(oef_msg_id, oef_service_description, service_id)
+            self.unregister_service(oef_msg_id, oef_service_description)
         elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)

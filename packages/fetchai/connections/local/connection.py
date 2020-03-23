@@ -33,8 +33,8 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef:0.1.0"):
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.1.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
@@ -152,7 +152,9 @@ class LocalNode:
         request_id = oef_message.message_id
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             await self._register_service(sender, oef_message.service_description)
-        elif oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
+        elif (
+            oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
+        ):
             await self._unregister_service(
                 sender, request_id, oef_message.service_description
             )

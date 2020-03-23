@@ -26,8 +26,8 @@ from typing import Optional, cast
 from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase

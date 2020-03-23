@@ -38,7 +38,7 @@ from aea.skills.error.handlers import ErrorHandler
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 

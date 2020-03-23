@@ -28,8 +28,8 @@ In this example, we implement a simple search behaviour. Each time, `act()` gets
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -100,7 +100,7 @@ Let us now implement a handler to deal with the incoming search responses.
 ``` python
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 
 class MySearchHandler(Handler):
@@ -190,7 +190,7 @@ handlers:
     class_name: MySearchHandler
     args: {}
 models: {}
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 
@@ -204,7 +204,7 @@ We place this code in `my_aea/skills/my_search/skill.yaml`.
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef:0.1.0
+aea add protocol fetchai/oef_search:0.1.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
@@ -242,11 +242,10 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
-SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -298,9 +297,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=oef_msg_id,
+            message_id=oef_msg_id,
             service_description=desc,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,
@@ -465,7 +463,7 @@ models:
       service_data:
         country: UK
         city: Cambridge
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 </p>

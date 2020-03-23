@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the oef protocol."""
+"""This module contains the support resources for the oef_search protocol."""

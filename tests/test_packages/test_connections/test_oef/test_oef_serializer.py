@@ -21,8 +21,8 @@
 
 from aea.helpers.search.models import Attribute, DataModel, Description
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 def test_oef_serialization():
@@ -33,7 +33,6 @@ def test_oef_serialization():
         performative=OefSearchMessage.Performative.REGISTER_SERVICE,
         id=1,
         service_description=desc,
-        service_id="",
     )
     msg_bytes = OefSearchSerializer().encode(msg)
     assert len(msg_bytes) > 0

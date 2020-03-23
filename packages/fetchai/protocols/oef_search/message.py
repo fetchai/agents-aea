@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains oef's message definition."""
+"""This module contains oef_search's message definition."""
 
 from enum import Enum
 from typing import Set, Tuple, cast
@@ -25,19 +25,21 @@ from typing import Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.oef.custom_types import Description as CustomDescription
-from packages.fetchai.protocols.oef.custom_types import (
+from packages.fetchai.protocols.oef_search.custom_types import (
+    Description as CustomDescription,
+)
+from packages.fetchai.protocols.oef_search.custom_types import (
     OefErrorOperation as CustomOefErrorOperation,
 )
-from packages.fetchai.protocols.oef.custom_types import Query as CustomQuery
+from packages.fetchai.protocols.oef_search.custom_types import Query as CustomQuery
 
 DEFAULT_BODY_SIZE = 4
 
 
 class OefSearchMessage(Message):
-    """A protocol for interacting with an OEF service."""
+    """A protocol for interacting with an OEF search service."""
 
-    protocol_id = ProtocolId("fetchai", "oef", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "oef_search", "0.1.0")
 
     Description = CustomDescription
 
@@ -46,7 +48,7 @@ class OefSearchMessage(Message):
     Query = CustomQuery
 
     class Performative(Enum):
-        """Performatives for the oef protocol."""
+        """Performatives for the oef_search protocol."""
 
         OEF_ERROR = "oef_error"
         REGISTER_SERVICE = "register_service"
@@ -90,7 +92,7 @@ class OefSearchMessage(Message):
         }
         assert (
             self._is_consistent()
-        ), "This message is invalid according to the 'oef' protocol."
+        ), "This message is invalid according to the 'oef_search' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -128,10 +130,12 @@ class OefSearchMessage(Message):
         return cast(Tuple[str, ...], self.get("agents"))
 
     @property
-    def operation(self) -> CustomOefErrorOperation:
-        """Get the 'operation' content from the message."""
-        assert self.is_set("operation"), "'operation' content is not set."
-        return cast(CustomOefErrorOperation, self.get("operation"))
+    def oef_error_operation(self) -> CustomOefErrorOperation:
+        """Get the 'oef_error_operation' content from the message."""
+        assert self.is_set(
+            "oef_error_operation"
+        ), "'oef_error_operation' content is not set."
+        return cast(CustomOefErrorOperation, self.get("oef_error_operation"))
 
     @property
     def query(self) -> CustomQuery:
@@ -147,14 +151,8 @@ class OefSearchMessage(Message):
         ), "'service_description' content is not set."
         return cast(CustomDescription, self.get("service_description"))
 
-    @property
-    def service_id(self) -> str:
-        """Get the 'service_id' content from the message."""
-        assert self.is_set("service_id"), "'service_id' content is not set."
-        return cast(str, self.get("service_id"))
-
     def _is_consistent(self) -> bool:
-        """Check that the message follows the oef protocol."""
+        """Check that the message follows the oef_search protocol."""
         try:
             assert (
                 type(self.dialogue_reference) == tuple
@@ -194,16 +192,11 @@ class OefSearchMessage(Message):
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
             if self.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 1
                 assert (
                     type(self.service_description) == CustomDescription
                 ), "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
                     type(self.service_description)
-                )
-                assert (
-                    type(self.service_id) == str
-                ), "Invalid type for content 'service_id'. Expected 'str'. Found '{}'.".format(
-                    type(self.service_id)
                 )
             elif self.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
                 expected_nb_of_contents = 1
@@ -232,9 +225,9 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 assert (
-                    type(self.operation) == CustomOefErrorOperation
-                ), "Invalid type for content 'operation'. Expected 'OefErrorOperation'. Found '{}'.".format(
-                    type(self.operation)
+                    type(self.oef_error_operation) == CustomOefErrorOperation
+                ), "Invalid type for content 'oef_error_operation'. Expected 'OefErrorOperation'. Found '{}'.".format(
+                    type(self.oef_error_operation)
                 )
 
             # Check correct content count

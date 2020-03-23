@@ -24,11 +24,10 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
-SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -80,9 +79,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=oef_msg_id,
+            message_id=oef_msg_id,
             service_description=desc,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,
@@ -104,9 +102,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=oef_msg_id,
+            message_id=oef_msg_id,
             service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,

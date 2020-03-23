@@ -29,14 +29,12 @@ from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.carpark_detection.strategy import Strategy
 
 REGISTER_ID = 1
 UNREGISTER_ID = 2
-SERVICE_ID = ""
-
 
 DEFAULT_LAT = 1
 DEFAULT_LON = 1
@@ -226,9 +224,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self._oef_msf_id += 1
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                id=self._oef_msf_id,
+                message_id=self._oef_msf_id,
                 service_description=desc,
-                service_id=SERVICE_ID,
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,
@@ -252,9 +249,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self._oef_msf_id += 1
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                id=self._oef_msf_id,
+                message_id=self._oef_msf_id,
                 service_description=self._registered_service_description,
-                service_id=SERVICE_ID,
             )
             self.context.outbox.put_message(
                 to=self.context.search_service_address,

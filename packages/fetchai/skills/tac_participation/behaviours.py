@@ -23,8 +23,8 @@ from typing import cast
 
 from aea.skills.base import Behaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 

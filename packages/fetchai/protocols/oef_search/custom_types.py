@@ -90,7 +90,9 @@ class OefErrorOperation(Enum):
         :param oef_error_operation_from_message: the message content to be encoded in the protocol buffer object.
         :return: the 'performative' protocol buffer object encoded with the message content in the 'oef_error_operation_from_message' argument.
         """
-        performative.operation.oef_error = oef_error_operation_from_message.value
+        performative.oef_error_operation.oef_error = (
+            oef_error_operation_from_message.value
+        )
         return performative
 
     @classmethod

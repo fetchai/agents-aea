@@ -27,7 +27,7 @@ import unittest
 from typing import Dict, cast
 from unittest import mock
 
-from oef.messages import OefErrorOperation
+from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
 import pytest
@@ -55,8 +55,8 @@ from packages.fetchai.connections.oef.connection import (
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 DEFAULT_OEF = "default_oef"
 
@@ -143,7 +143,7 @@ class TestOEF:
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=request_id,
+                message_id=request_id,
                 query=search_query_empty_model,
             )
             self.multiplexer.put(
@@ -157,9 +157,12 @@ class TestOEF:
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id")
-            assert request_id and search_result.get("agents") == []
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == request_id
+            assert request_id and search_result.agents == []
 
         def test_search_services_with_query_with_model(self):
             """Test that a search services request can be sent correctly.
@@ -173,7 +176,7 @@ class TestOEF:
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=request_id,
+                message_id=request_id,
                 query=search_query,
             )
             self.multiplexer.put(
@@ -187,9 +190,12 @@ class TestOEF:
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id") == request_id
-            assert search_result.get("agents") == []
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == request_id
+            assert search_result.agents == []
 
         @classmethod
         def teardown_class(cls):
@@ -220,9 +226,8 @@ class TestOEF:
             desc = Description({"bar": 1}, data_model=foo_datamodel)
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                id=1,
+                message_id=1,
                 service_description=desc,
-                service_id="",
             )
             msg_bytes = OefSearchSerializer().encode(msg)
             self.multiplexer.put(
@@ -237,7 +242,7 @@ class TestOEF:
 
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=2,
+                message_id=2,
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel
                 ),
@@ -252,11 +257,14 @@ class TestOEF:
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id") == 2
-            if search_result.get("agents") != [self.crypto1.address]:
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == 2
+            if search_result.agents != [self.crypto1.address]:
                 logger.warning(
-                    'search_result.get("agents") != [self.crypto1.address] FAILED in test_oef/test_communication.py'
+                    "search_result.agents != [self.crypto1.address] FAILED in test_oef/test_communication.py"
                 )
 
         @classmethod
@@ -293,9 +301,8 @@ class TestOEF:
             cls.desc = Description({"bar": 1}, data_model=cls.foo_datamodel)
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                id=cls.request_id,
+                message_id=cls.request_id,
                 service_description=cls.desc,
-                service_id="",
             )
             msg_bytes = OefSearchSerializer().encode(msg)
             cls.multiplexer.put(
@@ -312,7 +319,7 @@ class TestOEF:
             cls.request_id += 1
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=cls.request_id,
+                message_id=cls.request_id,
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))],
                     model=cls.foo_datamodel,
@@ -328,11 +335,14 @@ class TestOEF:
             )
             envelope = cls.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id") == cls.request_id
-            if search_result.get("agents") != [cls.crypto1.address]:
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == cls.request_id
+            if search_result.agents != [cls.crypto1.address]:
                 logger.warning(
-                    'search_result.get("agents") != [self.crypto1.address] FAILED in test_oef/test_communication.py'
+                    "search_result.agents != [self.crypto1.address] FAILED in test_oef/test_communication.py"
                 )
 
         def test_unregister_service(self):
@@ -346,9 +356,8 @@ class TestOEF:
             self.request_id += 1
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                id=self.request_id,
+                message_id=self.request_id,
                 service_description=self.desc,
-                service_id="",
             )
             msg_bytes = OefSearchSerializer().encode(msg)
             self.multiplexer.put(
@@ -365,7 +374,7 @@ class TestOEF:
             self.request_id += 1
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=self.request_id,
+                message_id=self.request_id,
                 query=Query(
                     [Constraint("bar", ConstraintType("==", 1))],
                     model=self.foo_datamodel,
@@ -382,9 +391,12 @@ class TestOEF:
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id") == self.request_id
-            assert search_result.get("agents") == []
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == self.request_id
+            assert search_result.agents == []
 
         @classmethod
         def teardown_class(cls):
@@ -417,7 +429,7 @@ class TestOEF:
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                id=request_id,
+                message_id=request_id,
                 query=search_query_empty_model,
             )
             self.multiplexer.put(
@@ -431,9 +443,12 @@ class TestOEF:
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
-            assert search_result.get("type") == OefSearchMessage.Performative.SEARCH_RESULT
-            assert search_result.get("id")
-            assert request_id and search_result.get("agents") == []
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.message_id == request_id
+            assert request_id and search_result.agents == []
 
         @classmethod
         def teardown_class(cls):
@@ -474,7 +489,7 @@ class TestFIPA:
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
         cfp_message = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.CFP,
@@ -496,7 +511,7 @@ class TestFIPA:
         assert expected_cfp_message == cfp_message
 
         cfp_none = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.CFP,
@@ -519,7 +534,7 @@ class TestFIPA:
     def test_propose(self):
         """Test that a Propose can be sent correctly."""
         propose_empty = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.PROPOSE,
@@ -540,7 +555,7 @@ class TestFIPA:
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.PROPOSE,
@@ -568,7 +583,7 @@ class TestFIPA:
     def test_accept(self):
         """Test that an Accept can be sent correctly."""
         accept = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.ACCEPT,
@@ -613,7 +628,7 @@ class TestFIPA:
     def test_decline(self):
         """Test that a Decline can be sent correctly."""
         decline = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.DECLINE,
@@ -635,7 +650,7 @@ class TestFIPA:
     def test_match_accept_w_inform(self):
         """Test that a match accept with inform can be sent correctly."""
         match_accept_w_inform = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
@@ -658,7 +673,7 @@ class TestFIPA:
     def test_accept_w_inform(self):
         """Test that an accept with address can be sent correctly."""
         accept_w_inform = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
@@ -682,7 +697,7 @@ class TestFIPA:
         """Test that an inform can be sent correctly."""
         payload = {"foo": "bar"}
         inform = FIPAMessage(
-            message_id=0,
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=FIPAMessage.Performative.INFORM,
@@ -707,9 +722,9 @@ class TestFIPA:
         with pytest.raises(ValueError):
             msg = FIPAMessage(
                 performative=FIPAMessage.Performative.CFP,
-                message_id=0,
+                message_id=1,
                 dialogue_reference=(str(0), ""),
-                target=1,
+                target=0,
                 query=None,
             )
             with mock.patch(
@@ -723,7 +738,7 @@ class TestFIPA:
             FIPASerializer().encode(msg)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(
-                message_id=0,
+                message_id=1,
                 dialogue_reference=(str(0), ""),
                 target=0,
                 performative=FIPAMessage.Performative.CFP,
@@ -731,11 +746,11 @@ class TestFIPA:
             )
             cfp_msg.set("query", "hello")
             fipa_msg = fipa_pb2.FIPAMessage()
-            fipa_msg.message_id = cfp_msg.get("message_id")
-            dialogue_reference = cast(Dict[str, str], cfp_msg.get("dialogue_reference"))
+            fipa_msg.message_id = cfp_msg.message_id
+            dialogue_reference = cast(Dict[str, str], cfp_msg.dialogue_reference)
             fipa_msg.dialogue_starter_reference = dialogue_reference[0]
             fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-            fipa_msg.target = cfp_msg.get("target")
+            fipa_msg.target = cfp_msg.target
             performative = fipa_pb2.FIPAMessage.CFP()
             fipa_msg.cfp.CopyFrom(performative)
             fipa_bytes = fipa_msg.SerializeToString()
@@ -744,7 +759,7 @@ class TestFIPA:
             FIPASerializer().decode(fipa_bytes)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(
-                message_id=0,
+                message_id=1,
                 dialogue_reference=(str(0), ""),
                 target=0,
                 performative=FIPAMessage.Performative.CFP,
@@ -755,13 +770,11 @@ class TestFIPA:
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
-                fipa_msg.message_id = cfp_msg.get("message_id")
-                dialogue_reference = cast(
-                    Dict[str, str], cfp_msg.get("dialogue_reference")
-                )
+                fipa_msg.message_id = cfp_msg.message_id
+                dialogue_reference = cast(Dict[str, str], cfp_msg.dialogue_reference)
                 fipa_msg.dialogue_starter_reference = dialogue_reference[0]
                 fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-                fipa_msg.target = cfp_msg.get("target")
+                fipa_msg.target = cfp_msg.target
                 performative = fipa_pb2.FIPAMessage.CFP()
                 fipa_msg.cfp.CopyFrom(performative)
                 fipa_bytes = fipa_msg.SerializeToString()
@@ -775,12 +788,12 @@ class TestFIPA:
         oef_channel = oef_connection.channel
 
         oef_channel.on_oef_error(
-            answer_id=0, operation=OefErrorOperation.SEARCH_SERVICES
+            answer_id=1, operation=OEFErrorOperation.SEARCH_SERVICES
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OefSearchSerializer().decode(envelope.message)
         assert (
-            dec_msg.get("type") is OefSearchMessage.Performative.OEF_ERROR
+            dec_msg.performative is OefSearchMessage.Performative.OEF_ERROR
         ), "It should be an error message"
 
     def test_send(self):
@@ -979,7 +992,7 @@ async def test_send_oef_message(network_node):
     await oef_connection.connect()
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.OEF_ERROR,
-        id=0,
+        message_id=1,
         operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
     )
     msg_bytes = OefSearchSerializer().encode(msg)
@@ -996,7 +1009,9 @@ async def test_send_oef_message(network_node):
     query = Query(constraints=[], model=data_model)
 
     msg = OefSearchMessage(
-        performative=OefSearchMessage.Performative.SEARCH_SERVICES, id=0, query=query
+        performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+        message_id=1,
+        query=query,
     )
     msg_bytes = OefSearchSerializer().encode(msg)
     envelope = Envelope(

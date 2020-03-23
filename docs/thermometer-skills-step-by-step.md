@@ -68,12 +68,11 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
-SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -179,9 +178,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            id=oef_msg_id,
+            message_id=oef_msg_id,
             service_description=desc,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,
@@ -205,9 +203,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=oef_msg_id,
+            message_id=oef_msg_id,
             service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,
@@ -880,7 +877,7 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
  pyserial: {}
@@ -953,8 +950,8 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -1077,7 +1074,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -1729,7 +1726,7 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
+protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
 ledgers: ['fetchai']
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 

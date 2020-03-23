@@ -20,7 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import pprint
-from typing import Dict, List, Optional, cast
+from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -34,7 +34,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogue as Dialogue
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogues
 from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
 from packages.fetchai.skills.tac_negotiation.search import Search
@@ -565,15 +565,20 @@ class OEFSearchHandler(Handler):
         oef_msg = cast(OefSearchMessage, message)
 
         if oef_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
-            agents = oef_msg.agents
+            agents = list(oef_msg.agents)
             search_id = oef_msg.message_id
             search = cast(Search, self.context.search)
             if self.context.agent_address in agents:
                 agents.remove(self.context.agent_address)
+                agents_less_self = tuple(agents)
             if search_id in search.ids_for_sellers:
-                self._handle_search(agents, search_id, is_searching_for_sellers=True)
+                self._handle_search(
+                    agents_less_self, search_id, is_searching_for_sellers=True
+                )
             elif search_id in search.ids_for_buyers:
-                self._handle_search(agents, search_id, is_searching_for_sellers=False)
+                self._handle_search(
+                    agents_less_self, search_id, is_searching_for_sellers=False
+                )
 
     def teardown(self) -> None:
         """
@@ -584,7 +589,7 @@ class OEFSearchHandler(Handler):
         pass
 
     def _handle_search(
-        self, agents: List[str], search_id: int, is_searching_for_sellers: bool
+        self, agents: Tuple[str, ...], search_id: int, is_searching_for_sellers: bool
     ) -> None:
         """
         Handle the search response.

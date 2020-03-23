@@ -19,7 +19,7 @@
 
 """This package contains the handlers."""
 
-from typing import List, Optional, cast
+from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -28,7 +28,7 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
@@ -89,8 +89,10 @@ class OEFHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, operation={}".format(
-                self.context.agent_name, oef_error.message_id, oef_error.operation
+            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
+                self.context.agent_name,
+                oef_error.message_id,
+                oef_error.oef_error_operation,
             )
         )
 
@@ -119,7 +121,9 @@ class OEFHandler(Handler):
                 )
             )
 
-    def _on_controller_search_result(self, agent_addresses: List[Address]) -> None:
+    def _on_controller_search_result(
+        self, agent_addresses: Tuple[Address, ...]
+    ) -> None:
         """
         Process the search result for a controller.
 

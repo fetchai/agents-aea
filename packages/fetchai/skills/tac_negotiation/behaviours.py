@@ -24,8 +24,8 @@ from typing import cast
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.tac_negotiation.registration import Registration
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy

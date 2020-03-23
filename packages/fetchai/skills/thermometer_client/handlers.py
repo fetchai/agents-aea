@@ -20,7 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import pprint
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -33,7 +33,7 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -332,7 +332,7 @@ class OEFHandler(Handler):
         """
         pass
 
-    def _handle_search(self, agents: List[str]) -> None:
+    def _handle_search(self, agents: Tuple[str, ...]) -> None:
         """
         Handle the search response.
 

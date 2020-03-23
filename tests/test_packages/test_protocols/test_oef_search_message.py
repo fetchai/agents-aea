@@ -27,8 +27,8 @@ from aea.helpers.search.models import (
     Description,
 )
 
-from packages.fetchai.protocols.oef.message import OefSearchMessage
-from packages.fetchai.protocols.oef.serialization import OefSearchSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 def test_oef_type_string_value():
@@ -85,9 +85,8 @@ def test_oef_message_consistency():
     )
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-        id=0,
+        message_id=1,
         service_description=description_foobar,
-        service_id="address",
     )
 
     with mock.patch.object(OefSearchMessage.Performative, "__eq__", return_value=False):
@@ -98,13 +97,13 @@ def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
     msg = OefSearchMessage(
         performative=OefSearchMessage.Performative.OEF_ERROR,
-        id=0,
-        operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+        message_id=1,
+        oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
     )
     assert OefSearchMessage(
         performative=OefSearchMessage.Performative.OEF_ERROR,
-        id=0,
-        operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+        message_id=1,
+        oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
     ), "Expects an oef message Error!"
     msg_bytes = OefSearchSerializer().encode(msg)
     assert len(msg_bytes) > 0, "Expects the length of bytes not to be Empty"
