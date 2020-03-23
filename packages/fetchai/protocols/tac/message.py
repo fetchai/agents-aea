@@ -32,7 +32,7 @@ DEFAULT_BODY_SIZE = 4
 
 
 class TacMessage(Message):
-    """The tac protocol implements the messages an AEA needs to participate in the TAC"""
+    """A protocol for participating in a TAC."""
 
     protocol_id = ProtocolId("fetchai", "tac", "0.1.0")
 
@@ -58,10 +58,10 @@ class TacMessage(Message):
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
         **kwargs,
     ):
         """
