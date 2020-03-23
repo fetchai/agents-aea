@@ -76,7 +76,7 @@
         {"$ref":  "#/definitions/version"}
       ]
     },
-    "fingerprint_ignore_list": {
+    "fingerprint_ignore_patterns": {
       "type": "array",
       "uniqueItems": true,
       "items": {

@@ -384,9 +384,9 @@ class PackageConfiguration(Configuration, ABC):
         self.license = license
         self.fingerprint = fingerprint if fingerprint is not None else {}
         self.fingerprint_ignore_patterns = (
-            tuple(fingerprint_ignore_patterns)
+            fingerprint_ignore_patterns
             if fingerprint_ignore_patterns is not None
-            else tuple()
+            else []
         )
         self.aea_version = aea_version if aea_version != "" else aea.__version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
