@@ -17,28 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains class representations corresponding to every custom type in the protocol specification."""
-
-
-class DataModel:
-    """This class represents an instance of DataModel."""
-
-    def __init__(self):
-        """Initialise an instance of DataModel."""
-        raise NotImplementedError
-
-
-class IOTApp7:
-    """This class represents an instance of IOTApp7."""
-
-    def __init__(self):
-        """Initialise an instance of IOTApp7."""
-        raise NotImplementedError
-
-
-class Unit:
-    """This class represents an instance of Unit."""
-
-    def __init__(self):
-        """Initialise an instance of Unit."""
-        raise NotImplementedError
+"""This module contains the support resources for the test_protocol protocol."""

@@ -88,27 +88,6 @@ class TestEmptySearch:
         assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
         assert search_result.get("agents") == []
 
-        # build and send the request
-        search_agents_request = OEFMessage(
-            type=OEFMessage.Type.SEARCH_AGENTS, id=request_id, query=query
-        )
-        msg_bytes = OEFSerializer().encode(search_agents_request)
-        envelope = Envelope(
-            to=DEFAULT_OEF,
-            sender=self.address_1,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        self.multiplexer.put(envelope)
-
-        # check the result
-        response_envelope = self.multiplexer.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OEFMessage.protocol_id
-        assert response_envelope.sender == DEFAULT_OEF
-        search_result = OEFSerializer().decode(response_envelope.message)
-        assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
-        assert search_result.get("agents") == []
-
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
@@ -269,9 +248,9 @@ class TestUnregister:
         )
         self.multiplexer1.put(envelope)
 
-        # Search for the register agent
+        # Search for the registered service
         msg = OEFMessage(
-            type=OEFMessage.Type.SEARCH_AGENTS,
+            type=OEFMessage.Type.SEARCH_SERVICES,
             id=0,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
@@ -314,7 +293,7 @@ class TestUnregister:
         # the same query returns empty
         # Search for the register agent
         msg = OEFMessage(
-            type=OEFMessage.Type.SEARCH_AGENTS,
+            type=OEFMessage.Type.SEARCH_SERVICES,
             id=0,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
@@ -333,89 +312,6 @@ class TestUnregister:
         result = OEFSerializer().decode(response_envelope.message)
         assert result.get("type") == OEFMessage.Type.SEARCH_RESULT
         assert len(result.get("agents")) == 0
-
-    def test_search_agent(self):
-        """Test the registered agents, we will not find any."""
-        data_model = DataModel("foobar", attributes=[])
-        agent_description = Description({"foo": 1, "bar": "baz"}, data_model=data_model)
-        query = Query(constraints=[], model=data_model)
-
-        # Register an agent
-        msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_AGENT,
-            id=0,
-            agent_description=agent_description,
-            agent_id="Test_agent",
-        )
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(
-            to=DEFAULT_OEF,
-            sender=self.address_1,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        self.multiplexer1.put(envelope)
-
-        time.sleep(0.1)
-
-        # Search for the register agent
-        msg = OEFMessage(type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(
-            to=DEFAULT_OEF,
-            sender=self.address_2,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        self.multiplexer2.put(envelope)
-
-        # check the result
-        response_envelope = self.multiplexer2.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OEFMessage.protocol_id
-        assert response_envelope.sender == DEFAULT_OEF
-        result = OEFSerializer().decode(response_envelope.message)
-        assert len(result.get("agents")) == 1, "There are registered agents!"
-
-        # Send unregister message.
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_AGENT,
-            id=0,
-            agent_description=agent_description,
-            agent_id="Test_agent",
-        )
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(
-            to=DEFAULT_OEF,
-            sender=self.address_1,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        self.multiplexer1.put(envelope)
-
-        time.sleep(0.1)
-
-        # Trigger error message.
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_AGENT,
-            id=0,
-            agent_description=agent_description,
-            agent_id="Unknown_Agent",
-        )
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(
-            to=DEFAULT_OEF,
-            sender=self.address_1,
-            protocol_id=OEFMessage.protocol_id,
-            message=msg_bytes,
-        )
-        self.multiplexer1.put(envelope)
-
-        # check the result
-        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OEFMessage.protocol_id
-        assert response_envelope.sender == DEFAULT_OEF
-        result = OEFSerializer().decode(response_envelope.message)
-        assert result.get("type") == OEFMessage.Type.OEF_ERROR
 
     @classmethod
     def teardown_class(cls):

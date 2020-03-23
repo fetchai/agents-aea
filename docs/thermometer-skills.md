@@ -1,7 +1,7 @@
 The AEA thermometer skills demonstrate an interaction between two AEAs.
 
-* The provider of thermometer data (the thermometer).
-* The buyer of thermometer data (the thermometer_client).
+* The provider of thermometer data (the `thermometer`).
+* The buyer of thermometer data (the `thermometer_client`).
 
 ### Discussion
 
@@ -132,6 +132,8 @@ aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_i
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 
+NOTE: If you are not using a Raspberry Pi make sure you set the `has_sensor` attribute to `False`
+
 In the thermometer client skill config (`my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 
 ``` yaml
@@ -158,9 +160,9 @@ aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.cur
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
 ```
 
-## Run the AEAs
+### Run the AEAs
 
-#### Important: Your thermometer AEA must run on your Raspberry Pi and the sensor must be connected to the usb.
+Important: Your thermometer AEA must run on your Raspberry Pi and the sensor must be connected to the usb.
 
 You can change the end point's address and port by modifying the connection's yaml file (my_thermometer_aea/connection/oef/connection.yaml)
 
@@ -180,7 +182,7 @@ aea run --connections fetchai/oef:0.1.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
-## Delete the AEAs
+### Delete the AEAs
 When you're done, go up a level and delete the AEAs.
 ```bash 
 cd ..

@@ -2,10 +2,10 @@
 
 The scaffold generator builds out the directory structure required when adding new skills, protocols, and connections to the AEA.
 
-For example, create a new AEA project.
+For example, create a new AEA project (add the author flag using your own author handle if this is your first project using the `aea` package).
 
 ``` bash
-aea create my_aea
+aea create my_aea --author "fetchai"
 cd my_aea
 ```
 

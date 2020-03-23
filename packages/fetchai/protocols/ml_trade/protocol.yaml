@@ -2,7 +2,7 @@ name: ml_trade
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.2
+aea_version: 0.2.3
 fingerprint:
   __init__.py: QmRJNTfmyV42nLMGxJaH25ibgG4CcAW1J2JaszxEHNA9xi
   message.py: QmYq4EYMUssVST2wrUiWeNpTxrz3qapeumNvXhTGNG2hwj

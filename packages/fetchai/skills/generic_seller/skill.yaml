@@ -2,14 +2,14 @@ name: generic_seller
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.2
+aea_version: 0.2.3
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
   behaviours.py: QmbkWV4NE2ENVGt4DyxFcLowi6S2PySSapreEV7RKL9vPY
+  data_model.py: QmZ7kqYdJJ6rcwjRSbmvRPc2jVG4sFEZA5rT11CJ3VXV9S
   dialogues.py: QmarNumFyrhnh1kcUuLxskBNGxEbfupMWW1eQ1w46PQq9a
-  generic_data_model.py: QmS9F5rozAgBAQDfZDDGnxARCA7Ni46GcNHytfudey59C7
   handlers.py: QmfDGa1zh1q7vsA6qnMbKFsvQopn1pCPmY9fc3sFhjN6mc
-  strategy.py: QmXr4bQ4cFrv6ykPL38xuWqUNsahDCfztoZTWCKUQ5kLNo
+  strategy.py: QmW4TJsYTPhvmVBawWB2g8mUZ7Kap5V5LThH4wK6JbVis6
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:
@@ -34,7 +34,8 @@ models:
         wind: 10
         pressure: 20
         temperature: 26
-      search_schema:
+      data_model_name: "location"
+      data_model:
         attribute_one:
           name: country
           type: str
@@ -43,7 +44,7 @@ models:
           name: city
           type: str
           is_required: True
-      search_data:
+      service_data:
         country: UK
         city: Cambridge
   dialogues:

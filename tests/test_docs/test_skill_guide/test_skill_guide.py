@@ -38,6 +38,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.cli.common import DEFAULT_VERSION
 
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
@@ -65,8 +66,14 @@ class TestBuildSkill:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.resource_name = "my_search"
+        cls.skill_id = AUTHOR + "/" + cls.resource_name + ":" + DEFAULT_VERSION
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+
+        # add packages folder
+        packages_src = os.path.join(cls.cwd, "packages")
+        packages_dst = os.path.join(cls.t, "packages")
+        shutil.copytree(packages_src, packages_dst)
 
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
@@ -75,20 +82,29 @@ class TestBuildSkill:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        cls.create_result = cls.runner.invoke(
+        cls.init_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+        )
+        cls.fetch_result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "fetch", "fetchai/simple_service_registration:0.1.0"],
+            standalone_mode=False,
         )
         cls.create_result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
         )
         if cls.create_result.exit_code == 0:
-            os.chdir(cls.agent_name)
+            os.chdir(Path(cls.t, cls.agent_name))
             # scaffold skill
             cls.result = cls.runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
                 standalone_mode=False,
             )
+
+    def test_agent_is_fetched(self):
+        """Test that the setup was successful."""
+        assert self.fetch_result.exit_code == 0, "Agent not fetched, setup incomplete"
 
     def test_agent_is_created(self):
         """Test that the setup was successful."""
@@ -124,9 +140,10 @@ class TestBuildSkill:
         with open(path, "w") as file:
             file.write(self.code_blocks[1])
 
-        path = Path(self.t, self.agent_name, "skills", self.resource_name, "tasks.py")
-        with open(path, "w+") as file:
-            file.write(self.code_blocks[2])
+        path = Path(
+            self.t, self.agent_name, "skills", self.resource_name, "my_model.py"
+        )
+        os.remove(path)
 
         # Update the yaml file.
         path = Path(self.t, self.agent_name, "skills", self.resource_name, "skill.yaml")
@@ -134,27 +151,60 @@ class TestBuildSkill:
         with open(path, "w") as file:
             file.write(yaml_code_block[0])
 
-        # run the agent
-        process_one = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run"],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-
-        time.sleep(5.0)
-        process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=5)
-
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
-
-        os.chdir(self.t)
+        # update fingerprint
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "fingerprint", "skill", self.skill_id],
+            standalone_mode=False,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, "Fingerprinting not successful"
+
+        os.chdir(Path(self.t, "simple_service_registration"))
+        try:
+            # run service agent
+            process_one = subprocess.Popen(  # nosec
+                [sys.executable, "-m", "aea.cli", "run"],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+
+            # run the agent
+            os.chdir(Path(self.t, self.agent_name))
+            process_two = subprocess.Popen(  # nosec
+                [sys.executable, "-m", "aea.cli", "run"],
+                stdout=subprocess.PIPE,
+                env=os.environ.copy(),
+            )
+
+            time.sleep(7.0)
+            process_one.send_signal(signal.SIGINT)
+            process_two.send_signal(signal.SIGINT)
+            process_one.wait(timeout=5)
+            process_two.wait(timeout=5)
+            assert process_one.returncode == 0
+            assert process_two.returncode == 0
+        finally:
+            poll_one = process_one.poll()
+            if poll_one is None:
+                process_one.terminate()
+                process_one.wait(2)
+
+            poll_two = process_two.poll()
+            if poll_two is None:
+                process_two.terminate()
+                process_two.wait(2)
+
+            os.chdir(self.t)
+            result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+            )
+            assert result.exit_code == 0
+            result = self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "delete", "simple_service_registration"],
+                standalone_mode=False,
+            )
+            assert result.exit_code == 0
 
     @classmethod
     def teardown_class(cls):

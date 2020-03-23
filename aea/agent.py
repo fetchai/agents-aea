@@ -171,7 +171,7 @@ class Agent(ABC):
 
         :return: None
         """
-        if not self.is_debug and not self.multiplexer.connection_status.is_connected:
+        if not self.is_debug:
             self.multiplexer.connect()
 
         logger.debug("[{}]: Calling setup method...".format(self.name))
@@ -206,8 +206,7 @@ class Agent(ABC):
         self.teardown()
 
         logger.debug("[{}]: Stopping message processing...".format(self.name))
-        if self.multiplexer.connection_status.is_connected:
-            self.multiplexer.disconnect()
+        self.multiplexer.disconnect()
 
     @abstractmethod
     def setup(self) -> None:

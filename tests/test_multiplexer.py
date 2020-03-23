@@ -244,8 +244,10 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         with unittest.mock.patch.object(
             connection_3, "disconnect", side_effect=Exception
         ):
-            # with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
-            multiplexer.disconnect()
+            with pytest.raises(
+                AEAConnectionError, match="Failed to disconnect the multiplexer."
+            ):
+                multiplexer.disconnect()
 
         assert not connection_1.connection_status.is_connected
         assert not connection_2.connection_status.is_connected

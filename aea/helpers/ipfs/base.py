@@ -27,8 +27,6 @@ import base58
 from aea.helpers.ipfs.pb import merkledag_pb2
 from aea.helpers.ipfs.pb import unixfs_pb2
 
-precious_data = b"I am a good unicorn.\n"
-
 # https://github.com/multiformats/multicodec/blob/master/table.csv
 SHA256_ID = "12"  # 0x12
 LEN_SHA256 = "20"  # 0x20
