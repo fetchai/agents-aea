@@ -85,7 +85,6 @@ class TACBehaviour(Behaviour):
                 ledger_api=ledger_api,
                 contract_address=str(parameters.contract_address),
             )
-            contract.token_ids = parameters.good_ids  # type: ignore
 
     def act(self) -> None:
         """
@@ -146,7 +145,7 @@ class TACBehaviour(Behaviour):
                 self.context.logger.info("Mint objects after registration.")
                 for agent in self.context.configuration.agent_addr_to_name.keys():
                     self._mint_objects(
-                        is_batch=True, address=agent, nonce_index=self.agent_counter,
+                        is_batch=True, address=agent,
                     )
                     self.agent_counter += 1
                 game.phase = Phase.GAME
@@ -311,9 +310,7 @@ class TACBehaviour(Behaviour):
                 token_id=token_ids,
             )
 
-    def _mint_objects(
-        self, is_batch: bool, address: Address, nonce_index: int, token_id: int = None
-    ):
+    def _mint_objects(self, is_batch: bool, address: Address, token_id: int = None):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
@@ -327,7 +324,6 @@ class TACBehaviour(Behaviour):
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
                 token_ids=self.token_ids,
-                nonce_index=nonce_index,
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
         else:

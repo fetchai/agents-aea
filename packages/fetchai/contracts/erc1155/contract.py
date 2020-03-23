@@ -65,6 +65,7 @@ class ERC1155Contract(Contract):
         """
         super().__init__(contract_id, contract_config, contract_interface)
         self._token_ids = {}  # type: Dict[int, int]
+        self.nonce = 0
 
     @property
     def token_ids(self) -> Dict[int, int]:
@@ -133,15 +134,14 @@ class ERC1155Contract(Contract):
         :returns tx: The Transaction dictionary.
         """
         # create the transaction dict
+        self.nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
         tx_data = self.instance.constructor().__dict__.get("data_in_transaction")
         tx = {
             "from": deployer_address,  # Only 'from' address, don't insert 'to' address
             "value": 0,  # Add how many ethers you'll transfer during the deploy
             "gas": 0,  # Trying to make it dynamic ..
             "gasPrice": ledger_api.api.eth.gasPrice,  # Get Gas Price
-            "nonce": ledger_api.api.eth.getTransactionCount(
-                deployer_address
-            ),  # Get Nonce
+            "nonce": self.nonce,  # Get Nonce
             "data": tx_data,  # Here is the data sent through the network
         }
 
@@ -195,7 +195,10 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Create a batch of items."""
         # create the items
+        self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if self.nonce != nonce:
+            self.nonce = nonce
         tx = self.instance.functions.createBatch(
             deployer_address, token_ids
         ).buildTransaction(
@@ -203,7 +206,7 @@ class ERC1155Contract(Contract):
                 "chainId": 3,
                 "gas": 300000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
         return tx
@@ -250,7 +253,10 @@ class ERC1155Contract(Contract):
         self, deployer_address: Address, ledger_api: LedgerApi, token_id: int
     ) -> str:
         """Create an item."""
+        self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        if self.nonce != nonce:
+            self.nonce = nonce
         tx = self.instance.functions.createSingle(
             deployer_address, token_id, ""
         ).buildTransaction(
@@ -258,7 +264,7 @@ class ERC1155Contract(Contract):
                 "chainId": 3,
                 "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
         return tx
@@ -271,7 +277,6 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_ids: List[int],
-        nonce_index: int,
     ):
 
         assert len(mint_quantities) == len(self.token_ids), "Wrong number of items."
@@ -281,7 +286,6 @@ class ERC1155Contract(Contract):
             batch_mint_quantities=mint_quantities,
             ledger_api=ledger_api,
             token_ids=token_ids,
-            nonce_index=nonce_index,
         )
 
         tx_message = TransactionMessage(
@@ -308,16 +312,10 @@ class ERC1155Contract(Contract):
         batch_mint_quantities: List[int],
         ledger_api: LedgerApi,
         token_ids: List[int],
-        nonce_index: int,
     ) -> str:
         """Mint a batch of items."""
         # mint batch
-        nonce = (
-            ledger_api.api.eth.getTransactionCount(
-                ledger_api.api.toChecksumAddress(deployer_address)
-            )
-            + nonce_index
-        )
+        self.nonce += 1
         for i in range(len(token_ids)):
             decoded_type = Helpers().decode_id(token_ids[i])
             assert (
@@ -334,7 +332,7 @@ class ERC1155Contract(Contract):
                 "chainId": 3,
                 "gas": 500000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
 
@@ -379,9 +377,12 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Mint a batch of items."""
         # mint batch
+        self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(
             ledger_api.api.toChecksumAddress(deployer_address)
         )
+        if self.nonce != nonce:
+            self.nonce = nonce
         assert recipient_address is not None
         decoded_type = Helpers().decode_id(token_id)
         assert (
@@ -397,7 +398,7 @@ class ERC1155Contract(Contract):
                 "chainId": 3,
                 "gas": 300000,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
 
@@ -422,7 +423,11 @@ class ERC1155Contract(Contract):
         :params signature: The signed terms from the counterparty.
         """
         data = b"hello"
-        nonce = ledger_api.api.eth.getTransactionCount(from_address) + 1
+        self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(from_address)
+        if self.nonce != nonce:
+            self.nonce = nonce
+
         tx = self.instance.functions.trade(
             from_address,
             to_address,
@@ -440,7 +445,7 @@ class ERC1155Contract(Contract):
                 "from": from_address,
                 "value": value_eth_wei,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
 
@@ -466,7 +471,10 @@ class ERC1155Contract(Contract):
         """
         data = b"hello"
         value_eth_wei = ledger_api.api.toWei(value, "ether")
-        nonce = ledger_api.api.eth.getTransactionCount(from_address) + 1
+        self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(from_address)
+        if self.nonce != nonce:
+            self.nonce = nonce
         tx = self.instance.functions.tradeBatch(
             from_address,
             to_address,
@@ -484,7 +492,7 @@ class ERC1155Contract(Contract):
                 "from": from_address,
                 "value": value_eth_wei,
                 "gasPrice": ledger_api.api.toWei("50", "gwei"),
-                "nonce": nonce,
+                "nonce": self.nonce,
             }
         )
         return tx

@@ -5,7 +5,7 @@ license: Apache-2.0
 aea_version: 0.2.2
 fingerprint:
   __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
-  contract.py: QmTn1vfcWdgX9ZL6KtsDB3YdxcFNY8ADujWgvbLmDikrq8
+  contract.py: Qmchdf4wYJbaeNxVqFjqNTHFGhHPPMZyBMDEmz4EW95yZ3
 description: "The erc1155 contract implements an ERC1155 contract package."
 path_to_contract_interface: "build/erc1155.json"
 dependencies:
