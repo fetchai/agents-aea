@@ -7,7 +7,7 @@ fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmanQQo7ns3Ui2oijVxhMW3sfMdEaYrDuFBfovw32cxSgm
   game.py: QmQhZmCVZeWcN6hkUsnLuEaru6SauXRFxeUP9ksrE2a6qg
-  handlers.py: QmPYQ5Ty3JkmgrtZrShuhZSWtTet6Zv4tSLhsiidCgDR4h
+  handlers.py: QmTRAhaQXRYqa9UM1sLwZSXWHH41aJkMxLuwcBkQabkVqP
   parameters.py: QmTV1pYCTMen281fYmec4h9FJqx8faecAJTARR6gGQYZNT
   search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
@@ -25,7 +25,8 @@ handlers:
     args: {}
   transaction:
     class_name: TransactionHandler
-    args: {}
+    args:
+      is_using_contract: False
 models:
   search:
     class_name: Search
