@@ -41,9 +41,6 @@
     "license": {
       "type": "string"
     },
-    "fingerprint": {
-      "type": "object"
-    },
     "description": {
       "type": "string"
     },
