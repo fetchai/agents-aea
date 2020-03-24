@@ -169,12 +169,12 @@ def _generate_item(ctx: Context, item_type, specification_path):
                 "--quiet",
             ]
         )
-        subp.wait(5.0)
+        subp.wait(10.0)
     finally:
         poll = subp.poll()
         if poll is None:  # pragma: no cover
             subp.terminate()
-            subp.wait(2)
+            subp.wait(5)
 
 
 @generate.command()
