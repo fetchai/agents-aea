@@ -29,7 +29,9 @@ from packages.fetchai.protocols.tac.serialization import TacSerializer
 
 def test_tac_message_instantiation():
     """Test instantiation of the tac message."""
-    assert TacMessage(performative=TacMessage.Performative.REGISTER, agent_name="some_name")
+    assert TacMessage(
+        performative=TacMessage.Performative.REGISTER, agent_name="some_name"
+    )
     assert TacMessage(performative=TacMessage.Performative.UNREGISTER)
     assert TacMessage(
         performative=TacMessage.Performative.TRANSACTION,
@@ -73,7 +75,9 @@ def test_tac_message_instantiation():
 
 def test_tac_serialization():
     """Test that the serialization for the tac message works."""
-    msg = TacMessage(performative=TacMessage.Performative.REGISTER, agent_name="some_name")
+    msg = TacMessage(
+        performative=TacMessage.Performative.REGISTER, agent_name="some_name"
+    )
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg
@@ -142,7 +146,9 @@ def test_tac_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    with pytest.raises(ValueError, match="Performative not valid: transaction_confirmation"):
+    with pytest.raises(
+        ValueError, match="Performative not valid: transaction_confirmation"
+    ):
         with mock.patch(
             "packages.fetchai.protocols.tac.message.TacMessage.Performative"
         ) as mocked_type:

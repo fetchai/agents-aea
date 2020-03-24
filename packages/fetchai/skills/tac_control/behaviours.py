@@ -205,7 +205,7 @@ class TACBehaviour(Behaviour):
             )
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
-            tac_msg = TacMessage(performative=TACMessage.Type.CANCELLED)
+            tac_msg = TacMessage(performative=TacMessage.Type.CANCELLED)
             self.context.outbox.put_message(
                 to=agent_addr,
                 sender=self.context.agent_address,
