@@ -2,6 +2,11 @@ An AEA developer writes skills that the framework can call.
 
 When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour`, `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
+## Independence of skills
+
+Skills are `horizontally layered`, that is they run independently of each other. They also cannot access each other's state.
+
+Two skills can communicate with each other in two ways. The skill context provides access via `self.context.shared_state` to a key-value store which allows skills to share state. A skill can also define as a callback another skill in [a message to the decision maker](../decision-maker-transaction).
 
 ## Context
 
