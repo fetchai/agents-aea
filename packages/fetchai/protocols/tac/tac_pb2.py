@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\x17protocols/tac/tac.proto\x12\rfetch.aea.Tac"\x83\x1a\n\nTacMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x38\n\tcancelled\x18\x05 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.CancelledH\x00\x12\x38\n\tgame_data\x18\x06 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.Game_DataH\x00\x12\x46\n\x10get_state_update\x18\x07 \x01(\x0b\x32*.fetch.aea.Tac.TacMessage.Get_State_UpdateH\x00\x12\x36\n\x08register\x18\x08 \x01(\x0b\x32".fetch.aea.Tac.TacMessage.RegisterH\x00\x12\x38\n\ttac_error\x18\t \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.Tac_ErrorH\x00\x12<\n\x0btransaction\x18\n \x01(\x0b\x32%.fetch.aea.Tac.TacMessage.TransactionH\x00\x12V\n\x18transaction_confirmation\x18\x0b \x01(\x0b\x32\x32.fetch.aea.Tac.TacMessage.Transaction_ConfirmationH\x00\x12:\n\nunregister\x18\x0c \x01(\x0b\x32$.fetch.aea.Tac.TacMessage.UnregisterH\x00\x1a\x80\x03\n\tErrorCode\x12\x45\n\nerror_code\x18\x01 \x01(\x0e\x32\x31.fetch.aea.Tac.TacMessage.ErrorCode.ErrorCodeEnum"\xab\x02\n\rErrorCodeEnum\x12\x11\n\rGENERIC_ERROR\x10\x00\x12\x15\n\x11REQUEST_NOT_VALID\x10\x01\x12!\n\x1d\x41GENT_ADDR_ALREADY_REGISTERED\x10\x02\x12!\n\x1d\x41GENT_NAME_ALREADY_REGISTERED\x10\x03\x12\x18\n\x14\x41GENT_NOT_REGISTERED\x10\x04\x12\x19\n\x15TRANSACTION_NOT_VALID\x10\x05\x12\x1c\n\x18TRANSACTION_NOT_MATCHING\x10\x06\x12\x1f\n\x1b\x41GENT_NAME_NOT_IN_WHITELIST\x10\x07\x12\x1b\n\x17\x43OMPETITION_NOT_RUNNING\x10\x08\x12\x19\n\x15\x44IALOGUE_INCONSISTENT\x10\t\x1a\x85\x01\n\tErrorInfo\x12\x46\n\nerror_info\x18\x01 \x03(\x0b\x32\x32.fetch.aea.Tac.TacMessage.ErrorInfo.ErrorInfoEntry\x1a\x30\n\x0e\x45rrorInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x1e\n\x08Register\x12\x12\n\nagent_name\x18\x01 \x01(\t\x1a\x0c\n\nUnregister\x1a\x8a\x04\n\x0bTransaction\x12\r\n\x05tx_id\x18\x01 \x01(\t\x12\x16\n\x0etx_sender_addr\x18\x02 \x01(\t\x12\x1c\n\x14tx_counterparty_addr\x18\x03 \x01(\t\x12\\\n\x15\x61mount_by_currency_id\x18\x04 \x03(\x0b\x32=.fetch.aea.Tac.TacMessage.Transaction.AmountByCurrencyIdEntry\x12\x15\n\rtx_sender_fee\x18\x05 \x01(\x05\x12\x1b\n\x13tx_counterparty_fee\x18\x06 \x01(\x05\x12\\\n\x15quantities_by_good_id\x18\x07 \x03(\x0b\x32=.fetch.aea.Tac.TacMessage.Transaction.QuantitiesByGoodIdEntry\x12\x10\n\x08tx_nonce\x18\x08 \x01(\x05\x12\x1b\n\x13tx_sender_signature\x18\t \x01(\x0c\x12!\n\x19tx_counterparty_signature\x18\n \x01(\x0c\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x12\n\x10Get_State_Update\x1a\x0b\n\tCancelled\x1a\xc1\x07\n\tGame_Data\x12Z\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32;.fetch.aea.Tac.TacMessage.Game_Data.AmountByCurrencyIdEntry\x12k\n\x1e\x65xchange_params_by_currency_id\x18\x02 \x03(\x0b\x32\x43.fetch.aea.Tac.TacMessage.Game_Data.ExchangeParamsByCurrencyIdEntry\x12Z\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32;.fetch.aea.Tac.TacMessage.Game_Data.QuantitiesByGoodIdEntry\x12\x61\n\x19utility_params_by_good_id\x18\x04 \x03(\x0b\x32>.fetch.aea.Tac.TacMessage.Game_Data.UtilityParamsByGoodIdEntry\x12\x0e\n\x06tx_fee\x18\x05 \x01(\x05\x12T\n\x12\x61gent_addr_to_name\x18\x06 \x03(\x0b\x32\x38.fetch.aea.Tac.TacMessage.Game_Data.AgentAddrToNameEntry\x12N\n\x0fgood_id_to_name\x18\x07 \x03(\x0b\x32\x35.fetch.aea.Tac.TacMessage.Game_Data.GoodIdToNameEntry\x12\x12\n\nversion_id\x18\x08 \x01(\t\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x36\n\x14\x41gentAddrToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11GoodIdToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xf5\x02\n\x18Transaction_Confirmation\x12\r\n\x05tx_id\x18\x01 \x01(\t\x12i\n\x15\x61mount_by_currency_id\x18\x02 \x03(\x0b\x32J.fetch.aea.Tac.TacMessage.Transaction_Confirmation.AmountByCurrencyIdEntry\x12i\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32J.fetch.aea.Tac.TacMessage.Transaction_Confirmation.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\xd3\x01\n\tTac_Error\x12\x37\n\nerror_code\x18\x01 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.ErrorCode\x12;\n\x04info\x18\x02 \x03(\x0b\x32-.fetch.aea.Tac.TacMessage.Tac_Error.InfoEntry\x1aP\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x32\n\x05value\x18\x02 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.ErrorInfo:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
+        '\n\x17protocols/tac/tac.proto\x12\rfetch.aea.Tac"\xd6\x18\n\nTacMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x38\n\tcancelled\x18\x05 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.CancelledH\x00\x12\x38\n\tgame_data\x18\x06 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.Game_DataH\x00\x12\x46\n\x10get_state_update\x18\x07 \x01(\x0b\x32*.fetch.aea.Tac.TacMessage.Get_State_UpdateH\x00\x12\x36\n\x08register\x18\x08 \x01(\x0b\x32".fetch.aea.Tac.TacMessage.RegisterH\x00\x12\x38\n\ttac_error\x18\t \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.Tac_ErrorH\x00\x12<\n\x0btransaction\x18\n \x01(\x0b\x32%.fetch.aea.Tac.TacMessage.TransactionH\x00\x12V\n\x18transaction_confirmation\x18\x0b \x01(\x0b\x32\x32.fetch.aea.Tac.TacMessage.Transaction_ConfirmationH\x00\x12:\n\nunregister\x18\x0c \x01(\x0b\x32$.fetch.aea.Tac.TacMessage.UnregisterH\x00\x1a\x80\x03\n\tErrorCode\x12\x45\n\nerror_code\x18\x01 \x01(\x0e\x32\x31.fetch.aea.Tac.TacMessage.ErrorCode.ErrorCodeEnum"\xab\x02\n\rErrorCodeEnum\x12\x11\n\rGENERIC_ERROR\x10\x00\x12\x15\n\x11REQUEST_NOT_VALID\x10\x01\x12!\n\x1d\x41GENT_ADDR_ALREADY_REGISTERED\x10\x02\x12!\n\x1d\x41GENT_NAME_ALREADY_REGISTERED\x10\x03\x12\x18\n\x14\x41GENT_NOT_REGISTERED\x10\x04\x12\x19\n\x15TRANSACTION_NOT_VALID\x10\x05\x12\x1c\n\x18TRANSACTION_NOT_MATCHING\x10\x06\x12\x1f\n\x1b\x41GENT_NAME_NOT_IN_WHITELIST\x10\x07\x12\x1b\n\x17\x43OMPETITION_NOT_RUNNING\x10\x08\x12\x19\n\x15\x44IALOGUE_INCONSISTENT\x10\t\x1a\x1e\n\x08Register\x12\x12\n\nagent_name\x18\x01 \x01(\t\x1a\x0c\n\nUnregister\x1a\x8a\x04\n\x0bTransaction\x12\r\n\x05tx_id\x18\x01 \x01(\t\x12\x16\n\x0etx_sender_addr\x18\x02 \x01(\t\x12\x1c\n\x14tx_counterparty_addr\x18\x03 \x01(\t\x12\\\n\x15\x61mount_by_currency_id\x18\x04 \x03(\x0b\x32=.fetch.aea.Tac.TacMessage.Transaction.AmountByCurrencyIdEntry\x12\x15\n\rtx_sender_fee\x18\x05 \x01(\x05\x12\x1b\n\x13tx_counterparty_fee\x18\x06 \x01(\x05\x12\\\n\x15quantities_by_good_id\x18\x07 \x03(\x0b\x32=.fetch.aea.Tac.TacMessage.Transaction.QuantitiesByGoodIdEntry\x12\x10\n\x08tx_nonce\x18\x08 \x01(\x05\x12\x1b\n\x13tx_sender_signature\x18\t \x01(\x0c\x12!\n\x19tx_counterparty_signature\x18\n \x01(\x0c\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x12\n\x10Get_State_Update\x1a\x0b\n\tCancelled\x1a\xc1\x07\n\tGame_Data\x12Z\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32;.fetch.aea.Tac.TacMessage.Game_Data.AmountByCurrencyIdEntry\x12k\n\x1e\x65xchange_params_by_currency_id\x18\x02 \x03(\x0b\x32\x43.fetch.aea.Tac.TacMessage.Game_Data.ExchangeParamsByCurrencyIdEntry\x12Z\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32;.fetch.aea.Tac.TacMessage.Game_Data.QuantitiesByGoodIdEntry\x12\x61\n\x19utility_params_by_good_id\x18\x04 \x03(\x0b\x32>.fetch.aea.Tac.TacMessage.Game_Data.UtilityParamsByGoodIdEntry\x12\x0e\n\x06tx_fee\x18\x05 \x01(\x05\x12T\n\x12\x61gent_addr_to_name\x18\x06 \x03(\x0b\x32\x38.fetch.aea.Tac.TacMessage.Game_Data.AgentAddrToNameEntry\x12N\n\x0fgood_id_to_name\x18\x07 \x03(\x0b\x32\x35.fetch.aea.Tac.TacMessage.Game_Data.GoodIdToNameEntry\x12\x12\n\nversion_id\x18\x08 \x01(\t\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x36\n\x14\x41gentAddrToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11GoodIdToNameEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xf5\x02\n\x18Transaction_Confirmation\x12\r\n\x05tx_id\x18\x01 \x01(\t\x12i\n\x15\x61mount_by_currency_id\x18\x02 \x03(\x0b\x32J.fetch.aea.Tac.TacMessage.Transaction_Confirmation.AmountByCurrencyIdEntry\x12i\n\x15quantities_by_good_id\x18\x03 \x03(\x0b\x32J.fetch.aea.Tac.TacMessage.Transaction_Confirmation.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\xae\x01\n\tTac_Error\x12\x37\n\nerror_code\x18\x01 \x01(\x0b\x32#.fetch.aea.Tac.TacMessage.ErrorCode\x12;\n\x04info\x18\x02 \x03(\x0b\x32-.fetch.aea.Tac.TacMessage.Tac_Error.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
@@ -145,100 +145,6 @@ _TACMESSAGE_ERRORCODE = _descriptor.Descriptor(
     serialized_end=1064,
 )
 
-_TACMESSAGE_ERRORINFO_ERRORINFOENTRY = _descriptor.Descriptor(
-    name="ErrorInfoEntry",
-    full_name="fetch.aea.Tac.TacMessage.ErrorInfo.ErrorInfoEntry",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="key",
-            full_name="fetch.aea.Tac.TacMessage.ErrorInfo.ErrorInfoEntry.key",
-            index=0,
-            number=1,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=_b("").decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-        _descriptor.FieldDescriptor(
-            name="value",
-            full_name="fetch.aea.Tac.TacMessage.ErrorInfo.ErrorInfoEntry.value",
-            index=1,
-            number=2,
-            type=9,
-            cpp_type=9,
-            label=1,
-            has_default_value=False,
-            default_value=_b("").decode("utf-8"),
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[],
-    enum_types=[],
-    serialized_options=_b("8\001"),
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1152,
-    serialized_end=1200,
-)
-
-_TACMESSAGE_ERRORINFO = _descriptor.Descriptor(
-    name="ErrorInfo",
-    full_name="fetch.aea.Tac.TacMessage.ErrorInfo",
-    filename=None,
-    file=DESCRIPTOR,
-    containing_type=None,
-    fields=[
-        _descriptor.FieldDescriptor(
-            name="error_info",
-            full_name="fetch.aea.Tac.TacMessage.ErrorInfo.error_info",
-            index=0,
-            number=1,
-            type=11,
-            cpp_type=10,
-            label=3,
-            has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
-    ],
-    extensions=[],
-    nested_types=[_TACMESSAGE_ERRORINFO_ERRORINFOENTRY,],
-    enum_types=[],
-    serialized_options=None,
-    is_extendable=False,
-    syntax="proto3",
-    extension_ranges=[],
-    oneofs=[],
-    serialized_start=1067,
-    serialized_end=1200,
-)
-
 _TACMESSAGE_REGISTER = _descriptor.Descriptor(
     name="Register",
     full_name="fetch.aea.Tac.TacMessage.Register",
@@ -273,8 +179,8 @@ _TACMESSAGE_REGISTER = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1202,
-    serialized_end=1232,
+    serialized_start=1066,
+    serialized_end=1096,
 )
 
 _TACMESSAGE_UNREGISTER = _descriptor.Descriptor(
@@ -292,8 +198,8 @@ _TACMESSAGE_UNREGISTER = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1234,
-    serialized_end=1246,
+    serialized_start=1098,
+    serialized_end=1110,
 )
 
 _TACMESSAGE_TRANSACTION_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
@@ -348,8 +254,8 @@ _TACMESSAGE_TRANSACTION_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1655,
-    serialized_end=1712,
+    serialized_start=1519,
+    serialized_end=1576,
 )
 
 _TACMESSAGE_TRANSACTION_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
@@ -404,8 +310,8 @@ _TACMESSAGE_TRANSACTION_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1714,
-    serialized_end=1771,
+    serialized_start=1578,
+    serialized_end=1635,
 )
 
 _TACMESSAGE_TRANSACTION = _descriptor.Descriptor(
@@ -607,8 +513,8 @@ _TACMESSAGE_TRANSACTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1249,
-    serialized_end=1771,
+    serialized_start=1113,
+    serialized_end=1635,
 )
 
 _TACMESSAGE_GET_STATE_UPDATE = _descriptor.Descriptor(
@@ -626,8 +532,8 @@ _TACMESSAGE_GET_STATE_UPDATE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1773,
-    serialized_end=1791,
+    serialized_start=1637,
+    serialized_end=1655,
 )
 
 _TACMESSAGE_CANCELLED = _descriptor.Descriptor(
@@ -645,8 +551,8 @@ _TACMESSAGE_CANCELLED = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1793,
-    serialized_end=1804,
+    serialized_start=1657,
+    serialized_end=1668,
 )
 
 _TACMESSAGE_GAME_DATA_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
@@ -701,8 +607,8 @@ _TACMESSAGE_GAME_DATA_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1655,
-    serialized_end=1712,
+    serialized_start=1519,
+    serialized_end=1576,
 )
 
 _TACMESSAGE_GAME_DATA_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor.Descriptor(
@@ -757,8 +663,8 @@ _TACMESSAGE_GAME_DATA_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2473,
-    serialized_end=2538,
+    serialized_start=2337,
+    serialized_end=2402,
 )
 
 _TACMESSAGE_GAME_DATA_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
@@ -813,8 +719,8 @@ _TACMESSAGE_GAME_DATA_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1714,
-    serialized_end=1771,
+    serialized_start=1578,
+    serialized_end=1635,
 )
 
 _TACMESSAGE_GAME_DATA_UTILITYPARAMSBYGOODIDENTRY = _descriptor.Descriptor(
@@ -869,8 +775,8 @@ _TACMESSAGE_GAME_DATA_UTILITYPARAMSBYGOODIDENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2599,
-    serialized_end=2659,
+    serialized_start=2463,
+    serialized_end=2523,
 )
 
 _TACMESSAGE_GAME_DATA_AGENTADDRTONAMEENTRY = _descriptor.Descriptor(
@@ -925,8 +831,8 @@ _TACMESSAGE_GAME_DATA_AGENTADDRTONAMEENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2661,
-    serialized_end=2715,
+    serialized_start=2525,
+    serialized_end=2579,
 )
 
 _TACMESSAGE_GAME_DATA_GOODIDTONAMEENTRY = _descriptor.Descriptor(
@@ -981,8 +887,8 @@ _TACMESSAGE_GAME_DATA_GOODIDTONAMEENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2717,
-    serialized_end=2768,
+    serialized_start=2581,
+    serialized_end=2632,
 )
 
 _TACMESSAGE_GAME_DATA = _descriptor.Descriptor(
@@ -1152,8 +1058,8 @@ _TACMESSAGE_GAME_DATA = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1807,
-    serialized_end=2768,
+    serialized_start=1671,
+    serialized_end=2632,
 )
 
 _TACMESSAGE_TRANSACTION_CONFIRMATION_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
@@ -1208,8 +1114,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descr
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1655,
-    serialized_end=1712,
+    serialized_start=1519,
+    serialized_end=1576,
 )
 
 _TACMESSAGE_TRANSACTION_CONFIRMATION_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
@@ -1264,8 +1170,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION_QUANTITIESBYGOODIDENTRY = _descriptor.Descr
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1714,
-    serialized_end=1771,
+    serialized_start=1578,
+    serialized_end=1635,
 )
 
 _TACMESSAGE_TRANSACTION_CONFIRMATION = _descriptor.Descriptor(
@@ -1341,8 +1247,8 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2771,
-    serialized_end=3144,
+    serialized_start=2635,
+    serialized_end=3008,
 )
 
 _TACMESSAGE_TAC_ERROR_INFOENTRY = _descriptor.Descriptor(
@@ -1375,11 +1281,11 @@ _TACMESSAGE_TAC_ERROR_INFOENTRY = _descriptor.Descriptor(
             full_name="fetch.aea.Tac.TacMessage.Tac_Error.InfoEntry.value",
             index=1,
             number=2,
-            type=11,
-            cpp_type=10,
+            type=9,
+            cpp_type=9,
             label=1,
             has_default_value=False,
-            default_value=None,
+            default_value=_b("").decode("utf-8"),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -1397,8 +1303,8 @@ _TACMESSAGE_TAC_ERROR_INFOENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3278,
-    serialized_end=3358,
+    serialized_start=3142,
+    serialized_end=3185,
 )
 
 _TACMESSAGE_TAC_ERROR = _descriptor.Descriptor(
@@ -1453,8 +1359,8 @@ _TACMESSAGE_TAC_ERROR = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3147,
-    serialized_end=3358,
+    serialized_start=3011,
+    serialized_end=3185,
 )
 
 _TACMESSAGE = _descriptor.Descriptor(
@@ -1684,7 +1590,6 @@ _TACMESSAGE = _descriptor.Descriptor(
     extensions=[],
     nested_types=[
         _TACMESSAGE_ERRORCODE,
-        _TACMESSAGE_ERRORINFO,
         _TACMESSAGE_REGISTER,
         _TACMESSAGE_UNREGISTER,
         _TACMESSAGE_TRANSACTION,
@@ -1709,7 +1614,7 @@ _TACMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=43,
-    serialized_end=3374,
+    serialized_end=3201,
 )
 
 _TACMESSAGE_ERRORCODE.fields_by_name[
@@ -1717,11 +1622,6 @@ _TACMESSAGE_ERRORCODE.fields_by_name[
 ].enum_type = _TACMESSAGE_ERRORCODE_ERRORCODEENUM
 _TACMESSAGE_ERRORCODE.containing_type = _TACMESSAGE
 _TACMESSAGE_ERRORCODE_ERRORCODEENUM.containing_type = _TACMESSAGE_ERRORCODE
-_TACMESSAGE_ERRORINFO_ERRORINFOENTRY.containing_type = _TACMESSAGE_ERRORINFO
-_TACMESSAGE_ERRORINFO.fields_by_name[
-    "error_info"
-].message_type = _TACMESSAGE_ERRORINFO_ERRORINFOENTRY
-_TACMESSAGE_ERRORINFO.containing_type = _TACMESSAGE
 _TACMESSAGE_REGISTER.containing_type = _TACMESSAGE
 _TACMESSAGE_UNREGISTER.containing_type = _TACMESSAGE
 _TACMESSAGE_TRANSACTION_AMOUNTBYCURRENCYIDENTRY.containing_type = (
@@ -1779,9 +1679,6 @@ _TACMESSAGE_TRANSACTION_CONFIRMATION.fields_by_name[
     "quantities_by_good_id"
 ].message_type = _TACMESSAGE_TRANSACTION_CONFIRMATION_QUANTITIESBYGOODIDENTRY
 _TACMESSAGE_TRANSACTION_CONFIRMATION.containing_type = _TACMESSAGE
-_TACMESSAGE_TAC_ERROR_INFOENTRY.fields_by_name[
-    "value"
-].message_type = _TACMESSAGE_ERRORINFO
 _TACMESSAGE_TAC_ERROR_INFOENTRY.containing_type = _TACMESSAGE_TAC_ERROR
 _TACMESSAGE_TAC_ERROR.fields_by_name["error_code"].message_type = _TACMESSAGE_ERRORCODE
 _TACMESSAGE_TAC_ERROR.fields_by_name[
@@ -1862,24 +1759,6 @@ TacMessage = _reflection.GeneratedProtocolMessageType(
                 DESCRIPTOR=_TACMESSAGE_ERRORCODE,
                 __module__="protocols.tac.tac_pb2"
                 # @@protoc_insertion_point(class_scope:fetch.aea.Tac.TacMessage.ErrorCode)
-            ),
-        ),
-        ErrorInfo=_reflection.GeneratedProtocolMessageType(
-            "ErrorInfo",
-            (_message.Message,),
-            dict(
-                ErrorInfoEntry=_reflection.GeneratedProtocolMessageType(
-                    "ErrorInfoEntry",
-                    (_message.Message,),
-                    dict(
-                        DESCRIPTOR=_TACMESSAGE_ERRORINFO_ERRORINFOENTRY,
-                        __module__="protocols.tac.tac_pb2"
-                        # @@protoc_insertion_point(class_scope:fetch.aea.Tac.TacMessage.ErrorInfo.ErrorInfoEntry)
-                    ),
-                ),
-                DESCRIPTOR=_TACMESSAGE_ERRORINFO,
-                __module__="protocols.tac.tac_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.Tac.TacMessage.ErrorInfo)
             ),
         ),
         Register=_reflection.GeneratedProtocolMessageType(
@@ -2060,8 +1939,6 @@ TacMessage = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(TacMessage)
 _sym_db.RegisterMessage(TacMessage.ErrorCode)
-_sym_db.RegisterMessage(TacMessage.ErrorInfo)
-_sym_db.RegisterMessage(TacMessage.ErrorInfo.ErrorInfoEntry)
 _sym_db.RegisterMessage(TacMessage.Register)
 _sym_db.RegisterMessage(TacMessage.Unregister)
 _sym_db.RegisterMessage(TacMessage.Transaction)
@@ -2083,7 +1960,6 @@ _sym_db.RegisterMessage(TacMessage.Tac_Error)
 _sym_db.RegisterMessage(TacMessage.Tac_Error.InfoEntry)
 
 
-_TACMESSAGE_ERRORINFO_ERRORINFOENTRY._options = None
 _TACMESSAGE_TRANSACTION_AMOUNTBYCURRENCYIDENTRY._options = None
 _TACMESSAGE_TRANSACTION_QUANTITIESBYGOODIDENTRY._options = None
 _TACMESSAGE_GAME_DATA_AMOUNTBYCURRENCYIDENTRY._options = None

@@ -29,10 +29,10 @@ from packages.fetchai.protocols.tac.serialization import TacSerializer
 
 def test_tac_message_instantiation():
     """Test instantiation of the tac message."""
-    assert TacMessage(type=TacMessage.Performative.REGISTER, agent_name="some_name")
-    assert TacMessage(type=TacMessage.Performative.UNREGISTER)
+    assert TacMessage(performative=TacMessage.Performative.REGISTER, agent_name="some_name")
+    assert TacMessage(performative=TacMessage.Performative.UNREGISTER)
     assert TacMessage(
-        type=TacMessage.Performative.TRANSACTION,
+        performative=TacMessage.Performative.TRANSACTION,
         tx_id="some_id",
         tx_sender_addr="some_address",
         tx_counterparty_addr="some_other_address",
@@ -44,10 +44,10 @@ def test_tac_message_instantiation():
         tx_sender_signature=b"some_signature",
         tx_counterparty_signature=b"some_other_signature",
     )
-    assert TacMessage(type=TacMessage.Performative.GET_STATE_UPDATE)
-    assert TacMessage(type=TacMessage.Performative.CANCELLED)
+    assert TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
+    assert TacMessage(performative=TacMessage.Performative.CANCELLED)
     assert TacMessage(
-        type=TacMessage.Performative.GAME_DATA,
+        performative=TacMessage.Performative.GAME_DATA,
         amount_by_currency_id={"FET": 10},
         exchange_params_by_currency_id={"FET": 10.0},
         quantities_by_good_id={"good_1": 20, "good_2": 15},
@@ -58,34 +58,35 @@ def test_tac_message_instantiation():
         version_id="game_version_1",
     )
     assert TacMessage(
-        type=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+        performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
         tx_id="some_id",
         amount_by_currency_id={"FET": 10},
         quantities_by_good_id={"good_1": 20, "good_2": 15},
     )
     assert TacMessage(
-        type=TacMessage.Performative.TAC_ERROR,
+        performative=TacMessage.Performative.TAC_ERROR,
         error_code=TacMessage.ErrorCode.GENERIC_ERROR,
+        info={"msg": "This is info msg."},
     )
     assert str(TacMessage.Performative.REGISTER) == "register"
 
 
 def test_tac_serialization():
     """Test that the serialization for the tac message works."""
-    msg = TacMessage(type=TacMessage.Performative.REGISTER, agent_name="some_name")
+    msg = TacMessage(performative=TacMessage.Performative.REGISTER, agent_name="some_name")
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TacMessage(type=TacMessage.Performative.UNREGISTER)
+    msg = TacMessage(performative=TacMessage.Performative.UNREGISTER)
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = TacMessage(
-        type=TacMessage.Performative.TRANSACTION,
+        performative=TacMessage.Performative.TRANSACTION,
         tx_id="some_id",
         tx_sender_addr="some_address",
         tx_counterparty_addr="some_other_address",
@@ -102,20 +103,20 @@ def test_tac_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TacMessage(type=TacMessage.Performative.GET_STATE_UPDATE)
+    msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TacMessage(type=TacMessage.Performative.CANCELLED)
+    msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = TacMessage(
-        type=TacMessage.Performative.GAME_DATA,
+        performative=TacMessage.Performative.GAME_DATA,
         amount_by_currency_id={"FET": 10},
         exchange_params_by_currency_id={"FET": 10.0},
         quantities_by_good_id={"good_1": 20, "good_2": 15},
@@ -131,7 +132,7 @@ def test_tac_serialization():
     assert expected_msg == actual_msg
 
     msg = TacMessage(
-        type=TacMessage.Performative.TRANSACTION_CONFIRMATION,
+        performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
         tx_id="some_id",
         amount_by_currency_id={"FET": 10},
         quantities_by_good_id={"good_1": 20, "good_2": 15},
@@ -141,7 +142,7 @@ def test_tac_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    with pytest.raises(ValueError, match="Performative not recognized."):
+    with pytest.raises(ValueError, match="Performative not valid: transaction_confirmation"):
         with mock.patch(
             "packages.fetchai.protocols.tac.message.TacMessage.Performative"
         ) as mocked_type:
@@ -149,7 +150,7 @@ def test_tac_serialization():
             TacSerializer().encode(msg)
 
     msg = TacMessage(
-        type=TacMessage.Performative.TAC_ERROR,
+        performative=TacMessage.Performative.TAC_ERROR,
         error_code=TacMessage.ErrorCode.GENERIC_ERROR,
         info={"msg": "This is info msg."},
     )

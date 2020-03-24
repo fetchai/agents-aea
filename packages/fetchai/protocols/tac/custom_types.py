@@ -38,7 +38,7 @@ CODE_TO_MSG = {
 
 
 class ErrorCode(Enum):
-    """This class defines the error codes."""
+    """This class represents an instance of ErrorCode."""
 
     GENERIC_ERROR = 0
     REQUEST_NOT_VALID = 1
@@ -83,46 +83,3 @@ class ErrorCode(Enum):
         """
         enum_value_from_pb2 = error_code_from_pb2.error_code
         return ErrorCode(enum_value_from_pb2)
-
-
-class ErrorInfo(dict):
-    """This class represents an instance of ErrorInfo."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialise an instance of ErrorInfo."""
-        self.update(*args, **kwargs)
-
-    def __setitem__(self, key, value):
-        """Set item."""
-        assert type(key) == str and type(value) == str
-        dict.__setitem__(self, key, value)
-
-    def update(self, *args, **kwargs):
-        for key, value in dict(*args, **kwargs).items():
-            assert type(key) == str and type(value) == str
-            self[key] = value
-
-    @classmethod
-    def encode(cls, performative, error_info_from_message: "ErrorInfo"):
-        """
-        Encode an instance of this class into the protocol buffer object.
-
-        The content in the 'performative' argument must be matched with the message content in the 'error_info_from_message' argument.
-
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
-        :param error_info_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'error_info_from_message' argument.
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def decode(cls, error_info_from_pb2) -> "ErrorInfo":
-        """
-        Decode a protocol buffer object that corresponds with this class into an instance of this class.
-
-        A new instance of this class must be created that matches the content in the 'error_info_from_pb2' argument.
-
-        :param error_info_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'error_info_from_pb2' argument.
-        """
-        raise NotImplementedError

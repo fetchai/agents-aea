@@ -26,19 +26,16 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.tac.custom_types import ErrorCode as CustomErrorCode
-from packages.fetchai.protocols.tac.custom_types import ErrorInfo as CustomErrorInfo
 
 DEFAULT_BODY_SIZE = 4
 
 
 class TacMessage(Message):
-    """A protocol for participating in a TAC."""
+    """The tac protocol implements the messages an AEA needs to participate in the TAC"""
 
     protocol_id = ProtocolId("fetchai", "tac", "0.1.0")
 
     ErrorCode = CustomErrorCode
-
-    ErrorInfo = CustomErrorInfo
 
     class Performative(Enum):
         """Performatives for the tac protocol."""
@@ -165,10 +162,10 @@ class TacMessage(Message):
         return cast(Dict[str, str], self.get("good_id_to_name"))
 
     @property
-    def info(self) -> Dict[str, CustomErrorInfo]:
+    def info(self) -> Dict[str, str]:
         """Get the 'info' content from the message."""
         assert self.is_set("info"), "'info' content is not set."
-        return cast(Dict[str, CustomErrorInfo], self.get("info"))
+        return cast(Dict[str, str], self.get("info"))
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -577,8 +574,8 @@ class TacMessage(Message):
                         type(key_of_info)
                     )
                     assert (
-                        type(value_of_info) == CustomErrorInfo
-                    ), "Invalid type for dictionary values in content 'info'. Expected 'ErrorInfo'. Found '{}'.".format(
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
                         type(value_of_info)
                     )
 

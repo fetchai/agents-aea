@@ -36,7 +36,7 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
     error_code: ct:ErrorCode
-    info: pt:dict[pt:str, ct:ErrorInfo]
+    info: pt:dict[pt:str, pt:str]
 ...
 ---
 ct:ErrorCode: |
@@ -53,6 +53,4 @@ ct:ErrorCode: |
     DIALOGUE_INCONSISTENT = 9;
   }
   ErrorCodeEnum error_code = 1;
-ct:ErrorInfo: |
-  map<string, string> error_info = 1;
 ...

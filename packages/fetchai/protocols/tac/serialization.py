@@ -26,7 +26,6 @@ from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.tac import tac_pb2
 from packages.fetchai.protocols.tac.custom_types import ErrorCode
-from packages.fetchai.protocols.tac.custom_types import ErrorInfo
 from packages.fetchai.protocols.tac.message import TacMessage
 
 

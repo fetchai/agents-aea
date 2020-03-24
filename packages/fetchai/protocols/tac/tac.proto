@@ -21,10 +21,6 @@ message TacMessage{
         ErrorCodeEnum error_code = 1;
     }
 
-    message ErrorInfo{
-        map<string, string> error_info = 1;
-    }
-
 
     // Performatives and contents
     message Register{
@@ -69,7 +65,7 @@ message TacMessage{
 
     message Tac_Error{
         ErrorCode error_code = 1;
-        map<string, ErrorInfo> info = 2;
+        map<string, string> info = 2;
     }
 
 
