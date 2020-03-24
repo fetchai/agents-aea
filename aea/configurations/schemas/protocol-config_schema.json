@@ -29,6 +29,9 @@
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
     },
+    "fingerprint_ignore_patterns": {
+      "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
+    },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
     },

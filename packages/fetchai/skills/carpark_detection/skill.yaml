@@ -11,6 +11,8 @@ fingerprint:
   dialogues.py: QmW1CB1mHTePURgb7jqnkRzuUf3jWVB3WACnriZEPQiG9U
   handlers.py: QmVzjsSmAv9teEwwdDSU2BASzK58CTdLRWV48JAaLKyxpx
   strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
+fingerprint_ignore_patterns:
+  - "temp_files_placeholder/*"
 description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
   service_registration:

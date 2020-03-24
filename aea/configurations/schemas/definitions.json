@@ -86,6 +86,16 @@
         {"$ref":  "#/definitions/version_specifiers"},
         {"$ref":  "#/definitions/pep440_version"}
       ]
+    },
+    "fingerprint_ignore_patterns": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ignore_pattern"
+      }
+    },
+    "ignore_pattern": {
+      "type": "string"
     }
   }
 }

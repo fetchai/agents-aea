@@ -27,6 +27,7 @@ from typing import (
     Generic,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -409,6 +410,7 @@ class PackageConfiguration(Configuration, ABC):
         license: str,
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
     ):
         """
         Initialize a package configuration.
@@ -422,12 +424,18 @@ class PackageConfiguration(Configuration, ABC):
            (default: empty string - no constraint).
            The fixed version is interpreted with the specifier '=='.
         :param fingerprint: the fingerprint.
+        :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         self.name = name
         self.author = author
         self.version = version if version != "" else "0.1.0"
         self.license = license
         self.fingerprint = fingerprint if fingerprint is not None else {}
+        self.fingerprint_ignore_patterns = (
+            fingerprint_ignore_patterns
+            if fingerprint_ignore_patterns is not None
+            else []
+        )
         self.aea_version = aea_version if aea_version != "" else aea.__version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
@@ -463,6 +471,7 @@ class ConnectionConfig(PackageConfiguration):
         license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -472,7 +481,15 @@ class ConnectionConfig(PackageConfiguration):
         **config
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+        )
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = (
@@ -495,6 +512,7 @@ class ConnectionConfig(PackageConfiguration):
             "license": self.license,
             "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
+            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
             "class_name": self.class_name,
             "protocols": sorted(map(str, self.protocols)),
             "restricted_to_protocols": sorted(map(str, self.restricted_to_protocols)),
@@ -522,6 +540,9 @@ class ConnectionConfig(PackageConfiguration):
             license=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
+            fingerprint_ignore_patterns=cast(
+                Sequence[str], obj.get("fingerprint_ignore_patterns")
+            ),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
@@ -542,6 +563,7 @@ class ProtocolConfig(PackageConfiguration):
         version: str = "",
         license: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
@@ -561,6 +583,7 @@ class ProtocolConfig(PackageConfiguration):
             "license": self.license,
             "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
+            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
             "dependencies": self.dependencies,
             "description": self.description,
         }
@@ -576,6 +599,9 @@ class ProtocolConfig(PackageConfiguration):
             license=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint")),
+            fingerprint_ignore_patterns=cast(
+                Sequence[str], obj.get("fingerprint_ignore_patterns")
+            ),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -652,13 +678,22 @@ class SkillConfig(PackageConfiguration):
         license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         protocols: List[PublicId] = None,
         contracts: List[PublicId] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
     ):
         """Initialize a skill configuration."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+        )
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]
@@ -681,6 +716,7 @@ class SkillConfig(PackageConfiguration):
             "license": self.license,
             "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
+            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
             "protocols": sorted(map(str, self.protocols)),
             "contracts": sorted(map(str, self.contracts)),
             "dependencies": self.dependencies,
@@ -699,6 +735,9 @@ class SkillConfig(PackageConfiguration):
         license = cast(str, obj.get("license"))
         aea_version_specifiers = cast(str, obj.get("aea_version", ""))
         fingerprint = cast(Dict[str, str], obj.get("fingerprint"))
+        fingerprint_ignore_patterns = cast(
+            Sequence[str], obj.get("fingerprint_ignore_patterns")
+        )
         protocols = cast(
             List[PublicId],
             [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
@@ -716,6 +755,7 @@ class SkillConfig(PackageConfiguration):
             license=license,
             aea_version=aea_version_specifiers,
             fingerprint=fingerprint,
+            fingerprint_ignore_patterns=fingerprint_ignore_patterns,
             protocols=protocols,
             contracts=contracts,
             dependencies=dependencies,
@@ -748,12 +788,21 @@ class AgentConfig(PackageConfiguration):
         license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         registry_path: str = "",
         description: str = "",
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
-        super().__init__(agent_name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            agent_name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+        )
         self.agent_name = agent_name
         self.registry_path = registry_path
         self.description = description
@@ -832,6 +881,7 @@ class AgentConfig(PackageConfiguration):
             "license": self.license,
             "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
+            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": self.private_key_paths_dict,
@@ -857,6 +907,9 @@ class AgentConfig(PackageConfiguration):
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
+            fingerprint_ignore_patterns=cast(
+                Sequence[str], obj.get("fingerprint_ignore_patterns")
+            ),
             logging_config=cast(Dict, obj.get("logging_config", {})),
         )
 
@@ -1033,12 +1086,21 @@ class ContractConfig(PackageConfiguration):
         license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
+        fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         path_to_contract_interface: str = "",
     ):
         """Initialize a protocol configuration object."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+        )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.path_to_contract_interface = path_to_contract_interface
@@ -1053,6 +1115,7 @@ class ContractConfig(PackageConfiguration):
             "license": self.license,
             "aea_version": self.aea_version,
             "fingerprint": self.fingerprint,
+            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
             "dependencies": self.dependencies,
             "description": self.description,
             "path_to_contract_interface": self.path_to_contract_interface,
@@ -1069,6 +1132,9 @@ class ContractConfig(PackageConfiguration):
             license=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
+            fingerprint_ignore_patterns=cast(
+                Sequence[str], obj.get("fingerprint_ignore_patterns")
+            ),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
             path_to_contract_interface=cast(
