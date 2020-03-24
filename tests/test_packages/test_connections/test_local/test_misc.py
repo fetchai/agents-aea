@@ -192,23 +192,23 @@ def test_communication():
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert envelope.protocol_id == DefaultMessage.protocol_id
-        assert msg.get("content") == b"hello"
+        assert msg.content == b"hello"
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.CFP
+        assert msg.performative == FIPAMessage.Performative.CFP
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.PROPOSE
+        assert msg.performative == FIPAMessage.Performative.PROPOSE
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.ACCEPT
+        assert msg.performative == FIPAMessage.Performative.ACCEPT
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.DECLINE
+        assert msg.performative == FIPAMessage.Performative.DECLINE
         multiplexer1.disconnect()
         multiplexer2.disconnect()
 

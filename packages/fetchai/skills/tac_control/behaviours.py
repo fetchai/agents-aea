@@ -26,8 +26,8 @@ from typing import Optional, cast
 from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase
@@ -120,17 +120,16 @@ class TACBehaviour(Behaviour):
         self.context.logger.info(
             "[{}]: Registering TAC data model".format(self.context.agent_name)
         )
-        oef_msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_SERVICE,
-            id=self._oef_msg_id,
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
-            service_id="",
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(oef_msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(oef_msg),
         )
         self._registered_desc = desc
 
@@ -144,17 +143,17 @@ class TACBehaviour(Behaviour):
         self.context.logger.info(
             "[{}]: Unregistering TAC data model".format(self.context.agent_name)
         )
-        oef_msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_SERVICE,
-            id=self._oef_msg_id,
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=self._registered_desc,
             service_id="",
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(oef_msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(oef_msg),
         )
         self._registered_desc = None
 
@@ -175,7 +174,7 @@ class TACBehaviour(Behaviour):
         for agent_address in game.configuration.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TACMessage(
-                type=TACMessage.Type.GAME_DATA,
+                performative=TACMessage.Type.GAME_DATA,
                 amount_by_currency_id=agent_state.amount_by_currency_id,
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
@@ -206,7 +205,7 @@ class TACBehaviour(Behaviour):
             )
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
-            tac_msg = TACMessage(type=TACMessage.Type.CANCELLED)
+            tac_msg = TACMessage(performative=TACMessage.Type.CANCELLED)
             self.context.outbox.put_message(
                 to=agent_addr,
                 sender=self.context.agent_address,

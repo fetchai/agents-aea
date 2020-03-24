@@ -20,26 +20,25 @@ The `default` protocol has two message performatives: `BYTES` and `ERROR`, and p
 
 The serialisation methods `encode` and `decode` implement transformations from `Message` type to bytes and back.
 
-## `fetchai/oef:0.1.0` protocol
+## `fetchai/oef_search:0.1.0` protocol
 
-The `fetchai/oef:0.1.0` protocol is used by AEAs to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.1.0` protocol is used by AEAs to register and unregister their own services and search for services registered by other agents.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>In future, the framework will support peer to peer communications.</p>
 </div>
 
-The `oef` protocol definition includes an `OEFMessage` with the following message types:
+The `oef` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ```python
-class Type(Enum):
+class Performative(Enum):
 
 	"""OEF Message types."""
     REGISTER_SERVICE = "register_service"
     UNREGISTER_SERVICE = "unregister_service"
     SEARCH_SERVICES = "search_services"
     OEF_ERROR = "oef_error"
-    DIALOGUE_ERROR = "dialogue_error"
     SEARCH_RESULT = "search_result"
 
     def __str__(self):
@@ -50,7 +49,7 @@ class Type(Enum):
 It also provides error codes.
 
 ```python
-class OEFErrorOperation(Enum):
+class OefErrorOperation(Enum):
 
 	"""Operation code for the OEF. It is returned in the OEF Error messages."""
 	REGISTER_SERVICE = 0

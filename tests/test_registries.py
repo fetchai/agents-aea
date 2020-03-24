@@ -175,7 +175,7 @@ class TestResources:
 
         cls.expected_protocols = {
             PublicId("fetchai", "default", "0.1.0"),
-            PublicId("fetchai", "oef", "0.1.0"),
+            PublicId("fetchai", "oef_search", "0.1.0"),
         }
 
     def test_unregister_handler(self):
@@ -241,7 +241,7 @@ class TestResources:
     def test_add_protocol(self):
         """Test that the 'add protocol' method works correctly."""
         oef_protocol = Protocol.from_dir(
-            os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef")
+            os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
         self.resources.add_protocol(oef_protocol)
         for protocol_id in self.expected_protocols:

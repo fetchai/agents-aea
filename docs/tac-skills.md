@@ -257,7 +257,7 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.1.0']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the `tac_negotiation` skill.
@@ -266,7 +266,7 @@ The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing
 
 The `TransactionHandler` deals with `TransactionMessage`s received from the decision maker component. The decision maker component is responsible for cryptoeconomic security.
 
-The `OEFSearchHandler` deals with `OEFMessage` types returned from the OEF search nodes.
+The `OEFSearchHandler` deals with `OefSearchMessage` types returned from the OEF search nodes.
 
 The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 

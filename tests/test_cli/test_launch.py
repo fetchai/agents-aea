@@ -87,7 +87,7 @@ class TestLaunch:
                 poll_one = process_launch.poll()
                 if poll_one is None:
                     process_launch.terminate()
-                    process_launch.wait(2)
+                    process_launch.wait(5)
 
         assert process_launch.returncode == 0
 
