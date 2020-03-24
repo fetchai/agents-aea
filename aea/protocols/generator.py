@@ -44,7 +44,18 @@ SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
 
 CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
-PYTHON_PRIMITIVE_TYPES = ["bytes", "int", "float", "bool", "str", "FrozenSet", "Tuple", "Dict", "Union", "Optional"]
+PYTHON_PRIMITIVE_TYPES = [
+    "bytes",
+    "int",
+    "float",
+    "bool",
+    "str",
+    "FrozenSet",
+    "Tuple",
+    "Dict",
+    "Union",
+    "Optional",
+]
 BASIC_FIELDS_AND_TYPES = {
     "name": str,
     "author": str,
@@ -150,7 +161,9 @@ def _is_composition_type_with_custom_type(content_type: str) -> bool:
         sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
         sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
 
-        result = (sub_type_1 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()) or (sub_type_2 not in PYTHON_TYPE_TO_PROTO_TYPE.keys())
+        result = (sub_type_1 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()) or (
+            sub_type_2 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
+        )
     elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
         sub_type = _get_sub_types_of_compositional_types(content_type)[0]
         result = sub_type not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
@@ -352,7 +365,9 @@ def _specification_type_to_python_type(specification_type: str) -> str:
     elif specification_type.startswith("pt:dict"):
         python_type = _pmt_specification_type_to_python_type(specification_type)
     else:
-        raise ProtocolSpecificationParseError("Unsupported type: '{}'".format(specification_type))
+        raise ProtocolSpecificationParseError(
+            "Unsupported type: '{}'".format(specification_type)
+        )
     return python_type
 
 
@@ -479,8 +494,7 @@ class ProtocolGenerator:
                 if not _is_valid_content_name(content_name):
                     raise ProtocolSpecificationParseError(
                         "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                            content_name,
-                            performative,
+                            content_name, performative,
                         )
                     )
 
@@ -501,8 +515,7 @@ class ProtocolGenerator:
                 if _is_composition_type_with_custom_type(pythonic_content_type):
                     raise ProtocolSpecificationParseError(
                         "Invalid type for content '{}' of performative '{}'. A custom type cannot be used in the following composition types: [pt:set, pt:list, pt:dict].".format(
-                            content_name,
-                            performative,
+                            content_name, performative,
                         )
                     )
 
@@ -661,8 +674,7 @@ class ProtocolGenerator:
                     check_str += (
                         indents
                         + "        all(type(element) == {} for element in self.{}) or\n".format(
-                            _to_custom_custom(frozen_set_element_type),
-                            content_name,
+                            _to_custom_custom(frozen_set_element_type), content_name,
                         )
                     )
                 check_str = check_str[:-4]
