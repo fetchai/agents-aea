@@ -20,226 +20,49 @@
 """This test module contains the integration test for the tac skills."""
 
 import os
-import shutil
 import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
 
 import pytest
 
-from aea.cli import cli
-
-from tests.common.click_testing import CliRunner
-from tests.conftest import CLI_LOG_OPTION
+from tests.test_packages.tools_for_testing import AeaTestCase
 
 
-class TestTacSkills:
+class TestTacSkills(AeaTestCase):
     """Test that tac skills work."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name_one = "tac_participant_one"
-        cls.agent_name_two = "tac_participant_two"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
 
     def test_tac(self, pytestconfig):
         """Run the tac skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        agent_name_one = "tac_participant_one"
+        agent_name_two = "tac_participant_two"
 
         # create agent one and agent two
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
-        )
-        assert result.exit_code == 0
+        self.create_agents(agent_name_one, agent_name_two)
 
-        # add packages for agent one and run it
-        agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
-        os.chdir(agent_one_dir_path)
+        # add packages for agent one
+        agent_one_dir_path = os.path.join(self.t, agent_name_one)
+        agent_two_dir_path = os.path.join(self.t, agent_name_two)
 
-        # add oef connection
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        for agent_path in (agent_one_dir_path, agent_two_dir_path):
+            os.chdir(agent_path)
 
-        # add tac_participation skill
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/tac_participation:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+            self.add_item("connection", "fetchai/oef:0.1.0")
+            self.add_item("skill", "fetchai/tac_participation:0.1.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
+            self.disable_ledger_tx("fetchai", "skill", "tac_participation")
+            self.disable_ledger_tx("fetchai", "skill", "tac_negotiation")
 
-        # add tac_negotiation skill
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/tac_negotiation:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Load the tac_participation yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "tac_participation", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        # Load the tac_negotiation yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "tac_negotiation", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        # install
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.t)
-
-
-        # add packages for agent two and run it
-        agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
-        os.chdir(agent_two_dir_path)
-
-        # add oef connection
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # add tac_participation skill
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/tac_participation:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # add tac_negotiation skill
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/tac_negotiation:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Load the tac_participation yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "tac_participation", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        # Load the tac_negotiation yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "tac_negotiation", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        # install
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.t)
+            self.run_install()
 
         try:
             os.chdir(agent_one_dir_path)
-            process_one = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.1.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
+            process_one = self.run_oef_subprocess()
+
             os.chdir(agent_two_dir_path)
-            process_two = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.1.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
+            process_two = self.run_oef_subprocess()
 
             time.sleep(10.0)
             process_one.send_signal(signal.SIGINT)
@@ -261,20 +84,4 @@ class TestTacSkills:
                 process_two.wait(2)
 
         os.chdir(self.t)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        self.delete_agents(agent_name_one, agent_name_two)
