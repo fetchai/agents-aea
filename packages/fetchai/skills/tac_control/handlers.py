@@ -24,7 +24,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase, Transaction
@@ -303,7 +303,7 @@ class TACHandler(Handler):
 class OEFRegistrationHandler(Handler):
     """Handle the message exchange with the OEF."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -320,24 +320,21 @@ class OEFRegistrationHandler(Handler):
         :param message: the message
         :return: None
         """
-        oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.type
+        oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
-            "[{}]: Handling OEF message. type={}".format(
-                self.context.agent_name, oef_type
+            "[{}]: Handling OEF message. performative={}".format(
+                self.context.agent_name, oef_message.performative
             )
         )
-        if oef_type == OEFMessage.Type.OEF_ERROR:
+        if oef_message.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
-        elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
-            self._on_dialogue_error(oef_message)
         else:
             self.context.logger.warning(
                 "[{}]: OEF Message type not recognized.".format(self.context.agent_name)
             )
 
-    def _on_oef_error(self, oef_error: OEFMessage) -> None:
+    def _on_oef_error(self, oef_error: OefSearchMessage) -> None:
         """
         Handle an OEF error message.
 
@@ -346,25 +343,10 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, operation={}".format(
-                self.context.agent_name, oef_error.id, oef_error.operation
-            )
-        )
-
-    def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
-        """
-        Handle a dialogue error message.
-
-        :param dialogue_error: the dialogue error message
-
-        :return: None
-        """
-        self.context.logger.error(
-            "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
+            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
                 self.context.agent_name,
-                dialogue_error.id,
-                dialogue_error.dialogue_id,
-                dialogue_error.origin,
+                oef_error.message_id,
+                oef_error.oef_error_operation,
             )
         )
 

@@ -35,6 +35,6 @@ models:
   game:
     class_name: Game
     args: {}
-protocols: ['fetchai/oef:0.1.0', 'fetchai/tac:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']
 dependencies:
   numpy: {}

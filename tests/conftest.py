@@ -105,7 +105,7 @@ protocol_config_files = [
         "packages",
         "fetchai",
         "protocols",
-        "oef",
+        "oef_search",
         DEFAULT_PROTOCOL_CONFIG_FILE,
     ),
     os.path.join(

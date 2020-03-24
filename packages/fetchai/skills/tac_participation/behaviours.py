@@ -23,8 +23,8 @@ from typing import cast
 
 from aea.skills.base import Behaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
@@ -78,12 +78,14 @@ class TACBehaviour(Behaviour):
                 self.context.agent_name, search_id
             )
         )
-        oef_msg = OEFMessage(
-            type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+        oef_msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=(str(search_id), ""),
+            query=query,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(oef_msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(oef_msg),
         )

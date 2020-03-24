@@ -19,7 +19,7 @@
 
 """This package contains the handlers."""
 
-from typing import List, Optional, cast
+from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -28,7 +28,7 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
@@ -38,7 +38,7 @@ from packages.fetchai.skills.tac_participation.search import Search
 class OEFHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
@@ -60,20 +60,17 @@ class OEFHandler(Handler):
         :param message: the message
         :return: None
         """
-        oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.type
+        oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
-            "[{}]: Handling OEF message. type={}".format(
-                self.context.agent_name, oef_type
+            "[{}]: Handling OEF message. performative={}".format(
+                self.context.agent_name, oef_message.performative
             )
         )
-        if oef_type == OEFMessage.Type.SEARCH_RESULT:
+        if oef_message.performative == OefSearchMessage.Performative.SEARCH_RESULT:
             self._on_search_result(oef_message)
-        elif oef_type == OEFMessage.Type.OEF_ERROR:
+        elif oef_message.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
-        elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
-            self._on_dialogue_error(oef_message)
 
     def teardown(self) -> None:
         """
@@ -83,7 +80,7 @@ class OEFHandler(Handler):
         """
         pass
 
-    def _on_oef_error(self, oef_error: OEFMessage) -> None:
+    def _on_oef_error(self, oef_error: OefSearchMessage) -> None:
         """
         Handle an OEF error message.
 
@@ -92,29 +89,14 @@ class OEFHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, operation={}".format(
-                self.context.agent_name, oef_error.id, oef_error.operation
-            )
-        )
-
-    def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
-        """
-        Handle a dialogue error message.
-
-        :param dialogue_error: the dialogue error message
-
-        :return: None
-        """
-        self.context.logger.error(
-            "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
+            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
                 self.context.agent_name,
-                dialogue_error.id,
-                dialogue_error.dialogue_id,
-                dialogue_error.origin,
+                oef_error.message_id,
+                oef_error.oef_error_operation,
             )
         )
 
-    def _on_search_result(self, search_result: OEFMessage) -> None:
+    def _on_search_result(self, search_result: OefSearchMessage) -> None:
         """
         Split the search results from the OEF.
 
@@ -123,7 +105,7 @@ class OEFHandler(Handler):
         :return: None
         """
         search = cast(Search, self.context.search)
-        search_id = search_result.id
+        search_id = search_result.message_id
         agents = search_result.agents
         self.context.logger.debug(
             "[{}]: on search result: {} {}".format(
@@ -139,7 +121,9 @@ class OEFHandler(Handler):
                 )
             )
 
-    def _on_controller_search_result(self, agent_addresses: List[Address]) -> None:
+    def _on_controller_search_result(
+        self, agent_addresses: Tuple[Address, ...]
+    ) -> None:
         """
         Process the search result for a controller.
 
