@@ -36,7 +36,7 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
     error_code: ct:ErrorCode
-    info: pt:dict[pt:str, ct:ErrorInfo]
+    info: ct:ErrorInfo
 ...
 ---
 ct:ErrorCode: |
