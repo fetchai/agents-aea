@@ -103,7 +103,7 @@ class TestTacSkills(AeaTestCase):
                 agent_two_process.wait(2)
 
             poll_tac = tac_controller_process.poll()
-            if poll_two is None:
+            if poll_tac is None:
                 tac_controller_process.terminate()
                 tac_controller_process.wait(2)
 
