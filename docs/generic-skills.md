@@ -19,8 +19,8 @@ You can modify the `has_data_source` variable in `skill.yaml` file of the generi
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF node
-In a separate terminal, launch a local OEF node (for search and discovery).
+### Launch an OEF search and communication node
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
@@ -127,7 +127,7 @@ In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`, replace the `
 |        city: Cambridge            |        city: Cambridge           |
 |----------------------------------------------------------------------| 
 ```
-The `search_schema` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
+The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger). and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
