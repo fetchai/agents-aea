@@ -34,8 +34,7 @@ class OefErrorOperation(Enum):
     REGISTER_SERVICE = 0
     UNREGISTER_SERVICE = 1
     SEARCH_SERVICES = 2
-    SEARCH_SERVICES_WIDE = 3
-    SEND_MESSAGE = 4
+    SEND_MESSAGE = 3
 
     OTHER = 10000
 

@@ -11,7 +11,7 @@ To follow this tutorial to completion you will need:
  
  - AEA Framework
 	
-The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the OEF and will identify itself as a seller of that data.
+The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the [OEF search and communication node](../oef-ledger) and will identify itself as a seller of that data.
 
 Throughout the tutorial we are using Python3.7, but you can use any Python >= 3.6.
 
@@ -168,7 +168,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
  
     def _register_service(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register to the OEF search node's service directory.
  
         :return: None
         """
@@ -188,14 +188,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating thermometer services on OEF.".format(
+            "[{}]: updating thermometer services on OEF search node's service directory.".format(
                 self.context.agent_name
             )
         )
  
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Unregister service from OEF search node's service directory.
  
         :return: None
         """
@@ -213,21 +213,21 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering thermometer station services from OEF.".format(
+            "[{}]: unregistering thermometer station services from OEF search node's service directory.".format(
                 self.context.agent_name
             )
         )
         self._registered_service_description = None
 ```
-This Behaviour will register and de-register our AEA’s service on the OEF at regular tick intervals. By registering, the AEA becomes discoverable to possible clients. 
+This Behaviour will register and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals. By registering, the AEA becomes discoverable to possible clients. 
 
 Currently, the AEA-framework supports two different blockchains [Ethereum, Fetchai], and that’s the reason we are checking if we have balance for these two blockchains in the setup method.
 
-The act method unregisters and registers the AEA to the OEF on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
+The act method unregisters and registers the AEA to the [OEF search node](../oef-ledger) on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
 
 ## Step3: Create the handler
 
-So far, we have tasked the AEA with sending register/unregister requests to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF or any other AEA at the moment.
+So far, we have tasked the AEA with sending register/unregister requests to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or any other AEA at the moment.
 
 This script contains the logic to negotiate with another AEA based on the strategy we want our AEA to follow. (we are going to write this next) . 
 
@@ -838,7 +838,7 @@ class Thermometer_Datamodel(DataModel):
        )
 
 ```
-This data model registers to the OEF as an AEA that is in the UK and specifically in Cambridge. 
+This data model registers to the [OEF search node](../oef-ledger) as an AEA that is in the UK and specifically in Cambridge. 
 If a client_AEA searches for AEA in the UK the oef will respond with the address of our AEA. 
 
 ## Step7: Update the YAML files
@@ -1051,11 +1051,11 @@ class MySearchBehaviour(TickerBehaviour):
 
 ```
 This Behaviour will register to the Search_Service of the oef with a specific query at regular tick intervals. 
-By registering to the search service the OEF can respond with possible sellers that match our query.
+By registering to the search service the [OEF search node](../oef-ledger) can respond with possible sellers that match our query.
 
 ## Step3: Create the handler
 
-So far, we have tasked the AEA with sending search queries to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF or any other agent at the moment.
+So far, we have tasked the AEA with sending search queries to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or any other agent at the moment.
 
 This script contains the logic to negotiate with another AEA based on the strategy we want our AEA to follow (we are going to write this next) .
 
@@ -1366,9 +1366,9 @@ def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         )
 ```
 The main difference between this handler and the my_aea handler is that in this one we create more than one handler. 
-The reason is that we receive messages not only from the seller_aea but also from the decision_maker and the OEF. 
+The reason is that we receive messages not only from the seller_aea but also from the decision_maker and the [OEF search node](../oef-ledger). 
 So we need a handler to be able to read different kinds of messages. 
-To handle the OEF response on our search request adds the following code in the same file :
+To handle the [OEF search node](../oef-ledger) response on our search request adds the following code in the same file :
 
 ```python 
 
@@ -1781,7 +1781,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)
 
-In a separate terminal, launch a local OEF node (for search and discovery).
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```

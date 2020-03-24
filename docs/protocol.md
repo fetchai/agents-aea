@@ -10,6 +10,14 @@ Protocols are not to be conflated with Interaction Protocols. The latter consist
 - Handlers: which handle incoming messages
 - Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type.
 
+## Metadata
+
+Each `Message` in an interaction protocol has a set of default metadata, this includes:
+
+* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
+* `message_id: int`, the id of the message. The default value is `1`.
+* `target: int`, the id of the message which is referenced by this message. The default value is `0`.
+
 ## Custom protocol
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. 
@@ -34,7 +42,7 @@ The `oef` protocol definition includes an `OefSearchMessage` with the following 
 ```python
 class Performative(Enum):
 
-	"""OEF Message types."""
+	"""Performatives for the oef_search protocol."""
     REGISTER_SERVICE = "register_service"
     UNREGISTER_SERVICE = "unregister_service"
     SEARCH_SERVICES = "search_services"
@@ -46,17 +54,108 @@ class Performative(Enum):
         return self.value
 ```
 
-It also provides error codes.
+We show some example messages below:
+
+* To register a service, we require a reference to the dialogue in string form, for instance
+``` python
+my_dialogue_reference = "a_unique_register_service_dialogue_reference"
+```
+and a description of the service we would like to register, for instance
+```python
+my_service_data = {"country": "UK", "city": "Cambridge"}
+my_service_description = Description(
+    my_service_data,
+    data_model=my_data_model,
+)
+```
+where we use, for instance
+``` python
+from aea.helpers.search.generic import GenericDataModel
+
+data_model_name = "location"
+data_model = {
+    "attribute_one": {
+        "name": "country",
+        "type": "str",
+        "is_required": "True",
+    },
+    "attribute_two": {
+        "name": "city",
+        "type": "str",
+        "is_required": "True",
+    },
+}
+my_data_model = GenericDataModel(data_model_name, data_model)
+```
+We can then create the message to register this service:
+``` python
+msg = OefSearchMessage(
+    performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+    dialogue_reference=(my_dialogue_reference, ""),
+    service_description=my_service_description,
+)
+```
+
+* To unregister a service, we require a reference to the dialogue in string form, for instance
+``` python
+my_dialogue_reference = "a_unique_unregister_service_dialogue_reference"
+```
+the description of the service we would like to unregister, say `my_service_description` from above and construct the message:
+``` python
+msg = OefSearchMessage(
+    performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+    dialogue_reference=(my_dialogue_reference, ""),
+    service_description=my_service_description,
+)
+```
+
+* To search a service, we require a reference to the dialogue in string form, for instance
+``` python
+my_dialogue_reference = "a_unique_search_dialogue_reference"
+```
+and a query we would like the search node to evaluate, for instance
+``` python
+from aea.helpers.search.models import Constraint, ConstraintType, Query
+
+query_data = {
+    "search_term": "country",
+    "search_value": "UK",
+    "constraint_type": "==",
+}
+query = Query(
+    [
+        Constraint(
+            query_data["search_term"],
+            ConstraintType(
+                query_data["constraint_type"],
+                query_data["search_value"],
+            ),
+        )
+    ],
+    model=None,
+)
+```
+We can then create the message to search these services:
+``` python
+oef_msg = OefSearchMessage(
+    performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+    dialogue_reference=(my_dialogue_reference, ""),
+    query=query,
+)
+```
+
+* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger).
+
+* If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 
 ```python
 class OefErrorOperation(Enum):
 
-	"""Operation code for the OEF. It is returned in the OEF Error messages."""
+	"""This class represents an instance of OefErrorOperation."""
 	REGISTER_SERVICE = 0
     UNREGISTER_SERVICE = 1
     SEARCH_SERVICES = 2
-    SEARCH_SERVICES_WIDE = 3
-    SEND_MESSAGE = 4
+    SEND_MESSAGE = 3
 
     OTHER = 10000
 ```

@@ -62,11 +62,8 @@ def test_oef_error_operation():
         str(OefSearchMessage.OefErrorOperation.SEARCH_SERVICES) == "2"
     ), "The string representation must be 2"
     assert (
-        str(OefSearchMessage.OefErrorOperation.SEARCH_SERVICES_WIDE) == "3"
+        str(OefSearchMessage.OefErrorOperation.SEND_MESSAGE) == "3"
     ), "The string representation must be 3"
-    assert (
-        str(OefSearchMessage.OefErrorOperation.SEND_MESSAGE) == "4"
-    ), "The string representation must be 4"
     assert (
         str(OefSearchMessage.OefErrorOperation.OTHER) == "10000"
     ), "The string representation must be 10000"
