@@ -33,10 +33,14 @@ import signal
 import subprocess  # nosec
 import sys
 import time
+from pathlib import Path
 from typing import Dict
 
 import ipfshttpclient
 
+import yaml
+
+from aea.cli.common import _compute_fingerprint
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
@@ -63,20 +67,12 @@ def ipfs_hashing(
     """Hashes a package and its components."""
     print("Processing package {} of type {}".format(package_name, package_type))
 
+    # load config file to get ignore patterns
+    config = yaml.safe_load(next(Path(target_dir).glob("*.yaml")).open())
+    ignore_patterns = config.get("fingerprint_ignore_patterns", [])
     if package_type != "agents":
-        # hash inner components (all `.py` files)
-        result_list = client.add(target_dir, pattern="*.py")
-
-        fingerprints_dict = {}  # Dict[str, str]
-        # get hashes of all `.py` files
-        for result_dict in result_list:
-            if package_name == result_dict["Name"]:
-                continue
-            if not result_dict["Name"][-3:] == ".py":
-                continue
-            key = result_dict["Name"].replace(package_name + "/", "", 1)
-            fingerprints_dict[key] = result_dict["Hash"]
-
+        # hash inner components
+        fingerprints_dict = _compute_fingerprint(Path(target_dir), ignore_patterns)
         # confirm ipfs only generates same hash:
         for file_name, ipfs_hash in fingerprints_dict.items():
             path = os.path.join(target_dir, file_name)
@@ -98,6 +94,7 @@ def ipfs_hashing(
         file = open(yaml_path, mode="r")
 
         # find and replace
+        # TODO this can be simplified after https://github.com/fetchai/agents-aea/issues/932
         existing = ""
         fingerprint_block = False
         for line in file:
@@ -131,6 +128,7 @@ def ipfs_hashing(
             f.write(whole_file)
 
     # hash again to get outer hash (this time all files):
+    # TODO we still need to ignore some files
     result_list = client.add(target_dir)
     for result_dict in result_list:
         if package_name == result_dict["Name"]:

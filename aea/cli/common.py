@@ -567,7 +567,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
 
 
 def _compute_fingerprint(
-    package_directory, ignore_patterns: Optional[Collection[str]] = None
+    package_directory: Path, ignore_patterns: Optional[Collection[str]] = None
 ) -> Dict[str, str]:
     ignore_patterns = ignore_patterns if ignore_patterns is not None else []
     ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)

@@ -8,6 +8,7 @@ fingerprint:
   behaviours.py: QmWTcPUxhDoCQVaXTgJHxNt4txJMSxERr75iDMcaFKTJ9x
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
   dialogues.py: QmVwpfdM3DBp7SndR4XCKhHUtGAW9RC3mRgVrpv3yPJTjD
+  dummy_weather_station_data.db: QmUkwwhytR3j8mL29s8VJwgvLi3FijJfNkruK5G8oyUkzs
   dummy_weather_station_data.py: QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT
   handlers.py: QmQka88DvnsdZJMb9P8te5Wng6T2PQwEjcy5hkDwLC1zCa
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5

@@ -6,6 +6,7 @@ aea_version: 0.2.3
 fingerprint:
   __init__.py: QmTJvkXfMucCBFoAG29ghp4fVA2nH4HxUnSGFTH9ScGXNC
   custom_types.py: QmZ676XPzG4hJpyXLSjffeDwXWxSZZX2hnNtzpg3cETmAm
+  default.proto: QmW2piNx9np1zLLmNQhQra3ytzCH4L2sgFef3bHj5dwVvL
   default_pb2.py: QmZ7hUkSqQzbFK3k3LX5ze6BRCeDLbL8sNThHXBxdf8XDR
   message.py: QmXWjTx6zjmFKEx3yBFtjjeRgJt6BiRKsH9W4xb5rFJMoh
   serialization.py: QmNRoQH2w1E4jJ1nDqoQ9PiCDgk5HcHJE22gt4aURofkN8

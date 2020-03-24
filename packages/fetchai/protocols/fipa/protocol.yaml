@@ -6,6 +6,7 @@ aea_version: 0.2.3
 fingerprint:
   __init__.py: Qmc3EFAp16MJiRXU8hgSh2ApPnRTpmgAnxfEKi52r7MmUa
   dialogues.py: QmUHyyQmYyuE6G2o3q6HnhniHba74ye9sgc1VywyRtT4kX
+  fipa.proto: QmUcEivBY3UhwhPQgKmLcDCc4cGwvQB1a4BLN7HmSP44Mi
   fipa_pb2.py: QmWYuBphykgLM2MtfYZ5sT5UaLeU68VrUDjyxF5duMVDps
   message.py: QmPvj6PEyjdnajUQDV2cKpvLREYwo5AKAL4vKx1jhWBmgX
   serialization.py: QmVZ8WXCFVx3NgmCcJ1Q2nPpNhe6hDL62X4Ud6rG2gNJZk
