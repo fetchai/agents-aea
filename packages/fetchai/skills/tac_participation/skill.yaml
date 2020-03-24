@@ -28,4 +28,4 @@ models:
     args:
       expected_version_id: v1
       # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
-protocols: ['fetchai/oef:0.1.0', 'fetchai/tac:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']

@@ -2,5 +2,7 @@ name: tac
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
-description: "The tac protocol implements the messages an AEA needs to participate in the TAC."
+fingerprint: ''
+dependencies: 
+    protobuf: {} 
+description: The tac protocol implements the messages an AEA needs to participate in the TAC

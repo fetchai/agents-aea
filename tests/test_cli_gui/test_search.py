@@ -31,8 +31,8 @@ Description: The default item allows for any byte logic.
 Version: 0.1.0
 ------------------------------
 ------------------------------
-Public ID: fetchai/oef:0.1.0
-Name: oef
+Public ID: fetchai/oef_search:0.1.0
+Name: oef_search
 Description: The oef item implements the OEF specific logic.
 Version: 0.1.0
 ------------------------------
@@ -63,7 +63,7 @@ def _test_search_items_with_query(item_type: str, query: str):
         data["search_result"][0]["description"]
         == "The default item allows for any byte logic."
     )
-    assert data["search_result"][1]["id"] == "fetchai/oef:0.1.0"
+    assert data["search_result"][1]["id"] == "fetchai/oef_search:0.1.0"
     assert (
         data["search_result"][1]["description"]
         == "The oef item implements the OEF specific logic."
@@ -88,7 +88,7 @@ def _test_search_items(item_type: str):
     assert len(data) == 2
     assert data[0]["id"] == "fetchai/default:0.1.0"
     assert data[0]["description"] == "The default item allows for any byte logic."
-    assert data[1]["id"] == "fetchai/oef:0.1.0"
+    assert data[1]["id"] == "fetchai/oef_search:0.1.0"
     assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 
@@ -166,7 +166,7 @@ def test_real_search():
     assert data[i]["id"] == "fetchai/oef:0.1.0"
     assert (
         data[i]["description"]
-        == "The oef connection provides a wrapper around the OEF sdk."
+        == "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
     )
     i += 1
     assert data[i]["id"] == "fetchai/p2p_client:0.1.0"

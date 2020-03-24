@@ -33,7 +33,7 @@ models:
     class_name: MLModel
     args:
       model_config_path: "./skills/ml_train/model.json"
-protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/ml_trade:0.1.0']
 dependencies:
   tensorflow: { version: "==1.14.0" }
   numpy: {}

@@ -51,7 +51,7 @@ You can find example of this implementation in the <a href='/thermometer-skills-
 <details><summary>How does one connect a frontend?</summary>
 There are two options that one could connect a frontend. The first option would be to create an HTTP connection and then create an app that will communicate with this
 connections.
-The other option is to create a frontend client that will communicate with the agent via the OEF.
+The other option is to create a frontend client that will communicate with the agent via the [OEF communication network](../oef-ledger).
 <br><br>
 You can find a more detailed approach <a href="/connect-a-frontend/">here</a>
 </details>

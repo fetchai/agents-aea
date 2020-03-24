@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """Useful classes for the OEF search."""
+
+import pickle  # nosec
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
@@ -107,6 +109,34 @@ class Description:
     def __iter__(self):
         """Create an iterator."""
         return iter(self.values)
+
+    @classmethod
+    def encode(cls, performative, description_from_message: "Description"):
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The content in the 'performative' argument must be matched with the message content in the 'description_from_message' argument.
+
+        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param description_from_message: the message content to be encoded in the protocol buffer object.
+        :return: the 'performative' protocol buffer object encoded with the message content in the 'description_from_message' argument.
+        """
+        description_from_message_bytes = pickle.dumps(description_from_message)  # nosec
+        performative.service_description.description = description_from_message_bytes
+        return performative
+
+    @classmethod
+    def decode(cls, description_from_pb2) -> "Description":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the content in the 'description_from_pb2' argument.
+
+        :param description_from_pb2: the protocol buffer content object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'description_from_pb2' argument.
+        """
+        service_description = pickle.loads(description_from_pb2.description)  # nosec
+        return service_description
 
 
 class ConstraintTypes(Enum):
@@ -448,3 +478,31 @@ class Query:
             and self.constraints == other.constraints
             and self.model == other.model
         )
+
+    @classmethod
+    def encode(cls, performative, query_from_message: "Query"):
+        """
+        Encode an instance of this class into the protocol buffer object.
+
+        The content in the 'performative' argument must be matched with the message content in the 'query_from_message' argument.
+
+        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param query_from_message: the message content to be encoded in the protocol buffer object.
+        :return: the 'performative' protocol buffer object encoded with the message content in the 'query_from_message' argument.
+        """
+        query_bytes = pickle.dumps(query_from_message)  # nosec
+        performative.query.query_bytes = query_bytes
+        return performative
+
+    @classmethod
+    def decode(cls, query_from_pb2) -> "Query":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the content in the 'query_from_pb2' argument.
+
+        :param query_from_pb2: the protocol buffer content object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'query_from_pb2' argument.
+        """
+        query = pickle.loads(query_from_pb2.query_bytes)  # nosec
+        return query

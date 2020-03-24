@@ -38,7 +38,7 @@ from aea.skills.error.handlers import ErrorHandler
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
@@ -145,7 +145,7 @@ class TestSkillError:
         envelope = Envelope(
             to=self.address,
             sender=self.address,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
 

@@ -25,11 +25,10 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
-SERVICE_ID = ""
 DEFAULT_SEARCH_INTERVAL = 5.0
 
 
@@ -91,14 +90,16 @@ class MySearchBehaviour(TickerBehaviour):
         if strategy.is_searching:
             query = strategy.get_service_query()
             search_id = strategy.get_next_search_id()
-            oef_msg = OEFMessage(
-                type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                dialogue_reference=(str(search_id), ""),
+                query=query,
             )
             self.context.outbox.put_message(
-                to=DEFAULT_OEF,
+                to=self.context.search_service_address,
                 sender=self.context.agent_address,
-                protocol_id=OEFMessage.protocol_id,
-                message=OEFSerializer().encode(oef_msg),
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(oef_msg),
             )
 
     def teardown(self) -> None:

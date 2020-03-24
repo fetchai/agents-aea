@@ -50,7 +50,7 @@ from aea.helpers.base import (
     load_agent_component_package,
     load_module,
 )
-from aea.mail.base import OutBox
+from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
@@ -171,6 +171,11 @@ class SkillContext:
     def ledger_apis(self) -> LedgerApis:
         """Get ledger APIs."""
         return self._agent_context.ledger_apis
+
+    @property
+    def search_service_address(self) -> Address:
+        """Get the address of the search service."""
+        return self._agent_context.search_service_address
 
     @property
     def handlers(self) -> SimpleNamespace:

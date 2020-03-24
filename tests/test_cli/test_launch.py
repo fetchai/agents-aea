@@ -87,7 +87,7 @@ class TestLaunch:
                 poll_one = process_launch.poll()
                 if poll_one is None:
                     process_launch.terminate()
-                    process_launch.wait(2)
+                    process_launch.wait(5)
 
         assert process_launch.returncode == 0
 
@@ -156,7 +156,7 @@ class TestLaunchWithOneFailingAgent:
             os.killpg(
                 os.getpgid(process_launch.pid), signal.SIGINT
             )  # Send the signal to all the process groups
-            process_launch.wait(timeout=5.0)
+            process_launch.wait(timeout=10.0)
         finally:
             if not process_launch.returncode == 0:
                 poll_one = process_launch.poll()

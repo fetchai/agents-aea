@@ -25,7 +25,7 @@ from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.message import TacMessage
 
 
 class Phase(Enum):
@@ -185,7 +185,7 @@ class Game(Model):
         assert self._configuration is not None, "Game configuration not assigned!"
         return self._configuration
 
-    def init(self, tac_message: TACMessage, controller_addr: Address) -> None:
+    def init(self, tac_message: TacMessage, controller_addr: Address) -> None:
         """
         Populate data structures with the game data.
 
@@ -195,14 +195,14 @@ class Game(Model):
         :return: None
         """
         assert (
-            tac_message.type == TACMessage.Type.GAME_DATA
-        ), "Wrong TACMessage for initialization of TAC game."
+            tac_message.performative == TacMessage.Performative.GAME_DATA
+        ), "Wrong TacMessage for initialization of TAC game."
         assert (
             controller_addr == self.expected_controller_addr
-        ), "TACMessage from unexpected controller."
+        ), "TacMessage from unexpected controller."
         assert (
             tac_message.version_id == self.expected_version_id
-        ), "TACMessage for unexpected game."
+        ), "TacMessage for unexpected game."
         self._configuration = Configuration(
             tac_message.version_id,
             tac_message.tx_fee,

@@ -23,7 +23,7 @@ import asyncio
 import logging
 import pickle  # nosec
 from asyncio import AbstractEventLoop, CancelledError
-from typing import List, Optional, Set, cast
+from typing import Dict, List, Optional, Set, Tuple, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -69,16 +69,23 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import Address, Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger(__name__)
 
-STUB_MESSSAGE_ID = 0
+TARGET = 0
+MESSAGE_ID = 1
+RESPONSE_TARGET = MESSAGE_ID
+RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
+STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
+DEFAULT_OEF = "default_oef"
 
 
 class OEFObjectTranslator:
@@ -296,6 +303,8 @@ class OEFChannel(OEFAgent):
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[AbstractEventLoop]
         self.excluded_protocols = excluded_protocols
+        self.oef_msg_id = 0
+        self.oef_msg_it_to_dialogue_reference = {}  # type: Dict[int, Tuple[str, str]]
 
     def on_message(
         self, msg_id: int, dialogue_id: int, origin: Address, content: bytes
@@ -445,14 +454,19 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(
-            type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents
+        dialogue_reference = self.oef_msg_it_to_dialogue_reference[search_id]
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            dialogue_reference=dialogue_reference,
+            target=RESPONSE_TARGET,
+            message_id=RESPONSE_MESSAGE_ID,
+            agents=tuple(agents),
         )
-        msg_bytes = OEFSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -472,18 +486,22 @@ class OEFChannel(OEFAgent):
         assert self.in_queue is not None
         assert self.loop is not None
         try:
-            operation = OEFMessage.OEFErrorOperation(operation)
+            operation = OefSearchMessage.OefErrorOperation(operation)
         except ValueError:
-            operation = OEFMessage.OEFErrorOperation.OTHER
-
-        msg = OEFMessage(
-            type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation
+            operation = OefSearchMessage.OefErrorOperation.OTHER
+        dialogue_reference = self.oef_msg_it_to_dialogue_reference[answer_id]
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.OEF_ERROR,
+            dialogue_reference=dialogue_reference,
+            target=RESPONSE_TARGET,
+            message_id=RESPONSE_MESSAGE_ID,
+            oef_error_operation=operation,
         )
-        msg_bytes = OEFSerializer().encode(msg)
+        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -503,17 +521,20 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(
-            type=OEFMessage.Type.DIALOGUE_ERROR,
-            id=answer_id,
-            dialogue_id=dialogue_id,
-            origin=origin,
+        msg = DefaultMessage(
+            performative=DefaultMessage.Performative.ERROR,
+            dialogue_reference=(str(answer_id), ""),
+            target=TARGET,
+            message_id=MESSAGE_ID,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Destination not available",
+            error_data={},  # TODO: add helper info
         )
-        msg_bytes = OEFSerializer().encode(msg)
+        msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OEFMessage.protocol_id,
+            protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(
@@ -535,7 +556,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.1.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -543,7 +564,7 @@ class OEFChannel(OEFAgent):
     def send_default_message(self, envelope: Envelope):
         """Send a 'default' message."""
         self.send_message(
-            STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode()
+            STUB_MESSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode()
         )
 
     def send_oef_message(self, envelope: Envelope) -> None:
@@ -553,28 +574,31 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        oef_message = OEFSerializer().decode(envelope.message)
-        oef_message = cast(OEFMessage, oef_message)
-        oef_type = oef_message.type
-        oef_msg_id = oef_message.id
-        if oef_type == OEFMessage.Type.REGISTER_SERVICE:
+        oef_message = OefSearchSerializer().decode(envelope.message)
+        oef_message = cast(OefSearchMessage, oef_message)
+        self.oef_msg_id += 1
+        self.oef_msg_it_to_dialogue_reference[self.oef_msg_id] = (
+            oef_message.dialogue_reference[0],
+            str(self.oef_msg_id),
+        )
+        if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             service_description = oef_message.service_description
-            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
-            self.register_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
+            self.register_service(self.oef_msg_id, oef_service_description)
+        elif (
+            oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
+        ):
             service_description = oef_message.service_description
-            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(
                 service_description
             )
-            self.unregister_service(oef_msg_id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
+            self.unregister_service(self.oef_msg_id, oef_service_description)
+        elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.search_services(oef_msg_id, oef_query)
+            self.search_services(self.oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
 
