@@ -61,7 +61,7 @@ class MySearchBehaviour(TickerBehaviour):
         search_query_w_empty_model = Query(search_constraints, model=None)
         search_request = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            id=self.sent_search_count,
+            dialogue_reference=(str(self.sent_search_count), ""),
             query=search_query_w_empty_model,
         )
         self.context.logger.info(
@@ -124,7 +124,7 @@ class MySearchHandler(Handler):
         :param message: the message.
         :return: None
         """
-        msg_type = OefSearchMessage.Performative(message.get("type"))
+        msg_type = OefSearchMessage.Performative(message.performative)
 
         if msg_type is OefSearchMessage.Performative.SEARCH_RESULT:
             self.received_search_count += 1
@@ -297,7 +297,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            message_id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
         self.context.outbox.put_message(
@@ -320,9 +320,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
             to=self.context.search_service_address,

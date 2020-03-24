@@ -178,7 +178,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            message_id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
         self.context.outbox.put_message(
@@ -203,7 +203,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         oef_msg_id = strategy.get_next_oef_msg_id()
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            message_id=oef_msg_id,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
         )
         self.context.outbox.put_message(
@@ -1014,7 +1014,7 @@ class MySearchBehaviour(TickerBehaviour):
            query = strategy.get_service_query()
            search_id = strategy.get_next_search_id()
            oef_msg = OefSearchMessage(
-               performative=OefSearchMessage.Performative.SEARCH_SERVICES, id=search_id, query=query
+               performative=OefSearchMessage.Performative.SEARCH_SERVICES, dialogue_reference=(str(search_id), ""), query=query
            )
            self.context.outbox.put_message(
                to=self.context.search_service_address,
