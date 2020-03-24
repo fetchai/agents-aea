@@ -38,11 +38,20 @@ class TestTacSkills(AeaTestCase):
 
         agent_name_one = "tac_participant_one"
         agent_name_two = "tac_participant_two"
+        tac_controller_name = "tac_controller"
 
-        # create agent one and agent two
-        self.create_agents(agent_name_one, agent_name_two)
+        # create tac controller, agent one and agent two
+        self.create_agents(agent_name_one, agent_name_two, tac_controller_name)
 
-        # prepare two agents for test
+        # prepare tac controller for test
+        tac_controller_dir_path = os.path.join(self.t, tac_controller_name)
+        os.chdir(tac_controller_dir_path)
+        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("skill", "fetchai/tac_control:0.1.0")
+        self.disable_ledger_tx("fetchai", "skill", "tac_control")
+        self.run_install()
+
+        # prepare agents for test
         agent_one_dir_path = os.path.join(self.t, agent_name_one)
         agent_two_dir_path = os.path.join(self.t, agent_name_two)
 
@@ -58,30 +67,45 @@ class TestTacSkills(AeaTestCase):
             self.run_install()
 
         try:
+            # run tac controller
+            os.chdir(tac_controller_dir_path)
+            tac_controller_process = self.run_oef_subprocess()
+
+            # run two agents (participants)
             os.chdir(agent_one_dir_path)
-            process_one = self.run_oef_subprocess()
+            agent_one_process = self.run_oef_subprocess()
 
             os.chdir(agent_two_dir_path)
-            process_two = self.run_oef_subprocess()
+            agent_two_process = self.run_oef_subprocess()
 
             time.sleep(10.0)
-            process_one.send_signal(signal.SIGINT)
-            process_one.wait(timeout=10)
-            process_two.send_signal(signal.SIGINT)
-            process_two.wait(timeout=10)
+            agent_one_process.send_signal(signal.SIGINT)
+            agent_one_process.wait(timeout=10)
 
-            assert process_one.returncode == 0
-            assert process_two.returncode == 0
+            agent_two_process.send_signal(signal.SIGINT)
+            agent_two_process.wait(timeout=10)
+
+            tac_controller_process.send_signal(signal.SIGINT)
+            tac_controller_process.wait(timeout=10)
+
+            assert agent_one_process.returncode == 0
+            assert agent_two_process.returncode == 0
+            assert tac_controller_process.returncode == 0
         finally:
-            poll_one = process_one.poll()
+            poll_one = agent_one_process.poll()
             if poll_one is None:
-                process_one.terminate()
-                process_one.wait(2)
+                agent_one_process.terminate()
+                agent_one_process.wait(2)
 
-            poll_two = process_two.poll()
+            poll_two = agent_two_process.poll()
             if poll_two is None:
-                process_two.terminate()
-                process_two.wait(2)
+                agent_two_process.terminate()
+                agent_two_process.wait(2)
+
+            poll_tac = tac_controller_process.poll()
+            if poll_two is None:
+                tac_controller_process.terminate()
+                tac_controller_process.wait(2)
 
         os.chdir(self.t)
         self.delete_agents(agent_name_one, agent_name_two)

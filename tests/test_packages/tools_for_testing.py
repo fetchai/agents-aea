@@ -79,7 +79,7 @@ class AeaTestCase:
             "vendor",
             "fetchai",
             "{}s".format(item_type),
-            "tac_participation",
+            item_name,
             "{}.yaml".format(item_type),
         )
         whole_file = ""
