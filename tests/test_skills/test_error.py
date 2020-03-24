@@ -36,8 +36,8 @@ from aea.skills.base import SkillContext
 from aea.skills.error.handlers import ErrorHandler
 
 from packages.fetchai.connections.local.connection import LocalNode
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
@@ -78,28 +78,28 @@ class TestSkillError:
 
     def test_error_handler_handle(self):
         """Test the handle function."""
-        msg = FIPAMessage(
-            message_id=0,
+        msg = FipaMessage(
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=FIPAMessage.Performative.ACCEPT,
+            performative=FipaMessage.Performative.ACCEPT,
         )
         msg.counterparty = "a_counterparty"
         self.my_error_handler.handle(message=msg)
 
     def test_error_skill_unsupported_protocol(self):
         """Test the unsupported error message."""
-        msg = FIPAMessage(
-            message_id=0,
+        msg = FipaMessage(
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=FIPAMessage.Performative.ACCEPT,
+            performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=self.address,
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
 
@@ -112,13 +112,13 @@ class TestSkillError:
 
     def test_error_decoding_error(self):
         """Test the decoding error."""
-        msg = FIPAMessage(
-            message_id=0,
+        msg = FipaMessage(
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=FIPAMessage.Performative.ACCEPT,
+            performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=self.address,
@@ -135,13 +135,13 @@ class TestSkillError:
 
     def test_error_invalid_message(self):
         """Test the invalid message."""
-        msg = FIPAMessage(
-            message_id=0,
+        msg = FipaMessage(
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=FIPAMessage.Performative.ACCEPT,
+            performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=self.address,
@@ -158,13 +158,13 @@ class TestSkillError:
 
     def test_error_unsupported_skill(self):
         """Test the unsupported skill."""
-        msg = FIPAMessage(
-            message_id=0,
+        msg = FipaMessage(
+            message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
-            performative=FIPAMessage.Performative.ACCEPT,
+            performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=self.address,

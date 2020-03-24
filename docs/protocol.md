@@ -162,7 +162,7 @@ class OefErrorOperation(Enum):
 
 ## `fetchai/fipa:0.1.0` protocol
 
-The `fetchai/fipa:0.1.0` protocol definition includes a `FIPAMessage` with the following performatives:
+The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ```python
 class Performative(Enum):
@@ -182,14 +182,14 @@ class Performative(Enum):
         return self.value
 ```
 
-`FIPAMessages` are constructed with a `message_id`, a `dialogue_id`, a `target` and `peformative`.
+`FipaMessages` are constructed with a `message_id`, a `dialogue_id`, a `target` and `peformative`.
 
 ```python
 super().__init__(
     message_id=message_id,
     dialogue_reference=dialogue_reference,
     target=target,
-    performative=FIPAMessage.Performative(performative),
+    performative=FipaMessage.Performative(performative),
     **kwargs
 )
 ```
@@ -201,7 +201,7 @@ syntax = "proto3";
 
 package fetch.aea.fipa;
 
-message FIPAMessage{
+message FipaMessage{
 
     message CFP{
         message Nothing {
