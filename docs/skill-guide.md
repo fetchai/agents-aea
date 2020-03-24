@@ -16,13 +16,13 @@ aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF](../oef-ledger) and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF search node](../oef-ledger) and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 
 A `Behaviour` class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
-In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
+In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the [OEF search node](../oef-ledger) via the [OEF communication network](../oef-ledger).
 
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
@@ -65,7 +65,7 @@ class MySearchBehaviour(TickerBehaviour):
             query=search_query_w_empty_model,
         )
         self.context.logger.info(
-            "[{}]: sending search request to OEF, search_count={}".format(
+            "[{}]: sending search request to OEF search node, search_count={}".format(
                 self.context.agent_name, self.sent_search_count
             )
         )
@@ -93,7 +93,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`.
 
 ## Step 3: Develop a Handler
 
-So far, we have tasked the AEA with sending search requests to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF at the moment. The AEA would simply respond to the OEF via the default `error` skill which sends all unrecognised envelopes back to the sender.
+So far, we have tasked the AEA with sending search requests to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) at the moment. The AEA would simply respond to the [OEF search node](../oef-ledger) via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
 Let us now implement a handler to deal with the incoming search responses.
 
@@ -153,7 +153,7 @@ class MySearchHandler(Handler):
         )
 ```
 
-We create a handler which is registered for the `oef` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
+We create a handler which is registered for the `oef_search` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
 
 We also implement a trivial check on the difference between the amount of search requests sent and responses received.
 
@@ -178,7 +178,7 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: 'A simple search skill utilising the OEF.'
+description: 'A simple search skill utilising the OEF search and communication node.'
 fingerprint: ''
 behaviours:
   my_search_behaviour:
@@ -217,7 +217,7 @@ aea install
 
 ## Step 7: Run a service provider AEA
 
-We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
+We first start a local [OEF search and communication node](../oef-ledger) in a separate terminal window.
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -229,7 +229,7 @@ aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registr
 aea run
 ```
 
-This AEA will simply register a location service on the OEF so we can search for it.
+This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -287,7 +287,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
     def _register_service(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register to the OEF search node's service directory.
 
         :return: None
         """
@@ -307,12 +307,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating services on OEF.".format(self.context.agent_name)
+            "[{}]: updating services on OEF search node's service directory.".format(self.context.agent_name)
         )
 
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Unregister service from OEF search node's service directory.
 
         :return: None
         """
@@ -330,7 +330,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering services from OEF.".format(self.context.agent_name)
+            "[{}]: unregistering services from search OEF node's service directory.".format(self.context.agent_name)
         )
         self._registered_service_description = None
 ```
@@ -476,7 +476,7 @@ We can then launch our AEA.
 aea run --connections fetchai/oef:0.1.0
 ```
 
-We can see that the AEA sends search requests to the OEF and receives search responses from the OEF. Since our AEA is only searching on the OEF - and not registered on the OEF - the search response returns a single agent (the service provider).
+We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).
 
 We stop the AEA with `CTRL + C`.
 

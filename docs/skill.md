@@ -242,14 +242,14 @@ protocols: ["fetchai/default:0.1.0"]
 
 ## Error skill
 
-All top level AEA `skills` directories receive a default `error` skill that contains error handling code for a number of scenarios:
+All AEA's have a default `error` skill that contains error handling code for a number of scenarios:
 
 * Received envelopes with unsupported protocols 
 * Received envelopes with unsupported skills (i.e. protocols for which no handler is registered)
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `default` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.1.0` protocol which provides error codes for the above.
 
 
 <br />

@@ -7,7 +7,7 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: 'A simple search skill utilising the OEF.'
+description: 'A simple search skill utilising the OEF search and communication node.'
 fingerprint: ''
 behaviours:
   my_search_behaviour:

@@ -33,7 +33,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 ### Installing docker
 
 At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
-(e.g. to run an OEF Node).
+(e.g. to run an [OEF search and communication node](../oef-ledger)).
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

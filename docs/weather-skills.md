@@ -17,9 +17,9 @@ You can use this AEA as an example of how to read data from a database and adver
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF node
+### Launch an OEF search and communication node
 
-In a separate terminal, launch a local OEF node (for search and discovery).
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
