@@ -42,7 +42,7 @@ class TestTacSkills(AeaTestCase):
         # create agent one and agent two
         self.create_agents(agent_name_one, agent_name_two)
 
-        # add packages for agent one
+        # prepare two agents for test
         agent_one_dir_path = os.path.join(self.t, agent_name_one)
         agent_two_dir_path = os.path.join(self.t, agent_name_two)
 
