@@ -18,15 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea add' subcommand."""
-import itertools
-import os
 import sys
 from pathlib import Path
-from typing import Dict, cast, Sequence, Iterator
+from typing import Dict, cast
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter, logger, _compute_fingerprint
+from aea.cli.common import Context, PublicIdParameter, _compute_fingerprint, logger
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -37,7 +35,6 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 @click.group()
@@ -57,7 +54,6 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
     """
     ctx = cast(Context, click_context.obj)
     item_type_plural = item_type + "s"
-    ipfs_hash_only = IPFSHashOnly()
 
     click.echo(
         "Fingerprinting {} components of '{}' ...".format(item_type, item_public_id)

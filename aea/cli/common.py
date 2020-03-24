@@ -28,7 +28,7 @@ import sys
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
-from typing import Dict, List, Optional, cast, Collection
+from typing import Collection, Dict, List, Optional, cast
 
 import click
 
