@@ -429,7 +429,9 @@ class ProtocolGenerator:
             for content_name, content_type in speech_act_content_config.args.items():
                 if not _is_valid_content_name(content_name):
                     raise ProtocolSpecificationParseError(
-                        "Incorrect content name: '{}'".format(content_name)
+                        "Invalid name for content '{}'. This name is reserved.".format(
+                            content_name
+                        )
                     )
 
                 # determining the necessary imports from typing
@@ -852,7 +854,9 @@ class ProtocolGenerator:
             cls_str += self._import_from_custom_types_module()
         else:
             cls_str += "\n{}\n".format(self._import_from_custom_types_module())
-        cls_str += "\nlogger = logging.getLogger(__name__)"
+        cls_str += '\nlogger = logging.getLogger("packages.{}.protocols.{}.message")\n'.format(
+            self.protocol_specification.author, self.protocol_specification.name
+        )
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
