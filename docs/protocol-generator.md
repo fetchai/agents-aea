@@ -80,19 +80,21 @@ A multi type denotes an "or" separated set of sub-types, e.g. `pt:union[pt:str, 
 
 An optional type for a content denotes that the content's existence is optional, but if it is present, its type must match `pt:optional`'s sub-type. 
                                                                                                                                                                  
-| Type                       | Code        | Format                                                                                                      | Example                                | In Python    |
-| ---------------------------| ------------| ------------------------------------------------------------------------------------------------------------|----------------------------------------|--------------|
-| Custom types               | &lt;CT&gt;  | ct:RegExp(^[A-Z][a-zA-Z0-9]*$)                                                                              | ct:DataModel                           | Custom Class |
-| Primitive types            | &lt;PT&gt;  | pt:bytes                                                                                                    | pt:bytes                               | bytes        |
-|                            |             | pt:int                                                                                                      | pt:int                                 | int          |
-|                            |             | pt:float                                                                                                    | pt:float                               | float        |
-|                            |             | pt:bool                                                                                                     | pt:bool                                | bool         |
-|                            |             | pt:str                                                                                                      | pt:str                                 | str          |
-| Primitive collection types | &lt;PCT&gt; | pt:set[&lt;PT&gt;/&lt;CT&gt;]                                                                               | pt:set[pt:int]                         | FrozenSet    |
-|                            |             | pt:list[&lt;PT&gt;/&lt;CT&gt;]                                                                              | pt:list[ct:DataModel]                  | Tuple        |
-| Primitive mapping types    | &lt;PMT&gt; | pt:dict[&lt;PT&gt;/&lt;CT&gt;, &lt;PT&gt;/&lt;CT&gt;]                                                       | pt:dict[pt:bool, ct:DataModel]         | Dict         |
-| Multi types                | &lt;MT&gt;  | pt:union[&lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;, ..., &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;] | pt:union[pt:str, pt:list[ct:Error]]    | Union        |
-| Optional types             | &lt;O&gt;   | pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]                                       | pt:optional[pt:list[pt:int]]           | Optional     |
+| Type                       | Code        | Format                                                                                                      | Example                                | In Python             |
+| ---------------------------| ------------| ------------------------------------------------------------------------------------------------------------|----------------------------------------|-----------------------|
+| Custom types               | &lt;CT&gt;  | ct:RegExp(^[A-Z][a-zA-Z0-9]*$)                                                                              | ct:DataModel                           | Custom Class          |
+| Primitive types            | &lt;PT&gt;  | pt:bytes                                                                                                    | pt:bytes                               | bytes                 |
+|                            |             | pt:int                                                                                                      | pt:int                                 | int                   |
+|                            |             | pt:float                                                                                                    | pt:float                               | float                 |
+|                            |             | pt:bool                                                                                                     | pt:bool                                | bool                  |
+|                            |             | pt:str                                                                                                      | pt:str                                 | str                   |
+| Primitive collection types | &lt;PCT&gt; | pt:set[&lt;PT&gt;/&lt;CT&gt;]                                                                               | pt:set[ct:DataModel]                   | FrozenSet[DataModel]  |
+|                            |             | pt:list[&lt;PT&gt;/&lt;CT&gt;]                                                                              | pt:list[pt:int]                        | Tuple[int, ...]<sup>*</sup>       |
+| Primitive mapping types    | &lt;PMT&gt; | pt:dict[&lt;PT&gt;/&lt;CT&gt;, &lt;PT&gt;/&lt;CT&gt;]                                                       | pt:dict[pt:bool, ct:DataModel]         | Dict[bool, DataModel] |
+| Multi types                | &lt;MT&gt;  | pt:union[&lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;, ..., &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;] | pt:union[pt:str, pt:set[ct:DataModel]] | Union[str, int]       |
+| Optional types             | &lt;O&gt;   | pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]                                       | pt:optional[pt:bool]                   | Optional[bool]        |
+
+<sup>*</sup> <sub>This is how variable length tuples containing elements of the same type are declared in Python; see <a href="https://docs.python.org/3/library/typing.html#typing.Tuple" target=_blank>here</a> </sub>
 
 ## Demo instructions
 

@@ -27,7 +27,10 @@ from os import path
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from aea.configurations.base import ProtocolSpecification
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+)
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -55,6 +58,7 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
+RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "performative"}
 
 logger = logging.getLogger(__name__)
 
@@ -363,6 +367,10 @@ def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
     return proto_type
 
 
+def _is_valid_content_name(content_name: str) -> bool:
+    return content_name not in RESERVED_NAMES
+
+
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
@@ -398,7 +406,10 @@ class ProtocolGenerator:
         self._all_custom_types = list()  # type: List[str]
         self._custom_custom_types = dict()  # type: Dict[str, str]
 
-        self._setup()
+        try:
+            self._setup()
+        except Exception as e:
+            raise ProtocolSpecificationParseError(e)
 
     def _setup(self) -> None:
         """
@@ -416,7 +427,12 @@ class ProtocolGenerator:
             all_performatives_set.add(performative)
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
-                custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
+                if not _is_valid_content_name(content_name):
+                    raise ProtocolSpecificationParseError(
+                        "Incorrect content name: '{}'".format(content_name)
+                    )
+
+                # determining the necessary imports from typing
                 if len(re.findall("pt:set\\[", content_type)) >= 1:
                     self._imports["FrozenSet"] = True
                 if len(re.findall("pt:dict\\[", content_type)) >= 1:
@@ -425,15 +441,24 @@ class ProtocolGenerator:
                     self._imports["Union"] = True
                 if len(re.findall("pt:optional\\[", content_type)) >= 1:
                     self._imports["Optional"] = True
+
+                # extracting all custom types
+                custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
                 for custom_type in custom_types:
                     all_custom_types_set.add(
                         _specification_type_to_python_type(custom_type)
                     )
+
+                # specification type --> python type
                 pythonic_content_type = _specification_type_to_python_type(content_type)
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
+
+        # sort the sets
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
+
+        # "XXX" custom type --> "CustomXXX"
         self._custom_custom_types = {
             pure_custom_type: "Custom" + pure_custom_type
             for pure_custom_type in self._all_custom_types
@@ -818,6 +843,7 @@ class ProtocolGenerator:
         )
 
         # Imports
+        cls_str += "import logging\n"
         cls_str += "from enum import Enum\n"
         cls_str += self._import_from_typing_module() + "\n\n"
         cls_str += "from aea.configurations.base import ProtocolId\n"
@@ -826,6 +852,7 @@ class ProtocolGenerator:
             cls_str += self._import_from_custom_types_module()
         else:
             cls_str += "\n{}\n".format(self._import_from_custom_types_module())
+        cls_str += "\nlogger = logging.getLogger(__name__)"
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
@@ -879,11 +906,6 @@ class ProtocolGenerator:
         cls_str += "        )\n"
         cls_str += "        self._performatives = {}\n".format(
             self._performatives_str()
-        )
-        cls_str += "        assert (\n"
-        cls_str += "            self._is_consistent()\n"
-        cls_str += "        ), \"This message is invalid according to the '{}' protocol.\"\n\n".format(
-            self.protocol_specification.name
         )
 
         # Instance properties
@@ -1013,7 +1035,7 @@ class ProtocolGenerator:
         cls_str += "                    self.target,\n"
         cls_str += "                )\n"
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"
-        cls_str += "            print(str(e))\n"
+        cls_str += "            logger.error(str(e))\n"
         cls_str += "            return False\n\n"
         cls_str += "        return True\n"
 
@@ -1338,7 +1360,7 @@ class ProtocolGenerator:
         )
 
         # Imports
-        cls_str += "from typing import cast\n\n"
+        cls_str += "from typing import Any, Dict, cast\n\n"
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
@@ -1486,7 +1508,7 @@ class ProtocolGenerator:
         cls_str += "        performative_id = {}Message.Performative(str(performative))\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += "        performative_content = dict()\n"
+        cls_str += "        performative_content = dict()  # type: Dict[str, Any]\n"
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -1747,13 +1769,10 @@ class ProtocolGenerator:
 
         # Warn if specification has custom types
         if len(self._all_custom_types) != 0:
-            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
-                self._all_custom_types
+            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                self._all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
-            incomplete_generation_warning_msg += "Update the generated '{}' file with the appropriate implementations of these custom types.".format(
-                CUSTOM_TYPES_DOT_PY_FILE_NAME
-            )
-            print(incomplete_generation_warning_msg)
+            logger.warning(incomplete_generation_warning_msg)
 
         # Compile protobuf schema
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(

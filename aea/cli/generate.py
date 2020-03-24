@@ -36,6 +36,7 @@ from aea.cli.common import (
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     ProtocolSpecification,
+    ProtocolSpecificationParseError,
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader
@@ -138,8 +139,20 @@ def _generate_item(ctx: Context, item_type, specification_path):
             )
         )
         sys.exit(1)
+    except ProtocolSpecificationParseError as e:
+        logger.error(
+            "The following error happened while parsing the protocol specification: "
+            + str(e)
+        )
+        shutil.rmtree(
+            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
+        )
+        sys.exit(1)
     except Exception as e:
-        logger.exception(e)
+        logger.debug("Exception thrown: " + str(e))
+        logger.error(
+            "There was an error while generating the protocol. The protocol is NOT generated."
+        )
         shutil.rmtree(
             os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
         )
