@@ -37,7 +37,7 @@ from aea.helpers.preference_representations.base import (
 from aea.mail.base import Address
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,
     generate_equilibrium_prices_and_holdings,
@@ -450,14 +450,14 @@ class Transaction:
         return result
 
     @classmethod
-    def from_message(cls, message: TACMessage) -> "Transaction":
+    def from_message(cls, message: TacMessage) -> "Transaction":
         """
         Create a transaction from a proposal.
 
         :param message: the message
         :return: Transaction
         """
-        assert message.type == TACMessage.Type.TRANSACTION
+        assert message.performative == TacMessage.Performative.TRANSACTION
         return Transaction(
             message.tx_id,
             message.tx_sender_addr,

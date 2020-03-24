@@ -28,8 +28,8 @@ from aea.skills.base import Behaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
-from packages.fetchai.protocols.tac.message import TACMessage
-from packages.fetchai.protocols.tac.serialization import TACSerializer
+from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
 
@@ -173,8 +173,8 @@ class TACBehaviour(Behaviour):
         )
         for agent_address in game.configuration.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
-            tac_msg = TACMessage(
-                performative=TACMessage.Type.GAME_DATA,
+            tac_msg = TacMessage(
+                performative=TacMessage.Performative.GAME_DATA,
                 amount_by_currency_id=agent_state.amount_by_currency_id,
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
@@ -192,8 +192,8 @@ class TACBehaviour(Behaviour):
             self.context.outbox.put_message(
                 to=agent_address,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
 
     def _cancel_tac(self):
@@ -205,12 +205,12 @@ class TACBehaviour(Behaviour):
             )
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
-            tac_msg = TACMessage(performative=TACMessage.Type.CANCELLED)
+            tac_msg = TacMessage(performative=TacMessage.Type.CANCELLED)
             self.context.outbox.put_message(
                 to=agent_addr,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
         if game.phase == Phase.GAME:
             self.context.logger.info(
