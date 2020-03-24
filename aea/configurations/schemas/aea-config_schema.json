@@ -27,7 +27,7 @@
       "$ref": "definitions.json#/definitions/author"
     },
     "version": {
-      "$ref": "definitions.json#/definitions/version"
+      "$ref": "definitions.json#/definitions/package_version"
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"

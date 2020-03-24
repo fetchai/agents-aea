@@ -22,6 +22,7 @@ import re
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import (
+    Any,
     Dict,
     Generic,
     List,
@@ -29,6 +30,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -37,6 +39,8 @@ from typing import (
 import packaging
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+
+import semver
 
 import aea
 
@@ -67,6 +71,10 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 Dependencies = Dict[str, Dependency]
+
+
+PackageVersion = Type[semver.VersionInfo]
+PackageVersionLike = Union[str, semver.VersionInfo]
 
 
 class ConfigurationType(Enum):
@@ -224,26 +232,39 @@ class PublicId(JSONSerializable):
         AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX
     )
 
-    def __init__(self, author: str, name: str, version: str):
+    def __init__(self, author: str, name: str, version: PackageVersionLike):
         """Initialize the public identifier."""
         self._author = author
         self._name = name
-        self._version = version
+        self._version, self._version_info = self._process_version(version)
+
+    def _process_version(self, version_like: PackageVersionLike) -> Tuple[Any, Any]:
+        if isinstance(version_like, str):
+            return version_like, semver.parse_version_info(version_like)
+        elif isinstance(version_like, semver.VersionInfo):
+            return str(version_like), version_like
+        else:
+            raise ValueError("Version type not valid.")
 
     @property
-    def author(self):
+    def author(self) -> str:
         """Get the author."""
         return self._author
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Get the name."""
         return self._name
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Get the version."""
         return self._version
+
+    @property
+    def version_info(self) -> PackageVersion:
+        """Get the package version."""
+        return self._version_info
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
@@ -342,8 +363,35 @@ class PublicId(JSONSerializable):
         )
 
     def __lt__(self, other):
-        """Compare two public ids."""
-        return str(self) < str(other)
+        """
+        Compare two public ids.
+
+        >>> public_id_1 = PublicId("author_1", "name_1", "0.1.0")
+        >>> public_id_2 = PublicId("author_1", "name_1", "0.1.1")
+        >>> public_id_3 = PublicId("author_1", "name_2", "0.1.0")
+        >>> public_id_1 > public_id_2
+        False
+        >>> public_id_1 < public_id_2
+        True
+
+        >>> public_id_1 < public_id_3
+        Traceback (most recent call last):
+        ...
+        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author and name attributes are different.
+
+        """
+        if (
+            isinstance(other, PublicId)
+            and self.author == other.author
+            and self.name == other.name
+        ):
+            return self.version_info < other.version_info
+        else:
+            raise ValueError(
+                "The public IDs {} and {} cannot be compared. Their author and name attributes are different.".format(
+                    self, other
+                )
+            )
 
 
 ProtocolId = PublicId
