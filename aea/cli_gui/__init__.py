@@ -587,7 +587,7 @@ def _kill_running_oef_nodes():
     )
     stdout = b""
     try:
-        process.wait(5.0)
+        process.wait(10.0)
         (stdout, stderr) = process.communicate()
         image_ids.update(stdout.decode("utf-8").splitlines())
     finally:
