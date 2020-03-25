@@ -15,9 +15,9 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
-description: "The oef connection provides a wrapper around the OEF sdk."
+description: "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
 class_name: OEFConnection
-protocols: ["fetchai/oef:0.1.0", "fetchai/fipa:0.1.0"]
+protocols: ["fetchai/oef_search:0.1.0", "fetchai/fipa:0.1.0"]
 restricted_to_protocols: []
 excluded_protocols: ["fetchai/gym:0.1.0"]
 config:

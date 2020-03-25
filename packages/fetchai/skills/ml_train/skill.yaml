@@ -2,7 +2,6 @@ name: 'ml_train'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmSadTxFrhupj6y2RfuMTNHTZDPgcSkyRMGjtPrzttxZ7e
@@ -10,6 +9,7 @@ fingerprint:
   model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
   strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
   tasks.py: QmbVq8VTXo8gEWUHBRmv5oUSSjtqY8659neL9AdyHMjE4i
+aea_version: 0.2.4
 description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
 behaviours:
   search:
@@ -40,7 +40,7 @@ models:
     class_name: MLModel
     args:
       model_config_path: "./skills/ml_train/model.json"
-protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/ml_trade:0.1.0']
 dependencies:
   tensorflow: { version: "==1.14.0" }
   numpy: {}

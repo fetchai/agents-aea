@@ -7,9 +7,14 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+<<<<<<< HEAD
 aea_version: 0.2.3
 description: 'A simple search skill utilising the OEF.'
 fingerprint: {}
+=======
+description: 'A simple search skill utilising the OEF search and communication node.'
+fingerprint: ''
+>>>>>>> develop
 behaviours:
   my_search_behaviour:
     class_name: MySearchBehaviour
@@ -20,14 +25,14 @@ handlers:
     class_name: MySearchHandler
     args: {}
 models: {}
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 ``` bash
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
-aea add protocol fetchai/oef:0.1.0
+aea add protocol fetchai/oef_search:0.1.0
 ```
 ``` bash
 aea add connection fetchai/oef:0.1.0
@@ -71,7 +76,7 @@ models:
       service_data:
         country: UK
         city: Cambridge
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 ```bash

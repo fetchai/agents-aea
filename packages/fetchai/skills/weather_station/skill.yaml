@@ -2,7 +2,6 @@ name: weather_station
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWTcPUxhDoCQVaXTgJHxNt4txJMSxERr75iDMcaFKTJ9x
@@ -12,6 +11,7 @@ fingerprint:
   handlers.py: QmQka88DvnsdZJMb9P8te5Wng6T2PQwEjcy5hkDwLC1zCa
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
+aea_version: 0.2.4
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:
@@ -36,5 +36,5 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']

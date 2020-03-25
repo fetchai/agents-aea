@@ -29,6 +29,11 @@ DEFAULT_MAX_BUYER_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
+DEFAULT_SEARCH_QUERY = {
+    "search_term": "country",
+    "search_value": "UK",
+    "constraint_type": "==",
+}
 
 
 class Strategy(Model):
@@ -48,7 +53,7 @@ class Strategy(Model):
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
-        self.search_query = kwargs.pop("search_query")
+        self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
 
     def get_next_search_id(self) -> int:
         """

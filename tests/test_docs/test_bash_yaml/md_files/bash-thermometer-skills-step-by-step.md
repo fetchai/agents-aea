@@ -76,7 +76,7 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
  pyserial: {}
@@ -118,12 +118,12 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
+protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
 ledgers: ['fetchai']
 ```
 ``` yaml
 
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: m_client
 author: author
 connections:

@@ -1,4 +1,4 @@
-aea_version: ">=0.1.1"
+aea_version: ">=0.2.0"
 agent_name: myagent
 author: fetchai
 version: 0.1.0
@@ -10,7 +10,7 @@ default_connection: fetchai/oef:0.1.0
 default_ledger: fetchai
 private_key_paths: {}
 protocols:
-- fetchai/oef:0.1.0
+- fetchai/oef_search:0.1.0
 - fetchai/default:0.1.0
 - fetchai/tac:0.1.0
 - fetchai/fipa:0.1.0

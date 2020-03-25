@@ -1,4 +1,4 @@
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: ml_model_trainer
 author: fetchai
 connections:
@@ -18,7 +18,7 @@ protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
 - fetchai/ml_trade:0.1.0
-- fetchai/oef:0.1.0
+- fetchai/oef_search:0.1.0
 registry_path: ../packages
 skills:
 - fetchai/error:0.1.0

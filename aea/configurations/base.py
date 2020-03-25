@@ -18,25 +18,27 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
+
+import packaging
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
-
-import packaging
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
+from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
 import aea
 
+T = TypeVar("T")
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
-T = TypeVar("T")
 
+
+Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
     - version: a version specifier(s) (e.g. '==0.1.0').
@@ -46,7 +48,8 @@ A dependency is a dictionary with the following (optional) keys:
 If the 'git' field is set, the 'version' field will be ignored.
 They are supposed to be forwarded to the 'pip' command.
 """
-Dependency = dict
+
+Dependencies = Dict[str, Dependency]
 """
 A dictionary from package name to dependency data structure (see above).
 The package name must satisfy the constraints on Python packages names.
@@ -55,7 +58,6 @@ For details, see https://www.python.org/dev/peps/pep-0426/#name.
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
-Dependencies = Dict[str, Dependency]
 
 
 class ConfigurationType(Enum):

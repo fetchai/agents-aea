@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package fetch.aea.MlTrade;
+
+message MlTradeMessage{
+
+    // Custom Types
+    message Description{
+        bytes description = 1;
+    }
+
+    message Query{
+        message Nothing {
+        }
+        oneof query{
+            bytes bytes = 1;
+            Nothing nothing = 2;
+            bytes query_bytes = 3;
+        }
+    }
+
+
+    // Performatives and contents
+    message Cfp{
+        Query query = 1;
+    }
+
+    message Terms{
+        Description terms = 1;
+    }
+
+    message Accept{
+        Description terms = 1;
+        string tx_digest = 2;
+    }
+
+    message Data{
+        Description terms = 1;
+        bytes payload = 2;
+    }
+
+
+    // Standard MlTradeMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Accept accept = 5;
+        Cfp cfp = 6;
+        Data data = 7;
+        Terms terms = 8;
+    }
+}

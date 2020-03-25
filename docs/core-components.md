@@ -46,8 +46,8 @@ The framework provides one default protocol:
 
 Additional protocols can be added as packages, including:
 
-* `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements, such as classes, needed to perform querying on the OEF, such as `Description`, `Query`, and `Constraint`, to name a few.
-* `fipa`: this protocol provides classes and functions necessary for communication between AEAs via a variant of the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
+* `oef_search`: this protocol provides the AEA protocol implementation for communication with the `OEF search node` including an `OefSearchMessage` class for hooking up to `OEF search node` services and search agents. Utility classes are available in the `models.py` module which provides `OEF search node` specific requirements, such as classes, needed to perform querying on the `OEF search node`, such as `Description`, `Query`, and `Constraint`, to name a few.
+* `fipa`: this protocol provides classes and functions necessary for communication between AEAs via a variant of the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FipaMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
 ### Skill
 

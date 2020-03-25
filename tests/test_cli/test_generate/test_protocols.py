@@ -86,6 +86,7 @@ class TestGenerateProtocol:
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
+        os.chdir(cls.cwd)
 
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
@@ -110,7 +111,6 @@ class TestGenerateProtocol:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -157,6 +157,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
+        os.chdir(cls.cwd)
 
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
@@ -186,7 +187,6 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -240,6 +240,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
             ],
             standalone_mode=False,
         )
+        os.chdir(cls.cwd)
 
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
@@ -271,7 +272,6 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -318,6 +318,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
+        os.chdir(cls.cwd)
 
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
@@ -338,7 +339,6 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
     def teardown_class(cls):
         """Tear the test down."""
         cls.patch.__exit__()
-        os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -379,6 +379,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
             [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
             standalone_mode=False,
         )
+        os.chdir(cls.cwd)
 
     def test_create_agent_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0 when creating the agent."""
@@ -399,7 +400,6 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
     def teardown_class(cls):
         """Tear the test down."""
         cls.patch.__exit__()
-        os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):

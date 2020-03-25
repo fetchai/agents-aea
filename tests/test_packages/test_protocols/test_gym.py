@@ -26,13 +26,15 @@ from packages.fetchai.protocols.gym.serialization import GymSerializer
 def test_gym_message_instantiation():
     """Test instantiation of the gym message."""
     assert GymMessage(
-        performative=GymMessage.Performative.ACT, action="any_action", step_id=1
+        performative=GymMessage.Performative.ACT,
+        action=GymMessage.AnyObject("any_action"),
+        step_id=1,
     )
     assert GymMessage(
         performative=GymMessage.Performative.PERCEPT,
-        observation="any_observation",
+        observation=GymMessage.AnyObject("any_observation"),
         reward=0.0,
-        info={"some_key": "some_value"},
+        info=GymMessage.AnyObject({"some_key": "some_value"}),
         done=True,
         step_id=1,
     )
@@ -44,7 +46,9 @@ def test_gym_message_instantiation():
 def test_gym_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
     msg = GymMessage(
-        performative=GymMessage.Performative.ACT, action="any_action", step_id=1
+        performative=GymMessage.Performative.ACT,
+        action=GymMessage.AnyObject("any_action"),
+        step_id=1,
     )
     msg_bytes = GymSerializer().encode(msg)
     actual_msg = GymSerializer().decode(msg_bytes)
@@ -53,9 +57,9 @@ def test_gym_serialization():
 
     msg = GymMessage(
         performative=GymMessage.Performative.PERCEPT,
-        observation="any_observation",
+        observation=GymMessage.AnyObject("any_observation"),
         reward=0.0,
-        info={"some_key": "some_value"},
+        info=GymMessage.AnyObject({"some_key": "some_value"}),
         done=True,
         step_id=1,
     )

@@ -30,7 +30,7 @@ Please enter the author handle you would like to use: fetchai
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.3
+v0.2.4
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -57,7 +57,7 @@ aea run --connections fetchai/stub:0.1.0
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.3
+v0.2.4
 
 my_first_aea starting ...
 info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}

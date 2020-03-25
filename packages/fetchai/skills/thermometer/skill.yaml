@@ -2,7 +2,6 @@ name: thermometer
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmYeqgBwZmE2rQKcjLQ8pZi463GK96zScNKhSDQddxdyfF
@@ -10,6 +9,7 @@ fingerprint:
   handlers.py: QmecDqsYiCPfukKRNQsFZvSa7NvNPqz2mbHezbcacd4736
   strategy.py: QmdY8EpmWdHP1HUsZDg9YWrsxpGyH6r1GtJJjPUBv5QQMg
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
+aea_version: 0.2.4
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
   service_registration:
@@ -33,7 +33,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}

@@ -2,12 +2,12 @@ name: http
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmRdY1QzpEXg7bX78QTpCTmMKRRR1DcyfpyvkL8xHnoY5C
   http_pb2.py: QmSjUjZrYH1yyVsi6aGzJSYmd2SqccGJ9wJugj1o8mmdQT
   message.py: QmeZuEm9ypuTEDcz9hmwZhqcsaU3HVKBLAyr8mgKUVBmDU
   serialization.py: QmTgKbmYfHQEkHMa7HwyVf6YyCnjomFNqdbokmQVP2YS5B
+aea_version: 0.2.4
 dependencies: 
     protobuf: {} 
 description: A protocol for HTTP requests and responses.

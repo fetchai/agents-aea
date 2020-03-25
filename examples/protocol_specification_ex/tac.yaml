@@ -3,7 +3,7 @@ name: tac
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: 'A protocol for participating in a TAC.'
+description: The tac protocol implements the messages an AEA needs to participate in the TAC
 speech_acts:
   register:
     agent_name: pt:str
@@ -36,7 +36,7 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
     error_code: ct:ErrorCode
-    info: pt:dict[pt:str, ct:ErrorInfo]
+    info: pt:dict[pt:str, pt:str]
 ...
 ---
 ct:ErrorCode: |
@@ -53,6 +53,4 @@ ct:ErrorCode: |
     DIALOGUE_INCONSISTENT = 9;
   }
   ErrorCodeEnum error_code = 1;
-ct:ErrorInfo: |
-  map<string, string> error_info = 1;
 ...

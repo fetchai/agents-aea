@@ -27,7 +27,10 @@ from os import path
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from aea.configurations.base import ProtocolSpecification
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+)
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -40,7 +43,19 @@ CUSTOM_TYPES_DOT_PY_FILE_NAME = "custom_types.py"
 SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
 
 CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
-PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
+SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
+PYTHON_PRIMITIVE_TYPES = [
+    "bytes",
+    "int",
+    "float",
+    "bool",
+    "str",
+    "FrozenSet",
+    "Tuple",
+    "Dict",
+    "Union",
+    "Optional",
+]
 BASIC_FIELDS_AND_TYPES = {
     "name": str,
     "author": str,
@@ -55,6 +70,7 @@ PYTHON_TYPE_TO_PROTO_TYPE = {
     "bool": "bool",
     "str": "string",
 }
+RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "performative"}
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +138,38 @@ def _get_indent_str(no_of_indents: int) -> str:
     for _ in itertools.repeat(None, no_of_indents):
         indents_str += "    "
     return indents_str
+
+
+def _is_composition_type_with_custom_type(content_type: str) -> bool:
+    """
+    Evaluate whether the content_type is a composition type (FrozenSet, Tuple, Dict) and contains a custom type as a sub-type.
+
+    :param: the content type
+    :return: Boolean result
+    """
+    if content_type.startswith("Optional"):
+        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+        result = _is_composition_type_with_custom_type(sub_type)
+    elif content_type.startswith("Union"):
+        sub_types = _get_sub_types_of_compositional_types(content_type)
+        result = False
+        for sub_type in sub_types:
+            if _is_composition_type_with_custom_type(sub_type):
+                result = True
+                break
+    elif content_type.startswith("Dict"):
+        sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
+        sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
+
+        result = (sub_type_1 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()) or (
+            sub_type_2 not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
+        )
+    elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
+        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
+        result = sub_type not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
+    else:
+        result = False
+    return result
 
 
 def _get_sub_types_of_compositional_types(compositional_type: str) -> tuple:
@@ -308,7 +356,7 @@ def _specification_type_to_python_type(specification_type: str) -> str:
         python_type = _mt_specification_type_to_python_type(specification_type)
     elif specification_type.startswith("ct:"):
         python_type = _ct_specification_type_to_python_type(specification_type)
-    elif specification_type in PRIMITIVE_TYPES:
+    elif specification_type in SPECIFICATION_PRIMITIVE_TYPES:
         python_type = _pt_specification_type_to_python_type(specification_type)
     elif specification_type.startswith("pt:set"):
         python_type = _pct_specification_type_to_python_type(specification_type)
@@ -317,7 +365,9 @@ def _specification_type_to_python_type(specification_type: str) -> str:
     elif specification_type.startswith("pt:dict"):
         python_type = _pmt_specification_type_to_python_type(specification_type)
     else:
-        raise TypeError("Unsupported type: '{}'".format(specification_type))
+        raise ProtocolSpecificationParseError(
+            "Unsupported type: '{}'".format(specification_type)
+        )
     return python_type
 
 
@@ -363,6 +413,27 @@ def _python_pt_or_ct_type_to_proto_type(content_type: str) -> str:
     return proto_type
 
 
+def _is_valid_content_name(content_name: str) -> bool:
+    return content_name not in RESERVED_NAMES
+
+
+def _to_custom_custom(content_type: str) -> str:
+    """
+    Evaluate whether a content type is a custom type or has a custom type as a sub-type.
+
+    :return: Boolean result
+    """
+    new_content_type = content_type
+    is_custom = True
+    for primitive_type in PYTHON_PRIMITIVE_TYPES:
+        if content_type.startswith(primitive_type):
+            is_custom = False
+            break
+    if is_custom:
+        new_content_type = "Custom" + content_type
+    return new_content_type
+
+
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
@@ -398,7 +469,10 @@ class ProtocolGenerator:
         self._all_custom_types = list()  # type: List[str]
         self._custom_custom_types = dict()  # type: Dict[str, str]
 
-        self._setup()
+        try:
+            self._setup()
+        except Exception:
+            raise
 
     def _setup(self) -> None:
         """
@@ -416,7 +490,15 @@ class ProtocolGenerator:
             all_performatives_set.add(performative)
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
-                custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
+                # check content's name is valid
+                if not _is_valid_content_name(content_name):
+                    raise ProtocolSpecificationParseError(
+                        "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
+                            content_name, performative,
+                        )
+                    )
+
+                # determine necessary imports from typing
                 if len(re.findall("pt:set\\[", content_type)) >= 1:
                     self._imports["FrozenSet"] = True
                 if len(re.findall("pt:dict\\[", content_type)) >= 1:
@@ -425,15 +507,28 @@ class ProtocolGenerator:
                     self._imports["Union"] = True
                 if len(re.findall("pt:optional\\[", content_type)) >= 1:
                     self._imports["Optional"] = True
-                for custom_type in custom_types:
-                    all_custom_types_set.add(
-                        _specification_type_to_python_type(custom_type)
-                    )
+
+                # specification type --> python type
                 pythonic_content_type = _specification_type_to_python_type(content_type)
+
+                # check composition type does not include custom type
+                if _is_composition_type_with_custom_type(pythonic_content_type):
+                    raise ProtocolSpecificationParseError(
+                        "Invalid type for content '{}' of performative '{}'. A custom type cannot be used in the following composition types: [pt:set, pt:list, pt:dict].".format(
+                            content_name, performative,
+                        )
+                    )
+
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
+                if content_type.startswith("ct:"):
+                    all_custom_types_set.add(pythonic_content_type)
+
+        # sort the sets
         self._all_performatives = sorted(all_performatives_set)
         self._all_custom_types = sorted(all_custom_types_set)
+
+        # "XXX" custom type --> "CustomXXX"
         self._custom_custom_types = {
             pure_custom_type: "Custom" + pure_custom_type
             for pure_custom_type in self._all_custom_types
@@ -553,7 +648,7 @@ class ProtocolGenerator:
             check_str += "assert "
             for unique_type in unique_standard_types_list:
                 check_str += "type(self.{}) == {} or ".format(
-                    content_name, self._to_custom_custom(unique_type)
+                    content_name, _to_custom_custom(unique_type)
                 )
             check_str = check_str[:-4]
             check_str += ", \"Invalid type for content '{}'. Expected either of '{}'. Found '{{}}'.\".format(type(self.{}))\n".format(
@@ -579,8 +674,7 @@ class ProtocolGenerator:
                     check_str += (
                         indents
                         + "        all(type(element) == {} for element in self.{}) or\n".format(
-                            self._to_custom_custom(frozen_set_element_type),
-                            content_name,
+                            _to_custom_custom(frozen_set_element_type), content_name,
                         )
                     )
                 check_str = check_str[:-4]
@@ -594,7 +688,7 @@ class ProtocolGenerator:
                     )
                     for frozen_set_element_type in frozen_set_element_types:
                         check_str += "'{}'".format(
-                            self._to_custom_custom(frozen_set_element_type)
+                            _to_custom_custom(frozen_set_element_type)
                         )
                     check_str += '."\n'
                 else:
@@ -606,7 +700,7 @@ class ProtocolGenerator:
                     )
                     for frozen_set_element_type in frozen_set_element_types:
                         check_str += "'{}' or ".format(
-                            self._to_custom_custom(frozen_set_element_type)
+                            _to_custom_custom(frozen_set_element_type)
                         )
                     check_str = check_str[:-4]
                     check_str += '."\n'
@@ -625,7 +719,7 @@ class ProtocolGenerator:
                     check_str += (
                         indents
                         + "        all(type(element) == {} for element in self.{}) or \n".format(
-                            self._to_custom_custom(tuple_element_type), content_name
+                            _to_custom_custom(tuple_element_type), content_name
                         )
                     )
                 check_str = check_str[:-4]
@@ -639,7 +733,7 @@ class ProtocolGenerator:
                     )
                     for tuple_element_type in tuple_element_types:
                         check_str += "'{}'".format(
-                            self._to_custom_custom(tuple_element_type)
+                            _to_custom_custom(tuple_element_type)
                         )
                     check_str += '."\n'
                 else:
@@ -651,7 +745,7 @@ class ProtocolGenerator:
                     )
                     for tuple_element_type in tuple_element_types:
                         check_str += "'{}' or ".format(
-                            self._to_custom_custom(tuple_element_type)
+                            _to_custom_custom(tuple_element_type)
                         )
                     check_str = check_str[:-4]
                     check_str += '."\n'
@@ -677,9 +771,9 @@ class ProtocolGenerator:
                         indents
                         + "                (type(key_of_{}) == {} and type(value_of_{}) == {}) or\n".format(
                             content_name,
-                            self._to_custom_custom(element1_type),
+                            _to_custom_custom(element1_type),
                             content_name,
-                            self._to_custom_custom(element2_type),
+                            _to_custom_custom(element2_type),
                         )
                     )
                 check_str = check_str[:-4]
@@ -719,7 +813,7 @@ class ProtocolGenerator:
             check_str += (
                 indents
                 + "    type(element) == {} for element in self.{}\n".format(
-                    self._to_custom_custom(element_type), content_name
+                    _to_custom_custom(element_type), content_name
                 )
             )
             check_str += (
@@ -741,7 +835,7 @@ class ProtocolGenerator:
             check_str += (
                 indents
                 + "    type(element) == {} for element in self.{}\n".format(
-                    self._to_custom_custom(element_type), content_name
+                    _to_custom_custom(element_type), content_name
                 )
             )
             check_str += (
@@ -769,7 +863,7 @@ class ProtocolGenerator:
             )
             check_str += indents + "    assert (\n"
             check_str += indents + "        type(key_of_{}) == {}\n".format(
-                content_name, self._to_custom_custom(element_type_1)
+                content_name, _to_custom_custom(element_type_1)
             )
             check_str += (
                 indents
@@ -780,7 +874,7 @@ class ProtocolGenerator:
 
             check_str += indents + "    assert (\n"
             check_str += indents + "        type(value_of_{}) == {}\n".format(
-                content_name, self._to_custom_custom(element_type_2)
+                content_name, _to_custom_custom(element_type_2)
             )
             check_str += (
                 indents
@@ -793,7 +887,7 @@ class ProtocolGenerator:
                 indents
                 + "assert type(self.{}) == {}, \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type(self.{}))\n".format(
                     content_name,
-                    self._to_custom_custom(content_type),
+                    _to_custom_custom(content_type),
                     content_name,
                     content_type,
                     content_name,
@@ -818,6 +912,7 @@ class ProtocolGenerator:
         )
 
         # Imports
+        cls_str += "import logging\n"
         cls_str += "from enum import Enum\n"
         cls_str += self._import_from_typing_module() + "\n\n"
         cls_str += "from aea.configurations.base import ProtocolId\n"
@@ -826,6 +921,9 @@ class ProtocolGenerator:
             cls_str += self._import_from_custom_types_module()
         else:
             cls_str += "\n{}\n".format(self._import_from_custom_types_module())
+        cls_str += '\nlogger = logging.getLogger("packages.{}.protocols.{}.message")\n'.format(
+            self.protocol_specification.author, self.protocol_specification.name
+        )
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
@@ -853,10 +951,10 @@ class ProtocolGenerator:
         # __init__
         cls_str += "    def __init__(\n"
         cls_str += "        self,\n"
-        cls_str += "        dialogue_reference: Tuple[str, str],\n"
-        cls_str += "        message_id: int,\n"
-        cls_str += "        target: int,\n"
         cls_str += "        performative: Performative,\n"
+        cls_str += '        dialogue_reference: Tuple[str, str] = ("", ""),\n'
+        cls_str += "        message_id: int = 1,\n"
+        cls_str += "        target: int = 0,\n"
         cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
         cls_str += '        """\n'
@@ -879,11 +977,6 @@ class ProtocolGenerator:
         cls_str += "        )\n"
         cls_str += "        self._performatives = {}\n".format(
             self._performatives_str()
-        )
-        cls_str += "        assert (\n"
-        cls_str += "            self._is_consistent()\n"
-        cls_str += "        ), \"This message is invalid according to the '{}' protocol.\"\n\n".format(
-            self.protocol_specification.name
         )
 
         # Instance properties
@@ -921,7 +1014,7 @@ class ProtocolGenerator:
         cls_str += '        return cast(int, self.get("target"))\n\n'
         for content_name in sorted(self._all_unique_contents.keys()):
             content_type = self._all_unique_contents[content_name]
-            content_type = self._to_custom_custom(content_type)
+            content_type = _to_custom_custom(content_type)
             cls_str += "    @property\n"
             cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
             cls_str += '        """Get the \'{}\' content from the message."""\n'.format(
@@ -1009,11 +1102,11 @@ class ProtocolGenerator:
         cls_str += "                assert (\n"
         cls_str += "                    0 < self.target < self.message_id\n"
         cls_str += "                ), \"Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.\".format(\n"
-        cls_str += "                    self.message_id-1,\n"
+        cls_str += "                    self.message_id - 1,\n"
         cls_str += "                    self.target,\n"
         cls_str += "                )\n"
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"
-        cls_str += "            print(str(e))\n"
+        cls_str += "            logger.error(str(e))\n"
         cls_str += "            return False\n\n"
         cls_str += "        return True\n"
 
@@ -1192,7 +1285,6 @@ class ProtocolGenerator:
                 content_name, content_name
             )
         elif content_type.startswith("FrozenSet"):
-            # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
@@ -1209,7 +1301,6 @@ class ProtocolGenerator:
                 )
             )
         elif content_type.startswith("Tuple"):
-            # if not self._includes_custom_type(content_type):
             decoding_str += indents + "{} = {}_pb.{}.{}\n".format(
                 content_name,
                 self.protocol_specification.name,
@@ -1278,51 +1369,6 @@ class ProtocolGenerator:
             )
         return decoding_str
 
-    def _includes_custom_type(self, content_type: str) -> bool:
-        """
-        Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-
-        :return: Boolean result
-        """
-        if content_type.startswith("Optional"):
-            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            result = self._includes_custom_type(sub_type)
-        elif content_type.startswith("Union"):
-            sub_types = _get_sub_types_of_compositional_types(content_type)
-            result = False
-            for sub_type in sub_types:
-                if self._includes_custom_type(sub_type):
-                    result = True
-                    break
-        elif content_type.startswith("Dict"):
-            sub_type_1 = _get_sub_types_of_compositional_types(content_type)[0]
-            sub_type_2 = _get_sub_types_of_compositional_types(content_type)[1]
-            result = self._includes_custom_type(
-                sub_type_1
-            ) or self._includes_custom_type(sub_type_2)
-        elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
-            sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-            result = self._includes_custom_type(sub_type)
-        elif content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
-            result = False
-        else:
-            result = True
-        return result
-
-    def _to_custom_custom(self, content_type: str) -> str:
-        """
-        Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-
-        :return: Boolean result
-        """
-        new_content_type = content_type
-        if self._includes_custom_type(content_type):
-            for custom_type in self._all_custom_types:
-                new_content_type = new_content_type.replace(
-                    custom_type, self._custom_custom_types[custom_type]
-                )
-        return new_content_type
-
     def _serialization_class_str(self) -> str:
         """
         Produce the content of the Serialization class.
@@ -1338,7 +1384,7 @@ class ProtocolGenerator:
         )
 
         # Imports
-        cls_str += "from typing import cast\n\n"
+        cls_str += "from typing import Any, Dict, cast\n\n"
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
@@ -1486,7 +1532,7 @@ class ProtocolGenerator:
         cls_str += "        performative_id = {}Message.Performative(str(performative))\n".format(
             self.protocol_specification_in_camel_case
         )
-        cls_str += "        performative_content = dict()\n"
+        cls_str += "        performative_content = dict()  # type: Dict[str, Any]\n"
         counter = 1
         for performative, contents in self._speech_acts.items():
             if counter == 1:
@@ -1750,13 +1796,10 @@ class ProtocolGenerator:
 
         # Warn if specification has custom types
         if len(self._all_custom_types) != 0:
-            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}\n".format(
-                self._all_custom_types
+            incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                self._all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
-            incomplete_generation_warning_msg += "Update the generated '{}' file with the appropriate implementations of these custom types.".format(
-                CUSTOM_TYPES_DOT_PY_FILE_NAME
-            )
-            print(incomplete_generation_warning_msg)
+            logger.warning(incomplete_generation_warning_msg)
 
         # Compile protobuf schema
         cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
