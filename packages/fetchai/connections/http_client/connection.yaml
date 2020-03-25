@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
+aea_version: 0.2.4
 description: "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
 class_name: HTTPConnection
 protocols: ["fetchai/http:0.1.0"]

@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
+aea_version: 0.2.4
 description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
 behaviours:
   search:

@@ -1,4 +1,4 @@
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: weather_station
 author: fetchai
 connections:
