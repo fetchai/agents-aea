@@ -39,7 +39,6 @@ class Performative(Enum):
 ```
 
 * The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
-
 ``` python
 msg = DefaultMessage(
     performative=DefaultMessage.Performative.BYTES,
@@ -48,7 +47,6 @@ msg = DefaultMessage(
 ```
 
 * The `DefaultMessage` of performative `DefaultMessage.Performative.ERROR` is used to notify other AEAs of errors in an interaction, including errors with other protocols, by including an `error_code` in the payload:
-
 ``` python
 class ErrorCode(Enum):
     """This class represents an instance of ErrorCode."""
@@ -59,7 +57,6 @@ class ErrorCode(Enum):
     UNSUPPORTED_SKILL = 3
     INVALID_DIALOGUE = 4
 ```
-
 An example is:
 ``` python
 msg = DefaultMessage(
@@ -186,7 +183,6 @@ oef_msg = OefSearchMessage(
 * The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.1.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
-
 ```python
 class OefErrorOperation(Enum):
 
