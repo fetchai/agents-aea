@@ -75,6 +75,41 @@ nav:
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
+      - API:
+        - AEA: 'api/aea.md'
+        - Agent: 'api/agent.md'
+        - Connections:
+          - Base: 'api/connections/base.md'          
+          - Stub Connection: 'api/connections/stub/connection.md'
+        - Context: 'api/context/base.md'
+        - Crypto:
+          - Base: 'api/crytpo/base.md'
+          - Ethereum: 'api/crypto/ethereum.md'
+          - Fetchai: 'api/crypto/fetchai.md'
+          - LedgerApis: 'api/crypto/ledger_apis.md'
+          - Wallet: 'api/crypto/wallet.md'
+        - Helpers:
+          - Dialogue:
+            - Base: 'api/helpers/dialogue/base.md'
+          - Search:
+            - Generic: 'api/helpers/search/generic.md'
+            - Models: 'api/helpers/search/models.md'
+        - Identity:
+          - Base: 'api/identity/base.md'
+        - Mail:
+          - Base: 'api/mail/base.md'
+        - Protocols:
+          - Base: 'api/protocols/base.md'
+          - Default Protocol:
+            - Message: 'api/protocols/default/message.md'
+            - Serialization: 'api/protocols/default/serialization.md'
+        - Registries:
+          - Base: 'api/registries/base.md'
+        - Skills:
+          - Base: 'api/skills/base.md'
+          - Error Skill: 'api/skills/error/handlers.md'
+          - Behaviors: 'api/skills/behaviours.md'
+          - Task: 'api/skills/tasks.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:
