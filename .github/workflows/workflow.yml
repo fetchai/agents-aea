@@ -27,6 +27,8 @@ jobs:
       run: |
         pip install pipenv
         pip install tox
+        sudo apt-get clean
+        sudo apt-get install -y protobuf-compiler
     - name: Security Check - Main
       run: tox -e bandit-main
     - name: Security Check - Tests
