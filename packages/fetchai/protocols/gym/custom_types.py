@@ -20,14 +20,14 @@
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
 import pickle  # nosec
-from typing import Any as TypingAny
+from typing import Any
 
 
-class Any:
-    """This class represents an instance of Any."""
+class AnyObject:
+    """This class represents an instance of AnyObject."""
 
-    def __init__(self, _any: TypingAny):
-        """Initialise an instance of Any."""
+    def __init__(self, _any: Any):
+        """Initialise an instance of AnyObject."""
         self.any = _any
 
     @classmethod
@@ -35,10 +35,10 @@ class Any:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative_content' argument must be matched with the message content in the 'any_from_message' argument.
+        The content in the 'performative_content' argument must be matched with the message content in the 'any_object_from_message' argument.
 
-        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
-        :param any_from_message: the message content to be encoded in the protocol buffer object.
+        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param any_object_from_message: the message content to be encoded in the protocol buffer object.
         :return: None
         """
         performative_content.any = pickle.dumps(any_from_message)  # nosec
@@ -48,10 +48,10 @@ class Any:
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'any_from_pb2' argument.
+        A new instance of this class must be created that matches the content in the 'any_object_from_pb2' argument.
 
-        :param any_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'any_from_pb2' argument.
+        :param any_object_from_pb2: the protocol buffer content object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'any_object_from_pb2' argument.
         """
         _any = pickle.loads(any_from_pb2.any)  # nosec
         return _any

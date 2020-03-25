@@ -21,21 +21,21 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\x17protocols/gym/gym.proto\x12\rfetch.aea.Gym"\xdb\x04\n\nGymMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12,\n\x03\x61\x63t\x18\x05 \x01(\x0b\x32\x1d.fetch.aea.Gym.GymMessage.ActH\x00\x12\x30\n\x05\x63lose\x18\x06 \x01(\x0b\x32\x1f.fetch.aea.Gym.GymMessage.CloseH\x00\x12\x34\n\x07percept\x18\x07 \x01(\x0b\x32!.fetch.aea.Gym.GymMessage.PerceptH\x00\x12\x30\n\x05reset\x18\x08 \x01(\x0b\x32\x1f.fetch.aea.Gym.GymMessage.ResetH\x00\x1a\x12\n\x03\x41ny\x12\x0b\n\x03\x61ny\x18\x01 \x01(\x0c\x1a\x45\n\x03\x41\x63t\x12-\n\x06\x61\x63tion\x18\x01 \x01(\x0b\x32\x1d.fetch.aea.Gym.GymMessage.Any\x12\x0f\n\x07step_id\x18\x02 \x01(\x05\x1a\x99\x01\n\x07Percept\x12\x0f\n\x07step_id\x18\x01 \x01(\x05\x12\x32\n\x0bobservation\x18\x02 \x01(\x0b\x32\x1d.fetch.aea.Gym.GymMessage.Any\x12\x0e\n\x06reward\x18\x03 \x01(\x02\x12\x0c\n\x04\x64one\x18\x04 \x01(\x08\x12+\n\x04info\x18\x05 \x01(\x0b\x32\x1d.fetch.aea.Gym.GymMessage.Any\x1a\x07\n\x05Reset\x1a\x07\n\x05\x43loseB\x0e\n\x0cperformativeb\x06proto3'
+        '\n\x17protocols/gym/gym.proto\x12\rfetch.aea.Gym"\xf3\x04\n\nGymMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12,\n\x03\x61\x63t\x18\x05 \x01(\x0b\x32\x1d.fetch.aea.Gym.GymMessage.ActH\x00\x12\x30\n\x05\x63lose\x18\x06 \x01(\x0b\x32\x1f.fetch.aea.Gym.GymMessage.CloseH\x00\x12\x34\n\x07percept\x18\x07 \x01(\x0b\x32!.fetch.aea.Gym.GymMessage.PerceptH\x00\x12\x30\n\x05reset\x18\x08 \x01(\x0b\x32\x1f.fetch.aea.Gym.GymMessage.ResetH\x00\x1a\x18\n\tAnyObject\x12\x0b\n\x03\x61ny\x18\x01 \x01(\x0c\x1aK\n\x03\x41\x63t\x12\x33\n\x06\x61\x63tion\x18\x01 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0f\n\x07step_id\x18\x02 \x01(\x05\x1a\xa5\x01\n\x07Percept\x12\x0f\n\x07step_id\x18\x01 \x01(\x05\x12\x38\n\x0bobservation\x18\x02 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x12\x0e\n\x06reward\x18\x03 \x01(\x02\x12\x0c\n\x04\x64one\x18\x04 \x01(\x08\x12\x31\n\x04info\x18\x05 \x01(\x0b\x32#.fetch.aea.Gym.GymMessage.AnyObject\x1a\x07\n\x05Reset\x1a\x07\n\x05\x43loseB\x0e\n\x0cperformativeb\x06proto3'
     ),
 )
 
 
-_GYMMESSAGE_ANY = _descriptor.Descriptor(
-    name="Any",
-    full_name="fetch.aea.Gym.GymMessage.Any",
+_GYMMESSAGE_ANYOBJECT = _descriptor.Descriptor(
+    name="AnyObject",
+    full_name="fetch.aea.Gym.GymMessage.AnyObject",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="any",
-            full_name="fetch.aea.Gym.GymMessage.Any.any",
+            full_name="fetch.aea.Gym.GymMessage.AnyObject.any",
             index=0,
             number=1,
             type=12,
@@ -61,7 +61,7 @@ _GYMMESSAGE_ANY = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=367,
-    serialized_end=385,
+    serialized_end=391,
 )
 
 _GYMMESSAGE_ACT = _descriptor.Descriptor(
@@ -116,8 +116,8 @@ _GYMMESSAGE_ACT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=387,
-    serialized_end=456,
+    serialized_start=393,
+    serialized_end=468,
 )
 
 _GYMMESSAGE_PERCEPT = _descriptor.Descriptor(
@@ -226,8 +226,8 @@ _GYMMESSAGE_PERCEPT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=459,
-    serialized_end=612,
+    serialized_start=471,
+    serialized_end=636,
 )
 
 _GYMMESSAGE_RESET = _descriptor.Descriptor(
@@ -245,8 +245,8 @@ _GYMMESSAGE_RESET = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=614,
-    serialized_end=621,
+    serialized_start=638,
+    serialized_end=645,
 )
 
 _GYMMESSAGE_CLOSE = _descriptor.Descriptor(
@@ -264,8 +264,8 @@ _GYMMESSAGE_CLOSE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=623,
-    serialized_end=630,
+    serialized_start=647,
+    serialized_end=654,
 )
 
 _GYMMESSAGE = _descriptor.Descriptor(
@@ -422,7 +422,7 @@ _GYMMESSAGE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[
-        _GYMMESSAGE_ANY,
+        _GYMMESSAGE_ANYOBJECT,
         _GYMMESSAGE_ACT,
         _GYMMESSAGE_PERCEPT,
         _GYMMESSAGE_RESET,
@@ -443,14 +443,14 @@ _GYMMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=43,
-    serialized_end=646,
+    serialized_end=670,
 )
 
-_GYMMESSAGE_ANY.containing_type = _GYMMESSAGE
-_GYMMESSAGE_ACT.fields_by_name["action"].message_type = _GYMMESSAGE_ANY
+_GYMMESSAGE_ANYOBJECT.containing_type = _GYMMESSAGE
+_GYMMESSAGE_ACT.fields_by_name["action"].message_type = _GYMMESSAGE_ANYOBJECT
 _GYMMESSAGE_ACT.containing_type = _GYMMESSAGE
-_GYMMESSAGE_PERCEPT.fields_by_name["observation"].message_type = _GYMMESSAGE_ANY
-_GYMMESSAGE_PERCEPT.fields_by_name["info"].message_type = _GYMMESSAGE_ANY
+_GYMMESSAGE_PERCEPT.fields_by_name["observation"].message_type = _GYMMESSAGE_ANYOBJECT
+_GYMMESSAGE_PERCEPT.fields_by_name["info"].message_type = _GYMMESSAGE_ANYOBJECT
 _GYMMESSAGE_PERCEPT.containing_type = _GYMMESSAGE
 _GYMMESSAGE_RESET.containing_type = _GYMMESSAGE
 _GYMMESSAGE_CLOSE.containing_type = _GYMMESSAGE
@@ -489,13 +489,13 @@ GymMessage = _reflection.GeneratedProtocolMessageType(
     "GymMessage",
     (_message.Message,),
     dict(
-        Any=_reflection.GeneratedProtocolMessageType(
-            "Any",
+        AnyObject=_reflection.GeneratedProtocolMessageType(
+            "AnyObject",
             (_message.Message,),
             dict(
-                DESCRIPTOR=_GYMMESSAGE_ANY,
+                DESCRIPTOR=_GYMMESSAGE_ANYOBJECT,
                 __module__="protocols.gym.gym_pb2"
-                # @@protoc_insertion_point(class_scope:fetch.aea.Gym.GymMessage.Any)
+                # @@protoc_insertion_point(class_scope:fetch.aea.Gym.GymMessage.AnyObject)
             ),
         ),
         Act=_reflection.GeneratedProtocolMessageType(
@@ -540,7 +540,7 @@ GymMessage = _reflection.GeneratedProtocolMessageType(
     ),
 )
 _sym_db.RegisterMessage(GymMessage)
-_sym_db.RegisterMessage(GymMessage.Any)
+_sym_db.RegisterMessage(GymMessage.AnyObject)
 _sym_db.RegisterMessage(GymMessage.Act)
 _sym_db.RegisterMessage(GymMessage.Percept)
 _sym_db.RegisterMessage(GymMessage.Reset)

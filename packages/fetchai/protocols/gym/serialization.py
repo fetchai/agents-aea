@@ -25,7 +25,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.gym import gym_pb2
-from packages.fetchai.protocols.gym.custom_types import Any
+from packages.fetchai.protocols.gym.custom_types import AnyObject
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
@@ -51,7 +51,7 @@ class GymSerializer(Serializer):
         if performative_id == GymMessage.Performative.ACT:
             performative = gym_pb2.GymMessage.Act()  # type: ignore
             action = msg.action
-            Any.encode(performative.action, action)
+            AnyObject.encode(performative.action, action)
             step_id = msg.step_id
             performative.step_id = step_id
             gym_msg.act.CopyFrom(performative)
@@ -60,13 +60,13 @@ class GymSerializer(Serializer):
             step_id = msg.step_id
             performative.step_id = step_id
             observation = msg.observation
-            Any.encode(performative.observation, observation)
+            AnyObject.encode(performative.observation, observation)
             reward = msg.reward
             performative.reward = reward
             done = msg.done
             performative.done = done
             info = msg.info
-            Any.encode(performative.info, info)
+            AnyObject.encode(performative.info, info)
             gym_msg.percept.CopyFrom(performative)
         elif performative_id == GymMessage.Performative.RESET:
             performative = gym_pb2.GymMessage.Reset()  # type: ignore
@@ -101,7 +101,7 @@ class GymSerializer(Serializer):
         performative_content = dict()  # type: Dict[str, Any]
         if performative_id == GymMessage.Performative.ACT:
             pb2_action = gym_pb.act.action
-            action = Any.decode(pb2_action)
+            action = AnyObject.decode(pb2_action)
             performative_content["action"] = action
             step_id = gym_pb.act.step_id
             performative_content["step_id"] = step_id
@@ -109,14 +109,14 @@ class GymSerializer(Serializer):
             step_id = gym_pb.percept.step_id
             performative_content["step_id"] = step_id
             pb2_observation = gym_pb.percept.observation
-            observation = Any.decode(pb2_observation)
+            observation = AnyObject.decode(pb2_observation)
             performative_content["observation"] = observation
             reward = gym_pb.percept.reward
             performative_content["reward"] = reward
             done = gym_pb.percept.done
             performative_content["done"] = done
             pb2_info = gym_pb.percept.info
-            info = Any.decode(pb2_info)
+            info = AnyObject.decode(pb2_info)
             performative_content["info"] = info
         elif performative_id == GymMessage.Performative.RESET:
             pass

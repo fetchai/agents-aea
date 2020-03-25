@@ -25,7 +25,7 @@ from typing import Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.gym.custom_types import Any as CustomAny
+from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
 
 DEFAULT_BODY_SIZE = 4
 
@@ -35,7 +35,7 @@ class GymMessage(Message):
 
     protocol_id = ProtocolId("fetchai", "gym", "0.1.0")
 
-    Any = CustomAny
+    AnyObject = CustomAnyObject
 
     class Performative(Enum):
         """Performatives for the gym protocol."""
@@ -107,10 +107,10 @@ class GymMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def action(self) -> CustomAny:
+    def action(self) -> CustomAnyObject:
         """Get the 'action' content from the message."""
         assert self.is_set("action"), "'action' content is not set."
-        return cast(CustomAny, self.get("action"))
+        return cast(CustomAnyObject, self.get("action"))
 
     @property
     def done(self) -> bool:
@@ -119,16 +119,16 @@ class GymMessage(Message):
         return cast(bool, self.get("done"))
 
     @property
-    def info(self) -> CustomAny:
+    def info(self) -> CustomAnyObject:
         """Get the 'info' content from the message."""
         assert self.is_set("info"), "'info' content is not set."
-        return cast(CustomAny, self.get("info"))
+        return cast(CustomAnyObject, self.get("info"))
 
     @property
-    def observation(self) -> CustomAny:
+    def observation(self) -> CustomAnyObject:
         """Get the 'observation' content from the message."""
         assert self.is_set("observation"), "'observation' content is not set."
-        return cast(CustomAny, self.get("observation"))
+        return cast(CustomAnyObject, self.get("observation"))
 
     @property
     def reward(self) -> float:
@@ -185,8 +185,8 @@ class GymMessage(Message):
             if self.performative == GymMessage.Performative.ACT:
                 expected_nb_of_contents = 2
                 assert (
-                    type(self.action) == CustomAny
-                ), "Invalid type for content 'action'. Expected 'Any'. Found '{}'.".format(
+                    type(self.action) == CustomAnyObject
+                ), "Invalid type for content 'action'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.action)
                 )
                 assert (
@@ -202,8 +202,8 @@ class GymMessage(Message):
                     type(self.step_id)
                 )
                 assert (
-                    type(self.observation) == CustomAny
-                ), "Invalid type for content 'observation'. Expected 'Any'. Found '{}'.".format(
+                    type(self.observation) == CustomAnyObject
+                ), "Invalid type for content 'observation'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.observation)
                 )
                 assert (
@@ -217,8 +217,8 @@ class GymMessage(Message):
                     type(self.done)
                 )
                 assert (
-                    type(self.info) == CustomAny
-                ), "Invalid type for content 'info'. Expected 'Any'. Found '{}'.".format(
+                    type(self.info) == CustomAnyObject
+                ), "Invalid type for content 'info'. Expected 'AnyObject'. Found '{}'.".format(
                     type(self.info)
                 )
             elif self.performative == GymMessage.Performative.RESET:

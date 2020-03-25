@@ -5,23 +5,23 @@ package fetch.aea.Gym;
 message GymMessage{
 
     // Custom Types
-    message Any{
+    message AnyObject{
         bytes any = 1;
     }
 
 
     // Performatives and contents
     message Act{
-        Any action = 1;
+        AnyObject action = 1;
         int32 step_id = 2;
     }
 
     message Percept{
         int32 step_id = 1;
-        Any observation = 2;
+        AnyObject observation = 2;
         float reward = 3;
         bool done = 4;
-        Any info = 5;
+        AnyObject info = 5;
     }
 
     message Reset{}

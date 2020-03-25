@@ -159,7 +159,7 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(
             performative=GymMessage.Performative.ACT,
-            action=GymMessage.Any(action),
+            action=GymMessage.AnyObject(action),
             step_id=step_id,
         )
         gym_bytes = GymSerializer().encode(gym_msg)

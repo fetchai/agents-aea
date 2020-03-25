@@ -27,14 +27,14 @@ def test_gym_message_instantiation():
     """Test instantiation of the gym message."""
     assert GymMessage(
         performative=GymMessage.Performative.ACT,
-        action=GymMessage.Any("any_action"),
+        action=GymMessage.AnyObject("any_action"),
         step_id=1,
     )
     assert GymMessage(
         performative=GymMessage.Performative.PERCEPT,
-        observation=GymMessage.Any("any_observation"),
+        observation=GymMessage.AnyObject("any_observation"),
         reward=0.0,
-        info=GymMessage.Any({"some_key": "some_value"}),
+        info=GymMessage.AnyObject({"some_key": "some_value"}),
         done=True,
         step_id=1,
     )
@@ -47,7 +47,7 @@ def test_gym_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
     msg = GymMessage(
         performative=GymMessage.Performative.ACT,
-        action=GymMessage.Any("any_action"),
+        action=GymMessage.AnyObject("any_action"),
         step_id=1,
     )
     msg_bytes = GymSerializer().encode(msg)
@@ -57,9 +57,9 @@ def test_gym_serialization():
 
     msg = GymMessage(
         performative=GymMessage.Performative.PERCEPT,
-        observation=GymMessage.Any("any_observation"),
+        observation=GymMessage.AnyObject("any_observation"),
         reward=0.0,
-        info=GymMessage.Any({"some_key": "some_value"}),
+        info=GymMessage.AnyObject({"some_key": "some_value"}),
         done=True,
         step_id=1,
     )
