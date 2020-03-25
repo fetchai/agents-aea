@@ -176,7 +176,9 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         gym_msg = GymMessage(
-            performative=GymMessage.Performative.ACT, action=action, step_id=step_id
+            performative=GymMessage.Performative.ACT,
+            action=GymMessage.AnyObject(action),
+            step_id=step_id,
         )
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(
@@ -199,19 +201,15 @@ class ProxyEnv(gym.Env):
         if envelope is not None:
             if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
                 gym_msg = GymSerializer().decode(envelope.message)
-                gym_msg_performative = GymMessage.Performative(
-                    gym_msg.get("performative")
-                )
-                gym_msg_step_id = gym_msg.get("step_id")
                 if (
-                    gym_msg_performative == GymMessage.Performative.PERCEPT
-                    and gym_msg_step_id == expected_step_id
+                    gym_msg.performative == GymMessage.Performative.PERCEPT
+                    and gym_msg.step_id == expected_step_id
                 ):
                     return gym_msg
                 else:
                     raise ValueError(
                         "Unexpected performative or no step_id: {}".format(
-                            gym_msg_performative
+                            gym_msg.performative
                         )
                     )
             else:
@@ -226,9 +224,9 @@ class ProxyEnv(gym.Env):
         :param: the message received as a response to the action performed in apply_action.
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
-        observation = cast(Any, message.get("observation"))
-        reward = cast(float, message.get("reward"))
-        done = cast(bool, message.get("done"))
-        info = cast(dict, message.get("info"))
+        observation = cast(Any, message.observation.any)
+        reward = cast(float, message.reward)
+        done = cast(bool, message.done)
+        info = cast(dict, message.info.any)
 
         return observation, reward, done, info
