@@ -31,7 +31,7 @@ class URI()
 URI following RFC3986.
 
 <a name=".aea.mail.base.URI.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(uri_raw: str)
@@ -148,7 +148,7 @@ Get the host.
 Get the port.
 
 <a name=".aea.mail.base.URI.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -157,7 +157,7 @@ Get the port.
 Get string representation.
 
 <a name=".aea.mail.base.URI.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -175,7 +175,7 @@ class EnvelopeContext()
 Extra information for the handling of an envelope.
 
 <a name=".aea.mail.base.EnvelopeContext.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(connection_id: Optional[PublicId] = None, uri: Optional[URI] = None)
@@ -184,7 +184,7 @@ Extra information for the handling of an envelope.
 Initialize the envelope context.
 
 <a name=".aea.mail.base.EnvelopeContext.uri_raw"></a>
-#### uri\_raw
+#### uri`_`raw
 
 ```python
  | @property
@@ -194,7 +194,7 @@ Initialize the envelope context.
 Get uri in string format.
 
 <a name=".aea.mail.base.EnvelopeContext.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -268,7 +268,7 @@ class Envelope()
 The top level message class.
 
 <a name=".aea.mail.base.Envelope.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(to: Address, sender: Address, protocol_id: ProtocolId, message: bytes, context: Optional[EnvelopeContext] = None)
@@ -304,7 +304,7 @@ Set address of receiver.
 Set address of sender.
 
 <a name=".aea.mail.base.Envelope.protocol_id"></a>
-#### protocol\_id
+#### protocol`_`id
 
 ```python
  | @protocol_id.setter
@@ -334,7 +334,7 @@ Set the message.
 Get the envelope context.
 
 <a name=".aea.mail.base.Envelope.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -379,7 +379,7 @@ Decode the envelope.
 the decoded envelope.
 
 <a name=".aea.mail.base.Envelope.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -397,7 +397,7 @@ class Multiplexer()
 This class can handle multiple connections at once.
 
 <a name=".aea.mail.base.Multiplexer.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(connections: Sequence["Connection"], default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None)
@@ -414,7 +414,7 @@ Initialize the connection multiplexer.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 
 <a name=".aea.mail.base.Multiplexer.in_queue"></a>
-#### in\_queue
+#### in`_`queue
 
 ```python
  | @property
@@ -424,7 +424,7 @@ Initialize the connection multiplexer.
 Get the in queue.
 
 <a name=".aea.mail.base.Multiplexer.out_queue"></a>
-#### out\_queue
+#### out`_`queue
 
 ```python
  | @property
@@ -444,7 +444,7 @@ Get the out queue.
 Get the connections.
 
 <a name=".aea.mail.base.Multiplexer.is_connected"></a>
-#### is\_connected
+#### is`_`connected
 
 ```python
  | @property
@@ -454,7 +454,7 @@ Get the connections.
 Check whether the multiplexer is processing messages.
 
 <a name=".aea.mail.base.Multiplexer.connection_status"></a>
-#### connection\_status
+#### connection`_`status
 
 ```python
  | @property
@@ -529,7 +529,7 @@ class InBox()
 A queue from where you can only consume messages.
 
 <a name=".aea.mail.base.InBox.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(multiplexer: Multiplexer)
@@ -577,7 +577,7 @@ the envelope object.
 - `Empty`: if the attempt to get a message fails.
 
 <a name=".aea.mail.base.InBox.get_nowait"></a>
-#### get\_nowait
+#### get`_`nowait
 
 ```python
  | get_nowait() -> Optional[Envelope]
@@ -599,7 +599,7 @@ class OutBox()
 A queue from where you can only enqueue messages.
 
 <a name=".aea.mail.base.OutBox.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(multiplexer: Multiplexer)
@@ -642,7 +642,7 @@ Put an envelope into the queue.
 None
 
 <a name=".aea.mail.base.OutBox.put_message"></a>
-#### put\_message
+#### put`_`message
 
 ```python
  | put_message(to: Address, sender: Address, protocol_id: ProtocolId, message: bytes) -> None

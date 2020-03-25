@@ -13,7 +13,7 @@ class Message()
 This class implements a message.
 
 <a name=".aea.protocols.base.Message.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(body: Optional[Dict] = None, **kwargs)
@@ -91,7 +91,7 @@ Get value for key.
 Unset valye for key.
 
 <a name=".aea.protocols.base.Message.is_set"></a>
-#### is\_set
+#### is`_`set
 
 ```python
  | is_set(key: str) -> bool
@@ -100,7 +100,7 @@ Unset valye for key.
 Check value is set for key.
 
 <a name=".aea.protocols.base.Message.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -109,7 +109,7 @@ Check value is set for key.
 Compare with another object.
 
 <a name=".aea.protocols.base.Message.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -266,7 +266,7 @@ This class implements a specifications for a protocol.
 It includes a serializer to encode/decode a message.
 
 <a name=".aea.protocols.base.Protocol.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig)
@@ -311,7 +311,7 @@ Get the serializer.
 Get the configuration.
 
 <a name=".aea.protocols.base.Protocol.from_dir"></a>
-#### from\_dir
+#### from`_`dir
 
 ```python
  | @classmethod

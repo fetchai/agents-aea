@@ -13,7 +13,7 @@ class ConfigLoader(Generic[T])
 This class implement parsing, serialization and validation functionalities for the 'aea' configuration files.
 
 <a name=".aea.configurations.loader.ConfigLoader.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(schema_filename: str, configuration_type: Type[T])
@@ -27,7 +27,7 @@ Initialize the parser for configuration files.
 - `configuration_type`: 
 
 <a name=".aea.configurations.loader.ConfigLoader.load_protocol_specification"></a>
-#### load\_protocol\_specification
+#### load`_`protocol`_`specification
 
 ```python
  | load_protocol_specification(file_pointer: TextIO) -> T
@@ -81,7 +81,7 @@ Dump a configuration.
 None
 
 <a name=".aea.configurations.loader.ConfigLoader.from_configuration_type"></a>
-#### from\_configuration\_type
+#### from`_`configuration`_`type
 
 ```python
  | @classmethod

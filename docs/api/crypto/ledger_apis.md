@@ -1,5 +1,5 @@
 <a name=".aea.crypto.ledger_apis"></a>
-## aea.crypto.ledger\_apis
+## aea.crypto.ledger`_`apis
 
 Module wrapping all the public and private keys cryptography.
 
@@ -13,7 +13,7 @@ class LedgerApis()
 Store all the ledger apis we initialise.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(ledger_api_configs: Dict[str, Dict[str, Union[str, int]]], default_ledger_id: str)
@@ -47,7 +47,7 @@ Get the configs.
 Get the apis.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_fetchai"></a>
-#### has\_fetchai
+#### has`_`fetchai
 
 ```python
  | @property
@@ -57,7 +57,7 @@ Get the apis.
 Check if it has the fetchai API.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_ethereum"></a>
-#### has\_ethereum
+#### has`_`ethereum
 
 ```python
  | @property
@@ -67,7 +67,7 @@ Check if it has the fetchai API.
 Check if it has the ethereum API.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_default_ledger"></a>
-#### has\_default\_ledger
+#### has`_`default`_`ledger
 
 ```python
  | @property
@@ -77,7 +77,7 @@ Check if it has the ethereum API.
 Check if it has the default ledger API.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.last_tx_statuses"></a>
-#### last\_tx\_statuses
+#### last`_`tx`_`statuses
 
 ```python
  | @property
@@ -87,7 +87,7 @@ Check if it has the default ledger API.
 Get the statuses for the last transaction.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.default_ledger_id"></a>
-#### default\_ledger\_id
+#### default`_`ledger`_`id
 
 ```python
  | @property
@@ -97,7 +97,7 @@ Get the statuses for the last transaction.
 Get the default ledger id.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.token_balance"></a>
-#### token\_balance
+#### token`_`balance
 
 ```python
  | token_balance(identifier: str, address: str) -> int
@@ -136,7 +136,7 @@ Transfer from self to destination.
 tx digest if successful, otherwise None
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.is_tx_valid"></a>
-#### is\_tx\_valid
+#### is`_`tx`_`valid
 
 ```python
  | is_tx_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
@@ -158,7 +158,7 @@ Check whether the transaction is valid
 True if is valid , False otherwise
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.generate_tx_nonce"></a>
-#### generate\_tx\_nonce
+#### generate`_`tx`_`nonce
 
 ```python
  | generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str

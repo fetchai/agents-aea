@@ -52,7 +52,7 @@ Implement the handler teardown.
 None
 
 <a name=".aea.skills.error.handlers.ErrorHandler.send_unsupported_protocol"></a>
-#### send\_unsupported\_protocol
+#### send`_`unsupported`_`protocol
 
 ```python
  | send_unsupported_protocol(envelope: Envelope) -> None
@@ -69,7 +69,7 @@ Handle the received envelope in case the protocol is not supported.
 None
 
 <a name=".aea.skills.error.handlers.ErrorHandler.send_decoding_error"></a>
-#### send\_decoding\_error
+#### send`_`decoding`_`error
 
 ```python
  | send_decoding_error(envelope: Envelope) -> None
@@ -86,7 +86,7 @@ Handle a decoding error.
 None
 
 <a name=".aea.skills.error.handlers.ErrorHandler.send_invalid_message"></a>
-#### send\_invalid\_message
+#### send`_`invalid`_`message
 
 ```python
  | send_invalid_message(envelope: Envelope) -> None
@@ -103,7 +103,7 @@ Handle an message that is invalid wrt a protocol.
 None
 
 <a name=".aea.skills.error.handlers.ErrorHandler.send_unsupported_skill"></a>
-#### send\_unsupported\_skill
+#### send`_`unsupported`_`skill
 
 ```python
  | send_unsupported_skill(envelope: Envelope) -> None

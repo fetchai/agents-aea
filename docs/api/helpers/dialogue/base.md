@@ -17,7 +17,7 @@ class DialogueLabel()
 The dialogue label class acts as an identifier for dialogues.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(dialogue_reference: Tuple[str, str], dialogue_opponent_addr: Address, dialogue_starter_addr: Address) -> None
@@ -36,7 +36,7 @@ Initialize a dialogue label.
 None
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.dialogue_reference"></a>
-#### dialogue\_reference
+#### dialogue`_`reference
 
 ```python
  | @property
@@ -46,7 +46,7 @@ None
 Get the dialogue reference.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.dialogue_starter_reference"></a>
-#### dialogue\_starter\_reference
+#### dialogue`_`starter`_`reference
 
 ```python
  | @property
@@ -56,7 +56,7 @@ Get the dialogue reference.
 Get the dialogue starter reference.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.dialogue_responder_reference"></a>
-#### dialogue\_responder\_reference
+#### dialogue`_`responder`_`reference
 
 ```python
  | @property
@@ -66,7 +66,7 @@ Get the dialogue starter reference.
 Get the dialogue responder reference.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.dialogue_opponent_addr"></a>
-#### dialogue\_opponent\_addr
+#### dialogue`_`opponent`_`addr
 
 ```python
  | @property
@@ -76,7 +76,7 @@ Get the dialogue responder reference.
 Get the address of the dialogue opponent.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.dialogue_starter_addr"></a>
-#### dialogue\_starter\_addr
+#### dialogue`_`starter`_`addr
 
 ```python
  | @property
@@ -86,7 +86,7 @@ Get the address of the dialogue opponent.
 Get the address of the dialogue starter.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other) -> bool
@@ -95,7 +95,7 @@ Get the address of the dialogue starter.
 Check for equality between two DialogueLabel objects.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.__hash__"></a>
-#### \_\_hash\_\_
+#### `__`hash`__`
 
 ```python
  | __hash__() -> int
@@ -114,7 +114,7 @@ Turn object into hash.
 Return the JSON representation.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -124,7 +124,7 @@ Return the JSON representation.
 Get dialogue label from json.
 
 <a name=".aea.helpers.dialogue.base.DialogueLabel.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -142,7 +142,7 @@ class Dialogue()
 The dialogue class maintains state of a dialogue and manages it.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(dialogue_label: DialogueLabel) -> None
@@ -159,7 +159,7 @@ Initialize a dialogue label.
 None
 
 <a name=".aea.helpers.dialogue.base.Dialogue.dialogue_label"></a>
-#### dialogue\_label
+#### dialogue`_`label
 
 ```python
  | @property
@@ -169,7 +169,7 @@ None
 Get the dialogue lable.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.is_self_initiated"></a>
-#### is\_self\_initiated
+#### is`_`self`_`initiated
 
 ```python
  | @property
@@ -179,7 +179,7 @@ Get the dialogue lable.
 Check whether the agent initiated the dialogue.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.last_incoming_message"></a>
-#### last\_incoming\_message
+#### last`_`incoming`_`message
 
 ```python
  | @property
@@ -189,7 +189,7 @@ Check whether the agent initiated the dialogue.
 Get the last incoming message.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.last_outgoing_message"></a>
-#### last\_outgoing\_message
+#### last`_`outgoing`_`message
 
 ```python
  | @property
@@ -199,7 +199,7 @@ Get the last incoming message.
 Get the last incoming message.
 
 <a name=".aea.helpers.dialogue.base.Dialogue.outgoing_extend"></a>
-#### outgoing\_extend
+#### outgoing`_`extend
 
 ```python
  | outgoing_extend(message: "Message") -> None
@@ -216,7 +216,7 @@ Extend the list of messages which keeps track of outgoing messages.
 None
 
 <a name=".aea.helpers.dialogue.base.Dialogue.incoming_extend"></a>
-#### incoming\_extend
+#### incoming`_`extend
 
 ```python
  | incoming_extend(message: "Message") -> None
@@ -242,7 +242,7 @@ class Dialogues()
 The dialogues class keeps track of all dialogues.
 
 <a name=".aea.helpers.dialogue.base.Dialogues.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__() -> None
@@ -265,7 +265,7 @@ None
 Get dictionary of dialogues in which the agent is engaged in.
 
 <a name=".aea.helpers.dialogue.base.Dialogues.is_permitted_for_new_dialogue"></a>
-#### is\_permitted\_for\_new\_dialogue
+#### is`_`permitted`_`for`_`new`_`dialogue
 
 ```python
  | @abstractmethod
@@ -283,7 +283,7 @@ Check whether an agent message is permitted for a new dialogue.
 a boolean indicating whether the message is permitted for a new dialogue
 
 <a name=".aea.helpers.dialogue.base.Dialogues.is_belonging_to_registered_dialogue"></a>
-#### is\_belonging\_to\_registered\_dialogue
+#### is`_`belonging`_`to`_`registered`_`dialogue
 
 ```python
  | @abstractmethod
@@ -302,7 +302,7 @@ Check whether an agent message is part of a registered dialogue.
 boolean indicating whether the message belongs to a registered dialogue
 
 <a name=".aea.helpers.dialogue.base.Dialogues.get_dialogue"></a>
-#### get\_dialogue
+#### get`_`dialogue
 
 ```python
  | @abstractmethod

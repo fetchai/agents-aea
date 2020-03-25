@@ -13,7 +13,7 @@ class Task()
 This class implements an abstract task.
 
 <a name=".aea.skills.tasks.Task.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -22,7 +22,7 @@ This class implements an abstract task.
 Initialize a task.
 
 <a name=".aea.skills.tasks.Task.__call__"></a>
-#### \_\_call\_\_
+#### `__`call`__`
 
 ```python
  | __call__(*args, **kwargs)
@@ -41,7 +41,7 @@ Execute the task.
 - `ValueError`: if the task has already been executed.
 
 <a name=".aea.skills.tasks.Task.is_executed"></a>
-#### is\_executed
+#### is`_`executed
 
 ```python
  | @property
@@ -109,7 +109,7 @@ Implement the behaviour teardown.
 None
 
 <a name=".aea.skills.tasks.init_worker"></a>
-#### init\_worker
+#### init`_`worker
 
 ```python
 init_worker()
@@ -130,7 +130,7 @@ class TaskManager()
 A Task manager.
 
 <a name=".aea.skills.tasks.TaskManager.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(nb_workers: int = 5)
@@ -143,7 +143,7 @@ Initialize the task manager.
 - `nb_workers`: the number of worker processes.
 
 <a name=".aea.skills.tasks.TaskManager.nb_workers"></a>
-#### nb\_workers
+#### nb`_`workers
 
 ```python
  | @property
@@ -153,7 +153,7 @@ Initialize the task manager.
 Get the number of workers.
 
 <a name=".aea.skills.tasks.TaskManager.enqueue_task"></a>
-#### enqueue\_task
+#### enqueue`_`task
 
 ```python
  | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
@@ -173,7 +173,7 @@ Enqueue a task with the executor.
 - `ValueError`: if the task manager is not running.
 
 <a name=".aea.skills.tasks.TaskManager.get_task_result"></a>
-#### get\_task\_result
+#### get`_`task`_`result
 
 ```python
  | get_task_result(task_id: int) -> AsyncResult

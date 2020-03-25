@@ -22,7 +22,7 @@ class Liveness()
 Determines the liveness of the agent.
 
 <a name=".aea.agent.Liveness.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__()
@@ -31,7 +31,7 @@ Determines the liveness of the agent.
 Instantiate the liveness.
 
 <a name=".aea.agent.Liveness.is_stopped"></a>
-#### is\_stopped
+#### is`_`stopped
 
 ```python
  | @property
@@ -68,7 +68,7 @@ class Agent(ABC)
 This class implements a template agent.
 
 <a name=".aea.agent.Agent.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, timeout: float = 1.0, is_debug: bool = False, is_programmatic: bool = True) -> None
@@ -160,7 +160,7 @@ Get the liveness.
 Get the tick.
 
 <a name=".aea.agent.Agent.agent_state"></a>
-#### agent\_state
+#### agent`_`state
 
 ```python
  | @property

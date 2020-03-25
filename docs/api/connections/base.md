@@ -13,7 +13,7 @@ class ConnectionStatus()
 The connection status class.
 
 <a name=".aea.connections.base.ConnectionStatus.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__()
@@ -31,7 +31,7 @@ class Connection(ABC)
 Abstract definition of a connection.
 
 <a name=".aea.connections.base.Connection.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(connection_id: Optional[PublicId] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None)
@@ -64,7 +64,7 @@ Set the event loop.
 None
 
 <a name=".aea.connections.base.Connection.connection_id"></a>
-#### connection\_id
+#### connection`_`id
 
 ```python
  | @property
@@ -74,7 +74,7 @@ None
 Get the id of the connection.
 
 <a name=".aea.connections.base.Connection.restricted_to_protocols"></a>
-#### restricted\_to\_protocols
+#### restricted`_`to`_`protocols
 
 ```python
  | @property
@@ -84,7 +84,7 @@ Get the id of the connection.
 Get the restricted to protocols..
 
 <a name=".aea.connections.base.Connection.excluded_protocols"></a>
-#### excluded\_protocols
+#### excluded`_`protocols
 
 ```python
  | @property
@@ -94,7 +94,7 @@ Get the restricted to protocols..
 Get the restricted to protocols..
 
 <a name=".aea.connections.base.Connection.connection_status"></a>
-#### connection\_status
+#### connection`_`status
 
 ```python
  | @property
@@ -156,7 +156,7 @@ Receive an envelope.
 the received envelope, or None if an error occurred.
 
 <a name=".aea.connections.base.Connection.from_config"></a>
-#### from\_config
+#### from`_`config
 
 ```python
  | @classmethod

@@ -6,7 +6,6 @@ Classes to handle AEA configurations.
 <a name=".aea.configurations.base.Dependency"></a>
 #### Dependency
 
->>> Dependency = dict
 A dependency is a dictionary with the following (optional) keys:
     - version: a version specifier(s) (e.g. '==0.1.0').
     - index: the PyPI index where to download the package from (default: https://pypi.org)
@@ -64,7 +63,7 @@ Interface for JSON-serializable objects.
 Compute the JSON representation.
 
 <a name=".aea.configurations.base.JSONSerializable.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -92,7 +91,7 @@ class CRUDCollection(Generic[T])
 Interface of a CRUD collection.
 
 <a name=".aea.configurations.base.CRUDCollection.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__()
@@ -167,7 +166,7 @@ None
 Delete an item.
 
 <a name=".aea.configurations.base.CRUDCollection.read_all"></a>
-#### read\_all
+#### read`_`all
 
 ```python
  | read_all() -> List[Tuple[str, T]]
@@ -202,7 +201,7 @@ The concatenation of those three elements gives the public identifier:
 >>> assert public_id == another_public_id
 
 <a name=".aea.configurations.base.PublicId.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(author: str, name: str, version: str)
@@ -241,7 +240,7 @@ Get the name.
 Get the version.
 
 <a name=".aea.configurations.base.PublicId.from_str"></a>
-#### from\_str
+#### from`_`str
 
 ```python
  | @classmethod
@@ -272,7 +271,7 @@ the public id object.
 - `ValueError`: if the string in input is not well formatted.
 
 <a name=".aea.configurations.base.PublicId.from_uri_path"></a>
-#### from\_uri\_path
+#### from`_`uri`_`path
 
 ```python
  | @classmethod
@@ -303,7 +302,7 @@ the public id object.
 - `ValueError`: if the string in input is not well formatted.
 
 <a name=".aea.configurations.base.PublicId.to_uri_path"></a>
-#### to\_uri\_path
+#### to`_`uri`_`path
 
 ```python
  | @property
@@ -327,7 +326,7 @@ uri path string
 Compute the JSON representation.
 
 <a name=".aea.configurations.base.PublicId.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -337,7 +336,7 @@ Compute the JSON representation.
 Build from a JSON object.
 
 <a name=".aea.configurations.base.PublicId.__hash__"></a>
-#### \_\_hash\_\_
+#### `__`hash`__`
 
 ```python
  | __hash__()
@@ -346,7 +345,7 @@ Build from a JSON object.
 Get the hash.
 
 <a name=".aea.configurations.base.PublicId.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -355,7 +354,7 @@ Get the hash.
 Get the string representation.
 
 <a name=".aea.configurations.base.PublicId.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -364,7 +363,7 @@ Get the string representation.
 Compare with another object.
 
 <a name=".aea.configurations.base.PublicId.__lt__"></a>
-#### \_\_lt\_\_
+#### `__`lt`__`
 
 ```python
  | __lt__(other)
@@ -382,7 +381,7 @@ class PackageConfiguration(Configuration,  ABC)
 This class represent a package configuration.
 
 <a name=".aea.configurations.base.PackageConfiguration.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str, author: str, version: str, license: str, aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None)
@@ -391,7 +390,7 @@ This class represent a package configuration.
 Initialize a package configuration.
 
 <a name=".aea.configurations.base.PackageConfiguration.public_id"></a>
-#### public\_id
+#### public`_`id
 
 ```python
  | @property
@@ -410,7 +409,7 @@ class ConnectionConfig(PackageConfiguration)
 Handle connection configuration.
 
 <a name=".aea.configurations.base.ConnectionConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", **config)
@@ -429,7 +428,7 @@ Initialize a connection configuration object.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.ConnectionConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -448,7 +447,7 @@ class ProtocolConfig(PackageConfiguration)
 Handle protocol configuration.
 
 <a name=".aea.configurations.base.ProtocolConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, dependencies: Optional[Dependencies] = None, description: str = "")
@@ -467,7 +466,7 @@ Initialize a connection configuration object.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.ProtocolConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -486,7 +485,7 @@ class HandlerConfig(Configuration)
 Handle a skill handler configuration.
 
 <a name=".aea.configurations.base.HandlerConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(class_name: str = "", **args)
@@ -505,7 +504,7 @@ Initialize a handler configuration.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.HandlerConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -524,7 +523,7 @@ class BehaviourConfig(Configuration)
 Handle a skill behaviour configuration.
 
 <a name=".aea.configurations.base.BehaviourConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(class_name: str = "", **args)
@@ -543,7 +542,7 @@ Initialize a behaviour configuration.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.BehaviourConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -562,7 +561,7 @@ class ModelConfig(Configuration)
 Handle a skill model configuration.
 
 <a name=".aea.configurations.base.ModelConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(class_name: str = "", **args)
@@ -581,7 +580,7 @@ Initialize a model configuration.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.ModelConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -600,7 +599,7 @@ class SkillConfig(PackageConfiguration)
 Class to represent a skill configuration file.
 
 <a name=".aea.configurations.base.SkillConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str = "", author: str = "", version: str = "", license: str = "", fingerprint: Optional[Dict[str, str]] = None, aea_version: str = "", protocols: List[PublicId] = None, dependencies: Optional[Dependencies] = None, description: str = "")
@@ -619,7 +618,7 @@ Initialize a skill configuration.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.SkillConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -638,7 +637,7 @@ class AgentConfig(PackageConfiguration)
 Class to represent the agent configuration file.
 
 <a name=".aea.configurations.base.AgentConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(agent_name: str = "", aea_version: str = "", author: str = "", version: str = "", license: str = "", fingerprint: Optional[Dict[str, str]] = None, registry_path: str = "", description: str = "", logging_config: Optional[Dict] = None)
@@ -647,7 +646,7 @@ Class to represent the agent configuration file.
 Instantiate the agent configuration object.
 
 <a name=".aea.configurations.base.AgentConfig.private_key_paths_dict"></a>
-#### private\_key\_paths\_dict
+#### private`_`key`_`paths`_`dict
 
 ```python
  | @property
@@ -657,7 +656,7 @@ Instantiate the agent configuration object.
 Dictionary version of private key paths.
 
 <a name=".aea.configurations.base.AgentConfig.ledger_apis_dict"></a>
-#### ledger\_apis\_dict
+#### ledger`_`apis`_`dict
 
 ```python
  | @property
@@ -667,7 +666,7 @@ Dictionary version of private key paths.
 Dictionary version of ledger apis.
 
 <a name=".aea.configurations.base.AgentConfig.default_connection"></a>
-#### default\_connection
+#### default`_`connection
 
 ```python
  | @default_connection.setter
@@ -685,7 +684,7 @@ Set the default connection.
 None
 
 <a name=".aea.configurations.base.AgentConfig.default_ledger"></a>
-#### default\_ledger
+#### default`_`ledger
 
 ```python
  | @default_ledger.setter
@@ -713,7 +712,7 @@ None
 Return the JSON representation.
 
 <a name=".aea.configurations.base.AgentConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -732,7 +731,7 @@ class SpeechActContentConfig(Configuration)
 Handle a speech_act content configuration.
 
 <a name=".aea.configurations.base.SpeechActContentConfig.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**args)
@@ -751,7 +750,7 @@ Initialize a speech_act content configuration.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.SpeechActContentConfig.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod
@@ -770,7 +769,7 @@ class ProtocolSpecification(ProtocolConfig)
 Handle protocol specification.
 
 <a name=".aea.configurations.base.ProtocolSpecification.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, description: str = "")
@@ -779,7 +778,7 @@ Handle protocol specification.
 Initialize a protocol specification configuration object.
 
 <a name=".aea.configurations.base.ProtocolSpecification.protobuf_snippets"></a>
-#### protobuf\_snippets
+#### protobuf`_`snippets
 
 ```python
  | @protobuf_snippets.setter
@@ -799,7 +798,7 @@ Set the protobuf snippets.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.ProtocolSpecification.from_json"></a>
-#### from\_json
+#### from`_`json
 
 ```python
  | @classmethod

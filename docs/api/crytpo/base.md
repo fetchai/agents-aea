@@ -28,7 +28,7 @@ Return an entity object.
 an entity object
 
 <a name=".aea.crypto.base.Crypto.public_key"></a>
-#### public\_key
+#### public`_`key
 
 ```python
  | @property
@@ -58,7 +58,7 @@ Return the address.
 an address string
 
 <a name=".aea.crypto.base.Crypto.get_address_from_public_key"></a>
-#### get\_address\_from\_public\_key
+#### get`_`address`_`from`_`public`_`key
 
 ```python
  | @classmethod
@@ -77,7 +77,7 @@ Get the address from the public key.
 str
 
 <a name=".aea.crypto.base.Crypto.sign_message"></a>
-#### sign\_message
+#### sign`_`message
 
 ```python
  | @abstractmethod
@@ -95,7 +95,7 @@ Sign a message in bytes string form.
 Signed message in bytes
 
 <a name=".aea.crypto.base.Crypto.recover_message"></a>
-#### recover\_message
+#### recover`_`message
 
 ```python
  | @abstractmethod
@@ -174,7 +174,7 @@ This can be used for low-level operations with the concrete ledger APIs.
 If there is no such object, return None.
 
 <a name=".aea.crypto.base.LedgerApi.get_balance"></a>
-#### get\_balance
+#### get`_`balance
 
 ```python
  | @abstractmethod
@@ -194,7 +194,7 @@ This usually takes the form of a web request to be waited synchronously.
 the balance.
 
 <a name=".aea.crypto.base.LedgerApi.send_transaction"></a>
-#### send\_transaction
+#### send`_`transaction
 
 ```python
  | @abstractmethod
@@ -219,7 +219,7 @@ in the concrete ledger API, use keyword arguments for the additional parameters.
 tx digest if successful, otherwise None
 
 <a name=".aea.crypto.base.LedgerApi.is_transaction_settled"></a>
-#### is\_transaction\_settled
+#### is`_`transaction`_`settled
 
 ```python
  | @abstractmethod
@@ -237,7 +237,7 @@ Check whether a transaction is settled or not.
 True if the transaction has been settled, False o/w.
 
 <a name=".aea.crypto.base.LedgerApi.validate_transaction"></a>
-#### validate\_transaction
+#### validate`_`transaction
 
 ```python
  | @abstractmethod
@@ -259,7 +259,7 @@ Check whether a transaction is valid or not.
 True if the transaction referenced by the tx_digest matches the terms.
 
 <a name=".aea.crypto.base.LedgerApi.generate_tx_nonce"></a>
-#### generate\_tx\_nonce
+#### generate`_`tx`_`nonce
 
 ```python
  | @abstractmethod

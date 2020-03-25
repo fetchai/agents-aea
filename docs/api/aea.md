@@ -13,7 +13,7 @@ class AEA(Agent)
 This class implements an autonomous economic agent.
 
 <a name=".aea.aea.AEA.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.0, is_debug: bool = False, is_programmatic: bool = True, max_reactions: int = 20) -> None
@@ -39,7 +39,7 @@ Instantiate the agent.
 None
 
 <a name=".aea.aea.AEA.decision_maker"></a>
-#### decision\_maker
+#### decision`_`maker
 
 ```python
  | @property
@@ -79,7 +79,7 @@ Set resources.
 Get filter.
 
 <a name=".aea.aea.AEA.task_manager"></a>
-#### task\_manager
+#### task`_`manager
 
 ```python
  | @property
