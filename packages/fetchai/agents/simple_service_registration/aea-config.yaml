@@ -1,4 +1,4 @@
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: simple_service_registration
 author: fetchai
 connections:
