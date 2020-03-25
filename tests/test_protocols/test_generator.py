@@ -37,6 +37,7 @@ from aea.aea import AEA
 from aea.configurations.base import (
     ProtocolConfig,
     ProtocolId,
+    ProtocolSpecificationParseError,
     PublicId,
 )
 from aea.crypto.fetchai import FETCHAI
@@ -48,6 +49,7 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
 from aea.protocols.generator import (
     ProtocolGenerator,
+    _is_composition_type_with_custom_type,
     _specification_type_to_python_type,
     _union_sub_type_to_protobuf_variable_name,
 )
@@ -392,7 +394,7 @@ class SpecificationTypeToPythonTypeTestCase(TestCase):
 
     def test__specification_type_to_python_type_unsupported_type(self):
         """Test _specification_type_to_python_type method unsupported type."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ProtocolSpecificationParseError):
             _specification_type_to_python_type("unsupported_type")
 
 
@@ -424,11 +426,11 @@ class ProtocolGeneratorTestCase(TestCase):
     def test__includes_custom_type_positive(self, *mocks):
         """Test _includes_custom_type method positive result."""
         content_type = "Union[str]"
-        result = self.protocol_generator._includes_custom_type(content_type)
+        result = not _is_composition_type_with_custom_type(content_type)
         self.assertTrue(result)
 
         content_type = "Optional[str]"
-        result = self.protocol_generator._includes_custom_type(content_type)
+        result = not _is_composition_type_with_custom_type(content_type)
         self.assertTrue(result)
 
     # @mock.patch("aea.protocols.generator._get_indent_str")
