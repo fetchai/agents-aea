@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ''
+aea_version: 0.2.4
 dependencies: 
     protobuf: {} 
 description: The tac protocol implements the messages an AEA needs to participate in the TAC
