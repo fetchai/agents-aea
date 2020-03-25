@@ -1,0 +1,38 @@
+---
+name: oef_search
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: 'A protocol for interacting with an OEF search service.'
+speech_acts:
+  register_service:
+    service_description: ct:Description
+  unregister_service:
+    service_description: ct:Description
+  search_services:
+    query: ct:Query
+  search_result:
+    agents: pt:list[pt:str]
+  oef_error:
+    oef_error_operation: ct:OefErrorOperation
+...
+---
+ct:Query: |
+  message Nothing {
+  }
+  oneof query{
+      bytes bytes = 1;
+      Nothing nothing = 2;
+      bytes query_bytes = 3;
+  }
+ct:Description: |
+  bytes description = 1;
+ct:OefErrorOperation: |
+  enum OefErrorEnum {
+        REGISTER_SERVICE = 0;
+        UNREGISTER_SERVICE = 1;
+        SEARCH_SERVICES = 2;
+        SEND_MESSAGE = 3;
+      }
+  OefErrorEnum oef_error = 1;
+...

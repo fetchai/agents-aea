@@ -14,7 +14,7 @@ speech_acts:
     tx_digest: pt:str
   data:
     terms: ct:Description
-    data: ct:Data
+    payload: pt:bytes
 ...
 ---
 ct:Query: |
@@ -27,6 +27,4 @@ ct:Query: |
   }
 ct:Description: |
   bytes description = 1;
-ct:Data: |
-  repeated bytes bytes = 1;
 ...

@@ -31,8 +31,8 @@ Description: The default item allows for any byte logic.
 Version: 0.1.0
 ------------------------------
 ------------------------------
-Public ID: fetchai/oef:0.1.0
-Name: oef
+Public ID: fetchai/oef_search:0.1.0
+Name: oef_search
 Description: The oef item implements the OEF specific logic.
 Version: 0.1.0
 ------------------------------
@@ -69,7 +69,7 @@ def _test_list_items(item_type: str):
     assert len(data) == 2
     assert data[0]["id"] == "fetchai/default:0.1.0"
     assert data[0]["description"] == "The default item allows for any byte logic."
-    assert data[1]["id"] == "fetchai/oef:0.1.0"
+    assert data[1]["id"] == "fetchai/oef_search:0.1.0"
     assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 

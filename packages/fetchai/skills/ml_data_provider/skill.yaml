@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
+aea_version: 0.2.4
 description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
 behaviours:
   service_registration:
@@ -25,7 +26,7 @@ models:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: False
-protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/ml_trade:0.1.0']
 dependencies:
   tensorflow: { version: "==1.14.0" }
   numpy: {}

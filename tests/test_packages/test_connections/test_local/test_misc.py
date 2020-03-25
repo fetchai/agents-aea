@@ -24,13 +24,14 @@ import unittest.mock
 import pytest
 
 from aea.configurations.base import PublicId
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import AEAConnectionError, Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 
 def test_connection():
@@ -147,44 +148,65 @@ def test_communication():
         )
         multiplexer1.put(envelope)
 
-        msg = FIPAMessage((str(0), ""), 0, 0, FIPAMessage.Performative.CFP, query=None)
-        msg_bytes = FIPASerializer().encode(msg)
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.CFP,
+            dialogue_reference=(str(0), ""),
+            message_id=1,
+            target=0,
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
+        )
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to="multiplexer2",
             sender="multiplexer1",
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         multiplexer1.put(envelope)
 
-        msg = FIPAMessage(
-            (str(0), str(1)), 0, 0, FIPAMessage.Performative.PROPOSE, proposal=[],
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.PROPOSE,
+            dialogue_reference=(str(0), ""),
+            message_id=2,
+            target=1,
+            proposal=Description({}),
         )
-        msg_bytes = FIPASerializer().encode(msg)
+
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to="multiplexer2",
             sender="multiplexer1",
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         multiplexer1.put(envelope)
 
-        msg = FIPAMessage((str(0), str(1)), 0, 0, FIPAMessage.Performative.ACCEPT)
-        msg_bytes = FIPASerializer().encode(msg)
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.ACCEPT,
+            dialogue_reference=(str(0), ""),
+            message_id=1,
+            target=0,
+        )
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to="multiplexer2",
             sender="multiplexer1",
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         multiplexer1.put(envelope)
 
-        msg = FIPAMessage((str(0), str(1)), 0, 0, FIPAMessage.Performative.DECLINE)
-        msg_bytes = FIPASerializer().encode(msg)
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.DECLINE,
+            dialogue_reference=(str(0), ""),
+            message_id=1,
+            target=0,
+        )
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to="multiplexer2",
             sender="multiplexer1",
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         multiplexer1.put(envelope)
@@ -192,23 +214,23 @@ def test_communication():
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert envelope.protocol_id == DefaultMessage.protocol_id
-        assert msg.get("content") == b"hello"
+        assert msg.content == b"hello"
         envelope = multiplexer2.get(block=True, timeout=1.0)
-        msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.CFP
+        msg = FipaSerializer().decode(envelope.message)
+        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert msg.performative == FipaMessage.Performative.CFP
         envelope = multiplexer2.get(block=True, timeout=1.0)
-        msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.PROPOSE
+        msg = FipaSerializer().decode(envelope.message)
+        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert msg.performative == FipaMessage.Performative.PROPOSE
         envelope = multiplexer2.get(block=True, timeout=1.0)
-        msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.ACCEPT
+        msg = FipaSerializer().decode(envelope.message)
+        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert msg.performative == FipaMessage.Performative.ACCEPT
         envelope = multiplexer2.get(block=True, timeout=1.0)
-        msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == FIPAMessage.protocol_id
-        assert msg.get("performative") == FIPAMessage.Performative.DECLINE
+        msg = FipaSerializer().decode(envelope.message)
+        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert msg.performative == FipaMessage.Performative.DECLINE
         multiplexer1.disconnect()
         multiplexer2.disconnect()
 

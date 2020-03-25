@@ -16,8 +16,8 @@ An other AEA has the role of the controller and it's responsible for calculating
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF node
-In a separate terminal, launch a local OEF node (for search and discovery).
+### Launch an OEF search and communication node
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
@@ -257,16 +257,16 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.1.0']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the `tac_negotiation` skill.
 
-The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
+The `FIPANegotiationHandler` deals with receiving `FipaMessage` types containing FIPA negotiation terms, such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
 The `TransactionHandler` deals with `TransactionMessage`s received from the decision maker component. The decision maker component is responsible for cryptoeconomic security.
 
-The `OEFSearchHandler` deals with `OEFMessage` types returned from the OEF search nodes.
+The `OEFSearchHandler` deals with `OefSearchMessage` types returned from the [OEF search node](../oef-ledger)
 
 The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
@@ -280,7 +280,7 @@ This class abstracts the logic required by AEAs performing searches for other bu
 
 #### Registration
 
-This class abstracts the logic required by AEAs performing service registrations on the OEF.
+This class abstracts the logic required by AEAs performing service registrations on the [OEF search node](../oef-ledger).
 
 #### Strategy
 

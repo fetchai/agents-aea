@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package fetch.aea.Gym;
+
+message GymMessage{
+
+    // Custom Types
+    message AnyObject{
+        bytes any = 1;
+    }
+
+
+    // Performatives and contents
+    message Act{
+        AnyObject action = 1;
+        int32 step_id = 2;
+    }
+
+    message Percept{
+        int32 step_id = 1;
+        AnyObject observation = 2;
+        float reward = 3;
+        bool done = 4;
+        AnyObject info = 5;
+    }
+
+    message Reset{}
+
+    message Close{}
+
+
+    // Standard GymMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Act act = 5;
+        Close close = 6;
+        Percept percept = 7;
+        Reset reset = 8;
+    }
+}

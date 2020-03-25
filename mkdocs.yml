@@ -23,6 +23,7 @@ nav:
       - Identity: 'identity.md'
       - Trust issues: 'trust.md'
     - Demos:
+      - Aries Cloud Agent: 'aries-cloud-agent.md'
       - Car park skills: 'car-park-skills.md'
       - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
@@ -41,6 +42,7 @@ nav:
         - Build a skill for an AEA: 'skill-guide.md'
         - Build an AEA programmatically: 'build-aea-programmatically.md'
         - AEAs vs agents: 'agent-vs-aea.md'
+        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - Step by step guides:
         - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
       - Use case components:
@@ -65,15 +67,52 @@ nav:
         - Protocol: 'protocol.md'
         - Connection: 'connection.md'
         - Scaffolding packages: 'scaffolding.md'
-        - Generating protocols: 'generator.md'
+        - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
         - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
-        - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
         - Using public ledgers: 'integration.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
+      - API:
+        - AEA: 'api/aea.md'
+        - Agent: 'api/agent.md'
+        - Configurations:
+          - Base: 'api/configurations/base.md'
+          - Loader: 'api/configurations/loader.md'
+        - Connections:
+          - Base: 'api/connections/base.md'          
+          - Stub Connection: 'api/connections/stub/connection.md'
+        - Context: 'api/context/base.md'
+        - Crypto:
+          - Base: 'api/crytpo/base.md'
+          - Ethereum: 'api/crypto/ethereum.md'
+          - Fetchai: 'api/crypto/fetchai.md'
+          - LedgerApis: 'api/crypto/ledger_apis.md'
+          - Wallet: 'api/crypto/wallet.md'
+        - Helpers:
+          - Dialogue:
+            - Base: 'api/helpers/dialogue/base.md'
+          - Search:
+            - Generic: 'api/helpers/search/generic.md'
+            - Models: 'api/helpers/search/models.md'
+        - Identity:
+          - Base: 'api/identity/base.md'
+        - Mail:
+          - Base: 'api/mail/base.md'
+        - Protocols:
+          - Base: 'api/protocols/base.md'
+          - Default Protocol:
+            - Message: 'api/protocols/default/message.md'
+            - Serialization: 'api/protocols/default/serialization.md'
+        - Registries:
+          - Base: 'api/registries/base.md'
+        - Skills:
+          - Base: 'api/skills/base.md'
+          - Error Skill: 'api/skills/error/handlers.md'
+          - Behaviors: 'api/skills/behaviours.md'
+          - Task: 'api/skills/tasks.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:

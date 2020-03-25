@@ -19,8 +19,8 @@ The AEA must run inside a Raspberry Pi or any other Linux system, and the sensor
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Launch an OEF node
-In a separate terminal, launch a local OEF node (for search and discovery).
+### Launch an OEF search and communication node
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```

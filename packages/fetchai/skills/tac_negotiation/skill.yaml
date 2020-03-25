@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
+aea_version: 0.2.4
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
   tac_negotiation:
@@ -44,4 +45,4 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.1.0']

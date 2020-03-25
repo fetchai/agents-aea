@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ""
+aea_version: 0.2.4
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:
@@ -27,5 +28,5 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']

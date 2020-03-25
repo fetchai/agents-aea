@@ -17,9 +17,9 @@ The scope of the specific demo is to demonstrate how a CLI based AEA can interac
 to achieve this we are going to use the weather station skills. 
 This demo does not utilize a smart contract or a ledger interaction. 
 
-### Launch an OEF node
+### Launch an OEF search and communication node
 
-In a separate terminal, launch a local OEF node (for search and discovery).
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
@@ -111,7 +111,7 @@ def run():
 
     # Add the oef protocol (which is a package)
     oef_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef",)
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
     )
     resources.add_protocol(oef_protocol)
 
