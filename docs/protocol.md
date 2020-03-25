@@ -1,14 +1,12 @@
-A `Protocol` manages message representation, encoding, and serialisation. It also defines the rules to which messages must adhere.
+A `Protocol` manages message representation (syntax, `message.py`), optionally rules of the message exchange (semantics, `dialogues.py`), as well as encoding, and decoding (`serialization.py`). All protocols are for point to point interaction between two agents. Agents can be AEAs or other types of agent-like services.
 
-An AEA can have one or more protocols. The AEA framework supplies the `fetchai/default:0.1.0` protocol.
-
-## Interaction Protocols
+<!-- ## Interaction Protocols
 
 Protocols are not to be conflated with Interaction Protocols. The latter consist of three components in the AEA:
 
 - Protocols: which deal with the syntax and potentially semantics of the message exchange
 - Handlers: which handle incoming messages
-- Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type.
+- Behaviours: which execute pro-active patterns of one-shot, cyclic or even finite-state-machine-like type. -->
 
 ## Metadata
 
@@ -18,26 +16,67 @@ Each `Message` in an interaction protocol has a set of default metadata, this in
 * `message_id: int`, the id of the message. The default value is `1`.
 * `target: int`, the id of the message which is referenced by this message. The default value is `0`.
 
+By default, `dialogue_reference`, `message_id` and `target` are set, however, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep reference to the preceding messages in a dialogue for a given interaction. For instance, following receipt of a message with `target=0` and `message_id=1` the responding AEA should respond with a `message_id=2` and `target=1`. In particular, `target` holds the id of the message being referenced. This can be the preceding message, it can also be an older message. Hence, `0 < target < message_id` for `message_id > 1` and `target=0` if `message_id = 1`. 
+
 ## Custom protocol
 
 The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. 
 
 ## `fetchai/default:0.1.0` protocol
 
-The `default` protocol has two message performatives: `BYTES` and `ERROR`, and provides error messages for the error skill which uses it.
+The `fetchai/default:0.1.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
-The serialisation methods `encode` and `decode` implement transformations from `Message` type to bytes and back.
+``` python
+class Performative(Enum):
+    """Performatives for the default protocol."""
+
+    BYTES = "bytes"
+    ERROR = "error"
+
+    def __str__(self):
+        """Get the string representation."""
+        return self.value
+```
+
+* The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
+
+``` python
+msg = DefaultMessage(
+    performative=DefaultMessage.Performative.BYTES,
+    content=b"This is a bytes payload",
+)
+```
+
+* The `DefaultMessage` of performative `DefaultMessage.Performative.ERROR` is used to notify other AEAs of errors in an interaction, including errors with other protocols, by including an `error_code` in the payload:
+
+``` python
+class ErrorCode(Enum):
+    """This class represents an instance of ErrorCode."""
+
+    UNSUPPORTED_PROTOCOL = 0
+    DECODING_ERROR = 1
+    INVALID_MESSAGE = 2
+    UNSUPPORTED_SKILL = 3
+    INVALID_DIALOGUE = 4
+```
+
+An example is:
+``` python
+msg = DefaultMessage(
+    performative=DefaultMessage.Performative.ERROR,
+    error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
+    error_msg="This protocol is not supported by this AEA.",
+    error_data={"unsupported_msg": b"serialized unsupported protocol message"},
+)
+```
+
+Each AEA's `fetchai/error:0.1.0` skill utilises the `fetchai/default:0.1.0` protocol for error handling.
 
 ## `fetchai/oef_search:0.1.0` protocol
 
-The `fetchai/oef_search:0.1.0` protocol is used by AEAs to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.1.0` protocol is used by AEAs to interact with an [OEF search node](../oef-ledger) to register and unregister their own services and search for services registered by other agents.
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>In future, the framework will support peer to peer communications.</p>
-</div>
-
-The `oef` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.1.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ```python
 class Performative(Enum):
@@ -56,7 +95,7 @@ class Performative(Enum):
 
 We show some example messages below:
 
-* To register a service, we require a reference to the dialogue in string form, for instance
+* To register a service, we require a reference to the dialogue in string form (used to keep different dialogues apart), for instance
 ``` python
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
@@ -144,7 +183,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger).
+* The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.1.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 
@@ -166,89 +205,36 @@ The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the f
 
 ```python
 class Performative(Enum):
+    """Performatives for the fipa protocol."""
 
-	"""FIPA performatives."""
-    CFP = "cfp"
-    PROPOSE = "propose"
     ACCEPT = "accept"
-    MATCH_ACCEPT = "match_accept"
+    ACCEPT_W_INFORM = "accept_w_inform"
+    CFP = "cfp"
     DECLINE = "decline"
     INFORM = "inform"
-    ACCEPT_W_INFORM = "accept_w_inform"
+    MATCH_ACCEPT = "match_accept"
     MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
+    PROPOSE = "propose"
 
     def __str__(self):
     	"""Get string representation."""
         return self.value
 ```
 
-`FipaMessages` are constructed with a `message_id`, a `dialogue_id`, a `target` and `peformative`.
+`FipaMessages` are constructed with a `performative`, `dialogue_reference`, `message_id`, and `target` as well as the `kwargs` specific to each message performative.
 
 ```python
-super().__init__(
-    message_id=message_id,
-    dialogue_reference=dialogue_reference,
-    target=target,
-    performative=FipaMessage.Performative(performative),
-    **kwargs
+def __init__(
+    self,
+    performative: Performative,
+    dialogue_reference: Tuple[str, str] = ("", ""),
+    message_id: int = 1,
+    target: int = 0,
+    **kwargs,
 )
 ```
 
-The `fipa.proto` file then further qualifies the performatives for `protobuf` messaging.
-
-``` proto
-syntax = "proto3";
-
-package fetch.aea.fipa;
-
-message FipaMessage{
-
-    message CFP{
-        message Nothing {
-        }
-        oneof query{
-            bytes bytes = 1;
-            Nothing nothing = 2;
-            bytes query_bytes = 3;
-        }
-    }
-    message Propose{
-        repeated bytes proposal = 1;
-    }
-    message Accept{}
-
-    message MatchAccept{}
-
-    message Decline{}
-
-    message Inform{
-        bytes bytes = 1;
-    }
-
-    message AcceptWInform{
-        bytes bytes = 1;
-    }
-
-    message MatchAcceptWInform{
-        bytes bytes = 1;
-    }
-
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
-    oneof performative{
-        CFP cfp = 5;
-        Propose propose = 6;
-        Accept accept = 7;
-        MatchAccept match_accept = 8;
-        Decline decline = 9;
-        Inform inform = 10;
-        AcceptWInform accept_w_inform = 11;
-        MatchAcceptWInform match_accept_w_inform = 12;
-    }
-}
-```
+For examples of the usage of the `fetchai/fipa:0.1.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
 
 

@@ -117,9 +117,9 @@ class Description:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'description_from_message' argument.
+        The content in the 'performative_content' argument must be matched with the message content in the 'description_from_message' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
         :param description_from_message: the message content to be encoded in the protocol buffer object.
         :return: None
         """
@@ -485,7 +485,7 @@ class Query:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'query_from_message' argument.
+        The content in the 'performative_content' argument must be matched with the message content in the 'query_from_message' argument.
 
         :param performative_content: the performative protocol buffer object containing a content whose type is this class.
         :param query_from_message: the message content to be encoded in the protocol buffer object.
