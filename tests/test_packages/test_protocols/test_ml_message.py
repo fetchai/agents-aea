@@ -20,7 +20,7 @@
 """This module contains the tests of the ml_messages module."""
 
 import logging
-import pickle
+import pickle  # nosec
 from unittest import mock
 
 import numpy as np
