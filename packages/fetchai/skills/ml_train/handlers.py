@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_train' skill."""
+
+import pickle  # nosec
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -26,8 +28,8 @@ from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
@@ -38,7 +40,7 @@ DUMMY_DIGEST = "dummy_digest"
 class TrainHandler(Handler):
     """Train handler."""
 
-    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
+    SUPPORTED_PROTOCOL = MlTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -59,13 +61,13 @@ class TrainHandler(Handler):
         :param message: the message
         :return: None
         """
-        ml_msg = cast(MLTradeMessage, message)
-        if ml_msg.performative == MLTradeMessage.Performative.TERMS:
+        ml_msg = cast(MlTradeMessage, message)
+        if ml_msg.performative == MlTradeMessage.Performative.TERMS:
             self._handle_terms(ml_msg)
-        elif ml_msg.performative == MLTradeMessage.Performative.DATA:
+        elif ml_msg.performative == MlTradeMessage.Performative.DATA:
             self._handle_data(ml_msg)
 
-    def _handle_terms(self, ml_trade_msg: MLTradeMessage) -> None:
+    def _handle_terms(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle the terms of the request.
 
@@ -115,16 +117,16 @@ class TrainHandler(Handler):
             )
         else:
             # accept directly with a dummy transaction digest, no settlement
-            ml_accept = MLTradeMessage(
-                performative=MLTradeMessage.Performative.ACCEPT,
+            ml_accept = MlTradeMessage(
+                performative=MlTradeMessage.Performative.ACCEPT,
                 tx_digest=DUMMY_DIGEST,
                 terms=terms,
             )
             self.context.outbox.put_message(
                 to=ml_trade_msg.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=MLTradeMessage.protocol_id,
-                message=MLTradeSerializer().encode(ml_accept),
+                protocol_id=MlTradeMessage.protocol_id,
+                message=MlTradeSerializer().encode(ml_accept),
             )
             self.context.logger.info(
                 "[{}]: sending dummy transaction digest ...".format(
@@ -132,7 +134,7 @@ class TrainHandler(Handler):
                 )
             )
 
-    def _handle_data(self, ml_trade_msg: MLTradeMessage) -> None:
+    def _handle_data(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle the data.
 
@@ -140,7 +142,8 @@ class TrainHandler(Handler):
         :return: None
         """
         terms = ml_trade_msg.terms
-        data = ml_trade_msg.data
+        payload = ml_trade_msg.payload
+        data = pickle.loads(payload)  # nosec
         if data is None:
             self.context.logger.info(
                 "Received data message with no data from {}".format(
@@ -227,14 +230,14 @@ class OEFHandler(Handler):
                     self.context.agent_name, opponent_address[-5:]
                 )
             )
-            cft_msg = MLTradeMessage(
-                performative=MLTradeMessage.Performative.CFT, query=query
+            cft_msg = MlTradeMessage(
+                performative=MlTradeMessage.Performative.CFP, query=query
             )
             self.context.outbox.put_message(
                 to=opponent_address,
                 sender=self.context.agent_address,
-                protocol_id=MLTradeMessage.protocol_id,
-                message=MLTradeSerializer().encode(cft_msg),
+                protocol_id=MlTradeMessage.protocol_id,
+                message=MlTradeSerializer().encode(cft_msg),
             )
 
 
@@ -264,16 +267,16 @@ class MyTransactionHandler(Handler):
             )
             info = tx_msg_response.info
             terms = cast(Description, info.get("terms"))
-            ml_accept = MLTradeMessage(
-                performative=MLTradeMessage.Performative.ACCEPT,
+            ml_accept = MlTradeMessage(
+                performative=MlTradeMessage.Performative.ACCEPT,
                 tx_digest=tx_msg_response.tx_digest,
                 terms=terms,
             )
             self.context.outbox.put_message(
                 to=tx_msg_response.tx_counterparty_addr,
                 sender=self.context.agent_address,
-                protocol_id=MLTradeMessage.protocol_id,
-                message=MLTradeSerializer().encode(ml_accept),
+                protocol_id=MlTradeMessage.protocol_id,
+                message=MlTradeSerializer().encode(ml_accept),
             )
             self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(

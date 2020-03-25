@@ -19,20 +19,21 @@
 
 """This module contains the handler for the 'ml_data_provider' skill."""
 
+import pickle  # nosec
 from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 
 
 class MLTradeHandler(Handler):
     """ML trade handler."""
 
-    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
+    SUPPORTED_PROTOCOL = MlTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -49,13 +50,13 @@ class MLTradeHandler(Handler):
         :param message: the message
         :return: None
         """
-        ml_msg = cast(MLTradeMessage, message)
-        if ml_msg.performative == MLTradeMessage.Performative.CFT:
+        ml_msg = cast(MlTradeMessage, message)
+        if ml_msg.performative == MlTradeMessage.Performative.CFP:
             self._handle_cft(ml_msg)
-        elif ml_msg.performative == MLTradeMessage.Performative.ACCEPT:
+        elif ml_msg.performative == MlTradeMessage.Performative.ACCEPT:
             self._handle_accept(ml_msg)
 
-    def _handle_cft(self, ml_trade_msg: MLTradeMessage) -> None:
+    def _handle_cft(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle call for terms.
 
@@ -77,17 +78,17 @@ class MLTradeHandler(Handler):
                 self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values
             )
         )
-        terms_msg = MLTradeMessage(
-            performative=MLTradeMessage.Performative.TERMS, terms=terms
+        terms_msg = MlTradeMessage(
+            performative=MlTradeMessage.Performative.TERMS, terms=terms
         )
         self.context.outbox.put_message(
             to=ml_trade_msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=MLTradeMessage.protocol_id,
-            message=MLTradeSerializer().encode(terms_msg),
+            protocol_id=MlTradeMessage.protocol_id,
+            message=MlTradeSerializer().encode(terms_msg),
         )
 
-    def _handle_accept(self, ml_trade_msg: MLTradeMessage) -> None:
+    def _handle_accept(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle accept.
 
@@ -110,14 +111,15 @@ class MLTradeHandler(Handler):
                 self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape
             )
         )
-        data_msg = MLTradeMessage(
-            performative=MLTradeMessage.Performative.DATA, terms=terms, data=data
+        payload = pickle.dumps(data)  # nosec
+        data_msg = MlTradeMessage(
+            performative=MlTradeMessage.Performative.DATA, terms=terms, payload=payload
         )
         self.context.outbox.put_message(
             to=ml_trade_msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=MLTradeMessage.protocol_id,
-            message=MLTradeSerializer().encode(data_msg),
+            protocol_id=MlTradeMessage.protocol_id,
+            message=MlTradeSerializer().encode(data_msg),
         )
 
     def teardown(self) -> None:

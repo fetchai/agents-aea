@@ -17,4 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the ml_trade protocol."""
+"""This module contains class representations corresponding to every custom type in the protocol specification."""
+
+from aea.helpers.search.models import Description as BaseDescription
+from aea.helpers.search.models import Query as BaseQuery
+
+
+Description = BaseDescription
+
+Query = BaseQuery
