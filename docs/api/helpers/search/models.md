@@ -13,7 +13,7 @@ class Attribute()
 Implements an attribute for an OEF data model.
 
 <a name=".aea.helpers.search.models.Attribute.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str, type: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "")
@@ -29,7 +29,7 @@ Initialize an attribute.
 - `description`: an (optional) human-readable description for the attribute.
 
 <a name=".aea.helpers.search.models.Attribute.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -47,7 +47,7 @@ class DataModel()
 Implements an OEF data model.
 
 <a name=".aea.helpers.search.models.DataModel.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str, attributes: List[Attribute], description: str = "")
@@ -61,7 +61,7 @@ Initialize a data model.
 - `attributes`: the attributes of the data model.
 
 <a name=".aea.helpers.search.models.DataModel.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other) -> bool
@@ -79,7 +79,7 @@ class Description()
 Implements an OEF description.
 
 <a name=".aea.helpers.search.models.Description.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(values: Dict, data_model: Optional[DataModel] = None)
@@ -92,7 +92,7 @@ Initialize the description object.
 - `values`: the values in the description.
 
 <a name=".aea.helpers.search.models.Description.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other) -> bool
@@ -101,7 +101,7 @@ Initialize the description object.
 Compare with another object.
 
 <a name=".aea.helpers.search.models.Description.__iter__"></a>
-#### \_\_iter\_\_
+#### `__`iter`__`
 
 ```python
  | __iter__()
@@ -160,7 +160,7 @@ class ConstraintTypes(Enum)
 Types of constraint.
 
 <a name=".aea.helpers.search.models.ConstraintTypes.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -193,7 +193,7 @@ Used with the Constraint class, this class allows to specify constraint over att
   >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
 
 <a name=".aea.helpers.search.models.ConstraintType.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(type: Union[ConstraintTypes, str], value: Any)
@@ -236,7 +236,7 @@ True if the value satisfy the constraint, False otherwise.
 - `ValueError`: if the constraint type is not recognized.
 
 <a name=".aea.helpers.search.models.ConstraintType.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -281,7 +281,7 @@ class And(ConstraintExpr)
 Implementation of the 'And' constraint expression.
 
 <a name=".aea.helpers.search.models.And.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(constraints: List[ConstraintExpr])
@@ -311,7 +311,7 @@ Check if a value satisfies the 'And' constraint expression.
 True if the description satisfy the constraint expression, False otherwise.
 
 <a name=".aea.helpers.search.models.And.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -329,7 +329,7 @@ class Or(ConstraintExpr)
 Implementation of the 'Or' constraint expression.
 
 <a name=".aea.helpers.search.models.Or.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(constraints: List[ConstraintExpr])
@@ -359,7 +359,7 @@ Check if a value satisfies the 'Or' constraint expression.
 True if the description satisfy the constraint expression, False otherwise.
 
 <a name=".aea.helpers.search.models.Or.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -377,7 +377,7 @@ class Not(ConstraintExpr)
 Implementation of the 'Not' constraint expression.
 
 <a name=".aea.helpers.search.models.Not.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(constraint: ConstraintExpr)
@@ -407,7 +407,7 @@ Check if a value satisfies the 'Not; constraint expression.
 True if the description satisfy the constraint expression, False otherwise.
 
 <a name=".aea.helpers.search.models.Not.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -425,7 +425,7 @@ class Constraint(ConstraintExpr)
 The atomic component of a constraint expression.
 
 <a name=".aea.helpers.search.models.Constraint.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(attribute_name: str, constraint_type: ConstraintType)
@@ -491,7 +491,7 @@ False
 False
 
 <a name=".aea.helpers.search.models.Constraint.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)
@@ -509,7 +509,7 @@ class Query()
 This class lets you build a query for the OEF.
 
 <a name=".aea.helpers.search.models.Query.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(constraints: List[ConstraintExpr], model: Optional[DataModel] = None) -> None
@@ -542,7 +542,7 @@ The constraints are interpreted as conjunction.
 True if the description satisfies all the constraints, False otherwise.
 
 <a name=".aea.helpers.search.models.Query.__eq__"></a>
-#### \_\_eq\_\_
+#### `__`eq`__`
 
 ```python
  | __eq__(other)

@@ -4,7 +4,7 @@
 This module contains the stub connection.
 
 <a name=".aea.connections.stub.connection.StubConnection.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(input_file_path: Union[str, Path], output_file_path: Union[str, Path], *args, **kwargs)
@@ -21,7 +21,7 @@ Initialize a stub connection.
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
 
 <a name=".aea.connections.stub.connection.StubConnection.read_envelopes"></a>
-#### read\_envelopes
+#### read`_`envelopes
 
 ```python
  | read_envelopes() -> None
@@ -72,7 +72,7 @@ Send messages.
 None
 
 <a name=".aea.connections.stub.connection.StubConnection.from_config"></a>
-#### from\_config
+#### from`_`config
 
 ```python
  | @classmethod

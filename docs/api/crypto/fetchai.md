@@ -13,7 +13,7 @@ class FetchAICrypto(Crypto)
 Class wrapping the Entity Generation from Fetch.AI ledger.
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(private_key_path: Optional[str] = None)
@@ -36,7 +36,7 @@ Instantiate a fetchai crypto object.
 Get the entity.
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.public_key"></a>
-#### public\_key
+#### public`_`key
 
 ```python
  | @property
@@ -64,7 +64,7 @@ Return the address for the key pair.
 a display_address str
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.sign_message"></a>
-#### sign\_message
+#### sign`_`message
 
 ```python
  | sign_message(message: bytes) -> bytes
@@ -81,7 +81,7 @@ Sign a message in bytes string form.
 Signed message in bytes
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.recover_message"></a>
-#### recover\_message
+#### recover`_`message
 
 ```python
  | recover_message(message: bytes, signature: bytes) -> Address
@@ -99,7 +99,7 @@ Recover the address from the hash.
 the recovered address
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.get_address_from_public_key"></a>
-#### get\_address\_from\_public\_key
+#### get`_`address`_`from`_`public`_`key
 
 ```python
  | @classmethod
@@ -161,7 +161,7 @@ class FetchAIApi(LedgerApi)
 Class to interact with the Fetch ledger APIs.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -184,7 +184,7 @@ Initialize the Fetch.AI ledger APIs.
 Get the underlying API object.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.get_balance"></a>
-#### get\_balance
+#### get`_`balance
 
 ```python
  | get_balance(address: AddressLike) -> int
@@ -193,7 +193,7 @@ Get the underlying API object.
 Get the balance of a given account.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.send_transaction"></a>
-#### send\_transaction
+#### send`_`transaction
 
 ```python
  | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, **kwargs) -> Optional[str]
@@ -202,7 +202,7 @@ Get the balance of a given account.
 Submit a transaction to the ledger.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.is_transaction_settled"></a>
-#### is\_transaction\_settled
+#### is`_`transaction`_`settled
 
 ```python
  | is_transaction_settled(tx_digest: str) -> bool
@@ -211,7 +211,7 @@ Submit a transaction to the ledger.
 Check whether a transaction is settled or not.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.validate_transaction"></a>
-#### validate\_transaction
+#### validate`_`transaction
 
 ```python
  | validate_transaction(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
@@ -232,7 +232,7 @@ Check whether a transaction is valid or not.
 True if the random_message is equals to tx['input']
 
 <a name=".aea.crypto.fetchai.FetchAIApi.generate_tx_nonce"></a>
-#### generate\_tx\_nonce
+#### generate`_`tx`_`nonce
 
 ```python
  | generate_tx_nonce(seller: Address, client: Address) -> str

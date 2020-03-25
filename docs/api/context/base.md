@@ -13,7 +13,7 @@ class AgentContext()
 Provide read access to relevant data of the agent for the skills.
 
 <a name=".aea.context.base.AgentContext.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, ownership_state: OwnershipState, preferences: Preferences, goal_pursuit_readiness: GoalPursuitReadiness, task_manager: TaskManager)
@@ -34,7 +34,7 @@ Initialize an agent context.
 - `task_manager`: the task manager
 
 <a name=".aea.context.base.AgentContext.shared_state"></a>
-#### shared\_state
+#### shared`_`state
 
 ```python
  | @property
@@ -54,7 +54,7 @@ Get the shared state dictionary.
 Get the identity.
 
 <a name=".aea.context.base.AgentContext.agent_name"></a>
-#### agent\_name
+#### agent`_`name
 
 ```python
  | @property
@@ -84,7 +84,7 @@ Get addresses.
 Get the default address.
 
 <a name=".aea.context.base.AgentContext.connection_status"></a>
-#### connection\_status
+#### connection`_`status
 
 ```python
  | @property
@@ -104,7 +104,7 @@ Get connection status.
 Get outbox.
 
 <a name=".aea.context.base.AgentContext.decision_maker_message_queue"></a>
-#### decision\_maker\_message\_queue
+#### decision`_`maker`_`message`_`queue
 
 ```python
  | @property
@@ -114,7 +114,7 @@ Get outbox.
 Get decision maker queue.
 
 <a name=".aea.context.base.AgentContext.ownership_state"></a>
-#### ownership\_state
+#### ownership`_`state
 
 ```python
  | @property
@@ -134,7 +134,7 @@ Get the ownership state of the agent.
 Get the preferences of the agent.
 
 <a name=".aea.context.base.AgentContext.goal_pursuit_readiness"></a>
-#### goal\_pursuit\_readiness
+#### goal`_`pursuit`_`readiness
 
 ```python
  | @property
@@ -144,7 +144,7 @@ Get the preferences of the agent.
 Get the goal pursuit readiness.
 
 <a name=".aea.context.base.AgentContext.ledger_apis"></a>
-#### ledger\_apis
+#### ledger`_`apis
 
 ```python
  | @property
@@ -154,7 +154,7 @@ Get the goal pursuit readiness.
 Get the ledger APIs.
 
 <a name=".aea.context.base.AgentContext.task_manager"></a>
-#### task\_manager
+#### task`_`manager
 
 ```python
  | @property
@@ -164,7 +164,7 @@ Get the ledger APIs.
 Get the task manager.
 
 <a name=".aea.context.base.AgentContext.search_service_address"></a>
-#### search\_service\_address
+#### search`_`service`_`address
 
 ```python
  | @property

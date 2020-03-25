@@ -70,7 +70,7 @@ Fetch an item.
 the Item
 
 <a name=".aea.registries.base.Registry.fetch_all"></a>
-#### fetch\_all
+#### fetch`_`all
 
 ```python
  | @abstractmethod
@@ -121,7 +121,7 @@ class ProtocolRegistry(Registry[PublicId, Protocol])
 This class implements the handlers registry.
 
 <a name=".aea.registries.base.ProtocolRegistry.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__() -> None
@@ -174,7 +174,7 @@ Fetch the protocol for the envelope.
 the protocol id or None if the protocol is not registered
 
 <a name=".aea.registries.base.ProtocolRegistry.fetch_all"></a>
-#### fetch\_all
+#### fetch`_`all
 
 ```python
  | fetch_all() -> List[Protocol]
@@ -238,7 +238,7 @@ class ComponentRegistry(
 This class implements a generic registry for skill components.
 
 <a name=".aea.registries.base.ComponentRegistry.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__() -> None
@@ -305,7 +305,7 @@ Fetch an item.
 the Item
 
 <a name=".aea.registries.base.ComponentRegistry.fetch_by_skill"></a>
-#### fetch\_by\_skill
+#### fetch`_`by`_`skill
 
 ```python
  | fetch_by_skill(skill_id: SkillId) -> List[Item]
@@ -314,7 +314,7 @@ the Item
 Fetch all the items of a given skill.
 
 <a name=".aea.registries.base.ComponentRegistry.fetch_all"></a>
-#### fetch\_all
+#### fetch`_`all
 
 ```python
  | fetch_all() -> List[SkillComponentType]
@@ -323,7 +323,7 @@ Fetch all the items of a given skill.
 Fetch all the items.
 
 <a name=".aea.registries.base.ComponentRegistry.unregister_by_skill"></a>
-#### unregister\_by\_skill
+#### unregister`_`by`_`skill
 
 ```python
  | unregister_by_skill(skill_id: SkillId) -> None
@@ -367,7 +367,7 @@ class HandlerRegistry(ComponentRegistry[Handler])
 This class implements the handlers registry.
 
 <a name=".aea.registries.base.HandlerRegistry.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__() -> None
@@ -420,7 +420,7 @@ None
 :raises: ValueError if no item is registered with that item id.
 
 <a name=".aea.registries.base.HandlerRegistry.unregister_by_skill"></a>
-#### unregister\_by\_skill
+#### unregister`_`by`_`skill
 
 ```python
  | unregister_by_skill(skill_id: SkillId) -> None
@@ -429,7 +429,7 @@ None
 Unregister all the components by skill.
 
 <a name=".aea.registries.base.HandlerRegistry.fetch_by_protocol"></a>
-#### fetch\_by\_protocol
+#### fetch`_`by`_`protocol
 
 ```python
  | fetch_by_protocol(protocol_id: ProtocolId) -> List[Handler]
@@ -446,7 +446,7 @@ Fetch the handler by the pair protocol id and skill id.
 the handlers registered for the protocol_id and skill_id
 
 <a name=".aea.registries.base.HandlerRegistry.fetch_by_protocol_and_skill"></a>
-#### fetch\_by\_protocol\_and\_skill
+#### fetch`_`by`_`protocol`_`and`_`skill
 
 ```python
  | fetch_by_protocol_and_skill(protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]
@@ -464,7 +464,7 @@ Fetch the handler by the pair protocol id and skill id.
 the handlers registered for the protocol_id and skill_id
 
 <a name=".aea.registries.base.HandlerRegistry.fetch_internal_handler"></a>
-#### fetch\_internal\_handler
+#### fetch`_`internal`_`handler
 
 ```python
  | fetch_internal_handler(skill_id: SkillId) -> Optional[Handler]
@@ -490,7 +490,7 @@ class Resources()
 This class implements the resources of an AEA.
 
 <a name=".aea.registries.base.Resources.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(directory: Optional[Union[str, os.PathLike]] = None)
@@ -518,7 +518,7 @@ Get the directory.
 Load all the resources.
 
 <a name=".aea.registries.base.Resources.populate_skills"></a>
-#### populate\_skills
+#### populate`_`skills
 
 ```python
  | populate_skills(directory: str, agent_context: AgentContext, allowed_skills: Optional[Set[PublicId]] = None) -> None
@@ -538,7 +538,7 @@ If None, every skill is allowed.
 None
 
 <a name=".aea.registries.base.Resources.add_skill"></a>
-#### add\_skill
+#### add`_`skill
 
 ```python
  | add_skill(skill: Skill)
@@ -547,7 +547,7 @@ None
 Add a skill to the set of resources.
 
 <a name=".aea.registries.base.Resources.add_protocol"></a>
-#### add\_protocol
+#### add`_`protocol
 
 ```python
  | add_protocol(protocol: Protocol)
@@ -556,7 +556,7 @@ Add a skill to the set of resources.
 Add a protocol to the set of resources.
 
 <a name=".aea.registries.base.Resources.get_skill"></a>
-#### get\_skill
+#### get`_`skill
 
 ```python
  | get_skill(skill_id: SkillId) -> Optional[Skill]
@@ -565,7 +565,7 @@ Add a protocol to the set of resources.
 Get the skill.
 
 <a name=".aea.registries.base.Resources.get_all_skills"></a>
-#### get\_all\_skills
+#### get`_`all`_`skills
 
 ```python
  | get_all_skills() -> List[Skill]
@@ -578,7 +578,7 @@ Get the list of all the skills.
 the list of skills.
 
 <a name=".aea.registries.base.Resources.remove_skill"></a>
-#### remove\_skill
+#### remove`_`skill
 
 ```python
  | remove_skill(skill_id: SkillId)
@@ -622,7 +622,7 @@ class Filter()
 This class implements the filter of an AEA.
 
 <a name=".aea.registries.base.Filter.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(resources: Resources, decision_maker_out_queue: Queue)
@@ -646,7 +646,7 @@ Instantiate the filter.
 Get resources.
 
 <a name=".aea.registries.base.Filter.decision_maker_out_queue"></a>
-#### decision\_maker\_out\_queue
+#### decision`_`maker`_`out`_`queue
 
 ```python
  | @property
@@ -656,7 +656,7 @@ Get resources.
 Get decision maker (out) queue.
 
 <a name=".aea.registries.base.Filter.get_active_handlers"></a>
-#### get\_active\_handlers
+#### get`_`active`_`handlers
 
 ```python
  | get_active_handlers(protocol_id: PublicId, envelope_context: Optional[EnvelopeContext]) -> List[Handler]
@@ -674,7 +674,7 @@ Get active handlers.
 the list of handlers currently active
 
 <a name=".aea.registries.base.Filter.get_active_behaviours"></a>
-#### get\_active\_behaviours
+#### get`_`active`_`behaviours
 
 ```python
  | get_active_behaviours() -> List[Behaviour]
@@ -687,7 +687,7 @@ Get the active behaviours.
 the list of behaviours currently active
 
 <a name=".aea.registries.base.Filter.handle_internal_messages"></a>
-#### handle\_internal\_messages
+#### handle`_`internal`_`messages
 
 ```python
  | handle_internal_messages() -> None

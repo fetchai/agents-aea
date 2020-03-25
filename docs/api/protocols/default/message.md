@@ -22,7 +22,7 @@ class Performative(Enum)
 Performatives for the default protocol.
 
 <a name=".aea.protocols.default.message.DefaultMessage.Performative.__str__"></a>
-#### \_\_str\_\_
+#### `__`str`__`
 
 ```python
  | __str__()
@@ -31,7 +31,7 @@ Performatives for the default protocol.
 Get the string representation.
 
 <a name=".aea.protocols.default.message.DefaultMessage.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(dialogue_reference: Tuple[str, str], message_id: int, target: int, performative: Performative, **kwargs, ,)
@@ -47,7 +47,7 @@ Initialise an instance of DefaultMessage.
 - `performative`: the message performative.
 
 <a name=".aea.protocols.default.message.DefaultMessage.valid_performatives"></a>
-#### valid\_performatives
+#### valid`_`performatives
 
 ```python
  | @property
@@ -57,7 +57,7 @@ Initialise an instance of DefaultMessage.
 Get valid performatives.
 
 <a name=".aea.protocols.default.message.DefaultMessage.dialogue_reference"></a>
-#### dialogue\_reference
+#### dialogue`_`reference
 
 ```python
  | @property
@@ -67,7 +67,7 @@ Get valid performatives.
 Get the dialogue_reference of the message.
 
 <a name=".aea.protocols.default.message.DefaultMessage.message_id"></a>
-#### message\_id
+#### message`_`id
 
 ```python
  | @property
@@ -107,7 +107,7 @@ Get the target of the message.
 Get the 'content' content from the message.
 
 <a name=".aea.protocols.default.message.DefaultMessage.error_code"></a>
-#### error\_code
+#### error`_`code
 
 ```python
  | @property
@@ -117,7 +117,7 @@ Get the 'content' content from the message.
 Get the 'error_code' content from the message.
 
 <a name=".aea.protocols.default.message.DefaultMessage.error_data"></a>
-#### error\_data
+#### error`_`data
 
 ```python
  | @property
@@ -127,7 +127,7 @@ Get the 'error_code' content from the message.
 Get the 'error_data' content from the message.
 
 <a name=".aea.protocols.default.message.DefaultMessage.error_msg"></a>
-#### error\_msg
+#### error`_`msg
 
 ```python
  | @property

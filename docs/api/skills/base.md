@@ -13,7 +13,7 @@ class SkillContext()
 This class implements the context of a skill.
 
 <a name=".aea.skills.base.SkillContext.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(agent_context: AgentContext)
@@ -26,7 +26,7 @@ Initialize a skill context.
 - `agent_context`: the agent's context
 
 <a name=".aea.skills.base.SkillContext.shared_state"></a>
-#### shared\_state
+#### shared`_`state
 
 ```python
  | @property
@@ -36,7 +36,7 @@ Initialize a skill context.
 Get the shared state dictionary.
 
 <a name=".aea.skills.base.SkillContext.agent_name"></a>
-#### agent\_name
+#### agent`_`name
 
 ```python
  | @property
@@ -46,7 +46,7 @@ Get the shared state dictionary.
 Get agent name.
 
 <a name=".aea.skills.base.SkillContext.skill_id"></a>
-#### skill\_id
+#### skill`_`id
 
 ```python
  | @property
@@ -56,7 +56,7 @@ Get agent name.
 Get the skill id of the skill context.
 
 <a name=".aea.skills.base.SkillContext.is_active"></a>
-#### is\_active
+#### is`_`active
 
 ```python
  | @is_active.setter
@@ -66,7 +66,7 @@ Get the skill id of the skill context.
 Set the status of the skill (active/not active).
 
 <a name=".aea.skills.base.SkillContext.new_behaviours"></a>
-#### new\_behaviours
+#### new`_`behaviours
 
 ```python
  | @property
@@ -81,7 +81,7 @@ to request the registration of a behaviour.
 :return the queue of new behaviours.
 
 <a name=".aea.skills.base.SkillContext.agent_addresses"></a>
-#### agent\_addresses
+#### agent`_`addresses
 
 ```python
  | @property
@@ -91,7 +91,7 @@ to request the registration of a behaviour.
 Get addresses.
 
 <a name=".aea.skills.base.SkillContext.agent_address"></a>
-#### agent\_address
+#### agent`_`address
 
 ```python
  | @property
@@ -101,7 +101,7 @@ Get addresses.
 Get address.
 
 <a name=".aea.skills.base.SkillContext.connection_status"></a>
-#### connection\_status
+#### connection`_`status
 
 ```python
  | @property
@@ -121,7 +121,7 @@ Get connection status.
 Get outbox.
 
 <a name=".aea.skills.base.SkillContext.message_in_queue"></a>
-#### message\_in\_queue
+#### message`_`in`_`queue
 
 ```python
  | @property
@@ -131,7 +131,7 @@ Get outbox.
 Get message in queue.
 
 <a name=".aea.skills.base.SkillContext.decision_maker_message_queue"></a>
-#### decision\_maker\_message\_queue
+#### decision`_`maker`_`message`_`queue
 
 ```python
  | @property
@@ -141,7 +141,7 @@ Get message in queue.
 Get message queue of decision maker.
 
 <a name=".aea.skills.base.SkillContext.agent_ownership_state"></a>
-#### agent\_ownership\_state
+#### agent`_`ownership`_`state
 
 ```python
  | @property
@@ -151,7 +151,7 @@ Get message queue of decision maker.
 Get ownership state.
 
 <a name=".aea.skills.base.SkillContext.agent_preferences"></a>
-#### agent\_preferences
+#### agent`_`preferences
 
 ```python
  | @property
@@ -161,7 +161,7 @@ Get ownership state.
 Get preferences.
 
 <a name=".aea.skills.base.SkillContext.agent_goal_pursuit_readiness"></a>
-#### agent\_goal\_pursuit\_readiness
+#### agent`_`goal`_`pursuit`_`readiness
 
 ```python
  | @property
@@ -171,7 +171,7 @@ Get preferences.
 Get the goal pursuit readiness.
 
 <a name=".aea.skills.base.SkillContext.task_manager"></a>
-#### task\_manager
+#### task`_`manager
 
 ```python
  | @property
@@ -181,7 +181,7 @@ Get the goal pursuit readiness.
 Get behaviours of the skill.
 
 <a name=".aea.skills.base.SkillContext.ledger_apis"></a>
-#### ledger\_apis
+#### ledger`_`apis
 
 ```python
  | @property
@@ -191,7 +191,7 @@ Get behaviours of the skill.
 Get ledger APIs.
 
 <a name=".aea.skills.base.SkillContext.search_service_address"></a>
-#### search\_service\_address
+#### search`_`service`_`address
 
 ```python
  | @property
@@ -231,7 +231,7 @@ Get behaviours of the skill.
 Get the logger.
 
 <a name=".aea.skills.base.SkillContext.__getattr__"></a>
-#### \_\_getattr\_\_
+#### `__`getattr`__`
 
 ```python
  | __getattr__(item) -> Any
@@ -249,7 +249,7 @@ class SkillComponent(ABC)
 This class defines an abstract interface for skill component classes.
 
 <a name=".aea.skills.base.SkillComponent.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -283,7 +283,7 @@ Get the name of the skill component.
 Get the context of the behaviour.
 
 <a name=".aea.skills.base.SkillComponent.skill_id"></a>
-#### skill\_id
+#### skill`_`id
 
 ```python
  | @property
@@ -331,7 +331,7 @@ Implement the behaviour teardown.
 None
 
 <a name=".aea.skills.base.SkillComponent.parse_module"></a>
-#### parse\_module
+#### parse`_`module
 
 ```python
  | @classmethod
@@ -351,7 +351,7 @@ class Behaviour(SkillComponent)
 This class implements an abstract behaviour.
 
 <a name=".aea.skills.base.Behaviour.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -374,7 +374,7 @@ Implement the behaviour.
 None
 
 <a name=".aea.skills.base.Behaviour.is_done"></a>
-#### is\_done
+#### is`_`done
 
 ```python
  | is_done() -> bool
@@ -383,7 +383,7 @@ None
 Return True if the behaviour is terminated, False otherwise.
 
 <a name=".aea.skills.base.Behaviour.act_wrapper"></a>
-#### act\_wrapper
+#### act`_`wrapper
 
 ```python
  | act_wrapper() -> None
@@ -392,7 +392,7 @@ Return True if the behaviour is terminated, False otherwise.
 Wrap the call of the action. This method must be called only by the framework.
 
 <a name=".aea.skills.base.Behaviour.parse_module"></a>
-#### parse\_module
+#### parse`_`module
 
 ```python
  | @classmethod
@@ -421,7 +421,7 @@ class Handler(SkillComponent)
 This class implements an abstract behaviour.
 
 <a name=".aea.skills.base.Handler.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -448,7 +448,7 @@ Implement the reaction to a message.
 None
 
 <a name=".aea.skills.base.Handler.parse_module"></a>
-#### parse\_module
+#### parse`_`module
 
 ```python
  | @classmethod
@@ -477,7 +477,7 @@ class Model(SkillComponent)
 This class implements an abstract model.
 
 <a name=".aea.skills.base.Model.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(**kwargs)
@@ -508,7 +508,7 @@ Set the class up.
 Tear the class down.
 
 <a name=".aea.skills.base.Model.parse_module"></a>
-#### parse\_module
+#### parse`_`module
 
 ```python
  | @classmethod
@@ -537,7 +537,7 @@ class Skill()
 This class implements a skill.
 
 <a name=".aea.skills.base.Skill.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(config: SkillConfig, skill_context: SkillContext, handlers: Optional[Dict[str, Handler]], behaviours: Optional[Dict[str, Behaviour]], models: Optional[Dict[str, Model]])
@@ -553,7 +553,7 @@ Initialize a skill.
 - `models`: the list of models shared across tasks, behaviours and
 
 <a name=".aea.skills.base.Skill.from_dir"></a>
-#### from\_dir
+#### from`_`dir
 
 ```python
  | @classmethod

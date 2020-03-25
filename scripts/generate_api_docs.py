@@ -31,6 +31,8 @@ DOCS_DIR = "docs/"
 MODULES_TO_PATH = {
     "aea.aea": "api/aea.md",
     "aea.agent": "api/agent.md",
+    "aea.configurations.base": "api/configurations/base.md",
+    "aea.configurations.loader": "api/configurations/loader.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
     "aea.context.base": "api/context/base.md",
@@ -60,6 +62,12 @@ def create_subdir(path):
     Path(directory).mkdir(parents=True, exist_ok=True)
 
 
+def replace_underscores(text):
+    text_a = text.replace("\\_\\_", "`__`")
+    text_b = text_a.replace("\\_", "`_`")
+    return text_b
+
+
 def save_to_file(path, text):
     with open(path, "w") as f:
         f.write(text)
@@ -74,7 +82,9 @@ def generate_api_docs():
         )
         stdout, stderr = pydoc.communicate()
         pydoc.wait()
-        save_to_file(path, stdout.decode("utf-8"))
+        stdout_text = stdout.decode("utf-8")
+        text = replace_underscores(stdout_text)
+        save_to_file(path, text)
 
 
 if __name__ == "__main__":

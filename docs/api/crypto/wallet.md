@@ -13,7 +13,7 @@ class Wallet()
 Store all the cryptos we initialise.
 
 <a name=".aea.crypto.wallet.Wallet.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(private_key_paths: Dict[str, str])
@@ -26,7 +26,7 @@ Instantiate a wallet object.
 - `private_key_paths`: the private key paths
 
 <a name=".aea.crypto.wallet.Wallet.public_keys"></a>
-#### public\_keys
+#### public`_`keys
 
 ```python
  | @property
@@ -36,7 +36,7 @@ Instantiate a wallet object.
 Get the public_key dictionary.
 
 <a name=".aea.crypto.wallet.Wallet.crypto_objects"></a>
-#### crypto\_objects
+#### crypto`_`objects
 
 ```python
  | @property

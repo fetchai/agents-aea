@@ -17,7 +17,7 @@ It can include:
 - the addresses
 
 <a name=".aea.identity.base.Identity.__init__"></a>
-#### \_\_init\_\_
+#### `__`init`__`
 
 ```python
  | __init__(name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: str = DEFAULT_ADDRESS_KEY)
