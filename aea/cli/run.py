@@ -224,9 +224,9 @@ def _build_aea(ctx: Context, connection_ids: List[PublicId]) -> AEA:
         ctx.agent_config.ledger_apis_dict, ctx.agent_config.default_ledger
     )
 
-    default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
+    all_connection_ids = ctx.agent_config.connections
     connection_ids = (
-        [default_connection_id] if connection_ids is None else connection_ids
+        all_connection_ids if connection_ids is None else connection_ids
     )
     connections = []
     try:
