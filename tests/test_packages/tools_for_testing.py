@@ -63,11 +63,10 @@ class AeaTestCase:
         except (OSError, IOError):
             pass
 
-    @staticmethod
-    def disable_ledger_tx(vendor_name, item_type, item_name):
+    def disable_ledger_tx(self, vendor_name, item_type, item_name):
         """
         Disable ledger tx by modifying item yaml settings.
-        Run from agent's directory.
+        Run from agent's directory and only for item with present strategy is_ledger_tx setting.
 
         :param vendor_name: str vendor name.
         :param item_type: str item type.
@@ -75,22 +74,10 @@ class AeaTestCase:
 
         :return: None
         """
-        yaml_path = os.path.join(
-            "vendor",
-            "fetchai",
-            "{}s".format(item_type),
-            item_name,
-            "{}.yaml".format(item_type),
+        json_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
+            vendor_name, item_type, item_name
         )
-        whole_file = ""
-        with open(yaml_path, mode="r") as f:
-            # read all lines at once
-            whole_file = f.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
+        self.run_cli_command("config", "set", json_path, False)
 
     def run_cli_command(self, *args):
         """

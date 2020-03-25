@@ -48,7 +48,6 @@ class TestTacSkills(AeaTestCase):
         os.chdir(tac_controller_dir_path)
         self.add_item("connection", "fetchai/oef:0.1.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
-        self.disable_ledger_tx("fetchai", "skill", "tac_control")
         self.run_install()
 
         # prepare agents for test
@@ -61,8 +60,6 @@ class TestTacSkills(AeaTestCase):
             self.add_item("connection", "fetchai/oef:0.1.0")
             self.add_item("skill", "fetchai/tac_participation:0.1.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
-            self.disable_ledger_tx("fetchai", "skill", "tac_participation")
-            self.disable_ledger_tx("fetchai", "skill", "tac_negotiation")
 
             self.run_install()
 
