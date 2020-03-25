@@ -24,7 +24,6 @@ This tool generates the API docs.
 
 # Install https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop
 
-import os
 import subprocess  # nosec
 from pathlib import Path
 
@@ -55,13 +54,14 @@ MODULES_TO_PATH = {
     "aea.skills.error.handlers": "api/skills/error/handlers.md",
 }
 
+
 def create_subdir(path):
     directory = "/".join(path.split("/")[:-1])
     Path(directory).mkdir(parents=True, exist_ok=True)
 
 
 def save_to_file(path, text):
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         f.write(text)
 
 
