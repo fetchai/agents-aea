@@ -225,9 +225,7 @@ def _build_aea(ctx: Context, connection_ids: List[PublicId]) -> AEA:
     )
 
     all_connection_ids = ctx.agent_config.connections
-    connection_ids = (
-        all_connection_ids if connection_ids is None else connection_ids
-    )
+    connection_ids = all_connection_ids if connection_ids is None else connection_ids
     connections = []
     try:
         for connection_id in connection_ids:
