@@ -78,6 +78,9 @@ nav:
       - API:
         - AEA: 'api/aea.md'
         - Agent: 'api/agent.md'
+        - Configurations:
+          - Base: 'api/configurations/base.md'
+          - Loader: 'api/configurations/loader.md'
         - Connections:
           - Base: 'api/connections/base.md'          
           - Stub Connection: 'api/connections/stub/connection.md'

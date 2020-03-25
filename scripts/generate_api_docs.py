@@ -31,6 +31,8 @@ DOCS_DIR = "docs/"
 MODULES_TO_PATH = {
     "aea.aea": "api/aea.md",
     "aea.agent": "api/agent.md",
+    "aea.configurations.base": "api/configurations/base.md",
+    "aea.configurations.loader": "api/configurations/loader.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
     "aea.context.base": "api/context/base.md",
