@@ -44,21 +44,18 @@ class OefErrorOperation(Enum):
 
     @classmethod
     def encode(
-        cls, performative, oef_error_operation_from_message: "OefErrorOperation"
-    ):
+        cls, performative_content, oef_error_operation_from_message: "OefErrorOperation"
+    ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
         The content in the 'performative' argument must be matched with the message content in the 'oef_error_operation_from_message' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
         :param oef_error_operation_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'oef_error_operation_from_message' argument.
+        :return: None
         """
-        performative.oef_error_operation.oef_error = (
-            oef_error_operation_from_message.value
-        )
-        return performative
+        performative_content.oef_error = oef_error_operation_from_message.value
 
     @classmethod
     def decode(cls, oef_error_operation_from_pb2) -> "OefErrorOperation":

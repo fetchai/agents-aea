@@ -72,8 +72,8 @@ from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
@@ -360,18 +360,18 @@ class OEFChannel(OEFAgent):
                     e
                 )
             )
-        msg = FIPAMessage(
+        msg = FipaMessage(
             message_id=msg_id,
             dialogue_reference=(str(dialogue_id), ""),
             target=target,
-            performative=FIPAMessage.Performative.CFP,
+            performative=FipaMessage.Performative.CFP,
             query=query if query != b"" else None,
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=self.address,
             sender=origin,
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(

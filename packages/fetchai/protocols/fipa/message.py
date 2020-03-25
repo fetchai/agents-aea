@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,50 +17,57 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the FIPA message definition."""
+"""This module contains fipa's message definition."""
 
 from enum import Enum
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Dict, Set, Tuple, cast
 
-from aea.configurations.base import PublicId
-from aea.helpers.search.models import Description, Query
+from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from packages.fetchai.protocols.fipa.custom_types import (
+    Description as CustomDescription,
+)
+from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
 
-class FIPAMessage(Message):
-    """The FIPA message class."""
+DEFAULT_BODY_SIZE = 4
 
-    protocol_id = PublicId("fetchai", "fipa", "0.1.0")
 
-    STARTING_MESSAGE_ID = 1
-    STARTING_TARGET = 0
+class FipaMessage(Message):
+    """A protocol for FIPA ACL."""
+
+    protocol_id = ProtocolId("fetchai", "fipa", "0.1.0")
+
+    Description = CustomDescription
+
+    Query = CustomQuery
 
     class Performative(Enum):
-        """FIPA performatives."""
+        """Performatives for the fipa protocol."""
 
-        CFP = "cfp"
-        PROPOSE = "propose"
         ACCEPT = "accept"
-        MATCH_ACCEPT = "match_accept"
+        ACCEPT_W_INFORM = "accept_w_inform"
+        CFP = "cfp"
         DECLINE = "decline"
         INFORM = "inform"
-        ACCEPT_W_INFORM = "accept_w_inform"
+        MATCH_ACCEPT = "match_accept"
         MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
+        PROPOSE = "propose"
 
         def __str__(self):
-            """Get string representation."""
+            """Get the string representation."""
             return self.value
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
-        **kwargs
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
+        **kwargs,
     ):
         """
-        Initialize.
+        Initialise an instance of FipaMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -68,25 +75,48 @@ class FIPAMessage(Message):
         :param performative: the message performative.
         """
         super().__init__(
-            message_id=message_id,
             dialogue_reference=dialogue_reference,
+            message_id=message_id,
             target=target,
-            performative=FIPAMessage.Performative(performative),
-            **kwargs
+            performative=FipaMessage.Performative(performative),
+            **kwargs,
         )
-        assert self._is_consistent(), "FIPAMessage initialization inconsistent."
+        self._performatives = {
+            "accept",
+            "accept_w_inform",
+            "cfp",
+            "decline",
+            "inform",
+            "match_accept",
+            "match_accept_w_inform",
+            "propose",
+        }
+        assert (
+            self._is_consistent()
+        ), "This message is invalid according to the 'fipa' protocol."
+
+    @property
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
-        assert self.is_set("dialogue_reference"), " dialogue_reference is not set"
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
-        assert self.is_set("message_id"), "message_id is not set"
+        assert self.is_set("message_id"), "message_id is not set."
         return cast(int, self.get("message_id"))
+
+    @property
+    def performative(self) -> Performative:  # noqa: F821
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set."
+        return cast(FipaMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -95,94 +125,160 @@ class FIPAMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def performative(self) -> Performative:  # noqa: F821
-        """Get the performative of the message."""
-        return FIPAMessage.Performative(self.get("performative"))
+    def info(self) -> Dict[str, str]:
+        """Get the 'info' content from the message."""
+        assert self.is_set("info"), "'info' content is not set."
+        return cast(Dict[str, str], self.get("info"))
 
     @property
-    def query(self) -> Union[Query, bytes, None]:
-        """Get the query of the message."""
-        assert self.is_set("query"), "query is not set."
-        return cast(Union[Query, bytes, None], self.get("query"))
+    def proposal(self) -> CustomDescription:
+        """Get the 'proposal' content from the message."""
+        assert self.is_set("proposal"), "'proposal' content is not set."
+        return cast(CustomDescription, self.get("proposal"))
 
     @property
-    def proposal(self) -> List[Description]:
-        """Get the proposal list from the message."""
-        assert self.is_set("proposal"), "proposal is not set."
-        return cast(List[Description], self.get("proposal"))
-
-    @property
-    def info(self) -> Dict[str, Any]:
-        """Get hte info from the message."""
-        assert self.is_set("info"), "info is not set."
-        return cast(Dict[str, Any], self.get("info"))
+    def query(self) -> CustomQuery:
+        """Get the 'query' content from the message."""
+        assert self.is_set("query"), "'query' content is not set."
+        return cast(CustomQuery, self.get("query"))
 
     def _is_consistent(self) -> bool:
-        """Check that the data is consistent."""
+        """Check that the message follows the fipa protocol."""
         try:
-            assert isinstance(self.performative, FIPAMessage.Performative)
-            assert isinstance(self.dialogue_reference, tuple)
-            assert isinstance(self.dialogue_reference[0], str) and isinstance(
-                self.dialogue_reference[1], str
+            assert (
+                type(self.dialogue_reference) == tuple
+            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                type(self.dialogue_reference)
             )
-            assert isinstance(self.message_id, int)
-            assert isinstance(self.target, int)
-            if self.performative == FIPAMessage.Performative.CFP:
-                assert (
-                    isinstance(self.query, Query)
-                    or isinstance(self.query, bytes)
-                    or self.query is None
-                )
-                assert len(self.body) == 5
-            elif self.performative == FIPAMessage.Performative.PROPOSE:
-                assert isinstance(self.proposal, list) and all(
-                    isinstance(d, Description) for d in self.proposal
-                )
-                assert len(self.body) == 5
-            elif (
-                self.performative == FIPAMessage.Performative.ACCEPT
-                or self.performative == FIPAMessage.Performative.MATCH_ACCEPT
-                or self.performative == FIPAMessage.Performative.DECLINE
-            ):
-                assert len(self.body) == 4
-            elif (
-                self.performative == FIPAMessage.Performative.ACCEPT_W_INFORM
-                or self.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM
-                or self.performative == FIPAMessage.Performative.INFORM
-            ):
-                assert isinstance(self.info, dict)
-                assert len(self.body) == 5
-            else:
-                raise ValueError("Performative not recognized.")
+            assert (
+                type(self.dialogue_reference[0]) == str
+            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[0])
+            )
+            assert (
+                type(self.dialogue_reference[1]) == str
+            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[1])
+            )
+            assert (
+                type(self.message_id) == int
+            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                type(self.message_id)
+            )
+            assert (
+                type(self.target) == int
+            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                type(self.target)
+            )
 
-        except (AssertionError, ValueError, KeyError):
+            # Light Protocol Rule 2
+            # Check correct performative
+            assert (
+                type(self.performative) == FipaMessage.Performative
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                self.valid_performatives, self.performative
+            )
+
+            # Check correct contents
+            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            expected_nb_of_contents = 0
+            if self.performative == FipaMessage.Performative.CFP:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.query) == CustomQuery
+                ), "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
+                    type(self.query)
+                )
+            elif self.performative == FipaMessage.Performative.PROPOSE:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.proposal) == CustomDescription
+                ), "Invalid type for content 'proposal'. Expected 'Description'. Found '{}'.".format(
+                    type(self.proposal)
+                )
+            elif self.performative == FipaMessage.Performative.ACCEPT_W_INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.ACCEPT:
+                expected_nb_of_contents = 0
+            elif self.performative == FipaMessage.Performative.DECLINE:
+                expected_nb_of_contents = 0
+            elif self.performative == FipaMessage.Performative.MATCH_ACCEPT:
+                expected_nb_of_contents = 0
+
+            # Check correct content count
+            assert (
+                expected_nb_of_contents == actual_nb_of_contents
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
+                expected_nb_of_contents, actual_nb_of_contents
+            )
+
+            # Light Protocol Rule 3
+            if self.message_id == 1:
+                assert (
+                    self.target == 0
+                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
+                    self.target
+                )
+            else:
+                assert (
+                    0 < self.target < self.message_id
+                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                    self.message_id - 1, self.target,
+                )
+        except (AssertionError, ValueError, KeyError) as e:
+            print(str(e))
             return False
 
         return True
-
-
-VALID_PREVIOUS_PERFORMATIVES = {
-    FIPAMessage.Performative.CFP: [None],
-    FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
-    FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
-    FIPAMessage.Performative.ACCEPT_W_INFORM: [FIPAMessage.Performative.PROPOSE],
-    FIPAMessage.Performative.MATCH_ACCEPT: [
-        FIPAMessage.Performative.ACCEPT,
-        FIPAMessage.Performative.ACCEPT_W_INFORM,
-    ],
-    FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM: [
-        FIPAMessage.Performative.ACCEPT,
-        FIPAMessage.Performative.ACCEPT_W_INFORM,
-    ],
-    FIPAMessage.Performative.INFORM: [
-        FIPAMessage.Performative.MATCH_ACCEPT,
-        FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-        FIPAMessage.Performative.INFORM,
-    ],
-    FIPAMessage.Performative.DECLINE: [
-        FIPAMessage.Performative.CFP,
-        FIPAMessage.Performative.PROPOSE,
-        FIPAMessage.Performative.ACCEPT,
-        FIPAMessage.Performative.ACCEPT_W_INFORM,
-    ],
-}  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

@@ -35,8 +35,8 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
@@ -347,12 +347,18 @@ class TestAgentMessage:
     @pytest.mark.asyncio
     async def test_messages(self):
         """Test that at the beginning, the search request returns an empty search result."""
-        msg = FIPAMessage((str(0), ""), 0, 0, FIPAMessage.Performative.CFP, query=None)
-        msg_bytes = FIPASerializer().encode(msg)
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.CFP,
+            dialogue_reference=(str(0), ""),
+            message_id=1,
+            target=0,
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
+        )
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=self.address_1,
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         with pytest.raises(AEAConnectionError):
@@ -363,14 +369,18 @@ class TestAgentMessage:
             ).send(envelope)
 
         self.multiplexer1.connect()
-        msg = FIPAMessage(
-            (str(0), str(1)), 0, 0, FIPAMessage.Performative.CFP, query=None
+        msg = FipaMessage(
+            performative=FipaMessage.Performative.CFP,
+            dialogue_reference=(str(0), str(1)),
+            message_id=1,
+            target=0,
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        msg_bytes = FIPASerializer().encode(msg)
+        msg_bytes = FipaSerializer().encode(msg)
         envelope = Envelope(
             to="this_address_does_not_exist",
             sender=self.address_1,
-            protocol_id=FIPAMessage.protocol_id,
+            protocol_id=FipaMessage.protocol_id,
             message=msg_bytes,
         )
         self.multiplexer1.put(envelope)

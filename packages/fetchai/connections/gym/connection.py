@@ -97,17 +97,17 @@ class GymChannel:
         :return: None
         """
         gym_message = GymSerializer().decode(envelope.message)
-        performative = gym_message.get("performative")
-        if GymMessage.Performative(performative) == GymMessage.Performative.ACT:
-            action = gym_message.get("action")
-            step_id = gym_message.get("step_id")
+        gym_message = cast(GymMessage, gym_message)
+        if gym_message.performative == GymMessage.Performative.ACT:
+            action = gym_message.action.any
+            step_id = gym_message.step_id
             observation, reward, done, info = self.gym_env.step(action)  # type: ignore
             msg = GymMessage(
                 performative=GymMessage.Performative.PERCEPT,
-                observation=observation,
+                observation=GymMessage.AnyObject(observation),
                 reward=reward,
                 done=done,
-                info=info,
+                info=GymMessage.AnyObject(info),
                 step_id=step_id,
             )
             msg_bytes = GymSerializer().encode(msg)
@@ -118,9 +118,9 @@ class GymChannel:
                 message=msg_bytes,
             )
             self._send(envelope)
-        elif GymMessage.Performative(performative) == GymMessage.Performative.RESET:
+        elif gym_message.performative == GymMessage.Performative.RESET:
             self.gym_env.reset()  # type: ignore
-        elif GymMessage.Performative(performative) == GymMessage.Performative.CLOSE:
+        elif gym_message.performative == GymMessage.Performative.CLOSE:
             self.gym_env.close()  # type: ignore
 
     def _send(self, envelope: Envelope) -> None:

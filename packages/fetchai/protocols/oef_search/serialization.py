@@ -53,17 +53,17 @@ class OefSearchSerializer(Serializer):
         if performative_id == OefSearchMessage.Performative.REGISTER_SERVICE:
             performative = oef_search_pb2.OefSearchMessage.Register_Service()  # type: ignore
             service_description = msg.service_description
-            performative = Description.encode(performative, service_description)
+            Description.encode(performative.service_description, service_description)
             oef_search_msg.register_service.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.UNREGISTER_SERVICE:
             performative = oef_search_pb2.OefSearchMessage.Unregister_Service()  # type: ignore
             service_description = msg.service_description
-            performative = Description.encode(performative, service_description)
+            Description.encode(performative.service_description, service_description)
             oef_search_msg.unregister_service.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.SEARCH_SERVICES:
             performative = oef_search_pb2.OefSearchMessage.Search_Services()  # type: ignore
             query = msg.query
-            performative = Query.encode(performative, query)
+            Query.encode(performative.query, query)
             oef_search_msg.search_services.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.SEARCH_RESULT:
             performative = oef_search_pb2.OefSearchMessage.Search_Result()  # type: ignore
@@ -73,7 +73,9 @@ class OefSearchSerializer(Serializer):
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
             performative = oef_search_pb2.OefSearchMessage.Oef_Error()  # type: ignore
             oef_error_operation = msg.oef_error_operation
-            performative = OefErrorOperation.encode(performative, oef_error_operation)
+            OefErrorOperation.encode(
+                performative.oef_error_operation, oef_error_operation
+            )
             oef_search_msg.oef_error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))

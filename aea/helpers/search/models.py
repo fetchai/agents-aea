@@ -111,19 +111,20 @@ class Description:
         return iter(self.values)
 
     @classmethod
-    def encode(cls, performative, description_from_message: "Description"):
+    def encode(
+        cls, performative_content, description_from_message: "Description"
+    ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'description_from_message' argument.
+        The content in the 'performative_content' argument must be matched with the message content in the 'description_from_message' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
         :param description_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'description_from_message' argument.
+        :return: None
         """
         description_from_message_bytes = pickle.dumps(description_from_message)  # nosec
-        performative.service_description.description = description_from_message_bytes
-        return performative
+        performative_content.description = description_from_message_bytes
 
     @classmethod
     def decode(cls, description_from_pb2) -> "Description":
@@ -480,19 +481,18 @@ class Query:
         )
 
     @classmethod
-    def encode(cls, performative, query_from_message: "Query"):
+    def encode(cls, performative_content, query_from_message: "Query") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'query_from_message' argument.
+        The content in the 'performative_content' argument must be matched with the message content in the 'query_from_message' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
+        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
         :param query_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'query_from_message' argument.
+        :return: None
         """
         query_bytes = pickle.dumps(query_from_message)  # nosec
-        performative.query.query_bytes = query_bytes
-        return performative
+        performative_content.query_bytes = query_bytes
 
     @classmethod
     def decode(cls, query_from_pb2) -> "Query":

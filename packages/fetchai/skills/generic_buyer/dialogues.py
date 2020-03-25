@@ -30,10 +30,10 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 
 
-class Dialogue(FIPADialogue):
+class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
@@ -45,11 +45,11 @@ class Dialogue(FIPADialogue):
 
         :return: None
         """
-        FIPADialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
         self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(Model, FIPADialogues):
+class Dialogues(Model, FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -59,4 +59,4 @@ class Dialogues(Model, FIPADialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FIPADialogues.__init__(self)
+        FipaDialogues.__init__(self)
