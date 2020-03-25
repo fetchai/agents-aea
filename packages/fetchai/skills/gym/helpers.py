@@ -158,7 +158,9 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         gym_msg = GymMessage(
-            performative=GymMessage.Performative.ACT, action=action, step_id=step_id
+            performative=GymMessage.Performative.ACT,
+            action=GymMessage.Any(action),
+            step_id=step_id,
         )
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(
@@ -177,10 +179,10 @@ class ProxyEnv(gym.Env):
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
         msg = cast(GymMessage, message)
-        observation = msg.observation
+        observation = msg.observation.any
         reward = msg.reward
         done = msg.done
-        info = msg.info
+        info = msg.info.any
 
         return observation, reward, done, info
 

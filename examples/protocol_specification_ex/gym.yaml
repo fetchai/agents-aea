@@ -6,22 +6,18 @@ license: Apache-2.0
 description: 'A protocol for interacting with a gym connection.'
 speech_acts:
   act:
-    action: ct:Action
+    action: ct:Any
     step_id: pt:int
   percept:
     step_id: pt:int
-    observation: ct:Observation
+    observation: ct:Any
     reward: pt:float
     done: pt:bool
-    info: pt:dict[pt:str, ct:Info]
+    info: ct:Any
   reset: {}
   close: {}
 ...
 ---
-ct:Action: |
-  bytes action = 1;
-ct:Observation: |
-  bytes observation = 1;
-ct:Info: |
-  bytes info = 1;
+ct:Any: |
+  bytes any = 1;
 ...
