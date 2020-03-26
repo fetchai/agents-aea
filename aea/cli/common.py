@@ -609,7 +609,8 @@ def _compare_fingerprints(
     :raises ValueError: if the fingerprints do not match.
     """
     expected_fingerprints = package_configuration.fingerprint
-    actual_fingerprints = _compute_fingerprint(package_directory)
+    ignore_patterns = package_configuration.fingerprint_ignore_patterns
+    actual_fingerprints = _compute_fingerprint(package_directory, ignore_patterns)
     if expected_fingerprints != actual_fingerprints:
         if is_vendor:
             raise ValueError(

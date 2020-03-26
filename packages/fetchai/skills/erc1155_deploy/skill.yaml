@@ -41,7 +41,7 @@ models:
           is_required: True
       search_data:
         has_erc1155_contract: True
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
   vyper: { version: "==0.1.0b12"}
