@@ -98,5 +98,5 @@ new_env: clean
 
 .PHONY: install_env
 install_env:
-	pipenv install --dev
+	pipenv install --dev --skip-lock
 	pip install -e .[all]	

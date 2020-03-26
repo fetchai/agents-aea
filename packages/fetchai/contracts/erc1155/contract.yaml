@@ -2,7 +2,7 @@ name: erc1155
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
   build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE

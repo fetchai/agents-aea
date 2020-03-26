@@ -2,7 +2,7 @@ name: test_protocol
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
+aea_version: 0.2.4
 description: 'A protocol for testing purposes.'
 speech_acts:
   performative_ct:

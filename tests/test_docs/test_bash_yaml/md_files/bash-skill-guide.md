@@ -7,14 +7,9 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-<<<<<<< HEAD
-aea_version: 0.2.3
-description: 'A simple search skill utilising the OEF.'
+aea_version: 0.2.4
 fingerprint: {}
-=======
 description: 'A simple search skill utilising the OEF search and communication node.'
-fingerprint: ''
->>>>>>> develop
 behaviours:
   my_search_behaviour:
     class_name: MySearchBehaviour
@@ -46,7 +41,7 @@ name: simple_service_registration
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
+aea_version: 0.2.4
 description: The scaffold skill is a scaffold for your own skill implementation.
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
