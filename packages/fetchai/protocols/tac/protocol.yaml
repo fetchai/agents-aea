@@ -7,6 +7,7 @@ fingerprint:
   custom_types.py: QmXRFSB2deNBQEsiy3TamxEE3Xz3p5hxSv29wCnno94wet
   message.py: QmVDvh8q1CmpaMNi1tZBkseEpqSeqHrwQcbb2qRmht58Mk
   serialization.py: QmXsoTkYeJRAoiwmykuURnBXQY6R83mjgEFZFEJTjAkCAu
+  tac.proto: QmZvRraQ3JEXafcS69XxPcrLzJqrXQ5UJeS1b7t42e2zWw
   tac_pb2.py: QmX6h96zmJA3ZoXkJEK7TtK5XkA9Af1YHTtkdURUgdS7NG
 aea_version: 0.2.4
 dependencies: 

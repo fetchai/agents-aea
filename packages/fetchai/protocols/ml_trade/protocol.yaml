@@ -3,9 +3,11 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
+  .DS_Store: QmSmnMF5mT67y6vFT7dkepfpGtsxJffoG6TmGPEiwoyWPq
   __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   message.py: QmSq28QAxB7BWgC7q8HLsneSqjoK8oE9DQwXTsCLWM7iDK
+  ml_trade.proto: QmWMjsNw8jf3c52fvCsf6mG2oAMoCNaW2rMmqu1aXwxVim
   ml_trade_pb2.py: QmR7rwS5X4PsvjGWMyT6kzFtHuqWqoNmY3QN92rM1PjFAj
   serialization.py: QmXHusvFg96W43PmKMvgkKsujizNzDN3tZk42qMr4XBnQm
 aea_version: 0.2.4

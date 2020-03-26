@@ -6,6 +6,7 @@ fingerprint:
   __init__.py: QmVvJPY2M46VXxtFsXda4NHfYQFZ8LYi29fE9fJBqvASvG
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
   dialogues.py: QmdyKoi14sG3VEzN68THXFCQjAK6gvmRBqogQw9uonFkmQ
+  fipa.proto: QmY7hXQcz7XLTqZJT1STkV5iMCvChDTNYFR19BAXrX5eha
   fipa_pb2.py: QmPGh3hB5EGFNXd7DDs3ukKeZexv5GEA4XYK76ELgTWWFZ
   message.py: Qmcmk9J4Vch6QyUvz4erYQhecWHQ5fEP5QzHGEUPKorHhH
   serialization.py: QmaZceqEcorQcmNw8yZWjxVoW8whFYp9eABdThTSAdBwm3
