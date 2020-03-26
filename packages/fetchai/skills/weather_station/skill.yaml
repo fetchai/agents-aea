@@ -12,6 +12,8 @@ fingerprint:
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 aea_version: 0.2.4
+fingerprint_ignore_patterns:
+  - "*.db"
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:

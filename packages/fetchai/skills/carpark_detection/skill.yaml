@@ -11,6 +11,8 @@ fingerprint:
   handlers.py: QmaeBEix3fZnF9Ewaf1NAkbwvNnUNg8iJoPY7X41kBadNX
   strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
 aea_version: 0.2.4
+fingerprint_ignore_patterns:
+  - "temp_files_placeholder/*"
 description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
   service_registration:

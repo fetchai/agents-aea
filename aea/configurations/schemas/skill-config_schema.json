@@ -19,7 +19,7 @@
       "$ref": "definitions.json#/definitions/author"
     },
     "version": {
-      "$ref": "definitions.json#/definitions/version"
+      "$ref": "definitions.json#/definitions/package_version"
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -29,6 +29,9 @@
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
+    },
+    "fingerprint_ignore_patterns": {
+      "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
     },
     "protocols": {
       "type": "array",
