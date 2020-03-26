@@ -19,6 +19,7 @@
 
 """This module contains t_protocol's message definition."""
 
+import logging
 from enum import Enum
 from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
@@ -26,6 +27,8 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
+
+logger = logging.getLogger("packages.fetchai.protocols.t_protocol.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -54,10 +57,10 @@ class TProtocolMessage(Message):
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
         **kwargs,
     ):
         """
@@ -84,9 +87,6 @@ class TProtocolMessage(Message):
             "performative_pmt",
             "performative_pt",
         }
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 't_protocol' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -144,14 +144,6 @@ class TProtocolMessage(Message):
         return cast(Dict[bool, bytes], self.get("content_dict_bool_bytes"))
 
     @property
-    def content_dict_int_ct(self) -> Dict[int, CustomDataModel]:
-        """Get the 'content_dict_int_ct' content from the message."""
-        assert self.is_set(
-            "content_dict_int_ct"
-        ), "'content_dict_int_ct' content is not set."
-        return cast(Dict[int, CustomDataModel], self.get("content_dict_int_ct"))
-
-    @property
     def content_dict_str_float(self) -> Dict[str, float]:
         """Get the 'content_dict_str_float' content from the message."""
         assert self.is_set(
@@ -186,12 +178,6 @@ class TProtocolMessage(Message):
             "content_list_bytes"
         ), "'content_list_bytes' content is not set."
         return cast(Tuple[bytes, ...], self.get("content_list_bytes"))
-
-    @property
-    def content_list_ct(self) -> Tuple[CustomDataModel, ...]:
-        """Get the 'content_list_ct' content from the message."""
-        assert self.is_set("content_list_ct"), "'content_list_ct' content is not set."
-        return cast(Tuple[CustomDataModel, ...], self.get("content_list_ct"))
 
     @property
     def content_list_float(self) -> Tuple[float, ...]:
@@ -256,7 +242,7 @@ class TProtocolMessage(Message):
         Union[
             str,
             Dict[str, int],
-            FrozenSet[CustomDataModel],
+            FrozenSet[int],
             FrozenSet[bytes],
             Tuple[bool, ...],
             Dict[str, float],
@@ -269,7 +255,7 @@ class TProtocolMessage(Message):
                 Union[
                     str,
                     Dict[str, int],
-                    FrozenSet[CustomDataModel],
+                    FrozenSet[int],
                     FrozenSet[bytes],
                     Tuple[bool, ...],
                     Dict[str, float],
@@ -291,12 +277,6 @@ class TProtocolMessage(Message):
             "content_set_bytes"
         ), "'content_set_bytes' content is not set."
         return cast(FrozenSet[bytes], self.get("content_set_bytes"))
-
-    @property
-    def content_set_ct(self) -> FrozenSet[CustomDataModel]:
-        """Get the 'content_set_ct' content from the message."""
-        assert self.is_set("content_set_ct"), "'content_set_ct' content is not set."
-        return cast(FrozenSet[CustomDataModel], self.get("content_set_ct"))
 
     @property
     def content_set_float(self) -> FrozenSet[float]:
@@ -335,8 +315,8 @@ class TProtocolMessage(Message):
         bool,
         str,
         FrozenSet[int],
-        Tuple[CustomDataModel, ...],
-        Dict[str, CustomDataModel],
+        Tuple[bool, ...],
+        Dict[str, int],
     ]:
         """Get the 'content_union_1' content from the message."""
         assert self.is_set("content_union_1"), "'content_union_1' content is not set."
@@ -349,8 +329,8 @@ class TProtocolMessage(Message):
                 bool,
                 str,
                 FrozenSet[int],
-                Tuple[CustomDataModel, ...],
-                Dict[str, CustomDataModel],
+                Tuple[bool, ...],
+                Dict[str, int],
             ],
             self.get("content_union_1"),
         )
@@ -359,13 +339,13 @@ class TProtocolMessage(Message):
     def content_union_2(
         self,
     ) -> Union[
+        FrozenSet[bytes],
         FrozenSet[int],
-        FrozenSet[CustomDataModel],
         FrozenSet[str],
-        Tuple[CustomDataModel, ...],
+        Tuple[float, ...],
         Tuple[bool, ...],
         Tuple[bytes, ...],
-        Dict[str, CustomDataModel],
+        Dict[str, int],
         Dict[int, float],
         Dict[bool, bytes],
     ]:
@@ -373,13 +353,13 @@ class TProtocolMessage(Message):
         assert self.is_set("content_union_2"), "'content_union_2' content is not set."
         return cast(
             Union[
+                FrozenSet[bytes],
                 FrozenSet[int],
-                FrozenSet[CustomDataModel],
                 FrozenSet[str],
-                Tuple[CustomDataModel, ...],
+                Tuple[float, ...],
                 Tuple[bool, ...],
                 Tuple[bytes, ...],
-                Dict[str, CustomDataModel],
+                Dict[str, int],
                 Dict[int, float],
                 Dict[bool, bytes],
             ],
@@ -461,15 +441,7 @@ class TProtocolMessage(Message):
                     type(self.content_str)
                 )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PCT:
-                expected_nb_of_contents = 12
-                assert (
-                    type(self.content_set_ct) == frozenset
-                ), "Invalid type for content 'content_set_ct'. Expected 'frozenset'. Found '{}'.".format(
-                    type(self.content_set_ct)
-                )
-                assert all(
-                    type(element) == CustomDataModel for element in self.content_set_ct
-                ), "Invalid type for frozenset elements in content 'content_set_ct'. Expected 'DataModel'."
+                expected_nb_of_contents = 10
                 assert (
                     type(self.content_set_bytes) == frozenset
                 ), "Invalid type for content 'content_set_bytes'. Expected 'frozenset'. Found '{}'.".format(
@@ -511,14 +483,6 @@ class TProtocolMessage(Message):
                     type(element) == str for element in self.content_set_str
                 ), "Invalid type for frozenset elements in content 'content_set_str'. Expected 'str'."
                 assert (
-                    type(self.content_list_ct) == tuple
-                ), "Invalid type for content 'content_list_ct'. Expected 'tuple'. Found '{}'.".format(
-                    type(self.content_list_ct)
-                )
-                assert all(
-                    type(element) == CustomDataModel for element in self.content_list_ct
-                ), "Invalid type for tuple elements in content 'content_list_ct'. Expected 'DataModel'."
-                assert (
                     type(self.content_list_bytes) == tuple
                 ), "Invalid type for content 'content_list_bytes'. Expected 'tuple'. Found '{}'.".format(
                     type(self.content_list_bytes)
@@ -559,26 +523,7 @@ class TProtocolMessage(Message):
                     type(element) == str for element in self.content_list_str
                 ), "Invalid type for tuple elements in content 'content_list_str'. Expected 'str'."
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PMT:
-                expected_nb_of_contents = 3
-                assert (
-                    type(self.content_dict_int_ct) == dict
-                ), "Invalid type for content 'content_dict_int_ct'. Expected 'dict'. Found '{}'.".format(
-                    type(self.content_dict_int_ct)
-                )
-                for (
-                    key_of_content_dict_int_ct,
-                    value_of_content_dict_int_ct,
-                ) in self.content_dict_int_ct.items():
-                    assert (
-                        type(key_of_content_dict_int_ct) == int
-                    ), "Invalid type for dictionary keys in content 'content_dict_int_ct'. Expected 'int'. Found '{}'.".format(
-                        type(key_of_content_dict_int_ct)
-                    )
-                    assert (
-                        type(value_of_content_dict_int_ct) == CustomDataModel
-                    ), "Invalid type for dictionary values in content 'content_dict_int_ct'. Expected 'DataModel'. Found '{}'.".format(
-                        type(value_of_content_dict_int_ct)
-                    )
+                expected_nb_of_contents = 2
                 assert (
                     type(self.content_dict_bool_bytes) == dict
                 ), "Invalid type for content 'content_dict_bool_bytes'. Expected 'dict'. Found '{}'.".format(
@@ -638,9 +583,8 @@ class TProtocolMessage(Message):
                     ), "Invalid type for elements of content 'content_union_1'. Expected 'int'."
                 if type(self.content_union_1) == tuple:
                     assert all(
-                        type(element) == CustomDataModel
-                        for element in self.content_union_1
-                    ), "Invalid type for tuple elements in content 'content_union_1'. Expected 'CustomDataModel'."
+                        type(element) == bool for element in self.content_union_1
+                    ), "Invalid type for tuple elements in content 'content_union_1'. Expected 'bool'."
                 if type(self.content_union_1) == dict:
                     for (
                         key_of_content_union_1,
@@ -648,8 +592,8 @@ class TProtocolMessage(Message):
                     ) in self.content_union_1.items():
                         assert (
                             type(key_of_content_union_1) == str
-                            and type(value_of_content_union_1) == CustomDataModel
-                        ), "Invalid type for dictionary key, value in content 'content_union_1'. Expected 'str', 'DataModel'."
+                            and type(value_of_content_union_1) == int
+                        ), "Invalid type for dictionary key, value in content 'content_union_1'. Expected 'str', 'int'."
                 assert (
                     type(self.content_union_2) == dict
                     or type(self.content_union_2) == frozenset
@@ -659,24 +603,20 @@ class TProtocolMessage(Message):
                 )
                 if type(self.content_union_2) == frozenset:
                     assert (
-                        all(type(element) == str for element in self.content_union_2)
-                        or all(
-                            type(element) == CustomDataModel
-                            for element in self.content_union_2
-                        )
+                        all(type(element) == bytes for element in self.content_union_2)
                         or all(type(element) == int for element in self.content_union_2)
-                    ), "Invalid type for frozenset elements in content 'content_union_2'. Expected either 'str' or 'CustomDataModel' or 'int'."
+                        or all(type(element) == str for element in self.content_union_2)
+                    ), "Invalid type for frozenset elements in content 'content_union_2'. Expected either 'bytes' or 'int' or 'str'."
                 if type(self.content_union_2) == tuple:
                     assert (
                         all(type(element) == bool for element in self.content_union_2)
                         or all(
-                            type(element) == CustomDataModel
-                            for element in self.content_union_2
-                        )
-                        or all(
                             type(element) == bytes for element in self.content_union_2
                         )
-                    ), "Invalid type for tuple elements in content 'content_union_2'. Expected either 'bool' or 'CustomDataModel' or 'bytes'."
+                        or all(
+                            type(element) == float for element in self.content_union_2
+                        )
+                    ), "Invalid type for tuple elements in content 'content_union_2'. Expected either 'bool' or 'bytes' or 'float'."
                 if type(self.content_union_2) == dict:
                     for (
                         key_of_content_union_2,
@@ -684,18 +624,18 @@ class TProtocolMessage(Message):
                     ) in self.content_union_2.items():
                         assert (
                             (
-                                type(key_of_content_union_2) == str
-                                and type(value_of_content_union_2) == CustomDataModel
+                                type(key_of_content_union_2) == bool
+                                and type(value_of_content_union_2) == bytes
                             )
                             or (
                                 type(key_of_content_union_2) == int
                                 and type(value_of_content_union_2) == float
                             )
                             or (
-                                type(key_of_content_union_2) == bool
-                                and type(value_of_content_union_2) == bytes
+                                type(key_of_content_union_2) == str
+                                and type(value_of_content_union_2) == int
                             )
-                        ), "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'str','DataModel' or 'int','float' or 'bool','bytes'."
+                        ), "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'."
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):
@@ -765,11 +705,10 @@ class TProtocolMessage(Message):
                     )
                     if type(self.content_o_union) == frozenset:
                         assert all(
-                            type(element) == CustomDataModel
-                            for element in self.content_o_union
-                        ) or all(
                             type(element) == bytes for element in self.content_o_union
-                        ), "Invalid type for frozenset elements in content 'content_o_union'. Expected either 'CustomDataModel' or 'bytes'."
+                        ) or all(
+                            type(element) == int for element in self.content_o_union
+                        ), "Invalid type for frozenset elements in content 'content_o_union'. Expected either 'bytes' or 'int'."
                     if type(self.content_o_union) == tuple:
                         assert all(
                             type(element) == bool for element in self.content_o_union
@@ -810,7 +749,7 @@ class TProtocolMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True
