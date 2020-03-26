@@ -5,8 +5,8 @@ license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: Qmadg8ZdZgBY6JjwstbLCkyZDejKWWzvbGkG63DLZ2QqDF
-  handlers.py: QmYYsiZ5yJHDvtdD3yye2QKmNLxcQNdP798caF6NvnWfwg
+  behaviours.py: QmQRBZUhT8YmgkCeW8RXc2T8qWc5hVotWgMACwBDpFmyKY
+  handlers.py: QmRHX8jNe6bqzS7Dtbgwv3SwN6btrASJ4T95SJN2GppnTV
   strategy.py: Qmf4pcqNZ3HRVtribUgNyAHvRk8gyzDbUYD6iFpJizRtsq
 description: "The weather client skill implements the skill to purchase weather data."
 contracts: ['fetchai/erc1155:0.1.0']

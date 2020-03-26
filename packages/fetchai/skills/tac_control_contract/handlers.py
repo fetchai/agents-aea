@@ -27,9 +27,9 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.tac.message import TACMessage
-from packages.fetchai.protocols.tac.serialization import TACSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.tac.message import TacMessage
+from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
@@ -37,7 +37,7 @@ from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 class TACHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = TACMessage.protocol_id
+    SUPPORTED_PROTOCOL = TacMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -53,11 +53,11 @@ class TACHandler(Handler):
 
         If the address is already registered, answer with an error message.
 
-        :param message: the 'get agent state' TACMessage.
+        :param message: the 'get agent state' TacMessage.
         :return: None
         """
-        tac_message = cast(TACMessage, message)
-        tac_type = tac_message.type
+        tac_message = cast(TacMessage, message)
+        tac_type = tac_message.performative
 
         game = cast(Game, self.context.game)
 
@@ -67,12 +67,12 @@ class TACHandler(Handler):
             )
         )
         if (
-            tac_type == TACMessage.Type.REGISTER
+            tac_type == TacMessage.Performative.REGISTER
             and game.phase == Phase.GAME_REGISTRATION
         ):
             self._on_register(tac_message)
         elif (
-            tac_type == TACMessage.Type.UNREGISTER
+            tac_type == TacMessage.Performative.UNREGISTER
             and game.phase == Phase.GAME_REGISTRATION
         ):
             self._on_unregister(tac_message)
@@ -83,13 +83,13 @@ class TACHandler(Handler):
                 )
             )
 
-    def _on_register(self, message: TACMessage) -> None:
+    def _on_register(self, message: TacMessage) -> None:
         """
         Handle a register message.
 
         If the address is not registered, answer with an error message.
 
-        :param message: the 'get agent state' TACMessage.
+        :param message: the 'get agent state' TacMessage.
         :return: None
         """
         parameters = cast(Parameters, self.context.parameters)
@@ -100,15 +100,15 @@ class TACHandler(Handler):
                     self.context.agent_name, agent_name
                 )
             )
-            tac_msg = TACMessage(
-                type=TACMessage.Type.TAC_ERROR,
-                error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
+            tac_msg = TacMessage(
+                performative=TacMessage.Performative.TAC_ERROR,
+                error_code=TacMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
             )
             self.context.outbox.put_message(
                 to=message.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
             return
 
@@ -120,15 +120,15 @@ class TACHandler(Handler):
                     game.registration.agent_addr_to_name[message.counterparty],
                 )
             )
-            tac_msg = TACMessage(
-                type=TACMessage.Type.TAC_ERROR,
-                error_code=TACMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
+            tac_msg = TacMessage(
+                performative=TacMessage.Performative.TAC_ERROR,
+                error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
             )
             self.context.outbox.put_message(
                 to=message.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
 
         if agent_name in game.registration.agent_addr_to_name.values():
@@ -137,15 +137,15 @@ class TACHandler(Handler):
                     self.context.agent_name, agent_name
                 )
             )
-            tac_msg = TACMessage(
-                type=TACMessage.Type.TAC_ERROR,
-                error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
+            tac_msg = TacMessage(
+                performative=TacMessage.Performative.TAC_ERROR,
+                error_code=TacMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
             )
             self.context.outbox.put_message(
                 to=message.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
         self.context.shared_state["agents_participants_counter"] += 1
         game.registration.register_agent(message.counterparty, agent_name)
@@ -153,13 +153,13 @@ class TACHandler(Handler):
             "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
         )
 
-    def _on_unregister(self, message: TACMessage) -> None:
+    def _on_unregister(self, message: TacMessage) -> None:
         """
         Handle a unregister message.
 
         If the address is not registered, answer with an error message.
 
-        :param message: the 'get agent state' TACMessage.
+        :param message: the 'get agent state' TacMessage.
         :return: None
         """
         game = cast(Game, self.context.game)
@@ -169,15 +169,15 @@ class TACHandler(Handler):
                     self.context.agent_name, message.counterparty
                 )
             )
-            tac_msg = TACMessage(
-                type=TACMessage.Type.TAC_ERROR,
-                error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED,
+            tac_msg = TacMessage(
+                performative=TacMessage.Performative.TAC_ERROR,
+                error_code=TacMessage.ErrorCode.AGENT_NOT_REGISTERED,
             )
             self.context.outbox.put_message(
                 to=message.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=TACMessage.protocol_id,
-                message=TACSerializer().encode(tac_msg),
+                protocol_id=TacMessage.protocol_id,
+                message=TacSerializer().encode(tac_msg),
             )
         else:
             self.context.logger.debug(
@@ -200,7 +200,7 @@ class TACHandler(Handler):
 class OEFRegistrationHandler(Handler):
     """Handle the message exchange with the OEF."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -217,24 +217,22 @@ class OEFRegistrationHandler(Handler):
         :param message: the message
         :return: None
         """
-        oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.type
+        oef_message = cast(OefSearchMessage, message)
+        oef_type = oef_message.performative
 
         self.context.logger.debug(
             "[{}]: Handling OEF message. type={}".format(
                 self.context.agent_name, oef_type
             )
         )
-        if oef_type == OEFMessage.Type.OEF_ERROR:
+        if oef_type == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
-        elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
-            self._on_dialogue_error(oef_message)
         else:
             self.context.logger.warning(
                 "[{}]: OEF Message type not recognized.".format(self.context.agent_name)
             )
 
-    def _on_oef_error(self, oef_error: OEFMessage) -> None:
+    def _on_oef_error(self, oef_error: OefSearchMessage) -> None:
         """
         Handle an OEF error message.
 
@@ -243,25 +241,10 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, operation={}".format(
-                self.context.agent_name, oef_error.id, oef_error.operation
-            )
-        )
-
-    def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
-        """
-        Handle a dialogue error message.
-
-        :param dialogue_error: the dialogue error message
-
-        :return: None
-        """
-        self.context.logger.error(
-            "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
+            "[{}]: Received OEF error: dialogue_reference={}, operation={}".format(
                 self.context.agent_name,
-                dialogue_error.id,
-                dialogue_error.dialogue_id,
-                dialogue_error.origin,
+                oef_error.dialogue_reference,
+                oef_error.oef_error_operation,
             )
         )
 

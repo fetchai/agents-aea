@@ -3,10 +3,11 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  __init__.py: QmdcwmmqBak2tEDnG4LJwjJA1GzhVcrN9gZ9fL1x8yhdJU
-  message.py: QmbQ8hNWh1hticBimqLCVVWhzecN1JvGSAPfzjFjBTYHkE
-  serialization.py: QmPpUY6FwA5gVQn4dW9SBo9rKKpbXMtqJW36Akz6RRiih8
-  tac_pb2.py: QmToG73UgCvc7diVC1Sb4yhm7gvovK6UXRYcaZbQwAegxF
+  __init__.py: QmUH8aTndA3gLK999bviGNg2Ky8dHxZosbA8PRPg9LgtjF
+  custom_types.py: QmXRFSB2deNBQEsiy3TamxEE3Xz3p5hxSv29wCnno94wet
+  message.py: QmVDvh8q1CmpaMNi1tZBkseEpqSeqHrwQcbb2qRmht58Mk
+  serialization.py: QmXsoTkYeJRAoiwmykuURnBXQY6R83mjgEFZFEJTjAkCAu
+  tac_pb2.py: QmX6h96zmJA3ZoXkJEK7TtK5XkA9Af1YHTtkdURUgdS7NG
 aea_version: 0.2.4
 dependencies: 
     protobuf: {} 

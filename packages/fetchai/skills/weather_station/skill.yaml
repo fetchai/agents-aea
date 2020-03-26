@@ -4,11 +4,11 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWTcPUxhDoCQVaXTgJHxNt4txJMSxERr75iDMcaFKTJ9x
+  behaviours.py: QmUCc37LFgd5JtHMUrUv9jmv4AqMAaqgp2cvm9Di9a4Gjq
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmVwpfdM3DBp7SndR4XCKhHUtGAW9RC3mRgVrpv3yPJTjD
+  dialogues.py: QmXL8fdTb4RHZtXn9uKjYr5JYyJxCiEDPGAze8BRWbnEsr
   dummy_weather_station_data.py: QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT
-  handlers.py: QmQka88DvnsdZJMb9P8te5Wng6T2PQwEjcy5hkDwLC1zCa
+  handlers.py: QmVBLL2mSbEPCNyi7Lhp98BFwrYkWi8W8J5c5g92ncCXnN
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 aea_version: 0.2.4

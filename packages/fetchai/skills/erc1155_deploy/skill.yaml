@@ -5,8 +5,8 @@ license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
-  handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
+  behaviours.py: QmZZw82yTxRxatcTnx8mujwMMKX9sk1EcSvxUn38sy9eTJ
+  handlers.py: QmeFZ2EiuGQj9tQ9UUWLXDJbX8UEUUwjVVc5KmHdUSYcYF
   strategy.py: QmWpc8aMte2vJ4akiKn6qTfXWavfE1vBtJqX1E7CFuLYaC
 description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
 contracts: ['fetchai/erc1155:0.1.0']

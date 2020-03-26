@@ -19,13 +19,14 @@
 
 """Classes to handle AEA configurations."""
 
-import packaging
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
+
+import packaging
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
 import aea
 

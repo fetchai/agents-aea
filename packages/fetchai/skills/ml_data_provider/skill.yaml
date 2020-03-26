@@ -4,8 +4,8 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
-  behaviours.py: QmekDWMQBH6AwBmbf96KEsUqHSokqroaBCT59sYciXiTny
-  handlers.py: QmZz1fvKaMirRffiFNMo8ehM31Zr3vRvHnF4JZcMb8iwiq
+  behaviours.py: QmbvgHXq3WsCJ9nfaDXpV9X9zU5xe4EFUGxaFt95DF7Cac
+  handlers.py: QmQvjPtQDDtjXi7dc8jJUXjJyAZtDpWtT2dWDq2Wdr8opZ
   strategy.py: QmRPSMeGPzq1W26ppZhXxubfL4h1VT4v8Xecxx5dnLJpoc
 aea_version: 0.2.4
 description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."

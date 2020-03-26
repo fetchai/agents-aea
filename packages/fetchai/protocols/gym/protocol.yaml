@@ -3,9 +3,11 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  __init__.py: QmbzdwPodGv27FyE612Pr6oYkhYC4dN8wGPQUvKpZMadoE
-  message.py: QmUuSY3mNUaNLUVVPUyP6EA3xxwbimvRzhTnReEdveWHna
-  serialization.py: QmNrtALa9stXzpy2Py422EXhAXPJyxsFWcRurLWdcq3b1R
+  __init__.py: QmU11JgCkwmmWx3jgKaG6ze1o5cRgGhiQownbie2HqrhmP
+  custom_types.py: QmXNroSj5D2DmzfBRToYitWodwbX3UDDF3xTjjLPKAjvgv
+  gym_pb2.py: QmSDaH6e3YYw5j87bc1bYaBNVQ4tqDoRetA5n6N2ttXcNX
+  message.py: QmZYZjd1LA6NJ8kvu1a2ZRM3dnyXfpvnGs4P5WM5uX7ewX
+  serialization.py: Qmc2efRzZLLrfYaQz3WMCxLGRKU92cQC4orb8pEuYvrbRB
 aea_version: 0.2.4
 description: A protocol for interacting with a gym connection.
 dependencies: 
