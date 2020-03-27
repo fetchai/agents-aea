@@ -3,7 +3,6 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint:
-  .DS_Store: QmNRHZbZYvG2gQri7MkmQje7XPzr2MVmGytFHDVYJ8UNBe
   __init__.py: QmS19cwrXWeHj97w4i11KamuWgUxwLoBE43yLGgz4kLAW1
   custom_types.py: QmcxTUhV1MkbLkvKmezLqwj1TFHp9QpeY5UjyCu6aWuyNg
   message.py: QmW4BhzMBWKaRT444PyEhxL4fJUieA1KNVw3sBQYVfKK99

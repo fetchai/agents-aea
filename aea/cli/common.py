@@ -82,6 +82,7 @@ DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
 
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
+    ".DS_Store",
     "*__pycache__/*",
     "*.pyc",
     "aea-config.yaml",
