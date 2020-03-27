@@ -119,6 +119,9 @@ Get the multiplexer.
 
 Get the inbox.
 
+The inbox contains Envelopes from the Multiplexer.
+The agent can pick these messages for processing.
+
 <a name=".aea.agent.Agent.outbox"></a>
 #### outbox
 
@@ -128,6 +131,9 @@ Get the inbox.
 ```
 
 Get the outbox.
+
+The outbox contains Envelopes for the Multiplexer.
+Envelopes placed in the Outbox are processed by the Multiplexer.
 
 <a name=".aea.agent.Agent.name"></a>
 #### name
@@ -157,7 +163,9 @@ Get the liveness.
  | tick() -> int
 ```
 
-Get the tick.
+Get the tick (or agent loop count).
+
+Each agent loop (see _run_main_loop) increments the tick.
 
 <a name=".aea.agent.Agent.agent_state"></a>
 #### agent`_`state

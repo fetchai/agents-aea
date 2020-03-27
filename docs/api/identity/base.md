@@ -10,7 +10,7 @@ This module contains the identity class.
 class Identity()
 ```
 
-An identity are the public elements identifying an agent.
+The identity holds the public elements identifying an agent.
 
 It can include:
 - the agent name

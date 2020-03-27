@@ -10,7 +10,7 @@ Protocols are not to be conflated with Interaction Protocols. The latter consist
 
 ## Metadata
 
-Each `Message` in an interaction protocol has a set of default metadata, this includes:
+Each `Message` in an interaction protocol has a set of default metadata, which includes:
 
 * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
 * `message_id: int`, the id of the message. The default value is `1`.
@@ -78,7 +78,7 @@ The `fetchai/oef_search:0.1.0` protocol definition includes an `OefSearchMessage
 ```python
 class Performative(Enum):
 
-	"""Performatives for the oef_search protocol."""
+    """Performatives for the oef_search protocol."""
     REGISTER_SERVICE = "register_service"
     UNREGISTER_SERVICE = "unregister_service"
     SEARCH_SERVICES = "search_services"
@@ -86,7 +86,7 @@ class Performative(Enum):
     SEARCH_RESULT = "search_result"
 
     def __str__(self):
-    	"""Get string representation."""
+        """Get string representation."""
         return self.value
 ```
 
@@ -186,8 +186,8 @@ oef_msg = OefSearchMessage(
 ```python
 class OefErrorOperation(Enum):
 
-	"""This class represents an instance of OefErrorOperation."""
-	REGISTER_SERVICE = 0
+    """This class represents an instance of OefErrorOperation."""
+    REGISTER_SERVICE = 0
     UNREGISTER_SERVICE = 1
     SEARCH_SERVICES = 2
     SEND_MESSAGE = 3

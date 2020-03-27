@@ -22,9 +22,9 @@
 This tool generates the API docs.
 """
 
-# Install https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop
-
+import shutil
 import subprocess  # nosec
+import sys
 from pathlib import Path
 
 DOCS_DIR = "docs/"
@@ -88,4 +88,10 @@ def generate_api_docs():
 
 
 if __name__ == "__main__":
+    res = shutil.which("pydoc-markdown")
+    if res is None:
+        print(
+            "Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop"
+        )
+        sys.exit(1)
     generate_api_docs()

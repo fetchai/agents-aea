@@ -27,7 +27,7 @@ Instantiate the agent.
 - `connections`: the list of connections of the agent.
 - `loop`: the event loop to run the connections.
 - `wallet`: the wallet of the agent.
-- `ledger_apis`: the ledger apis of the agent.
+- `ledger_apis`: the APIs the agent will use to connect to ledgers.
 - `resources`: the resources of the agent.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
 - `is_debug`: if True, run the agent in debug mode.
