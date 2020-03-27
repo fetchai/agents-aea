@@ -1164,37 +1164,40 @@ class ProtocolGenerator:
             )
             cls_str += "        raise NotImplementedError\n\n"
             cls_str += "    @classmethod\n"
-            cls_str += '    def encode(cls, performative, {}_from_message: "{}"):\n'.format(
-                _camel_case_to_snake_case(custom_type), custom_type
+            cls_str += '    def encode(cls, {}_protobuf_object, {}_object: "{}") -> None:\n'.format(
+                _camel_case_to_snake_case(custom_type),
+                _camel_case_to_snake_case(custom_type),
+                custom_type,
             )
             cls_str += '        """\n'
             cls_str += "        Encode an instance of this class into the protocol buffer object.\n\n"
-            cls_str += "        The content in the 'performative' argument must be matched with the message content in the '{}_from_message' argument.\n\n".format(
+            cls_str += "        The protocol buffer object in the {}_protobuf_object argument must be matched with the instance of this class in the '{}_object' argument.\n\n".format(
+                _camel_case_to_snake_case(custom_type),
+                _camel_case_to_snake_case(custom_type),
+            )
+            cls_str += "        :param {}_protobuf_object: the protocol buffer object whose type corresponds with this class.\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
-            cls_str += "        :param performative: the performative protocol buffer object containing a content whose type is this class.\n"
-            cls_str += "        :param {}_from_message: the message content to be encoded in the protocol buffer object.\n".format(
+            cls_str += "        :param {}_object: an instance of this class to be encoded in the protocol buffer object.\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
-            cls_str += "        :return: the 'performative' protocol buffer object encoded with the message content in the '{}_from_message' argument.\n".format(
-                _camel_case_to_snake_case(custom_type)
-            )
+            cls_str += "        :return: None\n"
             cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
 
             cls_str += "    @classmethod\n"
-            cls_str += '    def decode(cls, {}_from_pb2) -> "{}":\n'.format(
+            cls_str += '    def decode(cls, {}_protobuf_object) -> "{}":\n'.format(
                 _camel_case_to_snake_case(custom_type), custom_type,
             )
             cls_str += '        """\n'
             cls_str += "        Decode a protocol buffer object that corresponds with this class into an instance of this class.\n\n"
-            cls_str += "        A new instance of this class must be created that matches the content in the '{}_from_pb2' argument.\n\n".format(
+            cls_str += "        A new instance of this class must be created that matches the protocol buffer object in the '{}_protobuf_object' argument.\n\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
-            cls_str += "        :param {}_from_pb2: the protocol buffer content object whose type corresponds with this class.\n".format(
+            cls_str += "        :param {}_protobuf_object: the protocol buffer object whose type corresponds with this class.\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
-            cls_str += "        :return: A new instance of this class that matches the protocol buffer object in the '{}_from_pb2' argument.\n".format(
+            cls_str += "        :return: A new instance of this class that matches the protocol buffer object in the '{}_protobuf_object' argument.\n".format(
                 _camel_case_to_snake_case(custom_type)
             )
             cls_str += '        """\n'
@@ -1265,11 +1268,8 @@ class ProtocolGenerator:
             )
         else:
             encoding_str += indents + "{} = msg.{}\n".format(content_name, content_name)
-            encoding_str += (
-                indents
-                + "performative = {}.encode(performative, {})\n".format(
-                    content_type, content_name
-                )
+            encoding_str += indents + "{}.encode(performative.{}, {})\n".format(
+                content_type, content_name, content_name
             )
         return encoding_str
 

@@ -47,46 +47,45 @@ class DataModel:
         self.dict_field = dict_field
 
     @classmethod
-    def encode(cls, performative, data_model_from_message: "DataModel"):
+    def encode(cls, data_model_protobuf_object, data_model_object: "DataModel") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument is matched with the message content in the 'data_model_from_message' argument.
+        The protocol buffer object in the data_model_protobuf_object argument is matched with the instance of this class in the 'data_model_object' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
-        :param data_model_from_message: the message content to be encoded in the protocol buffer object.
-        :return: the 'performative' protocol buffer object encoded with the message content in the 'data_model_from_message' argument.
+        :param data_model_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param data_model_object: an instance of this class to be encoded in the protocol buffer object.
+        :return: None
         """
-        performative.content_ct.bytes_field = data_model_from_message.bytes_field
-        performative.content_ct.int_field = data_model_from_message.int_field
-        performative.content_ct.float_field = data_model_from_message.float_field
-        performative.content_ct.bool_field = data_model_from_message.bool_field
-        performative.content_ct.str_field = data_model_from_message.str_field
+        data_model_protobuf_object.bytes_field = data_model_object.bytes_field
+        data_model_protobuf_object.int_field = data_model_object.int_field
+        data_model_protobuf_object.float_field = data_model_object.float_field
+        data_model_protobuf_object.bool_field = data_model_object.bool_field
+        data_model_protobuf_object.str_field = data_model_object.str_field
 
-        performative.content_ct.set_field.extend(data_model_from_message.set_field)
-        performative.content_ct.list_field.extend(data_model_from_message.list_field)
-        performative.content_ct.dict_field.update(data_model_from_message.dict_field)
-        return performative
+        data_model_protobuf_object.set_field.extend(data_model_object.set_field)
+        data_model_protobuf_object.list_field.extend(data_model_object.list_field)
+        data_model_protobuf_object.dict_field.update(data_model_object.dict_field)
 
     @classmethod
-    def decode(cls, data_model_from_pb2) -> "DataModel":
+    def decode(cls, data_model_protobuf_object) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class is created that matches the content in the 'data_model_from_pb2' argument.
+        A new instance of this class is created that matches the protocol buffer object in the 'data_model_protobuf_object' argument.
 
-        :param data_model_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'data_model_from_pb2' argument.
+        :param data_model_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'data_model_protobuf_object' argument.
         """
         return DataModel(
-            bytes_field=data_model_from_pb2.bytes_field,
-            int_field=data_model_from_pb2.int_field,
-            float_field=data_model_from_pb2.float_field,
-            bool_field=data_model_from_pb2.bool_field,
-            str_field=data_model_from_pb2.str_field,
-            set_field=set(data_model_from_pb2.set_field),
-            list_field=data_model_from_pb2.list_field,
-            dict_field=data_model_from_pb2.dict_field,
+            bytes_field=data_model_protobuf_object.bytes_field,
+            int_field=data_model_protobuf_object.int_field,
+            float_field=data_model_protobuf_object.float_field,
+            bool_field=data_model_protobuf_object.bool_field,
+            str_field=data_model_protobuf_object.str_field,
+            set_field=set(data_model_protobuf_object.set_field),
+            list_field=data_model_protobuf_object.list_field,
+            dict_field=data_model_protobuf_object.dict_field,
         )
 
     def __eq__(self, other):
