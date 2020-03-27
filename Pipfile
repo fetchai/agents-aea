@@ -9,6 +9,7 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
+aries-cloudagent = "==0.4.5"
 bandit = "==1.6.2"
 black = "==19.10b0"
 bs4 = "==0.0.1"
@@ -37,6 +38,7 @@ pytest = "==5.3.5"
 pytest-asyncio = "==0.10.0"
 pytest-cov = "==2.8.1"
 pytest-randomly = "==3.2.1"
+requests = "==2.23.0"
 safety = "==1.8.5"
 tox = "==3.14.5"
 

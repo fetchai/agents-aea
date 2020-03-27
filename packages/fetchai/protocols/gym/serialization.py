@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,92 +17,118 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serialization for the Gym protocol."""
+"""Serialization module for gym protocol."""
 
-import base64
-import copy
-import json
-import pickle  # nosec
-from typing import Any, cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
+from packages.fetchai.protocols.gym import gym_pb2
+from packages.fetchai.protocols.gym.custom_types import AnyObject
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
 class GymSerializer(Serializer):
-    """Serialization for the Gym protocol."""
+    """Serialization for the 'gym' protocol."""
 
     def encode(self, msg: Message) -> bytes:
         """
-        Decode the message.
+        Encode a 'Gym' message into bytes.
 
-        :param msg: the message object
-        :return: the bytes
+        :param msg: the message object.
+        :return: the bytes.
         """
         msg = cast(GymMessage, msg)
-        new_body = copy.copy(msg.body)
-        new_body["performative"] = msg.performative.value
+        gym_msg = gym_pb2.GymMessage()
+        gym_msg.message_id = msg.message_id
+        dialogue_reference = msg.dialogue_reference
+        gym_msg.dialogue_starter_reference = dialogue_reference[0]
+        gym_msg.dialogue_responder_reference = dialogue_reference[1]
+        gym_msg.target = msg.target
 
-        if msg.performative == GymMessage.Performative.ACT:
-            action = msg.action  # type: Any
-            action_bytes = base64.b64encode(pickle.dumps(action)).decode(
-                "utf-8"
-            )  # nosec
-            new_body["action"] = action_bytes
-            new_body["step_id"] = msg.step_id
-        elif msg.performative == GymMessage.Performative.PERCEPT:
-            # observation, reward and info are gym implementation specific, done is boolean
+        performative_id = msg.performative
+        if performative_id == GymMessage.Performative.ACT:
+            performative = gym_pb2.GymMessage.Act()  # type: ignore
+            action = msg.action
+            AnyObject.encode(performative.action, action)
+            step_id = msg.step_id
+            performative.step_id = step_id
+            gym_msg.act.CopyFrom(performative)
+        elif performative_id == GymMessage.Performative.PERCEPT:
+            performative = gym_pb2.GymMessage.Percept()  # type: ignore
+            step_id = msg.step_id
+            performative.step_id = step_id
             observation = msg.observation
-            observation_bytes = base64.b64encode(
-                pickle.dumps(observation)
-            ).decode(  # nosec
-                "utf-8"
-            )
-            new_body["observation"] = observation_bytes
+            AnyObject.encode(performative.observation, observation)
             reward = msg.reward
-            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode(
-                "utf-8"
-            )  # nosec
-            new_body["reward"] = reward_bytes
+            performative.reward = reward
+            done = msg.done
+            performative.done = done
             info = msg.info
-            info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")  # nosec
-            new_body["info"] = info_bytes
-            new_body["step_id"] = msg.step_id
+            AnyObject.encode(performative.info, info)
+            gym_msg.percept.CopyFrom(performative)
+        elif performative_id == GymMessage.Performative.RESET:
+            performative = gym_pb2.GymMessage.Reset()  # type: ignore
+            gym_msg.reset.CopyFrom(performative)
+        elif performative_id == GymMessage.Performative.CLOSE:
+            performative = gym_pb2.GymMessage.Close()  # type: ignore
+            gym_msg.close.CopyFrom(performative)
+        else:
+            raise ValueError("Performative not valid: {}".format(performative_id))
 
-        gym_message_bytes = json.dumps(new_body).encode("utf-8")
-        return gym_message_bytes
+        gym_bytes = gym_msg.SerializeToString()
+        return gym_bytes
 
     def decode(self, obj: bytes) -> Message:
         """
-        Decode the message.
+        Decode bytes into a 'Gym' message.
 
-        :param obj: the bytes object
-        :return: the message
+        :param obj: the bytes object.
+        :return: the 'Gym' message.
         """
-        json_msg = json.loads(obj.decode("utf-8"))
-        performative = GymMessage.Performative(json_msg["performative"])
-        new_body = copy.copy(json_msg)
-        new_body["performative"] = performative
+        gym_pb = gym_pb2.GymMessage()
+        gym_pb.ParseFromString(obj)
+        message_id = gym_pb.message_id
+        dialogue_reference = (
+            gym_pb.dialogue_starter_reference,
+            gym_pb.dialogue_responder_reference,
+        )
+        target = gym_pb.target
 
-        if performative == GymMessage.Performative.ACT:
-            action_bytes = base64.b64decode(json_msg["action"])
-            action = pickle.loads(action_bytes)  # nosec
-            new_body["action"] = action
-            new_body["step_id"] = json_msg["step_id"]
-        elif performative == GymMessage.Performative.PERCEPT:
-            # observation, reward and info are gym implementation specific, done is boolean
-            observation_bytes = base64.b64decode(json_msg["observation"])
-            observation = pickle.loads(observation_bytes)  # nosec
-            new_body["observation"] = observation
-            reward_bytes = base64.b64decode(json_msg["reward"])
-            reward = pickle.loads(reward_bytes)  # nosec
-            new_body["reward"] = reward
-            info_bytes = base64.b64decode(json_msg["info"])
-            info = pickle.loads(info_bytes)  # nosec
-            new_body["info"] = info
-            new_body["step_id"] = json_msg["step_id"]
+        performative = gym_pb.WhichOneof("performative")
+        performative_id = GymMessage.Performative(str(performative))
+        performative_content = dict()  # type: Dict[str, Any]
+        if performative_id == GymMessage.Performative.ACT:
+            pb2_action = gym_pb.act.action
+            action = AnyObject.decode(pb2_action)
+            performative_content["action"] = action
+            step_id = gym_pb.act.step_id
+            performative_content["step_id"] = step_id
+        elif performative_id == GymMessage.Performative.PERCEPT:
+            step_id = gym_pb.percept.step_id
+            performative_content["step_id"] = step_id
+            pb2_observation = gym_pb.percept.observation
+            observation = AnyObject.decode(pb2_observation)
+            performative_content["observation"] = observation
+            reward = gym_pb.percept.reward
+            performative_content["reward"] = reward
+            done = gym_pb.percept.done
+            performative_content["done"] = done
+            pb2_info = gym_pb.percept.info
+            info = AnyObject.decode(pb2_info)
+            performative_content["info"] = info
+        elif performative_id == GymMessage.Performative.RESET:
+            pass
+        elif performative_id == GymMessage.Performative.CLOSE:
+            pass
+        else:
+            raise ValueError("Performative not valid: {}.".format(performative_id))
 
-        gym_message = GymMessage(performative=performative, body=new_body)
-        return gym_message
+        return GymMessage(
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=performative,
+            **performative_content
+        )

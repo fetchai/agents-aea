@@ -25,10 +25,10 @@ This module contains the classes required for dialogue management.
 
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FIPADialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogues
 
 
-class Dialogues(Model, FIPADialogues):
+class Dialogues(Model, FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -38,4 +38,4 @@ class Dialogues(Model, FIPADialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FIPADialogues.__init__(self)
+        FipaDialogues.__init__(self)

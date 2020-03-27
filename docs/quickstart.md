@@ -33,7 +33,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 ### Installing docker
 
 At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
-(e.g. to run an OEF Node).
+(e.g. to run an [OEF search and communication node](../oef-ledger)).
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
@@ -97,7 +97,7 @@ Please enter the author handle you would like to use: fetchai
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.3
+v0.2.4
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -164,7 +164,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.3
+v0.2.4
 
 my_first_aea starting ...
 info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}

@@ -1,4 +1,4 @@
-aea_version: 0.1.1
+aea_version: 0.2.4
 agent_name: myagent
 author: fetchai
 version: 0.1.0
@@ -12,7 +12,7 @@ private_key_paths:
    fetchai: 'fet_private_key.txt'
    ethereum: 'eth_private_key.txt'
 protocols:
-- fetchai/oef:0.1.0
+- fetchai/oef_search:0.1.0
 - fetchai/default:0.1.0
 - fetchai/tac:0.1.0
 - fetchai/fipa:0.1.0

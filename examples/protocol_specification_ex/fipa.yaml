@@ -8,13 +8,13 @@ speech_acts:
   cfp:
     query: ct:Query
   propose:
-    proposal: pt:list[ct:Description]
+    proposal: ct:Description
   accept_w_inform:
-    info: pt:dict[pt:str, ct:Info]
+    info: pt:dict[pt:str, pt:str]
   match_accept_w_inform:
-    info: pt:dict[pt:str, ct:Info]
+    info: pt:dict[pt:str, pt:str]
   inform:
-    info: pt:dict[pt:str, ct:Info]
+    info: pt:dict[pt:str, pt:str]
   accept: {}
   decline: {}
   match_accept: {}
@@ -30,6 +30,4 @@ ct:Query: |
   }
 ct:Description: |
   bytes description = 1;
-ct:Info: |
-  bytes info = 1;
 ...

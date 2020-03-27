@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,107 +17,237 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the FIPA message definition."""
+"""This module contains gym's message definition."""
 
 from enum import Enum
-from typing import Any, Dict, cast
+from typing import Set, Tuple, cast
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
+
+from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
+
+DEFAULT_BODY_SIZE = 4
 
 
 class GymMessage(Message):
-    """The Gym message class."""
+    """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId("fetchai", "gym", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "gym", "0.1.0")
+
+    AnyObject = CustomAnyObject
 
     class Performative(Enum):
-        """Gym performatives."""
+        """Performatives for the gym protocol."""
 
         ACT = "act"
+        CLOSE = "close"
         PERCEPT = "percept"
         RESET = "reset"
-        CLOSE = "close"
 
         def __str__(self):
-            """Get string representation."""
+            """Get the string representation."""
             return self.value
 
-    def __init__(self, performative: Performative, **kwargs):
+    def __init__(
+        self,
+        performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
+        **kwargs,
+    ):
         """
-        Initialize.
+        Initialise an instance of GymMessage.
 
-        :param performative: the performative.
+        :param message_id: the message id.
+        :param dialogue_reference: the dialogue reference.
+        :param target: the message target.
+        :param performative: the message performative.
         """
-        super().__init__(performative=performative, **kwargs)
-        assert self._is_consistent(), "GymMessage initialization inconsistent."
+        super().__init__(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=GymMessage.Performative(performative),
+            **kwargs,
+        )
+        self._performatives = {"act", "close", "percept", "reset"}
+        assert (
+            self._is_consistent()
+        ), "This message is invalid according to the 'gym' protocol."
+
+    @property
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
+
+    @property
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set."
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
+
+    @property
+    def message_id(self) -> int:
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set."
+        return cast(int, self.get("message_id"))
 
     @property
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
-        assert self.is_set("performative"), "Performative is not set."
-        return GymMessage.Performative(self.get("performative"))
+        assert self.is_set("performative"), "performative is not set."
+        return cast(GymMessage.Performative, self.get("performative"))
 
     @property
-    def action(self) -> Any:
-        """Get the action from the message."""
-        assert self.is_set("action"), "Action is not set."
-        return cast(Any, self.get("action"))
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
 
     @property
-    def step_id(self) -> int:
-        """Get the step id from the message."""
-        assert self.is_set("step_id"), "Step_id is not set."
-        return cast(int, self.get("step_id"))
-
-    @property
-    def observation(self) -> Any:
-        """Get the observation from the message."""
-        assert self.is_set("observation"), "Observation is not set."
-        return cast(Any, self.get("observation"))
-
-    @property
-    def reward(self) -> float:
-        """Get the reward from the message."""
-        assert self.is_set("reward"), "Reward is not set."
-        return cast(float, self.get("reward"))
+    def action(self) -> CustomAnyObject:
+        """Get the 'action' content from the message."""
+        assert self.is_set("action"), "'action' content is not set."
+        return cast(CustomAnyObject, self.get("action"))
 
     @property
     def done(self) -> bool:
-        """Get the value of the done variable from the message."""
-        assert self.is_set("done"), "Done is not set."
+        """Get the 'done' content from the message."""
+        assert self.is_set("done"), "'done' content is not set."
         return cast(bool, self.get("done"))
 
     @property
-    def info(self) -> Dict[str, Any]:
-        """Get the info from the message."""
-        assert self.is_set("info"), "Info is not set."
-        return cast(Dict[str, Any], self.get("info"))
+    def info(self) -> CustomAnyObject:
+        """Get the 'info' content from the message."""
+        assert self.is_set("info"), "'info' content is not set."
+        return cast(CustomAnyObject, self.get("info"))
+
+    @property
+    def observation(self) -> CustomAnyObject:
+        """Get the 'observation' content from the message."""
+        assert self.is_set("observation"), "'observation' content is not set."
+        return cast(CustomAnyObject, self.get("observation"))
+
+    @property
+    def reward(self) -> float:
+        """Get the 'reward' content from the message."""
+        assert self.is_set("reward"), "'reward' content is not set."
+        return cast(float, self.get("reward"))
+
+    @property
+    def step_id(self) -> int:
+        """Get the 'step_id' content from the message."""
+        assert self.is_set("step_id"), "'step_id' content is not set."
+        return cast(int, self.get("step_id"))
 
     def _is_consistent(self) -> bool:
-        """Check that the data is consistent."""
+        """Check that the message follows the gym protocol."""
         try:
-            assert isinstance(self.performative, GymMessage.Performative)
-            if self.performative == GymMessage.Performative.ACT:
-                assert self.is_set("action"), "Action is not set."
-                assert isinstance(self.step_id, int)
-                assert len(self.body) == 3
-            elif self.performative == GymMessage.Performative.PERCEPT:
-                assert self.is_set("observation"), "Observation is not set."
-                assert isinstance(self.reward, float)
-                assert isinstance(self.done, bool)
-                assert isinstance(self.info, dict)
-                assert isinstance(self.step_id, int)
-                assert len(self.body) == 6
-            elif (
-                self.performative == GymMessage.Performative.RESET
-                or self.performative == GymMessage.Performative.CLOSE
-            ):
-                assert len(self.body) == 1
-            else:
-                raise ValueError("Performative not recognized.")
+            assert (
+                type(self.dialogue_reference) == tuple
+            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                type(self.dialogue_reference)
+            )
+            assert (
+                type(self.dialogue_reference[0]) == str
+            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[0])
+            )
+            assert (
+                type(self.dialogue_reference[1]) == str
+            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[1])
+            )
+            assert (
+                type(self.message_id) == int
+            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                type(self.message_id)
+            )
+            assert (
+                type(self.target) == int
+            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                type(self.target)
+            )
 
-        except (AssertionError, ValueError, KeyError):  # pragma: no cover
+            # Light Protocol Rule 2
+            # Check correct performative
+            assert (
+                type(self.performative) == GymMessage.Performative
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                self.valid_performatives, self.performative
+            )
+
+            # Check correct contents
+            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
+            expected_nb_of_contents = 0
+            if self.performative == GymMessage.Performative.ACT:
+                expected_nb_of_contents = 2
+                assert (
+                    type(self.action) == CustomAnyObject
+                ), "Invalid type for content 'action'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.action)
+                )
+                assert (
+                    type(self.step_id) == int
+                ), "Invalid type for content 'step_id'. Expected 'int'. Found '{}'.".format(
+                    type(self.step_id)
+                )
+            elif self.performative == GymMessage.Performative.PERCEPT:
+                expected_nb_of_contents = 5
+                assert (
+                    type(self.step_id) == int
+                ), "Invalid type for content 'step_id'. Expected 'int'. Found '{}'.".format(
+                    type(self.step_id)
+                )
+                assert (
+                    type(self.observation) == CustomAnyObject
+                ), "Invalid type for content 'observation'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.observation)
+                )
+                assert (
+                    type(self.reward) == float
+                ), "Invalid type for content 'reward'. Expected 'float'. Found '{}'.".format(
+                    type(self.reward)
+                )
+                assert (
+                    type(self.done) == bool
+                ), "Invalid type for content 'done'. Expected 'bool'. Found '{}'.".format(
+                    type(self.done)
+                )
+                assert (
+                    type(self.info) == CustomAnyObject
+                ), "Invalid type for content 'info'. Expected 'AnyObject'. Found '{}'.".format(
+                    type(self.info)
+                )
+            elif self.performative == GymMessage.Performative.RESET:
+                expected_nb_of_contents = 0
+            elif self.performative == GymMessage.Performative.CLOSE:
+                expected_nb_of_contents = 0
+
+            # Check correct content count
+            assert (
+                expected_nb_of_contents == actual_nb_of_contents
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
+                expected_nb_of_contents, actual_nb_of_contents
+            )
+
+            # Light Protocol Rule 3
+            if self.message_id == 1:
+                assert (
+                    self.target == 0
+                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
+                    self.target
+                )
+            else:
+                assert (
+                    0 < self.target < self.message_id
+                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                    self.message_id - 1, self.target,
+                )
+        except (AssertionError, ValueError, KeyError) as e:
+            print(str(e))
             return False
 
         return True

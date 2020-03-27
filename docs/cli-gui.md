@@ -1,6 +1,6 @@
 You can invoke the AEA Command Line Interface (CLI) from a Graphical User Interface (GUI) accessed from a web browser.
 
-These instructions will take you through building an AEA, starting an OEF Node, and running the AEA - all from the GUI.
+These instructions will take you through building an AEA, starting an [OEF search and communication node](../oef-ledger), and running the AEA - all from the GUI.
 
 ## Preliminaries
 
@@ -42,7 +42,7 @@ To create a new AEA and run it, follow these steps.
 
 5. Find the Echo skill and click on it - this will select it.
 6. Click on the [Add skill] button - which should now say "Add echo skill to my_new_aea agent".
-7. Start an OEF Node by clicking on the [Start OEF Node] button. Wait for the text saying "A thing of beauty is a joy forever..." to appear. When you see that, the node has started successfully.
+7. Start an [OEF search and communication node](../oef-ledger) by clicking on the [Start OEF Node] button. Wait for the text saying "A thing of beauty is a joy forever..." to appear. When you see that, the node has started successfully.
 
 <center>![start node](assets/cli_gui03_oef_node.png)</center>
 

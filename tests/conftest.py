@@ -82,6 +82,8 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
+HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = PublicId("fetchai", "stub", "0.1.0")
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -103,7 +105,7 @@ protocol_config_files = [
         "packages",
         "fetchai",
         "protocols",
-        "oef",
+        "oef_search",
         DEFAULT_PROTOCOL_CONFIG_FILE,
     ),
     os.path.join(
@@ -269,6 +271,18 @@ def pytest_addoption(parser):
         default=False,
         help="Skip integration tests.",
     )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "ci: mark test as not for ci")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--ci"):
+        skip_ci = pytest.mark.skip(reason="need no --ci to run")
+        for item in items:
+            if "ci" in item.keywords:
+                item.add_marker(skip_ci)
 
 
 @pytest.fixture(scope="session")

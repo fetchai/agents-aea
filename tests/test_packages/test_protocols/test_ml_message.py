@@ -20,6 +20,7 @@
 """This module contains the tests of the ml_messages module."""
 
 import logging
+import pickle  # nosec
 from unittest import mock
 
 import numpy as np
@@ -35,32 +36,32 @@ from aea.helpers.search.models import (
     Query,
 )
 
-from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 
 logger = logging.getLogger(__name__)
 
 
 def test_perfomrative_str():
     """Test the str value of each performative."""
-    assert str(MLTradeMessage.Performative.CFT) == "cft"
-    assert str(MLTradeMessage.Performative.TERMS) == "terms"
-    assert str(MLTradeMessage.Performative.ACCEPT) == "accept"
-    assert str(MLTradeMessage.Performative.DATA) == "data"
+    assert str(MlTradeMessage.Performative.CFP) == "cfp"
+    assert str(MlTradeMessage.Performative.TERMS) == "terms"
+    assert str(MlTradeMessage.Performative.ACCEPT) == "accept"
+    assert str(MlTradeMessage.Performative.DATA) == "data"
 
 
 def test_ml_wrong_message_creation():
     """Test the creation of a ml message."""
     with pytest.raises(AssertionError):
-        MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query="")
+        MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query="")
 
 
 def test_ml_messge_consistency():
     """Test the consistency of the message."""
     dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
-    msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-    with mock.patch.object(MLTradeMessage.Performative, "__eq__", return_value=False):
+    msg = MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query=query)
+    with mock.patch.object(MlTradeMessage.Performative, "__eq__", return_value=False):
         assert not msg._is_consistent()
 
 
@@ -68,9 +69,9 @@ def test_ml_message_creation():
     """Test the creation of a ml message."""
     dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
-    msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-    msg_bytes = MLTradeSerializer().encode(msg)
-    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    msg = MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query=query)
+    msg_bytes = MlTradeSerializer().encode(msg)
+    recovered_msg = MlTradeSerializer().decode(msg_bytes)
     assert recovered_msg == msg
 
     terms = Description(
@@ -85,27 +86,28 @@ def test_ml_message_creation():
         }
     )
 
-    msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
-    msg_bytes = MLTradeSerializer().encode(msg)
-    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    msg = MlTradeMessage(performative=MlTradeMessage.Performative.TERMS, terms=terms)
+    msg_bytes = MlTradeSerializer().encode(msg)
+    recovered_msg = MlTradeSerializer().decode(msg_bytes)
     assert recovered_msg == msg
 
     tx_digest = "This is the transaction digest."
-    msg = MLTradeMessage(
-        performative=MLTradeMessage.Performative.ACCEPT,
+    msg = MlTradeMessage(
+        performative=MlTradeMessage.Performative.ACCEPT,
         terms=terms,
         tx_digest=tx_digest,
     )
-    msg_bytes = MLTradeSerializer().encode(msg)
-    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    msg_bytes = MlTradeSerializer().encode(msg)
+    recovered_msg = MlTradeSerializer().decode(msg_bytes)
     assert recovered_msg == msg
 
     data = np.zeros((5, 2)), np.zeros((5, 2))
-    msg = MLTradeMessage(
-        performative=MLTradeMessage.Performative.DATA, terms=terms, data=data
+    payload = pickle.dumps(data)  # nosec
+    msg = MlTradeMessage(
+        performative=MlTradeMessage.Performative.DATA, terms=terms, payload=payload
     )
-    msg_bytes = MLTradeSerializer().encode(msg)
-    with pytest.raises(ValueError):
-        recovered_msg = MLTradeSerializer().decode(msg_bytes)
-        assert recovered_msg == msg
-    assert np.array_equal(recovered_msg.data, msg.data)
+    msg_bytes = MlTradeSerializer().encode(msg)
+    recovered_msg = MlTradeSerializer().decode(msg_bytes)
+    assert recovered_msg == msg
+    recovered_data = pickle.loads(recovered_msg.payload)  # nosec
+    assert np.array_equal(recovered_data, data)

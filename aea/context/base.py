@@ -29,6 +29,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Address, OutBox
 from aea.skills.tasks import TaskManager
 
+DEFAULT_OEF = "default_oef"
+
 
 class AgentContext:
     """Provide read access to relevant data of the agent for the skills."""
@@ -68,6 +70,9 @@ class AgentContext:
         self._preferences = preferences
         self._goal_pursuit_readiness = goal_pursuit_readiness
         self._task_manager = task_manager
+        self._search_service_address = (
+            DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
+        )
 
     @property
     def shared_state(self) -> Dict[str, Any]:
@@ -91,7 +96,7 @@ class AgentContext:
 
     @property
     def address(self) -> Address:
-        """Get the defualt address."""
+        """Get the default address."""
         return self.identity.address
 
     @property
@@ -133,3 +138,8 @@ class AgentContext:
     def task_manager(self) -> TaskManager:
         """Get the task manager."""
         return self._task_manager
+
+    @property
+    def search_service_address(self) -> Address:
+        """Get the address of the search service."""
+        return self._search_service_address

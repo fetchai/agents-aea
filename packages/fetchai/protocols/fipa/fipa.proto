@@ -1,10 +1,15 @@
 syntax = "proto3";
 
-package fetch.aea.fipa;
+package fetch.aea.Fipa;
 
-message FIPAMessage{
+message FipaMessage{
 
-    message CFP{
+    // Custom Types
+    message Description{
+        bytes description = 1;
+    }
+
+    message Query{
         message Nothing {
         }
         oneof query{
@@ -13,39 +18,49 @@ message FIPAMessage{
             bytes query_bytes = 3;
         }
     }
-    message Propose{
-        repeated bytes proposal = 1;
-    }
-    message Accept{}
 
-    message MatchAccept{}
+
+    // Performatives and contents
+    message Cfp{
+        Query query = 1;
+    }
+
+    message Propose{
+        Description proposal = 1;
+    }
+
+    message Accept_W_Inform{
+        map<string, string> info = 1;
+    }
+
+    message Match_Accept_W_Inform{
+        map<string, string> info = 1;
+    }
+
+    message Inform{
+        map<string, string> info = 1;
+    }
+
+    message Accept{}
 
     message Decline{}
 
-    message Inform{
-        bytes bytes = 1;
-    }
+    message Match_Accept{}
 
-    message AcceptWInform{
-        bytes bytes = 1;
-    }
 
-    message MatchAcceptWInform{
-        bytes bytes = 1;
-    }
-
+    // Standard FipaMessage fields
     int32 message_id = 1;
     string dialogue_starter_reference = 2;
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        CFP cfp = 5;
-        Propose propose = 6;
-        Accept accept = 7;
-        MatchAccept match_accept = 8;
-        Decline decline = 9;
-        Inform inform = 10;
-        AcceptWInform accept_w_inform = 11;
-        MatchAcceptWInform match_accept_w_inform = 12;
+        Accept accept = 5;
+        Accept_W_Inform accept_w_inform = 6;
+        Cfp cfp = 7;
+        Decline decline = 8;
+        Inform inform = 9;
+        Match_Accept match_accept = 10;
+        Match_Accept_W_Inform match_accept_w_inform = 11;
+        Propose propose = 12;
     }
 }

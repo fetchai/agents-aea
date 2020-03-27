@@ -21,6 +21,7 @@
 
 import inspect
 import json
+import logging
 import os
 import re
 from abc import ABC, abstractmethod
@@ -44,6 +45,8 @@ from aea.helpers.base import (
 )
 from aea.mail.base import Address
 
+logger = logging.getLogger(__name__)
+
 
 class Message:
     """This class implements a message."""
@@ -60,7 +63,10 @@ class Message:
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
-        assert self._is_consistent(), "Message initialization inconsistent."
+        try:
+            self._is_consistent()
+        except Exception as e:
+            logger.error(e)
 
     @property
     def counterparty(self) -> Address:

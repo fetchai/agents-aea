@@ -13,35 +13,35 @@ speech_acts:
     content_bool: pt:bool
     content_str: pt:str
   performative_pct:
-    content_set_ct: pt:set[ct:DataModel]
+#    content_set_ct: pt:set[ct:DataModel] # custom type inside of set, list, and dict isn't allowed.
     content_set_bytes: pt:set[pt:bytes]
     content_set_int: pt:set[pt:int]
     content_set_float: pt:set[pt:float]
     content_set_bool: pt:set[pt:bool]
     content_set_str: pt:set[pt:str]
-    content_list_ct: pt:list[ct:DataModel]
+#    content_list_ct: pt:list[ct:DataModel] # custom type inside of set, list, and dict isn't allowed.
     content_list_bytes: pt:list[pt:bytes]
     content_list_int: pt:list[pt:int]
     content_list_float: pt:list[pt:float]
     content_list_bool: pt:list[pt:bool]
     content_list_str: pt:list[pt:str]
   performative_pmt:
-    content_dict_int_ct: pt:dict[pt:int, ct:DataModel]
+#    content_dict_int_ct: pt:dict[pt:int, ct:DataModel] # custom type inside of set, list, and dict isn't allowed.
     content_dict_bool_bytes: pt:dict[pt:bool, pt:bytes]
     content_dict_str_float: pt:dict[pt:str, pt:float]
 #    content_dict_ct_ct: pt:dict[ct:DataModel, ct:DataModel] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
 #    content_dict_bytes_int: pt:dict[pt:bytes, pt:int] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
 #    content_dict_float_int: pt:dict[pt:float, pt:int] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
   performative_mt:
-    content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:int], pt:list[ct:DataModel], pt:dict[pt:str, ct:DataModel]]
-    content_union_2: pt:union[pt:set[pt:int], pt:set[ct:DataModel], pt:set[pt:str], pt:list[ct:DataModel], pt:list[pt:bool], pt:list[pt:bytes], pt:dict[pt:str, ct:DataModel], pt:dict[pt:int, pt:float], pt:dict[pt:bool, pt:bytes]]
+    content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:int], pt:list[pt:bool], pt:dict[pt:str, pt:int]]
+    content_union_2: pt:union[pt:set[pt:int], pt:set[pt:int], pt:set[pt:str], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:bool, pt:bytes]]
   performative_o:
     content_o_ct: pt:optional[ct:DataModel]
     content_o_bool: pt:optional[pt:bool]
     content_o_set_float: pt:optional[pt:set[pt:float]]
     content_o_list_bytes: pt:optional[pt:list[pt:bytes]]
     content_o_dict_str_int: pt:optional[pt:dict[pt:str, ct:int]]
-    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
+    content_o_union: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:int], pt:set[pt:bytes], pt:list[pt:bool], pt:dict[pt:str, pt:float]]]
   performative_empty_contents: {}
 ---
 ct:DataModel: |
