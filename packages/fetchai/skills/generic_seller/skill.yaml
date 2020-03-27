@@ -2,14 +2,14 @@ name: generic_seller
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
-  behaviours.py: QmbkWV4NE2ENVGt4DyxFcLowi6S2PySSapreEV7RKL9vPY
+  behaviours.py: QmU7pGaF2KNRvwBHQGbmwqZiBF65bDsFsk1km9kwtotMm6
   data_model.py: QmZ7kqYdJJ6rcwjRSbmvRPc2jVG4sFEZA5rT11CJ3VXV9S
-  dialogues.py: QmarNumFyrhnh1kcUuLxskBNGxEbfupMWW1eQ1w46PQq9a
-  handlers.py: QmfDGa1zh1q7vsA6qnMbKFsvQopn1pCPmY9fc3sFhjN6mc
+  dialogues.py: QmaBzfmtEZssDWrHsYT1ovCsQ4qmFHvFSkzPBvHiR2Et44
+  handlers.py: QmTbKaBPrFiD8RWGpV6AAQnGg66vVohvLgkzHiUrqUew6U
   strategy.py: QmW4TJsYTPhvmVBawWB2g8mUZ7Kap5V5LThH4wK6JbVis6
+aea_version: 0.2.4
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:
   service_registration:
@@ -50,5 +50,5 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']

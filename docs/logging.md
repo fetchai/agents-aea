@@ -13,7 +13,7 @@ cd my_aea
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: my_aea
 author: ''
 connections:

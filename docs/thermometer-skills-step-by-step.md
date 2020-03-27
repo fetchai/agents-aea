@@ -11,7 +11,7 @@ To follow this tutorial to completion you will need:
  
  - AEA Framework
 	
-The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the OEF and will identify itself as a seller of that data.
+The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the [OEF search and communication node](../oef-ledger) and will identify itself as a seller of that data.
 
 Throughout the tutorial we are using Python3.7, but you can use any Python >= 3.6.
 
@@ -68,12 +68,11 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
-SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -169,7 +168,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
  
     def _register_service(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register to the OEF search node's service directory.
  
         :return: None
         """
@@ -177,60 +176,58 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_SERVICE,
-            id=oef_msg_id,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating thermometer services on OEF.".format(
+            "[{}]: updating thermometer services on OEF search node's service directory.".format(
                 self.context.agent_name
             )
         )
  
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Unregister service from OEF search node's service directory.
  
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_SERVICE,
-            id=oef_msg_id,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering thermometer station services from OEF.".format(
+            "[{}]: unregistering thermometer station services from OEF search node's service directory.".format(
                 self.context.agent_name
             )
         )
         self._registered_service_description = None
 ```
-This Behaviour will register and de-register our AEA’s service on the OEF at regular tick intervals. By registering, the AEA becomes discoverable to possible clients. 
+This Behaviour will register and de-register our AEA’s service on the [OEF search node](../oef-ledger) at regular tick intervals. By registering, the AEA becomes discoverable to possible clients. 
 
 Currently, the AEA-framework supports two different blockchains [Ethereum, Fetchai], and that’s the reason we are checking if we have balance for these two blockchains in the setup method.
 
-The act method unregisters and registers the AEA to the OEF on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
+The act method unregisters and registers the AEA to the [OEF search node](../oef-ledger) on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
 
 ## Step3: Create the handler
 
-So far, we have tasked the AEA with sending register/unregister requests to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF or any other AEA at the moment.
+So far, we have tasked the AEA with sending register/unregister requests to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or any other AEA at the moment.
 
 This script contains the logic to negotiate with another AEA based on the strategy we want our AEA to follow. (we are going to write this next) . 
 
@@ -279,8 +276,8 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.skills.thermometer.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
@@ -288,7 +285,7 @@ from packages.fetchai.skills.thermometer.strategy import Strategy
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
  
-    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
  
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -302,7 +299,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         # convenience representations
-        fipa_msg = cast(FIPAMessage, message)
+        fipa_msg = cast(FipaMessage, message)
         dialogue_reference = fipa_msg.dialogue_reference
  
         # recover dialogue
@@ -329,13 +326,13 @@ class FIPAHandler(Handler):
             return
  
         # handle message
-        if fipa_msg.performative == FIPAMessage.Performative.CFP:
+        if fipa_msg.performative == FipaMessage.Performative.CFP:
             self._handle_cfp(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.ACCEPT:
+        elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
             self._handle_accept(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, dialogue)
  
     def teardown(self) -> None:
@@ -352,7 +349,7 @@ The second part checks what kind of message we received. We are going to impleme
 Under the teardown function add the following code:
 
 ``` python
-def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
+def _handle_unidentified_dialogue(self, msg: FipaMessage) -> None:
    """
    Handle an unidentified dialogue.
 
@@ -364,7 +361,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
    """
    self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
    default_msg = DefaultMessage(
-       type=DefaultMessage.Type.ERROR,
+       performative=DefaultMessage.Performative.ERROR,
        error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
        error_msg="Invalid dialogue.",
        error_data="fipa_message",
@@ -380,7 +377,7 @@ The above code handles an unidentified dialogue by responding to the sender with
 The next code block handles the CFP message, paste the code under the  _handle_unidentified_dialogue function :
 
 ``` python
-def _handle_cfp(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_cfp(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the CFP.
  
@@ -411,19 +408,19 @@ def _handle_cfp(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                 self.context.agent_name, msg.counterparty[-5:], proposal.values
             )
         )
-        proposal_msg = FIPAMessage(
+        proposal_msg = FipaMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
-            performative=FIPAMessage.Performative.PROPOSE,
+            performative=FipaMessage.Performative.PROPOSE,
             proposal=[proposal],
         )
         dialogue.outgoing_extend(proposal_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=FIPAMessage.protocol_id,
-            message=FIPASerializer().encode(proposal_msg),
+            protocol_id=FipaMessage.protocol_id,
+            message=FipaSerializer().encode(proposal_msg),
         )
     else:
         self.context.logger.info(
@@ -431,25 +428,25 @@ def _handle_cfp(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
-        decline_msg = FIPAMessage(
+        decline_msg = FipaMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
-            performative=FIPAMessage.Performative.DECLINE,
+            performative=FipaMessage.Performative.DECLINE,
         )
         dialogue.outgoing_extend(decline_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=FIPAMessage.protocol_id,
-            message=FIPASerializer().encode(decline_msg),
+            protocol_id=FipaMessage.protocol_id,
+            message=FipaSerializer().encode(decline_msg),
         )
 ```
 The above code will respond with a proposal to the client if the CFP matches the supplied services and our strategy otherwise it will respond with a Decline message. 
 The next code-block  handles the decline message we receive from the client. Add the following code under the _handle_cfp function:
 
 ```python 
-def _handle_decline(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the DECLINE.
  
@@ -474,7 +471,7 @@ If we receive a decline message from the client we have to close the dialogue an
 The opposite would be to receive an accept message. Inorder to handle this option add the following code under the _handle_decline function:
 
 ``` python
-def _handle_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the ACCEPT.
  
@@ -498,19 +495,19 @@ def _handle_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
     )
     proposal = cast(Description, dialogue.proposal)
     identifier = cast(str, proposal.values.get("ledger_id"))
-    match_accept_msg = FIPAMessage(
+    match_accept_msg = FipaMessage(
         message_id=new_message_id,
         dialogue_reference=dialogue.dialogue_label.dialogue_reference,
         target=new_target,
-        performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+        performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
         info={"address": self.context.agent_addresses[identifier]},
     )
     dialogue.outgoing_extend(match_accept_msg)
     self.context.outbox.put_message(
         to=msg.counterparty,
         sender=self.context.agent_address,
-        protocol_id=FIPAMessage.protocol_id,
-        message=FIPASerializer().encode(match_accept_msg),
+        protocol_id=FipaMessage.protocol_id,
+        message=FipaSerializer().encode(match_accept_msg),
     )
 ```
 When the client_aea accepts the proposal we send him, we also have to respond with another message (MATCH_ACCEPT_W_INFORM )  to inform the 
@@ -518,7 +515,7 @@ client about the address we would like to send the funds to. Lastly, when we rec
 the funds to the specific address. Add the following code :
 
 ``` python
-def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the INFORM.
  
@@ -567,19 +564,19 @@ def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                     msg.counterparty[-5:],
                 )
             )
-            inform_msg = FIPAMessage(
+            inform_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target,
-                performative=FIPAMessage.Performative.INFORM,
+                performative=FipaMessage.Performative.INFORM,
                 info=dialogue.temp_data,
             )
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=FIPAMessage.protocol_id,
-                message=FIPASerializer().encode(inform_msg),
+                protocol_id=FipaMessage.protocol_id,
+                message=FipaSerializer().encode(inform_msg),
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(
@@ -592,19 +589,19 @@ def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                 )
             )
     elif "Done" in msg.info.keys():
-        inform_msg = FIPAMessage(
+        inform_msg = FipaMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
-            performative=FIPAMessage.Performative.INFORM,
+            performative=FipaMessage.Performative.INFORM,
             info=dialogue.temp_data,
         )
         dialogue.outgoing_extend(inform_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=FIPAMessage.protocol_id,
-            message=FIPASerializer().encode(inform_msg),
+            protocol_id=FipaMessage.protocol_id,
+            message=FipaSerializer().encode(inform_msg),
         )
         dialogues = cast(Dialogues, self.context.dialogues)
         dialogues.dialogue_stats.add_dialogue_endstate(
@@ -779,10 +776,10 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 
 
-class Dialogue(FIPADialogue):
+class Dialogue(FipaDialogue):
    """The dialogue class maintains state of a dialogue and manages it."""
 
    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
@@ -794,12 +791,12 @@ class Dialogue(FIPADialogue):
 
        :return: None
        """
-       FIPADialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+       FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
        self.temp_data = None  # type: Optional[Dict[str, Any]]
        self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(Model, FIPADialogues):
+class Dialogues(Model, FipaDialogues):
    """The dialogues class keeps track of all dialogues."""
 
    def __init__(self, **kwargs) -> None:
@@ -809,7 +806,7 @@ class Dialogues(Model, FIPADialogues):
        :return: None
        """
        Model.__init__(self, **kwargs)
-       FIPADialogues.__init__(self)
+       FipaDialogues.__init__(self)
 
 ```
 
@@ -841,7 +838,7 @@ class Thermometer_Datamodel(DataModel):
        )
 
 ```
-This data model registers to the OEF as an AEA that is in the UK and specifically in Cambridge. 
+This data model registers to the [OEF search node](../oef-ledger) as an AEA that is in the UK and specifically in Cambridge. 
 If a client_AEA searches for AEA in the UK the oef will respond with the address of our AEA. 
 
 ## Step7: Update the YAML files
@@ -880,7 +877,7 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
  pyserial: {}
@@ -894,7 +891,7 @@ We are going to modify this file later on before we run the aea but for now make
 
 
 ```
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: my_aea
 author: author
 connections:
@@ -953,8 +950,8 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -1016,14 +1013,14 @@ class MySearchBehaviour(TickerBehaviour):
        if strategy.is_searching:
            query = strategy.get_service_query()
            search_id = strategy.get_next_search_id()
-           oef_msg = OEFMessage(
-               type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+           oef_msg = OefSearchMessage(
+               performative=OefSearchMessage.Performative.SEARCH_SERVICES, dialogue_reference=(str(search_id), ""), query=query
            )
            self.context.outbox.put_message(
-               to=DEFAULT_OEF,
+               to=self.context.search_service_address,
                sender=self.context.agent_address,
-               protocol_id=OEFMessage.protocol_id,
-               message=OEFSerializer().encode(oef_msg),
+               protocol_id=OefSearchMessage.protocol_id,
+               message=OefSearchSerializer().encode(oef_msg),
            )
 
    def teardown(self) -> None:
@@ -1054,11 +1051,11 @@ class MySearchBehaviour(TickerBehaviour):
 
 ```
 This Behaviour will register to the Search_Service of the oef with a specific query at regular tick intervals. 
-By registering to the search service the OEF can respond with possible sellers that match our query.
+By registering to the search service the [OEF search node](../oef-ledger) can respond with possible sellers that match our query.
 
 ## Step3: Create the handler
 
-So far, we have tasked the AEA with sending search queries to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF or any other agent at the moment.
+So far, we have tasked the AEA with sending search queries to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) or any other agent at the moment.
 
 This script contains the logic to negotiate with another AEA based on the strategy we want our AEA to follow (we are going to write this next) .
 
@@ -1075,9 +1072,9 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.thermometer_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
@@ -1085,7 +1082,7 @@ from packages.fetchai.skills.thermometer_client.strategy import Strategy
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
  
-    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
  
     def setup(self) -> None:
         """
@@ -1103,7 +1100,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         # convenience representations
-        fipa_msg = cast(FIPAMessage, message)
+        fipa_msg = cast(FipaMessage, message)
  
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -1119,13 +1116,13 @@ class FIPAHandler(Handler):
             return
  
         # handle message
-        if fipa_msg.performative == FIPAMessage.Performative.PROPOSE:
+        if fipa_msg.performative == FipaMessage.Performative.PROPOSE:
             self._handle_propose(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+        elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._handle_match_accept(fipa_msg, dialogue)
-        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, dialogue)
  
     def teardown(self) -> None:
@@ -1140,7 +1137,7 @@ You will see that we are following similar logic when we develop the client’s 
 Then we are checking what kind of message we received. So lets start creating our handlers:
 
 ```python 
-def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
+def _handle_unidentified_dialogue(self, msg: FipaMessage) -> None:
     """
     Handle an unidentified dialogue.
  
@@ -1148,7 +1145,7 @@ def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
     """
     self.context.logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
     default_msg = DefaultMessage(
-        type=DefaultMessage.Type.ERROR,
+        performative=DefaultMessage.Performative.ERROR,
         error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
         error_msg="Invalid dialogue.",
         error_data="fipa_message",
@@ -1164,7 +1161,7 @@ The above code handles the unidentified dialogues. And responds with an error me
 Next we will handle the proposal that we receive from the seller_aea : 
 
 ```python
-def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the propose.
  
@@ -1195,18 +1192,18 @@ def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                 )
             )
             dialogue.proposal = proposal
-            accept_msg = FIPAMessage(
+            accept_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target_id,
-                performative=FIPAMessage.Performative.ACCEPT,
+                performative=FipaMessage.Performative.ACCEPT,
             )
             dialogue.outgoing_extend(accept_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=FIPAMessage.protocol_id,
-                message=FIPASerializer().encode(accept_msg),
+                protocol_id=FipaMessage.protocol_id,
+                message=FipaSerializer().encode(accept_msg),
             )
         else:
             self.context.logger.info(
@@ -1214,18 +1211,18 @@ def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
                     self.context.agent_name, msg.counterparty[-5:]
                 )
             )
-            decline_msg = FIPAMessage(
+            decline_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target_id,
-                performative=FIPAMessage.Performative.DECLINE,
+                performative=FipaMessage.Performative.DECLINE,
             )
             dialogue.outgoing_extend(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
-                protocol_id=FIPAMessage.protocol_id,
-                message=FIPASerializer().encode(decline_msg),
+                protocol_id=FipaMessage.protocol_id,
+                message=FipaSerializer().encode(decline_msg),
             )
 ```
 When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy.  If the proposal is not affordable or acceptable we respond with a decline message. Otherwise, we send an accept message to the seller.
@@ -1233,7 +1230,7 @@ The next code-block handles the decline message that we may receive from the cli
 
 ```python
 
-def _handle_decline(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the decline.
  
@@ -1263,7 +1260,7 @@ in that case, it will send a match_accept message in order to handle this add th
 
 ```python
 
-def _handle_match_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_match_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the match accept.
  
@@ -1308,19 +1305,19 @@ def _handle_match_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
     else:
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
-        inform_msg = FIPAMessage(
+        inform_msg = FipaMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
-            performative=FIPAMessage.Performative.INFORM,
+            performative=FipaMessage.Performative.INFORM,
             info={"Done": "Sending payment via bank transfer"},
         )
         dialogue.outgoing_extend(inform_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=FIPAMessage.protocol_id,
-            message=FIPASerializer().encode(inform_msg),
+            protocol_id=FipaMessage.protocol_id,
+            message=FipaSerializer().encode(inform_msg),
         )
         self.context.logger.info(
             "[{}]: informing counterparty={} of payment.".format(
@@ -1337,7 +1334,7 @@ Lastly, we need to handle the inform message because this is the message that wi
 
 ```python
 
-def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+def _handle_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
     """
     Handle the match inform.
  
@@ -1369,16 +1366,16 @@ def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         )
 ```
 The main difference between this handler and the my_aea handler is that in this one we create more than one handler. 
-The reason is that we receive messages not only from the seller_aea but also from the decision_maker and the OEF. 
+The reason is that we receive messages not only from the seller_aea but also from the decision_maker and the [OEF search node](../oef-ledger). 
 So we need a handler to be able to read different kinds of messages. 
-To handle the OEF response on our search request adds the following code in the same file :
+To handle the [OEF search node](../oef-ledger) response on our search request adds the following code in the same file :
 
 ```python 
 
 class OEFHandler(Handler):
     """This class scaffolds a handler."""
  
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
  
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -1392,8 +1389,8 @@ class OEFHandler(Handler):
         :return: None
         """
         # convenience representations
-        oef_msg = cast(OEFMessage, message)
-        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+        oef_msg = cast(OefSearchMessage, message)
+        if oef_msg.type is OefSearchMessage.Performative.SEARCH_RESULT:
             agents = oef_msg.agents
             self._handle_search(agents)
  
@@ -1433,19 +1430,19 @@ class OEFHandler(Handler):
                     self.context.agent_name, opponent_addr[-5:]
                 )
             )
-            cfp_msg = FIPAMessage(
-                message_id=FIPAMessage.STARTING_MESSAGE_ID,
+            cfp_msg = FipaMessage(
+                message_id=FipaMessage.STARTING_MESSAGE_ID,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                performative=FIPAMessage.Performative.CFP,
-                target=FIPAMessage.STARTING_TARGET,
+                performative=FipaMessage.Performative.CFP,
+                target=FipaMessage.STARTING_TARGET,
                 query=query,
             )
             dialogue.outgoing_extend(cfp_msg)
             self.context.outbox.put_message(
                 to=opponent_addr,
                 sender=self.context.agent_address,
-                protocol_id=FIPAMessage.protocol_id,
-                message=FIPASerializer().encode(cfp_msg),
+                protocol_id=FipaMessage.protocol_id,
+                message=FipaSerializer().encode(cfp_msg),
             )
         else:
             self.context.logger.info(
@@ -1494,23 +1491,23 @@ class MyTransactionHandler(Handler):
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
-            fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
+            fipa_msg = cast(FipaMessage, dialogue.last_incoming_message)
             new_message_id = fipa_msg.message_id + 1
             new_target_id = fipa_msg.message_id
             counterparty_addr = dialogue.dialogue_label.dialogue_opponent_addr
-            inform_msg = FIPAMessage(
+            inform_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target_id,
-                performative=FIPAMessage.Performative.INFORM,
+                performative=FipaMessage.Performative.INFORM,
                 info=json_data,
             )
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(
                 to=counterparty_addr,
                 sender=self.context.agent_address,
-                protocol_id=FIPAMessage.protocol_id,
-                message=FIPASerializer().encode(inform_msg),
+                protocol_id=FipaMessage.protocol_id,
+                message=FipaSerializer().encode(inform_msg),
             )
             self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(
@@ -1651,10 +1648,10 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 
 
-class Dialogue(FIPADialogue):
+class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
  
     def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
@@ -1666,11 +1663,11 @@ class Dialogue(FIPADialogue):
  
         :return: None
         """
-        FIPADialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
         self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(Model, FIPADialogues):
+class Dialogues(Model, FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
  
     def __init__(self, **kwargs) -> None:
@@ -1680,7 +1677,7 @@ class Dialogues(Model, FIPADialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FIPADialogues.__init__(self)
+        FipaDialogues.__init__(self)
 ```
 
 The dialogues class stores dialogue with each client_aea in a list so we can have access to previous messages and enable 
@@ -1729,7 +1726,7 @@ models:
  dialogues:
    class_name: Dialogues
    args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
+protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
 ledgers: ['fetchai']
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
@@ -1739,7 +1736,7 @@ We are going to modify this file later on before we run the aea but for now, mak
 
 ``` yaml
 
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: m_client
 author: author
 connections:
@@ -1784,7 +1781,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)
 
-In a separate terminal, launch a local OEF node (for search and discovery).
+In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```

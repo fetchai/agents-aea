@@ -1,4 +1,4 @@
-aea_version: 0.2.3
+aea_version: 0.2.4
 agent_name: car_data_buyer
 author: fetchai
 connections:
@@ -19,7 +19,7 @@ private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
-- fetchai/oef:0.1.0
+- fetchai/oef_search:0.1.0
 registry_path: ../packages
 skills:
 - fetchai/carpark_client:0.1.0

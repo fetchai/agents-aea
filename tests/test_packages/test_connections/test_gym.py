@@ -70,7 +70,9 @@ class TestGymConnection:
     async def test_send_connection_error(self):
         """Test send connection error."""
         msg = GymMessage(
-            performative=GymMessage.Performative.ACT, action="any_action", step_id=1
+            performative=GymMessage.Performative.ACT,
+            action=GymMessage.AnyObject("any_action"),
+            step_id=1,
         )
         msg_bytes = GymSerializer().encode(msg)
         envelope = Envelope(

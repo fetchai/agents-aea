@@ -2,18 +2,18 @@ name: 'tac_negotiation'
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: QmRrF3jm7h6EmnQoM2T4Z8yrmAgSVckNp8eCWvSBBCsctS
-  dialogues.py: Qmeuqeb4anuc1PsW2GbckbiT9CrYka6G8nhj2xaJELqVjB
-  handlers.py: QmRTWbdgziDa2czccPJD2akoQvurPRpmmJXhiCRvqepyAF
+  behaviours.py: QmRrHMEja2Q41RKeWULNcanqE2mGZzy9ZMaH2jg4JQZ6uw
+  dialogues.py: QmceDUEb1tmtTQZw2WxjQyTNKn6Zni7ZCUuDdznNN7nRzh
+  handlers.py: QmdaNWNunxtW445GefP9aQtihqYurJAKU59WX59rAwEsNH
   helpers.py: QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmbRgpQxF8iJEo1B2raAPXnXqHQmB1qYB4TURQhxeS1YL1
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
   transactions.py: QmY83PRH3ncMuqvjWsC3HuxJRS51dFq4RytMzEYjBA9KDx
+aea_version: 0.2.4
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
   tac_negotiation:
@@ -55,4 +55,4 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.1.0']

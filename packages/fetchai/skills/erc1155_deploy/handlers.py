@@ -27,15 +27,15 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
 
 class FIPAHandler(Handler):
     """This class implements a FIPA handler."""
 
-    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -48,11 +48,11 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        fipa_msg = cast(FIPAMessage, message)
+        fipa_msg = cast(FipaMessage, message)
 
-        if fipa_msg.performative == FIPAMessage.Performative.CFP:
+        if fipa_msg.performative == FipaMessage.Performative.CFP:
             self._handle_cfp(fipa_msg)
-        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
             self._handle_inform(fipa_msg)
 
     def teardown(self) -> None:
@@ -63,7 +63,7 @@ class FIPAHandler(Handler):
         """
         pass
 
-    def _handle_cfp(self, msg: FIPAMessage) -> None:
+    def _handle_cfp(self, msg: FipaMessage) -> None:
         """
         Handle the CFP.
 
@@ -83,11 +83,11 @@ class FIPAHandler(Handler):
         contract = self.context.contracts.erc1155
         contract_nonce = contract.generate_trade_nonce(self.context.agent_address)
         self.context.shared_state["contract_nonce"] = contract_nonce
-        info_msg = FIPAMessage(
+        info_msg = FipaMessage(
             message_id=new_message_id,
             dialogue_reference=("", ""),
             target=new_target,
-            performative=FIPAMessage.Performative.INFORM,
+            performative=FipaMessage.Performative.INFORM,
             info={
                 "contract": contract.instance.address,
                 "token_ids": contract.token_ids,
@@ -101,11 +101,11 @@ class FIPAHandler(Handler):
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
-            protocol_id=FIPAMessage.protocol_id,
-            message=FIPASerializer().encode(info_msg),
+            protocol_id=FipaMessage.protocol_id,
+            message=FipaSerializer().encode(info_msg),
         )
 
-    def _handle_inform(self, msg: FIPAMessage) -> None:
+    def _handle_inform(self, msg: FipaMessage) -> None:
         """
         Handle the INFORM.
 

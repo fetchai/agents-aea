@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,88 +17,114 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serialization for the TAC protocol."""
+"""Serialization module for ml_trade protocol."""
 
-import base64
-import json
-import pickle  # nosec
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
+from packages.fetchai.protocols.ml_trade import ml_trade_pb2
+from packages.fetchai.protocols.ml_trade.custom_types import Description
+from packages.fetchai.protocols.ml_trade.custom_types import Query
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 
 
-class MLTradeSerializer(Serializer):
-    """Serialization for the ML Trade protocol."""
+class MlTradeSerializer(Serializer):
+    """Serialization for the 'ml_trade' protocol."""
 
     def encode(self, msg: Message) -> bytes:
-        """Encode a 'ml_trade' message into bytes."""
-        body = {}  # Dict[str, Any]
-        msg = cast(MLTradeMessage, msg)
-        body["performative"] = msg.performative.value
+        """
+        Encode a 'MlTrade' message into bytes.
 
-        if msg.performative == MLTradeMessage.Performative.CFT:
+        :param msg: the message object.
+        :return: the bytes.
+        """
+        msg = cast(MlTradeMessage, msg)
+        ml_trade_msg = ml_trade_pb2.MlTradeMessage()
+        ml_trade_msg.message_id = msg.message_id
+        dialogue_reference = msg.dialogue_reference
+        ml_trade_msg.dialogue_starter_reference = dialogue_reference[0]
+        ml_trade_msg.dialogue_responder_reference = dialogue_reference[1]
+        ml_trade_msg.target = msg.target
+
+        performative_id = msg.performative
+        if performative_id == MlTradeMessage.Performative.CFP:
+            performative = ml_trade_pb2.MlTradeMessage.Cfp()  # type: ignore
             query = msg.query
-            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")  # nosec
-            body["query"] = query_bytes
-        elif msg.performative == MLTradeMessage.Performative.TERMS:
+            Query.encode(performative.query, query)
+            ml_trade_msg.cfp.CopyFrom(performative)
+        elif performative_id == MlTradeMessage.Performative.TERMS:
+            performative = ml_trade_pb2.MlTradeMessage.Terms()  # type: ignore
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
-            body["terms"] = terms_bytes
-        elif msg.performative == MLTradeMessage.Performative.ACCEPT:
-            # encoding terms
+            Description.encode(performative.terms, terms)
+            ml_trade_msg.terms.CopyFrom(performative)
+        elif performative_id == MlTradeMessage.Performative.ACCEPT:
+            performative = ml_trade_pb2.MlTradeMessage.Accept()  # type: ignore
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
-            body["terms"] = terms_bytes
-            # encoding tx_digest
-            body["tx_digest"] = msg.tx_digest
-        elif msg.performative == MLTradeMessage.Performative.DATA:
-            # encoding terms
+            Description.encode(performative.terms, terms)
+            tx_digest = msg.tx_digest
+            performative.tx_digest = tx_digest
+            ml_trade_msg.accept.CopyFrom(performative)
+        elif performative_id == MlTradeMessage.Performative.DATA:
+            performative = ml_trade_pb2.MlTradeMessage.Data()  # type: ignore
             terms = msg.terms
-            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")  # nosec
-            body["terms"] = terms_bytes
-            # encoding data
-            data = msg.data
-            data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")  # nosec
-            body["data"] = data_bytes
-        else:  # pragma: no cover
-            raise ValueError("Type not recognized.")
+            Description.encode(performative.terms, terms)
+            payload = msg.payload
+            performative.payload = payload
+            ml_trade_msg.data.CopyFrom(performative)
+        else:
+            raise ValueError("Performative not valid: {}".format(performative_id))
 
-        bytes_msg = json.dumps(body).encode("utf-8")
-        return bytes_msg
+        ml_trade_bytes = ml_trade_msg.SerializeToString()
+        return ml_trade_bytes
 
     def decode(self, obj: bytes) -> Message:
-        """Decode bytes into a 'ml_trade' message."""
-        json_body = json.loads(obj.decode("utf-8"))
-        body = {}
+        """
+        Decode bytes into a 'MlTrade' message.
 
-        msg_type = MLTradeMessage.Performative(json_body["performative"])
-        body["performative"] = msg_type
-        if msg_type == MLTradeMessage.Performative.CFT:
-            query_bytes = base64.b64decode(json_body["query"])
-            query = pickle.loads(query_bytes)  # nosec
-            body["query"] = query
-        elif msg_type == MLTradeMessage.Performative.TERMS:
-            terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)  # nosec
-            body["terms"] = terms
-        elif msg_type == MLTradeMessage.Performative.ACCEPT:
-            terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)  # nosec
-            body["terms"] = terms
-            body["tx_digest"] = json_body["tx_digest"]
-        elif msg_type == MLTradeMessage.Performative.DATA:
-            # encoding terms
-            terms_bytes = base64.b64decode(json_body["terms"])
-            terms = pickle.loads(terms_bytes)  # nosec
-            body["terms"] = terms
-            # encoding data
-            data_bytes = base64.b64decode(json_body["data"])
-            data = pickle.loads(data_bytes)  # nosec
-            body["data"] = data
-        else:  # pragma: no cover
-            raise ValueError("Type not recognized.")
+        :param obj: the bytes object.
+        :return: the 'MlTrade' message.
+        """
+        ml_trade_pb = ml_trade_pb2.MlTradeMessage()
+        ml_trade_pb.ParseFromString(obj)
+        message_id = ml_trade_pb.message_id
+        dialogue_reference = (
+            ml_trade_pb.dialogue_starter_reference,
+            ml_trade_pb.dialogue_responder_reference,
+        )
+        target = ml_trade_pb.target
 
-        return MLTradeMessage(performative=msg_type, body=body)
+        performative = ml_trade_pb.WhichOneof("performative")
+        performative_id = MlTradeMessage.Performative(str(performative))
+        performative_content = dict()  # type: Dict[str, Any]
+        if performative_id == MlTradeMessage.Performative.CFP:
+            pb2_query = ml_trade_pb.cfp.query
+            query = Query.decode(pb2_query)
+            performative_content["query"] = query
+        elif performative_id == MlTradeMessage.Performative.TERMS:
+            pb2_terms = ml_trade_pb.terms.terms
+            terms = Description.decode(pb2_terms)
+            performative_content["terms"] = terms
+        elif performative_id == MlTradeMessage.Performative.ACCEPT:
+            pb2_terms = ml_trade_pb.accept.terms
+            terms = Description.decode(pb2_terms)
+            performative_content["terms"] = terms
+            tx_digest = ml_trade_pb.accept.tx_digest
+            performative_content["tx_digest"] = tx_digest
+        elif performative_id == MlTradeMessage.Performative.DATA:
+            pb2_terms = ml_trade_pb.data.terms
+            terms = Description.decode(pb2_terms)
+            performative_content["terms"] = terms
+            payload = ml_trade_pb.data.payload
+            performative_content["payload"] = payload
+        else:
+            raise ValueError("Performative not valid: {}.".format(performative_id))
+
+        return MlTradeMessage(
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=performative,
+            **performative_content
+        )

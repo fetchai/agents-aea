@@ -111,7 +111,7 @@ protocol_config_files = [
         "packages",
         "fetchai",
         "protocols",
-        "oef",
+        "oef_search",
         DEFAULT_PROTOCOL_CONFIG_FILE,
     ),
     os.path.join(
@@ -277,6 +277,18 @@ def pytest_addoption(parser):
         default=False,
         help="Skip integration tests.",
     )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "ci: mark test as not for ci")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--ci"):
+        skip_ci = pytest.mark.skip(reason="need no --ci to run")
+        for item in items:
+            if "ci" in item.keywords:
+                item.add_marker(skip_ci)
 
 
 @pytest.fixture(scope="session")

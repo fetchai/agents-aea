@@ -16,20 +16,20 @@ aea create my_aea && cd my_aea
 aea scaffold skill my_search
 ```
 
-In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF](../oef-ledger) and process the resulting response.
+In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `my_aea/skills/my_search` with our implementation. We will build a simple skill which lets the AEA send a search query to the [OEF search node](../oef-ledger) and process the resulting response.
 
 ## Step 2: Develop a Behaviour
 
 A `Behaviour` class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
-In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
+In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the [OEF search node](../oef-ledger) via the [OEF communication network](../oef-ledger).
 
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 class MySearchBehaviour(TickerBehaviour):
@@ -59,21 +59,21 @@ class MySearchBehaviour(TickerBehaviour):
         self.sent_search_count += 1
         search_constraints = [Constraint("country", ConstraintType("==", "UK"))]
         search_query_w_empty_model = Query(search_constraints, model=None)
-        search_request = OEFMessage(
-            type=OEFMessage.Type.SEARCH_SERVICES,
-            id=self.sent_search_count,
+        search_request = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=(str(self.sent_search_count), ""),
             query=search_query_w_empty_model,
         )
         self.context.logger.info(
-            "[{}]: sending search request to OEF, search_count={}".format(
+            "[{}]: sending search request to OEF search node, search_count={}".format(
                 self.context.agent_name, self.sent_search_count
             )
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(search_request),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(search_request),
         )
 
     def teardown(self) -> None:
@@ -93,20 +93,20 @@ We place this code in `my_aea/skills/my_search/behaviours.py`.
 
 ## Step 3: Develop a Handler
 
-So far, we have tasked the AEA with sending search requests to the OEF. However, we have no way of handling the responses sent to the AEA by the OEF at the moment. The AEA would simply respond to the OEF via the default `error` skill which sends all unrecognised envelopes back to the sender.
+So far, we have tasked the AEA with sending search requests to the [OEF search node](../oef-ledger). However, we have no way of handling the responses sent to the AEA by the [OEF search node](../oef-ledger) at the moment. The AEA would simply respond to the [OEF search node](../oef-ledger) via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
 Let us now implement a handler to deal with the incoming search responses.
 
 ``` python
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 
 class MySearchHandler(Handler):
     """This class provides a simple search handler."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.protocol_id
+    SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -117,16 +117,16 @@ class MySearchHandler(Handler):
         """Set up the handler."""
         self.context.logger.info("[{}]: setting up MySearchHandler".format(self.context.agent_name))
 
-    def handle(self, message: OEFMessage) -> None:
+    def handle(self, message: OefSearchMessage) -> None:
         """
         Handle the message.
 
         :param message: the message.
         :return: None
         """
-        msg_type = OEFMessage.Type(message.get("type"))
+        msg_type = OefSearchMessage.Performative(message.performative)
 
-        if msg_type is OEFMessage.Type.SEARCH_RESULT:
+        if msg_type is OefSearchMessage.Performative.SEARCH_RESULT:
             self.received_search_count += 1
             nb_agents_found = len(message.get("agents"))
             self.context.logger.info(
@@ -153,7 +153,7 @@ class MySearchHandler(Handler):
         )
 ```
 
-We create a handler which is registered for the `oef` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
+We create a handler which is registered for the `oef_search` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
 
 We also implement a trivial check on the difference between the amount of search requests sent and responses received.
 
@@ -178,8 +178,8 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
-description: 'A simple search skill utilising the OEF.'
+aea_version: 0.2.4
+description: 'A simple search skill utilising the OEF search and communication node.'
 fingerprint: {}
 behaviours:
   my_search_behaviour:
@@ -191,7 +191,7 @@ handlers:
     class_name: MySearchHandler
     args: {}
 models: {}
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 
@@ -213,7 +213,7 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef:0.1.0
+aea add protocol fetchai/oef_search:0.1.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
@@ -226,7 +226,7 @@ aea install
 
 ## Step 8: Run a service provider AEA
 
-We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
+We first start a local [OEF search and communication node](../oef-ledger) in a separate terminal window.
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -238,7 +238,7 @@ aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registr
 aea run
 ```
 
-This AEA will simply register a location service on the OEF so we can search for it.
+This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -251,11 +251,10 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
-SERVICE_ID = ""
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -297,7 +296,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
     def _register_service(self) -> None:
         """
-        Register to the OEF Service Directory.
+        Register to the OEF search node's service directory.
 
         :return: None
         """
@@ -305,44 +304,42 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_SERVICE,
-            id=oef_msg_id,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating services on OEF.".format(self.context.agent_name)
+            "[{}]: updating services on OEF search node's service directory.".format(self.context.agent_name)
         )
 
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF Service Directory.
+        Unregister service from OEF search node's service directory.
 
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_SERVICE,
-            id=oef_msg_id,
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
         )
         self.context.outbox.put_message(
-            to=DEFAULT_OEF,
+            to=self.context.search_service_address,
             sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
+            protocol_id=OefSearchMessage.protocol_id,
+            message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering services from OEF.".format(self.context.agent_name)
+            "[{}]: unregistering services from search OEF node's service directory.".format(self.context.agent_name)
         )
         self._registered_service_description = None
 ```
@@ -449,13 +446,13 @@ name: simple_service_registration
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
-description: The scaffold skill is a scaffold for your own skill implementation.
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWRte74248mgV6DGsL4qWoeoTJgtVu5F893PQyQ43WtLD
+  behaviours.py: QmcYLWnWuB121Ghefv58GevCqAAetx1H7taMem94xwCjHQ
   data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
   strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
+aea_version: 0.2.4
+description: The simple service registration skills is a skill to register a service.
 behaviours:
   service:
     args:
@@ -479,7 +476,7 @@ models:
       service_data:
         country: UK
         city: Cambridge
-protocols: ['fetchai/oef:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 </p>
@@ -493,7 +490,7 @@ We can then launch our AEA.
 aea run --connections fetchai/oef:0.1.0
 ```
 
-We can see that the AEA sends search requests to the OEF and receives search responses from the OEF. Since our AEA is only searching on the OEF - and not registered on the OEF - the search response returns a single agent (the service provider).
+We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).
 
 We stop the AEA with `CTRL + C`.
 

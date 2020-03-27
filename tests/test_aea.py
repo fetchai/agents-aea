@@ -44,8 +44,8 @@ from aea.registries.base import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from .conftest import (
     CUR_PATH,
@@ -238,18 +238,18 @@ async def test_handle():
             assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
-            msg = FIPASerializer().encode(
-                FIPAMessage(
-                    performative=FIPAMessage.Performative.ACCEPT,
-                    message_id=0,
+            msg = FipaSerializer().encode(
+                FipaMessage(
+                    performative=FipaMessage.Performative.ACCEPT,
+                    message_id=1,
                     dialogue_reference=(str(0), ""),
-                    target=1,
+                    target=0,
                 )
             )
             envelope = Envelope(
                 to=identity.address,
                 sender=identity.address,
-                protocol_id=FIPAMessage.protocol_id,
+                protocol_id=FipaMessage.protocol_id,
                 message=msg,
             )
             # send envelope via localnode back to agent

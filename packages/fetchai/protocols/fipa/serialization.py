@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,26 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serialization for the FIPA protocol."""
+"""Serialization module for fipa protocol."""
 
-import pickle  # nosec
-from typing import cast
+from typing import Any, Dict, cast
 
-from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from packages.fetchai.protocols.fipa import fipa_pb2
-from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.custom_types import Description
+from packages.fetchai.protocols.fipa.custom_types import Query
+from packages.fetchai.protocols.fipa.message import FipaMessage
 
 
-class FIPASerializer(Serializer):
-    """Serialization for the FIPA protocol."""
+class FipaSerializer(Serializer):
+    """Serialization for the 'fipa' protocol."""
 
     def encode(self, msg: Message) -> bytes:
-        """Encode a FIPA message into bytes."""
-        msg = cast(FIPAMessage, msg)
-        fipa_msg = fipa_pb2.FIPAMessage()
+        """
+        Encode a 'Fipa' message into bytes.
+
+        :param msg: the message object.
+        :return: the bytes.
+        """
+        msg = cast(FipaMessage, msg)
+        fipa_msg = fipa_pb2.FipaMessage()
         fipa_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
         fipa_msg.dialogue_starter_reference = dialogue_reference[0]
@@ -44,53 +49,40 @@ class FIPASerializer(Serializer):
         fipa_msg.target = msg.target
 
         performative_id = msg.performative
-        if performative_id == FIPAMessage.Performative.CFP:
-            performative = fipa_pb2.FIPAMessage.CFP()  # type: ignore
+        if performative_id == FipaMessage.Performative.CFP:
+            performative = fipa_pb2.FipaMessage.Cfp()  # type: ignore
             query = msg.query
-            if query is None or query == b"":
-                nothing = fipa_pb2.FIPAMessage.CFP.Nothing()  # type: ignore
-                performative.nothing.CopyFrom(nothing)
-            elif type(query) == Query:
-                query = pickle.dumps(query)  # nosec
-                performative.query_bytes = query
-            elif type(query) == bytes:
-                performative.bytes = query
-            else:
-                raise ValueError("Query type not supported: {}".format(type(query)))
+            Query.encode(performative.query, query)
             fipa_msg.cfp.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.PROPOSE:
-            performative = fipa_pb2.FIPAMessage.Propose()  # type: ignore
+        elif performative_id == FipaMessage.Performative.PROPOSE:
+            performative = fipa_pb2.FipaMessage.Propose()  # type: ignore
             proposal = msg.proposal
-            p_array_bytes = [pickle.dumps(p) for p in proposal]  # nosec
-            performative.proposal.extend(p_array_bytes)
+            Description.encode(performative.proposal, proposal)
             fipa_msg.propose.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.ACCEPT:
-            performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
-            fipa_msg.accept.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
-            performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
-            fipa_msg.match_accept.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
-            performative = fipa_pb2.FIPAMessage.AcceptWInform()  # type: ignore
-            data = msg.info
-            data_bytes = pickle.dumps(data)  # nosec
-            performative.bytes = data_bytes
+        elif performative_id == FipaMessage.Performative.ACCEPT_W_INFORM:
+            performative = fipa_pb2.FipaMessage.Accept_W_Inform()  # type: ignore
+            info = msg.info
+            performative.info.update(info)
             fipa_msg.accept_w_inform.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            performative = fipa_pb2.FIPAMessage.MatchAcceptWInform()  # type: ignore
-            data = msg.info
-            data_bytes = pickle.dumps(data)  # nosec
-            performative.bytes = data_bytes
+        elif performative_id == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            performative = fipa_pb2.FipaMessage.Match_Accept_W_Inform()  # type: ignore
+            info = msg.info
+            performative.info.update(info)
             fipa_msg.match_accept_w_inform.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.DECLINE:
-            performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
-            fipa_msg.decline.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.INFORM:
-            performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
-            data = msg.info
-            data_bytes = pickle.dumps(data)  # nosec
-            performative.bytes = data_bytes
+        elif performative_id == FipaMessage.Performative.INFORM:
+            performative = fipa_pb2.FipaMessage.Inform()  # type: ignore
+            info = msg.info
+            performative.info.update(info)
             fipa_msg.inform.CopyFrom(performative)
+        elif performative_id == FipaMessage.Performative.ACCEPT:
+            performative = fipa_pb2.FipaMessage.Accept()  # type: ignore
+            fipa_msg.accept.CopyFrom(performative)
+        elif performative_id == FipaMessage.Performative.DECLINE:
+            performative = fipa_pb2.FipaMessage.Decline()  # type: ignore
+            fipa_msg.decline.CopyFrom(performative)
+        elif performative_id == FipaMessage.Performative.MATCH_ACCEPT:
+            performative = fipa_pb2.FipaMessage.Match_Accept()  # type: ignore
+            fipa_msg.match_accept.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -98,8 +90,13 @@ class FIPASerializer(Serializer):
         return fipa_bytes
 
     def decode(self, obj: bytes) -> Message:
-        """Decode bytes into a FIPA message."""
-        fipa_pb = fipa_pb2.FIPAMessage()
+        """
+        Decode bytes into a 'Fipa' message.
+
+        :param obj: the bytes object.
+        :return: the 'Fipa' message.
+        """
+        fipa_pb = fipa_pb2.FipaMessage()
         fipa_pb.ParseFromString(obj)
         message_id = fipa_pb.message_id
         dialogue_reference = (
@@ -109,45 +106,38 @@ class FIPASerializer(Serializer):
         target = fipa_pb.target
 
         performative = fipa_pb.WhichOneof("performative")
-        performative_id = FIPAMessage.Performative(str(performative))
-        performative_content = dict()
-        if performative_id == FIPAMessage.Performative.CFP:
-            query_type = fipa_pb.cfp.WhichOneof("query")
-            if query_type == "nothing":
-                query = None
-            elif query_type == "query_bytes":
-                query = pickle.loads(fipa_pb.cfp.query_bytes)  # nosec
-            elif query_type == "bytes":
-                query = fipa_pb.cfp.bytes
-            else:
-                raise ValueError("Query type not recognized.")  # pragma: no cover
+        performative_id = FipaMessage.Performative(str(performative))
+        performative_content = dict()  # type: Dict[str, Any]
+        if performative_id == FipaMessage.Performative.CFP:
+            pb2_query = fipa_pb.cfp.query
+            query = Query.decode(pb2_query)
             performative_content["query"] = query
-        elif performative_id == FIPAMessage.Performative.PROPOSE:
-            descriptions = []
-            for p_bytes in fipa_pb.propose.proposal:
-                p = pickle.loads(p_bytes)  # nosec
-                p = cast(Description, p)
-                descriptions.append(p)
-            performative_content["proposal"] = descriptions
-        elif performative_id == FIPAMessage.Performative.ACCEPT:
+        elif performative_id == FipaMessage.Performative.PROPOSE:
+            pb2_proposal = fipa_pb.propose.proposal
+            proposal = Description.decode(pb2_proposal)
+            performative_content["proposal"] = proposal
+        elif performative_id == FipaMessage.Performative.ACCEPT_W_INFORM:
+            info = fipa_pb.accept_w_inform.info
+            info_dict = dict(info)
+            performative_content["info"] = info_dict
+        elif performative_id == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            info = fipa_pb.match_accept_w_inform.info
+            info_dict = dict(info)
+            performative_content["info"] = info_dict
+        elif performative_id == FipaMessage.Performative.INFORM:
+            info = fipa_pb.inform.info
+            info_dict = dict(info)
+            performative_content["info"] = info_dict
+        elif performative_id == FipaMessage.Performative.ACCEPT:
             pass
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
+        elif performative_id == FipaMessage.Performative.DECLINE:
             pass
-        elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
-            info = pickle.loads(fipa_pb.accept_w_inform.bytes)  # nosec
-            performative_content["info"] = info
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            info = pickle.loads(fipa_pb.match_accept_w_inform.bytes)  # nosec
-            performative_content["info"] = info
-        elif performative_id == FIPAMessage.Performative.DECLINE:
+        elif performative_id == FipaMessage.Performative.MATCH_ACCEPT:
             pass
-        elif performative_id == FIPAMessage.Performative.INFORM:
-            info = pickle.loads(fipa_pb.inform.bytes)  # nosec
-            performative_content["info"] = info
         else:
-            raise ValueError("Performative not valid: {}.".format(performative))
+            raise ValueError("Performative not valid: {}.".format(performative_id))
 
-        return FIPAMessage(
+        return FipaMessage(
             message_id=message_id,
             dialogue_reference=dialogue_reference,
             target=target,

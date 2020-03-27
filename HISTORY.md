@@ -1,5 +1,14 @@
 # Release History
 
+## 0.2.4 (2020-03-25)
+
+- Breaking change to all protocols as we transition to auto-generated protocols
+- Fixes to protocol generator to move it to alpha status
+- Updates to documentation on protocols and OEF search and communication nodes
+- Improvements and fixes to AEA launch command
+- Multiple docs updates and restructuring
+- Multiple additional minor fixes and changes
+
 ## 0.2.3 (2020-03-19)
 
 - Fixes stub connection file I/O

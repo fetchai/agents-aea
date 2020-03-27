@@ -71,7 +71,7 @@ def run():
 
     # Add the oef protocol (which is a package)
     oef_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef",)
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
     )
     resources.add_protocol(oef_protocol)
 

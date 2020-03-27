@@ -2,9 +2,9 @@ name: dummy
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.3
 fingerprint:
   __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
+aea_version: 0.2.4
 behaviours: {}
 handlers: {}
 models: {}
