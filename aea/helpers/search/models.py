@@ -352,7 +352,7 @@ class Not(ConstraintExpr):
 
     def check(self, description: Description) -> bool:
         """
-        Check if a value satisfies the 'Not; constraint expression.
+        Check if a value satisfies the 'Not' constraint expression.
 
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.

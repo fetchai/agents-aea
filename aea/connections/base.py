@@ -123,12 +123,12 @@ class Connection(ABC):
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
-        """Get the restricted to protocols.."""
+        """Get the ids of the only supported protocols for this connection."""
         return self._restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
-        """Get the restricted to protocols.."""
+        """Get the ids of the excluded protocols for this connection."""
         return self._excluded_protocols
 
     @property

@@ -112,12 +112,22 @@ class Agent(ABC):
 
     @property
     def inbox(self) -> InBox:
-        """Get the inbox."""
+        """
+        Get the inbox.
+
+        The inbox contains Envelopes from the Multiplexer.
+        The agent can pick these messages for processing.
+        """
         return self._inbox
 
     @property
     def outbox(self) -> OutBox:
-        """Get the outbox."""
+        """
+        Get the outbox.
+
+        The outbox contains Envelopes for the Multiplexer.
+        Envelopes placed in the Outbox are processed by the Multiplexer.
+        """
         return self._outbox
 
     @property
@@ -132,7 +142,11 @@ class Agent(ABC):
 
     @property
     def tick(self) -> int:
-        """Get the tick."""
+        """
+        Get the tick (or agent loop count).
+
+        Each agent loop (see _run_main_loop) increments the tick.
+        """
         return self._tick
 
     @property

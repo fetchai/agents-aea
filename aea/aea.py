@@ -62,7 +62,7 @@ class AEA(Agent):
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param wallet: the wallet of the agent.
-        :param ledger_apis: the ledger apis of the agent.
+        :param ledger_apis: the APIs the agent will use to connect to ledgers.
         :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode.

@@ -396,7 +396,7 @@ Initialize a 'Not' expression.
  | check(description: Description) -> bool
 ```
 
-Check if a value satisfies the 'Not; constraint expression.
+Check if a value satisfies the 'Not' constraint expression.
 
 **Arguments**:
 
