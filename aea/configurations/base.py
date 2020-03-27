@@ -339,7 +339,7 @@ class PublicId(JSONSerializable):
 
 
 class PackageId:
-    """A component identifier."""
+    """A package identifier."""
 
     def __init__(
         self, package_type: Union[ConfigurationType, str], public_id: PublicId
@@ -898,6 +898,9 @@ class AgentConfig(PackageConfiguration):
             ComponentId(ComponentType.CONNECTION, public_id)
             for public_id in self.skills
         )
+
+        # TODO add contracts (release/v0.3)
+
         return set.union(protocols, connections, skills)
 
     @property

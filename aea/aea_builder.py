@@ -381,7 +381,7 @@ class AEABuilder:
             logger_name = "aea.{}.skills.{}.{}".format(
                 context.agent_name, skill.configuration.author, skill.configuration.name
             )
-            skill.skill_context._agent_context = context
+            skill.skill_context.set_agent_context(context)
             skill.skill_context._logger = logging.getLogger(logger_name)
 
 

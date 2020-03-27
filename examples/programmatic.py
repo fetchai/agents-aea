@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     builder.set_name("myagent")
     builder.add_address("fetchai", FetchAICrypto().address)
-    builder.add_protocol("./packages/fetchai/protocols/oef")
+    builder.add_protocol("./packages/fetchai/protocols/oef_search")
     builder.add_skill("./packages/fetchai/skills/echo")
 
     # you can also use the fluent interface

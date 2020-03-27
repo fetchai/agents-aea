@@ -241,24 +241,16 @@ class Protocol(Component):
 
     def __init__(
         self,
-        protocol_id: Optional[ProtocolId] = None,
-        serializer: Optional[Serializer] = None,
-        config: Optional[ProtocolConfig] = None,
+        configuration: ProtocolConfig,
     ):
         """
         Initialize the protocol manager.
 
-        :param protocol_id: the protocol id.
-        :param serializer: the serializer.
-        :param config: the protocol configurations.
+        :param configuration: the protocol configurations.
         """
-        # TODO to remove the cast by refactoring the arguments in the __init__
-        #      since they can be accessed by using self.configuration
-        super().__init__(cast(ProtocolConfig, config))
-        self._serializer = cast(Serializer, serializer)
-        # TODO to be removed, since now they are included in superclass.
-        self._protocol_id = cast(ProtocolId, protocol_id)
-        self._config = config
+        super().__init__(configuration)
+
+        self._serializer = None  # type: Optional[Serializer]
 
     @property
     def id(self) -> ProtocolId:
@@ -268,7 +260,14 @@ class Protocol(Component):
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
+        assert self._serializer is not None, "Serializer not initialized yet."
         return self._serializer
+
+    @serializer.setter
+    def serializer(self, serializer: Serializer) -> None:
+        """Set the serializer."""
+        assert self._serializer is  None, "Serializer already initialized."
+        self._serializer = serializer
 
     @property
     def config(self) -> ProtocolConfig:
@@ -306,7 +305,7 @@ class Protocol(Component):
         protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
 
-    def setup(self, *args, **kwargs):
+    def load(self, *args, **kwargs):
         """
         Set the component up.
 

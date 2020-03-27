@@ -115,11 +115,18 @@ class Component(ABC):
         return self._configuration
 
     @property
-    def directory(self) -> Optional[Path]:
-        """Get the directory, or None if the component is not associated with any directory."""
+    def directory(self) -> Path:
+        """Get the directory. Raise error if it has not been set yet."""
+        assert self._directory is not None, "Directory not set yet."
         return self._directory
 
-    def setup(self, *args, **kwargs):
+    @directory.setter
+    def directory(self, path: Path) -> None:
+        """Set the directory. Raise error if already set."""
+        assert self._directory is None, "Directory already set."
+        self._directory = path
+
+    def load(self, *args, **kwargs):
         """
         Set the component up.
 
@@ -174,5 +181,21 @@ class Component(ABC):
         init_modules = load_init_modules(directory)
         component_object.importpath_to_module.update(init_modules)
         with _SysModules.load_modules(list(init_modules.items())):
-            component_object.setup()
+            component_object.load()
         return component_object
+
+
+    # @classmethod
+    # def load_from_directory(
+    #     cls, component_type: ComponentType, directory: Path
+    # ) -> "Component":
+    #     """Load a component from the directory."""
+    #     configuration = ComponentConfiguration.load(component_type, directory)
+    #     component_class = component_class_from_type(component_type)
+    #     component_object = component_class(configuration=configuration)
+    #     component_object._directory = directory
+    #     init_modules = load_init_modules(directory)
+    #     component_object.importpath_to_module.update(init_modules)
+    #     with _SysModules.load_modules(list(init_modules.items())):
+    #         component_object.load()
+    #     return component_object

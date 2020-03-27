@@ -61,13 +61,11 @@ logger = logging.getLogger(__name__)
 class SkillContext:
     """This class implements the context of a skill."""
 
-    def __init__(self, agent_context: Optional[AgentContext] = None):
+    def __init__(self):
         """
         Initialize a skill context.
-
-        :param agent_context: the agent's context
         """
-        self._agent_context = cast(AgentContext, agent_context)
+        self._agent_context = None  # type: Optional[AgentContext]
         self._in_queue = Queue()  # type: Queue
         self._skill = None  # type: Optional[Skill]
 
@@ -76,14 +74,35 @@ class SkillContext:
         self._logger = None  # type: Optional[Logger]
 
     @property
+    def logger(self) -> Logger:
+        """Get the logger."""
+        assert self._logger is not None, "Logger not set yet."
+        return self._logger
+
+    @logger.setter
+    def logger(self, logger_: Logger) -> None:
+        assert self._logger is None, "Logger already set."
+        self._logger = logger_
+
+    def _get_agent_context(self) -> AgentContext:
+        """Get the agent context."""
+        assert self._agent_context is not None, "Agent context not set yet."
+        return self._agent_context
+
+    def set_agent_context(self, agent_context: AgentContext) -> None:
+        """Set the agent context."""
+        assert self._agent_context is None, "Agent context already set."
+        self._agent_context = agent_context
+
+    @property
     def shared_state(self) -> Dict[str, Any]:
         """Get the shared state dictionary."""
-        return self._agent_context.shared_state
+        return self._get_agent_context().shared_state
 
     @property
     def agent_name(self) -> str:
         """Get agent name."""
-        return self._agent_context.agent_name
+        return self._get_agent_context().agent_name
 
     @property
     def skill_id(self):
@@ -120,22 +139,22 @@ class SkillContext:
     @property
     def agent_addresses(self) -> Dict[str, str]:
         """Get addresses."""
-        return self._agent_context.addresses
+        return self._get_agent_context().addresses
 
     @property
     def agent_address(self) -> str:
         """Get address."""
-        return self._agent_context.address
+        return self._get_agent_context().address
 
     @property
     def connection_status(self) -> ConnectionStatus:
         """Get connection status."""
-        return self._agent_context.connection_status
+        return self._get_agent_context().connection_status
 
     @property
     def outbox(self) -> OutBox:
         """Get outbox."""
-        return self._agent_context.outbox
+        return self._get_agent_context().outbox
 
     @property
     def message_in_queue(self) -> Queue:
@@ -145,38 +164,38 @@ class SkillContext:
     @property
     def decision_maker_message_queue(self) -> Queue:
         """Get message queue of decision maker."""
-        return self._agent_context.decision_maker_message_queue
+        return self._get_agent_context().decision_maker_message_queue
 
     @property
     def agent_ownership_state(self) -> OwnershipState:
         """Get ownership state."""
-        return self._agent_context.ownership_state
+        return self._get_agent_context().ownership_state
 
     @property
     def agent_preferences(self) -> Preferences:
         """Get preferences."""
-        return self._agent_context.preferences
+        return self._get_agent_context().preferences
 
     @property
     def agent_goal_pursuit_readiness(self) -> GoalPursuitReadiness:
         """Get the goal pursuit readiness."""
-        return self._agent_context.goal_pursuit_readiness
+        return self._get_agent_context().goal_pursuit_readiness
 
     @property
     def task_manager(self) -> TaskManager:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._agent_context.task_manager
+        return self._get_agent_context().task_manager
 
     @property
     def ledger_apis(self) -> LedgerApis:
         """Get ledger APIs."""
-        return self._agent_context.ledger_apis
+        return self._get_agent_context().ledger_apis
 
     @property
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
-        return self._agent_context.search_service_address
+        return self._get_agent_context().search_service_address
 
     @property
     def handlers(self) -> SimpleNamespace:
@@ -542,26 +561,18 @@ class Skill(Component):
     def __init__(
         self,
         configuration: SkillConfig,
-        skill_context: Optional[SkillContext] = None,
-        handlers: Optional[Dict[str, Handler]] = None,
-        behaviours: Optional[Dict[str, Behaviour]] = None,
-        models: Optional[Dict[str, Model]] = None,
     ):
         """
         Initialize a skill.
 
         :param configuration: the skill configuration.
-        :param handlers: the list of handlers to handle incoming envelopes.
-        :param behaviours: the list of behaviours that defines the proactive component of the agent.
-        :param models: the list of models shared across tasks, behaviours and
         """
         super().__init__(configuration)
         self.config = configuration
-        # TODO this is to make the mypy checks to pass, a refactoring of arguments is needed
-        self._skill_context = cast(SkillContext, skill_context)
-        self._handlers = handlers if handlers is not None else {}
-        self._behaviours = behaviours if behaviours is not None else {}
-        self._models = models if models is not None else {}
+        self._skill_context = None  # type: Optional[SkillContext]
+        self._handlers = {}  # type: Optional[Dict[str, Handler]]
+        self._behaviours = {}    # type: Optional[Dict[str, Handler]]
+        self._models = {}   # type: Optional[Dict[str, Handler]]
 
     @property
     def skill_context(self) -> SkillContext:
@@ -630,21 +641,22 @@ class Skill(Component):
         models_by_id = dict(skill_config.models.read_all())
         model_instances = Model.parse_module(directory, models_by_id, skill_context)
 
-        skill = Skill(
-            skill_config, skill_context, handlers, behaviours, model_instances
-        )
+        skill = Skill(skill_config)
+        skill.handlers.update(handlers)
+        skill.behaviours.update(behaviours)
+        skill.models.update(model_instances)
         skill_context._skill = skill
 
         return skill
 
-    def setup(self, *args, **kwargs):
+    def load(self, *args, **kwargs):
         """
         Set the component up.
 
         In the case of a skill, we load the 'serialization.py' module
         to instantiate an instance of the Serializer.
         """
-        skill_context = SkillContext(None)
+        skill_context = SkillContext()
         skill_context._logger = logging.getLogger()
         skill_configuration = cast(SkillConfig, self.configuration)
         handlers_by_id = dict(skill_configuration.handlers.read_all())
