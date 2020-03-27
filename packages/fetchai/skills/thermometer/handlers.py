@@ -302,7 +302,7 @@ class FIPAHandler(Handler):
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                     target=new_target,
                     performative=FipaMessage.Performative.INFORM,
-                    info=str(dialogue.temp_data),
+                    info=dialogue.temp_data,
                 )
                 dialogue.outgoing_extend(inform_msg)
                 self.context.outbox.put_message(
