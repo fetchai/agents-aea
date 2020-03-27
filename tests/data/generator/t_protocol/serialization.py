@@ -51,7 +51,7 @@ class TProtocolSerializer(Serializer):
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Ct()  # type: ignore
             content_ct = msg.content_ct
-            performative = DataModel.encode(performative, content_ct)
+            DataModel.encode(performative.content_ct, content_ct)
             t_protocol_msg.performative_ct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pt()  # type: ignore
@@ -101,8 +101,9 @@ class TProtocolSerializer(Serializer):
             if msg.is_set("content_union_1_type_DataModel"):
                 performative.content_union_1_type_DataModel_is_set = True
                 content_union_1_type_DataModel = msg.content_union_1_type_DataModel
-                performative = DataModel.encode(
-                    performative, content_union_1_type_DataModel
+                DataModel.encode(
+                    performative.content_union_1_type_DataModel,
+                    content_union_1_type_DataModel,
                 )
             if msg.is_set("content_union_1_type_bytes"):
                 performative.content_union_1_type_bytes_is_set = True
@@ -220,7 +221,7 @@ class TProtocolSerializer(Serializer):
             if msg.is_set("content_o_ct"):
                 performative.content_o_ct_is_set = True
                 content_o_ct = msg.content_o_ct
-                performative = DataModel.encode(performative, content_o_ct)
+                DataModel.encode(performative.content_o_ct, content_o_ct)
             if msg.is_set("content_o_bool"):
                 performative.content_o_bool_is_set = True
                 content_o_bool = msg.content_o_bool
