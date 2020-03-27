@@ -508,8 +508,8 @@ class ProtocolGeneratorTestCase(TestCase):
     def setUp(self):
         protocol_specification = mock.Mock()
         protocol_specification.name = "name"
-        ProtocolGenerator._setup = mock.Mock()
-        self.protocol_generator = ProtocolGenerator(protocol_specification)
+        with mock.patch.object(ProtocolGenerator, "_setup"):
+            self.protocol_generator = ProtocolGenerator(protocol_specification)
 
     @mock.patch(
         "aea.protocols.generator._get_sub_types_of_compositional_types",
