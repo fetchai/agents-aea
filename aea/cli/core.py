@@ -76,7 +76,8 @@ FUNDS_RELEASE_TIMEOUT = 10
 @click.pass_context
 def cli(ctx) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
-    ctx.obj = Context(cwd=".")
+    verbosity_option = ctx.meta.pop("verbosity")
+    ctx.obj = Context(cwd=".", verbosity=verbosity_option)
 
 
 @cli.command()

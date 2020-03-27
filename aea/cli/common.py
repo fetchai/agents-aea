@@ -86,7 +86,7 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(self, cwd: str = "."):
+    def __init__(self, cwd: str = ".", verbosity: str = "INFO"):
         """Init the context."""
         self.config = dict()  # type: Dict
         self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
@@ -98,6 +98,7 @@ class Context:
             "protocol-config_schema.json", ProtocolConfig
         )
         self.cwd = cwd
+        self.verbosity = verbosity
 
     def set_config(self, key, value) -> None:
         """
