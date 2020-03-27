@@ -74,6 +74,9 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
         def _set_level(ctx, param, value):
             level = logging.getLevelName(value)
             logger.setLevel(level)
+            # save verbosity option so it can be
+            # read in the main CLI entrypoint
+            ctx.meta["verbosity"] = value
 
         return click.option(*names, callback=_set_level, **kwargs)(f)
 
