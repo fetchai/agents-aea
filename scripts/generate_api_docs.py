@@ -90,6 +90,8 @@ def generate_api_docs():
 if __name__ == "__main__":
     res = shutil.which("pydoc-markdown")
     if res is None:
-        print("Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop")
+        print(
+            "Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop"
+        )
         sys.exit(1)
     generate_api_docs()
