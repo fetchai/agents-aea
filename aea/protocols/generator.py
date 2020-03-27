@@ -417,22 +417,6 @@ def _is_valid_content_name(content_name: str) -> bool:
     return content_name not in RESERVED_NAMES
 
 
-# def _to_custom_custom(content_type: str) -> str:
-#     """
-#     Evaluate whether a content type is a custom type or has a custom type as a sub-type.
-#
-#     :return: Boolean result
-#     """
-#     new_content_type = content_type
-#     is_custom = True
-#     for primitive_type in PYTHON_PRIMITIVE_TYPES:
-#         if content_type.startswith(primitive_type):
-#             is_custom = False
-#             break
-#     if is_custom:
-#         new_content_type = "Custom" + content_type
-#     return new_content_type
-
 def _includes_custom_type(content_type: str) -> bool:
     """
     Evaluate whether a content type is a custom type or has a custom type as a sub-type.
@@ -448,7 +432,12 @@ def _includes_custom_type(content_type: str) -> bool:
             if _includes_custom_type(sub_type):
                 result = True
                 break
-    elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple") or content_type.startswith("Dict") or content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
+    elif (
+        content_type.startswith("FrozenSet")
+        or content_type.startswith("Tuple")
+        or content_type.startswith("Dict")
+        or content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys()
+    ):
         result = False
     else:
         result = True
@@ -459,7 +448,10 @@ class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
-        self, protocol_specification: ProtocolSpecification, output_path: str = ".", path_to_protocol_package: Optional[str] = None,
+        self,
+        protocol_specification: ProtocolSpecification,
+        output_path: str = ".",
+        path_to_protocol_package: Optional[str] = None,
     ) -> None:
         """
         Instantiate a protocol generator.
@@ -473,10 +465,14 @@ class ProtocolGenerator:
             self.protocol_specification.name
         )
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
-        self.path_to_protocol_package = path_to_protocol_package + self.protocol_specification.name if path_to_protocol_package is not None else "{}.{}.protocols.{}".format(
-            PATH_TO_PACKAGES,
-            self.protocol_specification.author,
-            self.protocol_specification.name,
+        self.path_to_protocol_package = (
+            path_to_protocol_package + self.protocol_specification.name
+            if path_to_protocol_package is not None
+            else "{}.{}.protocols.{}".format(
+                PATH_TO_PACKAGES,
+                self.protocol_specification.author,
+                self.protocol_specification.name,
+            )
         )
 
         self._imports = {
@@ -594,9 +590,7 @@ class ProtocolGenerator:
         else:
             for custom_class in self._all_custom_types:
                 import_str += "from {}.custom_types import {} as Custom{}\n".format(
-                    self.path_to_protocol_package,
-                    custom_class,
-                    custom_class,
+                    self.path_to_protocol_package, custom_class, custom_class,
                 )
             import_str = import_str[:-1]
         return import_str
@@ -699,7 +693,8 @@ class ProtocolGenerator:
                     check_str += (
                         indents
                         + "        all(type(element) == {} for element in self.{}) or\n".format(
-                            self._to_custom_custom(frozen_set_element_type), content_name,
+                            self._to_custom_custom(frozen_set_element_type),
+                            content_name,
                         )
                     )
                 check_str = check_str[:-4]
@@ -823,7 +818,9 @@ class ProtocolGenerator:
                         )
                     )
                     for key in sorted(dict_key_value_types.keys()):
-                        check_str += "'{}','{}' or ".format(key, dict_key_value_types[key])
+                        check_str += "'{}','{}' or ".format(
+                            key, dict_key_value_types[key]
+                        )
                     check_str = check_str[:-4]
                     check_str += '."\n'
         elif content_type.startswith("FrozenSet["):
@@ -1830,6 +1827,9 @@ class ProtocolGenerator:
 
         # Compile protobuf schema
         cmd = "protoc -I={} --python_out={} {}/{}.proto".format(
-            self.output_folder_path, self.output_folder_path, self.output_folder_path, self.protocol_specification.name, self.protocol_specification.name,
+            self.output_folder_path,
+            self.output_folder_path,
+            self.output_folder_path,
+            self.protocol_specification.name,
         )
         os.system(cmd)  # nosec
