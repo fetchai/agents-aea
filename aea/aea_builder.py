@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
+import itertools
 import logging
 import os
 import types
@@ -41,7 +42,6 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import _SysModules
 from aea.identity.base import Identity
-from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.base import Resources
 from aea.skills.base import Skill
@@ -173,41 +173,27 @@ class _DependenciesManager:
         At the moment:
         - a protocol has no dependencies.
         - a connection can depend on protocols.
-        - a skill can depend on protocols.
+        - a skill can depend on protocols and contracts.
         - a contract ...
 
         :return: a list of pairs: (import path, module object)
         """
         # get protocols first
-        protocols = [
-            (self.build_dotted_part(component, relative_import_path), module_obj)
-            for component in self.protocols.values()
-            for (
-                relative_import_path,
-                module_obj,
-            ) in component.importpath_to_module.items()
-        ]
-        connections = [
-            (self.build_dotted_part(component, relative_import_path), module_obj)
-            for component in self.connections.values()
-            for (
-                relative_import_path,
-                module_obj,
-            ) in component.importpath_to_module.items()
-        ]
-        skills = [
-            (self.build_dotted_part(component, relative_import_path), module_obj)
-            for component in self.skills.values()
-            for (
-                relative_import_path,
-                module_obj,
-            ) in component.importpath_to_module.items()
-        ]
-        return cast(
-            List[Tuple[str, types.ModuleType]], protocols + connections + skills
+        components = itertools.chain(
+            self.protocols.values(), self.connections.values(), self.skills.values()
         )
+        module_by_import_path = [
+            (self._build_dotted_part(component, relative_import_path), module_obj)
+            for component in components
+            for (
+                relative_import_path,
+                module_obj,
+            ) in component.importpath_to_module.items()
+        ]
+        return cast(List[Tuple[str, types.ModuleType]], module_by_import_path)
 
-    def build_dotted_part(self, component, relative_import_path) -> str:
+    @staticmethod
+    def _build_dotted_part(component, relative_import_path) -> str:
         """Given a component, build a dotted path for import."""
         if relative_import_path == "":
             return component.prefix_import_path
@@ -216,17 +202,22 @@ class _DependenciesManager:
 
 
 class AEABuilder:
-    """This class helps to build an AEA."""
+    """
+    This class helps to build an AEA.
+
+    It follows the fluent interface. Every method of the builder
+    returns the instance of the builder itself.
+    """
 
     def __init__(self):
-        self._resources = Resources()
-
-        # identity
         self._name = None
-        self._addresses = {}  # type: Dict[str, Address]
+        self._resources = Resources()
+        self._private_key_paths = {}  # type: Dict[str, str]
+        self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_key = None  # set by the user, or instantiate a default one.
+        self._default_ledger = None  # set by the user, or instantiate a default one.
 
-        self._package_dependency_graph = _DependenciesManager()
+        self._package_dependency_manager = _DependenciesManager()
 
         # add default protocol
         self.add_protocol(Path(AEA_DIR, "protocols", "default"))
@@ -235,17 +226,84 @@ class AEABuilder:
         # add error skill
         self.add_skill(Path(AEA_DIR, "skills", "error"))
 
+    def _check_can_remove(self, component_id: ComponentId):
+        """
+        Check if a component can be removed.
+
+        :param component_id: the component id.
+        :return: None
+        :raises ValueError: if the component is already present.
+        """
+        if component_id not in self._package_dependency_manager.all_dependencies:
+            raise ValueError(
+                "Component {} of type {} not present.".format(
+                    component_id.public_id, component_id.component_type
+                )
+            )
+
+    def _check_can_add(self, configuration: ComponentConfiguration) -> None:
+        """
+        Check if the component can be added, given its configuration.
+
+        :param configuration: the configuration of the component.
+        :return: None
+        :raises ValueError: if the component is not present.
+        """
+        self._check_configuration_not_already_added(configuration)
+        self._check_package_dependencies(configuration)
+
     def set_name(self, name: str) -> "AEABuilder":
+        """
+        Set the name of the agent.
+
+        :param name: the name of the agent.
+        """
         self._name = name
         return self
 
-    def add_address(self, identifier: str, address: Address) -> "AEABuilder":
-        self._addresses[identifier] = address
+    def add_private_key(
+        self, identifier: str, private_key_path: PathLike
+    ) -> "AEABuilder":
+        """
+        Add a private key path.
+
+        :param identifier: the identifier for that private key path.
+        :param private_key_path: path to the private key file.
+        """
+        self._private_key_paths[identifier] = private_key_path
         return self
 
-    def remove_address(self, identifier: str) -> "AEABuilder":
-        self._addresses.pop(identifier, None)
+    def remove_private_key(self, identifier: str) -> "AEABuilder":
+        """
+        Remove a private key path by identifier, if present.
+
+        :param identifier: the identifier of the private key.
+
+        """
+        self._private_key_paths.pop(identifier, None)
         return self
+
+    @property
+    def private_key_paths(self) -> Dict[str, str]:
+        """Get the private key paths."""
+        return self._private_key_paths
+
+    def add_ledger_api_config(self, identifier: str, config: Dict):
+        """Add a configuration for a ledger API to be supported by the agent."""
+        self._ledger_apis_configs[identifier] = config
+
+    def remove_ledger_api_config(self, identifier: str):
+        """Remove a ledger API configuration."""
+        self._ledger_apis_configs.pop(identifier, None)
+
+    @property
+    def ledger_apis_config(self) -> Dict[str, Dict[str, Union[str, int]]]:
+        """Get the ledger api configurations."""
+        return self._ledger_apis_configs
+
+    def set_default_ledger_api_config(self, default: str):
+        """Set a default ledger API to use."""
+        self._default_ledger = default
 
     def add_component(
         self, component_type: ComponentType, directory: PathLike
@@ -255,30 +313,17 @@ class AEABuilder:
 
         :param component_type: the component type.
         :param directory: the directory path.
-        :return: None
         :raises ValueError: if a component is already registered with the same component id.
         """
         directory = Path(directory)
         configuration = ComponentConfiguration.load(component_type, directory)
-        if (
-            configuration.component_id
-            in self._package_dependency_graph.all_dependencies
-        ):
-            raise ValueError(
-                "Component {} of type {} already added.".format(
-                    configuration.public_id, configuration.component_type
-                )
-            )
+        self._check_can_add(configuration)
 
-        with self._package_dependency_graph.load_dependencies():
+        with self._package_dependency_manager.load_dependencies():
             component = Component.load_from_directory(component_type, directory)
 
-        self._package_dependency_graph.check_package_dependencies(
-            component.configuration
-        )
-
         # update dependency graph
-        self._package_dependency_graph.add_component(component)
+        self._package_dependency_manager.add_component(component)
         # register new package in resources
         self._add_component_to_resources(component)
 
@@ -308,18 +353,14 @@ class AEABuilder:
             self._resources.remove_skill(component_id.public_id)
 
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
-        """Remove a package"""
-        if component_id not in self._package_dependency_graph.all_dependencies:
-            raise ValueError(
-                "Component {} of type {} not present.".format(
-                    component_id.public_id, component_id.component_type
-                )
-            )
-
-        self._package_dependency_graph.remove_component(component_id)
-        self._remove_component_from_resources(component_id)
-
+        """Remove a component."""
+        self._check_can_remove(component_id)
+        self._remove(component_id)
         return self
+
+    def _remove(self, component_id: ComponentId):
+        self._package_dependency_manager.remove_component(component_id)
+        self._remove_component_from_resources(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
         """Add a protocol to the agent."""
@@ -337,12 +378,12 @@ class AEABuilder:
         return self
 
     def remove_connection(self, public_id: PublicId) -> "AEABuilder":
-        """Remove protocol"""
+        """Remove a connection"""
         self.remove_component(ComponentId(ComponentType.CONNECTION, public_id))
         return self
 
     def add_skill(self, directory: PathLike) -> "AEABuilder":
-        """Add a protocol to the agent."""
+        """Add a skill to the agent."""
         self.add_component(ComponentType.SKILL, directory)
         return self
 
@@ -353,12 +394,12 @@ class AEABuilder:
 
     def build(self) -> AEA:
         """Get the AEA."""
-        connections = list(self._package_dependency_graph.connections.values())
+        connections = list(self._package_dependency_manager.connections.values())
         aea = AEA(
-            Identity(self._name, addresses=self._addresses),
+            Identity(self._name, addresses=self._private_key_paths),
             connections,
-            Wallet({}),
-            LedgerApis({}, ""),
+            Wallet(self.private_key_paths),
+            LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
             timeout=0.0,
@@ -366,23 +407,36 @@ class AEABuilder:
             is_programmatic=True,
             max_reactions=20,
         )
-        self._set_context_to_all_skills(aea.context)
+        self._set_agent_context_to_all_skills(aea.context)
         return aea
 
-    def dump_config(self) -> AgentConfig:
-        """Dump configurations"""
-
-    def dump(self, directory):
-        """Dump agent project."""
-
-    def _set_context_to_all_skills(self, context: AgentContext):
+    def _set_agent_context_to_all_skills(self, context: AgentContext):
         """Set a skill context to all skills"""
         for skill in self._resources.get_all_skills():
             logger_name = "aea.{}.skills.{}.{}".format(
                 context.agent_name, skill.configuration.author, skill.configuration.name
             )
             skill.skill_context.set_agent_context(context)
-            skill.skill_context._logger = logging.getLogger(logger_name)
+            skill.skill_context.logger = logging.getLogger(logger_name)
+
+    def _check_configuration_not_already_added(self, configuration):
+        if (
+            configuration.component_id
+            in self._package_dependency_manager.all_dependencies
+        ):
+            raise ValueError(
+                "Component {} of type {} already added.".format(
+                    configuration.public_id, configuration.component_type
+                )
+            )
+
+    def _check_package_dependencies(self, configuration):
+        self._package_dependency_manager.check_package_dependencies(configuration)
+
+    @classmethod
+    def from_aea_config(cls):
+        """Build the agent from a configuration file."""
+        raise NotImplementedError
 
 
 #

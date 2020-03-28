@@ -30,7 +30,7 @@ if __name__ == "__main__":
     builder = AEABuilder()
 
     builder.set_name("myagent")
-    builder.add_address("fetchai", FetchAICrypto().address)
+    builder.add_private_key("fetchai", FetchAICrypto().address)
     builder.add_protocol("./packages/fetchai/protocols/oef_search")
     builder.add_skill("./packages/fetchai/skills/echo")
 

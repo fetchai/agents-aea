@@ -69,6 +69,11 @@
         {"$ref":  "#/definitions/version_specifier"},
         {"$ref":  "#/definitions/version"}
       ]
+    },
+    "class_name": {
+      "type": "string",
+      "description": "The class name of a skill component.",
+      "pattern": "[A-Za-z_][A-Za-z0-9_]*"
     }
   }
 }

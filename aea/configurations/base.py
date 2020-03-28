@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-
+import enum
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -519,7 +519,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
         :raises ValueError if:
             - the argument is not a valid package directory
-            - the fingerprint do not match.
+            - the fingerprints do not match.
         """
         if not directory.exists() or not directory.is_dir():
             raise ValueError("Directory {} is not valid.".format(directory))
@@ -686,11 +686,17 @@ class ProtocolConfig(ComponentConfiguration):
         )
 
 
-class HandlerConfig(Configuration):
-    """Handle a skill handler configuration."""
+class SkillComponentConfiguration:
+    """This class represent a skill component configuration."""
 
-    def __init__(self, class_name: str = "", **args):
-        """Initialize a handler configuration."""
+    def __init__(self, class_name: str, **args):
+        """
+        Initialize a skill component configuration.
+
+        :param skill_component_type: the skill component type.
+        :param class_name: the class name of the component.
+        :param args: keyword arguments.
+        """
         self.class_name = class_name
         self.args = args
 
@@ -703,47 +709,7 @@ class HandlerConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         class_name = cast(str, obj.get("class_name"))
-        return HandlerConfig(class_name=class_name, **obj.get("args", {}))
-
-
-class BehaviourConfig(Configuration):
-    """Handle a skill behaviour configuration."""
-
-    def __init__(self, class_name: str = "", **args):
-        """Initialize a behaviour configuration."""
-        self.class_name = class_name
-        self.args = args
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"class_name": self.class_name, "args": self.args}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("class_name"))
-        return BehaviourConfig(class_name=class_name, **obj.get("args", {}))
-
-
-class ModelConfig(Configuration):
-    """Handle a skill model configuration."""
-
-    def __init__(self, class_name: str = "", **args):
-        """Initialize a model configuration."""
-        self.class_name = class_name
-        self.args = args
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"class_name": self.class_name, "args": self.args}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("class_name"))
-        return ModelConfig(class_name=class_name, **obj.get("args", {}))
+        return SkillComponentConfiguration(class_name=class_name, **obj.get("args", {}))
 
 
 class SkillConfig(ComponentConfiguration):
@@ -770,9 +736,9 @@ class SkillConfig(ComponentConfiguration):
         )  # type: List[PublicId]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.handlers = CRUDCollection[HandlerConfig]()
-        self.behaviours = CRUDCollection[BehaviourConfig]()
-        self.models = CRUDCollection[ModelConfig]()
+        self.handlers = CRUDCollection[SkillComponentConfiguration]()
+        self.behaviours = CRUDCollection[SkillComponentConfiguration]()
+        self.models = CRUDCollection[SkillComponentConfiguration]()
 
     @property
     def component_type(self) -> ComponentType:
@@ -833,15 +799,15 @@ class SkillConfig(ComponentConfiguration):
         )
 
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():  # type: ignore
-            behaviour_config = BehaviourConfig.from_json(behaviour_data)
+            behaviour_config = SkillComponentConfiguration.from_json(behaviour_data)
             skill_config.behaviours.create(behaviour_id, behaviour_config)
 
         for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
-            handler_config = HandlerConfig.from_json(handler_data)
+            handler_config = SkillComponentConfiguration.from_json(handler_data)
             skill_config.handlers.create(handler_id, handler_config)
 
         for model_id, model_data in obj.get("models", {}).items():  # type: ignore
-            model_config = ModelConfig.from_json(model_data)
+            model_config = SkillComponentConfiguration.from_json(model_data)
             skill_config.models.create(model_id, model_config)
 
         return skill_config
@@ -895,8 +861,7 @@ class AgentConfig(PackageConfiguration):
             for public_id in self.connections
         )
         skills = set(
-            ComponentId(ComponentType.CONNECTION, public_id)
-            for public_id in self.skills
+            ComponentId(ComponentType.SKILL, public_id) for public_id in self.skills
         )
 
         # TODO add contracts (release/v0.3)

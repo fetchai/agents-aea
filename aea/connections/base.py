@@ -54,19 +54,12 @@ class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
-        self,
-        configuration: Optional[ConnectionConfig] = None,
-        connection_id: Optional[PublicId] = None,
-        restricted_to_protocols: Optional[Set[PublicId]] = None,
-        excluded_protocols: Optional[Set[PublicId]] = None,
+        self, configuration: ConnectionConfig,
     ):
         """
         Initialize the connection.
 
         :param configuration: the connection configuration.
-        :param connection_id: the connection identifier.
-        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
-        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         super().__init__(configuration)
         self._loop = None  # type: Optional[AbstractEventLoop]
@@ -99,6 +92,11 @@ class Connection(Component, ABC):
     def connection_id(self) -> PublicId:
         """Get the id of the connection."""
         return self.public_id
+
+    @property
+    def configuration(self) -> ConnectionConfig:
+        """Get the connection configuration."""
+        return cast(ConnectionConfig, super().configuration)
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
@@ -138,19 +136,6 @@ class Connection(Component, ABC):
         Receive an envelope.
 
         :return: the received envelope, or None if an error occurred.
-        """
-
-    @classmethod
-    @abstractmethod
-    def from_config(
-        cls, address: "Address", connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Initialize a connection instance from a configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration.
-        :return: an instance of the concrete connection class.
         """
 
     @classmethod

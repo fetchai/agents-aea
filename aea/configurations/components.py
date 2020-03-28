@@ -38,25 +38,6 @@ from aea.helpers.base import _SysModules, load_init_modules, load_module
 logger = logging.getLogger(__name__)
 
 
-def component_class_from_type(component_type: ComponentType) -> Type["Component"]:
-    """Get component class from component type."""
-    from aea.protocols.base import Protocol
-    from aea.connections.base import Connection
-    from aea.skills.base import Skill
-
-    if component_type == ComponentType.PROTOCOL:
-        return Protocol
-    elif component_type == ComponentType.CONNECTION:
-        return Connection
-    elif component_type == ComponentType.SKILL:
-        return Skill
-    elif component_type == ComponentType.CONTRACT:
-        # TODO
-        raise NotImplementedError
-    else:
-        raise ValueError
-
-
 class Component(ABC):
     """Abstract class for an agent component."""
 
@@ -136,47 +117,13 @@ class Component(ABC):
         """
 
     @classmethod
-    def _load_connection(cls, configuration: ConnectionConfig, directory: Path):
-        """Load a connection object from a directory."""
-        connection_module = load_module(
-            "connection_module", directory / "connection.py"
-        )
-        classes = inspect.getmembers(connection_module, inspect.isclass)
-        connection_classes = list(
-            filter(lambda x: re.match("\\w+Connection", x[0]), classes)
-        )
-        name_to_class = dict(connection_classes)
-        connection_class_name = cast(str, configuration.class_name)
-        logger.debug("Processing connection {}".format(connection_class_name))
-        connection_class = name_to_class.get(connection_class_name, None)
-        if connection_class is None:
-            raise ValueError(
-                "Connection class '{}' not found.".format(connection_class_name)
-            )
-
-        # TODO address?
-        connection = connection_class.from_config(
-            "address", connection_configuration=configuration
-        )
-        connection._configuration = configuration
-        return connection
-
-    @classmethod
     def load_from_directory(
         cls, component_type: ComponentType, directory: Path
     ) -> "Component":
         """Load a component from the directory."""
         configuration = ComponentConfiguration.load(component_type, directory)
-        if component_type == ComponentType.CONNECTION:
-            # the connection case is an exception,
-            # because developers define custom initializers
-            # for connections, so we can't use the constructor (see below "cls(configuration)")
-            # TODO that suggests a design smell. Solve it.
-            configuration = cast(ConnectionConfig, configuration)
-            component_object = cls._load_connection(configuration, directory)
-        else:
-            component_class = component_class_from_type(component_type)
-            component_object = component_class(configuration=configuration)
+        component_class = _get_component_class(component_type, configuration, directory)
+        component_object = component_class(configuration=configuration)
         component_object._directory = directory
         init_modules = load_init_modules(directory)
         component_object.importpath_to_module.update(init_modules)
@@ -185,17 +132,42 @@ class Component(ABC):
         return component_object
 
 
-    # @classmethod
-    # def load_from_directory(
-    #     cls, component_type: ComponentType, directory: Path
-    # ) -> "Component":
-    #     """Load a component from the directory."""
-    #     configuration = ComponentConfiguration.load(component_type, directory)
-    #     component_class = component_class_from_type(component_type)
-    #     component_object = component_class(configuration=configuration)
-    #     component_object._directory = directory
-    #     init_modules = load_init_modules(directory)
-    #     component_object.importpath_to_module.update(init_modules)
-    #     with _SysModules.load_modules(list(init_modules.items())):
-    #         component_object.load()
-    #     return component_object
+def _load_connection_class(configuration: ConnectionConfig, directory: Path):
+    """Load a connection class from a directory."""
+    connection_module = load_module("connection_module", directory / "connection.py")
+    classes = inspect.getmembers(connection_module, inspect.isclass)
+    connection_class_name = cast(str, configuration.class_name)
+    connection_classes = list(
+        filter(lambda x: re.match(connection_class_name, x[0]), classes)
+    )
+    name_to_class = dict(connection_classes)
+    logger.debug("Processing connection {}".format(connection_class_name))
+    connection_class = name_to_class.get(connection_class_name, None)
+    if connection_class is None:
+        raise ValueError(
+            "Connection class '{}' not found.".format(connection_class_name)
+        )
+
+    return connection_class
+
+
+def _get_component_class(
+    component_type: ComponentType,
+    configuration: ComponentConfiguration,
+    directory: Path,
+) -> Type["Component"]:
+    """Get component class from component type."""
+    from aea.protocols.base import Protocol
+    from aea.skills.base import Skill
+
+    if component_type == ComponentType.PROTOCOL:
+        return Protocol
+    elif component_type == ComponentType.CONNECTION:
+        return _load_connection_class(cast(ConnectionConfig, configuration), directory)
+    elif component_type == ComponentType.SKILL:
+        return Skill
+    elif component_type == ComponentType.CONTRACT:
+        # TODO
+        raise NotImplementedError
+    else:
+        raise ValueError

@@ -240,8 +240,7 @@ class Protocol(Component):
     """
 
     def __init__(
-        self,
-        configuration: ProtocolConfig,
+        self, configuration: ProtocolConfig,
     ):
         """
         Initialize the protocol manager.
@@ -266,7 +265,7 @@ class Protocol(Component):
     @serializer.setter
     def serializer(self, serializer: Serializer) -> None:
         """Set the serializer."""
-        assert self._serializer is  None, "Serializer already initialized."
+        assert self._serializer is None, "Serializer already initialized."
         self._serializer = serializer
 
     @property
