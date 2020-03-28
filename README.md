@@ -1,4 +1,14 @@
-# agents-aea
+# AEA Framework 
+
+[![PyPI](https://img.shields.io/pypi/v/aea)](https://pypi.org/project/aea/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aea)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/aea)
+[![](https://img.shields.io/pypi/l/aea)](https://github.com/fetchai/agents-aea/blob/master/LICENSE)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aea)
+
+![AEA framework sanity checks and tests](https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master)
+![Codecov](https://img.shields.io/codecov/c/github/fetchai/agents-aea)
+
 A framework for autonomous economic agent (AEA) development
 
 ## Get started
