@@ -88,3 +88,17 @@ To amend the docs, create a new documentation file in `docs/` and add a referenc
 - Fetch submodules:
 
 	  git submodule sync --recursive && git submodule update --init --recursive
+
+## Cite
+
+If you are using our software in a publication, please 
+consider to cite it with the following BibTex entry:
+
+```
+@misc{agents-aea,
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen},
+  Title = {Autonomous Economic Agent framework},
+  Year = {2019},
+}
+
+```
