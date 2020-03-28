@@ -363,6 +363,26 @@ class PackageId:
         """Get the public id."""
         return self._public_id
 
+    @property
+    def author(self) -> str:
+        """Get the author of the package."""
+        return self.public_id.author
+
+    @property
+    def name(self) -> str:
+        """Get the name of the package."""
+        return self.public_id.name
+
+    @property
+    def version(self) -> str:
+        """Get the version of the package."""
+        return self.public_id.version
+
+    @property
+    def package_prefix(self) -> Tuple[ConfigurationType, str, str]:
+        """Get the package identifier without the version."""
+        return self.package_type, self.author, self.name
+
     def __hash__(self):
         """Get the hash."""
         return hash((self.package_type, self.public_id))
@@ -415,6 +435,13 @@ class ComponentId(PackageId):
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType(self.package_type.value)
+
+    @property
+    def component_prefix(self) -> Tuple[ComponentType, str, str]:
+        """Get the component identifier without the version."""
+        package_prefix = super().package_prefix
+        package_type, author, name = package_prefix
+        return ComponentType(package_type.value), author, name
 
 
 ProtocolId = PublicId

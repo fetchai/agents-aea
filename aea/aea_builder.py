@@ -20,6 +20,7 @@
 """This module contains utilities for building an AEA."""
 import itertools
 import logging
+import operator
 import os
 import types
 from contextlib import contextmanager
@@ -60,6 +61,9 @@ class _DependenciesManager:
         self._all_dependencies_by_type = (
             {}
         )  # type: Dict[ComponentType, Dict[ComponentId, Component]]
+        self._prefix_to_components = (
+            {}
+        )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
     @property
@@ -67,6 +71,11 @@ class _DependenciesManager:
         """Get all dependencies."""
         result = set(self._dependencies.keys())
         return result
+
+    @property
+    def dependencies_highest_version(self) -> Set[ComponentId]:
+        """Get the dependencies with highest version."""
+        return {max(ids) for _, ids in self._prefix_to_components.items()}
 
     @property
     def protocols(self) -> Dict[ComponentId, Protocol]:
@@ -102,10 +111,17 @@ class _DependenciesManager:
 
     def add_component(self, component: Component) -> None:
         """Add a component."""
+        # add to main index
         self._dependencies[component.component_id] = component
+        # add to index by type
         self._all_dependencies_by_type.setdefault(component.component_type, {})[
             component.component_id
         ] = component
+        # add to prefix to id index
+        self._prefix_to_components.setdefault(
+            component.component_id.component_prefix, set()
+        ).add(component.component_id)
+        # populate inverse dependency
         for dependency in component.configuration.package_dependencies:
             self._inverse_dependency_graph.setdefault(dependency, set()).add(
                 component.component_id
@@ -138,6 +154,10 @@ class _DependenciesManager:
         self._all_dependencies_by_type[component_id.component_type].pop(component_id)
         if len(self._all_dependencies_by_type[component_id.component_type]) == 0:
             self._all_dependencies_by_type.pop(component_id.component_type)
+        # remove from prefix to id index
+        self._prefix_to_components.get(component_id.component_prefix, set()).discard(
+            component_id
+        )
         # update inverse dependency graph
         for dependency in component.configuration.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
@@ -179,8 +199,11 @@ class _DependenciesManager:
         :return: a list of pairs: (import path, module object)
         """
         # get protocols first
-        components = itertools.chain(
-            self.protocols.values(), self.connections.values(), self.skills.values()
+        components = filter(
+            lambda x: x in self.dependencies_highest_version,
+            itertools.chain(
+                self.protocols.values(), self.connections.values(), self.skills.values()
+            ),
         )
         module_by_import_path = [
             (self._build_dotted_part(component, relative_import_path), module_obj)
@@ -210,6 +233,7 @@ class AEABuilder:
     """
 
     def __init__(self):
+        """Initialize the builder."""
         self._name = None
         self._resources = Resources()
         self._private_key_paths = {}  # type: Dict[str, str]

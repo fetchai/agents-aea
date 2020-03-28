@@ -114,14 +114,18 @@ class _SysModules:
         :return: None.
         """
         with _SysModules.__rlock:
+            # save the current state of sys.modules
+            old_keys = set(sys.modules.keys())
             try:
                 for import_path, module_obj in modules:
                     assert import_path not in sys.modules
                     sys.modules[import_path] = module_obj
                 yield
             finally:
-                for import_path, _ in modules:
-                    sys.modules.pop(import_path, None)
+                # restore old modules
+                sys.modules = dict(
+                    filter(lambda pair: pair[0] in old_keys, sys.modules.items())
+                )
 
 
 def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
