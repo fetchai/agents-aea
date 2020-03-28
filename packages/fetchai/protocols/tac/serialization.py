@@ -19,7 +19,7 @@
 
 """Serialization module for tac protocol."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -118,7 +118,7 @@ class TacSerializer(Serializer):
         elif performative_id == TacMessage.Performative.TAC_ERROR:
             performative = tac_pb2.TacMessage.Tac_Error()  # type: ignore
             error_code = msg.error_code
-            performative = ErrorCode.encode(performative, error_code)
+            ErrorCode.encode(performative.error_code, error_code)
             info = msg.info
             performative.info.update(info)
             tac_msg.tac_error.CopyFrom(performative)
@@ -146,7 +146,7 @@ class TacSerializer(Serializer):
 
         performative = tac_pb.WhichOneof("performative")
         performative_id = TacMessage.Performative(str(performative))
-        performative_content = dict()
+        performative_content = dict()  # type: Dict[str, Any]
         if performative_id == TacMessage.Performative.REGISTER:
             agent_name = tac_pb.register.agent_name
             performative_content["agent_name"] = agent_name

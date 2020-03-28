@@ -19,6 +19,7 @@
 
 """This module contains gym's message definition."""
 
+import logging
 from enum import Enum
 from typing import Set, Tuple, cast
 
@@ -26,6 +27,8 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
+
+logger = logging.getLogger("packages.fetchai.protocols.gym.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -73,9 +76,6 @@ class GymMessage(Message):
             **kwargs,
         )
         self._performatives = {"act", "close", "percept", "reset"}
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'gym' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -247,7 +247,7 @@ class GymMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True
