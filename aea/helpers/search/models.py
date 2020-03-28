@@ -136,9 +136,9 @@ class Description:
         :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
         """
-        service_description = pickle.loads(
+        service_description = pickle.loads(  # nosec
             description_protobuf_object.description
-        )  # nosec
+        )
         return service_description
 
 
