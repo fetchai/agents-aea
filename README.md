@@ -1,4 +1,15 @@
-# agents-aea
+# AEA Framework 
+
+[![PyPI](https://img.shields.io/pypi/v/aea)](https://pypi.org/project/aea/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aea)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/aea)
+[![](https://img.shields.io/pypi/l/aea)](https://github.com/fetchai/agents-aea/blob/master/LICENSE)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aea)
+[![](https://img.shields.io/badge/slack-fetchai-black.svg)](https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY)
+
+![AEA framework sanity checks and tests](https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master)
+![Codecov](https://img.shields.io/codecov/c/github/fetchai/agents-aea)
+
 A framework for autonomous economic agent (AEA) development
 
 ## Get started
@@ -94,3 +105,17 @@ To amend the docs, create a new documentation file in `docs/` and add a referenc
 - Fetch submodules:
 
 	    git submodule sync --recursive && git submodule update --init --recursive
+
+## Cite
+
+If you are using our software in a publication, please 
+consider to cite it with the following BibTex entry:
+
+```
+@misc{agents-aea,
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen},
+  Title = {Autonomous Economic Agent (AEA) Framework},
+  Year = {2019},
+}
+
+```
