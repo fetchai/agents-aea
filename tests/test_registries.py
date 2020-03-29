@@ -391,7 +391,7 @@ class TestFilter:
             tx_digest="some_tx_digest",
         )
         self.aea.decision_maker.message_out_queue.put(t)
-        self.aea.filter.handle_internal_messages()
+        self.aea._filter.handle_internal_messages()
 
         internal_handlers_list = self.aea.resources.handler_registry.fetch_by_protocol(
             PublicId("fetchai", "internal", "0.1.0")
