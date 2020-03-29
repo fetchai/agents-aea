@@ -35,7 +35,6 @@ from aea.cli.common import (
     AEA_LOGO,
     ConnectionsOption,
     Context,
-    _load_env_file,
     _verify_or_create_private_keys,
     logger,
     try_to_load_agent_config,
@@ -52,6 +51,7 @@ from aea.crypto.wallet import Wallet
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
     load_agent_component_package,
+    load_env_file,
     load_module,
 )
 from aea.identity.base import Identity
@@ -190,7 +190,7 @@ def _prepare_environment(click_context, env_file: str, is_install_deps: bool) ->
     :param env_file: the path to the envrionemtn file.
     :param is_install_deps: whether to install the dependencies
     """
-    _load_env_file(env_file)
+    load_env_file(env_file)
     if is_install_deps:
         if Path("requirements.txt").exists():
             click_context.invoke(install, requirement="requirements.txt")

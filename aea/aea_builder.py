@@ -20,7 +20,6 @@
 """This module contains utilities for building an AEA."""
 import itertools
 import logging
-import operator
 import os
 import types
 from contextlib import contextmanager
@@ -30,13 +29,16 @@ from typing import Any, Dict, List, Set, Tuple, Union, cast
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
-    AgentConfig,
     ComponentConfiguration,
     ComponentId,
     ComponentType,
+    ConfigurationType,
+    DEFAULT_AEA_CONFIG_FILE,
+    Dependencies,
     PublicId,
 )
 from aea.configurations.components import Component
+from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
@@ -175,6 +177,15 @@ class _DependenciesManager:
         )
         return len(not_supported_packages) == 0
 
+    @property
+    def pypi_dependencies(self) -> Dependencies:
+        """Get all the PyPI dependencies."""
+        all_pypi_dependencies = {}
+        for component in self._dependencies.values():
+            # TODO implement merging of two PyPI dependencies.
+            all_pypi_dependencies.update(component.configuration.package_dependencies)
+        return all_pypi_dependencies
+
     @contextmanager
     def load_dependencies(self):
         """
@@ -231,6 +242,12 @@ class AEABuilder:
     It follows the fluent interface. Every method of the builder
     returns the instance of the builder itself.
     """
+
+    _DEFAULT_COMPONENTS = {
+        ComponentId(ComponentType.PROTOCOL, PublicId("fetchai", "default", "0.1.0")),
+        ComponentId(ComponentType.CONNECTION, PublicId("fetchai", "stub", "0.1.0")),
+        ComponentId(ComponentType.SKILL, PublicId("fetchai", "error", "0.1.0")),
+    }
 
     def __init__(self):
         """Initialize the builder."""
@@ -457,10 +474,86 @@ class AEABuilder:
     def _check_package_dependencies(self, configuration):
         self._package_dependency_manager.check_package_dependencies(configuration)
 
+    @staticmethod
+    def _find_component_directory_from_component_id(
+        aea_project_directory: Path, component_id: ComponentId
+    ):
+        """Find a component directory from component id."""
+        # search in vendor first
+        vendor_package_path = (
+            aea_project_directory
+            / "vendor"
+            / component_id.public_id.author
+            / component_id.component_type.to_plural()
+            / component_id.public_id.name
+        )
+        if vendor_package_path.exists() and vendor_package_path.is_dir():
+            return vendor_package_path
+
+        # search in custom packages.
+        custom_package_path = (
+            aea_project_directory
+            / component_id.component_type.to_plural()
+            / component_id.public_id.name
+        )
+        if custom_package_path.exists() and custom_package_path.is_dir():
+            return custom_package_path
+
+        raise ValueError("Package {} not found.".format(component_id))
+
     @classmethod
-    def from_aea_config(cls):
-        """Build the agent from a configuration file."""
-        raise NotImplementedError
+    def from_aea_project(cls, aea_project_path: PathLike):
+        """
+        Build the agent from an AEA project
+
+        :param aea_project_path: path to the AEA project.
+        :return: an AEA agent.
+        """
+        aea_project_path = Path(aea_project_path)
+        builder = AEABuilder()
+
+        # TODO isolate environment
+        # load_env_file(str(aea_config_path / ".env"))
+
+        configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
+        loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        agent_configuration = loader.load(configuration_file.open())
+
+        for (
+            ledger_identifier,
+            private_key_path,
+        ) in agent_configuration.private_key_paths_dict.items():
+            builder.add_private_key(ledger_identifier, private_key_path)
+
+        for (
+            ledger_identifier,
+            ledger_api_conf,
+        ) in agent_configuration.ledger_apis_dict.items():
+            builder.add_ledger_api_config(ledger_identifier, ledger_api_conf)
+
+        component_ids = itertools.chain(
+            [
+                ComponentId(ComponentType.PROTOCOL, p_id)
+                for p_id in agent_configuration.protocols
+            ],
+            [
+                ComponentId(ComponentType.CONNECTION, p_id)
+                for p_id in agent_configuration.connections
+            ],
+            [
+                ComponentId(ComponentType.SKILL, p_id)
+                for p_id in agent_configuration.skills
+            ],
+        )
+        for component_id in component_ids:
+            if component_id in cls._DEFAULT_COMPONENTS:
+                continue
+            component_path = cls._find_component_directory_from_component_id(
+                aea_project_path, component_id
+            )
+            builder.add_component(component_id.component_type, component_path)
+
+        return builder
 
 
 #

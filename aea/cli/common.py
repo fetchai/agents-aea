@@ -31,8 +31,6 @@ from typing import Dict, List, Optional, cast
 
 import click
 
-from dotenv import load_dotenv
-
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
@@ -184,16 +182,6 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
                 )
             )
             sys.exit(1)
-
-
-def _load_env_file(env_file: str):
-    """
-    Load the content of the environment file into the process environment.
-
-    :param env_file: path to the env file.
-    :return: None.
-    """
-    load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:

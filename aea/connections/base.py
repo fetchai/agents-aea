@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
 from aea.configurations.base import (
-    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     PublicId,
@@ -33,7 +32,7 @@ from aea.configurations.base import (
 from aea.configurations.components import Component
 
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope, Address  # pragma: no cover
+    from aea.mail.base import Envelope  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)
@@ -101,12 +100,12 @@ class Connection(Component, ABC):
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
-        return self._configuration.restricted_to_protocols
+        return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
-        return self._configuration.excluded_protocols
+        return self.configuration.excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

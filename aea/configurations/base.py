@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-import enum
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -493,6 +492,24 @@ class PackageConfiguration(Configuration, ABC):
 class ComponentConfiguration(PackageConfiguration, ABC):
     """Class to represent an agent component configuration."""
 
+    def __init__(
+        self,
+        name: str,
+        author: str,
+        version: str,
+        license: str,
+        aea_version: str = "",
+        fingerprint: Optional[Dict[str, str]] = None,
+        dependencies: Optional[Dependencies] = None,
+    ):
+        super().__init__(name, author, version, license, aea_version, fingerprint)
+        self._pypi_dependencies = dependencies if dependencies is not None else {}
+
+    @property
+    def pypi_dependencies(self) -> Dependencies:
+        """Get PyPI dependencies."""
+        return self._pypi_dependencies
+
     @property
     @abstractmethod
     def component_type(self) -> ComponentType:
@@ -584,7 +601,9 @@ class ConnectionConfig(ComponentConfiguration):
         **config
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name, author, version, license, aea_version, fingerprint, dependencies
+        )
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = (
@@ -674,7 +693,9 @@ class ProtocolConfig(ComponentConfiguration):
         description: str = "",
     ):
         """Initialize a connection configuration object."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name, author, version, license, aea_version, fingerprint, dependencies
+        )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
@@ -757,7 +778,9 @@ class SkillConfig(ComponentConfiguration):
         description: str = "",
     ):
         """Initialize a skill configuration."""
-        super().__init__(name, author, version, license, aea_version, fingerprint)
+        super().__init__(
+            name, author, version, license, aea_version, fingerprint, dependencies
+        )
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]

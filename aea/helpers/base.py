@@ -28,7 +28,9 @@ import types
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
-from typing import Dict, List, Tuple, Sequence
+from typing import Dict, Sequence, Tuple
+
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -195,3 +197,13 @@ def add_agent_component_module_to_sys_modules(
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     import_module(dotted_path, module_obj)
+
+
+def load_env_file(env_file: str):
+    """
+    Load the content of the environment file into the process environment.
+
+    :param env_file: path to the env file.
+    :return: None.
+    """
+    load_dotenv(dotenv_path=Path(env_file), override=False)
