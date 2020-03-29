@@ -74,11 +74,19 @@ class InternalMessage:
         return self._body.get(key, None)
 
     def unset(self, key: str) -> None:
-        """Unset valye for key."""
+        """
+        Unset value for key.
+
+        :param key: the key to unset the value of
+        """
         self._body.pop(key, None)
 
     def is_set(self, key: str) -> bool:
-        """Check value is set for key."""
+        """
+        Check value is set for key.
+
+        :param key: the key to check
+        """
         return key in self._body
 
     def _is_consistent(self) -> bool:

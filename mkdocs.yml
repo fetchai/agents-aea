@@ -91,6 +91,12 @@ nav:
           - Fetchai: 'api/crypto/fetchai.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
           - Wallet: 'api/crypto/wallet.md'
+        - Decision Maker:
+          - Base: 'api/decision_maker/base.md'
+          - Messages:
+            - Base: 'api/decision_maker/messages/base.md'
+            - State Update: 'api/decision_maker/messages/state_update.md'
+            - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'

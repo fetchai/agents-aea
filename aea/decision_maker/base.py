@@ -38,7 +38,7 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
-from aea.mail.base import OutBox
+from aea.identity.base import Identity
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -56,13 +56,20 @@ class GoalPursuitReadiness:
     """The goal pursuit readiness."""
 
     class Status(Enum):
-        """The enum of status."""
+        """
+        The enum of the readiness status.
+
+        In particular, it can be one of the following:
+
+        - Status.READY: when the agent is ready to pursuit its goal
+        - Status.NOT_READY: when the agent is not ready to pursuit its goal
+        """
 
         READY = "ready"
         NOT_READY = "not_ready"
 
     def __init__(self):
-        """Instantiate an ownership state object."""
+        """Instantiate the goal pursuit readiness."""
         self._status = GoalPursuitReadiness.Status.NOT_READY
 
     @property
@@ -71,17 +78,17 @@ class GoalPursuitReadiness:
         return self._status.value == GoalPursuitReadiness.Status.READY.value
 
     def update(self, new_status: Status) -> None:
-        """Update the goal pursuit readiness."""
+        """
+        Update the goal pursuit readiness.
+
+        :param new_status: the new status
+        :return: None
+        """
         self._status = new_status
 
 
 class OwnershipState:
     """Represent the ownership state of an agent."""
-
-    def __init__(self):
-        """Instantiate an ownership state object."""
-        self._amount_by_currency_id = None  # type: CurrencyHoldings
-        self._quantities_by_good_id = None  # type: GoodHoldings
 
     def init(
         self,
@@ -128,6 +135,8 @@ class OwnershipState:
 
         E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         Note, the agent is the sender of the transaction message by design.
+
+        :param tx_message: the transaction message
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
         if tx_message.amount == 0 and all(
@@ -159,7 +168,7 @@ class OwnershipState:
         """
         Update the agent state from a transaction.
 
-        :param tx_message:
+        :param tx_message: the transaction message
         :return: None
         """
         assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
@@ -190,7 +199,7 @@ class OwnershipState:
         quantities_by_good_id: Dict[str, int],
     ) -> "OwnershipState":
         """
-        Apply a state update to the current state.
+        Apply a state update to (a copy of) the current state.
 
         :param amount_by_currency_id: the delta in the currency amounts
         :param quantities_by_good_id: the delta in the quantities by good
@@ -206,7 +215,7 @@ class OwnershipState:
 
         return new_state
 
-    def __copy__(self):
+    def __copy__(self) -> "OwnershipState":
         """Copy the object."""
         state = OwnershipState()
         if (
@@ -258,13 +267,6 @@ class LedgerStateProxy:
 class Preferences:
     """Class to represent the preferences."""
 
-    def __init__(self):
-        """Instantiate an agent preference object."""
-        self._exchange_params_by_currency_id = None  # type: ExchangeParams
-        self._utility_params_by_good_id = None  # type: UtilityParams
-        self._transaction_fees = None  # type: Dict[str, int]
-        self._quantity_shift = QUANTITY_SHIFT
-
     def init(
         self,
         exchange_params_by_currency_id: ExchangeParams,
@@ -277,6 +279,7 @@ class Preferences:
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
+        :param tx_fee: the acceptable transaction fee.
         :param agent_name: the agent name
         """
         logger.warning(
@@ -285,6 +288,7 @@ class Preferences:
         self._exchange_params_by_currency_id = exchange_params_by_currency_id
         self._utility_params_by_good_id = utility_params_by_good_id
         self._transaction_fees = self._split_tx_fees(tx_fee)
+        self._quantity_shift = QUANTITY_SHIFT
 
     @property
     def is_initialized(self) -> bool:
@@ -365,7 +369,7 @@ class Preferences:
         """
         Compute the marginal utility.
 
-        :param ownership_state: the current ownership state
+        :param ownership_state: the ownership state against which to compute the marginal utility.
         :param delta_quantities_by_good_id: the change in good holdings
         :param delta_amount_by_currency_id: the change in money holdings
         :return: the marginal utility score
@@ -403,7 +407,8 @@ class Preferences:
         """
         Simulate a transaction and get the resulting score (taking into account the fee).
 
-        :param tx_message: a transaction object.
+        :param ownership_state: the ownership state against which to apply the transaction.
+        :param tx_message: a transaction message.
         :return: the score.
         """
         current_score = self.get_score(
@@ -436,25 +441,16 @@ class DecisionMaker:
     """This class implements the decision maker."""
 
     def __init__(
-        self,
-        agent_name: str,
-        max_reactions: int,
-        outbox: OutBox,
-        wallet: Wallet,
-        ledger_apis: LedgerApis,
+        self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis,
     ):
         """
         Initialize the decision maker.
 
-        :param agent_name: the name of the agent
-        :param max_reactions: the processing rate of messages per iteration.
-        :param outbox: the outbox
+        :param identity: the identity
         :param wallet: the wallet
         :param ledger_apis: the ledger apis
         """
-        self._max_reactions = max_reactions
-        self._agent_name = agent_name
-        self._outbox = outbox
+        self._agent_name = identity.name
         self._wallet = wallet
         self._ledger_apis = ledger_apis
         self._message_in_queue = Queue()  # type: Queue
@@ -485,13 +481,8 @@ class DecisionMaker:
 
     @property
     def ledger_apis(self) -> LedgerApis:
-        """Get outbox."""
+        """Get ledger apis."""
         return self._ledger_apis
-
-    @property
-    def outbox(self) -> OutBox:
-        """Get outbox."""
-        return self._outbox
 
     @property
     def ownership_state(self) -> OwnershipState:
@@ -513,7 +504,7 @@ class DecisionMaker:
         """Get readiness of agent to pursuit its goals."""
         return self._goal_pursuit_readiness
 
-    def start(self):
+    def start(self) -> None:
         """Start the decision maker."""
         with self._lock:
             if not self._stopped:  # pragma: no cover
@@ -524,7 +515,7 @@ class DecisionMaker:
             self._thread = Thread(target=self.execute)
             self._thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the decision maker."""
         with self._lock:
             self._stopped = True
@@ -537,6 +528,10 @@ class DecisionMaker:
     def execute(self) -> None:
         """
         Execute the decision maker.
+
+        Performs the following while not stopped:
+
+        - gets internal messages from the in queue and calls handle() on them
 
         :return: None
         """
@@ -562,9 +557,9 @@ class DecisionMaker:
 
     def handle(self, message: InternalMessage) -> None:
         """
-        Handle a message.
+        Handle an internal message from the skills.
 
-        :param message: the message
+        :param message: the internal message
         :return: None
         """
         if isinstance(message, TransactionMessage):

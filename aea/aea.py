@@ -82,9 +82,7 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
-        self._decision_maker = DecisionMaker(
-            self.name, self.max_reactions, self.outbox, wallet, ledger_apis
-        )
+        self._decision_maker = DecisionMaker(identity, wallet, ledger_apis)
         self._context = AgentContext(
             self.identity,
             ledger_apis,

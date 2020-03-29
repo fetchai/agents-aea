@@ -38,6 +38,7 @@ from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
 from aea.decision_maker.base import LedgerStateProxy
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
+from aea.identity.base import Identity
 from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
@@ -234,14 +235,13 @@ class TestDecisionMaker:
         )
         cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
         cls.agent_name = "test"
+        cls.identity = Identity(
+            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI
+        )
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()
         cls.decision_maker = DecisionMaker(
-            agent_name=cls.agent_name,
-            max_reactions=MAX_REACTIONS,
-            outbox=cls.outbox,
-            wallet=cls.wallet,
-            ledger_apis=cls.ledger_apis,
+            identity=cls.identity, wallet=cls.wallet, ledger_apis=cls.ledger_apis,
         )
         cls.multiplexer.connect()
 
@@ -838,13 +838,13 @@ class DecisionMakerTestCase(TestCase):
     def test__handle_tx_message_for_signing_positive(self, *mocks):
         """Test for _handle_tx_message_for_signing positive result."""
         ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
-        dm = DecisionMaker("agent-name", 1, "OutBox", "Wallet", ledger_apis)
+        dm = DecisionMaker("identity", "Wallet", ledger_apis)
         dm._handle_tx_message_for_signing("tx_message")
 
     def test__is_affordable_positive(self, *mocks):
         """Test for _is_affordable positive result."""
         ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
-        dm = DecisionMaker("agent-name", 1, "OutBox", "Wallet", ledger_apis)
+        dm = DecisionMaker("identity", "Wallet", ledger_apis)
         tx_message = mock.Mock()
         tx_message.ledger_id = OFF_CHAIN
         dm._is_affordable(tx_message)
