@@ -90,10 +90,10 @@ class GoalPursuitReadiness:
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
-    def init(
+    def __init__(
         self,
-        amount_by_currency_id: CurrencyHoldings,
-        quantities_by_good_id: GoodHoldings,
+        amount_by_currency_id: Optional[CurrencyHoldings] = None,
+        quantities_by_good_id: Optional[GoodHoldings] = None,
         agent_name: str = "",
     ):
         """
@@ -171,6 +171,8 @@ class OwnershipState:
         :param tx_message: the transaction message
         :return: None
         """
+        assert self._amount_by_currency_id is not None, "CurrencyHoldings not set!"
+        assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
@@ -206,6 +208,8 @@ class OwnershipState:
         :return: the final state.
         """
         new_state = copy.copy(self)
+        assert new_state._amount_by_currency_id is not None, "CurrencyHoldings not set!"
+        assert new_state._quantities_by_good_id is not None, "GoodHoldings not set!"
 
         for currency, amount_delta in amount_by_currency_id.items():
             new_state._amount_by_currency_id[currency] += amount_delta
@@ -267,11 +271,11 @@ class LedgerStateProxy:
 class Preferences:
     """Class to represent the preferences."""
 
-    def init(
+    def __init__(
         self,
-        exchange_params_by_currency_id: ExchangeParams,
-        utility_params_by_good_id: UtilityParams,
-        tx_fee: int,
+        exchange_params_by_currency_id: Optional[ExchangeParams] = None,
+        utility_params_by_good_id: Optional[UtilityParams] = None,
+        tx_fee: int = 1,
         agent_name: str = "",
     ):
         """
@@ -823,12 +827,12 @@ class DecisionMaker:
             == StateUpdateMessage.Performative.INITIALIZE
         ):
             logger.info("[{}]: Applying state initialization!".format(self._agent_name))
-            self.ownership_state.init(
+            self._ownership_state = OwnershipState(
                 amount_by_currency_id=state_update_message.amount_by_currency_id,
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
                 agent_name=self._agent_name,
             )
-            self.preferences.init(
+            self._preferences = Preferences(
                 exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
                 utility_params_by_good_id=state_update_message.utility_params_by_good_id,
                 tx_fee=state_update_message.tx_fee,
