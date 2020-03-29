@@ -542,9 +542,9 @@ class Skill:
         self,
         config: SkillConfig,
         skill_context: SkillContext,
-        handlers: Optional[Dict[str, Handler]],
-        behaviours: Optional[Dict[str, Behaviour]],
-        models: Optional[Dict[str, Model]],
+        handlers: Optional[Dict[str, Handler]] = None,
+        behaviours: Optional[Dict[str, Behaviour]] = None,
+        models: Optional[Dict[str, Model]] = None,
     ):
         """
         Initialize a skill.
@@ -559,6 +559,7 @@ class Skill:
         self.handlers = handlers if handlers is not None else {}
         self.behaviours = behaviours if behaviours is not None else {}
         self.models = models if models is not None else {}
+        self.skill_context._skill = self
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
@@ -610,7 +611,7 @@ class Skill:
         skill = Skill(
             skill_config, skill_context, handlers, behaviours, model_instances
         )
-        skill_context._skill = skill
+        # skill_context._skill = skill
 
         return skill
 

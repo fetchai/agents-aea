@@ -55,7 +55,7 @@ from aea.helpers.base import (
     load_module,
 )
 from aea.identity.base import Identity
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 
 
 AEA_DIR = str(Path("."))

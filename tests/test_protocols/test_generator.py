@@ -58,7 +58,7 @@ from aea.protocols.generator import (
     _specification_type_to_python_type,
     _union_sub_type_to_protobuf_variable_name,
 )
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -310,12 +310,8 @@ class TestEndToEndGenerator:
             TProtocolSerializer(),
             generated_protocol_configuration,
         )
-        resources_1.protocol_registry.register(
-            TProtocolMessage.protocol_id, generated_protocol
-        )
-        resources_2.protocol_registry.register(
-            TProtocolMessage.protocol_id, generated_protocol
-        )
+        resources_1.add_protocol(generated_protocol)
+        resources_2.add_protocol(generated_protocol)
 
         # create AEAs
         aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
@@ -359,7 +355,7 @@ class TestEndToEndGenerator:
         agent_1_handler = Agent1Handler(
             skill_context=SkillContext(aea_1.context), name="fake_skill"
         )
-        resources_1.handler_registry.register(
+        resources_1._handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
@@ -371,7 +367,7 @@ class TestEndToEndGenerator:
             skill_context=SkillContext(aea_2.context),
             name="fake_skill",
         )
-        resources_2.handler_registry.register(
+        resources_2._handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
