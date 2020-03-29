@@ -36,7 +36,13 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.protocols.base import Protocol
-from aea.registries.base import ComponentRegistry, HandlerRegistry, ProtocolRegistry
+from aea.registries.base import (
+    ComponentRegistry,
+    HandlerRegistry,
+    ProtocolId,
+    ProtocolRegistry,
+    Registry,
+)
 from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
 
@@ -55,27 +61,32 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Mod
 
 
 class Resources:
-    """This class implements the resources of an AEA."""
+    """This class implements the object that holds the resources of an AEA."""
 
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
-        """Instantiate the resources."""
+        """
+        Instantiate the resources.
+
+        :param directory: the path to the directory which contains the resources
+             (skills, connections and protocols)
+        """
         self._directory = (
             str(Path(directory).absolute())
             if directory is not None
             else str(Path(".").absolute())
         )
-        self.protocol_registry = ProtocolRegistry()
-        self.handler_registry = HandlerRegistry()
-        self.behaviour_registry = ComponentRegistry[Behaviour]()
-        self.model_registry = ComponentRegistry[Model]()
+        self._protocol_registry = ProtocolRegistry()
+        self._handler_registry = HandlerRegistry()
+        self._behaviour_registry = ComponentRegistry[Behaviour]()
+        self._model_registry = ComponentRegistry[Model]()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
-            self.protocol_registry,
-            self.handler_registry,
-            self.behaviour_registry,
-            self.model_registry,
-        ]
+            self._protocol_registry,
+            self._handler_registry,
+            self._behaviour_registry,
+            self._model_registry,
+        ]  # type: List[Registry]
 
     @property
     def directory(self) -> str:
@@ -91,9 +102,19 @@ class Resources:
         return agent_config
 
     def load(self, agent_context: AgentContext) -> None:
-        """Load all the resources."""
+        """
+        Load all the resources.
+
+        Performs the following:
+
+        - loads the agent configuration
+        - populates the protocols registry
+        - calls populate_skills()
+
+        :param agent_context: the agent context
+        """
         agent_configuration = self._load_agent_config()
-        self.protocol_registry.populate(
+        self._protocol_registry.populate(
             self.directory, allowed_protocols=agent_configuration.protocols
         )
         self.populate_skills(
@@ -108,6 +129,8 @@ class Resources:
     ) -> None:
         """
         Populate skills.
+
+        Processes all allowed_skills in the directory and calls add_skill() with them.
 
         :param directory: the agent's resources directory.
         :param agent_context: the agent's context object
@@ -165,23 +188,33 @@ class Resources:
                     )
                 )
 
-    def add_skill(self, skill: Skill):
-        """Add a skill to the set of resources."""
+    def add_skill(self, skill: Skill) -> None:
+        """
+        Add a skill to the set of resources.
+
+        :param skill: a skill
+        :return: None
+        """
         skill_id = skill.config.public_id
         self._skills[skill_id] = skill
         if skill.handlers is not None:
             for handler in skill.handlers.values():
-                self.handler_registry.register((skill_id, handler.name), handler)
+                self._handler_registry.register((skill_id, handler.name), handler)
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
-                self.behaviour_registry.register((skill_id, behaviour.name), behaviour)
+                self._behaviour_registry.register((skill_id, behaviour.name), behaviour)
         if skill.models is not None:
             for model in skill.models.values():
-                self.model_registry.register((skill_id, model.name), model)
+                self._model_registry.register((skill_id, model.name), model)
 
-    def add_protocol(self, protocol: Protocol):
-        """Add a protocol to the set of resources."""
-        self.protocol_registry.register(protocol.id, protocol)
+    def add_protocol(self, protocol: Protocol) -> None:
+        """
+        Add a protocol to the set of resources.
+
+        :param protocol: a protocol
+        :return: None
+        """
+        self._protocol_registry.register(protocol.id, protocol)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
@@ -195,31 +228,82 @@ class Resources:
         """
         return list(self._skills.values())
 
-    def remove_skill(self, skill_id: SkillId):
-        """Remove a skill from the set of resources."""
+    def remove_skill(self, skill_id: SkillId) -> None:
+        """
+        Remove a skill from the set of resources.
+
+        :param skill_id: the skill id for the skill to be removed.
+        """
         self._skills.pop(skill_id, None)
         try:
-            self.handler_registry.unregister_by_skill(skill_id)
+            self._handler_registry.unregister_by_skill(skill_id)
         except ValueError:
             pass
 
         try:
-            self.behaviour_registry.unregister_by_skill(skill_id)
+            self._behaviour_registry.unregister_by_skill(skill_id)
         except ValueError:
             pass
 
-    def setup(self):
+    def get_handler(
+        self, protocol_id: ProtocolId, skill_id: SkillId
+    ) -> Optional[Handler]:
+        """
+        Get a specific handler.
+
+        :param protocol_id: the protocol id the handler is handling
+        :param skill_id: the skill id of the handler's skill
+        :return: the handler
+        """
+        handler = self._handler_registry.fetch_by_protocol_and_skill(
+            protocol_id, skill_id
+        )
+        return handler
+
+    def get_handlers(self, protocol_id: ProtocolId) -> List[Handler]:
+        """
+        Get all handlers for a given protocol.
+
+        :param protocol_id: the protocol id the handler is handling
+        :return: the list of handlers matching the protocol
+        """
+        handlers = self._handler_registry.fetch_by_protocol(protocol_id)
+        return handlers
+
+    def get_behaviours(self) -> List[Behaviour]:
+        """
+        Get all behaviours.
+
+        :return: a list of behaviours
+        """
+        behaviours = self._behaviour_registry.fetch_all()
+        return behaviours
+
+    def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
+        """
+        Get protocol for given protocol id.
+
+        :return: a protocol
+        """
+        protocol = self._protocol_registry.fetch(protocol_id)
+        return protocol
+
+    def setup(self) -> None:
         """
         Set up the resources.
+
+        Calls setup on all resources.
 
         :return: None
         """
         for r in self._registries:
             r.setup()
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Teardown the resources.
+
+        Calls teardown on all resources.
 
         :return: None
         """

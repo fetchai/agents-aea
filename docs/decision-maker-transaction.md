@@ -19,7 +19,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Message
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler
 
 logger = logging.getLogger("aea")
@@ -221,7 +221,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Message
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler
 
 logger = logging.getLogger("aea")

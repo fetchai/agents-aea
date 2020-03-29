@@ -93,14 +93,12 @@ class Filter:
                 logger.warning("URI - {} - not a valid skill id.".format(uri_path))
 
         if skill_id is not None:
-            handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-                protocol_id, skill_id
-            )
+            handler = self.resources.get_handler(protocol_id, skill_id)
             active_handlers = (
                 [] if handler is None or not handler.context.is_active else [handler]
             )
         else:
-            handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
+            handlers = self.resources.get_handlers(protocol_id)
             active_handlers = list(
                 filter(lambda handler: handler.context.is_active, handlers)
             )
@@ -112,7 +110,7 @@ class Filter:
 
         :return: the list of behaviours currently active
         """
-        behaviours = self.resources.behaviour_registry.fetch_all()
+        behaviours = self.resources.get_behaviours()
         active_behaviour = list(
             filter(lambda b: b.context.is_active and not b.is_done(), behaviours,)
         )
@@ -147,7 +145,7 @@ class Filter:
             while not skill.skill_context.new_behaviours.empty():
                 new_behaviour = skill.skill_context.new_behaviours.get()
                 try:
-                    self.resources.behaviour_registry.register(
+                    self.resources._behaviour_registry.register(
                         (skill.skill_context.skill_id, new_behaviour.name),
                         new_behaviour,
                     )
@@ -160,7 +158,7 @@ class Filter:
         """Handle transaction message from the Decision Maker."""
         skill_callback_ids = tx_message.skill_callback_ids
         for skill_id in skill_callback_ids:
-            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+            handler = self.resources._handler_registry.fetch_internal_handler(skill_id)
             if handler is not None:
                 logger.debug(
                     "Calling handler {} of skill {}".format(type(handler), skill_id)

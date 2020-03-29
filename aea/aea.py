@@ -172,10 +172,10 @@ class AEA(Agent):
         :return: None
         """
         logger.debug("Handling envelope: {}".format(envelope))
-        protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
+        protocol = self.resources.get_protocol(envelope.protocol_id)
 
         # TODO make this working for different skill/protocol versions.
-        error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+        error_handler = self.resources.get_handler(
             DefaultMessage.protocol_id, ERROR_SKILL_ID,
         )
 

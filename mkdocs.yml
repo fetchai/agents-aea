@@ -106,8 +106,7 @@ nav:
           - Default Protocol:
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
-        - Registries:
-          - Base: 'api/registries/base.md'
+        - Resources: 'api/registries/resources.md'
         - Skills:
           - Base: 'api/skills/base.md'
           - Error Skill: 'api/skills/error/handlers.md'
