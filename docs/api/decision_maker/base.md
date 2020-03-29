@@ -71,11 +71,11 @@ class OwnershipState()
 
 Represent the ownership state of an agent.
 
-<a name=".aea.decision_maker.base.OwnershipState.init"></a>
-#### init
+<a name=".aea.decision_maker.base.OwnershipState.__init__"></a>
+#### `__`init`__`
 
 ```python
- | init(amount_by_currency_id: CurrencyHoldings, quantities_by_good_id: GoodHoldings, agent_name: str = "")
+ | __init__(amount_by_currency_id: Optional[CurrencyHoldings] = None, quantities_by_good_id: Optional[GoodHoldings] = None, agent_name: str = "")
 ```
 
 Instantiate an ownership state object.
@@ -244,11 +244,11 @@ class Preferences()
 
 Class to represent the preferences.
 
-<a name=".aea.decision_maker.base.Preferences.init"></a>
-#### init
+<a name=".aea.decision_maker.base.Preferences.__init__"></a>
+#### `__`init`__`
 
 ```python
- | init(exchange_params_by_currency_id: ExchangeParams, utility_params_by_good_id: UtilityParams, tx_fee: int, agent_name: str = "")
+ | __init__(exchange_params_by_currency_id: Optional[ExchangeParams] = None, utility_params_by_good_id: Optional[UtilityParams] = None, tx_fee: int = 1, agent_name: str = "")
 ```
 
 Instantiate an agent preference object.
