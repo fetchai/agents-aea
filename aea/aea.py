@@ -32,7 +32,8 @@ from aea.decision_maker.base import DecisionMaker
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import Filter, Resources
+from aea.registries.filter import Filter
+from aea.registries.resources import Resources
 from aea.skills.error import ERROR_SKILL_ID
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
@@ -186,9 +187,10 @@ class AEA(Agent):
         :return: None
         """
         logger.debug("Handling envelope: {}".format(envelope))
-        protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
+        protocol = self.resources.get_protocol(envelope.protocol_id)
 
-        error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+        # TODO make this working for different skill/protocol versions.
+        error_handler = self.resources.get_handler(
             DefaultMessage.protocol_id, ERROR_SKILL_ID,
         )
 

@@ -540,7 +540,7 @@ This class implements a skill.
 #### `__`init`__`
 
 ```python
- | __init__(config: SkillConfig, skill_context: SkillContext, handlers: Optional[Dict[str, Handler]], behaviours: Optional[Dict[str, Behaviour]], models: Optional[Dict[str, Model]])
+ | __init__(config: SkillConfig, skill_context: SkillContext, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None)
 ```
 
 Initialize a skill.

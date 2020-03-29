@@ -28,7 +28,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Skill
 ```
 
@@ -167,7 +167,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 ROOT_DIR = "./"
