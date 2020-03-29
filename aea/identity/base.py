@@ -30,9 +30,10 @@ class Identity:
     """
     The identity holds the public elements identifying an agent.
 
-    It can include:
+    It includes:
+
     - the agent name
-    - the addresses
+    - the addresses, a map from address identifier to address (can be a single key-value pair)
     """
 
     def __init__(
@@ -46,8 +47,9 @@ class Identity:
         Instantiate the identity.
 
         :param name: the name of the agent.
+        :param address: the default address of the agent.
         :param addresses: the addresses of the agent.
-        :param default_address_key: the key for the default address
+        :param default_address_key: the key for the default address.
         """
         self._name = name
         assert default_address_key is not None, "Provide a key for the default address."
