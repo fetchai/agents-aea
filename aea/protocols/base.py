@@ -304,7 +304,7 @@ class Protocol(Component):
         protocol = Protocol(protocol_id, serializer_class(), protocol_config)
         return protocol
 
-    def load(self, *args, **kwargs):
+    def load(self) -> None:
         """
         Set the component up.
 
@@ -312,7 +312,7 @@ class Protocol(Component):
         to instantiate an instance of the Serializer.
         """
         serialization_module = load_module(
-            "protocols", Path(self.directory, "serialization.py")
+            "serialization", Path(self.directory, "serialization.py")
         )
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(

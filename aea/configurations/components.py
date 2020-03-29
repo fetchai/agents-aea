@@ -69,16 +69,9 @@ class Component(ABC):
     @property
     def prefix_import_path(self):
         """Get the prefix import path for this component."""
-        if self.is_vendor:
-            return "packages.{}.{}.{}".format(
-                self.public_id.author,
-                self.component_type.to_plural(),
-                self.public_id.name,
-            )
-        else:
-            return "packages.{}.{}".format(
-                self.component_type.to_plural(), self.public_id.name
-            )
+        return "packages.{}.{}.{}".format(
+            self.public_id.author, self.component_type.to_plural(), self.public_id.name
+        )
 
     @property
     def component_id(self) -> ComponentId:
@@ -107,7 +100,7 @@ class Component(ABC):
         assert self._directory is None, "Directory already set."
         self._directory = path
 
-    def load(self, *args, **kwargs):
+    def load(self) -> None:
         """
         Set the component up.
 
@@ -156,7 +149,12 @@ def _get_component_class(
     configuration: ComponentConfiguration,
     directory: Path,
 ) -> Type["Component"]:
-    """Get component class from component type."""
+    """
+    Get component class from component type.
+
+    For Protocols and Skills this is trivial.
+    For Connections, we have to parse the connection.py module.
+    """
     from aea.protocols.base import Protocol
     from aea.skills.base import Skill
 

@@ -257,6 +257,7 @@ class AEABuilder:
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_key = None  # set by the user, or instantiate a default one.
         self._default_ledger = None  # set by the user, or instantiate a default one.
+        self._default_connection = None
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -301,6 +302,15 @@ class AEABuilder:
         """
         self._name = name
         return self
+
+    def set_default_connection(self, public_id: PublicId):
+        """
+        Set the default connection.
+
+        :param public_id: the public id of the default connection package.
+        :return: None
+        """
+        self._default_connection = public_id
 
     def add_private_key(
         self, identifier: str, private_key_path: PathLike
@@ -433,13 +443,34 @@ class AEABuilder:
         self.remove_component(ComponentId(ComponentType.SKILL, public_id))
         return self
 
+    def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
+        """Get the identity associated to a wallet."""
+        if len(wallet.addresses) == 0:
+            raise ValueError("Add at least one private key.")
+        if len(wallet.addresses) > 1:
+            identity = Identity(
+                self._name,
+                addresses=wallet.addresses,
+                default_address_key=self._default_ledger,
+            )
+        else:  # pragma: no cover
+            identity = Identity(
+                self._name, address=wallet.addresses[self._default_ledger],
+            )
+        return identity
+
     def build(self) -> AEA:
         """Get the AEA."""
+        wallet = Wallet(self.private_key_paths)
+        identity = self._build_identity_from_wallet(wallet)
         connections = list(self._package_dependency_manager.connections.values())
+        for conneciton in connections:
+            conneciton.address = identity.address
+            conneciton.load()
         aea = AEA(
-            Identity(self._name, addresses=self._private_key_paths),
+            identity,
             connections,
-            Wallet(self.private_key_paths),
+            wallet,
             LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
@@ -506,6 +537,13 @@ class AEABuilder:
         """
         Build the agent from an AEA project
 
+        - load agent configuration file
+        - set name and default configurations
+        - load private keys
+        - load ledger API configurations
+        - set default ledger
+        - load every component
+
         :param aea_project_path: path to the AEA project.
         :return: an AEA agent.
         """
@@ -515,16 +553,26 @@ class AEABuilder:
         # TODO isolate environment
         # load_env_file(str(aea_config_path / ".env"))
 
+        # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
         loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
+        # set name
+        builder.set_name(agent_configuration.name)
+        builder.set_default_ledger_api_config(agent_configuration.default_ledger)
+        builder.set_default_connection(
+            PublicId.from_str(agent_configuration.default_connection)
+        )
+
+        # load private keys
         for (
             ledger_identifier,
             private_key_path,
         ) in agent_configuration.private_key_paths_dict.items():
             builder.add_private_key(ledger_identifier, private_key_path)
 
+        # load ledger API configurations
         for (
             ledger_identifier,
             ledger_api_conf,

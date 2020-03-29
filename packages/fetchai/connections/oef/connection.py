@@ -606,29 +606,23 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(
-        self, address: Address, oef_addr: str, oef_port: int = 10000, *args, **kwargs
-    ):
+    def load(self) -> None:
         """
-        Initialize.
+        Load the connection.
 
-        :param address: the address of the agent.
-        :param oef_addr: the OEF IP address.
-        :param oef_port: the OEF port.
-        :param connection_id: the identifier of the connection object.
-        :param restricted_to_protocols: the only supported protocols for this connection.
-        :param excluded_protocols: the excluded protocols for this connection.
+        :return: None
         """
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "oef", "0.1.0")
-        super().__init__(*args, **kwargs)
+        self.oef_addr = cast(str, self.configuration.config.get("addr"))
+        self.oef_port = cast(int, self.configuration.config.get("port"))
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = OEFChannel(
-            address, oef_addr, oef_port, core=self._core,
-        )  # type: ignore
-
+        self.channel = None  # type: Optional[OEFChannel]
         self._connection_check_task = None  # type: Optional[asyncio.Future]
+
+    def set_address(self, address: "Address") -> None:
+        """Set the address."""
+        self.address = address
+        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
 
     async def connect(self) -> None:
         """
@@ -740,31 +734,3 @@ class OEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        oef_addr = cast(str, connection_configuration.config.get("addr"))
-        oef_port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
-        return OEFConnection(
-            address,
-            oef_addr,
-            oef_port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )

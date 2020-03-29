@@ -93,7 +93,6 @@ class SkillContext:
 
     def set_agent_context(self, agent_context: AgentContext) -> None:
         """Set the agent context."""
-        assert self._agent_context is None, "Agent context already set."
         self._agent_context = agent_context
 
     @property
@@ -640,7 +639,7 @@ class Skill(Component):
 
         return skill
 
-    def load(self, *args, **kwargs):
+    def load(self):
         """
         Set the component up.
 

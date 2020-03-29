@@ -39,17 +39,8 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
-        """
-        Initialize a TCP channel.
-
-        :param address: address.
-        :param host: the socket bind address.
-        :param port: the socket bind port.
-        :param connection_id: the identifier for the connection object.
-        """
-        super().__init__(address, host, port, *args, **kwargs)
-
+    def load(self) -> None:
+        super().load()
         self._reader, self._writer = (
             None,
             None,
@@ -103,30 +94,3 @@ class TCPClientConnection(TCPConnection):
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
         return self._writer
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """Get the TCP server connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        server_address = cast(str, connection_configuration.config.get("address"))
-        server_port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
-        return TCPClientConnection(
-            address,
-            server_address,
-            server_port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )

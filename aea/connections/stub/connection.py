@@ -30,7 +30,7 @@ from watchdog.observers import Observer
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def load(self, *args, **kwargs):
+    def load(self):
         """Set the connection up."""
         input_file = self.configuration.config.get(
             "input_file", "./input_file"

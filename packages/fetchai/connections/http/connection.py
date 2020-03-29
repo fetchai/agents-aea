@@ -452,36 +452,17 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 class HTTPConnection(Connection):
     """Proxy to the functionality of the web RESTful API."""
 
-    def __init__(
-        self,
-        address: Address,
-        host: str,
-        port: int,
-        api_spec_path: Optional[str] = None,
-        *args,
-        **kwargs,
-    ):
-        """
-        Initialize a connection to an RESTful API.
-
-        :param address: the address of the agent.
-        :param host: RESTful API hostname / IP address
-        :param port: RESTful API port number
-        :param api_spec_path: Directory API path and filename of the API spec YAML source file.
-        """
-
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "http", "0.1.0")
-
-        super().__init__(*args, **kwargs)
-        self.address = address
+    def load(self) -> None:
+        host = cast(str, self.configuration.config.get("host"))
+        port = cast(int, self.configuration.config.get("port"))
+        api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
         self.channel = HTTPChannel(
-            address,
+            self.address,
             host,
             port,
             api_spec_path,
             connection_id=self.connection_id,
-            restricted_to_protocols=kwargs.get("restricted_to_protocols", {}),
+            restricted_to_protocols=self.configuration.restricted_to_protocols,
         )
 
     async def connect(self) -> None:
@@ -538,34 +519,3 @@ class HTTPConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the HTTP connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        host = cast(str, connection_configuration.config.get("host"))
-        port = cast(int, connection_configuration.config.get("port"))
-        api_spec_path = cast(str, connection_configuration.config.get("api_spec_path"))
-
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
-        return HTTPConnection(
-            address,
-            host,
-            port,
-            api_spec_path,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )

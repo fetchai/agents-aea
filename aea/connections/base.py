@@ -21,7 +21,6 @@
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
 from aea.configurations.base import (
@@ -32,7 +31,7 @@ from aea.configurations.base import (
 from aea.configurations.components import Component
 
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope  # pragma: no cover
+    from aea.mail.base import Envelope, Address  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)
@@ -63,6 +62,7 @@ class Connection(Component, ABC):
         super().__init__(configuration)
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
+        self._address = None  # type: Optional[Address]
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -81,6 +81,22 @@ class Connection(Component, ABC):
             self._loop is None or not self._loop.is_running()
         ), "Cannot set the loop while it is running."
         self._loop = loop
+
+    @property
+    def address(self) -> "Address":
+        """Get the address."""
+        assert self._address is not None, "Address not set."
+        return self._address
+
+    @address.setter
+    def address(self, address: "Address") -> None:
+        """
+        Set the address to be used by the connection.
+
+        :param address: a public key.
+        :return: None
+        """
+        self._address = address
 
     @property
     def component_type(self) -> ComponentType:
@@ -136,9 +152,3 @@ class Connection(Component, ABC):
 
         :return: the received envelope, or None if an error occurred.
         """
-
-    @classmethod
-    def load_from_directory(
-        cls, component_type: ComponentType, directory: Path
-    ) -> "Component":
-        pass
