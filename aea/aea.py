@@ -119,7 +119,6 @@ class AEA(Agent):
     @resources.setter
     def resources(self, resources: "Resources") -> None:
         """Set resources."""
-        assert type(resources) is Resources, "Must set resources."
         self._resources = resources
 
     @property

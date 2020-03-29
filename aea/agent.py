@@ -194,11 +194,11 @@ class Agent(ABC):
 
         While the liveness of the agent is not stopped it continues to loop over:
 
-            - increment the tick,
-            - call to act(),
-            - sleep for specified timeout,
-            - call to react(),
-            - call to update().
+        - increment the tick,
+        - call to act(),
+        - sleep for specified timeout,
+        - call to react(),
+        - call to update().
 
         :return: None
         """
