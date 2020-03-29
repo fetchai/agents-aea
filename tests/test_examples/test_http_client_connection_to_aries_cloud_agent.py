@@ -46,7 +46,7 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection

@@ -27,7 +27,7 @@ from queue import Queue
 from unittest import TestCase, mock
 
 import aea.registries.base
-from aea.aea import AEA, Resources
+from aea.aea import AEA
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -35,6 +35,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
+from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillComponent, SkillContext
 
 from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection

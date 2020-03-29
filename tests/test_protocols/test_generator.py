@@ -58,7 +58,7 @@ from aea.protocols.generator import (
     _specification_type_to_python_type,
     _union_sub_type_to_protobuf_variable_name,
 )
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection

@@ -31,7 +31,8 @@ from aea.decision_maker.base import DecisionMaker
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import Filter, Resources
+from aea.registries.filter import Filter
+from aea.registries.resources import Resources
 from aea.skills.error import ERROR_SKILL_ID
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
