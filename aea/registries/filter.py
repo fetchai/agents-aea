@@ -110,7 +110,7 @@ class Filter:
 
         :return: the list of behaviours currently active
         """
-        behaviours = self.resources.get_behaviours()
+        behaviours = self.resources.get_all_behaviours()
         active_behaviour = list(
             filter(lambda b: b.context.is_active and not b.is_done(), behaviours,)
         )

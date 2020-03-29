@@ -115,9 +115,7 @@ def test_act():
             t.start()
             time.sleep(1.0)
 
-            behaviour = agent.resources.behaviour_registry.fetch(
-                (DUMMY_SKILL_PUBLIC_ID, "dummy")
-            )
+            behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
             assert behaviour.nb_act_called > 0, "Act() wasn't called"
         finally:
             agent.stop()
@@ -166,7 +164,7 @@ def test_react():
             time.sleep(2.0)
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
-            handler = agent.resources.handler_registry.fetch_by_protocol_and_skill(
+            handler = agent.resources.get_handler(
                 default_protocol_public_id, dummy_skill_public_id
             )
             assert handler is not None, "Handler is not set."
@@ -316,8 +314,8 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         """Test that we can initialize an AEA programmatically."""
         dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
         dummy_behaviour_name = "dummy"
-        dummy_behaviour = self.aea.resources.behaviour_registry.fetch(
-            (dummy_skill_id, dummy_behaviour_name)
+        dummy_behaviour = self.aea.resources.get_behaviour(
+            dummy_skill_id, dummy_behaviour_name
         )
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
@@ -330,10 +328,10 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         expected_dummy_task = async_result.get(2.0)
         assert expected_dummy_task.nb_execute_called > 0
 
-        dummy_handler = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
+        dummy_handler = self.aea.resources.get_handler(
             DefaultMessage.protocol_id, dummy_skill_id
         )
-        dummy_handler_alt = self.aea.resources.handler_registry.fetch(
+        dummy_handler_alt = self.aea.resources._handler_registry.fetch(
             (dummy_skill_id, "dummy")
         )
         assert dummy_handler == dummy_handler_alt
@@ -385,9 +383,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.default_protocol = Protocol(
             default_protocol_id, DefaultSerializer(), cls.default_protocol_configuration
         )
-        cls.resources.protocol_registry.register(
-            default_protocol_id, cls.default_protocol
-        )
+        cls.resources.add_protocol(cls.default_protocol)
 
         cls.error_skill = Skill.from_dir(
             Path(AEA_DIR, "skills", "error"), cls.aea.context
@@ -426,8 +422,8 @@ class TestInitializeAEAProgrammaticallyBuildResources:
 
         dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
         dummy_behaviour_name = "dummy"
-        dummy_behaviour = self.aea.resources.behaviour_registry.fetch(
-            (dummy_skill_id, dummy_behaviour_name)
+        dummy_behaviour = self.aea.resources.get_behaviour(
+            dummy_skill_id, dummy_behaviour_name
         )
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
@@ -439,10 +435,10 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         assert expected_dummy_task.nb_execute_called > 0
 
         dummy_handler_name = "dummy"
-        dummy_handler = self.aea.resources.handler_registry.fetch(
+        dummy_handler = self.aea.resources._handler_registry.fetch(
             (dummy_skill_id, dummy_handler_name)
         )
-        dummy_handler_alt = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
+        dummy_handler_alt = self.aea.resources.get_handler(
             DefaultMessage.protocol_id, dummy_skill_id
         )
         assert dummy_handler == dummy_handler_alt
@@ -497,10 +493,7 @@ class TestAddBehaviourDynamically:
         dummy_skill.skill_context.new_behaviours.put(new_behaviour)
         time.sleep(1.0)
         assert new_behaviour.nb_act_called > 0
-        assert (
-            len(self.agent.resources.behaviour_registry.fetch_by_skill(dummy_skill_id))
-            == 2
-        )
+        assert len(self.agent.resources.get_behaviours(dummy_skill_id)) == 2
 
     @classmethod
     def teardown_class(cls):

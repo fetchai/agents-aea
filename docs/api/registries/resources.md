@@ -48,30 +48,74 @@ Load all the resources.
 Performs the following:
 
 - loads the agent configuration
-- populates the protocols registry
-- calls populate_skills()
+- populates the resources with all protocols in the directory
+and referenced in the configuration
+- populates the resources with all skills in the directory
+and referenced in the configuration
 
 **Arguments**:
 
 - `agent_context`: the agent context
 
-<a name=".aea.registries.resources.Resources.populate_skills"></a>
-#### populate`_`skills
+<a name=".aea.registries.resources.Resources.add_protocol"></a>
+#### add`_`protocol
 
 ```python
- | populate_skills(directory: str, agent_context: AgentContext, allowed_skills: Optional[Set[PublicId]] = None) -> None
+ | add_protocol(protocol: Protocol) -> None
 ```
 
-Populate skills.
-
-Processes all allowed_skills in the directory and calls add_skill() with them.
+Add a protocol to the set of resources.
 
 **Arguments**:
 
-- `directory`: the agent's resources directory.
-- `agent_context`: the agent's context object
-- `allowed_skills`: an optional set of allowed skills (public ids).
-If None, every skill is allowed.
+- `protocol`: a protocol
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.get_protocol"></a>
+#### get`_`protocol
+
+```python
+ | get_protocol(protocol_id: ProtocolId) -> Optional[Protocol]
+```
+
+Get protocol for given protocol id.
+
+**Arguments**:
+
+- `protocol_id`: the protocol id
+
+**Returns**:
+
+a matching protocol, if present, else None
+
+<a name=".aea.registries.resources.Resources.get_all_protocols"></a>
+#### get`_`all`_`protocols
+
+```python
+ | get_all_protocols() -> List[Protocol]
+```
+
+Get the list of all the protocols.
+
+**Returns**:
+
+the list of protocols.
+
+<a name=".aea.registries.resources.Resources.remove_protocol"></a>
+#### remove`_`protocol
+
+```python
+ | remove_protocol(protocol_id: ProtocolId) -> None
+```
+
+Remove a protocol from the set of resources.
+
+**Arguments**:
+
+- `protocol_id`: the protocol id for the protocol to be removed.
 
 **Returns**:
 
@@ -94,23 +138,6 @@ Add a skill to the set of resources.
 
 None
 
-<a name=".aea.registries.resources.Resources.add_protocol"></a>
-#### add`_`protocol
-
-```python
- | add_protocol(protocol: Protocol) -> None
-```
-
-Add a protocol to the set of resources.
-
-**Arguments**:
-
-- `protocol`: a protocol
-
-**Returns**:
-
-None
-
 <a name=".aea.registries.resources.Resources.get_skill"></a>
 #### get`_`skill
 
@@ -118,7 +145,15 @@ None
  | get_skill(skill_id: SkillId) -> Optional[Skill]
 ```
 
-Get the skill.
+Get the skill for a given skill id.
+
+**Arguments**:
+
+- `skill_id`: the skill id
+
+**Returns**:
+
+a matching skill, if present, else None
 
 <a name=".aea.registries.resources.Resources.get_all_skills"></a>
 #### get`_`all`_`skills
@@ -145,6 +180,10 @@ Remove a skill from the set of resources.
 **Arguments**:
 
 - `skill_id`: the skill id for the skill to be removed.
+
+**Returns**:
+
+None
 
 <a name=".aea.registries.resources.Resources.get_handler"></a>
 #### get`_`handler
@@ -181,31 +220,66 @@ Get all handlers for a given protocol.
 
 the list of handlers matching the protocol
 
+<a name=".aea.registries.resources.Resources.get_all_handlers"></a>
+#### get`_`all`_`handlers
+
+```python
+ | get_all_handlers() -> List[Handler]
+```
+
+Get all handlers from all skills.
+
+**Returns**:
+
+the list of handlers
+
+<a name=".aea.registries.resources.Resources.get_behaviour"></a>
+#### get`_`behaviour
+
+```python
+ | get_behaviour(skill_id: SkillId, behaviour_name: str) -> Optional[Behaviour]
+```
+
+Get a specific behaviours for a given skill.
+
+**Arguments**:
+
+- `skill_id`: the skill id
+- `behaviour_name`: the behaviour name
+
+**Returns**:
+
+the behaviour, if it is present, else None
+
 <a name=".aea.registries.resources.Resources.get_behaviours"></a>
 #### get`_`behaviours
 
 ```python
- | get_behaviours() -> List[Behaviour]
+ | get_behaviours(skill_id: SkillId) -> List[Behaviour]
 ```
 
-Get all behaviours.
+Get all behaviours for a given skill.
+
+**Arguments**:
+
+- `skill_id`: the skill id
 
 **Returns**:
 
-a list of behaviours
+the list of behaviours of the skill
 
-<a name=".aea.registries.resources.Resources.get_protocol"></a>
-#### get`_`protocol
+<a name=".aea.registries.resources.Resources.get_all_behaviours"></a>
+#### get`_`all`_`behaviours
 
 ```python
- | get_protocol(protocol_id: ProtocolId) -> Optional[Protocol]
+ | get_all_behaviours() -> List[Behaviour]
 ```
 
-Get protocol for given protocol id.
+Get all behaviours from all skills.
 
 **Returns**:
 
-a protocol
+the list of all behaviours
 
 <a name=".aea.registries.resources.Resources.setup"></a>
 #### setup

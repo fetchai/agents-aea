@@ -108,8 +108,10 @@ class Resources:
         Performs the following:
 
         - loads the agent configuration
-        - populates the protocols registry
-        - calls populate_skills()
+        - populates the resources with all protocols in the directory
+          and referenced in the configuration
+        - populates the resources with all skills in the directory
+          and referenced in the configuration
 
         :param agent_context: the agent context
         """
@@ -117,11 +119,11 @@ class Resources:
         self._protocol_registry.populate(
             self.directory, allowed_protocols=agent_configuration.protocols
         )
-        self.populate_skills(
+        self._populate_skills(
             self.directory, agent_context, allowed_skills=agent_configuration.skills
         )
 
-    def populate_skills(
+    def _populate_skills(
         self,
         directory: str,
         agent_context: AgentContext,
@@ -188,6 +190,43 @@ class Resources:
                     )
                 )
 
+    def add_protocol(self, protocol: Protocol) -> None:
+        """
+        Add a protocol to the set of resources.
+
+        :param protocol: a protocol
+        :return: None
+        """
+        self._protocol_registry.register(protocol.id, protocol)
+
+    def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
+        """
+        Get protocol for given protocol id.
+
+        :param protocol_id: the protocol id
+        :return: a matching protocol, if present, else None
+        """
+        protocol = self._protocol_registry.fetch(protocol_id)
+        return protocol
+
+    def get_all_protocols(self) -> List[Protocol]:
+        """
+        Get the list of all the protocols.
+
+        :return: the list of protocols.
+        """
+        protocols = self._protocol_registry.fetch_all()
+        return protocols
+
+    def remove_protocol(self, protocol_id: ProtocolId) -> None:
+        """
+        Remove a protocol from the set of resources.
+
+        :param protocol_id: the protocol id for the protocol to be removed.
+        :return: None
+        """
+        self._protocol_registry.unregister(protocol_id)
+
     def add_skill(self, skill: Skill) -> None:
         """
         Add a skill to the set of resources.
@@ -207,17 +246,13 @@ class Resources:
             for model in skill.models.values():
                 self._model_registry.register((skill_id, model.name), model)
 
-    def add_protocol(self, protocol: Protocol) -> None:
-        """
-        Add a protocol to the set of resources.
-
-        :param protocol: a protocol
-        :return: None
-        """
-        self._protocol_registry.register(protocol.id, protocol)
-
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
-        """Get the skill."""
+        """
+        Get the skill for a given skill id.
+
+        :param skill_id: the skill id
+        :return: a matching skill, if present, else None
+        """
         return self._skills.get(skill_id, None)
 
     def get_all_skills(self) -> List[Skill]:
@@ -233,6 +268,7 @@ class Resources:
         Remove a skill from the set of resources.
 
         :param skill_id: the skill id for the skill to be removed.
+        :return: None
         """
         self._skills.pop(skill_id, None)
         try:
@@ -270,23 +306,48 @@ class Resources:
         handlers = self._handler_registry.fetch_by_protocol(protocol_id)
         return handlers
 
-    def get_behaviours(self) -> List[Behaviour]:
+    def get_all_handlers(self) -> List[Handler]:
         """
-        Get all behaviours.
+        Get all handlers from all skills.
 
-        :return: a list of behaviours
+        :return: the list of handlers
+        """
+        handlers = self._handler_registry.fetch_all()
+        return handlers
+
+    def get_behaviour(
+        self, skill_id: SkillId, behaviour_name: str
+    ) -> Optional[Behaviour]:
+        """
+        Get a specific behaviours for a given skill.
+
+        :param skill_id: the skill id
+        :param behaviour_name: the behaviour name
+        :return: the behaviour, if it is present, else None
+        """
+        behaviour = self._behaviour_registry.fetch((skill_id, behaviour_name))
+        return behaviour
+
+    def get_behaviours(self, skill_id: SkillId) -> List[Behaviour]:
+        """
+        Get all behaviours for a given skill.
+
+        :param skill_id: the skill id
+        :return: the list of behaviours of the skill
+        """
+        behaviours = self._behaviour_registry.fetch_by_skill(
+            skill_id
+        )  # type: List[Behaviour]
+        return behaviours
+
+    def get_all_behaviours(self) -> List[Behaviour]:
+        """
+        Get all behaviours from all skills.
+
+        :return: the list of all behaviours
         """
         behaviours = self._behaviour_registry.fetch_all()
         return behaviours
-
-    def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
-        """
-        Get protocol for given protocol id.
-
-        :return: a protocol
-        """
-        protocol = self._protocol_registry.fetch(protocol_id)
-        return protocol
 
     def setup(self) -> None:
         """

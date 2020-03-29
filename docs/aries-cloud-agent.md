@@ -118,7 +118,7 @@ It then adds the HTTP protocol to the AEA. THe HTTP protocol defines the format 
         http_protocol = Protocol(
             HttpMessage.protocol_id, HttpSerializer(), http_protocol_configuration,
         )
-        resources.protocol_registry.register(HttpMessage.protocol_id, http_protocol)
+        resources.add_protocol(http_protocol)
 ```
 
 Then, the request message and envelope is created:
