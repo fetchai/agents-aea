@@ -49,11 +49,17 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
     ComponentType,
-)
+    ConnectionConfig, ComponentConfiguration)
 from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.mail.base import Address
+from packages.fetchai.connections.http.connection import HTTPConnection
+from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.local.connection import OEFLocalConnection, LocalNode
+from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.p2p_client.connection import PeerToPeerClientConnection
+from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
+from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
 logger = logging.getLogger(__name__)
 
@@ -528,7 +534,7 @@ def _make_dummy_connection() -> Connection:
     return dummy_connection
 
 
-def _make_local_connection(node: LocalNode, address: Address) -> Connection:
+def _make_local_connection(address: Address, node: LocalNode) -> Connection:
     oef_local_connection = OEFLocalConnection.load_from_directory(
         ComponentType.CONNECTION,
         Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
@@ -537,3 +543,74 @@ def _make_local_connection(node: LocalNode, address: Address) -> Connection:
     oef_local_connection._local_node = node
     oef_local_connection.address = address
     return oef_local_connection
+
+
+def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION, Path(ROOT_DIR, "packages", "fetchai", "connections", "oef")))
+    configuration.config["addr"] = oef_addr
+    configuration.config["port"] = oef_port
+    oef_connection = OEFConnection(configuration)
+    oef_connection.address = address
+    oef_connection.load()
+    return oef_connection
+
+
+def _make_http_connection(address: Address, host: str, port: int, api_spec_path: str):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
+                                                                       Path(ROOT_DIR, "packages", "fetchai",
+                                                                            "connections", "http")))
+    configuration.config["host"] = host
+    configuration.config["port"] = port
+    configuration.config["api_spec_path"] = api_spec_path
+    http_connection = HTTPConnection(configuration)
+    http_connection.address = address
+    http_connection.load()
+    return http_connection
+
+
+def _make_http_client_connection(address: Address, host: str, port: int):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
+                                                                       Path(ROOT_DIR, "packages", "fetchai",
+                                                                            "connections", "http_client")))
+    configuration.config["host"] = host
+    configuration.config["port"] = port
+    http_connection = HTTPClientConnection(configuration)
+    http_connection.address = address
+    http_connection.load()
+    return http_connection
+
+
+def _make_tcp_server_connection(address: str, host: str, port: int):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
+                                                                       Path(ROOT_DIR, "packages", "fetchai",
+                                                                            "connections", "tcp")))
+    configuration.config["host"] = host
+    configuration.config["port"] = port
+    tcp_connection = TCPServerConnection(configuration)
+    tcp_connection.address = address
+    tcp_connection.load()
+    return tcp_connection
+
+
+def _make_tcp_client_connection(address: str, host: str, port: int):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
+                                                                       Path(ROOT_DIR, "packages", "fetchai",
+                                                                            "connections", "tcp")))
+    configuration.config["host"] = host
+    configuration.config["port"] = port
+    tcp_connection = TCPClientConnection(configuration)
+    tcp_connection.address = address
+    tcp_connection.load()
+    return tcp_connection
+
+
+def _make_p2p_client_connection(address: Address, provider_addr: str, provider_port: int):
+    configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
+                                                                       Path(ROOT_DIR, "packages", "fetchai",
+                                                                            "connections", "p2p_client")))
+    configuration.config["addr"] = provider_addr
+    configuration.config["port"] = provider_port
+    p2p_client_connection = PeerToPeerClientConnection(configuration)
+    p2p_client_connection.address = address
+    p2p_client_connection.load()
+    return p2p_client_connection

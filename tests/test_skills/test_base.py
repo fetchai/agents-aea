@@ -25,9 +25,12 @@ import tempfile
 from pathlib import Path
 from queue import Queue
 from unittest import TestCase, mock
+from unittest.mock import Mock
 
 import aea.registries.base
 from aea.aea import AEA, Resources
+from aea.configurations.base import ComponentType
+from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -37,15 +40,14 @@ from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Prefer
 from aea.identity.base import Identity
 from aea.skills.base import Skill, SkillComponent, SkillContext
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID
-from ..data.dummy_connection.connection import DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, _make_dummy_connection
 
 
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     wallet = Wallet({FETCHAI: private_key_path})
-    connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    connections = [_make_dummy_connection()]
     ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
     identity = Identity("name", address=wallet.addresses[FETCHAI])
     my_aea = AEA(
@@ -72,7 +74,7 @@ class TestSkillContext:
             {ETHEREUM: eth_private_key_path, FETCHAI: fet_private_key_path}
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
-        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        cls.connections = [_make_dummy_connection()]
         cls.identity = Identity(
             "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI
         )
@@ -161,7 +163,7 @@ class TestSkillFromDir:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
-        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        cls.connections = [_make_dummy_connection()]
         cls.identity = Identity("name", address=cls.wallet.addresses[FETCHAI])
         cls.my_aea = AEA(
             cls.identity,
@@ -179,7 +181,7 @@ class TestSkillFromDir:
         Path(self.skill_directory, "behaviours.py").write_text("")
         Path(self.skill_directory, "dummy.py").write_text("")
 
-        Skill.from_dir(self.skill_directory, self.agent_context)
+        Component.load_from_directory(ComponentType.SKILL, self.skill_directory)
         self.mocked_logger_warning.assert_any_call(
             "Handler 'DummyInternalHandler' cannot be found."
         )
@@ -292,19 +294,19 @@ class SkillComponentTestCase(TestCase):
     def test_init_no_ctx(self):
         """Test init method no context provided."""
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             self.TestComponent()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             self.TestComponent(skill_context="skill_context")
 
     def test_skill_id_positive(self):
         """Test skill_id property positive."""
         ctx = mock.Mock()
         ctx.skill_id = "skill_id"
-        component = self.TestComponent(skill_context=ctx, name="name")
+        component = self.TestComponent(configuration=Mock(), skill_context=ctx, name="name")
         component.skill_id
 
     def test_config_positive(self):
         """Test config property positive."""
-        component = self.TestComponent(skill_context="ctx", name="name")
+        component = self.TestComponent(configuration=Mock(args={}), skill_context="ctx", name="name")
         component.config

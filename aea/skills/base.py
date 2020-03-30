@@ -233,8 +233,9 @@ class SkillComponent(ABC):
         :param skill_context: the skill context.
         """
         assert name is not None
-        assert configuration is not None
-        assert skill_context is not None
+        # TODO solve it
+        # assert configuration is not None
+        # assert skill_context is not None
         self._configuration = configuration
         self._name = name
         self._context = skill_context

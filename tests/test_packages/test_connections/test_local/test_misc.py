@@ -32,19 +32,18 @@ from aea.protocols.default.serialization import DefaultSerializer
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
+from tests.conftest import _make_local_connection
 
 
 def test_connection():
     """Test that two OEF local connection can connect to a local node."""
     with LocalNode() as node:
 
-        local_id_1 = PublicId("fetchai", "local1", "0.1.0")
-        local_id_2 = PublicId("fetchai", "local2", "0.1.0")
         multiplexer1 = Multiplexer(
-            [OEFLocalConnection("multiplexer1", node, connection_id=local_id_1)]
+            [_make_local_connection("multiplexer1", node)]
         )
         multiplexer2 = Multiplexer(
-            [OEFLocalConnection("multiplexer2", node, connection_id=local_id_2)]
+            [_make_local_connection("multiplexer2", node)]
         )
 
         multiplexer1.connect()
@@ -59,9 +58,7 @@ async def test_connection_twice_return_none():
     """Test that connecting twice works."""
     with LocalNode() as node:
         address = "address"
-        connection = OEFLocalConnection(
-            address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
-        )
+        connection = _make_local_connection(address, node)
         await connection.connect()
         await node.connect(address, connection._reader)
         message = DefaultMessage(
@@ -92,9 +89,7 @@ async def test_receiving_when_not_connected_raise_exception():
     with pytest.raises(AEAConnectionError, match="Connection not established yet."):
         with LocalNode() as node:
             address = "address"
-            connection = OEFLocalConnection(
-                address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
-            )
+            connection = _make_local_connection(address, node)
             await connection.receive()
 
 
@@ -103,9 +98,7 @@ async def test_receiving_returns_none_when_error_occurs():
     """Test that when we try to receive an envelope and an error occurs we return None."""
     with LocalNode() as node:
         address = "address"
-        connection = OEFLocalConnection(
-            address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
-        )
+        connection = _make_local_connection(address, node)
         await connection.connect()
 
         with unittest.mock.patch.object(
@@ -121,12 +114,11 @@ def test_communication():
     """Test that two multiplexer can communicate through the node."""
     with LocalNode() as node:
 
-        local_public_id = PublicId("fetchai", "local", "0.1.0")
         multiplexer1 = Multiplexer(
-            [OEFLocalConnection("multiplexer1", node, connection_id=local_public_id)]
+            [_make_local_connection("multiplexer1", node)]
         )
         multiplexer2 = Multiplexer(
-            [OEFLocalConnection("multiplexer2", node, connection_id=local_public_id)]
+            [_make_local_connection("multiplexer2", node)]
         )
 
         multiplexer1.connect()

@@ -37,7 +37,7 @@ from packages.fetchai.connections.http.connection import HTTPConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port
+from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port, _make_http_connection
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +57,11 @@ class TestHTTPConnectionConnectDisconnect:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         assert cls.http_connection.channel.is_stopped
 
@@ -92,13 +90,11 @@ class TestHTTPConnectionSend:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         loop = asyncio.get_event_loop()
         value = loop.run_until_complete(cls.http_connection.connect())
@@ -188,13 +184,11 @@ class TestHTTPConnectionGET404:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -260,13 +254,11 @@ class TestHTTPConnectionGET408:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -349,13 +341,11 @@ class TestHTTPConnectionGET200:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -457,13 +447,11 @@ class TestHTTPConnectionPOST404:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
@@ -529,13 +517,11 @@ class TestHTTPConnectionPOST408:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
@@ -618,13 +604,11 @@ class TestHTTPConnectionPOST201:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = _make_http_connection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
-            connection_id=cls.connection_id,
-            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
@@ -708,17 +692,3 @@ class TestHTTPConnectionPOST201:
         cls.t.join()
         value = cls.loop.run_until_complete(cls.http_connection.disconnect())
         assert value is None
-
-
-def test_conn_from_config():
-    """Test the Connection from config File."""
-    conf = ConnectionConfig()
-    conf.config["api_spec_path"] = os.path.join(
-        ROOT_DIR, "tests", "data", "petstore_sim.yaml"
-    )
-    conf.config["host"] = get_host()
-    conf.config["port"] = get_unused_tcp_port()
-    conf.config["restricted_to_protocols"] = set(["fetchai/http:0.1.0"])
-    con = HTTPConnection.from_config(address="my_key", connection_configuration=conf)
-    assert con is not None
-    assert not con.connection_status.is_connected

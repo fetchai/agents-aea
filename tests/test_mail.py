@@ -229,7 +229,7 @@ def test_multiplexer():
     """Tests if the multiplexer is connected."""
     with LocalNode() as node:
         address_1 = "address_1"
-        oef_local_connection = _make_local_connection(node, address_1)
+        oef_local_connection = _make_local_connection(address_1, node)
         multiplexer = Multiplexer([oef_local_connection])
         multiplexer.connect()
         assert (

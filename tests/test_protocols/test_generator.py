@@ -24,6 +24,7 @@ import os
 import shutil
 import tempfile
 import time
+from pathlib import Path
 from threading import Thread
 from typing import Optional
 from unittest import TestCase, mock
@@ -34,12 +35,14 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
     ProtocolConfig,
     ProtocolId,
     ProtocolSpecificationParseError,
     PublicId,
-)
+    ComponentType)
+from aea.configurations.components import Component
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.crypto.ledger_apis import LedgerApis
@@ -66,6 +69,7 @@ from tests.data.generator.t_protocol.serialization import (  # type: ignore
 )
 
 from ..common.click_testing import CliRunner
+from ..conftest import ROOT_DIR
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -165,63 +169,23 @@ class TestGenerateProtocol:
 
     def test_generated_protocol_end_to_end(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
-        # AEA components
-        ledger_apis = LedgerApis({}, FETCHAI)
+        builder_1 = AEABuilder()
+        builder_1.set_name("my_aea_1")
+        builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        builder_1.set_default_ledger_api_config(FETCHAI)
+        builder_1.add_protocol(Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"))
+        builder_1.add_connection(Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"))
 
-        wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-        wallet_2 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-
-        identity_1 = Identity(
-            name="my_aea_1",
-            address=wallet_1.addresses.get(FETCHAI),
-            default_address_key=FETCHAI,
-        )
-        identity_2 = Identity(
-            name="my_aea_2",
-            address=wallet_2.addresses.get(FETCHAI),
-            default_address_key=FETCHAI,
-        )
-
-        oef_connection_1 = OEFConnection(
-            address=identity_1.address, oef_addr=HOST, oef_port=PORT
-        )
-        oef_connection_2 = OEFConnection(
-            address=identity_2.address, oef_addr=HOST, oef_port=PORT
-        )
-
-        resources_1 = Resources()
-        resources_2 = Resources()
-
-        # add generated protocols to resources
-        generated_protocol_configuration = ProtocolConfig.from_json(
-            yaml.safe_load(
-                open(
-                    os.path.join(
-                        self.cwd,
-                        "tests",
-                        "data",
-                        "generator",
-                        "t_protocol",
-                        "protocol.yaml",
-                    )
-                )
-            )
-        )
-        generated_protocol = Protocol(
-            TProtocolMessage.protocol_id,
-            TProtocolSerializer(),
-            generated_protocol_configuration,
-        )
-        resources_1.protocol_registry.register(
-            TProtocolMessage.protocol_id, generated_protocol
-        )
-        resources_2.protocol_registry.register(
-            TProtocolMessage.protocol_id, generated_protocol
-        )
+        builder_2 = AEABuilder()
+        builder_2.set_name("my_aea_2")
+        builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        builder_2.set_default_ledger_api_config(FETCHAI)
+        builder_2.add_protocol(Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"))
+        builder_2.add_connection(Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"))
 
         # create AEAs
-        aea_1 = AEA(identity_1, [oef_connection_1], wallet_1, ledger_apis, resources_1)
-        aea_2 = AEA(identity_2, [oef_connection_2], wallet_2, ledger_apis, resources_2)
+        aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
+        aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
 
         # message 1
         message = TProtocolMessage(
@@ -237,8 +201,8 @@ class TestGenerateProtocol:
         )
         encoded_message_in_bytes = TProtocolSerializer().encode(message)
         envelope = Envelope(
-            to=identity_2.address,
-            sender=identity_1.address,
+            to=aea_2.identity.address,
+            sender=aea_1.identity.address,
             protocol_id=TProtocolMessage.protocol_id,
             message=encoded_message_in_bytes,
         )
@@ -259,38 +223,27 @@ class TestGenerateProtocol:
 
         # add handlers to AEA resources
         agent_1_handler = Agent1Handler(
-            skill_context=SkillContext(aea_1.context), name="fake_skill"
-        )
-        resources_1.handler_registry.register(
+            skill_context=SkillContext(aea_1.context), name="fake_skill")
+        aea_1.resources.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
             ),
             agent_1_handler,
         )
+
         agent_2_handler = Agent2Handler(
             encoded_messsage=encoded_message_2_in_bytes,
             skill_context=SkillContext(aea_2.context),
             name="fake_skill",
         )
-        resources_2.handler_registry.register(
+        aea_2.resources.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
             ),
             agent_2_handler,
         )
-
-        # add error skill to AEAs
-        error_skill_1 = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea_1.context
-        )
-        resources_1.add_skill(error_skill_1)
-
-        error_skill_2 = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea_2.context
-        )
-        resources_2.add_skill(error_skill_2)
 
         # Start threads
         t_1 = Thread(target=aea_1.start)

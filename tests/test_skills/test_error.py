@@ -40,8 +40,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID
-from ..data.dummy_connection.connection import DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, _make_dummy_connection
 
 
 class TestSkillError:
@@ -56,7 +55,7 @@ class TestSkillError:
         cls.ledger_apis = LedgerApis({}, FETCHAI)
         cls.agent_name = "Agent0"
 
-        cls.connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
+        cls.connection = _make_dummy_connection()
         cls.connections = [cls.connection]
         cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.address = cls.identity.address

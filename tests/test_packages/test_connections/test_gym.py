@@ -20,15 +20,16 @@
 """This module contains the tests of the gym connection module."""
 
 import logging
+from unittest.mock import Mock
 
 import gym
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.gym.connection import GymConnection
+from packages.fetchai.connections.gym.connection import GymConnection, GymChannel
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
@@ -44,11 +45,9 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(
-            address="my_key",
-            gym_env=cls.env,
-            connection_id=PublicId("fetchai", "gym", "0.1.0"),
-        )
+        cls.gym_con = GymConnection(None)
+        cls.gym_con.channel = GymChannel("my_key", gym.GoalEnv())
+        cls.gym_con._connection = None
 
     def test_gym_connection_initialization(self):
         """Test the connection None return value after connect()."""
@@ -91,11 +90,3 @@ class TestGymConnection:
         """Test receive connection error and Cancel Error."""
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
-
-
-def test_gym_from_config():
-    """Test the Connection from config File."""
-    conf = ConnectionConfig()
-    conf.config["env"] = "tests.conftest.DUMMY_ENV"
-    con = GymConnection.from_config(address="pk", connection_configuration=conf)
-    assert con is not None
