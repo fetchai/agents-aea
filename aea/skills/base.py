@@ -584,61 +584,6 @@ class Skill(Component):
         """Get the handlers."""
         return self._models
 
-    @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
-        """
-        Load a skill from a directory.
-
-        :param directory: the skill directory.
-        :param agent_context: the agent's context
-        :return: the Skill object.
-        :raises Exception: if the parsing failed.
-        """
-        # check if there is the config file. If not, then return None.
-        skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        skill_config = skill_loader.load(
-            open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE))
-        )
-        skill_module = load_agent_component_package(
-            "skill", skill_config.name, skill_config.author, Path(directory)
-        )
-        add_agent_component_module_to_sys_modules(
-            "skill", skill_config.name, skill_config.author, skill_module
-        )
-        loader_contents = [path.name for path in Path(directory).iterdir()]
-        skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
-        logger.debug(
-            "Processing the following skill package: {}".format(skills_packages)
-        )
-
-        skill_context = SkillContext(agent_context)
-        # set the logger of the skill context.
-        logger_name = "aea.{}.skills.{}.{}".format(
-            agent_context.agent_name, skill_config.author, skill_config.name
-        )
-        skill_context.logger = logging.getLogger(logger_name)
-
-        handlers_by_id = dict(skill_config.handlers.read_all())
-        handlers = Handler.parse_module(
-            os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
-        )
-
-        behaviours_by_id = dict(skill_config.behaviours.read_all())
-        behaviours = Behaviour.parse_module(
-            os.path.join(directory, "behaviours.py"), behaviours_by_id, skill_context,
-        )
-
-        models_by_id = dict(skill_config.models.read_all())
-        model_instances = Model.parse_module(directory, models_by_id, skill_context)
-
-        skill = Skill(skill_config)
-        skill.handlers.update(handlers)
-        skill.behaviours.update(behaviours)
-        skill.models.update(model_instances)
-        skill_context._skill = skill
-
-        return skill
-
     def load(self):
         """
         Set the component up.

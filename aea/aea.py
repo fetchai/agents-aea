@@ -77,7 +77,6 @@ class AEA(Agent):
             loop=loop,
             timeout=timeout,
             is_debug=is_debug,
-            is_programmatic=is_programmatic,
         )
 
         self.max_reactions = max_reactions
@@ -135,8 +134,6 @@ class AEA(Agent):
 
         :return: None
         """
-        if not self.is_programmatic:
-            self.resources.load(self.context)
         self.task_manager.start()
         self.decision_maker.start()
         self.resources.setup()

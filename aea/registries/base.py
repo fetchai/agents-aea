@@ -174,50 +174,6 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         """Fetch all the protocols."""
         return list(self._protocols.values())
 
-    def populate(
-        self, directory: str, allowed_protocols: Optional[Set[PublicId]] = None
-    ) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
-
-        :param directory: the filepath to the agent's resource directory.
-        :param allowed_protocols: an optional set of allowed protocols (public ids_.
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        protocol_directory_paths = set()  # type: ignore
-
-        # find all protocol directories from vendor/*/protocols
-        protocol_directory_paths.update(
-            Path(directory, "vendor").glob("./*/protocols/*/")
-        )
-        # find all protocol directories from protocols/
-        protocol_directory_paths.update(Path(directory, "protocols").glob("./*/"))
-
-        protocols_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                protocol_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following protocol packages: {}".format(
-                pprint.pformat(map(str, protocol_directory_paths))
-            )
-        )
-        for protocol_package_path in protocols_packages_paths:
-            try:
-                logger.debug(
-                    "Processing the protocol package '{}'".format(protocol_package_path)
-                )
-                self._add_protocol(
-                    protocol_package_path, allowed_protocols=allowed_protocols
-                )
-            except Exception:
-                logger.exception(
-                    "Not able to add protocol '{}'.".format(protocol_package_path.name)
-                )
-
     def setup(self) -> None:
         """
         Set up the registry.
@@ -233,61 +189,6 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         :return: None
         """
         self._protocols = {}
-
-    def _add_protocol(
-        self,
-        protocol_directory: Path,
-        allowed_protocols: Optional[Set[PublicId]] = None,
-    ):
-        """
-        Add a protocol. If the protocol is not allowed, it is ignored.
-
-        :param protocol_directory: the directory of the protocol to be added.
-        :param allowed_protocols: an optional set of allowed protocols.
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        protocol_name = protocol_directory.name
-        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(
-            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
-        )
-        protocol_public_id = PublicId(
-            protocol_config.author, protocol_config.name, protocol_config.version
-        )
-        if (
-            allowed_protocols is not None
-            and protocol_public_id not in allowed_protocols
-        ):
-            logger.debug(
-                "Ignoring protocol {}, not declared in the configuration file.".format(
-                    protocol_public_id
-                )
-            )
-            return
-
-        # get the serializer
-        serialization_spec = importlib.util.spec_from_file_location(
-            "serialization", protocol_directory / "serialization.py"
-        )
-        serialization_module = importlib.util.module_from_spec(serialization_spec)
-        serialization_spec.loader.exec_module(serialization_module)  # type: ignore
-        classes = inspect.getmembers(serialization_module, inspect.isclass)
-        serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
-        )
-        serializer_class = serializer_classes[0][1]
-
-        logger.debug(
-            "Found serializer class {serializer_class} for protocol {protocol_name}".format(
-                serializer_class=serializer_class, protocol_name=protocol_name
-            )
-        )
-        serializer = serializer_class()
-
-        # instantiate the protocol
-        protocol = Protocol(protocol_config.public_id, serializer, protocol_config)
-        self.register(protocol_public_id, protocol)
 
 
 class ComponentRegistry(
@@ -560,89 +461,6 @@ class Resources:
     def directory(self) -> str:
         """Get the directory."""
         return self._directory
-
-    def _load_agent_config(self) -> AgentConfig:
-        """Load the agent configuration."""
-        config_loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
-        agent_config = config_loader.load(
-            open(os.path.join(self.directory, DEFAULT_AEA_CONFIG_FILE))
-        )
-        return agent_config
-
-    def load(self, agent_context: AgentContext) -> None:
-        """Load all the resources."""
-        agent_configuration = self._load_agent_config()
-        self.protocol_registry.populate(
-            self.directory, allowed_protocols=agent_configuration.protocols
-        )
-        self.populate_skills(
-            self.directory, agent_context, allowed_skills=agent_configuration.skills
-        )
-
-    def populate_skills(
-        self,
-        directory: str,
-        agent_context: AgentContext,
-        allowed_skills: Optional[Set[PublicId]] = None,
-    ) -> None:
-        """
-        Populate skills.
-
-        :param directory: the agent's resources directory.
-        :param agent_context: the agent's context object
-        :param allowed_skills: an optional set of allowed skills (public ids).
-                               If None, every skill is allowed.
-        :return: None
-        """
-        skill_directory_paths = set()  # type: ignore
-
-        # find all skill directories from vendor/*/skills
-        skill_directory_paths.update(Path(directory, "vendor").glob("./*/skills/*/"))
-        # find all skill directories from skills/
-        skill_directory_paths.update(Path(directory, "skills").glob("./*/"))
-
-        skills_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                skill_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following skill packages: {}".format(
-                pprint.pformat(map(str, skills_packages_paths))
-            )
-        )
-        for skill_directory in skills_packages_paths:
-            logger.debug(
-                "Processing the following skill directory: '{}".format(skill_directory)
-            )
-            try:
-                skill_loader = ConfigLoader.from_configuration_type(
-                    ConfigurationType.SKILL
-                )
-                skill_config = skill_loader.load(
-                    open(skill_directory / DEFAULT_SKILL_CONFIG_FILE)
-                )
-                if (
-                    allowed_skills is not None
-                    and skill_config.public_id not in allowed_skills
-                ):
-                    logger.debug(
-                        "Ignoring skill {}, not declared in the configuration file.".format(
-                            skill_config.public_id
-                        )
-                    )
-                    continue
-                else:
-                    skill = Skill.from_dir(str(skill_directory), agent_context)
-                    assert skill is not None
-                    self.add_skill(skill)
-            except Exception as e:
-                logger.warning(
-                    "A problem occurred while parsing the skill directory {}. Exception: {}".format(
-                        skill_directory, str(e)
-                    )
-                )
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""

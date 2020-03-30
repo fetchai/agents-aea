@@ -72,7 +72,7 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
-        is_programmatic: bool = True,
+        is_programmatic: bool = True, # TODO to remove
     ) -> None:
         """
         Instantiate the agent.
@@ -98,7 +98,6 @@ class Agent(ABC):
         self._tick = 0
 
         self.is_debug = is_debug
-        self.is_programmatic = is_programmatic
 
     @property
     def identity(self) -> Identity:

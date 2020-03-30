@@ -273,37 +273,6 @@ class Protocol(Component):
         """Get the configuration."""
         return cast(ProtocolConfig, self._configuration)
 
-    @classmethod
-    def from_dir(cls, directory: str) -> "Protocol":
-        """
-        Load a protocol from a directory.
-
-        :param directory: the skill directory.
-        :return: the Protocol object.
-        :raises Exception: if the parsing failed.
-        """
-        # check if there is the config file. If not, then return None.
-        protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = protocol_loader.load(
-            open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE))
-        )
-        protocol_module = load_module("protocols", Path(directory, "serialization.py"))
-        add_agent_component_module_to_sys_modules(
-            "protocol", protocol_config.name, protocol_config.author, protocol_module
-        )
-        classes = inspect.getmembers(protocol_module, inspect.isclass)
-        serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
-        )
-        assert len(serializer_classes) == 1, "Not exactly one serializer detected."
-        serializer_class = serializer_classes[0][1]
-
-        protocol_id = PublicId(
-            protocol_config.author, protocol_config.name, protocol_config.version
-        )
-        protocol = Protocol(protocol_id, serializer_class(), protocol_config)
-        return protocol
-
     def load(self) -> None:
         """
         Set the component up.
