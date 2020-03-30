@@ -4,11 +4,11 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmUH8aTndA3gLK999bviGNg2Ky8dHxZosbA8PRPg9LgtjF
-  custom_types.py: QmXRFSB2deNBQEsiy3TamxEE3Xz3p5hxSv29wCnno94wet
-  message.py: QmVDvh8q1CmpaMNi1tZBkseEpqSeqHrwQcbb2qRmht58Mk
-  serialization.py: QmXsoTkYeJRAoiwmykuURnBXQY6R83mjgEFZFEJTjAkCAu
+  custom_types.py: QmY1KipXkw2tusRMXszDRxN347rqPmiegmAXaPN5ay4Mmw
+  message.py: QmU49j35NeJJCHbWYMGwp11L6FAA8p8yw4U6Y5edwceGFG
+  serialization.py: QmNbC8Re7PSLrjXVjcvQPnhHWn7jHeXwKUDn11jVqKFX4J
   tac.proto: QmZvRraQ3JEXafcS69XxPcrLzJqrXQ5UJeS1b7t42e2zWw
-  tac_pb2.py: QmX6h96zmJA3ZoXkJEK7TtK5XkA9Af1YHTtkdURUgdS7NG
+  tac_pb2.py: QmV17RKJP77jEF3j5fi41VQg33UHJJsj8LbBBhBiqDs8BC
 aea_version: 0.2.4
 dependencies: 
     protobuf: {} 

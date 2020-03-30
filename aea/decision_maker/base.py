@@ -955,7 +955,7 @@ class DecisionMaker:
         tx_signature = crypto_object.sign_message(tx_hash)
         return tx_signature
 
-    def _sign_ledger_tx(self, tx_message) -> Any:
+    def _sign_ledger_tx(self, tx_message: TransactionMessage) -> Any:
         """
         Handle a transaction message for deployment.
 

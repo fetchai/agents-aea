@@ -5,9 +5,9 @@ license: Apache-2.0
 fingerprint:
   __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
-  message.py: QmSq28QAxB7BWgC7q8HLsneSqjoK8oE9DQwXTsCLWM7iDK
+  message.py: QmbUm9UKFhVtn3jLhJHsPL79xbPmUNhpF7rTRrxoPEECsD
   ml_trade.proto: QmWMjsNw8jf3c52fvCsf6mG2oAMoCNaW2rMmqu1aXwxVim
-  ml_trade_pb2.py: QmR7rwS5X4PsvjGWMyT6kzFtHuqWqoNmY3QN92rM1PjFAj
+  ml_trade_pb2.py: QmTrHmA21ThmsgJqDDEnxmnW8r7YxYgxE8qs9UEnRZGu95
   serialization.py: QmXHusvFg96W43PmKMvgkKsujizNzDN3tZk42qMr4XBnQm
 aea_version: 0.2.4
 dependencies: 
