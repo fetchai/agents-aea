@@ -256,8 +256,10 @@ class AEABuilder:
         self._private_key_paths = {}  # type: Dict[str, str]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_key = None  # set by the user, or instantiate a default one.
-        self._default_ledger = None  # set by the user, or instantiate a default one.
-        self._default_connection = None
+        self._default_ledger = (
+            "fetchai"  # set by the user, or instantiate a default one.
+        )
+        self._default_connection = PublicId("fetchai", "stub", "0.1.0")
 
         self._package_dependency_manager = _DependenciesManager()
 

@@ -616,13 +616,8 @@ class OEFConnection(Connection):
         self.oef_port = cast(int, self.configuration.config.get("port"))
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = None  # type: Optional[OEFChannel]
+        self.channel = self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
         self._connection_check_task = None  # type: Optional[asyncio.Future]
-
-    def set_address(self, address: "Address") -> None:
-        """Set the address."""
-        self.address = address
-        self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
 
     async def connect(self) -> None:
         """

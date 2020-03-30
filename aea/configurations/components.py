@@ -118,9 +118,13 @@ class Component(ABC):
         component_class = _get_component_class(component_type, configuration, directory)
         component_object = component_class(configuration=configuration)
         component_object._directory = directory
-        init_modules = load_init_modules(directory)
+        import_prefix = configuration.component_id.prefix_import_path
+        init_modules = load_init_modules(directory, prefix=import_prefix)
         component_object.importpath_to_module.update(init_modules)
-        with _SysModules.load_modules(list(init_modules.items())):
+        if component_type != ComponentType.CONNECTION:
+            # load the component here, but only if it is not a connection
+            # (we need the identity and the address of the agent).
+            # with _SysModules.load_modules(list(init_modules.items())):
             component_object.load()
         return component_object
 

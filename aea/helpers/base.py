@@ -23,10 +23,12 @@ import builtins
 import importlib.util
 import logging
 import os
+import re
 import sys
 import types
 from contextlib import contextmanager
 from pathlib import Path
+import pprint
 from threading import RLock
 from typing import Dict, Sequence, Tuple
 
@@ -78,8 +80,14 @@ def locate(path):
     return object
 
 
-def load_init_modules(directory: Path) -> Dict[str, types.ModuleType]:
-    """Load __init__.py modules of a directory, recursively."""
+def load_init_modules(directory: Path, prefix: str = "") -> Dict[str, types.ModuleType]:
+    """
+    Load __init__.py modules of a directory, recursively.
+
+    :param directory: the directory where to search for __init__.py modules.
+    :param prefix: the prefix to apply in the import path.
+    :return: a mapping from import path to module objects.
+    """
     if not directory.exists() or not directory.is_dir():
         raise ValueError("The provided path does not exists or it is not a directory.")
     result = {}  # type: Dict[str, types.ModuleType]
@@ -96,7 +104,8 @@ def load_init_modules(directory: Path) -> Dict[str, types.ModuleType]:
             else ""
         )
         init_module = load_module(relative_dotted_path, init_module_path)
-        result[relative_dotted_path] = init_module
+        full_dotted_path = ".".join([prefix, relative_dotted_path])
+        result[full_dotted_path] = init_module
 
     return result
 
@@ -117,17 +126,18 @@ class _SysModules:
         """
         with _SysModules.__rlock:
             # save the current state of sys.modules
-            old_keys = set(sys.modules.keys())
             try:
                 for import_path, module_obj in modules:
                     assert import_path not in sys.modules
                     sys.modules[import_path] = module_obj
                 yield
             finally:
-                # restore old modules
-                sys.modules = dict(
-                    filter(lambda pair: pair[0] in old_keys, sys.modules.items())
-                )
+                pass
+                # remove modules whose import path prefix is "packages."
+                keys = set(sys.modules.keys())
+                for key in keys:
+                    if re.match("^packages.?", key):
+                        sys.modules.pop(key, None)
 
 
 def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:

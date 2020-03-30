@@ -442,6 +442,13 @@ class ComponentId(PackageId):
         package_type, author, name = package_prefix
         return ComponentType(package_type.value), author, name
 
+    @property
+    def prefix_import_path(self) -> str:
+        """Get the prefix import path for this component."""
+        return "packages.{}.{}.{}".format(
+            self.public_id.author, self.component_type.to_plural(), self.public_id.name
+        )
+
 
 ProtocolId = PublicId
 SkillId = PublicId
