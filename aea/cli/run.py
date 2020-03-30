@@ -30,6 +30,7 @@ from click import pass_context
 
 from aea import __version__
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.cli.common import (
     AEAConfigException,
     AEA_LOGO,
@@ -44,7 +45,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     PublicId,
-)
+    DEFAULT_AEA_CONFIG_FILE)
 from aea.connections.base import Connection
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -273,25 +274,25 @@ def run(
     click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
-    ctx = cast(Context, click_context.obj)
-
-    _validate_aea(ctx)
-
+    # ctx = cast(Context, click_context.obj)
+    # _validate_aea(ctx)
     _prepare_environment(click_context, env_file, is_install_deps)
+    # aea = _build_aea(ctx, connection_ids)
 
-    aea = _build_aea(ctx, connection_ids)
+    builder = AEABuilder.from_aea_project(Path("."))
+    aea = builder.build()
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo("{} starting ...".format(ctx.agent_config.agent_name))
+    click.echo("{} starting ...".format(aea.name))
     try:
         aea.start()
     except KeyboardInterrupt:
         click.echo(
-            " {} interrupted!".format(ctx.agent_config.agent_name)
+            " {} interrupted!".format(aea.name)
         )  # pragma: no cover
     except Exception as e:
         logger.exception(e)
         sys.exit(1)
     finally:
-        click.echo("{} stopping ...".format(ctx.agent_config.agent_name))
+        click.echo("{} stopping ...".format(aea.name))
         aea.stop()

@@ -24,7 +24,7 @@ import os
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Set, Tuple, Union, cast, Collection, Optional
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -36,13 +36,18 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PublicId,
-)
+    AgentConfig)
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import _create_fetchai_private_key, FETCHAI_PRIVATE_KEY_FILE, \
+    _try_validate_fet_private_key_path, _create_ethereum_private_key, ETHEREUM_PRIVATE_KEY_FILE, \
+    _try_validate_ethereum_private_key_path
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet
+from aea.crypto.wallet import Wallet, SUPPORTED_CRYPTOS
 from aea.helpers.base import _SysModules
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -50,6 +55,8 @@ from aea.registries.base import Resources
 from aea.skills.base import Skill
 
 PathLike = Union[os.PathLike, Path, str]
+
+logger = logging.getLogger(__name__)
 
 
 class _DependenciesManager:
@@ -447,8 +454,8 @@ class AEABuilder:
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """Get the identity associated to a wallet."""
-        if len(wallet.addresses) == 0:
-            raise ValueError("Add at least one private key.")
+        # if len(wallet.addresses) == 0:
+        #     raise ValueError("Add at least one private key.")
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
@@ -461,11 +468,20 @@ class AEABuilder:
             )
         return identity
 
-    def build(self) -> AEA:
-        """Get the AEA."""
+    def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
+        """
+        Get the AEA.
+
+        :param connection_ids: select only these connections.
+        :return: the AEA object.
+        """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
-        connections = list(self._package_dependency_manager.connections.values())
+        if connection_ids is not None:
+            connections = [connection for id_, connection in self._package_dependency_manager.connections.items() if id_ in connection_ids]
+        else:
+            connections = list(self._package_dependency_manager.connections.values())
+
         for conneciton in connections:
             conneciton.address = identity.address
             conneciton.load()
@@ -550,6 +566,7 @@ class AEABuilder:
         :return: an AEA agent.
         """
         aea_project_path = Path(aea_project_path)
+        _verify_or_create_private_keys(aea_project_path)
         builder = AEABuilder()
 
         # TODO isolate environment
@@ -557,10 +574,11 @@ class AEABuilder:
 
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
+
         loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
-        # set name
+        # set name and other configurations
         builder.set_name(agent_configuration.name)
         builder.set_default_ledger_api_config(agent_configuration.default_ledger)
         builder.set_default_connection(
@@ -605,6 +623,50 @@ class AEABuilder:
 
         return builder
 
+
+def _verify_or_create_private_keys(aea_project_path: Path) -> None:
+    """Verify or create private keys."""
+    path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp_read = path_to_configuration.open(mode="r", encoding="utf-8")
+    agent_configuration = agent_loader.load(fp_read)
+
+    for identifier, _value in agent_configuration.private_key_paths.read_all():
+        if identifier not in SUPPORTED_CRYPTOS:
+            ValueError("Unsupported identifier in private key paths.")
+
+    fetchai_private_key_path = agent_configuration.private_key_paths.read(FETCHAI)
+    if fetchai_private_key_path is None:
+        _create_fetchai_private_key(private_key_file=str(aea_project_path/FETCHAI_PRIVATE_KEY_FILE))
+        agent_configuration.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+    else:
+        try:
+            _try_validate_fet_private_key_path(str(aea_project_path/fetchai_private_key_path), exit_on_error=False)
+        except FileNotFoundError:  # pragma: no cover
+            logger.error(
+                "File {} for private key {} not found.".format(
+                    repr(fetchai_private_key_path), FETCHAI,
+                )
+            )
+            raise
+
+    ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
+    if ethereum_private_key_path is None:
+        _create_ethereum_private_key(private_key_file=aea_project_path/ETHEREUM_PRIVATE_KEY_FILE)
+        agent_configuration.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+    else:
+        try:
+            _try_validate_ethereum_private_key_path(str(aea_project_path/ethereum_private_key_path), exit_on_error=False)
+        except FileNotFoundError:  # pragma: no cover
+            logger.error(
+                "File {} for private key {} not found.".format(
+                    repr(ethereum_private_key_path), ETHEREUM,
+                )
+            )
+            raise
+
+    fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
+    agent_loader.dump(agent_configuration, fp_write)
 
 #
 # class AEAProject:

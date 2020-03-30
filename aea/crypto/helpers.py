@@ -41,7 +41,7 @@ TESTNETS = {FETCHAI: "testnet", ETHEREUM: "ropsten"}
 logger = logging.getLogger(__name__)
 
 
-def _try_validate_fet_private_key_path(private_key_path: str) -> None:
+def _try_validate_fet_private_key_path(private_key_path: str, exit_on_error: bool = True) -> None:
     """
     Try to validate a private key.
 
@@ -59,10 +59,13 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
                 private_key_path, e
             )
         )
-        sys.exit(1)
+        if exit_on_error:
+            sys.exit(1)
+        else:
+            raise
 
 
-def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
+def _try_validate_ethereum_private_key_path(private_key_path: str, exit_on_error: bool = True) -> None:
     """
     Try to validate a private key.
 
@@ -80,7 +83,10 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
                 private_key_path, e
             )
         )
-        sys.exit(1)
+        if exit_on_error:
+            sys.exit(1)
+        else:
+            raise
 
 
 def _validate_private_key_path(private_key_path: str, ledger_id: str):
