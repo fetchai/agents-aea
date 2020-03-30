@@ -216,10 +216,10 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message
         if envelope.context is not None:
-            envelope_pb.uri_is_set = True
+            # envelope_pb.uri_is_set = True
             envelope_pb.uri = envelope.context.uri_raw
-        else:
-            envelope_pb.uri_is_set = False
+        # else:
+        #     envelope_pb.uri_is_set = False
 
         envelope_bytes = envelope_pb.SerializeToString()
         return envelope_bytes
@@ -238,7 +238,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         sender = envelope_pb.sender
         protocol_id = PublicId.from_str(envelope_pb.protocol_id)
         message = envelope_pb.message
-        if envelope_pb.uri_is_set:
+        if envelope_pb.uri is not "":  # empty string means this field is not set in proto3
             uri_raw = envelope_pb.uri
             uri = URI(uri_raw=uri_raw)
             context = EnvelopeContext(uri=uri)

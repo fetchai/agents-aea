@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=None,
     serialized_pb=_b(
-        '\n\nbase.proto\x12\tfetch.aea"m\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\t\x12\x12\n\nuri_is_set\x18\x06 \x01(\x08\x62\x06proto3'
+        '\n\nbase.proto\x12\tfetch.aea"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3'
     ),
 )
 
@@ -123,24 +123,6 @@ _ENVELOPE = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
         ),
-        _descriptor.FieldDescriptor(
-            name="uri_is_set",
-            full_name="fetch.aea.Envelope.uri_is_set",
-            index=5,
-            number=6,
-            type=8,
-            cpp_type=7,
-            label=1,
-            has_default_value=False,
-            default_value=False,
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-        ),
     ],
     extensions=[],
     nested_types=[],
@@ -151,7 +133,7 @@ _ENVELOPE = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=25,
-    serialized_end=134,
+    serialized_end=114,
 )
 
 DESCRIPTOR.message_types_by_name["Envelope"] = _ENVELOPE

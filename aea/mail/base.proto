@@ -8,5 +8,4 @@ message Envelope{
     string protocol_id = 3;
     bytes message = 4;
     string uri = 5;
-    bool uri_is_set = 6;
 }
