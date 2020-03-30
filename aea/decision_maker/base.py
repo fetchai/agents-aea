@@ -38,7 +38,7 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
-from aea.mail.base import OutBox
+from aea.identity.base import Identity
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -56,13 +56,20 @@ class GoalPursuitReadiness:
     """The goal pursuit readiness."""
 
     class Status(Enum):
-        """The enum of status."""
+        """
+        The enum of the readiness status.
+
+        In particular, it can be one of the following:
+
+        - Status.READY: when the agent is ready to pursuit its goal
+        - Status.NOT_READY: when the agent is not ready to pursuit its goal
+        """
 
         READY = "ready"
         NOT_READY = "not_ready"
 
     def __init__(self):
-        """Instantiate an ownership state object."""
+        """Instantiate the goal pursuit readiness."""
         self._status = GoalPursuitReadiness.Status.NOT_READY
 
     @property
@@ -71,22 +78,22 @@ class GoalPursuitReadiness:
         return self._status.value == GoalPursuitReadiness.Status.READY.value
 
     def update(self, new_status: Status) -> None:
-        """Update the goal pursuit readiness."""
+        """
+        Update the goal pursuit readiness.
+
+        :param new_status: the new status
+        :return: None
+        """
         self._status = new_status
 
 
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
-    def __init__(self):
-        """Instantiate an ownership state object."""
-        self._amount_by_currency_id = None  # type: CurrencyHoldings
-        self._quantities_by_good_id = None  # type: GoodHoldings
-
-    def init(
+    def __init__(
         self,
-        amount_by_currency_id: CurrencyHoldings,
-        quantities_by_good_id: GoodHoldings,
+        amount_by_currency_id: Optional[CurrencyHoldings] = None,
+        quantities_by_good_id: Optional[GoodHoldings] = None,
         agent_name: str = "",
     ):
         """
@@ -96,9 +103,6 @@ class OwnershipState:
         :param quantities_by_good_id: the good endowment of the agent in this state.
         :param agent_name: the agent name
         """
-        logger.warning(
-            "[{}]: Careful! OwnershipState are being initialized!".format(agent_name)
-        )
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
 
@@ -128,6 +132,8 @@ class OwnershipState:
 
         E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         Note, the agent is the sender of the transaction message by design.
+
+        :param tx_message: the transaction message
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
         if tx_message.amount == 0 and all(
@@ -159,9 +165,13 @@ class OwnershipState:
         """
         Update the agent state from a transaction.
 
-        :param tx_message:
+        :param tx_message: the transaction message
         :return: None
         """
+        assert (
+            self._amount_by_currency_id is not None
+            and self._quantities_by_good_id is not None
+        ), "Cannot apply state update, current state is not initialized!"
         assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
@@ -190,13 +200,19 @@ class OwnershipState:
         quantities_by_good_id: Dict[str, int],
     ) -> "OwnershipState":
         """
-        Apply a state update to the current state.
+        Apply a state update to (a copy of) the current state.
+
+        This method is used to apply a raw state update without a transaction.
 
         :param amount_by_currency_id: the delta in the currency amounts
         :param quantities_by_good_id: the delta in the quantities by good
         :return: the final state.
         """
         new_state = copy.copy(self)
+        assert (
+            new_state._amount_by_currency_id is not None
+            and new_state._quantities_by_good_id is not None
+        ), "Cannot apply state update, current state is not initialized!"
 
         for currency, amount_delta in amount_by_currency_id.items():
             new_state._amount_by_currency_id[currency] += amount_delta
@@ -206,7 +222,7 @@ class OwnershipState:
 
         return new_state
 
-    def __copy__(self):
+    def __copy__(self) -> "OwnershipState":
         """Copy the object."""
         state = OwnershipState()
         if (
@@ -237,11 +253,14 @@ class LedgerStateProxy:
 
     def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
-        Check if the transaction is affordable on the ledger.
+        Check if the transaction is affordable on the default ledger.
 
         :param tx_message: the transaction message
         :return: whether the transaction is affordable on the ledger
         """
+        assert (
+            self.is_initialized
+        ), "LedgerStateProxy must be initialized with default ledger!"
         if tx_message.sender_amount <= 0:
             # check if the agent has the money to cover counterparty amount and tx fees
             available_balance = self.ledger_apis.token_balance(
@@ -258,37 +277,31 @@ class LedgerStateProxy:
 class Preferences:
     """Class to represent the preferences."""
 
-    def __init__(self):
-        """Instantiate an agent preference object."""
-        self._exchange_params_by_currency_id = None  # type: ExchangeParams
-        self._utility_params_by_good_id = None  # type: UtilityParams
-        self._transaction_fees = None  # type: Dict[str, int]
-        self._quantity_shift = QUANTITY_SHIFT
-
-    def init(
+    def __init__(
         self,
-        exchange_params_by_currency_id: ExchangeParams,
-        utility_params_by_good_id: UtilityParams,
-        tx_fee: int,
-        agent_name: str = "",
+        exchange_params_by_currency_id: Optional[ExchangeParams] = None,
+        utility_params_by_good_id: Optional[UtilityParams] = None,
+        tx_fee: int = 1,
     ):
         """
         Instantiate an agent preference object.
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
-        :param agent_name: the agent name
+        :param tx_fee: the acceptable transaction fee.
         """
-        logger.warning(
-            "[{}]: Careful! Preferences are being initialized!".format(agent_name)
-        )
-        self._exchange_params_by_currency_id = exchange_params_by_currency_id
-        self._utility_params_by_good_id = utility_params_by_good_id
-        self._transaction_fees = self._split_tx_fees(tx_fee)
+        self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
+        self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
+        self._transaction_fees = self._split_tx_fees(tx_fee)  # TODO: update
+        self._quantity_shift = QUANTITY_SHIFT
 
     @property
     def is_initialized(self) -> bool:
-        """Get the initialization status."""
+        """
+        Get the initialization status.
+
+        Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
+        """
         return (
             (self._exchange_params_by_currency_id is not None)
             and (self._utility_params_by_good_id is not None)
@@ -322,6 +335,9 @@ class Preferences:
         :param quantities_by_good_id: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
+        assert (
+            self.is_initialized
+        ), "Preferences must be initialized with non-None values!"
         result = logarithmic_utility(
             self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift
         )
@@ -334,23 +350,29 @@ class Preferences:
         :param amount_by_currency_id: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
+        assert (
+            self.is_initialized
+        ), "Preferences must be initialized with non-None values!"
         result = linear_utility(
             self.exchange_params_by_currency_id, amount_by_currency_id
         )
         return result
 
-    def get_score(
+    def utility(
         self,
         quantities_by_good_id: GoodHoldings,
         amount_by_currency_id: CurrencyHoldings,
     ) -> float:
         """
-        Compute the score given the good and currency holdings.
+        Compute the utility given the good and currency holdings.
 
         :param quantities_by_good_id: the good holdings
         :param amount_by_currency_id: the currency holdings
-        :return: the score.
+        :return: the utility value.
         """
+        assert (
+            self.is_initialized
+        ), "Preferences must be initialized with non-None values!"
         goods_score = self.logarithmic_utility(quantities_by_good_id)
         currency_score = self.linear_utility(amount_by_currency_id)
         score = goods_score + currency_score
@@ -365,11 +387,14 @@ class Preferences:
         """
         Compute the marginal utility.
 
-        :param ownership_state: the current ownership state
+        :param ownership_state: the ownership state against which to compute the marginal utility.
         :param delta_quantities_by_good_id: the change in good holdings
         :param delta_amount_by_currency_id: the change in money holdings
         :return: the marginal utility score
         """
+        assert (
+            self.is_initialized
+        ), "Preferences must be initialized with non-None values!"
         current_goods_score = self.logarithmic_utility(
             ownership_state.quantities_by_good_id
         )
@@ -390,32 +415,38 @@ class Preferences:
                 for currency, amount in ownership_state.amount_by_currency_id.items()
             }
             new_currency_score = self.linear_utility(new_amount_by_currency_id)
-        return (
+        marginal_utility = (
             new_goods_score
             + new_currency_score
             - current_goods_score
             - current_currency_score
         )
+        return marginal_utility
 
-    def get_score_diff_from_transaction(
+    def utility_diff_from_transaction(
         self, ownership_state: OwnershipState, tx_message: TransactionMessage
     ) -> float:
         """
-        Simulate a transaction and get the resulting score (taking into account the fee).
+        Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
-        :param tx_message: a transaction object.
+        :param ownership_state: the ownership state against which to apply the transaction.
+        :param tx_message: a transaction message.
         :return: the score.
         """
-        current_score = self.get_score(
+        assert (
+            self.is_initialized
+        ), "Preferences must be initialized with non-None values!"
+        current_score = self.utility(
             quantities_by_good_id=ownership_state.quantities_by_good_id,
             amount_by_currency_id=ownership_state.amount_by_currency_id,
         )
         new_ownership_state = ownership_state.apply_transactions([tx_message])
-        new_score = self.get_score(
+        new_score = self.utility(
             quantities_by_good_id=new_ownership_state.quantities_by_good_id,
             amount_by_currency_id=new_ownership_state.amount_by_currency_id,
         )
-        return new_score - current_score
+        score_difference = new_score - current_score
+        return score_difference
 
     @staticmethod
     def _split_tx_fees(tx_fee: int) -> Dict[str, int]:
@@ -429,35 +460,126 @@ class Preferences:
         seller_part = math.ceil(tx_fee * (1 - SENDER_TX_SHARE))
         if buyer_part + seller_part > tx_fee:
             seller_part -= 1
-        return {"seller_tx_fee": seller_part, "buyer_tx_fee": buyer_part}
+        tx_fee_split = {"seller_tx_fee": seller_part, "buyer_tx_fee": buyer_part}
+        return tx_fee_split
+
+
+class ProtectedQueue(Queue):
+    """A wrapper of a queue to protect which object can read from it."""
+
+    def __init__(self, permitted_caller):
+        """
+        Initialize the protected queue.
+
+        :param permitted_caller: the permitted caller to the get method
+        """
+        super().__init__()
+        self._permitted_caller = permitted_caller
+
+    @property
+    def permitted_caller(self) -> "DecisionMaker":
+        """Get the permitted caller."""
+        return self._permitted_caller
+
+    def put(
+        self, internal_message: Optional[InternalMessage], block=True, timeout=None
+    ) -> None:
+        """
+        Put an internal message on the queue.
+
+        If optional args block is true and timeout is None (the default),
+        block if necessary until a free slot is available. If timeout is
+        a positive number, it blocks at most timeout seconds and raises
+        the Full exception if no free slot was available within that time.
+        Otherwise (block is false), put an item on the queue if a free slot
+        is immediately available, else raise the Full exception (timeout is
+        ignored in that case).
+
+        :param internal_message: the internal message to put on the queue
+        :raises: ValueError, if the item is not an internal message
+        :return: None
+        """
+        if not (
+            type(internal_message)
+            in {InternalMessage, TransactionMessage, StateUpdateMessage}
+            or internal_message is None
+        ):
+            raise ValueError("Only internal messages are allowed!")
+        super().put(internal_message, block=True, timeout=None)
+
+    def put_nowait(self, internal_message: Optional[InternalMessage]) -> None:
+        """
+        Put an internal message on the queue.
+
+        Equivalent to put(item, False).
+
+        :param internal_message: the internal message to put on the queue
+        :raises: ValueError, if the item is not an internal message
+        :return: None
+        """
+        if not (
+            type(internal_message)
+            in {InternalMessage, TransactionMessage, StateUpdateMessage}
+            or internal_message is None
+        ):
+            raise ValueError("Only internal messages are allowed!")
+        super().put_nowait(internal_message)
+
+    def get(self, block=True, timeout=None) -> None:
+        """
+        Inaccessible get method.
+
+        :raises: ValueError, access not permitted.
+        :return: None
+        """
+        raise ValueError("Access not permitted!")
+
+    def get_nowait(self) -> None:
+        """
+        Inaccessible get_nowait method.
+
+        :raises: ValueError, access not permitted.
+        :return: None
+        """
+        raise ValueError("Access not permitted!")
+
+    def protected_get(
+        self, caller: "DecisionMaker", block=True, timeout=None
+    ) -> Optional[InternalMessage]:
+        """
+        Access protected get method.
+
+        :param caller: the permitted caller
+        :param block: If optional args block is true and timeout is None (the default), block if necessary until an item is available.
+        :param timeout: If timeout is a positive number, it blocks at most timeout seconds and raises the Empty exception if no item was available within that time.
+        :raises: ValueError, if caller is not permitted
+        :return: internal message
+        """
+        if not caller == self.permitted_caller:
+            raise ValueError("Caller not permitted!")
+        internal_message = super().get(
+            block=block, timeout=timeout
+        )  # type: Optional[InternalMessage]
+        return internal_message
 
 
 class DecisionMaker:
     """This class implements the decision maker."""
 
     def __init__(
-        self,
-        agent_name: str,
-        max_reactions: int,
-        outbox: OutBox,
-        wallet: Wallet,
-        ledger_apis: LedgerApis,
+        self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis,
     ):
         """
         Initialize the decision maker.
 
-        :param agent_name: the name of the agent
-        :param max_reactions: the processing rate of messages per iteration.
-        :param outbox: the outbox
+        :param identity: the identity
         :param wallet: the wallet
         :param ledger_apis: the ledger apis
         """
-        self._max_reactions = max_reactions
-        self._agent_name = agent_name
-        self._outbox = outbox
+        self._agent_name = identity.name
         self._wallet = wallet
         self._ledger_apis = ledger_apis
-        self._message_in_queue = Queue()  # type: Queue
+        self._message_in_queue = ProtectedQueue(self)  # type: ProtectedQueue
         self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._ledger_state_proxy = LedgerStateProxy(ledger_apis)
@@ -469,7 +591,7 @@ class DecisionMaker:
         self._stopped = True
 
     @property
-    def message_in_queue(self) -> Queue:
+    def message_in_queue(self) -> ProtectedQueue:
         """Get (in) queue."""
         return self._message_in_queue
 
@@ -485,13 +607,8 @@ class DecisionMaker:
 
     @property
     def ledger_apis(self) -> LedgerApis:
-        """Get outbox."""
+        """Get ledger apis."""
         return self._ledger_apis
-
-    @property
-    def outbox(self) -> OutBox:
-        """Get outbox."""
-        return self._outbox
 
     @property
     def ownership_state(self) -> OwnershipState:
@@ -513,7 +630,7 @@ class DecisionMaker:
         """Get readiness of agent to pursuit its goals."""
         return self._goal_pursuit_readiness
 
-    def start(self):
+    def start(self) -> None:
         """Start the decision maker."""
         with self._lock:
             if not self._stopped:  # pragma: no cover
@@ -524,7 +641,7 @@ class DecisionMaker:
             self._thread = Thread(target=self.execute)
             self._thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the decision maker."""
         with self._lock:
             self._stopped = True
@@ -538,11 +655,15 @@ class DecisionMaker:
         """
         Execute the decision maker.
 
+        Performs the following while not stopped:
+
+        - gets internal messages from the in queue and calls handle() on them
+
         :return: None
         """
         while not self._stopped:
-            message = self.message_in_queue.get(
-                block=True
+            message = self.message_in_queue.protected_get(
+                self, block=True
             )  # type: Optional[InternalMessage]
 
             if message is None:
@@ -562,9 +683,9 @@ class DecisionMaker:
 
     def handle(self, message: InternalMessage) -> None:
         """
-        Handle a message.
+        Handle an internal message from the skills.
 
-        :param message: the message
+        :param message: the internal message
         :return: None
         """
         if isinstance(message, TransactionMessage):
@@ -672,7 +793,7 @@ class DecisionMaker:
         """
         if self.preferences.is_initialized and self.ownership_state.is_initialized:
             is_utility_enhancing = (
-                self.preferences.get_score_diff_from_transaction(
+                self.preferences.utility_diff_from_transaction(
                     self.ownership_state, tx_message
                 )
                 >= 0.0
@@ -827,17 +948,19 @@ class DecisionMaker:
             state_update_message.performative
             == StateUpdateMessage.Performative.INITIALIZE
         ):
-            logger.info("[{}]: Applying state initialization!".format(self._agent_name))
-            self.ownership_state.init(
+            logger.warning(
+                "[{}]: Applying ownership_state and preferences initialization!".format(
+                    self._agent_name
+                )
+            )
+            self._ownership_state = OwnershipState(
                 amount_by_currency_id=state_update_message.amount_by_currency_id,
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
-                agent_name=self._agent_name,
             )
-            self.preferences.init(
+            self._preferences = Preferences(
                 exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
                 utility_params_by_good_id=state_update_message.utility_params_by_good_id,
                 tx_fee=state_update_message.tx_fee,
-                agent_name=self._agent_name,
             )
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:

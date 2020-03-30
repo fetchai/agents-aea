@@ -329,7 +329,7 @@ class Strategy(Model):
         )
         if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
             return False
-        proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(
+        proposal_delta_score = self.context.agent_preferences.utility_diff_from_transaction(
             ownership_state_after_locks, transaction_msg
         )
         if proposal_delta_score >= 0:
