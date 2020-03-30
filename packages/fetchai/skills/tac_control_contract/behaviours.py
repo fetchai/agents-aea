@@ -59,6 +59,7 @@ class TACBehaviour(Behaviour):
         self.can_start = False
         self.agent_counter = 0
         self.token_ids = []
+        self.currency_id = 0
 
     def setup(self) -> None:
         """
@@ -113,7 +114,12 @@ class TACBehaviour(Behaviour):
             )
             self.token_ids = [int(token_id) for token_id in token_ids_dictionary.keys()]
             self.context.logger.info("Creating the items.")
+            self.currency_id = self.token_ids[0]
+            self.token_ids = self.token_ids[1:11]
             transaction_message = self._create_items(self.token_ids)
+            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+
+            transaction_message = self._create_items(self.currency_id)
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
             time.sleep(10)
         if (
@@ -146,6 +152,10 @@ class TACBehaviour(Behaviour):
                 for agent in self.context.configuration.agent_addr_to_name.keys():
                     self._mint_objects(
                         is_batch=True, address=agent,
+                    )
+                    # Mint the game currency.
+                    self._mint_objects(
+                        is_batch=False, address=agent,
                     )
                     self.agent_counter += 1
                 game.phase = Phase.GAME
@@ -246,6 +256,7 @@ class TACBehaviour(Behaviour):
                 agent_addr_to_name=game.configuration.agent_addr_to_name,
                 good_id_to_name=game.configuration.good_id_to_name,
                 version_id=game.configuration.version_id,
+                contract_address=self.context.contracts.erc1155.instance.address,
             )
             self.context.logger.debug(
                 "[{}]: sending game data to '{}': {}".format(
@@ -307,12 +318,12 @@ class TACBehaviour(Behaviour):
                 token_id=token_ids,
             )
 
-    def _mint_objects(self, is_batch: bool, address: Address, token_id: int = None):
+    def _mint_objects(self, is_batch: bool, address: Address):
         self.context.logger.info("Minting the items")
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
         if is_batch:
-            minting = [parameters.base_good_endowment] * parameters.nb_goods
+            minting = [parameters.base_good_endowment] * (parameters.nb_goods - 1)
             transaction_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
                 recipient_address=address,
@@ -332,6 +343,6 @@ class TACBehaviour(Behaviour):
                 mint_quantity=parameters.money_endowment,
                 ledger_api=self.context.ledger_apis.apis.get("ethereum"),
                 skill_callback_id=self.context.skill_id,
-                token_id=token_id,
+                token_id=self.currency_id,
             )
             self.context.decision_maker_message_queue.put_nowait(transaction_message)

@@ -32,6 +32,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
+from packages.fetchai.skills.tac_participation.parameters import Parameters
 from packages.fetchai.skills.tac_participation.search import Search
 
 
@@ -316,12 +317,48 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
+        parameters = cast(Parameters, self.context.parameters)
+
+        if parameters.is_using_contract:
+            amount_by_currency_id = {
+                str(key): value
+                for key, value in tac_message.amount_by_currency_id.items()
+            }
+            quantities_by_good_id = {
+                str(key): value
+                for key, value in tac_message.quantities_by_good_id.items()
+            }
+            exchange_params_by_currency_id = {
+                str(key): value
+                for key, value in tac_message.exchange_params_by_currency_id.items()
+            }
+            utility_params_by_good_id = {
+                str(key): value
+                for key, value in tac_message.utility_params_by_good_id.items()
+            }
+
+            contract = self.context.contracts.erc1155
+            contract.set_deployed_instance(
+                self.context.ledger_apis.apis.get("ethereum"),
+                tac_message.get("contract_address"),
+            )
+
+            self.context.logger.info(
+                "We received a contract address: {}".format(contract.instance.address)
+            )
+        else:
+            amount_by_currency_id = tac_message.amount_by_currency_id
+            quantities_by_good_id = tac_message.quantities_by_good_id
+            exchange_params_by_currency_id = tac_message.exchange_params_by_currency_id
+
+            utility_params_by_good_id = tac_message.utility_params_by_good_id
+
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=tac_message.amount_by_currency_id,
-            quantities_by_good_id=tac_message.quantities_by_good_id,
-            exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
-            utility_params_by_good_id=tac_message.utility_params_by_good_id,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+            exchange_params_by_currency_id=exchange_params_by_currency_id,
+            utility_params_by_good_id=utility_params_by_good_id,
             tx_fee=tac_message.tx_fee,
         )
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
@@ -435,6 +472,9 @@ class TransactionHandler(Handler):
             tx_message.performative
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
+
+            # TODO: // Need to modify here and add the contract option in case we are using one.
+
             self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker, sending to controller.".format(
                     self.context.agent_name
