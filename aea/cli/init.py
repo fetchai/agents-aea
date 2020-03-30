@@ -33,6 +33,7 @@ from aea.cli.common import (
 )
 from aea.cli.login import do_login
 from aea.cli.register import do_register
+from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import check_is_author_logged_in, is_logged_in
 from aea.configurations.base import PublicId
 
@@ -76,6 +77,7 @@ def init(ctx: Context, author: str, registry: bool):
         author = _registry_init(author)
 
     config = _get_or_create_cli_config()
+    config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
     if config.get(AUTHOR, None) is None:
         is_not_valid_author = True
         if author is not None and _is_validate_author_handle(author):
