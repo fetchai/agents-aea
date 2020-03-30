@@ -72,7 +72,7 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
-        is_programmatic: bool = True, # TODO to remove
+        is_programmatic: bool = True,  # TODO to remove
     ) -> None:
         """
         Instantiate the agent.

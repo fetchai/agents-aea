@@ -316,7 +316,7 @@ class OEFLocalConnection(Connection):
     """
 
     def load(self) -> None:
-        self._local_node = None
+        self._local_node = LocalNode()
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
 

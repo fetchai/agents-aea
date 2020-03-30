@@ -48,7 +48,8 @@ from aea.configurations.base import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
-    ComponentType)
+    ComponentType,
+)
 from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.mail.base import Address
@@ -518,15 +519,21 @@ def reset_aea_cli_config() -> None:
 
 
 def _make_dummy_connection() -> Connection:
-    dummy_connection = cast(Connection, Component.load_from_directory(ComponentType.CONNECTION,
-                                                                      Path(CUR_PATH, "data", "dummy_connection")))
+    dummy_connection = cast(
+        Connection,
+        Component.load_from_directory(
+            ComponentType.CONNECTION, Path(CUR_PATH, "data", "dummy_connection")
+        ),
+    )
     return dummy_connection
 
 
-def _make_local_connection(node: LocalNode, address: Address)-> Connection:
-        oef_local_connection = OEFLocalConnection.load_from_directory(ComponentType.CONNECTION, Path(ROOT_DIR, "packages",
-                                                                                                     "fetchai", "connections", "local"))
-        oef_local_connection.load()
-        oef_local_connection._local_node = node
-        oef_local_connection.address = address
-        return oef_local_connection
+def _make_local_connection(node: LocalNode, address: Address) -> Connection:
+    oef_local_connection = OEFLocalConnection.load_from_directory(
+        ComponentType.CONNECTION,
+        Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
+    )
+    oef_local_connection.load()
+    oef_local_connection._local_node = node
+    oef_local_connection.address = address
+    return oef_local_connection

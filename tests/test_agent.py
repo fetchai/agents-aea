@@ -67,12 +67,7 @@ def test_run_agent():
         identity = Identity(agent_name, address=agent_address)
         oef_local_connection = _make_local_connection(node, agent_address)
         oef_local_connection._local_node = node
-        agent = DummyAgent(
-            identity,
-            [
-                oef_local_connection
-            ],
-        )
+        agent = DummyAgent(identity, [oef_local_connection],)
         assert agent.name == identity.name
         assert agent.tick == 0
         assert (

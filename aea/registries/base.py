@@ -41,7 +41,8 @@ from aea.configurations.base import (
     ProtocolId,
     PublicId,
     SkillId,
-    ComponentType)
+    ComponentType,
+)
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.base import InternalMessage
@@ -470,7 +471,11 @@ class Resources:
         elif component.component_type == ComponentType.SKILL:
             self.add_skill(cast(Skill, component))
         else:
-            raise ValueError("Component type {} not supported.".format(component.component_type.value))
+            raise ValueError(
+                "Component type {} not supported.".format(
+                    component.component_type.value
+                )
+            )
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""

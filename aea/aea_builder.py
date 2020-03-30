@@ -26,6 +26,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple, Union, cast, Collection, Optional
 
+import jsonschema
+
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
@@ -36,16 +38,22 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PublicId,
-    AgentConfig)
+    AgentConfig,
+)
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key, FETCHAI_PRIVATE_KEY_FILE, \
-    _try_validate_fet_private_key_path, _create_ethereum_private_key, ETHEREUM_PRIVATE_KEY_FILE, \
-    _try_validate_ethereum_private_key_path
+from aea.crypto.helpers import (
+    _create_fetchai_private_key,
+    FETCHAI_PRIVATE_KEY_FILE,
+    _try_validate_fet_private_key_path,
+    _create_ethereum_private_key,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    _try_validate_ethereum_private_key_path,
+)
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, SUPPORTED_CRYPTOS
 from aea.helpers.base import _SysModules
@@ -250,14 +258,12 @@ class AEABuilder:
     returns the instance of the builder itself.
     """
 
-    _DEFAULT_COMPONENTS = {
-        ComponentId(ComponentType.PROTOCOL, PublicId("fetchai", "default", "0.1.0")),
-        ComponentId(ComponentType.CONNECTION, PublicId("fetchai", "stub", "0.1.0")),
-        ComponentId(ComponentType.SKILL, PublicId("fetchai", "error", "0.1.0")),
-    }
+    def __init__(self, with_default_packages: bool = True):
+        """
+        Initialize the builder.
 
-    def __init__(self):
-        """Initialize the builder."""
+        :param with_default_packages: add the default packages.
+        """
         self._name = None
         self._resources = Resources()
         self._private_key_paths = {}  # type: Dict[str, str]
@@ -270,6 +276,11 @@ class AEABuilder:
 
         self._package_dependency_manager = _DependenciesManager()
 
+        if with_default_packages:
+            self.add_default_packages()
+
+    def add_default_packages(self):
+        """Add default packages."""
         # add default protocol
         self.add_protocol(Path(AEA_DIR, "protocols", "default"))
         # add stub connection
@@ -468,23 +479,49 @@ class AEABuilder:
             )
         return identity
 
+    def _process_connection_ids(
+        self, connection_ids: Optional[Collection[PublicId]] = None
+    ):
+        """Process connection ids."""
+        if connection_ids is not None:
+            # check that all the connections are in the configuration file.
+            connection_ids_set = set(connection_ids)
+            all_supported_connection_ids = {
+                cid.public_id
+                for cid in self._package_dependency_manager.connections.keys()
+            }
+            non_supported_connections = connection_ids_set.difference(
+                all_supported_connection_ids
+            )
+            if len(non_supported_connections) > 0:
+                raise ValueError(
+                    "Connection ids {} not declared in the configuration file.".format(
+                        sorted(map(str, non_supported_connections))
+                    )
+                )
+            connections = [
+                connection
+                for id_, connection in self._package_dependency_manager.connections.items()
+                if id_.public_id in connection_ids_set
+            ]
+        else:
+            connections = list(self._package_dependency_manager.connections.values())
+
+        return connections
+
     def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
         """
-        Get the AEA.
+        Build the AEA.
 
         :param connection_ids: select only these connections.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
-        if connection_ids is not None:
-            connections = [connection for id_, connection in self._package_dependency_manager.connections.items() if id_.public_id in connection_ids]
-        else:
-            connections = list(self._package_dependency_manager.connections.values())
-
-        for conneciton in connections:
-            conneciton.address = identity.address
-            conneciton.load()
+        connections = self._process_connection_ids(connection_ids)
+        for connection in connections:
+            connection.address = identity.address
+            connection.load()
         aea = AEA(
             identity,
             connections,
@@ -550,10 +587,32 @@ class AEABuilder:
 
         raise ValueError("Package {} not found.".format(component_id))
 
+    @staticmethod
+    def _try_to_load_agent_configuration_file(aea_project_path: Path):
+        """Try to load the agent configuration file.."""
+        try:
+            configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
+            with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
+                loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+                agent_configuration = loader.load(configuration_file_path.open())
+                logging.config.dictConfig(agent_configuration.logging_config)
+        except FileNotFoundError:
+            raise Exception(
+                "Agent configuration file '{}' not found in the current directory.".format(
+                    DEFAULT_AEA_CONFIG_FILE
+                )
+            )
+        except jsonschema.exceptions.ValidationError:
+            raise Exception(
+                "Agent configuration file '{}' is invalid. Please check the documentation.".format(
+                    DEFAULT_AEA_CONFIG_FILE
+                )
+            )
+
     @classmethod
     def from_aea_project(cls, aea_project_path: PathLike):
         """
-        Build the agent from an AEA project
+        Construct the builder from an AEA project
 
         - load agent configuration file
         - set name and default configurations
@@ -566,8 +625,9 @@ class AEABuilder:
         :return: an AEA agent.
         """
         aea_project_path = Path(aea_project_path)
+        cls._try_to_load_agent_configuration_file(aea_project_path)
         _verify_or_create_private_keys(aea_project_path)
-        builder = AEABuilder()
+        builder = AEABuilder(with_default_packages=False)
 
         # TODO isolate environment
         # load_env_file(str(aea_config_path / ".env"))
@@ -614,8 +674,6 @@ class AEABuilder:
             ],
         )
         for component_id in component_ids:
-            if component_id in cls._DEFAULT_COMPONENTS:
-                continue
             component_path = cls._find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
@@ -637,11 +695,15 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fetchai_private_key_path = agent_configuration.private_key_paths.read(FETCHAI)
     if fetchai_private_key_path is None:
-        _create_fetchai_private_key(private_key_file=str(aea_project_path/FETCHAI_PRIVATE_KEY_FILE))
+        _create_fetchai_private_key(
+            private_key_file=str(aea_project_path / FETCHAI_PRIVATE_KEY_FILE)
+        )
         agent_configuration.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
     else:
         try:
-            _try_validate_fet_private_key_path(str(aea_project_path/fetchai_private_key_path), exit_on_error=False)
+            _try_validate_fet_private_key_path(
+                str(aea_project_path / fetchai_private_key_path), exit_on_error=False
+            )
         except FileNotFoundError:  # pragma: no cover
             logger.error(
                 "File {} for private key {} not found.".format(
@@ -652,11 +714,17 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_path is None:
-        _create_ethereum_private_key(private_key_file=aea_project_path/ETHEREUM_PRIVATE_KEY_FILE)
-        agent_configuration.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        _create_ethereum_private_key(
+            private_key_file=aea_project_path / ETHEREUM_PRIVATE_KEY_FILE
+        )
+        agent_configuration.private_key_paths.update(
+            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
+        )
     else:
         try:
-            _try_validate_ethereum_private_key_path(str(aea_project_path/ethereum_private_key_path), exit_on_error=False)
+            _try_validate_ethereum_private_key_path(
+                str(aea_project_path / ethereum_private_key_path), exit_on_error=False
+            )
         except FileNotFoundError:  # pragma: no cover
             logger.error(
                 "File {} for private key {} not found.".format(
@@ -667,6 +735,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
+
 
 #
 # class AEAProject:

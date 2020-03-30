@@ -31,7 +31,12 @@ from unittest import TestCase, mock
 import pytest
 
 import aea
-from aea.configurations.base import ConnectionConfig, PublicId, ComponentType, ComponentConfiguration
+from aea.configurations.base import (
+    ConnectionConfig,
+    PublicId,
+    ComponentType,
+    ComponentConfiguration,
+)
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
@@ -39,8 +44,12 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection_configuration = cast(ConnectionConfig, ComponentConfiguration.load(ComponentType.CONNECTION,
-                                                                                  Path(aea.AEA_DIR, "connections", "stub")))
+    connection_configuration = cast(
+        ConnectionConfig,
+        ComponentConfiguration.load(
+            ComponentType.CONNECTION, Path(aea.AEA_DIR, "connections", "stub")
+        ),
+    )
     connection_configuration.config["input_file"] = input_file_path
     connection_configuration.config["output_file"] = output_file_path
     connection = StubConnection(connection_configuration)
@@ -60,7 +69,9 @@ class TestStubConnectionReception:
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
         cls.output_file_path = d / "output_file.csv"
-        cls.connection = _make_stub_connection(cls.input_file_path, cls.output_file_path)
+        cls.connection = _make_stub_connection(
+            cls.input_file_path, cls.output_file_path
+        )
 
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
@@ -134,7 +145,9 @@ class TestStubConnectionSending:
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
         cls.output_file_path = d / "output_file.csv"
-        cls.connection = _make_stub_connection(cls.input_file_path, cls.output_file_path)
+        cls.connection = _make_stub_connection(
+            cls.input_file_path, cls.output_file_path
+        )
 
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()

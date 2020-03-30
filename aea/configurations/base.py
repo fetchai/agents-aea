@@ -24,6 +24,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
+import jsonschema
+
 T = TypeVar("T")
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -546,7 +548,14 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
     @staticmethod
     def _load_configuration_object(component_type: ComponentType, directory: Path):
-        """Load the configuration object, without consistency checks."""
+        """
+        Load the configuration object, without consistency checks.
+
+        :param component_type: the component type.
+        :param directory: the directory of the configuration.
+        :return: the configuratiuon object.
+        :raises FileNotFoundError: if the configuration file is not found.
+        """
         from aea.configurations.loader import ConfigLoader
 
         configuration_loader = ConfigLoader.from_configuration_type(
@@ -556,7 +565,15 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             configuration_loader.configuration_class.default_configuration_filename
         )
         configuration_filepath = directory / configuration_filename
-        configuration_object = configuration_loader.load(open(configuration_filepath))
+        try:
+            fp = open(configuration_filepath)
+            configuration_object = configuration_loader.load(fp)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "{} configuration not found: {}".format(
+                    component_type.value.capitalize(), configuration_filepath
+                )
+            )
         return configuration_object
 
     def _check_configuration_consistency(self, directory: Path):

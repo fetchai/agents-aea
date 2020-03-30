@@ -131,19 +131,27 @@ class Component(ABC):
 
 def _load_connection_class(configuration: ConnectionConfig, directory: Path):
     """Load a connection class from a directory."""
-    connection_module = load_module("connection_module", directory / "connection.py")
-    classes = inspect.getmembers(connection_module, inspect.isclass)
-    connection_class_name = cast(str, configuration.class_name)
-    connection_classes = list(
-        filter(lambda x: re.match(connection_class_name, x[0]), classes)
-    )
-    name_to_class = dict(connection_classes)
-    logger.debug("Processing connection {}".format(connection_class_name))
-    connection_class = name_to_class.get(connection_class_name, None)
-    if connection_class is None:
-        raise ValueError(
-            "Connection class '{}' not found.".format(connection_class_name)
+    try:
+        connection_module_path = directory / "connection.py"
+        assert (
+            connection_module_path.exists() and connection_module_path.is_file()
+        ), "Connection module '{}' not found.".format(connection_module_path)
+        connection_module = load_module(
+            "connection_module", directory / "connection.py"
         )
+        classes = inspect.getmembers(connection_module, inspect.isclass)
+        connection_class_name = cast(str, configuration.class_name)
+        connection_classes = list(
+            filter(lambda x: re.match(connection_class_name, x[0]), classes)
+        )
+        name_to_class = dict(connection_classes)
+        logger.debug("Processing connection {}".format(connection_class_name))
+        connection_class = name_to_class.get(connection_class_name, None)
+        assert connection_class is not None, "Connection class '{}' not found.".format(
+            connection_class_name
+        )
+    except AssertionError as e:
+        raise ValueError(str(e))
 
     return connection_class
 
