@@ -39,7 +39,7 @@ from aea.decision_maker.base import LedgerStateProxy
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.identity.base import Identity
-from aea.mail.base import Multiplexer, OutBox
+from aea.mail.base import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from ..conftest import AUTHOR, CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
