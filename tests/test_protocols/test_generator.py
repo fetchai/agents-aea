@@ -31,35 +31,23 @@ from unittest import TestCase, mock
 
 import pytest
 
-import yaml
-
-from aea import AEA_DIR
-from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
-    ProtocolConfig,
     ProtocolId,
     ProtocolSpecificationParseError,
     PublicId,
-    ComponentType)
-from aea.configurations.components import Component
+)
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Message, Protocol
+from aea.protocols.base import Message
 from aea.protocols.generator import (
     ProtocolGenerator,
     _is_composition_type_with_custom_type,
     _specification_type_to_python_type,
     _union_sub_type_to_protobuf_variable_name,
 )
-from aea.registries.base import Resources
-from aea.skills.base import Handler, Skill, SkillContext
-
-from packages.fetchai.connections.oef.connection import OEFConnection
+from aea.skills.base import Handler, SkillContext
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
@@ -173,15 +161,23 @@ class TestGenerateProtocol:
         builder_1.set_name("my_aea_1")
         builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_1.set_default_ledger_api_config(FETCHAI)
-        builder_1.add_protocol(Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"))
-        builder_1.add_connection(Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"))
+        builder_1.add_protocol(
+            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol")
+        )
+        builder_1.add_connection(
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef")
+        )
 
         builder_2 = AEABuilder()
         builder_2.set_name("my_aea_2")
         builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_2.set_default_ledger_api_config(FETCHAI)
-        builder_2.add_protocol(Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"))
-        builder_2.add_connection(Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"))
+        builder_2.add_protocol(
+            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol")
+        )
+        builder_2.add_connection(
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef")
+        )
 
         # create AEAs
         aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
@@ -223,7 +219,8 @@ class TestGenerateProtocol:
 
         # add handlers to AEA resources
         agent_1_handler = Agent1Handler(
-            skill_context=SkillContext(aea_1.context), name="fake_skill")
+            skill_context=SkillContext(aea_1.context), name="fake_skill"
+        )
         aea_1.resources.handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),

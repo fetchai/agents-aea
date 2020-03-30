@@ -24,8 +24,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
-import jsonschema
-
 T = TypeVar("T")
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"

@@ -22,9 +22,8 @@
 import logging
 from typing import Optional
 
-from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 

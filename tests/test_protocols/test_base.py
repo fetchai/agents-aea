@@ -23,18 +23,15 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import cast
 
 from aea import AEA_DIR
-from aea.configurations.base import ProtocolConfig, PublicId, ComponentType
+from aea.configurations.base import ComponentType
 from aea.configurations.components import Component
 from aea.mail.base import Envelope
 from aea.protocols.base import (
     JSONSerializer,
     Message,
     ProtobufSerializer,
-    Protocol,
-    Serializer,
 )
 
 from ..conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
@@ -119,8 +116,7 @@ class TestProtocolFromDir:
     def test_protocol_load_positive(self):
         """Test protocol loaded correctly."""
         default_protocol = Component.load_from_directory(
-            ComponentType.PROTOCOL,
-            Path(AEA_DIR, "protocols", "default")
+            ComponentType.PROTOCOL, Path(AEA_DIR, "protocols", "default")
         )
         assert (
             str(default_protocol.public_id) == "fetchai/default:0.1.0"

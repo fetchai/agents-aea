@@ -30,7 +30,7 @@ from watchdog.observers import Observer
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 

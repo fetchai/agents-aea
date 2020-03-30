@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 

@@ -28,7 +28,6 @@ import sys
 import types
 from contextlib import contextmanager
 from pathlib import Path
-import pprint
 from threading import RLock
 from typing import Dict, Sequence, Tuple
 

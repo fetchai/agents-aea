@@ -38,9 +38,9 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
-from aea.skills.base import Skill, SkillComponent, SkillContext
+from aea.skills.base import SkillComponent, SkillContext
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, _make_dummy_connection
+from ..conftest import CUR_PATH, _make_dummy_connection
 
 
 def test_agent_context_ledger_apis():
@@ -303,10 +303,14 @@ class SkillComponentTestCase(TestCase):
         """Test skill_id property positive."""
         ctx = mock.Mock()
         ctx.skill_id = "skill_id"
-        component = self.TestComponent(configuration=Mock(), skill_context=ctx, name="name")
+        component = self.TestComponent(
+            configuration=Mock(), skill_context=ctx, name="name"
+        )
         component.skill_id
 
     def test_config_positive(self):
         """Test config property positive."""
-        component = self.TestComponent(configuration=Mock(args={}), skill_context="ctx", name="name")
+        component = self.TestComponent(
+            configuration=Mock(args={}), skill_context="ctx", name="name"
+        )
         component.config

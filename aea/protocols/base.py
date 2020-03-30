@@ -22,7 +22,6 @@
 import inspect
 import json
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
 from copy import copy
@@ -32,15 +31,12 @@ from typing import Any, Dict, Optional, cast
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
-    DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
     PublicId,
 )
 from aea.configurations.components import Component
-from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
     load_module,
 )
 from aea.mail.base import Address

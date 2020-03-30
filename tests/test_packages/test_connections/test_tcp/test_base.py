@@ -25,17 +25,12 @@ from asyncio import CancelledError
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 
 import packages
-from packages.fetchai.connections.tcp.connection import (
-    TCPClientConnection,
-    TCPServerConnection,
-)
 
-from ....conftest import get_unused_tcp_port, _make_tcp_server_connection
+from ....conftest import _make_tcp_server_connection, get_unused_tcp_port
 
 
 @pytest.mark.asyncio

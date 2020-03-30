@@ -23,11 +23,9 @@ import asyncio
 import logging
 import struct
 from asyncio import CancelledError, StreamReader, StreamWriter
-from typing import Optional, cast
+from typing import Optional
 
-from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 

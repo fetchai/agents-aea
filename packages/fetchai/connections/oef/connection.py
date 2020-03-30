@@ -53,7 +53,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,

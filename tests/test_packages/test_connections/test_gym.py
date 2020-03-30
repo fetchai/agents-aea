@@ -20,16 +20,14 @@
 """This module contains the tests of the gym connection module."""
 
 import logging
-from unittest.mock import Mock
 
 import gym
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.gym.connection import GymConnection, GymChannel
+from packages.fetchai.connections.gym.connection import GymChannel, GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 

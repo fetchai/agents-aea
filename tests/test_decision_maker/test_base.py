@@ -44,10 +44,8 @@ from aea.protocols.default.message import DefaultMessage
 from ..conftest import (
     AUTHOR,
     CUR_PATH,
-    DUMMY_CONNECTION_PUBLIC_ID,
     _make_dummy_connection,
 )
-from ..data.dummy_connection.connection import DummyConnection
 
 MAX_REACTIONS = 10
 

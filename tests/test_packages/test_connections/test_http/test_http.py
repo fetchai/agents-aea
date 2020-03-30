@@ -30,14 +30,13 @@ from typing import Dict, Tuple, cast
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.http.connection import HTTPConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port, _make_http_connection
+from ....conftest import ROOT_DIR, _make_http_connection, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 

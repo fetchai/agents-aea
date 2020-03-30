@@ -23,28 +23,24 @@ import unittest.mock
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import AEAConnectionError, Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
-from tests.conftest import _make_local_connection
+
+from ....conftest import _make_local_connection
 
 
 def test_connection():
     """Test that two OEF local connection can connect to a local node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer(
-            [_make_local_connection("multiplexer1", node)]
-        )
-        multiplexer2 = Multiplexer(
-            [_make_local_connection("multiplexer2", node)]
-        )
+        multiplexer1 = Multiplexer([_make_local_connection("multiplexer1", node)])
+        multiplexer2 = Multiplexer([_make_local_connection("multiplexer2", node)])
 
         multiplexer1.connect()
         multiplexer2.connect()
@@ -114,12 +110,8 @@ def test_communication():
     """Test that two multiplexer can communicate through the node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer(
-            [_make_local_connection("multiplexer1", node)]
-        )
-        multiplexer2 = Multiplexer(
-            [_make_local_connection("multiplexer2", node)]
-        )
+        multiplexer1 = Multiplexer([_make_local_connection("multiplexer1", node)])
+        multiplexer2 = Multiplexer([_make_local_connection("multiplexer2", node)])
 
         multiplexer1.connect()
         multiplexer2.connect()

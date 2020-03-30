@@ -33,7 +33,7 @@ from aea.configurations.base import (
     ConnectionConfig,
     PublicId,
 )
-from aea.helpers.base import _SysModules, load_init_modules, load_module
+from aea.helpers.base import load_init_modules, load_module
 
 logger = logging.getLogger(__name__)
 

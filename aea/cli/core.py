@@ -33,10 +33,10 @@ from aea.cli.add import add
 from aea.cli.common import (
     AgentDirectory,
     Context,
+    _verify_or_create_private_keys,
     logger,
     pass_ctx,
     try_to_load_agent_config,
-    _verify_or_create_private_keys,
 )
 from aea.cli.config import config
 from aea.cli.create import create

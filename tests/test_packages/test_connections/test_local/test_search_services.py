@@ -22,7 +22,6 @@ import time
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -39,6 +38,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
+
 from ....conftest import _make_local_connection
 
 DEFAULT_OEF = "default_oef"
@@ -55,12 +55,7 @@ class TestEmptySearch:
 
         cls.address_1 = "address_1"
         cls.multiplexer = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_1,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
         cls.multiplexer.connect()
@@ -112,12 +107,7 @@ class TestSimpleSearchResult:
 
         cls.address_1 = "address"
         cls.multiplexer = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_1,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
         cls.multiplexer.connect()
@@ -189,21 +179,11 @@ class TestUnregister:
 
         cls.address_1 = "address_1"
         cls.multiplexer1 = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_1,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
         cls.address_2 = "address_2"
         cls.multiplexer2 = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_2,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_2, cls.node,)]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
@@ -332,12 +312,7 @@ class TestAgentMessage:
 
         cls.address_1 = "address_1"
         cls.multiplexer1 = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_1,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
     @pytest.mark.asyncio
@@ -358,10 +333,7 @@ class TestAgentMessage:
             message=msg_bytes,
         )
         with pytest.raises(AEAConnectionError):
-            await _make_local_connection(
-                self.address_1,
-                self.node,
-            ).send(envelope)
+            await _make_local_connection(self.address_1, self.node,).send(envelope)
 
         self.multiplexer1.connect()
         msg = FipaMessage(
@@ -406,20 +378,10 @@ class TestFilteredSearchResult:
         cls.address_1 = "multiplexer1"
         cls.address_2 = "multiplexer2"
         cls.multiplexer1 = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_1,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
         cls.multiplexer2 = Multiplexer(
-            [
-                _make_local_connection(
-                    cls.address_2,
-                    cls.node,
-                )
-            ]
+            [_make_local_connection(cls.address_2, cls.node,)]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()

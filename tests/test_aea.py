@@ -19,52 +19,31 @@
 """This module contains the tests for aea/aea.py."""
 
 import os
-import tempfile
 import time
 from pathlib import Path
 from threading import Thread
-from typing import cast
 
 import pytest
 
-import yaml
-
-from aea import AEA_DIR
-from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import (
-    ProtocolConfig,
-    PublicId,
-    ConnectionConfig,
-    ComponentType,
-)
-from aea.configurations.components import Component
-from aea.connections.base import Connection
-from aea.connections.stub.connection import StubConnection
+from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
-from aea.skills.base import Skill
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from .conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
-    LOCAL_CONNECTION_PUBLIC_ID,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
     ROOT_DIR,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
-from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_initialise_aea():

@@ -23,10 +23,10 @@ import asyncio
 from concurrent.futures._base import CancelledError
 from typing import Optional
 
-from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
-from tests.conftest import logger
+from aea.mail.base import Envelope
+
+from ...conftest import logger
 
 
 class DummyConnection(Connection):
@@ -72,9 +72,3 @@ class DummyConnection(Connection):
         """Put an envelope in the queue."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """Return a connection obj fom a configuration."""

@@ -24,13 +24,14 @@ import os
 import types
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple, Union, cast, Collection, Optional
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
+    AgentConfig,
     ComponentConfiguration,
     ComponentId,
     ComponentType,
@@ -38,7 +39,6 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PublicId,
-    AgentConfig,
 )
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
@@ -47,15 +47,15 @@ from aea.context.base import AgentContext
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    _create_fetchai_private_key,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _try_validate_fet_private_key_path,
-    _create_ethereum_private_key,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+    _create_ethereum_private_key,
+    _create_fetchai_private_key,
     _try_validate_ethereum_private_key_path,
+    _try_validate_fet_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet, SUPPORTED_CRYPTOS
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
 from aea.helpers.base import _SysModules
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
@@ -195,10 +195,10 @@ class _DependenciesManager:
     @property
     def pypi_dependencies(self) -> Dependencies:
         """Get all the PyPI dependencies."""
-        all_pypi_dependencies = {}
+        all_pypi_dependencies = {}  # type: Dependencies
         for component in self._dependencies.values():
             # TODO implement merging of two PyPI dependencies.
-            all_pypi_dependencies.update(component.configuration.package_dependencies)
+            all_pypi_dependencies.update(component.configuration.pypi_dependencies)
         return all_pypi_dependencies
 
     @contextmanager
@@ -264,7 +264,7 @@ class AEABuilder:
 
         :param with_default_packages: add the default packages.
         """
-        self._name = None
+        self._name = None  # type: Optional[str]
         self._resources = Resources()
         self._private_key_paths = {}  # type: Dict[str, str]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
@@ -341,7 +341,7 @@ class AEABuilder:
         :param identifier: the identifier for that private key path.
         :param private_key_path: path to the private key file.
         """
-        self._private_key_paths[identifier] = private_key_path
+        self._private_key_paths[identifier] = str(private_key_path)
         return self
 
     def remove_private_key(self, identifier: str) -> "AEABuilder":
@@ -465,8 +465,7 @@ class AEABuilder:
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """Get the identity associated to a wallet."""
-        # if len(wallet.addresses) == 0:
-        #     raise ValueError("Add at least one private key.")
+        assert self._name is not None, "You must set the name of the agent."
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
@@ -594,7 +593,7 @@ class AEABuilder:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
-                agent_configuration = loader.load(configuration_file_path.open())
+                agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)
         except FileNotFoundError:
             raise Exception(
@@ -715,7 +714,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_path is None:
         _create_ethereum_private_key(
-            private_key_file=aea_project_path / ETHEREUM_PRIVATE_KEY_FILE
+            private_key_file=str(aea_project_path / ETHEREUM_PRIVATE_KEY_FILE)
         )
         agent_configuration.private_key_paths.update(
             ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE

@@ -20,15 +20,14 @@
 """This module contains the tests of the agent module."""
 
 import time
-from pathlib import Path
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
-from aea.configurations.base import PublicId, ComponentType
 from aea.mail.base import InBox, OutBox
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from .conftest import ROOT_DIR, _make_local_connection
+from packages.fetchai.connections.local.connection import LocalNode
+
+from .conftest import _make_local_connection
 
 
 class DummyAgent(Agent):

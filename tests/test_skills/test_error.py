@@ -40,7 +40,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, _make_dummy_connection
+from ..conftest import CUR_PATH, _make_dummy_connection
 
 
 class TestSkillError:

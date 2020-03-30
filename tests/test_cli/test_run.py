@@ -27,7 +27,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 
@@ -41,12 +41,6 @@ from aea.configurations.base import (
     PublicId,
 )
 
-from .tools_for_testing import (
-    ContextMock,
-    PublicIdMock,
-    StopTest,
-    raise_stoptest,
-)
 from ..common.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
@@ -275,7 +269,7 @@ def test_run_unknown_private_key(pytestconfig):
 
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
-    except SystemExit as e:
+    except SystemExit:
         pass
 
     mocked_logger_error.assert_called_with(
@@ -341,7 +335,7 @@ def test_run_unknown_ledger(pytestconfig):
 
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
-    except SystemExit as e:
+    except SystemExit:
         pass
 
     mocked_logger_error.assert_called_with("Unsupported identifier in ledger apis.")

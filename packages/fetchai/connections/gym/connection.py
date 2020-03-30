@@ -27,7 +27,7 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope

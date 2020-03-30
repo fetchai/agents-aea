@@ -21,32 +21,23 @@
 
 import time
 import unittest.mock
-from pathlib import Path
-from typing import cast
 
 import pytest
 
 import aea
-from aea.configurations.base import PublicId, ComponentType
-from aea.configurations.components import Component
-from aea.connections.base import Connection
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode
 
 from .conftest import (
-    DUMMY_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
-    CUR_PATH,
-    ROOT_DIR,
     _make_dummy_connection,
     _make_local_connection,
 )
-from .data.dummy_connection.connection import DummyConnection
 
 
 def test_uri():

@@ -26,16 +26,16 @@ import tempfile
 import time
 from pathlib import Path
 from typing import cast
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 
 import aea
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ConnectionConfig,
     PublicId,
-    ComponentType,
-    ComponentConfiguration,
 )
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Envelope, Multiplexer

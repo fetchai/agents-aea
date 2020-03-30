@@ -24,8 +24,6 @@ import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection

@@ -21,7 +21,6 @@
 
 import inspect
 import logging
-import os
 import queue
 import re
 from abc import ABC, abstractmethod
@@ -32,21 +31,17 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
-    DEFAULT_SKILL_CONFIG_FILE,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
 )
 from aea.configurations.components import Component
-from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
-    load_agent_component_package,
     load_module,
 )
 from aea.mail.base import Address, OutBox
@@ -259,13 +254,14 @@ class SkillComponent(ABC):
     @property
     def configuration(self) -> SkillComponentConfiguration:
         """Get the skill component configuration."""
+        assert self._configuration is not None, "Configuration not set."
         return self._configuration
 
     # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
         """Get the config of the behaviour."""
-        return self._configuration.args
+        return self.configuration.args
 
     @abstractmethod
     def setup(self) -> None:
@@ -561,13 +557,14 @@ class Skill(Component):
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = None  # type: Optional[SkillContext]
-        self._handlers = {}  # type: Optional[Dict[str, Handler]]
-        self._behaviours = {}  # type: Optional[Dict[str, Behaviour]]
-        self._models = {}  # type: Optional[Dict[str, Model]]
+        self._handlers = {}  # type: Dict[str, Handler]
+        self._behaviours = {}  # type: Dict[str, Behaviour]
+        self._models = {}  # type: Dict[str, Model]
 
     @property
     def skill_context(self) -> SkillContext:
         """Get the skill context."""
+        assert self._skill_context is not None, "Skill context not set."
         return self._skill_context
 
     @property

@@ -28,14 +28,17 @@ import pytest
 
 import requests
 
-from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port, _make_http_client_connection
+from ....conftest import (
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+    _make_http_client_connection,
+    get_host,
+    get_unused_tcp_port,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +54,7 @@ class TestHTTPClientConnect:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = _make_http_client_connection(
-            cls.agent_address,
-            cls.address,
-            cls.port
+            cls.agent_address, cls.address, cls.port
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
@@ -86,9 +87,7 @@ class TestHTTPClientDisconnection:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = _make_http_client_connection(
-            cls.agent_address,
-            cls.address,
-            cls.port
+            cls.agent_address, cls.address, cls.port
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
@@ -115,7 +114,7 @@ async def test_http_send():
     port = get_unused_tcp_port()
     agent_address = "some agent address"
 
-    http_client_connection = _make_http_client_connection( agent_address, address, port)
+    http_client_connection = _make_http_client_connection(agent_address, address, port)
     http_client_connection.loop = asyncio.get_event_loop()
 
     request_http_message = HttpMessage(

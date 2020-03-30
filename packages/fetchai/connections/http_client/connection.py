@@ -27,7 +27,7 @@ from typing import Optional, Set, Union, cast
 
 import requests
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 

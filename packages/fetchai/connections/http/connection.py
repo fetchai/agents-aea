@@ -39,7 +39,7 @@ from openapi_spec_validator.schemas import read_yaml_file
 
 from werkzeug.datastructures import ImmutableMultiDict
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 

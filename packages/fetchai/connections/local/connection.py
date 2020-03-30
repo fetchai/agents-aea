@@ -26,7 +26,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -324,7 +324,7 @@ class OEFLocalConnection(Connection):
         """Connect to the local OEF Node."""
         if not self.connection_status.is_connected:
             self._reader = Queue()
-            self._writer = await self._local_node.connect(self._address, self._reader)
+            self._writer = await self._local_node.connect(self.address, self._reader)
             self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
