@@ -34,14 +34,14 @@ from aea.cli.common import (
 from aea.cli.login import do_login
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.registry.utils import check_is_author_logged_in, is_logged_in
+from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
 from aea.configurations.base import PublicId
 
 
 def _registry_init(author):
     username = author
 
-    if is_logged_in():
+    if is_auth_token_present():
         check_is_author_logged_in(username)
     else:
         is_registered = click.confirm("Do you have a Registry account?")

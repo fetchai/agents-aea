@@ -270,10 +270,10 @@ def check_is_author_logged_in(author_name: str) -> None:
         )
 
 
-def is_logged_in():
+def is_auth_token_present():
     """
     Check if any user is currently logged in.
 
     :return: bool is logged in.
     """
-    return bool(get_auth_token())
+    return get_auth_token() is not None
