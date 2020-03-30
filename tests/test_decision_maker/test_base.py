@@ -103,7 +103,7 @@ def test_linear_utility():
     assert linear_utility is not None, "Linear utility must not be none."
 
 
-def test_get_score():
+def test_utility():
     """Calculate the score."""
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
@@ -115,7 +115,7 @@ def test_get_score():
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
     )
-    score = preferences.get_score(
+    score = preferences.utility(
         quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings,
     )
     linear_utility = preferences.linear_utility(amount_by_currency_id=currency_holdings)
@@ -180,16 +180,16 @@ def test_score_diff_from_transaction():
         tx_nonce="transaction nonce",
     )
 
-    cur_score = preferences.get_score(
+    cur_score = preferences.utility(
         quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings
     )
     new_state = ownership_state.apply_transactions([tx_message])
-    new_score = preferences.get_score(
+    new_score = preferences.utility(
         quantities_by_good_id=new_state.quantities_by_good_id,
         amount_by_currency_id=new_state.amount_by_currency_id,
     )
     dif_scores = new_score - cur_score
-    score_difference = preferences.get_score_diff_from_transaction(
+    score_difference = preferences.utility_diff_from_transaction(
         ownership_state=ownership_state, tx_message=tx_message
     )
     assert (
@@ -516,13 +516,8 @@ class TestDecisionMaker:
             content=b"hello",
         )
 
-        self.decision_maker.message_in_queue.put_nowait(default_message)
-        time.sleep(0.5)
-        self.mocked_logger_warning.assert_called_with(
-            "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
-                self.agent_name
-            )
-        )
+        with pytest.raises(ValueError):
+            self.decision_maker.message_in_queue.put_nowait(default_message)
 
     def test_is_affordable_off_chain(self):
         """Test the off_chain message."""
