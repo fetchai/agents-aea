@@ -60,7 +60,9 @@ from packages.fetchai.connections.http.connection import HTTPConnection
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.connections.p2p_client.connection import PeerToPeerClientConnection
+from packages.fetchai.connections.p2p_client.connection import (
+    PeerToPeerClientConnection,
+)
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
@@ -538,9 +540,12 @@ def _make_dummy_connection() -> Connection:
 
 
 def _make_local_connection(address: Address, node: LocalNode) -> Connection:
-    oef_local_connection = OEFLocalConnection.load_from_directory(
-        ComponentType.CONNECTION,
-        Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
+    oef_local_connection = cast(
+        OEFLocalConnection,
+        Component.load_from_directory(
+            ComponentType.CONNECTION,
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
+        ),
     )
     oef_local_connection.load()
     oef_local_connection._local_node = node

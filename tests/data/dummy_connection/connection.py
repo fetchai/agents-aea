@@ -26,8 +26,6 @@ from typing import Optional
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
 
-from ...conftest import logger
-
 
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
@@ -59,7 +57,6 @@ class DummyConnection(Connection):
             assert self._queue is not None
             envelope = await self._queue.get()
             if envelope is None:
-                logger.debug("Received none envelope.")
                 return None
             return envelope
         except CancelledError:

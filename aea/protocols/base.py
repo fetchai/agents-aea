@@ -36,9 +36,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.components import Component
-from aea.helpers.base import (
-    load_module,
-)
+from aea.helpers.base import load_module
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)

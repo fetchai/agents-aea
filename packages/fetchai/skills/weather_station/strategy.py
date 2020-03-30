@@ -79,7 +79,7 @@ class Strategy(Model):
 
         :return: a description of the offered services
         """
-        desc = Description(SCHEME, data_model=WEATHER_STATION_DATAMODEL())
+        desc = Description(SCHEME, data_model=WEATHER_STATION_DATAMODEL)
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:

@@ -805,8 +805,9 @@ class Game(Model):
         """Get the registration."""
         return self._registration
 
+    # TODO the name of this property conflicts with the Model.configuration property.
     @property
-    def configuration(self) -> Configuration:
+    def configuration(self) -> Configuration:  # type: ignore
         """Get game configuration."""
         assert (
             self._configuration is not None

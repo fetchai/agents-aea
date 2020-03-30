@@ -41,9 +41,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.helpers.base import (
-    load_module,
-)
+from aea.helpers.base import load_module
 from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
