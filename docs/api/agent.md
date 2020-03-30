@@ -1,7 +1,7 @@
 <a name=".aea.agent"></a>
 ## aea.agent
 
-This module contains the implementation of a template agent.
+This module contains the implementation of a generic agent.
 
 <a name=".aea.agent.AgentState"></a>
 ### AgentState
@@ -11,6 +11,12 @@ class AgentState(Enum)
 ```
 
 Enumeration for an agent state.
+
+In particular, it can be one of the following states:
+
+- AgentState.INITIATED: when the Agent object has been created.
+- AgentState.CONNECTED: when the agent is connected.
+- AgentState.RUNNING: when the agent is running.
 
 <a name=".aea.agent.Liveness"></a>
 ### Liveness
@@ -65,7 +71,7 @@ Stop the liveness.
 class Agent(ABC)
 ```
 
-This class implements a template agent.
+This class provides an abstract base class for a generic agent.
 
 <a name=".aea.agent.Agent.__init__"></a>
 #### `__`init`__`
@@ -82,7 +88,7 @@ Instantiate the agent.
 - `connections`: the list of connections of the agent.
 - `loop`: the event loop to run the connections.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
-- `is_debug`: if True, run the agent in debug mode.
+- `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
 - `is_programmatic`: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
 **Returns**:
@@ -165,7 +171,7 @@ Get the liveness.
 
 Get the tick (or agent loop count).
 
-Each agent loop (see _run_main_loop) increments the tick.
+Each agent loop (one call to each one of act(), react(), update()) increments the tick.
 
 <a name=".aea.agent.Agent.agent_state"></a>
 #### agent`_`state
@@ -177,16 +183,13 @@ Each agent loop (see _run_main_loop) increments the tick.
 
 Get the state of the agent.
 
-In particular, it can be one of the following states:
-- AgentState.INITIATED: when the Agent object has been created.
-- AgentState.CONNECTED: when the agent is connected.
-- AgentState.RUNNING: when the agent is running.
-
-:return the agent state.
-
 **Raises**:
 
 - `ValueError`: if the state does not satisfy any of the foreseen conditions.
+
+**Returns**:
+
+None
 
 <a name=".aea.agent.Agent.start"></a>
 #### start
@@ -196,6 +199,21 @@ In particular, it can be one of the following states:
 ```
 
 Start the agent.
+
+Performs the following:
+
+- calls connect() on the multiplexer (unless in debug mode), and
+- calls setup(), and
+- calls start() on the liveness, and
+- enters the agent main loop.
+
+While the liveness of the agent is not stopped it continues to loop over:
+
+- increment the tick,
+- call to act(),
+- sleep for specified timeout,
+- call to react(),
+- call to update().
 
 **Returns**:
 
@@ -209,6 +227,12 @@ None
 ```
 
 Stop the agent.
+
+Performs the following:
+
+- calls stop() on the liveness, and
+- calls teardown(), and
+- calls disconnect() on the multiplexer.
 
 **Returns**:
 
@@ -250,7 +274,7 @@ None
  | react() -> None
 ```
 
-React to incoming events.
+React to events.
 
 **Returns**:
 
@@ -264,7 +288,7 @@ None
  | update() -> None
 ```
 
-Update the current state of the agent.
+Update the internal state of the agent.
 
 :return None
 

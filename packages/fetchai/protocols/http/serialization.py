@@ -19,7 +19,7 @@
 
 """Serialization module for http protocol."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -97,7 +97,7 @@ class HttpSerializer(Serializer):
 
         performative = http_pb.WhichOneof("performative")
         performative_id = HttpMessage.Performative(str(performative))
-        performative_content = dict()
+        performative_content = dict()  # type: Dict[str, Any]
         if performative_id == HttpMessage.Performative.REQUEST:
             method = http_pb.request.method
             performative_content["method"] = method

@@ -16,11 +16,13 @@ A framework for autonomous economic agent (AEA) development
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-        pipenv --python 3.7 && pipenv shell
+      pipenv --python 3.7 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-        pip install aea[all]
+      pip install aea[all]
+
+(`pip install "aea[all]"` if you use `zsh` rather than `bash`.)
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -34,7 +36,7 @@ A framework for autonomous economic agent (AEA) development
 
 This repository contains submodules. Clone with recursive strategy:
 
-	  git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+      git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ### Dependencies
 
@@ -51,6 +53,8 @@ Or, you can have more control on the installed dependencies by leveraging the se
 - Install the package from source:
 
       pip install .[all]
+
+(`pip install ".[all]"` if you use `zsh` rather than `bash`.)
 
 - Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -69,9 +73,11 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  pip install -e .[all]
 
+(`pip install -e ".[all]"` if you use `zsh` rather than `bash`.)
+
 - To run tests (ensure no oef docker containers are running):
 
-	  tox -e py3.7
+	    tox -e py3.7
 
 - To run linters (code style checks):
 

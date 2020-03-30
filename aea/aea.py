@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of an Autonomous Economic Agent."""
+"""This module contains the implementation of an autonomous economic agent (AEA)."""
+
 import logging
 from asyncio import AbstractEventLoop
 from typing import List, Optional, cast
@@ -61,14 +62,14 @@ class AEA(Agent):
 
         :param identity: the identity of the agent
         :param connections: the list of connections of the agent.
-        :param loop: the event loop to run the connections.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the APIs the agent will use to connect to ledgers.
-        :param resources: the resources of the agent.
+        :param resources: the resources (protocols and skills) of the agent.
+        :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param is_debug: if True, run the agent in debug mode.
+        :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
-        :param max_reactions: the processing rate of messages per iteration.
+        :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
 
         :return: None
         """
@@ -107,7 +108,7 @@ class AEA(Agent):
 
     @property
     def context(self) -> AgentContext:
-        """Get context."""
+        """Get (agent) context."""
         return self._context
 
     @property
@@ -121,11 +122,6 @@ class AEA(Agent):
         self._resources = resources
 
     @property
-    def filter(self) -> Filter:
-        """Get filter."""
-        return self._filter
-
-    @property
     def task_manager(self) -> TaskManager:
         """Get the task manager."""
         return self._task_manager
@@ -133,6 +129,13 @@ class AEA(Agent):
     def setup(self) -> None:
         """
         Set up the agent.
+
+        Performs the following:
+
+        - loads the resources (unless in programmatic mode)
+        - starts the task manager
+        - starts the decision maker
+        - calls setup() on the resources
 
         :return: None
         """
@@ -146,14 +149,25 @@ class AEA(Agent):
         """
         Perform actions.
 
+        Calls act() of each active behaviour.
+
         :return: None
         """
-        for behaviour in self.filter.get_active_behaviours():
+        for behaviour in self._filter.get_active_behaviours():
             behaviour.act_wrapper()
 
     def react(self) -> None:
         """
-        React to incoming events (envelopes).
+        React to incoming envelopes.
+
+        Gets up to max_reactions number of envelopes from the inbox and
+        handles each envelope, which entailes:
+
+        - fetching the protocol referenced by the envelope, and
+        - returning an envelope to sender if the protocol is unsupported, using the error handler, or
+        - returning an envelope to sender if there is a decoding error, using the error handler, or
+        - returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
+        - handling the message recovered from the envelope with all active handlers for the specified protocol.
 
         :return: None
         """
@@ -194,7 +208,7 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        handlers = self.filter.get_active_handlers(protocol.id, envelope.context)
+        handlers = self._filter.get_active_handlers(protocol.id, envelope.context)
         if len(handlers) == 0:
             if error_handler is not None:
                 error_handler.send_unsupported_skill(envelope)
@@ -207,17 +221,24 @@ class AEA(Agent):
         """
         Update the current state of the agent.
 
+        Handles the internal messages from the skills to the decision maker.
+
         :return None
         """
-        self.filter.handle_internal_messages()
+        self._filter.handle_internal_messages()
 
     def teardown(self) -> None:
         """
         Tear down the agent.
 
+        Performs the following:
+
+        - stops the decision maker
+        - stops the task manager
+        - tears down the resources.
+
         :return: None
         """
         self.decision_maker.stop()
         self.task_manager.stop()
-        if self._resources is not None:
-            self._resources.teardown()
+        self.resources.teardown()

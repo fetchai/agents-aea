@@ -97,10 +97,8 @@ nav:
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
-        - Identity:
-          - Base: 'api/identity/base.md'
-        - Mail:
-          - Base: 'api/mail/base.md'
+        - Identity: 'api/identity/base.md'
+        - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
           - Default Protocol:
