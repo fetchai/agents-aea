@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Generic, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, TextIO, Type, TypeVar, Union
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -36,6 +36,7 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
     SkillConfig,
@@ -49,6 +50,7 @@ T = TypeVar(
     AgentConfig,
     SkillConfig,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
 )
@@ -64,11 +66,21 @@ class ConfigLoader(Generic[T]):
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         :param configuration_type:
         """
-        self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
+        self._schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
-        self.resolver = jsonschema.RefResolver(root_path, self.schema)
-        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
-        self.configuration_type = configuration_type  # type: Type[T]
+        self._resolver = jsonschema.RefResolver(root_path, self._schema)
+        self._validator = Draft4Validator(self._schema, resolver=self._resolver)
+        self._configuration_type = configuration_type  # type: Type[T]
+
+    @property
+    def validator(self) -> Draft4Validator:
+        """Get the json schema validator."""
+        return self._validator
+
+    @property
+    def configuration_type(self) -> Type[T]:
+        """Get the configuration type of the loader."""
+        return self._configuration_type
 
     def load_protocol_specification(self, file_pointer: TextIO) -> T:
         """
@@ -131,16 +143,31 @@ class ConfigLoader(Generic[T]):
     ) -> "ConfigLoader":
         """Get the configuration loader from the type."""
         configuration_type = ConfigurationType(configuration_type)
-        if configuration_type == ConfigurationType.AGENT:
-            return ConfigLoader("aea-config_schema.json", AgentConfig)
-        elif configuration_type == ConfigurationType.PROTOCOL:
-            return ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        elif configuration_type == ConfigurationType.CONNECTION:
-            return ConfigLoader("connection-config_schema.json", ConnectionConfig)
-        elif configuration_type == ConfigurationType.SKILL:
-            return ConfigLoader("skill-config_schema.json", SkillConfig)
-        else:  # pragma: no cover
-            raise ValueError("Invalid configuration type.")
+        return ConfigLoaders.from_configuration_type(configuration_type)
+
+
+class ConfigLoaders:
+
+    _from_configuration_type_to_loaders = {
+        ConfigurationType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
+        ConfigurationType.PROTOCOL: ConfigLoader(
+            "protocol-config_schema.json", ProtocolConfig
+        ),
+        ConfigurationType.CONNECTION: ConfigLoader(
+            "connection-config_schema.json", ConnectionConfig
+        ),
+        ConfigurationType.SKILL: ConfigLoader("skill-config_schema.json", SkillConfig),
+        ConfigurationType.CONTRACT: ConfigLoader(
+            "contract-config_schema.json", ContractConfig
+        ),
+    }  # type: Dict[ConfigurationType, ConfigLoader]
+
+    @classmethod
+    def from_configuration_type(
+        cls, configuration_type: Union[ConfigurationType, str]
+    ) -> "ConfigLoader":
+        configuration_type = ConfigurationType(configuration_type)
+        return cls._from_configuration_type_to_loaders[configuration_type]
 
 
 def _config_loader():

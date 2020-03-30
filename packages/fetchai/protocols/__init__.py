@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol registry for the AEA framework."""
+"""This module contains the protocol packages authored by Fetch.ai."""

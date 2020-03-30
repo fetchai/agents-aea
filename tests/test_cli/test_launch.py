@@ -77,11 +77,11 @@ class TestLaunch:
                 preexec_fn=os.setsid,
             )
 
-            time.sleep(5.0)
+            time.sleep(10.0)
             os.killpg(
                 os.getpgid(process_launch.pid), signal.SIGINT
             )  # Send the signal to all the process groups
-            process_launch.wait(timeout=5.0)
+            process_launch.wait(timeout=10.0)
         finally:
             if not process_launch.returncode == 0:
                 poll_one = process_launch.poll()

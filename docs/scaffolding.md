@@ -34,4 +34,12 @@ aea scaffold connection my_connection
 
 After running the above commands, you are ready to develop your own skill, protocol and connection.
 
+Once you have made changes to your scaffolded packages, make sure you update the fingerprint of the package:
+
+``` bash
+aea fingerprint [package_name]
+```
+
+Then you are ready to run the AEA.
+
 <br />

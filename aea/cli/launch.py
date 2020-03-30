@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea launch' subcommand."""
+
 import os
 import subprocess  # nosec
 import sys
@@ -27,7 +28,6 @@ from subprocess import Popen  # nosec
 from typing import List, cast
 
 import click
-from click import pass_context
 
 from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
@@ -83,7 +83,7 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
 
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
-@pass_context
+@click.pass_context
 def launch(click_context, agents: List[str]):
     """Launch many agents."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))

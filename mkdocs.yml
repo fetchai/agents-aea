@@ -49,6 +49,7 @@ nav:
         - Generic skills: 'generic-skills.md'
         - ORM integration: 'orm-integration-to-generic.md'
         - Frontend intergration: 'connect-a-frontend.md'
+        - ERC1155 deploy and interact: 'erc1155-skills.md'
         - HTTP Connection: 'http-connection-and-skill.md'
       - Architecture:
         - Design principles: 'design-principles.md'

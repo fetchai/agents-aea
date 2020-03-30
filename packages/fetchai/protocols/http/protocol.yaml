@@ -2,7 +2,12 @@ name: http
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ''
+fingerprint:
+  __init__.py: QmRdY1QzpEXg7bX78QTpCTmMKRRR1DcyfpyvkL8xHnoY5C
+  http.proto: QmPGupLxaNgcL78ccyRyh7FVHpBmiqCzn77DJJxmTJAjrU
+  http_pb2.py: QmboBsJ9DNAF3nVtRALzw2QBswQ6JS9kCrGGQVFLs1rPi1
+  message.py: QmVSKw2MzBWcmcSnuFzbXhySsqDuYYDz4THQQU4GDWGQWR
+  serialization.py: Qmd9MC7vBJocQ84bVJKcxsk8KiUZMBZcUoSkCQmKqRTnZX
 aea_version: 0.2.4
 dependencies: 
     protobuf: {} 

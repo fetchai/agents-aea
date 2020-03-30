@@ -789,7 +789,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         shutil.copytree(
             Path(CUR_PATH, "data", "exception_skill"),
-            Path(cls.t, cls.agent_name, "skills", "exception"),
+            Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", "exception"),
         )
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
@@ -843,7 +843,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run"])
+            cli.main(["--skip-consistency-check", *CLI_LOG_OPTION, "run"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1023,7 +1023,15 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    str(cls.connection_id),
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1091,7 +1099,15 @@ class TestRunFailsWhenConnectionNotComplete:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    str(cls.connection_id),
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1158,7 +1174,15 @@ class TestRunFailsWhenConnectionClassNotPresent:
         ).write_text("")
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    cls.connection_id,
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1220,7 +1244,15 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    cls.connection_id,
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1282,7 +1314,15 @@ class TestRunFailsWhenProtocolNotComplete:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    cls.connection_id,
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 

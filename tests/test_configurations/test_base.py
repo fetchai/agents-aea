@@ -28,6 +28,7 @@ from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
     ConnectionConfig,
+    ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -41,6 +42,7 @@ from ..conftest import (
     AUTHOR,
     agent_config_files,
     connection_config_files,
+    contract_config_files,
     protocol_config_files,
     skill_config_files,
 )
@@ -96,6 +98,23 @@ class TestCRUDCollection:
 
         keyvalue_pairs = collection.read_all()
         assert {("one", 1), ("two", 2)} == set(keyvalue_pairs)
+
+
+class TestContractConfig:
+    """Test the contract configuration class."""
+
+    @pytest.mark.parametrize("contract_path", contract_config_files)
+    def test_from_json_and_to_json(self, contract_path):
+        """Test the 'from_json' method and 'to_json' work correctly."""
+        f = open(contract_path)
+        original_json = yaml.safe_load(f)
+
+        expected_config = ContractConfig.from_json(original_json)
+        assert isinstance(expected_config, ContractConfig)
+        expected_json = expected_config.json
+        actual_config = ContractConfig.from_json(expected_json)
+        actual_json = actual_config.json
+        assert expected_json == actual_json
 
 
 class TestConnectionConfig:
@@ -179,6 +198,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
         _get_default_configuration_file_name_from_type("connection")
         _get_default_configuration_file_name_from_type("protocol")
         _get_default_configuration_file_name_from_type("skill")
+        _get_default_configuration_file_name_from_type("contract")
 
 
 class PublicIdTestCase(TestCase):
@@ -192,24 +212,24 @@ class PublicIdTestCase(TestCase):
 
     def test_public_id_from_json_positive(self):
         """Test case for from_json method positive result."""
-        obj = {"author": AUTHOR, "name": "name", "version": "version"}
+        obj = {"author": AUTHOR, "name": "name", "version": "0.1.0"}
         PublicId.from_json(obj)
 
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
-        obj = PublicId(AUTHOR, "name", "version")
+        obj = PublicId(AUTHOR, "name", "0.1.0")
         obj.json
 
     def test_public_id_eq_positive(self):
         """Test case for json __eq__ method positive result."""
-        obj1 = PublicId(AUTHOR, "name", "version")
-        obj2 = PublicId(AUTHOR, "name", "version")
+        obj1 = PublicId(AUTHOR, "name", "0.1.0")
+        obj2 = PublicId(AUTHOR, "name", "0.1.0")
         self.assertTrue(obj1 == obj2)
 
     def test_public_id_lt_positive(self):
         """Test case for json __lt__ method positive result."""
-        obj1 = PublicId(AUTHOR, "name", "1")
-        obj2 = PublicId(AUTHOR, "name", "2")
+        obj1 = PublicId(AUTHOR, "name", "1.0.0")
+        obj2 = PublicId(AUTHOR, "name", "2.0.0")
         self.assertTrue(obj1 < obj2)
 
 
@@ -273,7 +293,7 @@ class ProtocolSpecificationTestCase(TestCase):
         json_disc = {
             "name": "name",
             "author": AUTHOR,
-            "version": "version",
+            "version": "0.1.0",
             "license": "license",
             "description": "description",
             "speech_acts": {"arg1": "arg1", "arg2": "arg2"},

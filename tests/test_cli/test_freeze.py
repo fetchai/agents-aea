@@ -67,7 +67,7 @@ class TestFreeze:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == """protobuf\n"""
+        assert self.result.output == """protobuf\nvyper==0.1.0b12\n"""
 
     @classmethod
     def teardown_class(cls):

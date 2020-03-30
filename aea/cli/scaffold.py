@@ -33,9 +33,9 @@ from aea.cli.common import (
     Context,
     DEFAULT_VERSION,
     _validate_package_name,
+    check_aea_project,
     logger,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.base import (  # noqa: F401
@@ -46,10 +46,10 @@ from aea.configurations.base import (  # noqa: F401
 
 
 @click.group()
-@pass_ctx
-def scaffold(ctx: Context):
+@click.pass_context
+@check_aea_project
+def scaffold(click_context):
     """Scaffold a resource for the agent."""
-    try_to_load_agent_config(ctx)
 
 
 @scaffold.command()

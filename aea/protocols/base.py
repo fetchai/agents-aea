@@ -273,7 +273,6 @@ class Protocol(ABC):
         Load a protocol from a directory.
 
         :param directory: the skill directory.
-        :param agent_context: the agent's context
         :return: the Protocol object.
         :raises Exception: if the parsing failed.
         """

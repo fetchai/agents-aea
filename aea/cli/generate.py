@@ -26,13 +26,7 @@ import sys
 
 import click
 
-from aea.cli.common import (
-    Context,
-    DEFAULT_VERSION,
-    logger,
-    pass_ctx,
-    try_to_load_agent_config,
-)
+from aea.cli.common import Context, DEFAULT_VERSION, check_aea_project, logger, pass_ctx
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     ProtocolSpecification,
@@ -44,10 +38,10 @@ from aea.protocols.generator import ProtocolGenerator
 
 
 @click.group()
-@pass_ctx
-def generate(ctx: Context):
+@click.pass_context
+@check_aea_project
+def generate(click_context):
     """Generate a resource for the agent."""
-    try_to_load_agent_config(ctx)
 
 
 def _generate_item(ctx: Context, item_type, specification_path):

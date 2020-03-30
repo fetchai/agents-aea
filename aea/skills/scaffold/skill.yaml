@@ -2,7 +2,12 @@ name: scaffold
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+aea_version: 0.2.4
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmYa1rczhGTtMJBgCd1QR9uZhhkf45orm7TnGTE5Eizjpy
+  handlers.py: QmZYyTENRr6ecnxx1FeBdgjLiBhFLVn9mqarzUtFQmNUFn
+  my_model.py: QmPaZ6G37Juk63mJj88nParaEp71XyURts8AmmX1axs24V
 description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:
   scaffold:

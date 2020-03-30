@@ -2,7 +2,8 @@ name: t_protocol
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ''
+aea_version: 0.2.4
+fingerprint: {}
 dependencies: 
     protobuf: {} 
 description: A protocol for testing purposes.

@@ -31,7 +31,6 @@ from aea.cli.common import (
     # AEAConfigException,
     PublicIdParameter,
     _format_items,
-    _format_skills,
     _get_or_create_cli_config,
     _init_cli_config,
     _try_get_item_source_path,
@@ -61,33 +60,6 @@ class FormatItemsTestCase(TestCase):
             "Name: obj-name\n"
             "Description: Some description\n"
             "Author: author\n"
-            "Version: 1.0\n"
-            "------------------------------\n"
-        )
-        self.assertEqual(result, expected_result)
-
-
-class FormatSkillsTestCase(TestCase):
-    """Test case for format_skills method."""
-
-    def test_format_skills_positive(self):
-        """Test format_skills positive result."""
-        items = [
-            {
-                "public_id": "author/name:version",
-                "name": "obj-name",
-                "description": "Some description",
-                "version": "1.0",
-                "protocol_names": ["p1", "p2", "p3"],
-            }
-        ]
-        result = _format_skills(items)
-        expected_result = (
-            "------------------------------\n"
-            "Public ID: author/name:version\n"
-            "Name: obj-name\n"
-            "Description: Some description\n"
-            "Protocols: p1 | p2 | p3 | \n"
             "Version: 1.0\n"
             "------------------------------\n"
         )

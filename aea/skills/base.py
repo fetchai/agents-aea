@@ -43,6 +43,7 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
+from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.helpers.base import (
@@ -188,6 +189,12 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
+
+    @property
+    def contracts(self) -> SimpleNamespace:
+        """Get contracts the skill has access to."""
+        assert self._skill is not None, "Skill not initialized."
+        return SimpleNamespace(**self._skill.contracts)
 
     @property
     def logger(self) -> Logger:
@@ -559,7 +566,17 @@ class Skill:
         self.handlers = handlers if handlers is not None else {}
         self.behaviours = behaviours if behaviours is not None else {}
         self.models = models if models is not None else {}
+        self._contracts = {}  # type: Dict[str, Contract]
         self.skill_context._skill = self
+
+    @property
+    def contracts(self) -> Dict[str, Contract]:
+        """Get the contracts associated with the skill."""
+        return self._contracts
+
+    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
+        """Add the contracts to the skill."""
+        self._contracts = contracts
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
