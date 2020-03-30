@@ -224,7 +224,7 @@ def registry_logout() -> None:
 
     :return: None
     """
-    resp = request_api("POST", "/rest-auth/logout/")
+    request_api("POST", "/rest-auth/logout/")
 
 
 def _rm_tarfiles():
