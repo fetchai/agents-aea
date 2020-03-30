@@ -31,14 +31,50 @@ from aea.cli.common import (
     _update_cli_config,
     pass_ctx,
 )
+from aea.cli.login import do_login
+from aea.cli.register import do_register
+from aea.cli.registry.utils import check_is_author_logged_in, is_logged_in
 from aea.configurations.base import PublicId
+
+
+def _registry_init(author):
+    username = author
+
+    if is_logged_in():
+        check_is_author_logged_in(username)
+    else:
+        is_registered = click.confirm("Do you have a Registry account?")
+
+        if is_registered:
+            username = click.prompt("Username", type=str)
+            password = click.prompt("Password", type=str, hide_input=True)
+            do_login(username, password)
+        else:
+            click.echo("Registering a new account...")
+            username = click.prompt("Username", type=str)
+            email = click.prompt("Email", type=str)
+            password = click.prompt("Password", type=str, hide_input=True)
+            password_confirmation = click.prompt(
+                "Confirm password", type=str, hide_input=True
+            )
+            do_register(username, email, password, password_confirmation)
+
+            username = click.prompt("Username", type=str)
+            password = click.prompt("Password", type=str, hide_input=True)
+            do_login(username, password)
+
+    return username
 
 
 @click.command()
 @click.option("--author", type=str, required=False)
+@click.option("--registry", is_flag=True, help="For AEA init with Registry.")
 @pass_ctx
-def init(ctx: Context, author: str):
+def init(ctx: Context, author: str, registry: bool):
     """Initialize your AEA configurations."""
+    if registry:
+        author = _registry_init(author)
+
     config = _get_or_create_cli_config()
     if config.get(AUTHOR, None) is None:
         is_not_valid_author = True
@@ -52,7 +88,8 @@ def init(ctx: Context, author: str):
                 is_not_valid_author = False
             else:
                 click.echo(
-                    "Not a valid author handle. Please try again. Author handles must satisfy the following regex: {}".format(
+                    "Not a valid author handle. Please try again. "
+                    "Author handles must satisfy the following regex: {}".format(
                         PublicId.AUTHOR_REGEX
                     )
                 )

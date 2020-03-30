@@ -17,33 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea login' subcommand."""
+"""Implementation of the 'aea logout' subcommand."""
 
 import click
 
 from aea.cli.common import _update_cli_config
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.registry.utils import registry_login
+from aea.cli.registry.utils import registry_logout
 
 
-def do_login(username: str, password: str):
-    """
-    Login to Registry account and save auth token in config.
-
-    :param username: str username.
-    :param password: str password.
-
-    :return: None
-    """
-    click.echo("Signing in as {}...".format(username))
-    token = registry_login(username, password)
-    _update_cli_config({AUTH_TOKEN_KEY: token})
-    click.echo("Successfully signed in: {}.".format(username))
-
-
-@click.command(name="login", help="Login to Registry account")
-@click.argument("username", type=str, required=True)
-@click.option("--password", type=str, required=True, prompt=True, hide_input=True)
-def login(username, password):
-    """Login to Registry account."""
-    do_login(username, password)
+@click.command(name="logout", help="Logout from Registry account")
+def logout():
+    """Logout from Registry account."""
+    click.echo("Logging {} out...".format(username))
+    registry_logout()
+    _update_cli_config({AUTH_TOKEN_KEY: None})
+    click.echo("Successfully logged out.")

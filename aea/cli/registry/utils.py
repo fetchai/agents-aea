@@ -32,8 +32,24 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.configurations.base import PublicId
 
 
+def get_auth_token() -> str:
+    """
+    Get current auth token.
+
+    :return: str auth token
+    """
+    config = _get_or_create_cli_config()
+    return config.get(AUTH_TOKEN_KEY, None)
+
+
 def request_api(
-    method: str, path: str, params=None, data=None, is_auth=False, filepath=None
+    method: str,
+    path: str,
+    params=None,
+    data=None,
+    is_auth=False,
+    filepath=None,
+    handle_400=True,
 ) -> Dict:
     """
     Request Registry API.
@@ -49,8 +65,7 @@ def request_api(
     """
     headers = {}
     if is_auth:
-        config = _get_or_create_cli_config()
-        token = config.get(AUTH_TOKEN_KEY, None)
+        token = get_auth_token()
         if token is None:
             raise click.ClickException(
                 "Unable to read authentication config. "
@@ -93,7 +108,8 @@ def request_api(
             "Conflict in Registry. {}".format(resp_json["detail"])
         )
     elif resp.status_code == 400:
-        raise click.ClickException(resp.json())
+        if handle_400:
+            raise click.ClickException(resp_json)
     else:
         raise click.ClickException(
             "Wrong server response. Status code: {}".format(resp.status_code)
@@ -202,6 +218,15 @@ def registry_login(username: str, password: str) -> str:
     return resp["key"]
 
 
+def registry_logout() -> None:
+    """
+    Logout from Registry account.
+
+    :return: None
+    """
+    resp = request_api("POST", "/rest-auth/logout/")
+
+
 def _rm_tarfiles():
     cwd = os.getcwd()
     for filename in os.listdir(cwd):
@@ -239,8 +264,16 @@ def check_is_author_logged_in(author_name: str) -> None:
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "
-            "(logged in: {}, author: {}). "
-            "You are allowed to push only items of your authorship.".format(
+            "(logged in: {}, author: {}). Please logout and then login correctly.".format(
                 resp["username"], author_name
             )
         )
+
+
+def is_logged_in():
+    """
+    Check if any user is currently logged in.
+
+    :return: bool is logged in.
+    """
+    return bool(get_auth_token())
