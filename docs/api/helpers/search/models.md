@@ -114,17 +114,17 @@ Create an iterator.
 
 ```python
  | @classmethod
- | encode(cls, performative_content, description_from_message: "Description") -> None
+ | encode(cls, description_protobuf_object, description_object: "Description") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
 
-The content in the 'performative_content' argument must be matched with the message content in the 'description_from_message' argument.
+The protocol buffer object in the description_protobuf_object argument must be matched with the instance of this class in the 'description_object' argument.
 
 **Arguments**:
 
-- `performative_content`: the performative protocol buffer object containing a content whose type is this class.
-- `description_from_message`: the message content to be encoded in the protocol buffer object.
+- `description_protobuf_object`: the protocol buffer object whose type corresponds with this class.
+- `description_object`: an instance of this class to be encoded in the protocol buffer object.
 
 **Returns**:
 
@@ -135,20 +135,20 @@ None
 
 ```python
  | @classmethod
- | decode(cls, description_from_pb2) -> "Description"
+ | decode(cls, description_protobuf_object) -> "Description"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-A new instance of this class must be created that matches the content in the 'description_from_pb2' argument.
+A new instance of this class must be created that matches the protocol buffer object in the 'description_protobuf_object' argument.
 
 **Arguments**:
 
-- `description_from_pb2`: the protocol buffer content object whose type corresponds with this class.
+- `description_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 
 **Returns**:
 
-A new instance of this class that matches the protocol buffer object in the 'description_from_pb2' argument.
+A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
 
 <a name=".aea.helpers.search.models.ConstraintTypes"></a>
 ### ConstraintTypes
@@ -396,7 +396,7 @@ Initialize a 'Not' expression.
  | check(description: Description) -> bool
 ```
 
-Check if a value satisfies the 'Not; constraint expression.
+Check if a value satisfies the 'Not' constraint expression.
 
 **Arguments**:
 
@@ -555,17 +555,17 @@ Compare with another object.
 
 ```python
  | @classmethod
- | encode(cls, performative_content, query_from_message: "Query") -> None
+ | encode(cls, query_protobuf_object, query_object: "Query") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
 
-The content in the 'performative_content' argument must be matched with the message content in the 'query_from_message' argument.
+The protocol buffer object in the query_protobuf_object argument must be matched with the instance of this class in the 'query_object' argument.
 
 **Arguments**:
 
-- `performative_content`: the performative protocol buffer object containing a content whose type is this class.
-- `query_from_message`: the message content to be encoded in the protocol buffer object.
+- `query_protobuf_object`: the protocol buffer object whose type corresponds with this class.
+- `query_object`: an instance of this class to be encoded in the protocol buffer object.
 
 **Returns**:
 
@@ -576,18 +576,18 @@ None
 
 ```python
  | @classmethod
- | decode(cls, query_from_pb2) -> "Query"
+ | decode(cls, query_protobuf_object) -> "Query"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-A new instance of this class must be created that matches the content in the 'query_from_pb2' argument.
+A new instance of this class must be created that matches the protocol buffer object in the 'query_protobuf_object' argument.
 
 **Arguments**:
 
-- `query_from_pb2`: the protocol buffer content object whose type corresponds with this class.
+- `query_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 
 **Returns**:
 
-A new instance of this class that matches the protocol buffer object in the 'query_from_pb2' argument.
+A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
 

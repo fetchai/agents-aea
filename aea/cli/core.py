@@ -80,7 +80,8 @@ FUNDS_RELEASE_TIMEOUT = 10
 @click.pass_context
 def cli(click_context, skip_consistency_check: bool) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
-    click_context.obj = Context(cwd=".")
+    verbosity_option = click_context.meta.pop("verbosity")
+    click_context.obj = Context(cwd=".", verbosity=verbosity_option)
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
 

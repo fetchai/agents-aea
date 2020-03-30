@@ -19,11 +19,14 @@
 
 """This module contains http's message definition."""
 
+import logging
 from enum import Enum
 from typing import Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
+
+logger = logging.getLogger("packages.fetchai.protocols.http.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -45,10 +48,10 @@ class HttpMessage(Message):
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
         **kwargs,
     ):
         """
@@ -67,9 +70,6 @@ class HttpMessage(Message):
             **kwargs,
         )
         self._performatives = {"request", "response"}
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'http' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -147,22 +147,36 @@ class HttpMessage(Message):
         try:
             assert (
                 type(self.dialogue_reference) == tuple
-            ), "dialogue_reference must be 'tuple' but it is not."
+            ), "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
+                type(self.dialogue_reference)
+            )
             assert (
                 type(self.dialogue_reference[0]) == str
-            ), "The first element of dialogue_reference must be 'str' but it is not."
+            ), "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[0])
+            )
             assert (
                 type(self.dialogue_reference[1]) == str
-            ), "The second element of dialogue_reference must be 'str' but it is not."
-            assert type(self.message_id) == int, "message_id is not int"
-            assert type(self.target) == int, "target is not int"
+            ), "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
+                type(self.dialogue_reference[1])
+            )
+            assert (
+                type(self.message_id) == int
+            ), "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
+                type(self.message_id)
+            )
+            assert (
+                type(self.target) == int
+            ), "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
+                type(self.target)
+            )
 
             # Light Protocol Rule 2
             # Check correct performative
             assert (
                 type(self.performative) == HttpMessage.Performative
-            ), "'{}' is not in the list of valid performatives: {}".format(
-                self.performative, self.valid_performatives
+            ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
+                self.valid_performatives, self.performative
             )
 
             # Check correct contents
@@ -172,39 +186,61 @@ class HttpMessage(Message):
                 expected_nb_of_contents = 5
                 assert (
                     type(self.method) == str
-                ), "Content 'method' is not of type 'str'."
-                assert type(self.url) == str, "Content 'url' is not of type 'str'."
+                ), "Invalid type for content 'method'. Expected 'str'. Found '{}'.".format(
+                    type(self.method)
+                )
+                assert (
+                    type(self.url) == str
+                ), "Invalid type for content 'url'. Expected 'str'. Found '{}'.".format(
+                    type(self.url)
+                )
                 assert (
                     type(self.version) == str
-                ), "Content 'version' is not of type 'str'."
+                ), "Invalid type for content 'version'. Expected 'str'. Found '{}'.".format(
+                    type(self.version)
+                )
                 assert (
                     type(self.headers) == str
-                ), "Content 'headers' is not of type 'str'."
+                ), "Invalid type for content 'headers'. Expected 'str'. Found '{}'.".format(
+                    type(self.headers)
+                )
                 assert (
                     type(self.bodyy) == bytes
-                ), "Content 'bodyy' is not of type 'bytes'."
+                ), "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.bodyy)
+                )
             elif self.performative == HttpMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 5
                 assert (
                     type(self.version) == str
-                ), "Content 'version' is not of type 'str'."
+                ), "Invalid type for content 'version'. Expected 'str'. Found '{}'.".format(
+                    type(self.version)
+                )
                 assert (
                     type(self.status_code) == int
-                ), "Content 'status_code' is not of type 'int'."
+                ), "Invalid type for content 'status_code'. Expected 'int'. Found '{}'.".format(
+                    type(self.status_code)
+                )
                 assert (
                     type(self.status_text) == str
-                ), "Content 'status_text' is not of type 'str'."
+                ), "Invalid type for content 'status_text'. Expected 'str'. Found '{}'.".format(
+                    type(self.status_text)
+                )
                 assert (
                     type(self.headers) == str
-                ), "Content 'headers' is not of type 'str'."
+                ), "Invalid type for content 'headers'. Expected 'str'. Found '{}'.".format(
+                    type(self.headers)
+                )
                 assert (
                     type(self.bodyy) == bytes
-                ), "Content 'bodyy' is not of type 'bytes'."
+                ), "Invalid type for content 'bodyy'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.bodyy)
+                )
 
             # Check correct content count
             assert (
                 expected_nb_of_contents == actual_nb_of_contents
-            ), "Incorrect number of contents. Expected {} contents. Found {}".format(
+            ), "Incorrect number of contents. Expected {}. Found {}".format(
                 expected_nb_of_contents, actual_nb_of_contents
             )
 
@@ -212,17 +248,17 @@ class HttpMessage(Message):
             if self.message_id == 1:
                 assert (
                     self.target == 0
-                ), "Expected target to be 0 when message_id is 1. Found {}.".format(
+                ), "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                     self.target
                 )
             else:
                 assert (
                     0 < self.target < self.message_id
-                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(
-                    self.target
+                ), "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
+                    self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True

@@ -68,8 +68,8 @@ class TransactionMessage(InternalMessage):
         :param performative: the performative
         :param skill_callback_ids: the list public ids of skills to receive the transaction message response
         :param tx_id: the id of the transaction.
-        :param tx_sender: the sender of the transaction.
-        :param tx_counterparty: the counterparty of the transaction.
+        :param tx_sender_addr: the sender address of the transaction.
+        :param tx_counterparty_addr: the counterparty address of the transaction.
         :param tx_amount_by_currency_id: the amount by the currency of the transaction.
         :param tx_sender_fee: the part of the tx fee paid by the sender
         :param tx_counterparty_fee: the part of the tx fee paid by the counterparty

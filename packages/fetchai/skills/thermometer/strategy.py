@@ -133,13 +133,13 @@ class Strategy(Model):
             while True:
                 results = temper.read()
                 if "internal temperature" in results[0].keys():
-                    degrees = {"thermometer_data": results}
+                    degrees = {"thermometer_data": str(results)}
                 else:
                     self.context.logger.debug(
                         "Couldn't read the sensor I am re-trying."
                     )
         else:
-            degrees = {"thermometer_data": randrange(10, 25)}  # nosec
+            degrees = {"thermometer_data": str(randrange(10, 25))}  # nosec
             self.context.logger.info(degrees)
 
         return degrees

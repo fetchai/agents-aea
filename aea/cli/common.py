@@ -101,10 +101,11 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(self, cwd: str = "."):
+    def __init__(self, cwd: str = ".", verbosity: str = "INFO"):
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd
+        self.verbosity = verbosity
 
     @property
     def agent_loader(self) -> ConfigLoader:

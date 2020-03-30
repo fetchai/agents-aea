@@ -19,7 +19,7 @@
 
 """Serialization module for t_protocol protocol."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -51,7 +51,7 @@ class TProtocolSerializer(Serializer):
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Ct()  # type: ignore
             content_ct = msg.content_ct
-            performative = DataModel.encode(performative, content_ct)
+            DataModel.encode(performative.content_ct, content_ct)
             t_protocol_msg.performative_ct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pt()  # type: ignore
@@ -68,8 +68,6 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PCT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pct()  # type: ignore
-            content_set_ct = msg.content_set_ct
-            performative.content_set_ct.extend(content_set_ct)
             content_set_bytes = msg.content_set_bytes
             performative.content_set_bytes.extend(content_set_bytes)
             content_set_int = msg.content_set_int
@@ -80,8 +78,6 @@ class TProtocolSerializer(Serializer):
             performative.content_set_bool.extend(content_set_bool)
             content_set_str = msg.content_set_str
             performative.content_set_str.extend(content_set_str)
-            content_list_ct = msg.content_list_ct
-            performative.content_list_ct.extend(content_list_ct)
             content_list_bytes = msg.content_list_bytes
             performative.content_list_bytes.extend(content_list_bytes)
             content_list_int = msg.content_list_int
@@ -95,8 +91,6 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt()  # type: ignore
-            content_dict_int_ct = msg.content_dict_int_ct
-            performative.content_dict_int_ct.update(content_dict_int_ct)
             content_dict_bool_bytes = msg.content_dict_bool_bytes
             performative.content_dict_bool_bytes.update(content_dict_bool_bytes)
             content_dict_str_float = msg.content_dict_str_float
@@ -107,8 +101,9 @@ class TProtocolSerializer(Serializer):
             if msg.is_set("content_union_1_type_DataModel"):
                 performative.content_union_1_type_DataModel_is_set = True
                 content_union_1_type_DataModel = msg.content_union_1_type_DataModel
-                performative = DataModel.encode(
-                    performative, content_union_1_type_DataModel
+                DataModel.encode(
+                    performative.content_union_1_type_DataModel,
+                    content_union_1_type_DataModel,
                 )
             if msg.is_set("content_union_1_type_bytes"):
                 performative.content_union_1_type_bytes_is_set = True
@@ -136,21 +131,29 @@ class TProtocolSerializer(Serializer):
                 performative.content_union_1_type_set_of_int.extend(
                     content_union_1_type_set_of_int
                 )
-            if msg.is_set("content_union_1_type_list_of_DataModel"):
-                performative.content_union_1_type_list_of_DataModel_is_set = True
-                content_union_1_type_list_of_DataModel = (
-                    msg.content_union_1_type_list_of_DataModel
+            if msg.is_set("content_union_1_type_list_of_bool"):
+                performative.content_union_1_type_list_of_bool_is_set = True
+                content_union_1_type_list_of_bool = (
+                    msg.content_union_1_type_list_of_bool
                 )
-                performative.content_union_1_type_list_of_DataModel.extend(
-                    content_union_1_type_list_of_DataModel
+                performative.content_union_1_type_list_of_bool.extend(
+                    content_union_1_type_list_of_bool
                 )
-            if msg.is_set("content_union_1_type_dict_of_str_DataModel"):
-                performative.content_union_1_type_dict_of_str_DataModel_is_set = True
-                content_union_1_type_dict_of_str_DataModel = (
-                    msg.content_union_1_type_dict_of_str_DataModel
+            if msg.is_set("content_union_1_type_dict_of_str_int"):
+                performative.content_union_1_type_dict_of_str_int_is_set = True
+                content_union_1_type_dict_of_str_int = (
+                    msg.content_union_1_type_dict_of_str_int
                 )
-                performative.content_union_1_type_dict_of_str_DataModel.update(
-                    content_union_1_type_dict_of_str_DataModel
+                performative.content_union_1_type_dict_of_str_int.update(
+                    content_union_1_type_dict_of_str_int
+                )
+            if msg.is_set("content_union_2_type_set_of_bytes"):
+                performative.content_union_2_type_set_of_bytes_is_set = True
+                content_union_2_type_set_of_bytes = (
+                    msg.content_union_2_type_set_of_bytes
+                )
+                performative.content_union_2_type_set_of_bytes.extend(
+                    content_union_2_type_set_of_bytes
                 )
             if msg.is_set("content_union_2_type_set_of_int"):
                 performative.content_union_2_type_set_of_int_is_set = True
@@ -158,27 +161,19 @@ class TProtocolSerializer(Serializer):
                 performative.content_union_2_type_set_of_int.extend(
                     content_union_2_type_set_of_int
                 )
-            if msg.is_set("content_union_2_type_set_of_DataModel"):
-                performative.content_union_2_type_set_of_DataModel_is_set = True
-                content_union_2_type_set_of_DataModel = (
-                    msg.content_union_2_type_set_of_DataModel
-                )
-                performative.content_union_2_type_set_of_DataModel.extend(
-                    content_union_2_type_set_of_DataModel
-                )
             if msg.is_set("content_union_2_type_set_of_str"):
                 performative.content_union_2_type_set_of_str_is_set = True
                 content_union_2_type_set_of_str = msg.content_union_2_type_set_of_str
                 performative.content_union_2_type_set_of_str.extend(
                     content_union_2_type_set_of_str
                 )
-            if msg.is_set("content_union_2_type_list_of_DataModel"):
-                performative.content_union_2_type_list_of_DataModel_is_set = True
-                content_union_2_type_list_of_DataModel = (
-                    msg.content_union_2_type_list_of_DataModel
+            if msg.is_set("content_union_2_type_list_of_float"):
+                performative.content_union_2_type_list_of_float_is_set = True
+                content_union_2_type_list_of_float = (
+                    msg.content_union_2_type_list_of_float
                 )
-                performative.content_union_2_type_list_of_DataModel.extend(
-                    content_union_2_type_list_of_DataModel
+                performative.content_union_2_type_list_of_float.extend(
+                    content_union_2_type_list_of_float
                 )
             if msg.is_set("content_union_2_type_list_of_bool"):
                 performative.content_union_2_type_list_of_bool_is_set = True
@@ -196,13 +191,13 @@ class TProtocolSerializer(Serializer):
                 performative.content_union_2_type_list_of_bytes.extend(
                     content_union_2_type_list_of_bytes
                 )
-            if msg.is_set("content_union_2_type_dict_of_str_DataModel"):
-                performative.content_union_2_type_dict_of_str_DataModel_is_set = True
-                content_union_2_type_dict_of_str_DataModel = (
-                    msg.content_union_2_type_dict_of_str_DataModel
+            if msg.is_set("content_union_2_type_dict_of_str_int"):
+                performative.content_union_2_type_dict_of_str_int_is_set = True
+                content_union_2_type_dict_of_str_int = (
+                    msg.content_union_2_type_dict_of_str_int
                 )
-                performative.content_union_2_type_dict_of_str_DataModel.update(
-                    content_union_2_type_dict_of_str_DataModel
+                performative.content_union_2_type_dict_of_str_int.update(
+                    content_union_2_type_dict_of_str_int
                 )
             if msg.is_set("content_union_2_type_dict_of_int_float"):
                 performative.content_union_2_type_dict_of_int_float_is_set = True
@@ -226,7 +221,7 @@ class TProtocolSerializer(Serializer):
             if msg.is_set("content_o_ct"):
                 performative.content_o_ct_is_set = True
                 content_o_ct = msg.content_o_ct
-                performative = DataModel.encode(performative, content_o_ct)
+                DataModel.encode(performative.content_o_ct, content_o_ct)
             if msg.is_set("content_o_bool"):
                 performative.content_o_bool_is_set = True
                 content_o_bool = msg.content_o_bool
@@ -255,13 +250,11 @@ class TProtocolSerializer(Serializer):
                 performative.content_o_union_type_dict_of_str_int.update(
                     content_o_union_type_dict_of_str_int
                 )
-            if msg.is_set("content_o_union_type_set_of_DataModel"):
-                performative.content_o_union_type_set_of_DataModel_is_set = True
-                content_o_union_type_set_of_DataModel = (
-                    msg.content_o_union_type_set_of_DataModel
-                )
-                performative.content_o_union_type_set_of_DataModel.extend(
-                    content_o_union_type_set_of_DataModel
+            if msg.is_set("content_o_union_type_set_of_int"):
+                performative.content_o_union_type_set_of_int_is_set = True
+                content_o_union_type_set_of_int = msg.content_o_union_type_set_of_int
+                performative.content_o_union_type_set_of_int.extend(
+                    content_o_union_type_set_of_int
                 )
             if msg.is_set("content_o_union_type_set_of_bytes"):
                 performative.content_o_union_type_set_of_bytes_is_set = True
@@ -317,7 +310,7 @@ class TProtocolSerializer(Serializer):
 
         performative = t_protocol_pb.WhichOneof("performative")
         performative_id = TProtocolMessage.Performative(str(performative))
-        performative_content = dict()
+        performative_content = dict()  # type: Dict[str, Any]
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
             pb2_content_ct = t_protocol_pb.performative_ct.content_ct
             content_ct = DataModel.decode(pb2_content_ct)
@@ -334,9 +327,6 @@ class TProtocolSerializer(Serializer):
             content_str = t_protocol_pb.performative_pt.content_str
             performative_content["content_str"] = content_str
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PCT:
-            content_set_ct = t_protocol_pb.performative_pct.content_set_ct
-            content_set_ct_frozenset = frozenset(content_set_ct)
-            performative_content["content_set_ct"] = content_set_ct_frozenset
             content_set_bytes = t_protocol_pb.performative_pct.content_set_bytes
             content_set_bytes_frozenset = frozenset(content_set_bytes)
             performative_content["content_set_bytes"] = content_set_bytes_frozenset
@@ -352,9 +342,6 @@ class TProtocolSerializer(Serializer):
             content_set_str = t_protocol_pb.performative_pct.content_set_str
             content_set_str_frozenset = frozenset(content_set_str)
             performative_content["content_set_str"] = content_set_str_frozenset
-            content_list_ct = t_protocol_pb.performative_pct.content_list_ct
-            content_list_ct_tuple = tuple(content_list_ct)
-            performative_content["content_list_ct"] = content_list_ct_tuple
             content_list_bytes = t_protocol_pb.performative_pct.content_list_bytes
             content_list_bytes_tuple = tuple(content_list_bytes)
             performative_content["content_list_bytes"] = content_list_bytes_tuple
@@ -371,9 +358,6 @@ class TProtocolSerializer(Serializer):
             content_list_str_tuple = tuple(content_list_str)
             performative_content["content_list_str"] = content_list_str_tuple
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
-            content_dict_int_ct = t_protocol_pb.performative_pmt.content_dict_int_ct
-            content_dict_int_ct_dict = dict(content_dict_int_ct)
-            performative_content["content_dict_int_ct"] = content_dict_int_ct_dict
             content_dict_bool_bytes = (
                 t_protocol_pb.performative_pmt.content_dict_bool_bytes
             )
@@ -418,25 +402,21 @@ class TProtocolSerializer(Serializer):
                 content_union_1 = t_protocol_pb.performative_mt.content_union_1
                 content_union_1_frozenset = frozenset(content_union_1)
                 performative_content["content_union_1"] = content_union_1_frozenset
-            if (
-                t_protocol_pb.performative_mt.content_union_1_type_list_of_DataModel_is_set
-            ):
+            if t_protocol_pb.performative_mt.content_union_1_type_list_of_bool_is_set:
                 content_union_1 = t_protocol_pb.performative_mt.content_union_1
                 content_union_1_tuple = tuple(content_union_1)
                 performative_content["content_union_1"] = content_union_1_tuple
             if (
-                t_protocol_pb.performative_mt.content_union_1_type_dict_of_str_DataModel_is_set
+                t_protocol_pb.performative_mt.content_union_1_type_dict_of_str_int_is_set
             ):
                 content_union_1 = t_protocol_pb.performative_mt.content_union_1
                 content_union_1_dict = dict(content_union_1)
                 performative_content["content_union_1"] = content_union_1_dict
-            if t_protocol_pb.performative_mt.content_union_2_type_set_of_int_is_set:
+            if t_protocol_pb.performative_mt.content_union_2_type_set_of_bytes_is_set:
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_frozenset = frozenset(content_union_2)
                 performative_content["content_union_2"] = content_union_2_frozenset
-            if (
-                t_protocol_pb.performative_mt.content_union_2_type_set_of_DataModel_is_set
-            ):
+            if t_protocol_pb.performative_mt.content_union_2_type_set_of_int_is_set:
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_frozenset = frozenset(content_union_2)
                 performative_content["content_union_2"] = content_union_2_frozenset
@@ -444,9 +424,7 @@ class TProtocolSerializer(Serializer):
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_frozenset = frozenset(content_union_2)
                 performative_content["content_union_2"] = content_union_2_frozenset
-            if (
-                t_protocol_pb.performative_mt.content_union_2_type_list_of_DataModel_is_set
-            ):
+            if t_protocol_pb.performative_mt.content_union_2_type_list_of_float_is_set:
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_tuple = tuple(content_union_2)
                 performative_content["content_union_2"] = content_union_2_tuple
@@ -459,7 +437,7 @@ class TProtocolSerializer(Serializer):
                 content_union_2_tuple = tuple(content_union_2)
                 performative_content["content_union_2"] = content_union_2_tuple
             if (
-                t_protocol_pb.performative_mt.content_union_2_type_dict_of_str_DataModel_is_set
+                t_protocol_pb.performative_mt.content_union_2_type_dict_of_str_int_is_set
             ):
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_dict = dict(content_union_2)
@@ -511,9 +489,7 @@ class TProtocolSerializer(Serializer):
                 content_o_union = t_protocol_pb.performative_o.content_o_union
                 content_o_union_dict = dict(content_o_union)
                 performative_content["content_o_union"] = content_o_union_dict
-            if (
-                t_protocol_pb.performative_o.content_o_union_type_set_of_DataModel_is_set
-            ):
+            if t_protocol_pb.performative_o.content_o_union_type_set_of_int_is_set:
                 content_o_union = t_protocol_pb.performative_o.content_o_union
                 content_o_union_frozenset = frozenset(content_o_union)
                 performative_content["content_o_union"] = content_o_union_frozenset

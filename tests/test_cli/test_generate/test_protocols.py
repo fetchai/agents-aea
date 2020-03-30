@@ -102,7 +102,7 @@ class TestGenerateProtocol:
             self.t,
             self.agent_name,
             "protocols",
-            "test_protocol",
+            "t_protocol",
             DEFAULT_PROTOCOL_CONFIG_FILE,
         )
         config_file = yaml.safe_load(open(p))
@@ -125,7 +125,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.protocol_name = "test_protocol"
+        cls.protocol_name = "t_protocol"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         shutil.copyfile(
@@ -259,7 +259,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name 'test_protocol' already exists. Aborting..."
+        s = "A protocol with name 't_protocol' already exists. Aborting..."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
@@ -267,7 +267,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -333,7 +333,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert not Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -394,7 +394,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert not Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
     @classmethod
     def teardown_class(cls):

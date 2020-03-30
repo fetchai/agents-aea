@@ -31,30 +31,29 @@ class AnyObject:
         self.any = _any
 
     @classmethod
-    def encode(cls, performative_content, any_from_message: "Any"):
+    def encode(cls, any_object_protobuf_object, any_object_object: "AnyObject") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative_content' argument must be matched with the message content in the 'any_object_from_message' argument.
+        The protocol buffer object in the any_object_protobuf_object argument must be matched with the instance of this class in the 'any_object_object' argument.
 
-        :param performative: the performative protocol buffer object containing a content whose type is this class.
-        :param any_object_from_message: the message content to be encoded in the protocol buffer object.
+        :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param any_object_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        performative_content.any = pickle.dumps(any_from_message)  # nosec
+        any_object_protobuf_object.any = pickle.dumps(any_object_object)  # nosec
 
     @classmethod
-    def decode(cls, any_from_pb2) -> "Any":
+    def decode(cls, any_object_protobuf_object) -> "AnyObject":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'any_object_from_pb2' argument.
+        A new instance of this class must be created that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
 
-        :param any_object_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'any_object_from_pb2' argument.
+        :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
         """
-        _any = pickle.loads(any_from_pb2.any)  # nosec
-        return _any
+        return pickle.loads(any_object_protobuf_object.any)  # nosec
 
     def __eq__(self, other):
         return self.any == other.any
