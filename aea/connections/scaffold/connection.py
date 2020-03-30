@@ -32,16 +32,6 @@ logger = logging.getLogger(__name__)
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, address: Address, *args, **kwargs):
-        """
-        Initialize a connection to an SDK or API.
-
-        :param connection_id: the identifier of the connection object.
-        :param address: the address used in the protocols.
-        """
-        super().__init__(*args, **kwargs)
-        self.address = address
-
     async def connect(self) -> None:
         """
         Set up the connection.
@@ -72,18 +62,5 @@ class MyScaffoldConnection(Connection):
         Receive an envelope. Blocking.
 
         :return: the envelope received, or None.
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the Gym connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
         """
         raise NotImplementedError  # pragma: no cover

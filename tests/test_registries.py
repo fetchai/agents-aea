@@ -42,7 +42,8 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ProtocolRegistry, Resources
 
-from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection, ROOT_DIR
+from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, ROOT_DIR
+from .data.dummy_connection.connection import DummyConnection
 
 
 class TestProtocolRegistry:

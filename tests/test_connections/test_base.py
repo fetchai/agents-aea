@@ -21,6 +21,7 @@
 
 from unittest import TestCase
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 
 
@@ -55,19 +56,14 @@ class ConnectionTestCase(TestCase):
 
         self.TestConnection = TestConnection
 
-    def test_init_no_connection_id(self):
-        """Test init positive result."""
-        with self.assertRaises(ValueError):
-            self.TestConnection()
-
     def test_loop_positive(self):
         """Test loop property positive result."""
-        obj = self.TestConnection("connection_id")
+        obj = self.TestConnection(ConnectionConfig())
         obj._loop = "loop"
         obj.loop
 
     def test_excluded_protocols_positive(self):
         """Test excluded_protocols property positive result."""
-        obj = self.TestConnection("connection_id")
+        obj = self.TestConnection(ConnectionConfig())
         obj._excluded_protocols = "excluded_protocols"
         obj.excluded_protocols

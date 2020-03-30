@@ -37,7 +37,8 @@ from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Prefer
 from aea.identity.base import Identity
 from aea.skills.base import Skill, SkillComponent, SkillContext
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID
+from ..data.dummy_connection.connection import DummyConnection
 
 
 def test_agent_context_ledger_apis():

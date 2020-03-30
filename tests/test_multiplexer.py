@@ -41,10 +41,10 @@ from packages.fetchai.connections.local.connection import LocalNode, OEFLocalCon
 
 from .conftest import (
     DUMMY_CONNECTION_PUBLIC_ID,
-    DummyConnection,
     UNKNOWN_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
+from .data.dummy_connection.connection import DummyConnection
 
 
 @pytest.mark.asyncio

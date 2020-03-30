@@ -478,7 +478,7 @@ class AEABuilder:
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
         if connection_ids is not None:
-            connections = [connection for id_, connection in self._package_dependency_manager.connections.items() if id_ in connection_ids]
+            connections = [connection for id_, connection in self._package_dependency_manager.connections.items() if id_.public_id in connection_ids]
         else:
             connections = list(self._package_dependency_manager.connections.values())
 

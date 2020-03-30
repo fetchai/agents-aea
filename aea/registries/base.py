@@ -41,7 +41,8 @@ from aea.configurations.base import (
     ProtocolId,
     PublicId,
     SkillId,
-)
+    ComponentType)
+from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -461,6 +462,15 @@ class Resources:
     def directory(self) -> str:
         """Get the directory."""
         return self._directory
+
+    def add_component(self, component: Component):
+        """Add a component to resources."""
+        if component.component_type == ComponentType.PROTOCOL:
+            self.add_protocol(cast(Protocol, component))
+        elif component.component_type == ComponentType.SKILL:
+            self.add_skill(cast(Skill, component))
+        else:
+            raise ValueError("Component type {} not supported.".format(component.component_type.value))
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""

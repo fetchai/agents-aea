@@ -26,9 +26,9 @@ import os
 import socket
 import sys
 import time
-from asyncio import CancelledError
+from pathlib import Path
 from threading import Timer
-from typing import Optional
+from typing import Optional, cast
 
 import docker as docker
 from docker.models.containers import Container
@@ -43,15 +43,16 @@ from aea import AEA_DIR
 from aea.cli.common import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
-)
+    ComponentType)
+from aea.configurations.components import Component
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Address
+from packages.fetchai.connections.local.connection import OEFLocalConnection, LocalNode
 
 logger = logging.getLogger(__name__)
 
@@ -309,57 +310,6 @@ def tcpping(ip, port) -> bool:
         return False
 
 
-class DummyConnection(Connection):
-    """A dummy connection that just stores the messages."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize."""
-        super().__init__(*args, **kwargs)
-        self.connection_status.is_connected = False
-        self._queue = None
-
-    async def connect(self, *args, **kwargs):
-        """Connect."""
-        self._queue = asyncio.Queue(loop=self.loop)
-        self.connection_status.is_connected = True
-
-    async def disconnect(self, *args, **kwargs):
-        """Disconnect."""
-        await self._queue.put(None)
-        self.connection_status.is_connected = False
-
-    async def send(self, envelope: "Envelope"):
-        """Send an envelope."""
-        assert self._queue is not None
-        self._queue.put_nowait(envelope)
-
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
-        """Receive an envelope."""
-        try:
-            assert self._queue is not None
-            envelope = await self._queue.get()
-            if envelope is None:
-                logger.debug("Received none envelope.")
-                return None
-            return envelope
-        except CancelledError:
-            return None
-        except Exception as e:
-            print(str(e))
-            return None
-
-    def put(self, envelope: Envelope):
-        """Put an envelope in the queue."""
-        assert self._queue is not None
-        self._queue.put_nowait(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """Return a connection obj fom a configuration."""
-
-
 class OEFHealthCheck(object):
     """A health check class."""
 
@@ -565,3 +515,18 @@ def get_host():
 def reset_aea_cli_config() -> None:
     """Resets the cli config."""
     _init_cli_config()
+
+
+def _make_dummy_connection() -> Connection:
+    dummy_connection = cast(Connection, Component.load_from_directory(ComponentType.CONNECTION,
+                                                                      Path(CUR_PATH, "data", "dummy_connection")))
+    return dummy_connection
+
+
+def _make_local_connection(node: LocalNode, address: Address)-> Connection:
+        oef_local_connection = OEFLocalConnection.load_from_directory(ComponentType.CONNECTION, Path(ROOT_DIR, "packages",
+                                                                                                     "fetchai", "connections", "local"))
+        oef_local_connection.load()
+        oef_local_connection._local_node = node
+        oef_local_connection.address = address
+        return oef_local_connection

@@ -103,15 +103,6 @@ class TestBaseSerializations:
         self.message2.body = m_dict
         assert "Hello" in self.message2.body.keys()
 
-    def test_protocols_config(self):
-        """Test the protocol config."""
-        protocol = Protocol(
-            protocol_id=PublicId.from_str("author/my_own_protocol:0.1.0"),
-            serializer=cast(Serializer, ProtobufSerializer),
-            config=ProtocolConfig(),
-        )
-        assert protocol.config is not None
-
 
 class TestProtocolFromDir:
     """Test the 'Protocol.from_dir' method."""

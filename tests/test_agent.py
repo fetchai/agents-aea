@@ -20,13 +20,15 @@
 """This module contains the tests of the agent module."""
 
 import time
+from pathlib import Path
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
-from aea.configurations.base import PublicId
+from aea.configurations.base import PublicId, ComponentType
 from aea.mail.base import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from .conftest import ROOT_DIR, _make_local_connection
 
 
 class DummyAgent(Agent):
@@ -63,12 +65,12 @@ def test_run_agent():
         agent_name = "dummyagent"
         agent_address = "some_address"
         identity = Identity(agent_name, address=agent_address)
+        oef_local_connection = _make_local_connection(node, agent_address)
+        oef_local_connection._local_node = node
         agent = DummyAgent(
             identity,
             [
-                OEFLocalConnection(
-                    "mypbk", node, connection_id=PublicId("fetchai", "oef", "0.1.0")
-                )
+                oef_local_connection
             ],
         )
         assert agent.name == identity.name

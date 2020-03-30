@@ -21,11 +21,15 @@
 
 import time
 import unittest.mock
+from pathlib import Path
+from typing import cast
 
 import pytest
 
 import aea
-from aea.configurations.base import PublicId
+from aea.configurations.base import PublicId, ComponentType
+from aea.configurations.components import Component
+from aea.connections.base import Connection
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
@@ -36,9 +40,9 @@ from packages.fetchai.connections.local.connection import LocalNode, OEFLocalCon
 
 from .conftest import (
     DUMMY_CONNECTION_PUBLIC_ID,
-    DummyConnection,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
-)
+    CUR_PATH, ROOT_DIR, _make_dummy_connection, _make_local_connection)
+from .data.dummy_connection.connection import DummyConnection
 
 
 def test_uri():
@@ -100,7 +104,7 @@ def test_envelope_initialisation():
 def test_inbox_empty():
     """Tests if the inbox is empty."""
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [_make_dummy_connection()]
     )
     _inbox = InBox(multiplexer)
     assert _inbox.empty(), "Inbox is not empty"
@@ -111,7 +115,7 @@ def test_inbox_nowait():
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [_make_dummy_connection()]
     )
     envelope = Envelope(
         to="Agent1",
@@ -131,7 +135,7 @@ def test_inbox_get():
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [_make_dummy_connection()]
     )
     envelope = Envelope(
         to="Agent1",
@@ -150,7 +154,7 @@ def test_inbox_get():
 def test_inbox_get_raises_exception_when_empty():
     """Test that getting an envelope from an empty inbox raises an exception."""
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [_make_dummy_connection()]
     )
     inbox = InBox(multiplexer)
 
@@ -163,7 +167,7 @@ def test_inbox_get_nowait_returns_none():
     """Test that getting an envelope from an empty inbox returns None."""
     # TODO get_nowait in this case should raise an exception, like it's done in queue.Queue
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [_make_dummy_connection()]
     )
     inbox = InBox(multiplexer)
     assert inbox.get_nowait() is None
@@ -179,8 +183,9 @@ def test_outbox_put():
         content=b"hello",
     )
     message_bytes = DefaultSerializer().encode(msg)
+    dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [dummy_connection]
     )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
@@ -207,8 +212,9 @@ def test_outbox_put_message():
         content=b"hello",
     )
     message_bytes = DefaultSerializer().encode(msg)
+    dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [dummy_connection]
     )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
@@ -221,8 +227,9 @@ def test_outbox_put_message():
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
+    dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        [dummy_connection]
     )
     multiplexer.connect()
     outbox = OutBox(multiplexer)
@@ -234,11 +241,10 @@ def test_multiplexer():
     """Tests if the multiplexer is connected."""
     with LocalNode() as node:
         address_1 = "address_1"
+        oef_local_connection = _make_local_connection(node, address_1)
         multiplexer = Multiplexer(
             [
-                OEFLocalConnection(
-                    address_1, node, connection_id=PublicId("fetchai", "local", "0.1.0")
-                )
+                oef_local_connection
             ]
         )
         multiplexer.connect()

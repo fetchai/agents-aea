@@ -52,7 +52,7 @@ class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
-        self, configuration: ConnectionConfig,
+        self, configuration: ConnectionConfig, address: Optional["Address"] = None
     ):
         """
         Initialize the connection.
@@ -62,7 +62,7 @@ class Connection(Component, ABC):
         super().__init__(configuration)
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
-        self._address = None  # type: Optional[Address]
+        self._address = address  # type: Optional[Address]
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
