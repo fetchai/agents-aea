@@ -242,12 +242,18 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
             uri_raw = envelope_pb.uri
             uri = URI(uri_raw=uri_raw)
             context = EnvelopeContext(uri=uri)
+            envelope = Envelope(
+                to=to,
+                sender=sender,
+                protocol_id=protocol_id,
+                message=message,
+                context=context,
+            )
         else:
-            context = None
+            envelope = Envelope(
+                to=to, sender=sender, protocol_id=protocol_id, message=message,
+            )
 
-        envelope = Envelope(
-            to=to, sender=sender, protocol_id=protocol_id, message=message, context=context
-        )
         return envelope
 
 
