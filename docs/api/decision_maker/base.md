@@ -162,6 +162,8 @@ the final state.
 
 Apply a state update to (a copy of) the current state.
 
+This method is used to apply a raw state update without a transaction.
+
 **Arguments**:
 
 - `amount_by_currency_id`: the delta in the currency amounts
@@ -225,7 +227,7 @@ Get the initialization status.
  | is_affordable_transaction(tx_message: TransactionMessage) -> bool
 ```
 
-Check if the transaction is affordable on the ledger.
+Check if the transaction is affordable on the default ledger.
 
 **Arguments**:
 
@@ -248,7 +250,7 @@ Class to represent the preferences.
 #### `__`init`__`
 
 ```python
- | __init__(exchange_params_by_currency_id: Optional[ExchangeParams] = None, utility_params_by_good_id: Optional[UtilityParams] = None, tx_fee: int = 1, agent_name: str = "")
+ | __init__(exchange_params_by_currency_id: Optional[ExchangeParams] = None, utility_params_by_good_id: Optional[UtilityParams] = None, tx_fee: int = 1)
 ```
 
 Instantiate an agent preference object.
@@ -258,7 +260,6 @@ Instantiate an agent preference object.
 - `exchange_params_by_currency_id`: the exchange params.
 - `utility_params_by_good_id`: the utility params for every asset.
 - `tx_fee`: the acceptable transaction fee.
-- `agent_name`: the agent name
 
 <a name=".aea.decision_maker.base.Preferences.is_initialized"></a>
 #### is`_`initialized
@@ -269,6 +270,8 @@ Instantiate an agent preference object.
 ```
 
 Get the initialization status.
+
+Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
 
 <a name=".aea.decision_maker.base.Preferences.exchange_params_by_currency_id"></a>
 #### exchange`_`params`_`by`_`currency`_`id
@@ -334,14 +337,14 @@ Compute agent's utility given her utility function params and a currency bundle.
 
 utility value
 
-<a name=".aea.decision_maker.base.Preferences.get_score"></a>
-#### get`_`score
+<a name=".aea.decision_maker.base.Preferences.utility"></a>
+#### utility
 
 ```python
- | get_score(quantities_by_good_id: GoodHoldings, amount_by_currency_id: CurrencyHoldings) -> float
+ | utility(quantities_by_good_id: GoodHoldings, amount_by_currency_id: CurrencyHoldings) -> float
 ```
 
-Compute the score given the good and currency holdings.
+Compute the utility given the good and currency holdings.
 
 **Arguments**:
 
@@ -350,7 +353,7 @@ Compute the score given the good and currency holdings.
 
 **Returns**:
 
-the score.
+the utility value.
 
 <a name=".aea.decision_maker.base.Preferences.marginal_utility"></a>
 #### marginal`_`utility
@@ -371,14 +374,14 @@ Compute the marginal utility.
 
 the marginal utility score
 
-<a name=".aea.decision_maker.base.Preferences.get_score_diff_from_transaction"></a>
-#### get`_`score`_`diff`_`from`_`transaction
+<a name=".aea.decision_maker.base.Preferences.utility_diff_from_transaction"></a>
+#### utility`_`diff`_`from`_`transaction
 
 ```python
- | get_score_diff_from_transaction(ownership_state: OwnershipState, tx_message: TransactionMessage) -> float
+ | utility_diff_from_transaction(ownership_state: OwnershipState, tx_message: TransactionMessage) -> float
 ```
 
-Simulate a transaction and get the resulting score (taking into account the fee).
+Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
 **Arguments**:
 
@@ -388,6 +391,134 @@ Simulate a transaction and get the resulting score (taking into account the fee)
 **Returns**:
 
 the score.
+
+<a name=".aea.decision_maker.base.ProtectedQueue"></a>
+### ProtectedQueue
+
+```python
+class ProtectedQueue(Queue)
+```
+
+A wrapper of a queue to protect which object can read from it.
+
+<a name=".aea.decision_maker.base.ProtectedQueue.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(permitted_caller)
+```
+
+Initialize the protected queue.
+
+**Arguments**:
+
+- `permitted_caller`: the permitted caller to the get method
+
+<a name=".aea.decision_maker.base.ProtectedQueue.permitted_caller"></a>
+#### permitted`_`caller
+
+```python
+ | @property
+ | permitted_caller() -> "DecisionMaker"
+```
+
+Get the permitted caller.
+
+<a name=".aea.decision_maker.base.ProtectedQueue.put"></a>
+#### put
+
+```python
+ | put(internal_message: Optional[InternalMessage], block=True, timeout=None) -> None
+```
+
+Put an internal message on the queue.
+
+If optional args block is true and timeout is None (the default),
+block if necessary until a free slot is available. If timeout is
+a positive number, it blocks at most timeout seconds and raises
+the Full exception if no free slot was available within that time.
+Otherwise (block is false), put an item on the queue if a free slot
+is immediately available, else raise the Full exception (timeout is
+ignored in that case).
+
+**Arguments**:
+
+- `internal_message`: the internal message to put on the queue
+:raises: ValueError, if the item is not an internal message
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.base.ProtectedQueue.put_nowait"></a>
+#### put`_`nowait
+
+```python
+ | put_nowait(internal_message: Optional[InternalMessage]) -> None
+```
+
+Put an internal message on the queue.
+
+Equivalent to put(item, False).
+
+**Arguments**:
+
+- `internal_message`: the internal message to put on the queue
+:raises: ValueError, if the item is not an internal message
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.base.ProtectedQueue.get"></a>
+#### get
+
+```python
+ | get(block=True, timeout=None) -> None
+```
+
+Inaccessible get method.
+
+:raises: ValueError, access not permitted.
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.base.ProtectedQueue.get_nowait"></a>
+#### get`_`nowait
+
+```python
+ | get_nowait() -> None
+```
+
+Inaccessible get_nowait method.
+
+:raises: ValueError, access not permitted.
+
+**Returns**:
+
+None
+
+<a name=".aea.decision_maker.base.ProtectedQueue.protected_get"></a>
+#### protected`_`get
+
+```python
+ | protected_get(caller: "DecisionMaker", block=True, timeout=None) -> Optional[InternalMessage]
+```
+
+Access protected get method.
+
+**Arguments**:
+
+- `caller`: the permitted caller
+- `block`: If optional args block is true and timeout is None (the default), block if necessary until an item is available.
+- `timeout`: If timeout is a positive number, it blocks at most timeout seconds and raises the Empty exception if no item was available within that time.
+:raises: ValueError, if caller is not permitted
+
+**Returns**:
+
+internal message
 
 <a name=".aea.decision_maker.base.DecisionMaker"></a>
 ### DecisionMaker
@@ -418,7 +549,7 @@ Initialize the decision maker.
 
 ```python
  | @property
- | message_in_queue() -> Queue
+ | message_in_queue() -> ProtectedQueue
 ```
 
 Get (in) queue.
