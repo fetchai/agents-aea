@@ -30,6 +30,9 @@ from pathlib import Path
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.configurations.base import (
+    ContractConfig,
+    ContractId,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
@@ -37,6 +40,7 @@ from aea.configurations.base import (
     SkillId,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
 from aea.skills.tasks import Task

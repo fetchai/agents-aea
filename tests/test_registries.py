@@ -41,7 +41,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import ProtocolRegistry
+from aea.registries.base import ContractRegistry, ProtocolRegistry
 from aea.registries.resources import Resources
 
 from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection, ROOT_DIR

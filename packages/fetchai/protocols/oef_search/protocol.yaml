@@ -4,10 +4,10 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmS19cwrXWeHj97w4i11KamuWgUxwLoBE43yLGgz4kLAW1
-  custom_types.py: QmcxTUhV1MkbLkvKmezLqwj1TFHp9QpeY5UjyCu6aWuyNg
-  message.py: QmW4BhzMBWKaRT444PyEhxL4fJUieA1KNVw3sBQYVfKK99
+  custom_types.py: QmQJENMj1exBccGiHavUNJrUycRPB99ftWSv1AzdhbVA49
+  message.py: QmSSrQg7cckXrdKJ2CGufhXG53Hj8Z5rNSX7Got2sDJp8W
   oef_search.proto: QmVB6bWkPRoejo4jJtGAuJvjmoEfx5stnZXCGNibHNmaw1
-  oef_search_pb2.py: QmTijNgQTTte5nR4K2P6e1uHmxnyS69UBdhmvNqzAXq7Jy
+  oef_search_pb2.py: QmVgEs1JWAVM5crA7Tj2mMArmMPcuYZZSXy8GZzz1t5xwU
   serialization.py: QmRwYFqJzNpUJ3wereeDimApMXSrqja2syjAcDYVjyUFiD
 aea_version: 0.2.4
 dependencies: 
