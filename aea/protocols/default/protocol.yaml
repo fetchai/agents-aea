@@ -3,6 +3,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: ''
+aea_version: 0.2.4
 dependencies: 
     protobuf: {} 
 description: A protocol for exchanging any bytes message.

@@ -103,17 +103,14 @@ nav:
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
-        - Identity:
-          - Base: 'api/identity/base.md'
-        - Mail:
-          - Base: 'api/mail/base.md'
+        - Identity: 'api/identity/base.md'
+        - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
           - Default Protocol:
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
-        - Registries:
-          - Base: 'api/registries/base.md'
+        - Resources: 'api/registries/resources.md'
         - Skills:
           - Base: 'api/skills/base.md'
           - Error Skill: 'api/skills/error/handlers.md'

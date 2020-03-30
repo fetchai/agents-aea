@@ -31,7 +31,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
 from aea.skills.error.handlers import ErrorHandler
 

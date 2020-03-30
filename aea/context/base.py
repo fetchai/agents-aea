@@ -33,7 +33,7 @@ DEFAULT_OEF = "default_oef"
 
 
 class AgentContext:
-    """Provide read access to relevant data of the agent for the skills."""
+    """Provide read access to relevant objects of the agent for the skills."""
 
     def __init__(
         self,
@@ -51,13 +51,13 @@ class AgentContext:
         Initialize an agent context.
 
         :param identity: the identity object
-        :param ledger_apis: the ledger apis
-        :param connection_status: the connection status
+        :param ledger_apis: the APIs the agent will use to connect to ledgers.
+        :param connection_status: the connection status of the multiplexer
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
-        :param goal_pursuit_readiness: ready to pursuit its goals
+        :param goal_pursuit_readiness: if True, the agent is ready to pursuit its goals
         :param task_manager: the task manager
         """
         self._shared_state = {}  # type: Dict[str, Any]
@@ -76,7 +76,13 @@ class AgentContext:
 
     @property
     def shared_state(self) -> Dict[str, Any]:
-        """Get the shared state dictionary."""
+        """
+        Get the shared state dictionary.
+
+        The shared state is the only object which skills can use
+        to exchange state directly. It is accessible (read and write) from
+        all skills.
+        """
         return self._shared_state
 
     @property
@@ -101,7 +107,7 @@ class AgentContext:
 
     @property
     def connection_status(self) -> ConnectionStatus:
-        """Get connection status."""
+        """Get connection status of the multiplexer."""
         return self._connection_status
 
     @property

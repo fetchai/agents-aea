@@ -53,7 +53,7 @@ MODULES_TO_PATH = {
     "aea.protocols.base": "api/protocols/base.md",
     "aea.protocols.default.message": "api/protocols/default/message.md",
     "aea.protocols.default.serialization": "api/protocols/default/serialization.md",
-    "aea.registries.base": "api/registries/base.md",
+    "aea.registries.resources": "api/registries/resources.md",
     "aea.skills.base": "api/skills/base.md",
     "aea.skills.behaviours": "api/skills/behaviours.md",
     "aea.skills.tasks": "api/skills/tasks.md",

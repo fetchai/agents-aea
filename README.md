@@ -1,15 +1,28 @@
-# agents-aea
+# AEA Framework 
+
+[![PyPI](https://img.shields.io/pypi/v/aea)](https://pypi.org/project/aea/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aea)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/aea)
+[![](https://img.shields.io/pypi/l/aea)](https://github.com/fetchai/agents-aea/blob/master/LICENSE)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aea)
+[![](https://img.shields.io/badge/slack-fetchai-black.svg)](https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY)
+
+![AEA framework sanity checks and tests](https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master)
+![Codecov](https://img.shields.io/codecov/c/github/fetchai/agents-aea)
+
 A framework for autonomous economic agent (AEA) development
 
 ## Get started
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-        pipenv --python 3.7 && pipenv shell
+      pipenv --python 3.7 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-        pip install aea[all]
+      pip install aea[all]
+
+(`pip install "aea[all]"` if you use `zsh` rather than `bash`.)
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -23,7 +36,7 @@ A framework for autonomous economic agent (AEA) development
 
 This repository contains submodules. Clone with recursive strategy:
 
-	  git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+      git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ### Dependencies
 
@@ -40,6 +53,8 @@ Or, you can have more control on the installed dependencies by leveraging the se
 - Install the package from source:
 
       pip install .[all]
+
+(`pip install ".[all]"` if you use `zsh` rather than `bash`.)
 
 - Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -58,9 +73,11 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  pip install -e .[all]
 
+(`pip install -e ".[all]"` if you use `zsh` rather than `bash`.)
+
 - To run tests (ensure no oef docker containers are running):
 
-	  tox -e py3.7
+	    tox -e py3.7
 
 - To run linters (code style checks):
 
@@ -88,3 +105,17 @@ To amend the docs, create a new documentation file in `docs/` and add a referenc
 - Fetch submodules:
 
 	  git submodule sync --recursive && git submodule update --init --recursive
+
+## Cite
+
+If you are using our software in a publication, please 
+consider to cite it with the following BibTex entry:
+
+```
+@misc{agents-aea,
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen},
+  Title = {Autonomous Economic Agent (AEA) Framework},
+  Year = {2019},
+}
+
+```
