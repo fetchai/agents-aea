@@ -1182,8 +1182,8 @@ class ProtocolGenerator:
             cls_str += '        """\n'
             cls_str += "        raise NotImplementedError\n\n"
 
-            cls_str += "    @staticmethod\n"
-            cls_str += '    def decode({}_protobuf_object) -> "{}":\n'.format(
+            cls_str += "    @classmethod\n"
+            cls_str += '    def decode(cls, {}_protobuf_object) -> "{}":\n'.format(
                 _camel_case_to_snake_case(custom_type), custom_type,
             )
             cls_str += '        """\n'
@@ -1418,7 +1418,6 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += "from typing import Any, Dict, cast\n\n"
-        cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
             "from {} import (\n    {}_pb2,\n)\n",
@@ -1447,7 +1446,9 @@ class ProtocolGenerator:
         )
 
         # encoder
-        cls_str += str.format("    def encode(self, msg: Message) -> bytes:\n")
+        cls_str += "    def encode(self, msg: {}Message) -> bytes:\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += '        """\n'
         cls_str += "        Encode a '{}' message into bytes.\n\n".format(
             self.protocol_specification_in_camel_case,
@@ -1488,7 +1489,7 @@ class ProtocolGenerator:
                 cls_str += "        elif performative_id == {}Message.Performative.{}:\n".format(
                     self.protocol_specification_in_camel_case, performative.upper()
                 )
-            cls_str += "            performative = {}_pb2.{}Message.{}_performative()  # type: ignore\n".format(
+            cls_str += "            performative = {}_pb2.{}Message.{}_Performative()  # type: ignore\n".format(
                 self.protocol_specification.name,
                 self.protocol_specification_in_camel_case,
                 performative.title(),
@@ -1518,7 +1519,9 @@ class ProtocolGenerator:
         )
 
         # decoder
-        cls_str += str.format("    def decode(self, obj: bytes) -> Message:\n")
+        cls_str += "    def decode(self, obj: bytes) -> {}Message:\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += '        """\n'
         cls_str += "        Decode bytes into a '{}' message.\n\n".format(
             self.protocol_specification_in_camel_case,
@@ -1702,7 +1705,7 @@ class ProtocolGenerator:
         # performatives
         proto_buff_schema_str += indents + "// Performatives and contents\n"
         for performative, contents in self._speech_acts.items():
-            proto_buff_schema_str += indents + "message {}_performative{{".format(
+            proto_buff_schema_str += indents + "message {}_Performative{{".format(
                 performative.title()
             )
             tag_no = 1
@@ -1733,7 +1736,7 @@ class ProtocolGenerator:
         indents = _get_indent_str(2)
         tag_no = 5
         for performative in self._all_performatives:
-            proto_buff_schema_str += indents + "{}_performative {} = {};\n".format(
+            proto_buff_schema_str += indents + "{}_Performative {} = {};\n".format(
                 performative.title(), performative, tag_no
             )
             tag_no += 1
