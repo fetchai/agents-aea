@@ -46,8 +46,8 @@ class DataModel:
         self.list_field = list_field
         self.dict_field = dict_field
 
-    @classmethod
-    def encode(cls, data_model_protobuf_object, data_model_object: "DataModel") -> None:
+    @staticmethod
+    def encode(data_model_protobuf_object, data_model_object: "DataModel") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -67,8 +67,8 @@ class DataModel:
         data_model_protobuf_object.list_field.extend(data_model_object.list_field)
         data_model_protobuf_object.dict_field.update(data_model_object.dict_field)
 
-    @classmethod
-    def decode(cls, data_model_protobuf_object) -> "DataModel":
+    @staticmethod
+    def decode(data_model_protobuf_object) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

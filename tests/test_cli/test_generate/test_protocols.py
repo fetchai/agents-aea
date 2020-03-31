@@ -335,6 +335,15 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         """
         assert not Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
+    def test_configuration_file_not_valid(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'Cannot find protocol: '{protocol_name}'
+        """
+        self.mocked_logger_error.assert_called_once_with(
+            "There was an error while generating the protocol. The protocol is NOT generated."
+        )
+
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
