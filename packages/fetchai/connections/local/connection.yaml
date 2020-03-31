@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
-  connection.py: QmczV5UFcKEfDTWEt8WHyWW98U3nAY4G29LuNcGecn35rT
+  connection.py: QmNXh59Qd9j1t7Ynny7pELE5ZTHq8xwrwFwtvgzB2kPsf5
 aea_version: 0.2.4
 description: "The local connection provides a stub for an OEF node."
 class_name: OEFLocalConnection

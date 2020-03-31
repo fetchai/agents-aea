@@ -4,10 +4,10 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
-  base.py: QmVEjJEEUcKeqbB1xc2rkZn4nPv3Yuiti8KNN6yeES9Q4h
+  base.py: QmPN2BCUDKzw5HEJFff2st16MJncdmFz2nyKkgraiK85NA
   connection.py: QmcG4q5Hg55aXRPiYi6zXAPDCJGchj7xUMxUHoYRS6G1J5
-  tcp_client.py: QmechTq3e7SBTmsPcaadP1hofA8aw3nbtejD8YKadUMZ8d
-  tcp_server.py: QmPSvUSDri6SwSUTzhiVTNUk5NYEQBJaAzEULxKBF8zUqh
+  tcp_client.py: QmbcrgBTqmW6qDCqGeaWMoumcdSNb5yjP5Du4HR858obBA
+  tcp_server.py: QmVmjnHWZTVt65ntpoL92cp4hxoj14EpAyDf89zPma1cNB
 aea_version: 0.2.4
 description: "The tcp connection implements a tcp server and client."
 class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
