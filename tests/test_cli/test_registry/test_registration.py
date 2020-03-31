@@ -30,6 +30,7 @@ class RegistrationTestCase(TestCase):
 
     @mock.patch("aea.cli.registry.registration.request_api", return_value=None)
     def test_register_positive(self, *mocks):
+        """Test register method positive result."""
         username, email, password = ("username", "email", "password")
         register(username, email, password, password)
 
@@ -38,6 +39,7 @@ class RegistrationTestCase(TestCase):
         return_value={"username": "Already exists"},
     )
     def test_register_negative(self, *mocks):
+        """Test register method negative result."""
         username, email, password = ("bad-username", "email", "password")
         with self.assertRaises(ClickException):
             register(username, email, password, password)
