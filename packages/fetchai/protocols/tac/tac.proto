@@ -53,8 +53,10 @@ message TacMessage{
         map<string, float> utility_params_by_good_id = 4;
         int32 tx_fee = 5;
         map<string, string> agent_addr_to_name = 6;
-        map<string, string> good_id_to_name = 7;
-        string version_id = 8;
+        map<string, string> currency_id_to_name = 7;
+        map<string, string> good_id_to_name = 8;
+        string version_id = 9;
+        map<string, string> info = 10;
     }
 
     message Transaction_Confirmation{

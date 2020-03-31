@@ -101,10 +101,14 @@ class TacSerializer(Serializer):
             performative.tx_fee = tx_fee
             agent_addr_to_name = msg.agent_addr_to_name
             performative.agent_addr_to_name.update(agent_addr_to_name)
+            currency_id_to_name = msg.currency_id_to_name
+            performative.currency_id_to_name.update(currency_id_to_name)
             good_id_to_name = msg.good_id_to_name
             performative.good_id_to_name.update(good_id_to_name)
             version_id = msg.version_id
             performative.version_id = version_id
+            info = msg.info
+            performative.info.update(info)
             tac_msg.game_data.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
             performative = tac_pb2.TacMessage.Transaction_Confirmation()  # type: ignore
@@ -205,11 +209,17 @@ class TacSerializer(Serializer):
             agent_addr_to_name = tac_pb.game_data.agent_addr_to_name
             agent_addr_to_name_dict = dict(agent_addr_to_name)
             performative_content["agent_addr_to_name"] = agent_addr_to_name_dict
+            currency_id_to_name = tac_pb.game_data.currency_id_to_name
+            currency_id_to_name_dict = dict(currency_id_to_name)
+            performative_content["currency_id_to_name"] = currency_id_to_name_dict
             good_id_to_name = tac_pb.game_data.good_id_to_name
             good_id_to_name_dict = dict(good_id_to_name)
             performative_content["good_id_to_name"] = good_id_to_name_dict
             version_id = tac_pb.game_data.version_id
             performative_content["version_id"] = version_id
+            info = tac_pb.game_data.info
+            info_dict = dict(info)
+            performative_content["info"] = info_dict
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
             tx_id = tac_pb.transaction_confirmation.tx_id
             performative_content["tx_id"] = tx_id

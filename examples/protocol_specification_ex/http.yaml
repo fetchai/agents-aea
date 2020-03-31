@@ -4,6 +4,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 description: 'A protocol for HTTP requests and responses.'
+aea_version: 0.2.4
 speech_acts:
   request:
     method: pt:str
