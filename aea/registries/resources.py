@@ -39,11 +39,11 @@ from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
     ComponentRegistry,
+    ContractRegistry,
     HandlerRegistry,
     ProtocolId,
     ProtocolRegistry,
     Registry,
-    ContractRegistry,
 )
 from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
