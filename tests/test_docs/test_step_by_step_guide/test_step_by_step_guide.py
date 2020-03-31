@@ -125,7 +125,7 @@ class TestDemoDocs:
             assert code_block in python_code, "Code is not identical."
 
     def test_thermometer_client_skill_strategy(self):
-        """Test strategy.py of thermometer client skill."""
+        """Test strategy.py correctness of thermometer client skill."""
         path = Path(
             os.getcwd(),
             "packages",
