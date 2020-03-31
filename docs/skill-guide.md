@@ -163,11 +163,11 @@ Also note, how we have access to other objects in the skill via `self.context`.
 
 We place this code in `my_aea/skills/my_search/handlers.py`.
 
-## Step 4: Remove unused Task and Model
+## Step 4: Remove unused Model
 
-We have implemented a behaviour and a handler. We could also implement a `task` and a `model`, but instead we delete these files in this case, to keep it simple.
+We have implemented a behaviour and a handler. We could also implement a `model`, but instead we delete this file in this case, to keep it simple.
 
-We remove the files `my_aea/skills/my_search/tasks.py` and `my_aea/skills/my_search/my_model.py`.
+We remove the file `my_aea/skills/my_search/my_model.py`.
 
 ## Step 5: Create the config file
 
@@ -178,8 +178,9 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A simple search skill utilising the OEF search and communication node.'
-fingerprint: ''
+fingerprint: {}
 behaviours:
   my_search_behaviour:
     class_name: MySearchBehaviour
@@ -200,7 +201,15 @@ Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in 
 
 We place this code in `my_aea/skills/my_search/skill.yaml`.
 
-## Step 6: Add the oef protocol and connection
+## Step 6: Update fingerprint
+
+We need to update the fingerprint of our skill next:
+``` bash
+aea fingerprint skill fetchai/my_search:0.1.0
+```
+Ensure, you use the correct author name to reference your skill (here we use `fetchai` as the author.)
+
+## Step 7: Add the oef protocol and connection
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
@@ -215,7 +224,7 @@ aea add connection fetchai/oef:0.1.0
 aea install
 ```
 
-## Step 7: Run a service provider AEA
+## Step 8: Run a service provider AEA
 
 We first start a local [OEF search and communication node](../oef-ledger) in a separate terminal window.
 
@@ -437,8 +446,13 @@ name: simple_service_registration
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: The scaffold skill is a scaffold for your own skill implementation.
-fingerprint: ''
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmcYLWnWuB121Ghefv58GevCqAAetx1H7taMem94xwCjHQ
+  data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
+  strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
+aea_version: 0.2.4
+description: The simple service registration skills is a skill to register a service.
 behaviours:
   service:
     args:
@@ -468,7 +482,7 @@ dependencies: {}
 </p>
 </details>
 
-## Step 8: Run the Search AEA
+## Step 9: Run the Search AEA
 
 We can then launch our AEA.
 

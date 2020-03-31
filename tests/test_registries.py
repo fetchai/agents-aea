@@ -27,12 +27,15 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+import yaml
 
 import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.components import Component
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -40,9 +43,80 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import ProtocolRegistry, Resources
+from aea.registries.base import ContractRegistry, ProtocolRegistry
+from aea.registries.resources import Resources
 
 from .conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
+
+
+class TestContractRegistry:
+    """Test the contract registry."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
+        cls.mocked_logger = cls.patch.__enter__()
+
+        cls.oldcwd = os.getcwd()
+        cls.agent_name = "agent_dir_test"
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = os.path.join(cls.t, cls.agent_name)
+        shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
+
+        # make fake contract
+        cls.fake_contract_id = PublicId.from_str("fake_author/fake:0.1.0")
+        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
+        agent_config = yaml.safe_load(agent_config_path.read_text())
+        agent_config.get("contracts").append(str(cls.fake_contract_id))
+        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
+        Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
+
+        cls.registry = ContractRegistry()
+        cls.registry.populate(cls.agent_folder)
+        cls.expected_contract_ids = {
+            PublicId("fetchai", "erc1155", "0.1.0"),
+        }
+
+    def test_not_able_to_add_bad_formatted_contract(self):
+        """Test that the contract registry has not been able to add the contract 'fake'."""
+        self.mocked_logger.assert_called_with(
+            "Not able to add contract '{}'.".format("fake")
+        )
+
+    def test_fetch_all(self):
+        """Test that the 'fetch_all' method works as expected."""
+        contracts = self.registry.fetch_all()
+        assert all(isinstance(c, Contract) for c in contracts)
+        assert set(c.id for c in contracts) == self.expected_contract_ids
+
+    def test_fetch(self):
+        """ Test that the `fetch` method works as expected."""
+        contract_id = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract = self.registry.fetch(contract_id)
+        assert isinstance(contract, Contract)
+        assert contract.id == contract_id
+
+    def test_unregister(self):
+        """Test that the 'unregister' method works as expected."""
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract_removed = self.registry.fetch(contract_id_removed)
+        self.registry.unregister(contract_id_removed)
+        expected_contract_ids = set(self.expected_contract_ids)
+        expected_contract_ids.remove(contract_id_removed)
+
+        assert set(c.id for c in self.registry.fetch_all()) == expected_contract_ids
+
+        # restore the contract
+        self.registry.register(contract_id_removed, contract_removed)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the tests."""
+        cls.mocked_logger.__exit__()
+        os.chdir(cls.oldcwd)
+        shutil.rmtree(cls.t, ignore_errors=True)
 
 
 class TestProtocolRegistry:
@@ -171,45 +245,57 @@ class TestResources:
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
-        assert len(self.resources.handler_registry.fetch_all()) == 3
+        assert len(self.resources.get_all_handlers()) == 3
 
         # unregister the error handler and test that it has been actually unregistered.
         # TODO shouldn't we prevent the unregistration of this?
-        error_handler = self.resources.handler_registry.fetch(
+        error_handler = self.resources._handler_registry.fetch(
             (self.error_skill_public_id, "error_handler")
         )
         assert error_handler is not None
-        self.resources.handler_registry.unregister(
+        self.resources._handler_registry.unregister(
             (self.error_skill_public_id, "error_handler")
         )
         assert (
-            self.resources.handler_registry.fetch(
+            self.resources._handler_registry.fetch(
                 (self.error_skill_public_id, "error_handler")
             )
             is None
         )
 
         # unregister the dummy handler and test that it has been actually unregistered.
-        dummy_handler = self.resources.handler_registry.fetch(
+        dummy_handler = self.resources._handler_registry.fetch(
             (self.dummy_skill_public_id, "dummy")
         )
         assert dummy_handler is not None
-        self.resources.handler_registry.unregister(
+        self.resources._handler_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
         assert (
-            self.resources.handler_registry.fetch((self.dummy_skill_public_id, "dummy"))
+            self.resources._handler_registry.fetch(
+                (self.dummy_skill_public_id, "dummy")
+            )
             is None
         )
 
         # restore the handlers
-        self.resources.handler_registry.register(
+        self.resources._handler_registry.register(
             (self.error_skill_public_id, "error"), error_handler
         )
-        self.resources.handler_registry.register(
+        self.resources._handler_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_handler
         )
-        assert len(self.resources.handler_registry.fetch_all()) == 3
+        assert len(self.resources.get_all_handlers()) == 3
+
+    # def test_fake_skill_loading_failed(self):
+    #     """Test that when the skill is bad formatted, we print a log message."""
+    #     s = "A problem occurred while parsing the skill directory {}. Exception: {}".format(
+    #         os.path.join(self.agent_folder, "skills", "fake"),
+    #         "[Errno 2] No such file or directory: '"
+    #         + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml")
+    #         + "'",
+    #     )
+    #     self.mocked_logger_warning.assert_called_once_with(s)
 
     def test_remove_skill(self):
         """Test that the 'remove skill' and 'add skill' method works correctly."""
@@ -228,7 +314,7 @@ class TestResources:
         self.resources.add_protocol(cast(Protocol, oef_protocol))
         for protocol_id in self.expected_protocols:
             assert (
-                self.resources.protocol_registry.fetch(protocol_id) is not None
+                self.resources.get_protocol(protocol_id) is not None
             ), "Protocol missing!"
 
     def test_register_behaviour_with_already_existing_skill_id(self):
@@ -240,30 +326,25 @@ class TestResources:
                 self.dummy_skill_public_id, "dummy"
             ),
         ):
-            self.resources.behaviour_registry.register(
+            self.resources._behaviour_registry.register(
                 (self.dummy_skill_public_id, "dummy"), None
             )
 
     def test_behaviour_registry(self):
         """Test that the behaviour registry behaves as expected."""
-        dummy_behaviour = self.resources.behaviour_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
+        dummy_behaviour = self.resources.get_behaviour(
+            self.dummy_skill_public_id, "dummy"
         )
-        assert len(self.resources.behaviour_registry.fetch_all()) == 1
+        assert len(self.resources.get_all_behaviours()) == 1
         assert dummy_behaviour is not None
 
-        self.resources.behaviour_registry.unregister(
+        self.resources._behaviour_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
-        assert (
-            self.resources.behaviour_registry.fetch(
-                (self.dummy_skill_public_id, "dummy")
-            )
-            is None
-        )
-        assert len(self.resources.behaviour_registry.fetch_all()) == 0
+        assert self.resources.get_behaviour(self.dummy_skill_public_id, "dummy") is None
+        assert len(self.resources.get_all_behaviours()) == 0
 
-        self.resources.behaviour_registry.register(
+        self.resources._behaviour_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_behaviour
         )
 
@@ -289,9 +370,7 @@ class TestResources:
 
     def test_handler_configuration_loading(self):
         """Test that the handler configurations are loaded correctly."""
-        default_handlers = self.resources.handler_registry.fetch_by_protocol(
-            DefaultMessage.protocol_id
-        )
+        default_handlers = self.resources.get_handlers(DefaultMessage.protocol_id)
         assert len(default_handlers) == 2
         handler1, handler2 = default_handlers[0], default_handlers[1]
         dummy_handler = (
@@ -302,8 +381,8 @@ class TestResources:
 
     def test_behaviour_configuration_loading(self):
         """Test that the behaviour configurations are loaded correctly."""
-        dummy_behaviour = self.resources.behaviour_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
+        dummy_behaviour = self.resources.get_behaviour(
+            self.dummy_skill_public_id, "dummy"
         )
         assert dummy_behaviour.config == {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}
 
@@ -381,9 +460,9 @@ class TestFilter:
             tx_digest="some_tx_digest",
         )
         self.aea.decision_maker.message_out_queue.put(t)
-        self.aea.filter.handle_internal_messages()
+        self.aea._filter.handle_internal_messages()
 
-        internal_handlers_list = self.aea.resources.handler_registry.fetch_by_protocol(
+        internal_handlers_list = self.aea.resources.get_handlers(
             PublicId("fetchai", "internal", "0.1.0")
         )
         assert len(internal_handlers_list) == 1

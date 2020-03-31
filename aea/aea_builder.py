@@ -59,7 +59,7 @@ from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
 from aea.helpers.base import _SysModules
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 PathLike = Union[os.PathLike, Path, str]
@@ -543,7 +543,7 @@ class AEABuilder:
                 context.agent_name, skill.configuration.author, skill.configuration.name
             )
             skill.skill_context.set_agent_context(context)
-            skill.skill_context.logger = logging.getLogger(logger_name)
+            skill.skill_context._logger = logging.getLogger(logger_name)
 
     def _check_configuration_not_already_added(self, configuration):
         if (
@@ -734,36 +734,3 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
-
-
-#
-# class AEAProject:
-#     """
-#     A kind of ORM for an AEA project. Ideally,
-#     it would support all the operations done with `aea`.
-#     """
-#
-#     def __init__(self):
-#
-#         self.agent_config = AgentConfig()
-#
-#         self.package_configurations = {}  # type: Dict[PublicId, PackageConfiguration]
-#         self.vendor_package_configurations = (
-#             {}
-#         )  # type: Dict[PublicId, PackageConfiguration]
-#         # dependency graph also here?
-#         self._dependency_graph = {}
-#
-#     @classmethod
-#     def from_directory(cls, directory):
-#         """Load agent project from directory"""
-#         # agent_configuration = ConfigLoader.from_configuration_type(
-#         #     ConfigurationType.AGENT
-#         # )
-#         # iterate over all the packages, do fingerprint checks etc. etc.
-#
-#     def run(self):
-#         """Run the agent project"""
-#         # instantiate the builder
-#         # add protocols, then connections, then skills,
-#         #     in the order specified by the dependency graph (built from configs)

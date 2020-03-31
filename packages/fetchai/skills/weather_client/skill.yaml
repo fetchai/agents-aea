@@ -2,7 +2,12 @@ name: weather_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmeYdWoT3tPDY9EZThnJKLqNhTHutww3MQmuM7jzmK4n9R
+  dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
+  handlers.py: QmeWgXiqTfH7TcNMhS8yg3bZeUqo9hvg1KrzKHgx1Cx1ik
+  strategy.py: QmQP72pwqiBSbPfMVjsSNaUAC6izcUM8aJbMNMBYT4Uvey
 aea_version: 0.2.4
 description: "The weather client skill implements the skill to purchase weather data."
 behaviours:

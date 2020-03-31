@@ -458,7 +458,7 @@ class TransactionHandler(Handler):
                     tx_sender_fee=tx_message.tx_sender_fee,
                     tx_counterparty_fee=tx_message.tx_counterparty_fee,
                     quantities_by_good_id=tx_message.tx_quantities_by_good_id,
-                    tx_sender_signature=tx_message.tx_signature,
+                    tx_sender_signature=tx_message.signed_payload.get("tx_signature"),
                     tx_counterparty_signature=tx_message.info.get(
                         "tx_counterparty_signature"
                     ),

@@ -17,11 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the protocol generator."""
-
+import filecmp
 import inspect
 import logging
 import os
 import shutil
+import subprocess  # nosec
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -34,9 +36,11 @@ import pytest
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
     ProtocolId,
+    ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
 )
+from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.mail.base import Envelope
@@ -48,6 +52,10 @@ from aea.protocols.generator import (
     _union_sub_type_to_protobuf_variable_name,
 )
 from aea.skills.base import Handler, SkillContext
+from aea.registries.resources import Resources
+from aea.skills.base import Handler, Skill, SkillContext
+
+from packages.fetchai.connections.oef.connection import OEFConnection
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
@@ -67,7 +75,7 @@ HOST = "127.0.0.1"
 PORT = 10000
 
 
-class TestGenerateProtocol:
+class TestEndToEndGenerator:
     """Test that the generating a protocol works correctly in correct preconditions."""
 
     @pytest.fixture(autouse=True)
@@ -78,10 +86,103 @@ class TestGenerateProtocol:
     def setup_class(cls):
         """Set the test up."""
         cls.runner = CliRunner()
-        cls.agent_name = "agent_1"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
+    def test_compare_latest_generator_output_with_test_protocol(self):
+        """Test that the "t_protocol" test protocol matches with what the latest generator generates based on the specification."""
+        # check protoc is installed
+        res = shutil.which("protoc")
+        if res is None:
+            pytest.skip(
+                "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
+            )
+
+        # Specification
+        protocol_name = "t_protocol"
+        path_to_specification = os.path.join(
+            self.cwd, "tests", "data", "sample_specification.yaml"
+        )
+        path_to_generated_protocol = self.t
+        path_to_original_protocol = os.path.join(
+            self.cwd, "tests", "data", "generator", protocol_name
+        )
+        path_to_package = "tests.data.generator."
+
+        # Load the config
+        config_loader = ConfigLoader(
+            "protocol-specification_schema.json", ProtocolSpecification
+        )
+        protocol_specification = config_loader.load_protocol_specification(
+            open(path_to_specification)
+        )
+
+        # Generate the protocol
+        protocol_generator = ProtocolGenerator(
+            protocol_specification,
+            path_to_generated_protocol,
+            path_to_protocol_package=path_to_package,
+        )
+        protocol_generator.generate()
+
+        # Apply black
+        try:
+            subp = subprocess.Popen(  # nosec
+                [
+                    sys.executable,
+                    "-m",
+                    "black",
+                    os.path.join(path_to_generated_protocol, protocol_name),
+                    "--quiet",
+                ]
+            )
+            subp.wait(10.0)
+        finally:
+            poll = subp.poll()
+            if poll is None:  # pragma: no cover
+                subp.terminate()
+                subp.wait(5)
+
+        # compare __init__.py
+        init_file_generated = Path(self.t, protocol_name, "__init__.py")
+        init_file_original = Path(path_to_original_protocol, "__init__.py",)
+        assert filecmp.cmp(init_file_generated, init_file_original)
+
+        # compare protocol.yaml
+        protocol_yaml_file_generated = Path(self.t, protocol_name, "protocol.yaml")
+        protocol_yaml_file_original = Path(path_to_original_protocol, "protocol.yaml",)
+        assert filecmp.cmp(protocol_yaml_file_generated, protocol_yaml_file_original)
+
+        # compare message.py
+        message_file_generated = Path(self.t, protocol_name, "message.py")
+        message_file_original = Path(path_to_original_protocol, "message.py",)
+        assert filecmp.cmp(message_file_generated, message_file_original)
+
+        # compare serialization.py
+        serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
+        serialization_file_original = Path(
+            path_to_original_protocol, "serialization.py",
+        )
+        assert filecmp.cmp(serialization_file_generated, serialization_file_original)
+
+        # compare .proto
+        proto_file_generated = Path(
+            self.t, protocol_name, "{}.proto".format(protocol_name)
+        )
+        proto_file_original = Path(
+            path_to_original_protocol, "{}.proto".format(protocol_name),
+        )
+        assert filecmp.cmp(proto_file_generated, proto_file_original)
+
+        # compare _pb2.py
+        pb2_file_generated = Path(
+            self.t, protocol_name, "{}_pb2.py".format(protocol_name)
+        )
+        pb2_file_original = Path(
+            path_to_original_protocol, "{}_pb2.py".format(protocol_name),
+        )
+        assert filecmp.cmp(pb2_file_generated, pb2_file_original)
 
     def test_generated_protocol_serialisation_ct(self):
         """Test that a generated protocol's serialisation + deserialisation work correctly."""
@@ -221,7 +322,7 @@ class TestGenerateProtocol:
         agent_1_handler = Agent1Handler(
             skill_context=SkillContext(aea_1.context), name="fake_skill"
         )
-        aea_1.resources.handler_registry.register(
+        aea_1.resources._handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
@@ -234,7 +335,7 @@ class TestGenerateProtocol:
             skill_context=SkillContext(aea_2.context),
             name="fake_skill",
         )
-        aea_2.resources.handler_registry.register(
+        aea_2.resources._handler_registry.register(
             (
                 PublicId.from_str("fetchai/fake_skill:0.1.0"),
                 TProtocolMessage.protocol_id,
@@ -366,8 +467,8 @@ class ProtocolGeneratorTestCase(TestCase):
     def setUp(self):
         protocol_specification = mock.Mock()
         protocol_specification.name = "name"
-        ProtocolGenerator._setup = mock.Mock()
-        self.protocol_generator = ProtocolGenerator(protocol_specification)
+        with mock.patch.object(ProtocolGenerator, "_setup"):
+            self.protocol_generator = ProtocolGenerator(protocol_specification)
 
     @mock.patch(
         "aea.protocols.generator._get_sub_types_of_compositional_types",

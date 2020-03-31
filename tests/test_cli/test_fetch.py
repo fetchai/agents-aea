@@ -64,7 +64,9 @@ class FetchAgentLocallyTestCase(TestCase):
     def test__fetch_agent_locally_with_deps_positive(self, *mocks):
         """Test for fetch_agent_locally method with deps positive result."""
         click_context_mock = ContextMock()
-        ctx_mock = ContextMock(connections=["1"], protocols=["2"], skills=["3"])
+        ctx_mock = ContextMock(
+            connections=["1"], protocols=["2"], skills=["3"], contracts=["4"]
+        )
         _fetch_agent_locally(ctx_mock, PublicIdMock(), click_context_mock)
         click_context_mock.invoke.assert_called()
 

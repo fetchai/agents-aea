@@ -8,6 +8,7 @@
     "author",
     "version",
     "license",
+    "aea_version",
     "class_name",
     "config",
     "protocols"
@@ -20,16 +21,19 @@
       "$ref": "definitions.json#/definitions/author"
     },
     "version": {
-      "$ref": "definitions.json#/definitions/version"
+      "$ref": "definitions.json#/definitions/package_version"
     },
     "license": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/license"
     },
     "aea_version": {
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "fingerprint": {
       "$ref": "definitions.json#/definitions/fingerprint"
+    },
+    "fingerprint_ignore_patterns": {
+      "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
     },
     "class_name": {
       "type": "string"
@@ -63,7 +67,7 @@
       "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/description"
     }
   }
 }

@@ -2,8 +2,14 @@ name: gym
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ''
+fingerprint:
+  __init__.py: QmU11JgCkwmmWx3jgKaG6ze1o5cRgGhiQownbie2HqrhmP
+  custom_types.py: QmVGtCov56qBVFKEisqMLMiMYXMTygXoN52B27ADS968hT
+  gym.proto: QmPFhSJc2oKhT5vn9r7wdXHYhKV5kgZdJ1JmNZi4TPh1rA
+  gym_pb2.py: Qmbf1AtEc11CW1UQrhxjuNaamnUaDMdNX9BgrVJXQnxYCS
+  message.py: QmQhz5qY2ASXCGJmpS3zkMe5DbZGK8LN1d89ZuCYhjVqFy
+  serialization.py: Qmc2efRzZLLrfYaQz3WMCxLGRKU92cQC4orb8pEuYvrbRB
 aea_version: 0.2.4
+description: A protocol for interacting with a gym connection.
 dependencies: 
     protobuf: {} 
-description: A protocol for interacting with a gym connection.

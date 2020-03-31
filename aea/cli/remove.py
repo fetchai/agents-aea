@@ -28,18 +28,18 @@ import click
 from aea.cli.common import (
     Context,
     PublicIdParameter,
+    check_aea_project,
     logger,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @click.group()
-@pass_ctx
-def remove(ctx: Context):
+@click.pass_context
+@check_aea_project
+def remove(click_context):
     """Remove a resource from the agent."""
-    try_to_load_agent_config(ctx)
 
 
 def _remove_item(ctx: Context, item_type, item_id: PublicId):
@@ -109,6 +109,18 @@ def connection(ctx: Context, connection_id):
     It expects the public id of the connection to remove from the local registry.
     """
     _remove_item(ctx, "connection", connection_id)
+
+
+@remove.command()
+@click.argument("contract_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_id):
+    """
+    Remove a contract from the agent.
+
+    It expects the public id of the contract to remove from the local registry.
+    """
+    _remove_item(ctx, "contract", contract_id)
 
 
 @remove.command()

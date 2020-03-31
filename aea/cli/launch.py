@@ -18,18 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea launch' subcommand."""
+
 import os
 import subprocess  # nosec
 import sys
 from collections import OrderedDict
 from pathlib import Path
 from subprocess import Popen  # nosec
-from typing import List
+from typing import List, cast
 
 import click
-from click import pass_context
 
-from aea.cli.common import AgentDirectory, logger
+from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
 
 
@@ -38,18 +38,20 @@ def _run_agent(click_context, agent_directory: str):
     click_context.invoke(run)
 
 
-def _launch_subprocesses(agents: List[Path]):
+def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
     """
     Launch many agents using subprocesses.
 
     :param agents: list of paths to agent projects.
     :return: None
     """
+    ctx = cast(Context, click_context.obj)
     processes = []
     failed = 0
     for agent_directory in agents:
         process = Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run"], cwd=str(agent_directory)
+            [sys.executable, "-m", "aea.cli", "-v", ctx.verbosity, "run"],
+            cwd=str(agent_directory),
         )
         logger.info("Agent {} started...".format(agent_directory.name))
         processes.append(process)
@@ -81,8 +83,8 @@ def _launch_subprocesses(agents: List[Path]):
 
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
-@pass_context
+@click.pass_context
 def launch(click_context, agents: List[str]):
     """Launch many agents."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    _launch_subprocesses(agents_directories)
+    _launch_subprocesses(click_context, agents_directories)

@@ -25,7 +25,7 @@
               "pattern": "^[A-Za-z0-9/\\.\\-_]+$"
             },
             "version": {
-              "$ref": "#/definitions/version_specifier"
+              "$ref": "#/definitions/version_specifiers"
             }
           }
         }
@@ -38,6 +38,12 @@
     "private_key_path": {
       "type": "string"
     },
+    "license": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
     "ledger_api": {
       "type": "object"
     },
@@ -45,9 +51,18 @@
       "type": "string",
       "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
     },
-    "version": {
+    "package_version": {
+      "$ref": "definitions.json#/definitions/semantic_version"
+    },
+    "semantic_version": {
       "type": "string",
+      "description": "A semantic version number. See https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string",
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "pep440_version": {
+      "type": "string",
+      "description": "Version number that matches PEP 440 version schemes. Differently from 'version_specifiers', this type matches only one version number, without comparison operators. See: https://www.python.org/dev/peps/pep-0440/#examples-of-compliant-version-schemes",
+      "pattern": "^(([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?)(, *(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?))*$"
     },
     "fingerprint": {
       "oneOf": [
@@ -59,21 +74,33 @@
       "type": "string",
       "pattern": "^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     },
-    "version_specifier": {
+    "version_specifiers": {
       "type": "string",
-      "pattern": "^(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?)?$"
+      "description": "A comma-separated list of PEP 440 version specifiers. See https://www.python.org/dev/peps/pep-0440/#version-specifiers",
+      "pattern": "^(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?)(, *(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?))*$"
     },
     "aea_version": {
       "type": "string",
+      "description": "The version of AEA framework to use. It can be either a list of version specifiers (e.g. >0.2.0,<=0.2.3), or just a version number interpreted with the equality operator (e.g. 0.2.0, interpreted as ==0.2.0) (according to PEP 440).",
       "oneOf": [
-        {"$ref":  "#/definitions/version_specifier"},
-        {"$ref":  "#/definitions/version"}
+        {"$ref":  "#/definitions/version_specifiers"},
+        {"$ref":  "#/definitions/pep440_version"}
       ]
     },
     "class_name": {
       "type": "string",
       "description": "The class name of a skill component.",
       "pattern": "[A-Za-z_][A-Za-z0-9_]*"
+    },
+    "fingerprint_ignore_patterns": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ignore_pattern"
+      }
+    },
+    "ignore_pattern": {
+      "type": "string"
     }
   }
 }

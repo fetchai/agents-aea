@@ -9,6 +9,7 @@
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `[path]`. Optionally cast to type.    |
 | `delete NAME`                               | Delete an aea project. See below for disabling a resource.                   |
 | `fetch PUBLIC_ID`                           | Fetch an aea project with `[public_id]`. `fetch --registry` to fetch from remote registry. |
+| `fingerprint c/p/s [public_id]`             | Fingerprint connection, protocol, or skill, with `[public_id]`.              |
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
 | `gui`                                       | Run the GUI.                                                                 |
 | `generate-key fetchai/ethereum/all`         | Generate private keys. The AEA uses a private key to derive the associated public key and address. |

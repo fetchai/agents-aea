@@ -10,7 +10,7 @@ This module contains the agent context class.
 class AgentContext()
 ```
 
-Provide read access to relevant data of the agent for the skills.
+Provide read access to relevant objects of the agent for the skills.
 
 <a name=".aea.context.base.AgentContext.__init__"></a>
 #### `__`init`__`
@@ -24,13 +24,13 @@ Initialize an agent context.
 **Arguments**:
 
 - `identity`: the identity object
-- `ledger_apis`: the ledger apis
-- `connection_status`: the connection status
+- `ledger_apis`: the APIs the agent will use to connect to ledgers.
+- `connection_status`: the connection status of the multiplexer
 - `outbox`: the outbox
 - `decision_maker_message_queue`: the (in) queue of the decision maker
 - `ownership_state`: the ownership state of the agent
 - `preferences`: the preferences of the agent
-- `goal_pursuit_readiness`: ready to pursuit its goals
+- `goal_pursuit_readiness`: if True, the agent is ready to pursuit its goals
 - `task_manager`: the task manager
 
 <a name=".aea.context.base.AgentContext.shared_state"></a>
@@ -42,6 +42,10 @@ Initialize an agent context.
 ```
 
 Get the shared state dictionary.
+
+The shared state is the only object which skills can use
+to exchange state directly. It is accessible (read and write) from
+all skills.
 
 <a name=".aea.context.base.AgentContext.identity"></a>
 #### identity
@@ -91,7 +95,7 @@ Get the default address.
  | connection_status() -> ConnectionStatus
 ```
 
-Get connection status.
+Get connection status of the multiplexer.
 
 <a name=".aea.context.base.AgentContext.outbox"></a>
 #### outbox

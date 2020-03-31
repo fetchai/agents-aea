@@ -115,12 +115,11 @@ class Connection(Component, ABC):
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
-        """Get the restricted to protocols.."""
         return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
-        """Get the restricted to protocols.."""
+        """Get the ids of the excluded protocols for this connection."""
         return self.configuration.excluded_protocols
 
     @property

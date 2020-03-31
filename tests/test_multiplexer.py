@@ -421,7 +421,7 @@ def test_send_message_no_supported_protocol():
             multiplexer.put(envelope)
             time.sleep(0.5)
             mock_logger_warning.assert_called_with(
-                "Connection {} cannot handle protocol {}. Cannot send the message.".format(
+                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
                     connection_1.public_id, protocol_id
                 )
             )

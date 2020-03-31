@@ -21,6 +21,7 @@
 
 import os
 from shutil import copyfile
+from typing import cast
 
 import click
 
@@ -32,8 +33,7 @@ from aea.cli.common import (
     DEFAULT_SKILL,
     _try_get_item_source_path,
     _try_get_item_target_path,
-    pass_ctx,
-    try_to_load_agent_config,
+    check_aea_project,
 )
 from aea.cli.registry.publish import publish_agent
 from aea.configurations.base import PublicId
@@ -41,10 +41,11 @@ from aea.configurations.base import PublicId
 
 @click.command(name="publish")
 @click.option("--registry", is_flag=True, help="For publishing agent to Registry.")
-@pass_ctx
-def publish(ctx: Context, registry):
+@click.pass_context
+@check_aea_project
+def publish(click_context, registry):
     """Publish Agent to Registry."""
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
     if not registry:
         _save_agent_locally(ctx)
     else:
@@ -72,7 +73,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     :return: None
     """
-    for item_type_plural in ("connections", "protocols", "skills"):
+    for item_type_plural in ("connections", "contracts", "protocols", "skills"):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             if public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:

@@ -34,7 +34,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_reference: Tuple[str, str], message_id: int, target: int, performative: Performative, **kwargs, ,)
+ | __init__(performative: Performative, dialogue_reference: Tuple[str, str] = ("", ""), message_id: int = 1, target: int = 0, **kwargs, ,)
 ```
 
 Initialise an instance of DefaultMessage.

@@ -22,9 +22,9 @@
 This tool generates the API docs.
 """
 
-# Install https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop
-
+import shutil
 import subprocess  # nosec
+import sys
 from pathlib import Path
 
 DOCS_DIR = "docs/"
@@ -41,6 +41,10 @@ MODULES_TO_PATH = {
     "aea.crypto.fetchai": "api/crypto/fetchai.md",
     "aea.crypto.ledger_apis": "api/crypto/ledger_apis.md",
     "aea.crypto.wallet": "api/crypto/wallet.md",
+    "aea.decision_maker.base": "api/decision_maker/base.md",
+    "aea.decision_maker.messages.base": "api/decision_maker/messages/base.md",
+    "aea.decision_maker.messages.state_update": "api/decision_maker/messages/state_update.md",
+    "aea.decision_maker.messages.transaction": "api/decision_maker/messages/transaction.md",
     "aea.helpers.dialogue.base": "api/helpers/dialogue/base.md",
     "aea.helpers.search.generic": "api/helpers/search/generic.md",
     "aea.helpers.search.models": "api/helpers/search/models.md",
@@ -49,7 +53,7 @@ MODULES_TO_PATH = {
     "aea.protocols.base": "api/protocols/base.md",
     "aea.protocols.default.message": "api/protocols/default/message.md",
     "aea.protocols.default.serialization": "api/protocols/default/serialization.md",
-    "aea.registries.base": "api/registries/base.md",
+    "aea.registries.resources": "api/registries/resources.md",
     "aea.skills.base": "api/skills/base.md",
     "aea.skills.behaviours": "api/skills/behaviours.md",
     "aea.skills.tasks": "api/skills/tasks.md",
@@ -88,4 +92,10 @@ def generate_api_docs():
 
 
 if __name__ == "__main__":
+    res = shutil.which("pydoc-markdown")
+    if res is None:
+        print(
+            "Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop"
+        )
+        sys.exit(1)
     generate_api_docs()

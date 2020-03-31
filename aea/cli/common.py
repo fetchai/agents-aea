@@ -18,38 +18,40 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the common utils of the aea cli."""
-
 import logging
 import logging.config
 import os
+import pprint
 import re
 import shutil
 import sys
 from collections import OrderedDict
+from functools import update_wrapper
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Collection, Dict, List, Optional, cast
 
 import click
 
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
+from packaging.version import Version
+
 import yaml
 
+import aea
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
-    ProtocolConfig,
+    PackageConfiguration,
     PublicId,
-    SkillConfig,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
@@ -61,6 +63,7 @@ from aea.crypto.helpers import (
     _try_validate_fet_private_key_path,
 )
 from aea.crypto.wallet import SUPPORTED_CRYPTOS
+from aea.helpers.ipfs.base import IPFSHashOnly
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
@@ -76,6 +79,18 @@ DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
 
+DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
+    ".DS_Store",
+    "*__pycache__/*",
+    "*.pyc",
+    "aea-config.yaml",
+    "protocol.yaml",
+    "connection.yaml",
+    "skill.yaml",
+    "contract.yaml",
+]
+
+
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
@@ -84,18 +99,36 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(self, cwd: str = "."):
+    def __init__(self, cwd: str = ".", verbosity: str = "INFO"):
         """Init the context."""
         self.config = dict()  # type: Dict
-        self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        self.connection_loader = ConfigLoader(
-            "connection-config_schema.json", ConnectionConfig
-        )
-        self.protocol_loader = ConfigLoader(
-            "protocol-config_schema.json", ProtocolConfig
-        )
         self.cwd = cwd
+        self.verbosity = verbosity
+
+    @property
+    def agent_loader(self) -> ConfigLoader:
+        """Get the agent loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+
+    @property
+    def protocol_loader(self) -> ConfigLoader:
+        """Get the protocol loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.PROTOCOL)
+
+    @property
+    def connection_loader(self) -> ConfigLoader:
+        """Get the connection loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONNECTION)
+
+    @property
+    def skill_loader(self) -> ConfigLoader:
+        """Get the skill loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.SKILL)
+
+    @property
+    def contract_loader(self) -> ConfigLoader:
+        """Get the contract loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONTRACT)
 
     def set_config(self, key, value) -> None:
         """
@@ -145,6 +178,9 @@ class Context:
 
         for skill_id in self.agent_config.skills:
             dependencies.update(self._get_item_dependencies("skill", skill_id))
+
+        for contract_id in self.agent_config.contracts:
+            dependencies.update(self._get_item_dependencies("contract", contract_id))
 
         return dependencies
 
@@ -253,29 +289,6 @@ def _format_items(items):
                 description=item["description"],
                 author=item["author"],
                 version=item["version"],
-                line="-" * 30,
-            )
-        )
-    return list_str
-
-
-def _format_skills(items):
-    """Format list of skills to a string for CLI output."""
-    list_str = ""
-    for item in items:
-        list_str += (
-            "{line}\n"
-            "Public ID: {public_id}\n"
-            "Name: {name}\n"
-            "Description: {description}\n"
-            "Protocols: {protocols}\n"
-            "Version: {version}\n"
-            "{line}\n".format(
-                name=item["name"],
-                public_id=item["public_id"],
-                description=item["description"],
-                version=item["version"],
-                protocols="".join(name + " | " for name in item["protocol_names"]),
                 line="-" * 30,
             )
         )
@@ -541,6 +554,180 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
         sys.exit(1)
 
     return package_path
+
+
+def _compute_fingerprint(
+    package_directory: Path, ignore_patterns: Optional[Collection[str]] = None
+) -> Dict[str, str]:
+    ignore_patterns = ignore_patterns if ignore_patterns is not None else []
+    ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
+    hasher = IPFSHashOnly()
+    fingerprints = {}  # type: Dict[str, str]
+    # find all valid files of the package
+    all_files = [
+        x
+        for x in package_directory.glob("**/*")
+        if x.is_file()
+        and (
+            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
+        )
+    ]
+
+    for file in all_files:
+        file_hash = hasher.get(str(file))
+        key = str(file.relative_to(package_directory))
+        assert key not in fingerprints  # nosec
+        fingerprints[key] = file_hash
+
+    return fingerprints
+
+
+def _compare_fingerprints(
+    package_configuration: PackageConfiguration,
+    package_directory: Path,
+    is_vendor: bool,
+    item_type: ConfigurationType,
+):
+    """
+    Check fingerprints of a package directory against the fingerprints declared in the configuration file.
+
+    :param package_configuration: the package configuration object.
+    :param package_directory: the directory of the package.
+    :param is_vendor: whether the package is vendorized or not.
+    :param item_type: the type of the item.
+    :return: None
+    :raises ValueError: if the fingerprints do not match.
+    """
+    expected_fingerprints = package_configuration.fingerprint
+    ignore_patterns = package_configuration.fingerprint_ignore_patterns
+    actual_fingerprints = _compute_fingerprint(package_directory, ignore_patterns)
+    if expected_fingerprints != actual_fingerprints:
+        if is_vendor:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Vendorized projects should not be tampered with, please revert any changes to {} {}"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
+                    str(item_type),
+                    package_configuration.public_id,
+                )
+            )
+        else:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
+                    str(item_type),
+                    package_configuration.public_id,
+                )
+            )
+
+
+def _check_aea_version(package_configuration: PackageConfiguration):
+    """Check the package configuration version against the version of the framework."""
+    current_aea_version = Version(aea.__version__)
+    version_specifiers = package_configuration.aea_version_specifiers
+    if current_aea_version not in version_specifiers:
+        raise ValueError(
+            "The CLI version is {}, but package {} requires version {}".format(
+                current_aea_version,
+                package_configuration.public_id,
+                package_configuration.aea_version_specifiers,
+            )
+        )
+
+
+def _validate_config_consistency(ctx: Context):
+    """
+    Validate fingerprints for every agent component.
+
+    :raise ValueError: if there is a missing configuration file.
+                       or if the configuration file is not valid.
+                       or if the fingerprints do not match
+    """
+
+    packages_public_ids_to_types = dict(
+        [
+            *map(lambda x: (x, ConfigurationType.PROTOCOL), ctx.agent_config.protocols),
+            *map(
+                lambda x: (x, ConfigurationType.CONNECTION),
+                ctx.agent_config.connections,
+            ),
+            *map(lambda x: (x, ConfigurationType.SKILL), ctx.agent_config.skills),
+            *map(lambda x: (x, ConfigurationType.CONTRACT), ctx.agent_config.contracts),
+        ]
+    )  # type: Dict[PublicId, ConfigurationType]
+
+    for public_id, item_type in packages_public_ids_to_types.items():
+
+        # find the configuration file.
+        try:
+            # either in vendor/ or in personal packages.
+            # we give precedence to custom agent components (i.e. not vendorized).
+            package_directory = Path(item_type.to_plural(), public_id.name)
+            is_vendor = False
+            if not package_directory.exists():
+                package_directory = Path(
+                    "vendor", public_id.author, item_type.to_plural(), public_id.name
+                )
+                is_vendor = True
+            # we fail if none of the two alternative works.
+            assert package_directory.exists()
+
+            loader = ConfigLoaders.from_configuration_type(item_type)
+            config_file_name = _get_default_configuration_file_name_from_type(item_type)
+            configuration_file_path = package_directory / config_file_name
+            assert configuration_file_path.exists()
+        except Exception:
+            raise ValueError(
+                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
+            )
+
+        # load the configuration file.
+        try:
+            package_configuration = loader.load(configuration_file_path.open("r"))
+        except ValidationError as e:
+            raise ValueError(
+                "{} configuration file not valid: {}".format(
+                    item_type.value.capitalize(), str(e)
+                )
+            )
+
+        _check_aea_version(package_configuration)
+        _compare_fingerprints(
+            package_configuration, package_directory, is_vendor, item_type
+        )
+
+
+def check_aea_project(f):
+    """
+    Decorator that checks the consistency of the project.
+
+    - try to load agent configuration file
+    - iterate over all the agent packages and check for consistency.
+    """
+
+    def wrapper(*args, **kwargs):
+        try:
+            click_context = args[0]
+            ctx = cast(Context, click_context.obj)
+            try_to_load_agent_config(ctx)
+            skip_consistency_check = ctx.config["skip_consistency_check"]
+            if not skip_consistency_check:
+                _validate_config_consistency(ctx)
+        except Exception as e:
+            logger.error(str(e))
+            sys.exit(1)
+        return f(*args, **kwargs)
+
+    return update_wrapper(wrapper, f)
 
 
 def _init_cli_config() -> None:

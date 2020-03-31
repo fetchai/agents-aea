@@ -26,6 +26,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
 ATTRIBUTE_TYPES = Union[float, str, bool, int]
+SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
 class Attribute:
@@ -85,6 +86,34 @@ class DataModel:
         )
 
 
+class GenericDataModel(DataModel):
+    """Data model for the the erc1155 deploy skill aea."""
+
+    def __init__(
+        self,
+        data_model_attributes: Dict[str, Dict[str, Union[str, bool]]],
+        data_model_name: str,
+    ):
+        """Initialise the dataModel."""
+        self.attributes = []
+        for values in data_model_attributes.values():
+            assert (
+                values["type"] in SUPPORTED_TYPES.keys()
+            ), "Type is not supported. Use str, int, float or bool"
+            assert isinstance(
+                values["is_required"], bool
+            ), "Wrong type!! is_required must be bool"
+            self.attributes.append(
+                Attribute(
+                    name=values["name"],  # type: ignore
+                    type=SUPPORTED_TYPES[values["type"]],  # type: ignore
+                    is_required=values["is_required"],
+                )
+            )
+
+        super().__init__(data_model_name, self.attributes)
+
+
 class Description:
     """Implements an OEF description."""
 
@@ -112,31 +141,33 @@ class Description:
 
     @classmethod
     def encode(
-        cls, performative_content, description_from_message: "Description"
+        cls, description_protobuf_object, description_object: "Description"
     ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative_content' argument must be matched with the message content in the 'description_from_message' argument.
+        The protocol buffer object in the description_protobuf_object argument must be matched with the instance of this class in the 'description_object' argument.
 
-        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
-        :param description_from_message: the message content to be encoded in the protocol buffer object.
+        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param description_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        description_from_message_bytes = pickle.dumps(description_from_message)  # nosec
-        performative_content.description = description_from_message_bytes
+        description_from_message_bytes = pickle.dumps(description_object)  # nosec
+        description_protobuf_object.description = description_from_message_bytes
 
     @classmethod
-    def decode(cls, description_from_pb2) -> "Description":
+    def decode(cls, description_protobuf_object) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'description_from_pb2' argument.
+        A new instance of this class must be created that matches the protocol buffer object in the 'description_protobuf_object' argument.
 
-        :param description_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'description_from_pb2' argument.
+        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
         """
-        service_description = pickle.loads(description_from_pb2.description)  # nosec
+        service_description = pickle.loads(  # nosec
+            description_protobuf_object.description
+        )
         return service_description
 
 
@@ -352,7 +383,7 @@ class Not(ConstraintExpr):
 
     def check(self, description: Description) -> bool:
         """
-        Check if a value satisfies the 'Not; constraint expression.
+        Check if a value satisfies the 'Not' constraint expression.
 
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.
@@ -481,28 +512,28 @@ class Query:
         )
 
     @classmethod
-    def encode(cls, performative_content, query_from_message: "Query") -> None:
+    def encode(cls, query_protobuf_object, query_object: "Query") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative_content' argument must be matched with the message content in the 'query_from_message' argument.
+        The protocol buffer object in the query_protobuf_object argument must be matched with the instance of this class in the 'query_object' argument.
 
-        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
-        :param query_from_message: the message content to be encoded in the protocol buffer object.
+        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param query_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        query_bytes = pickle.dumps(query_from_message)  # nosec
-        performative_content.query_bytes = query_bytes
+        query_bytes = pickle.dumps(query_object)  # nosec
+        query_protobuf_object.query_bytes = query_bytes
 
     @classmethod
-    def decode(cls, query_from_pb2) -> "Query":
+    def decode(cls, query_protobuf_object) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'query_from_pb2' argument.
+        A new instance of this class must be created that matches the protocol buffer object in the 'query_protobuf_object' argument.
 
-        :param query_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'query_from_pb2' argument.
+        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
         """
-        query = pickle.loads(query_from_pb2.query_bytes)  # nosec
+        query = pickle.loads(query_protobuf_object.query_bytes)  # nosec
         return query

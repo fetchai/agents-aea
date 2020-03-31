@@ -48,6 +48,7 @@ from aea.configurations.base import (
     ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
@@ -102,6 +103,11 @@ DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
+contract_config_files = [
+    os.path.join(
+        ROOT_DIR, "aea", "contracts", "scaffold", DEFAULT_CONTRACT_CONFIG_FILE
+    ),
+]
 
 protocol_config_files = [
     os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),

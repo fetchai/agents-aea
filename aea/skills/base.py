@@ -39,6 +39,7 @@ from aea.configurations.base import (
 from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
+from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.helpers.base import load_module
@@ -102,7 +103,7 @@ class SkillContext:
     def skill_id(self):
         """Get the skill id of the skill context."""
         assert self._skill is not None, "Skill not set yet."
-        return self._skill.config.public_id
+        return self._skill.configuration.public_id
 
     @property
     def is_active(self):
@@ -203,6 +204,18 @@ class SkillContext:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
+
+    @property
+    def contracts(self) -> SimpleNamespace:
+        """Get contracts the skill has access to."""
+        assert self._skill is not None, "Skill not initialized."
+        return SimpleNamespace(**self._skill.contracts)
+
+    @property
+    def logger(self) -> Logger:
+        """Get the logger."""
+        assert self._logger is not None, "Logger not set."
+        return self._logger
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
@@ -546,18 +559,34 @@ class Skill(Component):
 
     def __init__(
         self, configuration: SkillConfig,
+        skill_context: Optional[SkillContext] = None,
+        handlers: Optional[Dict[str, Handler]] = None,
+        behaviours: Optional[Dict[str, Behaviour]] = None,
+        models: Optional[Dict[str, Model]] = None,
     ):
         """
         Initialize a skill.
 
         :param configuration: the skill configuration.
         """
+
         super().__init__(configuration)
         self.config = configuration
-        self._skill_context = None  # type: Optional[SkillContext]
-        self._handlers = {}  # type: Dict[str, Handler]
-        self._behaviours = {}  # type: Dict[str, Behaviour]
-        self._models = {}  # type: Dict[str, Model]
+        self._skill_context = skill_context  # type: Optional[SkillContext]
+        self._handlers = {} if handlers is None else handlers  # type: Dict[str, Handler]
+        self._behaviours = {} if behaviours is None else behaviours  # type: Dict[str, Behaviour]
+        self._models = {} if models is None else models  # type: Dict[str, Model]
+
+        self._contracts = {}   # type: Dict[str, Contract]
+
+    @property
+    def contracts(self) -> Dict[str, Contract]:
+        """Get the contracts associated with the skill."""
+        return self._contracts
+
+    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
+        """Add the contracts to the skill."""
+        self._contracts = contracts
 
     @property
     def skill_context(self) -> SkillContext:

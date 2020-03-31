@@ -55,6 +55,7 @@ def publish_agent(ctx: Context):
         "description": ctx.agent_config.description,
         "version": ctx.agent_config.version,
         "connections": ctx.agent_config.connections,
+        "contracts": ctx.agent_config.contracts,
         "protocols": ctx.agent_config.protocols,
         "skills": ctx.agent_config.skills,
     }

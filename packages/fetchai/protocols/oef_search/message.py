@@ -19,6 +19,7 @@
 
 """This module contains oef_search's message definition."""
 
+import logging
 from enum import Enum
 from typing import Set, Tuple, cast
 
@@ -32,6 +33,8 @@ from packages.fetchai.protocols.oef_search.custom_types import (
     OefErrorOperation as CustomOefErrorOperation,
 )
 from packages.fetchai.protocols.oef_search.custom_types import Query as CustomQuery
+
+logger = logging.getLogger("packages.fetchai.protocols.oef_search.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -90,9 +93,6 @@ class OefSearchMessage(Message):
             "search_services",
             "unregister_service",
         }
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'oef_search' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -251,7 +251,7 @@ class OefSearchMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True

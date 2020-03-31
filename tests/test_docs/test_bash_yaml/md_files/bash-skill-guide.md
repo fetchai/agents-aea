@@ -7,8 +7,9 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A simple search skill utilising the OEF search and communication node.'
-fingerprint: ''
+fingerprint: {}
 behaviours:
   my_search_behaviour:
     class_name: MySearchBehaviour
@@ -21,6 +22,9 @@ handlers:
 models: {}
 protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
+```
+``` bash
+aea fingerprint skill fetchai/my_search:0.1.0
 ```
 ``` bash
 aea add protocol fetchai/oef_search:0.1.0
@@ -37,8 +41,13 @@ name: simple_service_registration
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: The scaffold skill is a scaffold for your own skill implementation.
-fingerprint: ''
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmcYLWnWuB121Ghefv58GevCqAAetx1H7taMem94xwCjHQ
+  data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
+  strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
+aea_version: 0.2.4
+description: The simple service registration skills is a skill to register a service.
 behaviours:
   service:
     args:

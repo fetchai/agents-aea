@@ -60,14 +60,52 @@ class TestSearchProtocols:
         self.result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False
         )
-        assert self.result.output == "Available protocols:\n{}\n".format(
-            FORMAT_ITEMS_SAMPLE_OUTPUT
+        assert self.result.output == (
+            'Searching for ""...\n'
+            "Protocols found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+
+
+class TestSearchContracts(TestCase):
+    """Test that the command 'aea search contracts' works as expected."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search._search_items", return_value=["item1"])
+    def test_search_contracts_positive(self, *mocks):
+        """Test search contracts command positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "search", "contracts"], standalone_mode=False
+        )
+        assert result.output == (
+            'Searching for ""...\n'
+            "Contracts found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+
+    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.request_api", return_value=["item1"])
+    def test_search_contracts_registry_positive(self, *mocks):
+        """Test search contracts in registry command positive result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "search", "--registry", "contracts"],
+            standalone_mode=False,
+        )
+        assert result.output == (
+            'Searching for ""...\n'
+            "Contracts found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
 
 
 class TestSearchConnections:
@@ -86,8 +124,10 @@ class TestSearchConnections:
         self.result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False
         )
-        assert self.result.output == "Available connections:\n{}\n".format(
-            FORMAT_ITEMS_SAMPLE_OUTPUT
+        assert self.result.output == (
+            'Searching for ""...\n'
+            "Connections found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
     @classmethod
@@ -112,8 +152,10 @@ class TestSearchSkills:
         self.result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False
         )
-        assert self.result.output == "Available skills:\n{}\n".format(
-            FORMAT_ITEMS_SAMPLE_OUTPUT
+        assert self.result.output == (
+            'Searching for ""...\n'
+            "Skills found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
     @classmethod
@@ -158,7 +200,8 @@ class TestSearchAgents:
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         assert (
-            self.result.output == "Available agents:\n"
+            self.result.output == 'Searching for ""...\n'
+            "Agents found:\n\n"
             "------------------------------\n"
             "Public ID: default_author/myagent:0.1.0\n"
             "Name: myagent\n"
@@ -212,7 +255,11 @@ class RegistrySearchTestCase(TestCase):
             [*CLI_LOG_OPTION, "search", "--registry", "agents", "--query=some"],
             standalone_mode=False,
         )
-        expected_output = "Agents found:\n\n" "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        expected_output = (
+            'Searching for "some"...\n'
+            "Agents found:\n\n"
+            "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
             "GET", "/agents", params={"search": "some"}
@@ -237,12 +284,7 @@ class RegistrySearchTestCase(TestCase):
         )
         _format_items_mock.assert_called_once_with(["correct", "results"])
 
-    @mock.patch(
-        "aea.cli.search._format_skills", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
-    )
-    def test_search_skills_positive(
-        self, _format_skills_mock, _format_items_mock, request_api_mock
-    ):
+    def test_search_skills_positive(self, _format_items_mock, request_api_mock):
         """Test for CLI search --registry skills positive result."""
         result = self.runner.invoke(
             cli,
@@ -258,8 +300,7 @@ class RegistrySearchTestCase(TestCase):
         request_api_mock.assert_called_once_with(
             "GET", "/skills", params={"search": "some"}
         )
-        _format_skills_mock.assert_called_once_with(["correct", "results"])
-        _format_items_mock.assert_not_called()
+        _format_items_mock.assert_called_once_with(["correct", "results"])
 
 
 class TestSearchWithRegistryInSubfolder:
@@ -292,7 +333,8 @@ class TestSearchWithRegistryInSubfolder:
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
         assert (
-            self.result.output == "Available skills:\n"
+            self.result.output == 'Searching for ""...\n'
+            "Skills found:\n\n"
             "------------------------------\n"
             "Public ID: fetchai/echo:0.1.0\n"
             "Name: echo\n"
@@ -361,7 +403,8 @@ class TestSearchInAgentDirectory:
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
         assert (
-            self.result.output == "Available skills:\n"
+            self.result.output == 'Searching for ""...\n'
+            "Skills found:\n\n"
             "------------------------------\n"
             "Public ID: fetchai/echo:0.1.0\n"
             "Name: echo\n"

@@ -1,4 +1,4 @@
-aea_version: 0.2.4
+aea_version: ">=0.2.4, <0.3.0"
 agent_name: Agent0
 author: dummy_author
 connections:
@@ -7,7 +7,7 @@ default_connection: fetchai/local:0.1.0
 default_ledger: fetchai
 description: dummy_aea agent description [Fill in]
 license: Apache-2.0
-fingerprint: ""
+fingerprint: {}
 ledger_apis:
    fetchai:
      args:
@@ -31,4 +31,6 @@ registry_path: aea
 skills:
 - dummy_author/dummy:0.1.0
 - fetchai/error:0.1.0
+contracts:
+- fetchai/erc1155:0.1.0
 version: 1.0.0

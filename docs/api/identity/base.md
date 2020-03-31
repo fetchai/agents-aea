@@ -10,11 +10,12 @@ This module contains the identity class.
 class Identity()
 ```
 
-An identity are the public elements identifying an agent.
+The identity holds the public elements identifying an agent.
 
-It can include:
+It includes:
+
 - the agent name
-- the addresses
+- the addresses, a map from address identifier to address (can be a single key-value pair)
 
 <a name=".aea.identity.base.Identity.__init__"></a>
 #### `__`init`__`
@@ -28,8 +29,9 @@ Instantiate the identity.
 **Arguments**:
 
 - `name`: the name of the agent.
+- `address`: the default address of the agent.
 - `addresses`: the addresses of the agent.
-- `default_address_key`: the key for the default address
+- `default_address_key`: the key for the default address.
 
 <a name=".aea.identity.base.Identity.name"></a>
 #### name

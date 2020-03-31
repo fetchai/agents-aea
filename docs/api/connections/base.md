@@ -81,7 +81,7 @@ Get the id of the connection.
  | restricted_to_protocols() -> Set[PublicId]
 ```
 
-Get the restricted to protocols..
+Get the ids of the only supported protocols for this connection.
 
 <a name=".aea.connections.base.Connection.excluded_protocols"></a>
 #### excluded`_`protocols
@@ -91,7 +91,7 @@ Get the restricted to protocols..
  | excluded_protocols() -> Set[PublicId]
 ```
 
-Get the restricted to protocols..
+Get the ids of the excluded protocols for this connection.
 
 <a name=".aea.connections.base.Connection.connection_status"></a>
 #### connection`_`status

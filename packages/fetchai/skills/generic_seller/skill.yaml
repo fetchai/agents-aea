@@ -2,7 +2,13 @@ name: generic_seller
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
+  behaviours.py: QmU7pGaF2KNRvwBHQGbmwqZiBF65bDsFsk1km9kwtotMm6
+  data_model.py: QmZ7kqYdJJ6rcwjRSbmvRPc2jVG4sFEZA5rT11CJ3VXV9S
+  dialogues.py: QmaBzfmtEZssDWrHsYT1ovCsQ4qmFHvFSkzPBvHiR2Et44
+  handlers.py: QmTbKaBPrFiD8RWGpV6AAQnGg66vVohvLgkzHiUrqUew6U
+  strategy.py: QmW4TJsYTPhvmVBawWB2g8mUZ7Kap5V5LThH4wK6JbVis6
 aea_version: 0.2.4
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:

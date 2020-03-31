@@ -2,7 +2,12 @@ name: thermometer_client
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmRLGnLmojPrafe41e1WrMpsGCdmfpWZ4sQTWgDSrsBHcu
+  dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
+  handlers.py: QmdvPajsdMtswng7EutHX5QVUBUxqoqsmKPfcoEKcdZmaQ
+  strategy.py: QmUyiNs8qWPvNBwKevuF1Qj7orgNGbczYRfKTzPHeF1kXt
 aea_version: 0.2.4
 description: "The thermometer client skill implements the skill to purchase temperature data."
 behaviours:

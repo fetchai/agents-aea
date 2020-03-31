@@ -1,7 +1,8 @@
-name: test_protocol
+name: t_protocol
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A protocol for testing purposes.'
 speech_acts:
   performative_ct:
@@ -34,7 +35,7 @@ speech_acts:
 #    content_dict_float_int: pt:dict[pt:float, pt:int] # invalid in protobuf (key in map<X, Y> cannot be 'bytes', 'float', 'double', 'message')
   performative_mt:
     content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:int], pt:list[pt:bool], pt:dict[pt:str, pt:int]]
-    content_union_2: pt:union[pt:set[pt:int], pt:set[pt:int], pt:set[pt:str], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:bool, pt:bytes]]
+    content_union_2: pt:union[pt:set[pt:bytes], pt:set[pt:int], pt:set[pt:str], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:bool, pt:bytes]]
   performative_o:
     content_o_ct: pt:optional[ct:DataModel]
     content_o_bool: pt:optional[pt:bool]

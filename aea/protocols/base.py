@@ -273,6 +273,9 @@ class Protocol(Component):
 
         In the case of a protocol, we load the 'serialization.py' module
         to instantiate an instance of the Serializer.
+
+        :return: None
+        :raises Exception: if the parsing failed.
         """
         serialization_module = load_module(
             "serialization", Path(self.directory, "serialization.py")

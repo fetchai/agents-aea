@@ -25,8 +25,6 @@ from unittest import mock
 
 import numpy as np
 
-import pytest
-
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -52,8 +50,8 @@ def test_perfomrative_str():
 
 def test_ml_wrong_message_creation():
     """Test the creation of a ml message."""
-    with pytest.raises(AssertionError):
-        MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query="")
+    msg = MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query="")
+    assert not msg._is_consistent()
 
 
 def test_ml_messge_consistency():

@@ -2,7 +2,10 @@ name: error
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-fingerprint: ""
+aea_version: 0.2.4
+fingerprint:
+  __init__.py: QmRznFfmUCKAv4gmXN4Gv73h1xesmoJu35BgeKxDZGyU8U
+  handlers.py: QmYC8dH3QVstQX78C3wFaAYhpxSk2hpKR3XV6PanGnxXKY
 description: "The error skill implements basic error handling required by all AEAs."
 behaviours: {}
 handlers:

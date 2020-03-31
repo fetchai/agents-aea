@@ -11,3 +11,6 @@ aea scaffold protocol my_protocol
 ``` bash
 aea scaffold connection my_connection
 ```
+``` bash
+aea fingerprint [package_name]
+```

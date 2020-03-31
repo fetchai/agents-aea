@@ -38,6 +38,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.cli.common import DEFAULT_VERSION
 
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
@@ -65,6 +66,7 @@ class TestBuildSkill:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.resource_name = "my_search"
+        cls.skill_id = AUTHOR + "/" + cls.resource_name + ":" + DEFAULT_VERSION
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
 
@@ -138,9 +140,6 @@ class TestBuildSkill:
         with open(path, "w") as file:
             file.write(self.code_blocks[1])
 
-        path = Path(self.t, self.agent_name, "skills", self.resource_name, "tasks.py")
-        os.remove(path)
-
         path = Path(
             self.t, self.agent_name, "skills", self.resource_name, "my_model.py"
         )
@@ -151,6 +150,14 @@ class TestBuildSkill:
         yaml_code_block = extract_code_blocks(self.path, filter="yaml")
         with open(path, "w") as file:
             file.write(yaml_code_block[0])
+
+        # update fingerprint
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "fingerprint", "skill", self.skill_id],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0, "Fingerprinting not successful"
 
         os.chdir(Path(self.t, "simple_service_registration"))
         try:
