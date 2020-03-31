@@ -9,8 +9,8 @@ fingerprint:
   dialogues.py: QmXL8fdTb4RHZtXn9uKjYr5JYyJxCiEDPGAze8BRWbnEsr
   dummy_weather_station_data.py: QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT
   handlers.py: QmVBLL2mSbEPCNyi7Lhp98BFwrYkWi8W8J5c5g92ncCXnN
-  strategy.py: QmP6F2Zu3eXY3PuVqMT7jqUPgX3mdaYnmsmTjUSVq4RMQN
-  weather_station_data_model.py: QmfYVUTAef6p89qng1PqNCL5iC5rJqGR8RwFcikeqRsbYT
+  strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
+  weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 aea_version: 0.2.4
 fingerprint_ignore_patterns:
   - "*.db"

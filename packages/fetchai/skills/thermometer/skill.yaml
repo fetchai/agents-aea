@@ -6,9 +6,9 @@ fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmduRrnfDsguRm1eJt3TyAGCvNbU89DVEthWGp2VdqqfaD
   dialogues.py: QmaUUzZJJJyC8zRDvHjdrNXbeaJ15Le7qNsZfe5BKoAkq1
-  handlers.py: QmcYMtqvjVwENPJquW7CT7vcX364HAsnPiaAjETencEVAw
-  strategy.py: QmWySyhPNH3sypUxrbSAfemE9XnmwK4dhJsSjXBcrzdjAH
-  thermometer_data_model.py: QmWnXZTJpgBM57v9qjEzA9qwK6791yxKVjE3Zav2GLzrZF
+  handlers.py: QmNhSiHkQN27i1vsjD5FmxMdssYpBtD9fHFdovaqJVzy3J
+  strategy.py: QmSoFFxMJhPejHaYztRtMFmgykThnSncV42kLChWeum5H7
+  thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 aea_version: 0.2.4
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
