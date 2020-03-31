@@ -196,6 +196,8 @@ class ERC1155Contract(Contract):
         """Create a batch of items."""
         # create the items
         self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         tx = self.instance.functions.createBatch(
             deployer_address, token_ids
         ).buildTransaction(
@@ -251,6 +253,8 @@ class ERC1155Contract(Contract):
     ) -> str:
         """Create an item."""
         self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         tx = self.instance.functions.createSingle(
             deployer_address, token_id, ""
         ).buildTransaction(
@@ -309,6 +313,8 @@ class ERC1155Contract(Contract):
         """Mint a batch of items."""
         # mint batch
         self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         for i in range(len(token_ids)):
             decoded_type = Helpers().decode_id(token_ids[i])
             assert (
@@ -371,6 +377,8 @@ class ERC1155Contract(Contract):
         """Mint a batch of items."""
         # mint batch
         self.nonce += 1
+        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         assert recipient_address is not None
         decoded_type = Helpers().decode_id(token_id)
         assert (
@@ -413,8 +421,7 @@ class ERC1155Contract(Contract):
         data = b"hello"
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        if self.nonce != nonce:
-            self.nonce = nonce
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
 
         tx = self.instance.functions.trade(
             from_address,
@@ -461,8 +468,7 @@ class ERC1155Contract(Contract):
         value_eth_wei = ledger_api.api.toWei(value, "ether")
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
-        if self.nonce != nonce:
-            self.nonce = nonce
+        assert nonce <= self.nonce, "The local nonce should be > from the chain nonce."
         tx = self.instance.functions.tradeBatch(
             from_address,
             to_address,
