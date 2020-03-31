@@ -36,7 +36,7 @@ def register(
     :param password: str password.
     :param password_confirmation: str password confirmation.
 
-    :return: None
+    :return: str auth token.
     """
     data = {
         "username": username,
@@ -44,10 +44,14 @@ def register(
         "password1": password,
         "password2": password_confirmation,
     }
-    resp_json = request_api(
-        "POST", "/rest-auth/registration/", data=data, handle_400=False
+    resp_json, status_code = request_api(
+        "POST",
+        "/rest-auth/registration/",
+        data=data,
+        handle_400=False,
+        return_code=True,
     )
-    if resp_json:
+    if status_code == 400:
         errors: List[str] = []
         for key in ("username", "email", "password1", "password2"):
             param_errors = resp_json.get(key)
@@ -57,3 +61,5 @@ def register(
         raise ClickException(
             "Errors occured during registration.\n" + "\n".join(errors)
         )
+    else:
+        return resp_json["key"]

@@ -50,6 +50,7 @@ def request_api(
     is_auth=False,
     filepath=None,
     handle_400=True,
+    return_code=False,
 ) -> Dict:
     """
     Request Registry API.
@@ -114,7 +115,10 @@ def request_api(
         raise click.ClickException(
             "Wrong server response. Status code: {}".format(resp.status_code)
         )
-    return resp_json
+    if return_code:
+        return resp_json, resp.status_code
+    else:
+        return resp_json
 
 
 def download_file(url: str, cwd: str) -> str:

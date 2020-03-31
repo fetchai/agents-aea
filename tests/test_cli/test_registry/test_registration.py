@@ -28,15 +28,20 @@ from aea.cli.registry.registration import register
 class RegistrationTestCase(TestCase):
     """Test case for Registry registration methods."""
 
-    @mock.patch("aea.cli.registry.registration.request_api", return_value=None)
+    @mock.patch(
+        "aea.cli.registry.registration.request_api",
+        return_value=({"key": "token"}, 201),
+    )
     def test_register_positive(self, *mocks):
         """Test register method positive result."""
         username, email, password = ("username", "email", "password")
-        register(username, email, password, password)
+        result = register(username, email, password, password)
+        expected_result = "token"
+        self.assertEqual(result, expected_result)
 
     @mock.patch(
         "aea.cli.registry.registration.request_api",
-        return_value={"username": "Already exists"},
+        return_value=({"username": "Already exists"}, 400),
     )
     def test_register_negative(self, *mocks):
         """Test register method negative result."""
