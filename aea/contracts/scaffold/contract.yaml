@@ -5,5 +5,5 @@ license: Apache-2.0
 aea_version: ">=0.2.4"
 fingerprint:
   __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
-  contract.py: QmPSVpxVSoDHNfxEGZLBL3XqBrxPUu8waQ47tQqeztVN2e
+  contract.py: QmdNCqFy9fBg4QfgY62Sr6zY9Ph1Vc76DiYxTMdirAUCSU
 description: "The scaffold contract scaffolds a contract to be implemented by the developer."
