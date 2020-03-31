@@ -39,6 +39,7 @@ from oef.agents import AsyncioCore, OEFAgent
 
 import pytest
 
+import aea
 from aea import AEA_DIR
 from aea.cli.common import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
@@ -55,6 +56,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.components import Component
 from aea.connections.base import Connection
+from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Address
 
 from packages.fetchai.connections.http.connection import HTTPConnection
@@ -656,3 +658,17 @@ def _make_p2p_client_connection(
     p2p_client_connection.address = address
     p2p_client_connection.load()
     return p2p_client_connection
+
+
+def _make_stub_connection(input_file_path: str, output_file_path: str):
+    connection_configuration = cast(
+        ConnectionConfig,
+        ComponentConfiguration.load(
+            ComponentType.CONNECTION, Path(aea.AEA_DIR, "connections", "stub")
+        ),
+    )
+    connection_configuration.config["input_file"] = input_file_path
+    connection_configuration.config["output_file"] = output_file_path
+    connection = StubConnection(connection_configuration)
+    connection.load()
+    return connection

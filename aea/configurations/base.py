@@ -1139,9 +1139,12 @@ class AgentConfig(PackageConfiguration):
             ComponentId(ComponentType.SKILL, public_id) for public_id in self.skills
         )
 
-        # TODO add contracts (release/v0.3)
+        contracts = set(
+            ComponentId(ComponentType.CONTRACT, public_id)
+            for public_id in self.contracts
+        )
 
-        return set.union(protocols, connections, skills)
+        return set.union(protocols, contracts, connections, skills)
 
     @property
     def private_key_paths_dict(self) -> Dict[str, str]:

@@ -22,6 +22,7 @@
 import logging
 
 from aea.aea_builder import AEABuilder
+from aea.configurations.base import PublicId
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 
@@ -34,23 +35,24 @@ if __name__ == "__main__":
     builder.add_private_key("fetchai", FetchAICrypto().address)
     builder.add_private_key("ethereum", EthereumCrypto().address)
     builder.add_protocol("./packages/fetchai/protocols/oef_search")
-    builder.add_skill("./packages/fetchai/skills/echo")
-    builder.add_contract("./packages/fetchai/contracts/erc1155")
-    builder.add_ledger_api_config(
-        "ethereum",
-        {
-            "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-            "chain_id": 3,
-            "gas_price": 50,
-        },
-    )
-
-    builder.add_skill("./packages/fetchai/skills/erc1155_deploy")
+    # builder.add_skill("./packages/fetchai/skills/echo")
+    # builder.add_contract("./packages/fetchai/contracts/erc1155")
+    # builder.add_ledger_api_config(
+    #     "ethereum",
+    #     {
+    #         "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    #         "chain_id": 3,
+    #         "gas_price": 50,
+    #     },
+    # )
+    # builder.add_skill("./packages/fetchai/skills/erc1155_deploy")
+    builder.add_connection("./packages/fetchai/connections/oef")
+    builder.add_skill("./packages/fetchai/skills/weather_station")
 
     # you can also use the fluent interface
     # builder.add_protocol(...).add_skill(...)
 
-    aea_agent = builder.build()
+    aea_agent = builder.build(connection_ids=[PublicId("fetchai", "oef", "0.1.0")])
     try:
         aea_agent.start()
     except KeyboardInterrupt:

@@ -43,8 +43,8 @@ from .conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
     _make_local_connection,
+    _make_stub_connection,
 )
-from .test_connections.test_stub import _make_stub_connection
 
 
 @pytest.mark.asyncio

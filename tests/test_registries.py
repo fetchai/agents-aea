@@ -74,7 +74,6 @@ class TestContractRegistry:
         Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
 
         cls.registry = ContractRegistry()
-        cls.registry.populate(cls.agent_folder)
         cls.expected_contract_ids = {
             PublicId("fetchai", "erc1155", "0.1.0"),
         }

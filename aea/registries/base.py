@@ -19,25 +19,17 @@
 
 """This module contains registries."""
 
-import importlib.util
-import inspect
-import json
 import logging
-import pprint
 import re
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, cast
 
 from aea.configurations.base import (
-    ContractConfig,
     ContractId,
-    DEFAULT_CONTRACT_CONFIG_FILE,
     ProtocolId,
     PublicId,
     SkillId,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
@@ -172,50 +164,6 @@ class ContractRegistry(Registry[PublicId, Contract]):
         """Fetch all the contracts."""
         return list(self._contracts.values())
 
-    def populate(
-        self, directory: str, allowed_contracts: Optional[Set[PublicId]] = None
-    ) -> None:
-        """
-        Load the contract from the directory
-
-        :param directory: the filepath to the agent's resource directory.
-        :param allowed_contracts: an optional set of allowed contracts (public ids).
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        contract_directory_paths = set()  # type: ignore
-
-        # find all contract directories from vendor/*/contracts
-        contract_directory_paths.update(
-            Path(directory, "vendor").glob("./*/contracts/*/")
-        )
-        # find all contract directories from contracts/
-        contract_directory_paths.update(Path(directory, "contracts").glob("./*/"))
-
-        contract_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                contract_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following contract packages: {}".format(
-                pprint.pformat(map(str, contract_directory_paths))
-            )
-        )
-        for contract_package_path in contract_packages_paths:
-            try:
-                logger.debug(
-                    "Processing the contract package '{}'".format(contract_package_path)
-                )
-                self._add_contract(
-                    contract_package_path, allowed_contracts=allowed_contracts
-                )
-            except Exception:
-                logger.exception(
-                    "Not able to add contract '{}'.".format(contract_package_path.name)
-                )
-
     def setup(self) -> None:
         """
         Set up the registry.
@@ -231,58 +179,6 @@ class ContractRegistry(Registry[PublicId, Contract]):
         :return: None
         """
         self._contracts = {}
-
-    def _add_contract(
-        self,
-        contract_directory: Path,
-        allowed_contracts: Optional[Set[PublicId]] = None,
-    ):
-        """
-        Add a contract.
-
-        :param contract_directory: the directory of the contract to be added.
-        :param allowed_contracts: an optional set of allowed contracts (public ids).
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        config_loader = ConfigLoader("contract-config_schema.json", ContractConfig)
-        contract_config = config_loader.load(
-            open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
-        )
-        contract_public_id = PublicId(
-            contract_config.author, contract_config.name, contract_config.version
-        )
-        if (
-            allowed_contracts is not None
-            and contract_public_id not in allowed_contracts
-        ):
-            logger.debug(
-                "Ignoring contract {}, not declared in the configuration file.".format(
-                    contract_public_id
-                )
-            )
-            return
-
-        contract_spec = importlib.util.spec_from_file_location(
-            "contracts", contract_directory / "contract.py"
-        )
-        contract_module = importlib.util.module_from_spec(contract_spec)
-        contract_spec.loader.exec_module(contract_module)  # type: ignore
-        classes = inspect.getmembers(contract_module, inspect.isclass)
-        contract_classes = list(
-            filter(lambda x: re.match("\\w+Contract", x[0]), classes)
-        )
-        contract_class = contract_classes[0][1]
-        path = Path(contract_directory, contract_config.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
-        contract = contract_class(
-            contract_id=contract_public_id,
-            contract_config=contract_config,
-            contract_interface=contract_interface,
-        )
-
-        self.register(contract_public_id, contract)
 
 
 class ProtocolRegistry(Registry[PublicId, Protocol]):

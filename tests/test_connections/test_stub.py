@@ -25,36 +25,17 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import cast
 from unittest import mock
 
 import pytest
 
 import aea
-from aea.configurations.base import (
-    ComponentConfiguration,
-    ComponentType,
-    ConnectionConfig,
-    PublicId,
-)
-from aea.connections.stub.connection import StubConnection
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-
-def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection_configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION, Path(aea.AEA_DIR, "connections", "stub")
-        ),
-    )
-    connection_configuration.config["input_file"] = input_file_path
-    connection_configuration.config["output_file"] = output_file_path
-    connection = StubConnection(connection_configuration)
-    connection.load()
-    return connection
+from ..conftest import _make_stub_connection
 
 
 class TestStubConnectionReception:

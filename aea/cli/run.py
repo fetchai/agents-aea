@@ -63,7 +63,9 @@ def _build_aea(connection_ids: Optional[List[PublicId]]) -> AEA:
         aea = builder.build(connection_ids=connection_ids)
         return aea
     except Exception as e:
-        logger.exception(e)
+        # TODO use an ad-hoc exception class for predictable errors
+        #      all the other exceptions should be logged with logger.exception
+        logger.error(str(e))
         sys.exit(1)
 
 
