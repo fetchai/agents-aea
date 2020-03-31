@@ -43,8 +43,8 @@ to r/w r/w r (for root [the default owner], plugdev, and everyone else respectiv
 
 Create a new AEA by typing the following command in the terminal: 
 ``` bash
-aea create thermometer
-cd thermometer
+aea create my_thermometer
+cd my_thermometer
 ```
 Our newly created AEA is inside the current working directory. Let’s create our new skill that will handle the sale of the thermomemeter data. Type the following command:
 ``` bash
@@ -63,7 +63,7 @@ This command will create the correct structure for a new skill inside our AEA pr
 
 A Behaviour class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
-Open the behaviours.py (`thermometer/skills/thermometer/behaviours.py`) and add the following code:
+Open the behaviours.py (`my_thermometer/skills/thermometer/behaviours.py`) and add the following code:
 
 ``` python
 from typing import Optional, cast
@@ -267,9 +267,9 @@ We have to specify the logic to negotiate with another AEA based on the strategy
        
 </div>
 
-In the context of our thermometer use-case, the thermometer AEA is the seller.
+In the context of our thermometer use-case, the `my_thermometer` AEA is the seller.
 
-Let us now implement a handler to deal with the incoming messages. Open the `handlers.py` file (`thermometer/skills/thermometer/handlers.py`) and add the following code:
+Let us now implement a handler to deal with the incoming messages. Open the `handlers.py` file (`my_thermometer/skills/thermometer/handlers.py`) and add the following code:
 
 ``` python
 from typing import Optional, cast
@@ -348,7 +348,7 @@ class FIPAHandler(Handler):
         """
         pass
 ```
-The code above is logic for handling `FipaMessages` received by the thermometer AEA. We use `Dialogues` to keep track of the dialogue state between the `thermometer_aea` and the `client_aea`.
+The code above is logic for handling `FipaMessages` received by the `my_thermometer` AEA. We use `Dialogues` to keep track of the dialogue state between the `my_thermometer` and the `client_aea`.
 
 First, we check if the message is registered to an existing dialogue or if we have to create a new dialogue. The second part assigns messages to their handler based on the message's performative. We are going to implement each case in a different function.
 
@@ -820,7 +820,7 @@ class Dialogues(Model, FipaDialogues):
 ```
 
 The dialogues class stores dialogue with each `client_aea` in a list so we can have access to previous messages and 
-enable us to identify possible communications problems between the `thermometer_aea` and the `client_aea`. It also keeps track of the data that we offer for sale during the proposal phase.
+enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
 ### Step 6: Create the data_model
 
@@ -1153,7 +1153,7 @@ You will see that we are following similar logic when we develop the client’s 
             message=DefaultSerializer().encode(default_msg),
         )
 ```
-The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the proposal that we receive from the `thermometer_aea` : 
+The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the proposal that we receive from the `my_thermometer` AEA: 
 
 ``` python
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1243,7 +1243,7 @@ When we receive a proposal we have to check if we have the funds to complete the
                 Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated
             )
 ```
-The above code terminates each dialogue with the specific aea and stores the step. For example, if the `target == 1` we know that the seller declined our CFP message. In case you didn’t receive any decline message that means that the `thermometer_aea` want to move on with the sale, in that case, it will send a `match_accept` message in order to handle this add the following code : 
+The above code terminates each dialogue with the specific aea and stores the step. For example, if the `target == 1` we know that the seller declined our CFP message. In case you didn’t receive any decline message that means that the `my_thermometer` AEA want to move on with the sale, in that case, it will send a `match_accept` message in order to handle this add the following code : 
 
 ``` python
     def _handle_match_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -1346,8 +1346,8 @@ Lastly, we need to handle the inform message because this is the message that wi
                 )
             )
 ```
-The main difference between this handler and the `thermometer` handler is that in this one we create more than one handler. 
-The reason is that we receive messages not only from the `thermometer` AEA but also from the `decision_maker` and the [OEF search node](../oef-ledger). So we need a handler to be able to read different kinds of messages.
+The main difference between this handler and the `thermometer` skill handler is that in this one we create more than one handler. 
+The reason is that we receive messages not only from the `my_thermometer` AEA but also from the `decision_maker` and the [OEF search node](../oef-ledger). So we need a handler to be able to read different kinds of messages.
 
 To handle the [OEF search node](../oef-ledger) response on our search request adds the following code in the same file:
 
@@ -1651,7 +1651,7 @@ class Dialogues(Model, FipaDialogues):
         FipaDialogues.__init__(self)
 ```
 
-The dialogues class stores dialogue with each `thermometer_aea` in a list so we can have access to previous messages and enable us to identify possible communications problems between the `thermometer_aea` and the `client_aea`.
+The dialogues class stores dialogue with each `my_thermometer` AEA in a list so we can have access to previous messages and enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA.
 
 ### Step 6: Update the YAML files
 
@@ -1740,7 +1740,7 @@ aea add-key fetchai fet_private_key.txt
 
 ### Update the AEA configs
 
-Both in `thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
+Both in `my_thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace ```ledger_apis```: {} with the following.
 ``` yaml
 ledger_apis:
   fetchai:
@@ -1768,7 +1768,7 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten testnet. 
 This demo assumes the temperature client trusts our AEA to send the temperature data upon successful payment.
 
-Create the private key for the thermometer client AEA.
+Create the private key for the `my_client` AEA.
 
 ``` bash
 aea generate-key ethereum
@@ -1777,7 +1777,7 @@ aea add-key ethereum eth_private_key.txt
 
 ### Update the AEA configs
 
-Both in `thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
+Both in `my_thermometer/aea-config.yaml` and `my_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
 
 ``` yaml
 ledger_apis:
@@ -1789,7 +1789,7 @@ ledger_apis:
 
 ### Update the skill configs
 
-In the  thermometer skill config (`thermometer/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+In the thermometer skill config (`my_thermometer/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 
 ``` yaml
 currency_id: 'ETH'
@@ -1826,6 +1826,6 @@ You will see that the AEAs negotiate and then transact using the Ethereum testne
 When you're done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
-aea delete my_weather_station
-aea delete my_weather_client
+aea delete my_thermometer
+aea delete my_client
 ```
