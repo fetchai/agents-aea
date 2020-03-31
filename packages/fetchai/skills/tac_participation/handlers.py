@@ -32,7 +32,6 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
-from packages.fetchai.skills.tac_participation.parameters import Parameters
 from packages.fetchai.skills.tac_participation.search import Search
 
 
@@ -317,9 +316,8 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
-        parameters = cast(Parameters, self.context.parameters)
 
-        if parameters.is_using_contract:
+        if game.is_using_contract:
             contract = self.context.contracts.erc1155
             contract.set_deployed_instance(
                 self.context.ledger_apis.apis.get("ethereum"),

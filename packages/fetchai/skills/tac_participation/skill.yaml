@@ -31,13 +31,10 @@ models:
     class_name: Search
     args:
       search_interval: 5
-  parameters:
-    class_name: Parameters
-    args:
-      is_using_contract: False
   game:
     class_name: Game
     args:
       expected_version_id: v1
+      is_using_contract: False
       # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
 protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']
