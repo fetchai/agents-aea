@@ -32,7 +32,7 @@ models:
     args:
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 11
+      nb_goods: 10
       tx_fee: 1
       base_good_endowment: 4
       lower_bound_factor: 1

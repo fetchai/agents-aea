@@ -337,7 +337,8 @@ class TACBehaviour(Behaviour):
         contract = self.context.contracts.erc1155
         parameters = cast(Parameters, self.context.parameters)
         if is_batch:
-            minting = [parameters.base_good_endowment] * (parameters.nb_goods - 1)
+            # minting = [parameters.base_good_endowment] * (parameters.nb_goods - 1)
+            minting = [parameters.base_good_endowment] * (parameters.nb_goods)
             transaction_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
                 recipient_address=address,
