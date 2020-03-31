@@ -45,7 +45,7 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
 CORE_PATH = "aea"
-CORE_PACKAGES = {"connections": ["stub", "scaffold"], "protocols": ["default", "scaffold"], "skills": ["error", "scaffold"]}
+CORE_PACKAGES = {"contracts": ["scaffold"], "connections": ["stub", "scaffold"], "protocols": ["default", "scaffold"], "skills": ["error", "scaffold"]}
 PACKAGE_PATH = "packages/fetchai"
 PACKAGE_TYPES = ["agents", "connections", "contracts", "protocols", "skills"]
 PACKAGE_HASHES_PATH = "packages/hashes.csv"
