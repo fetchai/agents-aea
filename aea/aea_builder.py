@@ -217,10 +217,9 @@ class _DependenciesManager:
         Get the import order.
 
         At the moment:
-        - a protocol has no dependencies.
+        - protocols and contracts don't have dependencies.
         - a connection can depend on protocols.
         - a skill can depend on protocols and contracts.
-        - a contract ...
 
         :return: a list of pairs: (import path, module object)
         """
@@ -228,7 +227,7 @@ class _DependenciesManager:
         components = filter(
             lambda x: x in self.dependencies_highest_version,
             itertools.chain(
-                self.protocols.values(), self.connections.values(), self.skills.values()
+                self.protocols.values(), self.contracts.values(), self.connections.values(), self.skills.values()
             ),
         )
         module_by_import_path = [
@@ -405,13 +404,7 @@ class AEABuilder:
         if component.component_type == ComponentType.CONNECTION:
             # Do nothing - we don't add connections to resources.
             return
-
-        if component.component_type == ComponentType.PROTOCOL:
-            protocol = cast(Protocol, component)
-            self._resources.add_protocol(protocol)
-        elif component.component_type == ComponentType.SKILL:
-            skill = cast(Skill, component)
-            self._resources.add_skill(skill)
+        self._resources.add_component(component)
 
     def _remove_component_from_resources(self, component_id: ComponentId):
         """Remove a component from the resources."""
@@ -461,6 +454,16 @@ class AEABuilder:
     def remove_skill(self, public_id: PublicId) -> "AEABuilder":
         """Remove protocol"""
         self.remove_component(ComponentId(ComponentType.SKILL, public_id))
+        return self
+
+    def add_contract(self, directory: PathLike) -> "AEABuilder":
+        """Add a contract to the agent."""
+        self.add_component(ComponentType.CONTRACT, directory)
+        return self
+
+    def remove_contract(self, public_id: PublicId) -> "AEABuilder":
+        """Remove protocol"""
+        self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
@@ -662,6 +665,10 @@ class AEABuilder:
             [
                 ComponentId(ComponentType.PROTOCOL, p_id)
                 for p_id in agent_configuration.protocols
+            ],
+            [
+                ComponentId(ComponentType.CONTRACT, p_id)
+                for p_id in agent_configuration.contracts
             ],
             [
                 ComponentId(ComponentType.CONNECTION, p_id)

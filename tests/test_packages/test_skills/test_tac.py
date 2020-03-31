@@ -41,7 +41,9 @@ class TestTacSkills(AeaTestCase):
         tac_controller_name = "tac_controller"
 
         # create tac controller, agent one and agent two
-        self.create_agents(agent_name_one, agent_name_two, tac_controller_name)
+        self.create_agents(
+            agent_name_one, agent_name_two, tac_controller_name,
+        )
 
         # prepare tac controller for test
         tac_controller_dir_path = os.path.join(self.t, tac_controller_name)

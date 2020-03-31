@@ -462,7 +462,7 @@ class Model(SkillComponent, ABC):
 
         :param kwargs: keyword arguments.
         """
-        super().__init__(**kwargs)
+        super().__init__(kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context"))
 
     def setup(self) -> None:
         """Set the class up."""
@@ -540,8 +540,9 @@ class Model(SkillComponent, ABC):
             else:
                 model_instance = model(
                     name=model_id,
-                    configuration=model_config,
                     skill_context=skill_context,
+                    configuration=model_config,
+                    **dict(model_config.args)
                 )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)

@@ -17,16 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the scaffold contract definition."""
+"""Implementation of the 'aea logout' subcommand."""
 
-from aea.configurations.base import PublicId
-from aea.contracts.base import Contract
+import click
+
+from aea.cli.common import _update_cli_config
+from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.registry.utils import registry_logout
 
 
-class MyScaffoldContract(Contract):
-    """The scaffold contract class."""
-
-    def load(self) -> None:
-        """Load the connection."""
-        super().load()
-        # Put your code here to initialize the contract.
+@click.command(name="logout", help="Logout from Registry account.")
+def logout():
+    """Logout from Registry account."""
+    click.echo("Logging out...")
+    registry_logout()
+    _update_cli_config({AUTH_TOKEN_KEY: None})
+    click.echo("Successfully logged out.")

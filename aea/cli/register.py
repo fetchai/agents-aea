@@ -21,29 +21,33 @@
 
 import click
 
-from aea.cli.common import _update_cli_config
-from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.registry.utils import registry_login
+from aea.cli.registry.registration import register as register_new_account
 
 
-def do_login(username: str, password: str):
+def do_register(
+    username: str, email: str, password: str, password_confirmation: str
+) -> None:
     """
-    Login to Registry account and save auth token in config.
+    Register a new Registry account.
 
     :param username: str username.
+    :param email: str email.
     :param password: str password.
+    :param password_confirmation: str password confirmation.
 
     :return: None
     """
-    click.echo("Signing in as {}...".format(username))
-    token = registry_login(username, password)
-    _update_cli_config({AUTH_TOKEN_KEY: token})
-    click.echo("Successfully signed in: {}.".format(username))
+    register_new_account(username, email, password, password_confirmation)
+    click.echo("User successfully registered! " "Now login with your new credentials.")
 
 
-@click.command(name="login", help="Login to Registry account.")
-@click.argument("username", type=str, required=True)
+@click.command(name="register", help="Register a new Registry account.")
+@click.option("--username", type=str, required=True, prompt=True)
+@click.option("--email", type=str, required=True, prompt=True)
 @click.option("--password", type=str, required=True, prompt=True, hide_input=True)
-def login(username, password):
-    """Login to Registry account."""
-    do_login(username, password)
+@click.option(
+    "--confirm_password", type=str, required=True, prompt=True, hide_input=True
+)
+def register(username, email, password, confirm_password):
+    """Register a new Registry account CLI command."""
+    do_register(username, email, password, confirm_password)

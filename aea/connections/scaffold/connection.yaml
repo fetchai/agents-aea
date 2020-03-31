@@ -5,7 +5,7 @@ license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmXMh85EEu3jKEqNwwmht4kYnnPzrb4nwcCeWfNtx9iqXP
+  connection.py: QmPcSy66qBhRZWR8V2nyQXKi5wUcWZ3UQTzHMGFDCiDkbf
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
 protocols: []

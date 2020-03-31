@@ -31,6 +31,10 @@ logger = logging.getLogger(__name__)
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
+    def load(self) -> None:
+        """Load the connection."""
+        # Put your code here to initialize the connection.
+
     async def connect(self) -> None:
         """
         Set up the connection.

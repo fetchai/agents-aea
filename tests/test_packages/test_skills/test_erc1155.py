@@ -200,13 +200,13 @@ class TestGenericSkills:
             process_two.send_signal(signal.SIGINT)
             process_two.wait(timeout=10)
 
-            if not process_one.returncode == 0:
+            if process_one.returncode is None:
                 poll_one = process_one.poll()
                 if poll_one is None:
                     process_one.terminate()
                     process_one.wait(2)
 
-            if not process_two.returncode == 0:
+            if process_two.returncode is None:
                 poll_two = process_two.poll()
                 if poll_two is None:
                     process_two.terminate()
@@ -225,6 +225,10 @@ class TestGenericSkills:
                 standalone_mode=False,
             )
             assert result.exit_code == 0
+
+            # TODO uncomment these to test success!
+            # assert process_one.returncode == 0
+            # assert process_two.returncode == 0
 
     @classmethod
     def teardown_class(cls):

@@ -1414,6 +1414,7 @@ class ContractConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         path_to_contract_interface: str = "",
+        class_name: str = "",
     ):
         """Initialize a protocol configuration object."""
         super().__init__(
@@ -1429,6 +1430,7 @@ class ContractConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.path_to_contract_interface = path_to_contract_interface
+        self.class_name = class_name
 
     @property
     def component_type(self) -> ComponentType:
@@ -1449,6 +1451,7 @@ class ContractConfig(ComponentConfiguration):
             "dependencies": self.dependencies,
             "description": self.description,
             "path_to_contract_interface": self.path_to_contract_interface,
+            "class_name": self.class_name,
         }
 
     @classmethod
@@ -1470,6 +1473,7 @@ class ContractConfig(ComponentConfiguration):
             path_to_contract_interface=cast(
                 str, obj.get("path_to_contract_interface", "")
             ),
+            class_name=obj.get("class_name", "")
         )
 
 

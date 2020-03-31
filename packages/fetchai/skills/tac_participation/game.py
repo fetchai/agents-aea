@@ -160,6 +160,12 @@ class Game(Model):
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._configuration = None  # type: Optional[Configuration]
+        self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
+
+    @property
+    def is_using_contract(self) -> bool:
+        """Returns the is_using_contract."""
+        return self._is_using_contract
 
     @property
     def expected_version_id(self) -> str:

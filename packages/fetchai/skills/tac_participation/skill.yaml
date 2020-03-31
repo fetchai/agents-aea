@@ -5,11 +5,12 @@ license: Apache-2.0
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmTBRm5rneqkYirRZcdgaWaptgPLgk4kTPd1Eb9dM9iK3W
-  game.py: QmaAavauAu19XnJqcVrZWW1uf8h7oycqiyeRDw196Jt196
-  handlers.py: QmQBGtZym6jJ9dnGDZ6jCan3htSzaL1hSnouB8MdN3hk6z
+  game.py: QmZG7qnNqfewMBGSFEiuH8J6xaysGXBj3ZLkb2w6gD6BQo
+  handlers.py: QmQLChjK5hDcNBv8aeYg4brY9jhdv1gzTstu3xLKztgRR3
   search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
 aea_version: 0.2.4
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
+contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
   tac:
     class_name: TACBehaviour
@@ -33,5 +34,6 @@ models:
     class_name: Game
     args:
       expected_version_id: v1
+      is_using_contract: False
       # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
 protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']

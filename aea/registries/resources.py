@@ -28,11 +28,13 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
     SkillId,
-)
+    ContractId)
 from aea.configurations.components import Component
+from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
     ComponentRegistry,
+    ContractRegistry,
     HandlerRegistry,
     ProtocolId,
     ProtocolRegistry,
@@ -67,6 +69,7 @@ class Resources:
         :param directory: the path to the directory which contains the resources
              (skills, connections and protocols)
         """
+        self._contract_registry = ContractRegistry()
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
         self._behaviour_registry = ComponentRegistry[Behaviour]()
@@ -74,6 +77,7 @@ class Resources:
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
+            self._contract_registry,
             self._protocol_registry,
             self._handler_registry,
             self._behaviour_registry,
@@ -86,6 +90,8 @@ class Resources:
             self.add_protocol(cast(Protocol, component))
         elif component.component_type == ComponentType.SKILL:
             self.add_skill(cast(Skill, component))
+        elif component.component_type == ComponentType.CONTRACT:
+            self.add_contract(cast(Contract, component))
         else:
             raise ValueError(
                 "Component type {} not supported.".format(
@@ -130,6 +136,43 @@ class Resources:
         """
         self._protocol_registry.unregister(protocol_id)
 
+    def add_contract(self, contract: Contract) -> None:
+        """
+        Add a contract to the set of resources.
+
+        :param contract: a contract
+        :return: None
+        """
+        self._contract_registry.register(contract.id, contract)
+
+    def get_contract(self, contract_id: ContractId) -> Optional[Contract]:
+        """
+        Get contract for given contract id.
+
+        :param contract_id: the contract id
+        :return: a matching contract, if present, else None
+        """
+        contract = self._contract_registry.fetch(contract_id)
+        return contract
+
+    def get_all_contracts(self) -> List[Contract]:
+        """
+        Get the list of all the contracts.
+
+        :return: the list of contracts.
+        """
+        contracts = self._contract_registry.fetch_all()
+        return contracts
+
+    def remove_contract(self, contract_id: ContractId) -> None:
+        """
+        Remove a contract from the set of resources.
+
+        :param contract_id: the contract id for the contract to be removed.
+        :return: None
+        """
+        self._contract_registry.unregister(contract_id)
+
     def add_skill(self, skill: Skill) -> None:
         """
         Add a skill to the set of resources.
@@ -148,6 +191,20 @@ class Resources:
         if skill.models is not None:
             for model in skill.models.values():
                 self._model_registry.register((skill_id, model.name), model)
+        self.inject_contracts(skill)
+
+    def inject_contracts(self, skill: Skill) -> None:
+        if skill.config.contracts is not None:
+            # check all contracts are present
+            contracts = {}  # type: Dict[str, Contract]
+            for contract_id in skill.config.contracts:
+                contract = self._contract_registry.fetch(contract_id)
+                if contract is None:
+                    raise ValueError(
+                        "Missing contract for contract id {}".format(contract_id)
+                    )
+                contracts[contract_id.name] = contract
+            skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """

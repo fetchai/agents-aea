@@ -32,7 +32,7 @@ from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     PublicId,
-)
+    ContractConfig)
 from aea.helpers.base import load_init_modules, load_module
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ class Component(ABC):
         """Load a component from the directory."""
         configuration = ComponentConfiguration.load(component_type, directory)
         component_class = _get_component_class(component_type, configuration, directory)
-        component_object = component_class(configuration=configuration)
+        component_object = component_class(configuration)
         component_object._directory = directory
         import_prefix = configuration.component_id.prefix_import_path
         init_modules = load_init_modules(directory, prefix=import_prefix)
@@ -130,7 +130,13 @@ class Component(ABC):
 
 
 def _load_connection_class(configuration: ConnectionConfig, directory: Path):
-    """Load a connection class from a directory."""
+    """
+    Load a connection class from a directory.
+
+    :param configuration: the connection configuration.
+    :param directory: the package directory.
+    :return: the connection class.
+    """
     try:
         connection_module_path = directory / "connection.py"
         assert (
@@ -150,10 +156,35 @@ def _load_connection_class(configuration: ConnectionConfig, directory: Path):
         assert connection_class is not None, "Connection class '{}' not found.".format(
             connection_class_name
         )
+        return connection_class
     except AssertionError as e:
         raise ValueError(str(e))
 
-    return connection_class
+
+def _load_contract_class(configuration: ContractConfig, directory: Path):
+    """
+    Load a contract class from a directory.
+
+    :param configuration: the contract configuration.
+    :param directory: the package directory.
+    :return: the contract class.
+    """
+    try:
+        contract_module = load_module("contracts", directory / "contract.py")
+        classes = inspect.getmembers(contract_module, inspect.isclass)
+        contract_class_name = cast(str, configuration.class_name)
+        contract_classes = list(
+            filter(lambda x: re.match(contract_class_name, x[0]), classes)
+        )
+        name_to_class = dict(contract_classes)
+        logger.debug("Processing connection {}".format(contract_class_name))
+        contract_class = name_to_class.get(contract_class_name, None)
+        assert contract_class_name is not None, "Contract class '{}' not found.".format(
+            contract_class_name
+        )
+        return contract_class
+    except AssertionError as e:
+        raise ValueError(str(e))
 
 
 def _get_component_class(
@@ -177,7 +208,6 @@ def _get_component_class(
     elif component_type == ComponentType.SKILL:
         return Skill
     elif component_type == ComponentType.CONTRACT:
-        # TODO
-        raise NotImplementedError
+        return _load_contract_class(cast(ContractConfig, configuration), directory)
     else:
         raise ValueError
