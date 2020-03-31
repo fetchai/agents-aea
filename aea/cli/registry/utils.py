@@ -21,7 +21,6 @@
 
 import os
 import tarfile
-from typing import Dict
 
 import click
 
@@ -50,7 +49,8 @@ def request_api(
     is_auth=False,
     filepath=None,
     handle_400=True,
-) -> Dict:
+    return_code=False,
+):
     """
     Request Registry API.
 
@@ -61,7 +61,7 @@ def request_api(
     :param is_auth: bool is auth requied (default False).
     :param filepath: str path to file to upload (default None).
 
-    :return: dict response from Registry API
+    :return: dict response from Registry API or tuple (dict response, status code).
     """
     headers = {}
     if is_auth:
@@ -114,7 +114,10 @@ def request_api(
         raise click.ClickException(
             "Wrong server response. Status code: {}".format(resp.status_code)
         )
-    return resp_json
+    if return_code:
+        return resp_json, resp.status_code
+    else:
+        return resp_json
 
 
 def download_file(url: str, cwd: str) -> str:
