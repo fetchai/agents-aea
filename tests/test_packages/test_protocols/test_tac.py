@@ -56,6 +56,7 @@ def test_tac_message_instantiation():
         utility_params_by_good_id={"123": 30.0, "1234": 50.0},
         tx_fee=20,
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
+        currency_id_to_name={"FET": "currency_name"},
         good_id_to_name={"123": "First good", "1234": "Second good"},
         version_id="game_version_1",
     )
@@ -127,6 +128,7 @@ def test_tac_serialization():
         utility_params_by_good_id={"123": 30.0, "1234": 50.0},
         tx_fee=20,
         agent_addr_to_name={"agent_1": "Agent one", "agent_2": "Agent two"},
+        currency_id_to_name={"FET": "currency_name"},
         good_id_to_name={"123": "First good", "1234": "Second good"},
         version_id="game_version_1",
     )

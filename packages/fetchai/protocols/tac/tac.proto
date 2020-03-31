@@ -57,6 +57,7 @@ message TacMessage{
         map<string, string> good_id_to_name = 8;
         string version_id = 9;
         map<string, string> info = 10;
+        bool info_is_set = 11;
     }
 
     message Transaction_Confirmation{
@@ -68,6 +69,7 @@ message TacMessage{
     message Tac_Error{
         ErrorCode error_code = 1;
         map<string, string> info = 2;
+        bool info_is_set = 3;
     }
 
 

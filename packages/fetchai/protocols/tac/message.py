@@ -21,7 +21,7 @@
 
 import logging
 from enum import Enum
-from typing import Dict, Set, Tuple, cast
+from typing import Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -170,10 +170,9 @@ class TacMessage(Message):
         return cast(Dict[str, str], self.get("good_id_to_name"))
 
     @property
-    def info(self) -> Dict[str, str]:
+    def info(self) -> Optional[Dict[str, str]]:
         """Get the 'info' content from the message."""
-        assert self.is_set("info"), "'info' content is not set."
-        return cast(Dict[str, str], self.get("info"))
+        return cast(Optional[Dict[str, str]], self.get("info"))
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -393,7 +392,7 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.CANCELLED:
                 expected_nb_of_contents = 0
             elif self.performative == TacMessage.Performative.GAME_DATA:
-                expected_nb_of_contents = 10
+                expected_nb_of_contents = 9
                 assert (
                     type(self.amount_by_currency_id) == dict
                 ), "Invalid type for content 'amount_by_currency_id'. Expected 'dict'. Found '{}'.".format(
@@ -537,22 +536,25 @@ class TacMessage(Message):
                 ), "Invalid type for content 'version_id'. Expected 'str'. Found '{}'.".format(
                     type(self.version_id)
                 )
-                assert (
-                    type(self.info) == dict
-                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
-                    type(self.info)
-                )
-                for key_of_info, value_of_info in self.info.items():
+                if self.is_set("info"):
+                    expected_nb_of_contents += 1
+                    info = cast(Dict[str, str], self.info)
                     assert (
-                        type(key_of_info) == str
-                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
-                        type(key_of_info)
+                        type(info) == dict
+                    ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                        type(info)
                     )
-                    assert (
-                        type(value_of_info) == str
-                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
-                        type(value_of_info)
-                    )
+                    for key_of_info, value_of_info in info.items():
+                        assert (
+                            type(key_of_info) == str
+                        ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_info)
+                        )
+                        assert (
+                            type(value_of_info) == str
+                        ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                            type(value_of_info)
+                        )
             elif self.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
                 expected_nb_of_contents = 3
                 assert (
@@ -599,28 +601,31 @@ class TacMessage(Message):
                         type(value_of_quantities_by_good_id)
                     )
             elif self.performative == TacMessage.Performative.TAC_ERROR:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 1
                 assert (
                     type(self.error_code) == CustomErrorCode
                 ), "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
                     type(self.error_code)
                 )
-                assert (
-                    type(self.info) == dict
-                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
-                    type(self.info)
-                )
-                for key_of_info, value_of_info in self.info.items():
+                if self.is_set("info"):
+                    expected_nb_of_contents += 1
+                    info = cast(Dict[str, str], self.info)
                     assert (
-                        type(key_of_info) == str
-                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
-                        type(key_of_info)
+                        type(info) == dict
+                    ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                        type(info)
                     )
-                    assert (
-                        type(value_of_info) == str
-                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
-                        type(value_of_info)
-                    )
+                    for key_of_info, value_of_info in info.items():
+                        assert (
+                            type(key_of_info) == str
+                        ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_info)
+                        )
+                        assert (
+                            type(value_of_info) == str
+                        ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                            type(value_of_info)
+                        )
 
             # Check correct content count
             assert (

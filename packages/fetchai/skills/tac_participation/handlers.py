@@ -19,7 +19,7 @@
 
 """This package contains the handlers."""
 
-from typing import Optional, Tuple, cast
+from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -288,10 +288,10 @@ class TACHandler(Handler):
             )
         )
         if error_code == TacMessage.ErrorCode.TRANSACTION_NOT_VALID:
-            info = tac_message.info
+            info = cast(Dict[str, str], tac_message.info)
             transaction_id = (
                 cast(str, info.get("transaction_id"))
-                if (info.get("transaction_id") is not None)
+                if (info is not None and info.get("transaction_id") is not None)
                 else "NO_TX_ID"
             )
             self.context.logger.warning(

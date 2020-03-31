@@ -107,8 +107,10 @@ class TacSerializer(Serializer):
             performative.good_id_to_name.update(good_id_to_name)
             version_id = msg.version_id
             performative.version_id = version_id
-            info = msg.info
-            performative.info.update(info)
+            if msg.is_set("info"):
+                performative.info_is_set = True
+                info = msg.info
+                performative.info.update(info)
             tac_msg.game_data.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
             performative = tac_pb2.TacMessage.Transaction_Confirmation()  # type: ignore
@@ -123,8 +125,10 @@ class TacSerializer(Serializer):
             performative = tac_pb2.TacMessage.Tac_Error()  # type: ignore
             error_code = msg.error_code
             ErrorCode.encode(performative.error_code, error_code)
-            info = msg.info
-            performative.info.update(info)
+            if msg.is_set("info"):
+                performative.info_is_set = True
+                info = msg.info
+                performative.info.update(info)
             tac_msg.tac_error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -217,9 +221,10 @@ class TacSerializer(Serializer):
             performative_content["good_id_to_name"] = good_id_to_name_dict
             version_id = tac_pb.game_data.version_id
             performative_content["version_id"] = version_id
-            info = tac_pb.game_data.info
-            info_dict = dict(info)
-            performative_content["info"] = info_dict
+            if tac_pb.game_data.info_is_set:
+                info = tac_pb.game_data.info
+                info_dict = dict(info)
+                performative_content["info"] = info_dict
         elif performative_id == TacMessage.Performative.TRANSACTION_CONFIRMATION:
             tx_id = tac_pb.transaction_confirmation.tx_id
             performative_content["tx_id"] = tx_id
@@ -237,9 +242,10 @@ class TacSerializer(Serializer):
             pb2_error_code = tac_pb.tac_error.error_code
             error_code = ErrorCode.decode(pb2_error_code)
             performative_content["error_code"] = error_code
-            info = tac_pb.tac_error.info
-            info_dict = dict(info)
-            performative_content["info"] = info_dict
+            if tac_pb.tac_error.info_is_set:
+                info = tac_pb.tac_error.info
+                info_dict = dict(info)
+                performative_content["info"] = info_dict
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 
