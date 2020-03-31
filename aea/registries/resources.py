@@ -35,6 +35,7 @@ from aea.configurations.base import (
     SkillId,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
     ComponentRegistry,
@@ -42,6 +43,7 @@ from aea.registries.base import (
     ProtocolId,
     ProtocolRegistry,
     Registry,
+    ContractRegistry,
 )
 from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
@@ -75,6 +77,7 @@ class Resources:
             if directory is not None
             else str(Path(".").absolute())
         )
+        self._contract_registry = ContractRegistry()
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
         self._behaviour_registry = ComponentRegistry[Behaviour]()
@@ -82,6 +85,7 @@ class Resources:
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
+            self._contract_registry,
             self._protocol_registry,
             self._handler_registry,
             self._behaviour_registry,
@@ -116,6 +120,9 @@ class Resources:
         :param agent_context: the agent context
         """
         agent_configuration = self._load_agent_config()
+        self._contract_registry.populate(
+            self.directory, allowed_contracts=agent_configuration.contracts
+        )
         self._protocol_registry.populate(
             self.directory, allowed_protocols=agent_configuration.protocols
         )
@@ -183,6 +190,7 @@ class Resources:
                     skill = Skill.from_dir(str(skill_directory), agent_context)
                     assert skill is not None
                     self.add_skill(skill)
+                    self.inject_contracts(skill)
             except Exception as e:
                 logger.warning(
                     "A problem occurred while parsing the skill directory {}. Exception: {}".format(
@@ -245,6 +253,19 @@ class Resources:
         if skill.models is not None:
             for model in skill.models.values():
                 self._model_registry.register((skill_id, model.name), model)
+
+    def inject_contracts(self, skill: Skill) -> None:
+        if skill.config.contracts is not None:
+            # check all contracts are present
+            contracts = {}  # type: Dict[str, Contract]
+            for contract_id in skill.config.contracts:
+                contract = self._contract_registry.fetch(contract_id)
+                if contract is None:
+                    raise ValueError(
+                        "Missing contract for contract id {}".format(contract_id)
+                    )
+                contracts[contract_id.name] = contract
+            skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """
