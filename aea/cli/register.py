@@ -30,7 +30,7 @@ def do_register(
     username: str, email: str, password: str, password_confirmation: str
 ) -> None:
     """
-    Register a new Registry account.
+    Register a new Registry account and save auth token.
 
     :param username: str username.
     :param email: str email.

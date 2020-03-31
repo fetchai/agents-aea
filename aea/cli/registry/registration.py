@@ -29,7 +29,7 @@ def register(
     username: str, email: str, password: str, password_confirmation: str
 ) -> str:
     """
-    Register new Registry account.
+    Register new Registry account and automatically login if successful.
 
     :param username: str username.
     :param email: str email.
