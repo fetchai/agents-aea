@@ -21,14 +21,16 @@
 
 import click
 
+from aea.cli.common import _update_cli_config
 from aea.cli.registry.registration import register as register_new_account
+from aea.cli.registry.settings import AUTH_TOKEN_KEY
 
 
 def do_register(
     username: str, email: str, password: str, password_confirmation: str
 ) -> None:
     """
-    Register a new Registry account.
+    Register a new Registry account and save auth token.
 
     :param username: str username.
     :param email: str email.
@@ -37,8 +39,9 @@ def do_register(
 
     :return: None
     """
-    register_new_account(username, email, password, password_confirmation)
-    click.echo("User successfully registered! " "Now login with your new credentials.")
+    token = register_new_account(username, email, password, password_confirmation)
+    _update_cli_config({AUTH_TOKEN_KEY: token})
+    click.echo("Successfully registered and logged in: {}".format(username))
 
 
 @click.command(name="register", help="Register a new Registry account.")

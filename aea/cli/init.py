@@ -65,10 +65,6 @@ def _registry_init(author):
 
             do_register(username, email, password, password_confirmation)
 
-            username = click.prompt("Username", type=str)
-            password = click.prompt("Password", type=str, hide_input=True)
-            do_login(username, password)
-
     return username
 
 
@@ -102,6 +98,7 @@ def init(ctx: Context, author: str, registry: bool):
                 )
         _update_cli_config({AUTHOR: author})
         config = _get_or_create_cli_config()
+        config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
         success_msg = "AEA configurations already initialized: {}".format(config)

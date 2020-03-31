@@ -5,7 +5,6 @@ version: 0.1.0
 license: Apache-2.0
 aea_version: 0.2.4
 description: 'A protocol for exchanging any bytes message.'
-aea_version: 0.2.4
 speech_acts:
   bytes:
     content: pt:bytes
