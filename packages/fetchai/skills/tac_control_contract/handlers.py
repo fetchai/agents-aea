@@ -304,11 +304,10 @@ class TransactionHandler(Handler):
                     )
                 )
                 contract.set_address(ledger_api, transaction.contractAddress)
-        elif (
-            tx_msg_response.tx_id == "contract_create_batch"
-            or tx_msg_response.tx_id == "contract_create_single"
-        ):
-            self.context.logger.info("Sending creation transaction to the ledger!")
+        elif tx_msg_response.tx_id == "contract_create_single":
+            self.context.logger.info(
+                "Sending single creation transaction to the ledger!"
+            )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
             tx_digest = ledger_api.send_signed_transaction(
@@ -322,6 +321,25 @@ class TransactionHandler(Handler):
                 self.context.info("The creation command wasn't successful. Aborting.")
             else:
                 tac_behaviour.is_items_created = True
+                self.context.logger.info(
+                    "Successfully created the item. Transaction hash: {}".format(
+                        transaction.transactionHash.hex()
+                    )
+                )
+        elif tx_msg_response.tx_id == "contract_create_batch":
+            self.context.logger.info("Sending creation transaction to the ledger!")
+            tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
+            tx_digest = ledger_api.send_signed_transaction(
+                is_waiting_for_confirmation=True, tx_signed=tx_signed
+            )
+            transaction = ledger_api.get_transaction_status(  # type: ignore
+                tx_digest=tx_digest
+            )
+            if transaction.status != 1:
+                self.context.is_active = False
+                self.context.info("The creation command wasn't successful. Aborting.")
+            else:
                 self.context.logger.info(
                     "Successfully created the items. Transaction hash: {}".format(
                         transaction.transactionHash.hex()
