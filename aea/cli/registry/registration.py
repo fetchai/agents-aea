@@ -27,7 +27,7 @@ from aea.cli.registry.utils import request_api
 
 def register(
     username: str, email: str, password: str, password_confirmation: str
-) -> None:
+) -> str:
     """
     Register new Registry account.
 

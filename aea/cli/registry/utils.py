@@ -21,7 +21,7 @@
 
 import os
 import tarfile
-from typing import Dict
+from typing import Dict, Tuple, Union
 
 import click
 
@@ -51,7 +51,7 @@ def request_api(
     filepath=None,
     handle_400=True,
     return_code=False,
-) -> Dict:
+):
     """
     Request Registry API.
 
@@ -62,7 +62,7 @@ def request_api(
     :param is_auth: bool is auth requied (default False).
     :param filepath: str path to file to upload (default None).
 
-    :return: dict response from Registry API
+    :return: dict response from Registry API or tuple (dict response, status code).
     """
     headers = {}
     if is_auth:
