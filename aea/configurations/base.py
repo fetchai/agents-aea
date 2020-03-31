@@ -633,7 +633,15 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         dependencies: Optional[Dependencies] = None,
     ):
-        super().__init__(name, author, version, license, aea_version, fingerprint, fingerprint_ignore_patterns)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+        )
         self._pypi_dependencies = dependencies if dependencies is not None else {}
 
     @property
@@ -756,7 +764,7 @@ class ConnectionConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            dependencies
+            dependencies,
         )
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
@@ -853,7 +861,14 @@ class ProtocolConfig(ComponentConfiguration):
     ):
         """Initialize a connection configuration object."""
         super().__init__(
-            name, author, version, license, aea_version, fingerprint, fingerprint_ignore_patterns, dependencies
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+            dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -943,7 +958,16 @@ class SkillConfig(ComponentConfiguration):
         description: str = "",
     ):
         """Initialize a skill configuration."""
-        super().__init__(name, author, version, license, aea_version, fingerprint, fingerprint_ignore_patterns, dependencies)
+        super().__init__(
+            name,
+            author,
+            version,
+            license,
+            aea_version,
+            fingerprint,
+            fingerprint_ignore_patterns,
+            dependencies,
+        )
         self.protocols = (
             protocols if protocols is not None else []
         )  # type: List[PublicId]
@@ -1386,7 +1410,7 @@ class ContractConfig(ComponentConfiguration):
             aea_version,
             fingerprint,
             fingerprint_ignore_patterns,
-            dependencies
+            dependencies,
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description

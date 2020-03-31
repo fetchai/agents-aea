@@ -27,14 +27,14 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+
 import yaml
 
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import ComponentType, PublicId
+from aea.configurations.base import ComponentType, DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.components import Component
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis

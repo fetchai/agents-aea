@@ -30,7 +30,7 @@ import pytest
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import PublicId, ComponentType
+from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.components import Component
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
@@ -52,10 +52,10 @@ from .conftest import (
     DUMMY_SKILL_PUBLIC_ID,
     ROOT_DIR,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_local_connection)
+    _make_local_connection,
+)
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
-from .data.dummy_skill.behaviours import DummyBehaviour
-from .test_connections.test_stub import _make_stub_connection
+from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_initialise_aea():
@@ -333,23 +333,31 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.wallet = Wallet({FETCHAI: cls.private_key_path})
         cls.ledger_apis = LedgerApis({}, FETCHAI)
         cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
-        cls.connection = _make_local_connection(
-            cls.agent_name, cls.node
-        )
+        cls.connection = _make_local_connection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
 
-        cls.default_protocol = cast(Protocol, Component.load_from_directory(ComponentType.PROTOCOL,
-                                                             Path(AEA_DIR, "protocols", "default")))
+        cls.default_protocol = cast(
+            Protocol,
+            Component.load_from_directory(
+                ComponentType.PROTOCOL, Path(AEA_DIR, "protocols", "default")
+            ),
+        )
         cls.resources.add_protocol(cls.default_protocol)
 
-        cls.error_skill = cast(Skill, Component.load_from_directory(ComponentType.SKILL,
-            Path(AEA_DIR, "skills", "error")
-        ))
-        cls.dummy_skill = cast(Skill, Component.load_from_directory(ComponentType.SKILL,
-            Path(CUR_PATH, "data", "dummy_skill")
-        ))
+        cls.error_skill = cast(
+            Skill,
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(AEA_DIR, "skills", "error")
+            ),
+        )
+        cls.dummy_skill = cast(
+            Skill,
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
+            ),
+        )
         cls.resources.add_skill(cls.dummy_skill)
         cls.resources.add_skill(cls.error_skill)
 
@@ -438,7 +446,11 @@ class TestAddBehaviourDynamically:
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources()
-        resources.add_component(Component.load_from_directory(ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")))
+        resources.add_component(
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
+            )
+        )
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         cls.input_file = tempfile.mkstemp()[1]
         cls.output_file = tempfile.mkstemp()[1]
@@ -447,7 +459,7 @@ class TestAddBehaviourDynamically:
             [_make_local_connection(identity.address, LocalNode())],
             wallet,
             ledger_apis,
-            resources
+            resources,
         )
         for skill in resources.get_all_skills():
             skill.skill_context.set_agent_context(cls.agent.context)
@@ -476,4 +488,3 @@ class TestAddBehaviourDynamically:
         cls.t.join()
         Path(cls.input_file).unlink()
         Path(cls.output_file).unlink()
-

@@ -19,15 +19,6 @@
 
 """This module contains registries."""
 
-import logging
-import os
-import queue
-import re
-from abc import ABC, abstractmethod
-from pathlib import Path
-from queue import Queue
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
-
 import importlib.util
 import inspect
 import json
@@ -39,29 +30,19 @@ from pathlib import Path
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.configurations.base import (
-    ComponentType,
     ContractConfig,
     ContractId,
     DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    ProtocolConfig,
     ProtocolId,
     PublicId,
     SkillId,
 )
-from aea.configurations.components import Component
-from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import EnvelopeContext
-from aea.protocols.base import Message, Protocol
-from aea.skills.base import Behaviour, Handler, Model, Skill
-
 from aea.configurations.loader import ConfigLoader
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
-
 from aea.skills.tasks import Task
+
 
 logger = logging.getLogger(__name__)
 

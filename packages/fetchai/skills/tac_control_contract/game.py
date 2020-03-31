@@ -750,7 +750,7 @@ class Game(Model):
         return self._registration
 
     @property
-    def configuration(self) -> Configuration:
+    def configuration(self) -> Configuration:  # type: ignore
         """Get game configuration."""
         assert (
             self._configuration is not None

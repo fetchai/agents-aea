@@ -21,21 +21,15 @@
 
 import logging
 import os
-import pprint
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 from aea.configurations.base import (
-    AgentConfig,
-    ConfigurationType,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
+    ComponentType,
     PublicId,
     SkillId,
-    ComponentType)
+)
 from aea.configurations.components import Component
-from aea.configurations.loader import ConfigLoader
 from aea.protocols.base import Protocol
 from aea.registries.base import (
     ComponentRegistry,
@@ -44,8 +38,9 @@ from aea.registries.base import (
     ProtocolRegistry,
     Registry,
 )
-from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
+from aea.skills.base import Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
+
 
 logger = logging.getLogger(__name__)
 

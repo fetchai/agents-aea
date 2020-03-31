@@ -125,6 +125,7 @@ class _SysModules:
         """
         with _SysModules.__rlock:
             # save the current state of sys.modules
+            old_keys = set(sys.modules.keys())
             try:
                 for import_path, module_obj in modules:
                     assert import_path not in sys.modules
@@ -132,10 +133,12 @@ class _SysModules:
                 yield
             finally:
                 pass
-                # remove modules whose import path prefix is "packages."
+                # remove modules that:
+                # - whose import path prefix is "packages." and
+                # - were not loaded before us.
                 keys = set(sys.modules.keys())
                 for key in keys:
-                    if re.match("^packages.?", key):
+                    if re.match("^packages.?", key) and key not in old_keys:
                         sys.modules.pop(key, None)
 
 

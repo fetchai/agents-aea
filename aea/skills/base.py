@@ -72,7 +72,7 @@ class SkillContext:
     @property
     def logger(self) -> Logger:
         """Get the logger."""
-        assert self._logger is not None, "Logger not set yet."
+        assert self._logger is not None, "Logger not set."
         return self._logger
 
     @logger.setter
@@ -210,12 +210,6 @@ class SkillContext:
         """Get contracts the skill has access to."""
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.contracts)
-
-    @property
-    def logger(self) -> Logger:
-        """Get the logger."""
-        assert self._logger is not None, "Logger not set."
-        return self._logger
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
@@ -558,7 +552,8 @@ class Skill(Component):
     """This class implements a skill."""
 
     def __init__(
-        self, configuration: SkillConfig,
+        self,
+        configuration: SkillConfig,
         skill_context: Optional[SkillContext] = None,
         handlers: Optional[Dict[str, Handler]] = None,
         behaviours: Optional[Dict[str, Behaviour]] = None,
@@ -573,11 +568,15 @@ class Skill(Component):
         super().__init__(configuration)
         self.config = configuration
         self._skill_context = skill_context  # type: Optional[SkillContext]
-        self._handlers = {} if handlers is None else handlers  # type: Dict[str, Handler]
-        self._behaviours = {} if behaviours is None else behaviours  # type: Dict[str, Behaviour]
+        self._handlers = (
+            {} if handlers is None else handlers
+        )  # type: Dict[str, Handler]
+        self._behaviours = (
+            {} if behaviours is None else behaviours
+        )  # type: Dict[str, Behaviour]
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
-        self._contracts = {}   # type: Dict[str, Contract]
+        self._contracts = {}  # type: Dict[str, Contract]
 
     @property
     def contracts(self) -> Dict[str, Contract]:

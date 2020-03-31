@@ -30,7 +30,11 @@ from aea.protocols.default.message import DefaultMessage
 
 import packages
 
-from ....conftest import _make_tcp_server_connection, get_unused_tcp_port
+from ....conftest import (
+    _make_tcp_client_connection,
+    _make_tcp_server_connection,
+    get_unused_tcp_port,
+)
 
 
 @pytest.mark.asyncio
@@ -111,7 +115,7 @@ async def test_send_cancelled():
     """Test that cancelling a send works correctly."""
     port = get_unused_tcp_port()
     tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port)
-    tcp_client = _make_tcp_server_connection("address_client", "127.0.0.1", port)
+    tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port)
 
     await tcp_server.connect()
     await tcp_client.connect()

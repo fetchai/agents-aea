@@ -52,10 +52,6 @@ from aea.protocols.generator import (
     _union_sub_type_to_protobuf_variable_name,
 )
 from aea.skills.base import Handler, SkillContext
-from aea.registries.resources import Resources
-from aea.skills.base import Handler, Skill, SkillContext
-
-from packages.fetchai.connections.oef.connection import OEFConnection
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
