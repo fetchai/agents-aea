@@ -3,6 +3,7 @@ name: http
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A protocol for HTTP requests and responses.'
 speech_acts:
   request:

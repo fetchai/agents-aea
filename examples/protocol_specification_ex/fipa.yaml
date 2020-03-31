@@ -3,6 +3,7 @@ name: fipa
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A protocol for FIPA ACL.'
 speech_acts:
   cfp:
