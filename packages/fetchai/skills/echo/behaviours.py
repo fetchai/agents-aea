@@ -25,6 +25,11 @@ from aea.skills.behaviours import TickerBehaviour
 class EchoBehaviour(TickerBehaviour):
     """Echo behaviour."""
 
+    def __init__(self, **kwargs):
+        """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
+        self.context.logger.info("EchoBehaviour.__init__: arguments: {}".format(kwargs))
+
     def setup(self) -> None:
         """Set up the behaviour."""
         self.context.logger.info("Echo Behaviour: setup method called.")

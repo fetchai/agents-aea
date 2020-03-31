@@ -674,19 +674,23 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
     @staticmethod
     def load(
-        component_type: ComponentType, directory: Path
+        component_type: ComponentType,
+        directory: Path,
+        skip_consistency_check: bool = False,
     ) -> "ComponentConfiguration":
         """
         Load configuration and check that it is consistent against the directory.
 
         :param component_type: the component type.
         :param directory: the root of the package
+        :param skip_consistency_check: if True, the consistency check are skipped.
         :return: the configuration object.
         """
         configuration_object = ComponentConfiguration._load_configuration_object(
             component_type, directory
         )
-        configuration_object._check_configuration_consistency(directory)
+        if not skip_consistency_check:
+            configuration_object._check_configuration_consistency(directory)
         return configuration_object
 
     @staticmethod

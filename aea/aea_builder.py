@@ -379,21 +379,29 @@ class AEABuilder:
         self._default_ledger = default
 
     def add_component(
-        self, component_type: ComponentType, directory: PathLike
+        self,
+        component_type: ComponentType,
+        directory: PathLike,
+        skip_consistency_check: bool = False,
     ) -> "AEABuilder":
         """
         Add a component, given its type and the directory.
 
         :param component_type: the component type.
         :param directory: the directory path.
+        :param skip_consistency_check: if True, the consistency check are skipped.
         :raises ValueError: if a component is already registered with the same component id.
         """
         directory = Path(directory)
-        configuration = ComponentConfiguration.load(component_type, directory)
+        configuration = ComponentConfiguration.load(
+            component_type, directory, skip_consistency_check
+        )
         self._check_can_add(configuration)
 
-        with self._package_dependency_manager.load_dependencies():
-            component = Component.load_from_directory(component_type, directory)
+        # with self._package_dependency_manager.load_dependencies():
+        component = Component.load_from_directory(
+            component_type, directory, skip_consistency_check
+        )
 
         # update dependency graph
         self._package_dependency_manager.add_component(component)
@@ -615,7 +623,9 @@ class AEABuilder:
             )
 
     @classmethod
-    def from_aea_project(cls, aea_project_path: PathLike):
+    def from_aea_project(
+        cls, aea_project_path: PathLike, skip_consistency_check: bool = False
+    ):
         """
         Construct the builder from an AEA project
 
@@ -627,6 +637,7 @@ class AEABuilder:
         - load every component
 
         :param aea_project_path: path to the AEA project.
+        :param skip_consistency_check: if True, the consistency check are skipped.
         :return: an AEA agent.
         """
         aea_project_path = Path(aea_project_path)
@@ -686,7 +697,11 @@ class AEABuilder:
             component_path = cls._find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
-            builder.add_component(component_id.component_type, component_path)
+            builder.add_component(
+                component_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
 
         return builder
 

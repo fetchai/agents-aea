@@ -57,9 +57,13 @@ def _prepare_environment(click_context, env_file: str, is_install_deps: bool) ->
             click_context.invoke(install)
 
 
-def _build_aea(connection_ids: Optional[List[PublicId]]) -> AEA:
+def _build_aea(
+    connection_ids: Optional[List[PublicId]], skip_consistency_check: bool
+) -> AEA:
     try:
-        builder = AEABuilder.from_aea_project(Path("."))
+        builder = AEABuilder.from_aea_project(
+            Path("."), skip_consistency_check=skip_consistency_check
+        )
         aea = builder.build(connection_ids=connection_ids)
         return aea
     except Exception as e:
@@ -115,6 +119,7 @@ def run(
     click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
+    skip_consistency_check = click_context.obj.config["skip_consistency_check"]
     _prepare_environment(click_context, env_file, is_install_deps)
-    aea = _build_aea(connection_ids)
+    aea = _build_aea(connection_ids, skip_consistency_check)
     _run_aea(aea)

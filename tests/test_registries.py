@@ -28,12 +28,10 @@ from typing import cast
 
 import pytest
 
-import yaml
-
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import ComponentType, DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
@@ -65,24 +63,19 @@ class TestContractRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        # make fake contract
-        cls.fake_contract_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("contracts").append(str(cls.fake_contract_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
+        contract = Component.load_from_directory(
+            ComponentType.CONTRACT,
+            Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"),
+        )
+        contract.load()
 
         cls.registry = ContractRegistry()
+        cls.registry.register(
+            contract.configuration.public_id, cast(Contract, contract)
+        )
         cls.expected_contract_ids = {
             PublicId("fetchai", "erc1155", "0.1.0"),
         }
-
-    def test_not_able_to_add_bad_formatted_contract(self):
-        """Test that the contract registry has not been able to add the contract 'fake'."""
-        self.mocked_logger.assert_called_with(
-            "Not able to add contract '{}'.".format("fake")
-        )
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""

@@ -73,14 +73,7 @@ def test_run(pytestconfig):
 
     try:
         process = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/local:0.1.0",
-            ],
+            [sys.executable, "-m", "aea.cli", "run"],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )

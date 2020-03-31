@@ -30,6 +30,11 @@ class EchoHandler(Handler):
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+        self.context.logger.info("EchoHandler.__init__: arguments: {}".format(kwargs))
+
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("Echo Handler: setup method called.")
