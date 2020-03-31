@@ -320,23 +320,6 @@ class TACHandler(Handler):
         parameters = cast(Parameters, self.context.parameters)
 
         if parameters.is_using_contract:
-            amount_by_currency_id = {
-                str(key): value
-                for key, value in tac_message.amount_by_currency_id.items()
-            }
-            quantities_by_good_id = {
-                str(key): value
-                for key, value in tac_message.quantities_by_good_id.items()
-            }
-            exchange_params_by_currency_id = {
-                str(key): value
-                for key, value in tac_message.exchange_params_by_currency_id.items()
-            }
-            utility_params_by_good_id = {
-                str(key): value
-                for key, value in tac_message.utility_params_by_good_id.items()
-            }
-
             contract = self.context.contracts.erc1155
             contract.set_deployed_instance(
                 self.context.ledger_apis.apis.get("ethereum"),
@@ -346,19 +329,13 @@ class TACHandler(Handler):
             self.context.logger.info(
                 "We received a contract address: {}".format(contract.instance.address)
             )
-        else:
-            amount_by_currency_id = tac_message.amount_by_currency_id
-            quantities_by_good_id = tac_message.quantities_by_good_id
-            exchange_params_by_currency_id = tac_message.exchange_params_by_currency_id
-
-            utility_params_by_good_id = tac_message.utility_params_by_good_id
 
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=amount_by_currency_id,
-            quantities_by_good_id=quantities_by_good_id,
-            exchange_params_by_currency_id=exchange_params_by_currency_id,
-            utility_params_by_good_id=utility_params_by_good_id,
+            amount_by_currency_id=tac_message.amount_by_currency_id,
+            quantities_by_good_id=tac_message.quantities_by_good_id,
+            exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
+            utility_params_by_good_id=tac_message.utility_params_by_good_id,
             tx_fee=tac_message.tx_fee,
         )
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
