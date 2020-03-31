@@ -51,13 +51,18 @@ def _registry_init(author):
             password = click.prompt("Password", type=str, hide_input=True)
             do_login(username, password)
         else:
-            click.echo("Registering a new account...")
+            click.echo("Create a new account on the Registry now:")
             username = click.prompt("Username", type=str)
             email = click.prompt("Email", type=str)
             password = click.prompt("Password", type=str, hide_input=True)
-            password_confirmation = click.prompt(
-                "Confirm password", type=str, hide_input=True
-            )
+
+            password_confirmation = None
+            while password_confirmation != password:
+                click.echo("Please make sure that passwords are equal.")
+                password_confirmation = click.prompt(
+                    "Confirm password", type=str, hide_input=True
+                )
+
             do_register(username, email, password, password_confirmation)
 
             username = click.prompt("Username", type=str)
