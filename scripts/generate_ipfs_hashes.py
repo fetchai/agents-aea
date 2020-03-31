@@ -45,7 +45,7 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
 CORE_PATH = "aea"
-CORE_PACKAGES = {"connections": "stub", "protocols": "default", "skills": "error"}
+CORE_PACKAGES = {"connections": ["stub", "scaffold"], "protocols": ["default", "scaffold"], "skills": ["error", "scaffold"]}
 PACKAGE_PATH = "packages/fetchai"
 PACKAGE_TYPES = ["agents", "connections", "contracts", "protocols", "skills"]
 PACKAGE_HASHES_PATH = "packages/hashes.csv"
@@ -170,11 +170,12 @@ if __name__ == "__main__":
         ipfs_hash_only = IPFSHashOnly()
 
         # ipfs hash the core packages
-        for package_type, package_name in CORE_PACKAGES.items():
-            target_dir = os.path.join(CORE_PATH, package_type, package_name)
-            ipfs_hashing(
-                package_hashes, target_dir, package_type, package_name, ipfs_hash_only
-            )
+        for package_type, package_names in CORE_PACKAGES.items():
+            for package_name in package_names:
+                target_dir = os.path.join(CORE_PATH, package_type, package_name)
+                ipfs_hashing(
+                    package_hashes, target_dir, package_type, package_name, ipfs_hash_only
+                )
 
         # ipfs hash the registry packages
         for package_type in PACKAGE_TYPES:
