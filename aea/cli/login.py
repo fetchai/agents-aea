@@ -41,7 +41,7 @@ def do_login(username: str, password: str):
     click.echo("Successfully signed in: {}.".format(username))
 
 
-@click.command(name="login", help="Login to Registry account")
+@click.command(name="login", help="Login to Registry account.")
 @click.argument("username", type=str, required=True)
 @click.option("--password", type=str, required=True, prompt=True, hide_input=True)
 def login(username, password):

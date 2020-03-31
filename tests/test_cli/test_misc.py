@@ -53,7 +53,6 @@ Options:
   --version                 Show the version and exit.
   -v, --verbosity LVL       One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                             CRITICAL, OFF
-
   --skip-consistency-check  Skip consistency check.
   --help                    Show this message and exit.
 
@@ -76,9 +75,11 @@ Commands:
   install          Install the dependencies.
   launch           Launch many agents.
   list             List the installed resources.
-  login            Login to Registry account
+  login            Login to Registry account.
+  logout           Logout from Registry account.
   publish          Publish Agent to Registry.
   push             Push item to Registry or save it in local packages.
+  register         Register a new Registry account.
   remove           Remove a resource from the agent.
   run              Run the agent.
   scaffold         Scaffold a resource for the agent.

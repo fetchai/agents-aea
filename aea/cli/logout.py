@@ -26,7 +26,7 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import registry_logout
 
 
-@click.command(name="logout", help="Logout from Registry account")
+@click.command(name="logout", help="Logout from Registry account.")
 def logout():
     """Logout from Registry account."""
     click.echo("Logging out...")

@@ -41,7 +41,7 @@ def do_register(
     click.echo("User successfully registered! " "Now login with your new credentials.")
 
 
-@click.command(name="register", help="Register a new Registry account")
+@click.command(name="register", help="Register a new Registry account.")
 @click.option("--username", type=str, required=True, prompt=True)
 @click.option("--email", type=str, required=True, prompt=True)
 @click.option("--password", type=str, required=True, prompt=True, hide_input=True)
