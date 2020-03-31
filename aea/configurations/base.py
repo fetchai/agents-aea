@@ -1473,7 +1473,7 @@ class ContractConfig(ComponentConfiguration):
             path_to_contract_interface=cast(
                 str, obj.get("path_to_contract_interface", "")
             ),
-            class_name=obj.get("class_name", "")
+            class_name=obj.get("class_name", ""),
         )
 
 

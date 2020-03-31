@@ -24,11 +24,7 @@ import os
 import re
 from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
-from aea.configurations.base import (
-    ComponentType,
-    PublicId,
-    SkillId,
-    ContractId)
+from aea.configurations.base import ComponentType, ContractId, PublicId, SkillId
 from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol

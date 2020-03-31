@@ -25,7 +25,7 @@ from typing import Any, Dict, List
 
 from vyper.utils import keccak256
 
-from aea.configurations.base import ContractConfig, ContractId
+from aea.configurations.base import ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage

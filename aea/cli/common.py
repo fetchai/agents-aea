@@ -44,8 +44,8 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PublicId,
-    _compare_fingerprints,
     _check_aea_version,
+    _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders

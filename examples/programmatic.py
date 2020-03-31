@@ -36,9 +36,14 @@ if __name__ == "__main__":
     builder.add_protocol("./packages/fetchai/protocols/oef_search")
     builder.add_skill("./packages/fetchai/skills/echo")
     builder.add_contract("./packages/fetchai/contracts/erc1155")
-    builder.add_ledger_api_config("ethereum",
-                                  {"address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-                                   "chain_id": 3, "gas_price": 50, })
+    builder.add_ledger_api_config(
+        "ethereum",
+        {
+            "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+            "chain_id": 3,
+            "gas_price": 50,
+        },
+    )
 
     builder.add_skill("./packages/fetchai/skills/erc1155_deploy")
 

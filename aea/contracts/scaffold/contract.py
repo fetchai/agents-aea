@@ -19,7 +19,6 @@
 
 """This module contains the scaffold contract definition."""
 
-from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 
 

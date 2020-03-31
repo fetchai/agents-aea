@@ -30,8 +30,7 @@ class Contract(Component):
     """Abstract definition of a contract."""
 
     def __init__(
-        self,
-        config: ContractConfig,
+        self, config: ContractConfig,
     ):
         """
         Initialize the contract.
@@ -51,7 +50,7 @@ class Contract(Component):
     def config(self) -> ContractConfig:
         """Get the configuration."""
         # return self._config
-        return self._configuration
+        return self._configuration  # type: ignore
 
     @property
     def contract_interface(self) -> Dict[str, Any]:

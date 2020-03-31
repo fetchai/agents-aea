@@ -31,8 +31,9 @@ from aea.configurations.base import (
     ComponentId,
     ComponentType,
     ConnectionConfig,
+    ContractConfig,
     PublicId,
-    ContractConfig)
+)
 from aea.helpers.base import load_init_modules, load_module
 
 logger = logging.getLogger(__name__)

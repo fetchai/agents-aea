@@ -462,7 +462,9 @@ class Model(SkillComponent, ABC):
 
         :param kwargs: keyword arguments.
         """
-        super().__init__(kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context"))
+        super().__init__(
+            kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context")
+        )
 
     def setup(self) -> None:
         """Set the class up."""

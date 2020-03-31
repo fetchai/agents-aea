@@ -227,7 +227,10 @@ class _DependenciesManager:
         components = filter(
             lambda x: x in self.dependencies_highest_version,
             itertools.chain(
-                self.protocols.values(), self.contracts.values(), self.connections.values(), self.skills.values()
+                self.protocols.values(),
+                self.contracts.values(),
+                self.connections.values(),
+                self.skills.values(),
             ),
         )
         module_by_import_path = [
