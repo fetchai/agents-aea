@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+
 from random import randrange
 from typing import Any, Dict, Tuple
 
