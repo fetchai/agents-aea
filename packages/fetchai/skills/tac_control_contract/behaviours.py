@@ -58,8 +58,20 @@ class TACBehaviour(Behaviour):
         self.is_items_created = False
         self.can_start = False
         self.agent_counter = 0
-        self.token_ids = []
-        self.currency_id = 0
+        self._token_ids = None  # type: Optional[List[int]]
+        self._currency_id = None  # type: Optional[int]
+
+    @property
+    def token_ids(self) -> List[int]:
+        """Return the list of token ids."""
+        assert self._token_ids is not None, "Token ids must not be None."
+        return cast(List[int], self._token_ids)
+
+    @property
+    def currency_id(self) -> int:
+        """Return the currency_id."""
+        assert self._currency_id is not None, "Currency id must not be None."
+        return cast(int, self._currency_id)
 
     def setup(self) -> None:
         """
@@ -112,10 +124,12 @@ class TACBehaviour(Behaviour):
             token_ids_dictionary = cast(
                 Dict[str, str], self.context.configuration.good_id_to_name
             )
-            self.token_ids = [int(token_id) for token_id in token_ids_dictionary.keys()]
+            self._token_ids = [
+                int(token_id) for token_id in token_ids_dictionary.keys()
+            ]
             self.context.logger.info("Creating the items.")
-            self.currency_id = self.token_ids[0]
-            self.token_ids = self.token_ids[1:11]
+            self._currency_id = self.token_ids[0]
+            self._token_ids = self.token_ids[1:11]
             transaction_message = self._create_items(self.token_ids)
             self.context.decision_maker_message_queue.put_nowait(transaction_message)
 
