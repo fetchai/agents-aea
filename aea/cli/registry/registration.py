@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """Module with methods for new user registration."""
 
+from typing import List
+
 from click import ClickException
 
 from aea.cli.registry.utils import request_api
@@ -46,7 +48,7 @@ def register(
         "POST", "/rest-auth/registration/", data=data, handle_400=False
     )
     if resp_json:
-        errors = []
+        errors: List[str] = []
         for key in ("username", "email", "password1", "password2"):
             param_errors = resp_json.get(key)
             if param_errors:
