@@ -1418,6 +1418,7 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += "from typing import Any, Dict, cast\n\n"
+        cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
             "from {} import (\n    {}_pb2,\n)\n",
@@ -1446,9 +1447,7 @@ class ProtocolGenerator:
         )
 
         # encoder
-        cls_str += "    def encode(self, msg: {}Message) -> bytes:\n".format(
-            self.protocol_specification_in_camel_case
-        )
+        cls_str += "    def encode(self, msg: Message) -> bytes:\n"
         cls_str += '        """\n'
         cls_str += "        Encode a '{}' message into bytes.\n\n".format(
             self.protocol_specification_in_camel_case,
@@ -1519,9 +1518,7 @@ class ProtocolGenerator:
         )
 
         # decoder
-        cls_str += "    def decode(self, obj: bytes) -> {}Message:\n".format(
-            self.protocol_specification_in_camel_case
-        )
+        cls_str += "    def decode(self, obj: bytes) -> Message:\n"
         cls_str += '        """\n'
         cls_str += "        Decode bytes into a '{}' message.\n\n".format(
             self.protocol_specification_in_camel_case,

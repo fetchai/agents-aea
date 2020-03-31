@@ -21,6 +21,7 @@
 
 from typing import Any, Dict, cast
 
+from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
 from tests.data.generator.t_protocol import t_protocol_pb2
@@ -31,7 +32,7 @@ from tests.data.generator.t_protocol.message import TProtocolMessage
 class TProtocolSerializer(Serializer):
     """Serialization for the 't_protocol' protocol."""
 
-    def encode(self, msg: TProtocolMessage) -> bytes:
+    def encode(self, msg: Message) -> bytes:
         """
         Encode a 'TProtocol' message into bytes.
 
@@ -291,7 +292,7 @@ class TProtocolSerializer(Serializer):
         t_protocol_bytes = t_protocol_msg.SerializeToString()
         return t_protocol_bytes
 
-    def decode(self, obj: bytes) -> TProtocolMessage:
+    def decode(self, obj: bytes) -> Message:
         """
         Decode bytes into a 'TProtocol' message.
 
