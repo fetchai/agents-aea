@@ -44,7 +44,7 @@ from ..conftest import (
 )
 
 
-class TestSearchProtocols:
+class TestSearchProtocolsLocal:
     """Test that the command 'aea search protocols' works as expected."""
 
     @classmethod
@@ -58,7 +58,7 @@ class TestSearchProtocols:
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "protocols"], standalone_mode=False
         )
         assert self.result.output == (
             'Searching for ""...\n'
@@ -72,7 +72,7 @@ class TestSearchProtocols:
         os.chdir(cls.cwd)
 
 
-class TestSearchContracts(TestCase):
+class TestSearchContractsLocal(TestCase):
     """Test that the command 'aea search contracts' works as expected."""
 
     def setUp(self):
@@ -84,7 +84,7 @@ class TestSearchContracts(TestCase):
     def test_search_contracts_positive(self, *mocks):
         """Test search contracts command positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "contracts"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "contracts"], standalone_mode=False
         )
         assert result.output == (
             'Searching for ""...\n'
@@ -98,7 +98,7 @@ class TestSearchContracts(TestCase):
         """Test search contracts in registry command positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "search", "--registry", "contracts"],
+            [*CLI_LOG_OPTION, "search", "contracts"],
             standalone_mode=False,
         )
         assert result.output == (
@@ -108,7 +108,7 @@ class TestSearchContracts(TestCase):
         )
 
 
-class TestSearchConnections:
+class TestSearchConnectionsLocal:
     """Test that the command 'aea search connections' works as expected."""
 
     @classmethod
@@ -122,7 +122,7 @@ class TestSearchConnections:
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "connections"], standalone_mode=False
         )
         assert self.result.output == (
             'Searching for ""...\n'
@@ -136,7 +136,7 @@ class TestSearchConnections:
         os.chdir(cls.cwd)
 
 
-class TestSearchSkills:
+class TestSearchSkillsLocal:
     """Test that the command 'aea search skills' works as expected."""
 
     @classmethod
@@ -150,7 +150,7 @@ class TestSearchSkills:
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "skills"], standalone_mode=False
         )
         assert self.result.output == (
             'Searching for ""...\n'
@@ -164,7 +164,7 @@ class TestSearchSkills:
         os.chdir(cls.cwd)
 
 
-class TestSearchAgents:
+class TestSearchAgentsLocal:
     """Test that the command 'aea search agents' works as expected."""
 
     @classmethod
@@ -194,7 +194,7 @@ class TestSearchAgents:
         )
         os.chdir(Path(cls.t, "myagent"))
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "agents"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "agents"], standalone_mode=False
         )
 
     def test_correct_output_default_registry(self):
@@ -234,7 +234,7 @@ class RegistrySearchTestCase(TestCase):
         """Test for CLI search --registry connections positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"],
+            [*CLI_LOG_OPTION, "search", "connections", "--query=some"],
             standalone_mode=False,
         )
         expected_output = (
@@ -252,7 +252,7 @@ class RegistrySearchTestCase(TestCase):
         """Test for CLI search --registry agents positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "search", "--registry", "agents", "--query=some"],
+            [*CLI_LOG_OPTION, "search", "agents", "--query=some"],
             standalone_mode=False,
         )
         expected_output = (
@@ -270,7 +270,7 @@ class RegistrySearchTestCase(TestCase):
         """Test for CLI search --registry protocols positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"],
+            [*CLI_LOG_OPTION, "search", "protocols", "--query=some"],
             standalone_mode=False,
         )
         expected_output = (
@@ -288,7 +288,7 @@ class RegistrySearchTestCase(TestCase):
         """Test for CLI search --registry skills positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"],
+            [*CLI_LOG_OPTION, "search", "skills", "--query=some"],
             standalone_mode=False,
         )
         expected_output = (
@@ -303,7 +303,7 @@ class RegistrySearchTestCase(TestCase):
         _format_items_mock.assert_called_once_with(["correct", "results"])
 
 
-class TestSearchWithRegistryInSubfolder:
+class TestSearchWithRegistryInSubfolderLocal:
     """Test the search when the registry directory is a subfolder of the current path."""
 
     @classmethod
@@ -323,7 +323,7 @@ class TestSearchWithRegistryInSubfolder:
                 shutil.rmtree(p)
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "skills"], standalone_mode=False
         )
 
     def test_exit_code_equal_to_zero(self):
@@ -361,7 +361,7 @@ class TestSearchWithRegistryInSubfolder:
             pass
 
 
-class TestSearchInAgentDirectory:
+class TestSearchInAgentDirectoryLocal:
     """Test the search when we are in the agent directory."""
 
     @classmethod
@@ -393,7 +393,7 @@ class TestSearchInAgentDirectory:
         os.chdir(Path(cls.t, "myagent"))
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "search", "--local", "skills"], standalone_mode=False
         )
 
     def test_exit_code_equal_to_zero(self):

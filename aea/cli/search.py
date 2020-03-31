@@ -47,9 +47,9 @@ from aea.configurations.base import (
 
 
 @click.group()
-@click.option("--registry", is_flag=True, help="For Registry search.")
+@click.option("--local", is_flag=True, help="For local search.")
 @click.pass_context
-def search(click_context, registry):
+def search(click_context, local):
     """Search for components in the registry.
 
     If called from an agent directory, it will check
@@ -57,12 +57,11 @@ def search(click_context, registry):
     E.g.
 
         aea search connections
-        aea search --registry skills
+        aea search --local skills
     """
     ctx = cast(Context, click_context.obj)
-    if registry:
-        ctx.set_config("is_registry", True)
-    else:
+    if local:
+        ctx.set_config("is_local", True)
         # if we are in an agent directory, try to load the configuration file.
         # otherwise, use the default path (i.e. 'packages/' in the current directory.)
         try:
@@ -155,10 +154,10 @@ def _search_items(ctx, item_type_plural):
 def connections(ctx: Context, query):
     """Search for Connections."""
     click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_registry"):
-        results = request_api("GET", "/connections", params={"search": query})
-    else:
+    if ctx.config.get("is_local"):
         results = _search_items(ctx, "connections")
+    else:
+        results = request_api("GET", "/connections", params={"search": query})
 
     if not len(results):
         click.echo("No connections found.")  # pragma: no cover
@@ -173,10 +172,10 @@ def connections(ctx: Context, query):
 def contracts(ctx: Context, query):
     """Search for Contracts."""
     click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_registry"):
-        results = request_api("GET", "/contracts", params={"search": query})
-    else:
+    if ctx.config.get("is_local"):
         results = _search_items(ctx, "contracts")
+    else:
+        results = request_api("GET", "/contracts", params={"search": query})
 
     if not len(results):
         click.echo("No contracts found.")  # pragma: no cover
@@ -191,10 +190,10 @@ def contracts(ctx: Context, query):
 def protocols(ctx: Context, query):
     """Search for Protocols."""
     click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_registry"):
-        results = request_api("GET", "/protocols", params={"search": query})
-    else:
+    if ctx.config.get("is_local"):
         results = _search_items(ctx, "protocols")
+    else:
+        results = request_api("GET", "/protocols", params={"search": query})
 
     if not len(results):
         click.echo("No protocols found.")  # pragma: no cover
@@ -209,10 +208,10 @@ def protocols(ctx: Context, query):
 def skills(ctx: Context, query):
     """Search for Skills."""
     click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_registry"):
-        results = request_api("GET", "/skills", params={"search": query})
-    else:
+    if ctx.config.get("is_local"):
         results = _search_items(ctx, "skills")
+    else:
+        results = request_api("GET", "/skills", params={"search": query})
 
     if not len(results):
         click.echo("No skills found.")  # pragma: no cover
@@ -227,10 +226,10 @@ def skills(ctx: Context, query):
 def agents(ctx: Context, query):
     """Search for Agents."""
     click.echo('Searching for "{}"...'.format(query))
-    if ctx.config.get("is_registry"):
-        results = request_api("GET", "/agents", params={"search": query})
-    else:
+    if ctx.config.get("is_local"):
         results = _search_items(ctx, "agents")
+    else:
+        results = request_api("GET", "/agents", params={"search": query})
 
     if not len(results):
         click.echo("No agents found.")  # pragma: no cover
