@@ -316,6 +316,18 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
+
+        if game.is_using_contract:
+            contract = self.context.contracts.erc1155
+            contract.set_deployed_instance(
+                self.context.ledger_apis.apis.get("ethereum"),
+                tac_message.get("contract_address"),
+            )
+
+            self.context.logger.info(
+                "We received a contract address: {}".format(contract.instance.address)
+            )
+
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=tac_message.amount_by_currency_id,
@@ -435,6 +447,9 @@ class TransactionHandler(Handler):
             tx_message.performative
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
+
+            # TODO: // Need to modify here and add the contract option in case we are using one.
+
             self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker, sending to controller.".format(
                     self.context.agent_name
