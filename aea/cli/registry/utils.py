@@ -21,7 +21,6 @@
 
 import os
 import tarfile
-from typing import Dict, Tuple, Union
 
 import click
 
