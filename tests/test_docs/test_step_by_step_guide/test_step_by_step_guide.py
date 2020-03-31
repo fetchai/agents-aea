@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the multiplexer-standalone.md file."""
+"""This module contains the tests for the code-blocks in thermometer-skills-step-by-step.md file."""
 
 import logging
 import os
@@ -34,14 +34,14 @@ class TestDemoDocs:
 
     @classmethod
     def setup_class(cls):
+        """Setup the test class."""
         md_path = os.path.join(ROOT_DIR, "docs", "thermometer-skills-step-by-step.md")
         code_blocks = extract_code_blocks(filepath=md_path, filter="python")
         cls.thermometer = code_blocks[0:11]
         cls.thermometer_client = code_blocks[11 : len(code_blocks)]
 
-    def test_thermometer_skill(self):
-        """Test that the code blocks exist in the thermometer_skill."""
-        # Test behaviours.py of thermometer skill
+    def test_thermometer_skill_behaviour(self):
+        """Test behaviours.py of thermometer skill."""
         path = Path(
             os.getcwd(), "packages", "fetchai", "skills", "thermometer", "behaviours.py"
         )
@@ -49,7 +49,8 @@ class TestDemoDocs:
             python_code = file.read()
             assert self.thermometer[0] in python_code, "Code is not identical."
 
-        # Test handlers.py of thermometer skill
+    def test_thermometer_skill_handler(self):
+        """Test handlers.py of thermometer skill."""
         path = Path(
             os.getcwd(), "packages", "fetchai", "skills", "thermometer", "handlers.py"
         )
@@ -59,7 +60,8 @@ class TestDemoDocs:
         for code_block in self.thermometer[1:7]:
             assert code_block in python_code, "Code is not identical."
 
-        # Test strategy.py of thermometer skill
+    def test_thermometer_skill_strategy(self):
+        """Test strategy.py of thermometer skill."""
         path = Path(
             os.getcwd(), "packages", "fetchai", "skills", "thermometer", "strategy.py"
         )
@@ -69,7 +71,8 @@ class TestDemoDocs:
         for code_block in self.thermometer[7:9]:
             assert code_block in python_code, "Code is not identical."
 
-        # # Test dialogues.py of thermometer skill
+    def test_thermometer_skill_dialogues(self):
+        """Test dialogues.py of thermometer skill."""
         path = Path(
             os.getcwd(), "packages", "fetchai", "skills", "thermometer", "dialogues.py"
         )
@@ -77,7 +80,8 @@ class TestDemoDocs:
             python_code = file.read()
         assert self.thermometer[9] in python_code, "Code is not identical."
 
-        # Test thermometer_data_model.py of thermometer skill
+    def test_thermometer_skill_data_model(self):
+        """Test thermometer_data_model.py of thermometer skill."""
         path = Path(
             os.getcwd(),
             "packages",
@@ -90,7 +94,7 @@ class TestDemoDocs:
             python_code = file.read()
         assert self.thermometer[10] in python_code, "Code is not identical."
 
-    def test_thermometer_client_skill(self):
+    def test_thermometer_client_skill_behaviour(self):
         """Test that the code blocks exist in the thermometer_client_skill."""
         path = Path(
             os.getcwd(),
@@ -104,7 +108,8 @@ class TestDemoDocs:
             python_code = file.read()
             assert self.thermometer_client[0] in python_code, "Code is not identical."
 
-        # Test handlers.py of thermometer skill
+    def test_thermometer_client_skill_handler(self):
+        """Test handlers.py of thermometer skill."""
         path = Path(
             os.getcwd(),
             "packages",
@@ -119,7 +124,8 @@ class TestDemoDocs:
         for code_block in self.thermometer_client[1:9]:
             assert code_block in python_code, "Code is not identical."
 
-        # Test strategy.py of thermometer client skill
+    def test_thermometer_client_skill_strategy(self):
+        """Test strategy.py of thermometer client skill."""
         path = Path(
             os.getcwd(),
             "packages",
@@ -134,6 +140,8 @@ class TestDemoDocs:
         for code_block in self.thermometer_client[9:13]:
             assert code_block in python_code, "Code is not identical."
 
+    def test_thermometer_client_skill_dialogues(self):
+        """Test dialogues.py of thermometer client skill."""
         path = Path(
             os.getcwd(),
             "packages",
