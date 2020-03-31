@@ -63,7 +63,7 @@ def _build_aea(connection_ids: Optional[List[PublicId]]) -> AEA:
         aea = builder.build(connection_ids=connection_ids)
         return aea
     except Exception as e:
-        logger.error(str(e))
+        logger.exception(e)
         sys.exit(1)
 
 

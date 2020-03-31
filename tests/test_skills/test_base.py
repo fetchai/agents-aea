@@ -20,17 +20,12 @@
 """This module contains the tests for the base classes for the skills."""
 
 import os
-import shutil
-import tempfile
 from pathlib import Path
 from queue import Queue
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
-import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import ComponentType
-from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -136,72 +131,6 @@ class TestSkillContext:
     def teardown_class(cls):
         """Test teardown."""
         pass
-
-
-class TestSkillFromDir:
-    """Test the 'Skill.from_dir' method."""
-
-    @classmethod
-    def _patch_logger(cls):
-        cls.patch_logger_warning = mock.patch.object(aea.skills.base.logger, "warning")
-        cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
-
-    @classmethod
-    def _unpatch_logger(cls):
-        cls.mocked_logger_warning.__exit__()
-
-    @classmethod
-    def setup_class(cls):
-        """Set the tests up."""
-        cls._patch_logger()
-
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.skill_directory = Path(cls.t, "dummy_skill")
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.skill_directory)
-        os.chdir(cls.t)
-
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        cls.connections = [_make_dummy_connection()]
-        cls.identity = Identity("name", address=cls.wallet.addresses[FETCHAI])
-        cls.my_aea = AEA(
-            cls.identity,
-            cls.connections,
-            cls.wallet,
-            ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            is_programmatic=False,
-        )
-        cls.agent_context = cls.my_aea.context
-
-    def test_missing_components(self):
-        """Test log message for missing components."""
-        Path(self.skill_directory, "handlers.py").write_text("")
-        Path(self.skill_directory, "behaviours.py").write_text("")
-        Path(self.skill_directory, "dummy.py").write_text("")
-
-        Component.load_from_directory(ComponentType.SKILL, self.skill_directory)
-        self.mocked_logger_warning.assert_any_call(
-            "Handler 'DummyInternalHandler' cannot be found."
-        )
-        self.mocked_logger_warning.assert_any_call(
-            "Behaviour 'DummyBehaviour' cannot be found."
-        )
-        self.mocked_logger_warning.assert_any_call(
-            "Model 'DummyModel' cannot be found."
-        )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the tests down."""
-        cls._unpatch_logger()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 class SkillContextTestCase(TestCase):

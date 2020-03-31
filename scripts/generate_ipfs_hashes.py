@@ -40,7 +40,7 @@ import ipfshttpclient
 
 import yaml
 
-from aea.cli.common import _compute_fingerprint
+from aea.configurations.base import _compute_fingerprint
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
