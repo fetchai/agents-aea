@@ -168,6 +168,7 @@ class HTTPClientConnection(Connection):
     """Proxy to the functionality of the web client."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         address = cast(str, self.configuration.config.get("address"))
         port = cast(int, self.configuration.config.get("port"))
         self.channel = HTTPClientChannel(

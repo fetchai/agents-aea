@@ -156,6 +156,7 @@ class PeerToPeerClientConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         provider_addr = cast(str, self.configuration.config.get("addr"))
         provider_port = cast(int, self.configuration.config.get("port"))
         self.channel = PeerToPeerChannel(self.address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore

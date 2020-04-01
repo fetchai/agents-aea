@@ -38,6 +38,7 @@ class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         super().load()
         self._reader, self._writer = (
             None,

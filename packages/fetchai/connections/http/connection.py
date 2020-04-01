@@ -453,6 +453,7 @@ class HTTPConnection(Connection):
     """Proxy to the functionality of the web RESTful API."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
         api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))

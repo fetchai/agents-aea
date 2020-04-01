@@ -607,11 +607,7 @@ class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
     def load(self) -> None:
-        """
-        Load the connection.
-
-        :return: None
-        """
+        """Load the connection configuration."""
         self.oef_addr = cast(str, self.configuration.config.get("addr"))
         self.oef_port = cast(int, self.configuration.config.get("port"))
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore

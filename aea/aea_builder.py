@@ -127,7 +127,12 @@ class _DependenciesManager:
         )
 
     def add_component(self, component: Component) -> None:
-        """Add a component."""
+        """
+        Add a component to the dependency manager..
+
+        :param component: the component to add.
+        :return: None
+        """
         # add to main index
         self._dependencies[component.component_id] = component
         # add to index by type

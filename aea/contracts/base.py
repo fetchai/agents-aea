@@ -45,7 +45,6 @@ class Contract(Component):
         """Get the name."""
         return self.public_id
 
-    # TODO to remove
     @property
     def config(self) -> ContractConfig:
         """Get the configuration."""

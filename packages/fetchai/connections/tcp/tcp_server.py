@@ -37,6 +37,7 @@ class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
     def load(self):
+        """Load the connection configuration."""
         super().load()
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]

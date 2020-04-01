@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
-  connection.py: QmeURRBNn77KVQbSaD4Zmkc1Pkix6BUpWJRkiAQY1Dk7a5
+  connection.py: QmaNaWzNtASvBuMk4EUfGZ4LDTX7F2NTHaeb2BxTJDn5dY
 aea_version: 0.2.4
 description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection

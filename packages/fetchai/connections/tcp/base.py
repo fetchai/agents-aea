@@ -34,6 +34,7 @@ class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         # for the server, the listening address/port
         # for the client, the server address/port
         self.host = cast(str, self.configuration.config.get("address"))

@@ -146,6 +146,7 @@ class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
     def load(self) -> None:
+        """Load the connection configuration."""
         gym_env_package = cast(str, self.configuration.config.get("env"))
         gym_env_class = locate(gym_env_package)
         self.channel = GymChannel(self.address, gym_env_class())

@@ -31,6 +31,7 @@ class Contract(BaseContract):
     """Definition of an ethereum contract."""
 
     def load(self) -> None:
+        """Load the contract."""
         super().load()
         self._abi = self.contract_interface["abi"]
         self._bytecode = self.contract_interface["bytecode"]

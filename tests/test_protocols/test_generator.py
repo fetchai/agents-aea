@@ -35,6 +35,7 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import (
+    ComponentType,
     ProtocolId,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -258,8 +259,10 @@ class TestEndToEndGenerator:
         builder_1.set_name("my_aea_1")
         builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_1.set_default_ledger_api_config(FETCHAI)
-        builder_1.add_protocol(
-            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol")
+        builder_1.add_component(
+            ComponentType.PROTOCOL,
+            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
+            skip_consistency_check=True,
         )
         builder_1.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef")
@@ -269,8 +272,10 @@ class TestEndToEndGenerator:
         builder_2.set_name("my_aea_2")
         builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_2.set_default_ledger_api_config(FETCHAI)
-        builder_2.add_protocol(
-            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol")
+        builder_2.add_component(
+            ComponentType.PROTOCOL,
+            Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
+            skip_consistency_check=True,
         )
         builder_2.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef")
