@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-import operator
 import pprint
 import re
 from abc import ABC, abstractmethod
@@ -225,7 +224,7 @@ class Configuration(JSONSerializable, ABC):
         :return: the ordered dictionary.
         """
         data = self.json
-        result = OrderedDict()
+        result = OrderedDict()  # type: OrderedDict
 
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
@@ -237,8 +236,7 @@ class Configuration(JSONSerializable, ABC):
                 seen_keys.add(key)
 
         # Now process the keys in the dictionary that were not covered before.
-        # Put them at the end, in alphanumerical order.
-        for key, value in sorted(data.items(), key=operator.itemgetter(0)):
+        for key, value in data.items():
             if key not in seen_keys:
                 result[key] = value
         return result
@@ -743,7 +741,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         return configuration_object
 
     @staticmethod
-    def _load_configuration_object(component_type: ComponentType, directory: Path) -> "ComponentConfiguration":
+    def _load_configuration_object(
+        component_type: ComponentType, directory: Path
+    ) -> "ComponentConfiguration":
         """
         Load the configuration object, without consistency checks.
 
@@ -861,22 +861,26 @@ class ConnectionConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "fingerprint": self.fingerprint,
-            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-            "class_name": self.class_name,
-            "protocols": sorted(map(str, self.protocols)),
-            "restricted_to_protocols": sorted(map(str, self.restricted_to_protocols)),
-            "excluded_protocols": sorted(map(str, self.excluded_protocols)),
-            "dependencies": self.dependencies,
-            "description": self.description,
-            "config": self.config,
-        }
+        return OrderedDict(
+            {
+                "name": self.name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "fingerprint": self.fingerprint,
+                "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "class_name": self.class_name,
+                "protocols": sorted(map(str, self.protocols)),
+                "restricted_to_protocols": sorted(
+                    map(str, self.restricted_to_protocols)
+                ),
+                "excluded_protocols": sorted(map(str, self.excluded_protocols)),
+                "dependencies": self.dependencies,
+                "config": self.config,
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -948,17 +952,19 @@ class ProtocolConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "fingerprint": self.fingerprint,
-            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-            "dependencies": self.dependencies,
-            "description": self.description,
-        }
+        return OrderedDict(
+            {
+                "name": self.name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "fingerprint": self.fingerprint,
+                "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "dependencies": self.dependencies,
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1063,22 +1069,24 @@ class SkillConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "fingerprint": self.fingerprint,
-            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-            "protocols": sorted(map(str, self.protocols)),
-            "contracts": sorted(map(str, self.contracts)),
-            "dependencies": self.dependencies,
-            "handlers": {key: h.json for key, h in self.handlers.read_all()},
-            "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
-            "models": {key: m.json for key, m in self.models.read_all()},
-            "description": self.description,
-        }
+        return OrderedDict(
+            {
+                "name": self.name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "fingerprint": self.fingerprint,
+                "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "protocols": sorted(map(str, self.protocols)),
+                "contracts": sorted(map(str, self.contracts)),
+                "dependencies": self.dependencies,
+                "handlers": {key: h.json for key, h in self.handlers.read_all()},
+                "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
+                "models": {key: m.json for key, m in self.models.read_all()},
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1252,26 +1260,28 @@ class AgentConfig(PackageConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "agent_name": self.agent_name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "fingerprint": self.fingerprint,
-            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-            "registry_path": self.registry_path,
-            "description": self.description,
-            "private_key_paths": self.private_key_paths_dict,
-            "ledger_apis": self.ledger_apis_dict,
-            "logging_config": self.logging_config,
-            "default_ledger": self.default_ledger,
-            "default_connection": self.default_connection,
-            "connections": sorted(map(str, self.connections)),
-            "protocols": sorted(map(str, self.protocols)),
-            "skills": sorted(map(str, self.skills)),
-            "contracts": sorted(map(str, self.contracts)),
-        }
+        return OrderedDict(
+            {
+                "agent_name": self.agent_name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "fingerprint": self.fingerprint,
+                "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "registry_path": self.registry_path,
+                "private_key_paths": self.private_key_paths_dict,
+                "ledger_apis": self.ledger_apis_dict,
+                "logging_config": self.logging_config,
+                "default_ledger": self.default_ledger,
+                "default_connection": self.default_connection,
+                "connections": sorted(map(str, self.connections)),
+                "protocols": sorted(map(str, self.protocols)),
+                "skills": sorted(map(str, self.skills)),
+                "contracts": sorted(map(str, self.contracts)),
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1394,17 +1404,20 @@ class ProtocolSpecification(ProtocolConfig):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "description": self.description,
-            "speech_acts": {
-                key: speech_act.json for key, speech_act in self.speech_acts.read_all()
-            },
-        }
+        return OrderedDict(
+            {
+                "name": self.name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "speech_acts": {
+                    key: speech_act.json
+                    for key, speech_act in self.speech_acts.read_all()
+                },
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):
@@ -1497,19 +1510,21 @@ class ContractConfig(ComponentConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "license": self.license,
-            "aea_version": self.aea_version,
-            "fingerprint": self.fingerprint,
-            "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-            "dependencies": self.dependencies,
-            "description": self.description,
-            "path_to_contract_interface": self.path_to_contract_interface,
-            "class_name": self.class_name,
-        }
+        return OrderedDict(
+            {
+                "name": self.name,
+                "author": self.author,
+                "version": self.version,
+                "description": self.description,
+                "license": self.license,
+                "aea_version": self.aea_version,
+                "fingerprint": self.fingerprint,
+                "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
+                "dependencies": self.dependencies,
+                "path_to_contract_interface": self.path_to_contract_interface,
+                "class_name": self.class_name,
+            }
+        )
 
     @classmethod
     def from_json(cls, obj: Dict):

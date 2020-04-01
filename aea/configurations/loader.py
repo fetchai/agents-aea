@@ -41,7 +41,7 @@ from aea.configurations.base import (
     ProtocolSpecification,
     SkillConfig,
 )
-from aea.helpers.base import yaml_load, yaml_dump
+from aea.helpers.base import yaml_dump, yaml_load
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")

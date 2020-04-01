@@ -36,7 +36,7 @@ from aea.cli.common import (
     logger,
     pass_ctx,
 )
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId, DEFAULT_VERSION
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,

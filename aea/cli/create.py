@@ -42,7 +42,11 @@ from aea.cli.common import (
     logger,
 )
 from aea.cli.init import do_init
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_VERSION,
+)
 
 
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:
@@ -119,6 +123,7 @@ def create(click_context, agent_name, author, local):
 
         # set up packages directories.
         _setup_package_folder(Path(agent_name, "protocols"))
+        _setup_package_folder(Path(agent_name, "contracts"))
         _setup_package_folder(Path(agent_name, "connections"))
         _setup_package_folder(Path(agent_name, "skills"))
 

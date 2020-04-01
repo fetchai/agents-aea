@@ -42,12 +42,13 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_VERSION,
     Dependencies,
     PublicId,
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
-    DEFAULT_VERSION)
+)
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
