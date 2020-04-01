@@ -405,10 +405,10 @@ def _is_valid_author_handle(author: str) -> bool:
     """
     Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
-    >>> _is_validate_author_handle("this_is_a_good_author_name")
+    >>> _is_valid_author_handle("this_is_a_good_author_name")
     ...
     True
-    >>> _is_validate_author_handle("this-is-not")
+    >>> _is_valid_author_handle("this-is-not")
     ...
     False
     """
