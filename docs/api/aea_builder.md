@@ -3,142 +3,6 @@
 
 This module contains utilities for building an AEA.
 
-<a name=".aea.aea_builder._DependenciesManager.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__()
-```
-
-Initialize the dependency graph.
-
-<a name=".aea.aea_builder._DependenciesManager.all_dependencies"></a>
-#### all`_`dependencies
-
-```python
- | @property
- | all_dependencies() -> Set[ComponentId]
-```
-
-Get all dependencies.
-
-<a name=".aea.aea_builder._DependenciesManager.dependencies_highest_version"></a>
-#### dependencies`_`highest`_`version
-
-```python
- | @property
- | dependencies_highest_version() -> Set[ComponentId]
-```
-
-Get the dependencies with highest version.
-
-<a name=".aea.aea_builder._DependenciesManager.protocols"></a>
-#### protocols
-
-```python
- | @property
- | protocols() -> Dict[ComponentId, Protocol]
-```
-
-Get the protocols.
-
-<a name=".aea.aea_builder._DependenciesManager.connections"></a>
-#### connections
-
-```python
- | @property
- | connections() -> Dict[ComponentId, Connection]
-```
-
-Get the connections.
-
-<a name=".aea.aea_builder._DependenciesManager.skills"></a>
-#### skills
-
-```python
- | @property
- | skills() -> Dict[ComponentId, Skill]
-```
-
-Get the skills.
-
-<a name=".aea.aea_builder._DependenciesManager.contracts"></a>
-#### contracts
-
-```python
- | @property
- | contracts() -> Dict[ComponentId, Any]
-```
-
-Get the contracts.
-
-<a name=".aea.aea_builder._DependenciesManager.add_component"></a>
-#### add`_`component
-
-```python
- | add_component(component: Component) -> None
-```
-
-Add a component to the dependency manager..
-
-**Arguments**:
-
-- `component`: the component to add.
-
-**Returns**:
-
-None
-
-<a name=".aea.aea_builder._DependenciesManager.remove_component"></a>
-#### remove`_`component
-
-```python
- | remove_component(component_id: ComponentId)
-```
-
-Remove a component.
-
-:return None
-
-**Raises**:
-
-- `ValueError`: if some component depends on this package.
-
-<a name=".aea.aea_builder._DependenciesManager.check_package_dependencies"></a>
-#### check`_`package`_`dependencies
-
-```python
- | check_package_dependencies(component_configuration: ComponentConfiguration) -> bool
-```
-
-Check that we have all the dependencies needed to the package.
-
-return: True if all the dependencies are covered, False otherwise.
-
-<a name=".aea.aea_builder._DependenciesManager.pypi_dependencies"></a>
-#### pypi`_`dependencies
-
-```python
- | @property
- | pypi_dependencies() -> Dependencies
-```
-
-Get all the PyPI dependencies.
-
-<a name=".aea.aea_builder._DependenciesManager.load_dependencies"></a>
-#### load`_`dependencies
-
-```python
- | @contextmanager
- | load_dependencies()
-```
-
-Load dependencies of a component, so its modules can be loaded.
-
-**Returns**:
-
-None
-
 <a name=".aea.aea_builder.AEABuilder"></a>
 ### AEABuilder
 
@@ -164,15 +28,6 @@ Initialize the builder.
 
 - `with_default_packages`: add the default packages.
 
-<a name=".aea.aea_builder.AEABuilder.add_default_packages"></a>
-#### add`_`default`_`packages
-
-```python
- | add_default_packages()
-```
-
-Add default packages.
-
 <a name=".aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
@@ -186,11 +41,15 @@ Set the name of the agent.
 
 - `name`: the name of the agent.
 
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.set_default_connection"></a>
 #### set`_`default`_`connection
 
 ```python
- | set_default_connection(public_id: PublicId)
+ | set_default_connection(public_id: PublicId) -> "AEABuilder"
 ```
 
 Set the default connection.
@@ -201,7 +60,7 @@ Set the default connection.
 
 **Returns**:
 
-None
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_private_key"></a>
 #### add`_`private`_`key
@@ -217,6 +76,10 @@ Add a private key path.
 - `identifier`: the identifier for that private key path.
 - `private_key_path`: path to the private key file.
 
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.remove_private_key"></a>
 #### remove`_`private`_`key
 
@@ -229,6 +92,10 @@ Remove a private key path by identifier, if present.
 **Arguments**:
 
 - `identifier`: the identifier of the private key.
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.private_key_paths"></a>
 #### private`_`key`_`paths
@@ -244,19 +111,36 @@ Get the private key paths.
 #### add`_`ledger`_`api`_`config
 
 ```python
- | add_ledger_api_config(identifier: str, config: Dict)
+ | add_ledger_api_config(identifier: str, config: Dict) -> "AEABuilder"
 ```
 
 Add a configuration for a ledger API to be supported by the agent.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger api
+- `config`: the configuration of the ledger api
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.remove_ledger_api_config"></a>
 #### remove`_`ledger`_`api`_`config
 
 ```python
- | remove_ledger_api_config(identifier: str)
+ | remove_ledger_api_config(identifier: str) -> "AEABuilder"
 ```
 
 Remove a ledger API configuration.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger api
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.ledger_apis_config"></a>
 #### ledger`_`apis`_`config
@@ -268,14 +152,22 @@ Remove a ledger API configuration.
 
 Get the ledger api configurations.
 
-<a name=".aea.aea_builder.AEABuilder.set_default_ledger_api_config"></a>
-#### set`_`default`_`ledger`_`api`_`config
+<a name=".aea.aea_builder.AEABuilder.set_default_ledger"></a>
+#### set`_`default`_`ledger
 
 ```python
- | set_default_ledger_api_config(default: str)
+ | set_default_ledger(identifier: str) -> "AEABuilder"
 ```
 
 Set a default ledger API to use.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger api
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_component"></a>
 #### add`_`component
@@ -296,6 +188,10 @@ Add a component, given its type and the directory.
 
 - `ValueError`: if a component is already registered with the same component id.
 
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component
 
@@ -304,6 +200,14 @@ Add a component, given its type and the directory.
 ```
 
 Remove a component.
+
+**Arguments**:
+
+- `component_id`: the public id of the component.
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_protocol"></a>
 #### add`_`protocol
@@ -314,6 +218,14 @@ Remove a component.
 
 Add a protocol to the agent.
 
+**Arguments**:
+
+- `directory`: the path to the protocol directory
+
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.remove_protocol"></a>
 #### remove`_`protocol
 
@@ -321,7 +233,15 @@ Add a protocol to the agent.
  | remove_protocol(public_id: PublicId) -> "AEABuilder"
 ```
 
-Remove protocol
+Remove protocol.
+
+**Arguments**:
+
+- `public_id`: the public id of the protocol
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_connection"></a>
 #### add`_`connection
@@ -330,7 +250,15 @@ Remove protocol
  | add_connection(directory: PathLike) -> "AEABuilder"
 ```
 
-Add a protocol to the agent.
+Add a connection to the agent.
+
+**Arguments**:
+
+- `directory`: the path to the connection directory
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.remove_connection"></a>
 #### remove`_`connection
@@ -339,7 +267,15 @@ Add a protocol to the agent.
  | remove_connection(public_id: PublicId) -> "AEABuilder"
 ```
 
-Remove a connection
+Remove a connection.
+
+**Arguments**:
+
+- `public_id`: the public id of the connection
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_skill"></a>
 #### add`_`skill
@@ -350,6 +286,14 @@ Remove a connection
 
 Add a skill to the agent.
 
+**Arguments**:
+
+- `directory`: the path to the skill directory
+
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.remove_skill"></a>
 #### remove`_`skill
 
@@ -357,7 +301,15 @@ Add a skill to the agent.
  | remove_skill(public_id: PublicId) -> "AEABuilder"
 ```
 
-Remove protocol
+Remove protocol.
+
+**Arguments**:
+
+- `public_id`: the public id of the skill
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.add_contract"></a>
 #### add`_`contract
@@ -368,6 +320,14 @@ Remove protocol
 
 Add a contract to the agent.
 
+**Arguments**:
+
+- `directory`: the path to the contract directory
+
+**Returns**:
+
+the AEABuilder
+
 <a name=".aea.aea_builder.AEABuilder.remove_contract"></a>
 #### remove`_`contract
 
@@ -375,7 +335,15 @@ Add a contract to the agent.
  | remove_contract(public_id: PublicId) -> "AEABuilder"
 ```
 
-Remove protocol
+Remove protocol.
+
+**Arguments**:
+
+- `public_id`: the public id of the contract
+
+**Returns**:
+
+the AEABuilder
 
 <a name=".aea.aea_builder.AEABuilder.build"></a>
 #### build
@@ -388,7 +356,7 @@ Build the AEA.
 
 **Arguments**:
 
-- `connection_ids`: select only these connections.
+- `connection_ids`: select only these connections to run the AEA.
 
 **Returns**:
 
@@ -399,7 +367,7 @@ the AEA object.
 
 ```python
  | @classmethod
- | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False)
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project
@@ -418,5 +386,5 @@ Construct the builder from an AEA project
 
 **Returns**:
 
-an AEA agent.
+an AEABuilder.
 
