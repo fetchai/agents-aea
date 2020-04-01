@@ -79,11 +79,11 @@ def locate(path):
     return object
 
 
-def load_init_modules(directory: Path, prefix: str = "") -> Dict[str, types.ModuleType]:
+def load_all_modules(directory: Path, prefix: str = "") -> Dict[str, types.ModuleType]:
     """
-    Load __init__.py modules of a directory, recursively.
+    Load all modules of a directory, recursively.
 
-    :param directory: the directory where to search for __init__.py modules.
+    :param directory: the directory where to search for .py modules.
     :param prefix: the prefix to apply in the import path.
     :return: a mapping from import path to module objects.
     """
@@ -91,21 +91,26 @@ def load_init_modules(directory: Path, prefix: str = "") -> Dict[str, types.Modu
         raise ValueError("The provided path does not exists or it is not a directory.")
     result = {}  # type: Dict[str, types.ModuleType]
     package_root_directory = directory
-    for init_module_path in directory.rglob("__init__.py"):
-        relative_path_directory = init_module_path.relative_to(
-            package_root_directory
-        ).parent
-        # relative_path_directory is "." if __init__.py is in the root of the package directory,
-        # and a path when it is a subpackage. We handle these cases separately.
+    for module_path in directory.rglob("*.py"):
+        relative_path_directory = module_path.relative_to(package_root_directory).parent
+        # handle the case when relative_dotted_path is "."
         relative_dotted_path = (
             str(relative_path_directory).replace(os.path.sep, ".")
             if str(relative_path_directory) != "."
             else ""
         )
-        init_module = load_module(relative_dotted_path, init_module_path)
-        full_dotted_path = ".".join([prefix, relative_dotted_path])
-        result[full_dotted_path] = init_module
+        if relative_dotted_path != "":
+            prefix = prefix + "." + relative_dotted_path
 
+        if module_path.name == "__init__.py":
+            full_dotted_path = ".".join([prefix, relative_dotted_path])
+        else:
+            full_dotted_path = ".".join(
+                [prefix, relative_dotted_path, module_path.name[:-3]]
+            )
+
+        module_obj = load_module(full_dotted_path, module_path)
+        result[full_dotted_path] = module_obj
     return result
 
 

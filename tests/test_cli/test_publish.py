@@ -96,8 +96,8 @@ class PublishCommandTestCase(TestCase):
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--registry"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
         )
         self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )
