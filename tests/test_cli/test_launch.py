@@ -51,7 +51,7 @@ class TestLaunch:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_1])
         assert result.exit_code == 0
@@ -114,7 +114,7 @@ class TestLaunchWithOneFailingAgent:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name_1])
         assert result.exit_code == 0

@@ -83,7 +83,7 @@ class TestBuildSkill:
 
         os.chdir(cls.t)
         cls.init_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
         )
         cls.fetch_result = cls.runner.invoke(
             cli,

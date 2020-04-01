@@ -81,7 +81,7 @@ class TestWeatherSkillsFetchaiLedger:
         shutil.copytree(scripts_src, scripts_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
         )
         assert result.exit_code == 0
 
