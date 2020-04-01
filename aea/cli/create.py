@@ -80,7 +80,7 @@ def _setup_package_folder(path: Path):
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
-@click.option("--local", is_flag=True, help="For creating from local data.")
+@click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
 def create(click_context, agent_name, author, local):
     """Create an agent."""
