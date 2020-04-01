@@ -74,6 +74,7 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+NOT_PERMITTED_AUTHORS = ["skills", "connections", "protocols", "contracts", "vendor"]
 
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
@@ -400,8 +401,9 @@ def _validate_package_name(package_name: str):
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
-def _is_validate_author_handle(author: str) -> bool:
-    """Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
+def _is_valid_author_handle(author: str) -> bool:
+    """
+    Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
     >>> _is_validate_author_handle("this_is_a_good_author_name")
     ...
@@ -413,6 +415,17 @@ def _is_validate_author_handle(author: str) -> bool:
     if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
         return False
     return True
+
+
+def _is_permitted_author_handle(author: str) -> bool:
+    """
+    Check that the author handle is permitted.
+
+    :param author: the author
+    :retun: bool
+    """
+    result = author not in NOT_PERMITTED_AUTHORS
+    return result
 
 
 def _try_get_item_source_path(
