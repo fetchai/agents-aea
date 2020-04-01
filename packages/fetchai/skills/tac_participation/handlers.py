@@ -35,7 +35,7 @@ from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
 
-class OEFHandler(Handler):
+class OEFSearchHandler(Handler):
     """This class handles oef messages."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
@@ -63,7 +63,7 @@ class OEFHandler(Handler):
         oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
-            "[{}]: Handling OEF message. performative={}".format(
+            "[{}]: Handling OEFSearch message. performative={}".format(
                 self.context.agent_name, oef_message.performative
             )
         )
@@ -89,7 +89,7 @@ class OEFHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
+            "[{}]: Received OEFSearch error: answer_id={}, oef_error_operation={}".format(
                 self.context.agent_name,
                 oef_error.message_id,
                 oef_error.oef_error_operation,
@@ -98,7 +98,7 @@ class OEFHandler(Handler):
 
     def _on_search_result(self, search_result: OefSearchMessage) -> None:
         """
-        Split the search results from the OEF.
+        Split the search results from the OEF search node.
 
         :param search_result: the search result
 

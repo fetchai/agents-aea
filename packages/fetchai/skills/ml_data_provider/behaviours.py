@@ -146,7 +146,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating ml data provider service on OEF.".format(
+            "[{}]: updating ml data provider service on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -171,7 +171,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering ml data provider service from OEF.".format(
+            "[{}]: unregistering ml data provider service from OEF service directory.".format(
                 self.context.agent_name
             )
         )

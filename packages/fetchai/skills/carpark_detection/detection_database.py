@@ -301,7 +301,7 @@ class DetectionDatabase:
         self.execute_single_sql(command, variables)
 
     def lookup_friendly_name(self, oef_key):
-        """Look iup friendly name given the OEF key."""
+        """Look up friendly name given the OEF key."""
         command = "SELECT * FROM name_lookup2 WHERE oef_key = ? ORDER BY epoch DESC"
         variables = (str(oef_key),)
         results = self.execute_single_sql(command, variables)

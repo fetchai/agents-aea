@@ -5,7 +5,7 @@ license: Apache-2.0
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmRarc5Gjna1HZU2LvTRB7cPp5ungpBXEk6YqxFJWR2yMU
-  handlers.py: QmRSm93bZ3PKj9xvjP6Y3nRYhULkd5uRhCo4y5Yqkz577z
+  handlers.py: QmemTjrWgNbyaRvZjnyfke5Rnhnjgjx3UaaQaJcnzJCqu1
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
   strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
@@ -19,7 +19,7 @@ behaviours:
       search_interval: 10
 handlers:
   oef:
-    class_name: OEFHandler
+    class_name: OEFSearchHandler
     args: {}
   train:
     class_name: TrainHandler

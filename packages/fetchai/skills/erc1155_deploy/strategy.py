@@ -19,11 +19,11 @@
 
 """This module contains the strategy class."""
 
-from aea.helpers.search.models import Description, GenericDataModel, Query
+from typing import Any, Dict, Optional
+
+from aea.helpers.search.models import Description, GenericDataModel
 from aea.skills.base import Model
 
-
-DEFAULT_LEDGER_ID = "ethereum"
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_NFT = 1
 DEFAULT_FT = 2
@@ -32,6 +32,15 @@ DEFAULT_MINT_STOCK = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
 DEFAULT_FROM_SUPPLY = 10
 DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
+DEFAULT_DATA_MODEL_NAME = "erc1155_deploy"
+DEFAULT_DATA_MODEL = {
+    "attribute_one": {
+        "name": "has_erc1155_contract",
+        "type": "bool",
+        "is_required": "True",
+    },
+}  # type: Optional[Dict[str, Any]]
+DEFAULT_SERVICE_DATA = {"has_erc1155_contract": True}
 
 
 class Strategy(Model):
@@ -40,14 +49,8 @@ class Strategy(Model):
     def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
-
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
         :return: None
         """
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self.nft = kwargs.pop("nft", DEFAULT_NFT)
         self.ft = kwargs.pop("ft", DEFAULT_NFT)
         self.nb_tokens = kwargs.pop("nb_tokens", DEFAULT_NB_TOKENS)
@@ -56,15 +59,11 @@ class Strategy(Model):
         self.from_supply = kwargs.pop("from_supply", DEFAULT_FROM_SUPPLY)
         self.to_supply = kwargs.pop("to_supply", DEFAULT_TO_SUPPLY)
         self.value = kwargs.pop("value", DEFAULT_VALUE)
-
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
-
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
         super().__init__(**kwargs)
         self._oef_msg_id = 0
-
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -82,16 +81,7 @@ class Strategy(Model):
         :return: a description of the offered services
         """
         desc = Description(
-            self._scheme, data_model=GenericDataModel(self._datamodel, "erc1155_deploy")
+            self._service_data,
+            data_model=GenericDataModel(self._data_model_name, self._data_model),
         )
         return desc
-
-    def is_matching_supply(self, query: Query) -> bool:
-        """
-        Check if the query matches the supply.
-
-        :param query: the query
-        :return: bool indiciating whether matches or not
-        """
-        # TODO, this is a stub
-        return True

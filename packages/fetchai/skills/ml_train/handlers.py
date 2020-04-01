@@ -170,8 +170,8 @@ class TrainHandler(Handler):
         self.context.logger.debug("Train handler: teardown method called.")
 
 
-class OEFHandler(Handler):
-    """The OEF handler."""
+class OEFSearchHandler(Handler):
+    """The OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

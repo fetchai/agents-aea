@@ -6,7 +6,7 @@ fingerprint:
   __init__.py: QmPZ4bRmXpsDKD7ogCJHEMrtm67hpA5aqxvujgfQD1PtMd
   behaviours.py: QmSwQYASQ7icpD4g2WE4yyTRpqonX62KuZisXRQD11NtBu
   dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
-  handlers.py: QmdbhQUDLDX5qqLgMdL5vPZee2NZfU86sodhMdbxYzKaaK
+  handlers.py: QmcrkENTLFMNpe8NRSDVmKdDa3rVstpZ6JqiQLsKBfZqfy
   strategy.py: QmSSjggQ5KDQkQKjqLiFf6QP7bpSd9eq7WfgrkbrHyqAbN
 aea_version: 0.2.4
 description: "The carpark client skill implements the functionality to run a client for carpark data."
@@ -20,7 +20,7 @@ handlers:
     class_name: FIPAHandler
     args: {}
   oef:
-    class_name: OEFHandler
+    class_name: OEFSearchHandler
     args: {}
   transaction:
     class_name: MyTransactionHandler

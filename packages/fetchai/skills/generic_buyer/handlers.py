@@ -298,8 +298,8 @@ class FIPAHandler(Handler):
             )
 
 
-class OEFHandler(Handler):
-    """This class implements an OEF handler."""
+class OEFSearchHandler(Handler):
+    """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

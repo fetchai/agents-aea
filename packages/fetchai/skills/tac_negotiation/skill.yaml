@@ -10,7 +10,7 @@ fingerprint:
   helpers.py: QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmcouVcVuz8PPy3DaqDJ4GJRCwZnWVE3qwsT7HA1znVBrF
+  strategy.py: QmT2y3gPWasEBtksj6jEWniP7mT6FbmZ1DjHSNE85vLLjb
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
   transactions.py: QmY83PRH3ncMuqvjWsC3HuxJRS51dFq4RytMzEYjBA9KDx
 aea_version: 0.2.4
