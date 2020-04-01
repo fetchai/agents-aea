@@ -48,12 +48,12 @@ class DefaultSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == DefaultMessage.Performative.BYTES:
-            performative = default_pb2.DefaultMessage.Bytes()  # type: ignore
+            performative = default_pb2.DefaultMessage.Bytes_Performative()  # type: ignore
             content = msg.content
             performative.content = content
             default_msg.bytes.CopyFrom(performative)
         elif performative_id == DefaultMessage.Performative.ERROR:
-            performative = default_pb2.DefaultMessage.Error()  # type: ignore
+            performative = default_pb2.DefaultMessage.Error_Performative()  # type: ignore
             error_code = msg.error_code
             ErrorCode.encode(performative.error_code, error_code)
             error_msg = msg.error_msg

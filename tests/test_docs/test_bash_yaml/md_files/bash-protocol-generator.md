@@ -9,18 +9,25 @@ cd my_aea
 aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 ```
 ``` yaml
+---
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+aea_version: 0.2.4
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
     query: ct:DataModel
   propose:
-    query: ct:DataModel
+    offer: ct:DataModel
     price: pt:float
   accept: {}
   decline: {}
   match_accept: {}
+...
+---
+ct:DataModel: |
+  bytes data_model = 1;
+...
 ```

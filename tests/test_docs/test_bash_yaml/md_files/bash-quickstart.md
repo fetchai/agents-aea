@@ -23,7 +23,13 @@ sudo apt-get install python3.7-dev
 aea init
 ```
 ``` bash
-Please enter the author handle you would like to use: fetchai
+Do you have a Registry account? [y/N]: n
+Create a new account on the Registry now:
+Username: fetchai
+Email: hello@fetch.ai
+Password:
+Please make sure that passwords are equal.
+Confirm password:
     _     _____     _    
    / \   | ____|   / \   
   / _ \  |  _|    / _ \  
@@ -60,8 +66,6 @@ aea run --connections fetchai/stub:0.1.0
 v0.2.4
 
 my_first_aea starting ...
-info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}
-info: EchoBehaviour.__init__: arguments: {'tick_interval': 1.0, 'skill_context': ..., 'name': 'echo'}
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
 info: Echo Behaviour: act method called.
@@ -77,6 +81,14 @@ info: Echo Behaviour: act method called.
 info: Echo Handler: message=Message(dialogue_reference=('', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
+```
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+^C my_first_aea interrupted!
+my_first_aea stopping ...
+info: Echo Handler: teardown method called.
+info: Echo Behaviour: teardown method called.
 ```
 ``` bash
 aea delete my_first_aea

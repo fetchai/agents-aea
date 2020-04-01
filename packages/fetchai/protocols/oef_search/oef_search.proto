@@ -31,23 +31,23 @@ message OefSearchMessage{
 
 
     // Performatives and contents
-    message Register_Service{
+    message Register_Service_Performative{
         Description service_description = 1;
     }
 
-    message Unregister_Service{
+    message Unregister_Service_Performative{
         Description service_description = 1;
     }
 
-    message Search_Services{
+    message Search_Services_Performative{
         Query query = 1;
     }
 
-    message Search_Result{
+    message Search_Result_Performative{
         repeated string agents = 1;
     }
 
-    message Oef_Error{
+    message Oef_Error_Performative{
         OefErrorOperation oef_error_operation = 1;
     }
 
@@ -58,10 +58,10 @@ message OefSearchMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Oef_Error oef_error = 5;
-        Register_Service register_service = 6;
-        Search_Result search_result = 7;
-        Search_Services search_services = 8;
-        Unregister_Service unregister_service = 9;
+        Oef_Error_Performative oef_error = 5;
+        Register_Service_Performative register_service = 6;
+        Search_Result_Performative search_result = 7;
+        Search_Services_Performative search_services = 8;
+        Unregister_Service_Performative unregister_service = 9;
     }
 }

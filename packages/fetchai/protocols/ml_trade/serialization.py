@@ -50,24 +50,24 @@ class MlTradeSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == MlTradeMessage.Performative.CFP:
-            performative = ml_trade_pb2.MlTradeMessage.Cfp()  # type: ignore
+            performative = ml_trade_pb2.MlTradeMessage.Cfp_Performative()  # type: ignore
             query = msg.query
             Query.encode(performative.query, query)
             ml_trade_msg.cfp.CopyFrom(performative)
         elif performative_id == MlTradeMessage.Performative.TERMS:
-            performative = ml_trade_pb2.MlTradeMessage.Terms()  # type: ignore
+            performative = ml_trade_pb2.MlTradeMessage.Terms_Performative()  # type: ignore
             terms = msg.terms
             Description.encode(performative.terms, terms)
             ml_trade_msg.terms.CopyFrom(performative)
         elif performative_id == MlTradeMessage.Performative.ACCEPT:
-            performative = ml_trade_pb2.MlTradeMessage.Accept()  # type: ignore
+            performative = ml_trade_pb2.MlTradeMessage.Accept_Performative()  # type: ignore
             terms = msg.terms
             Description.encode(performative.terms, terms)
             tx_digest = msg.tx_digest
             performative.tx_digest = tx_digest
             ml_trade_msg.accept.CopyFrom(performative)
         elif performative_id == MlTradeMessage.Performative.DATA:
-            performative = ml_trade_pb2.MlTradeMessage.Data()  # type: ignore
+            performative = ml_trade_pb2.MlTradeMessage.Data_Performative()  # type: ignore
             terms = msg.terms
             Description.encode(performative.terms, terms)
             payload = msg.payload

@@ -5,11 +5,11 @@ license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: QmXaLVbHaHd71bK2vzpXzWsjnXSLT9kFy11RGmXBZQAuNy
-  custom_types.py: QmXUs99DVi6DFQh5zrT1LbMm5EG1gxPw3hbjdYd2jdVy3u
-  default.proto: QmW2piNx9np1zLLmNQhQra3ytzCH4L2sgFef3bHj5dwVvL
-  default_pb2.py: QmPo9wdRq9dkb2vJoU6523G1MUpA6ArBJziozM3pp45yXA
+  custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
+  default.proto: QmNzMUvXkBm5bbitR5Yi49ADiwNn1FhCvXqSKKoqAPZyXv
+  default_pb2.py: QmeRdcv4f6X4shHKv6i1ktxDo8W7G6pdHsw4cqmz6WrFz3
   message.py: QmNfAZGYvBmok9JZ6m8BhBuFcMg9BCpqps4EgHe1HsTQbR
-  serialization.py: QmUgSoCf1v1jDjbToUszkbWFsEopSpY8r2EhaZnZznJQha
+  serialization.py: QmRoYwiU4WQ279o1mQh1EF9pPhfhTJMkRdKgt6ysLvGCGu
 dependencies: 
     protobuf: {} 
 description: A protocol for exchanging any bytes message.
