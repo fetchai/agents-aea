@@ -212,6 +212,10 @@ class TestGenericSkills:
 
             # TODO: check the erc1155 run ends
 
+            # TODO uncomment these to test success!
+            # assert process_one.returncode == 0
+            # assert process_two.returncode == 0
+
         finally:
             process_one.send_signal(signal.SIGINT)
             process_one.wait(timeout=10)
@@ -243,10 +247,6 @@ class TestGenericSkills:
                 standalone_mode=False,
             )
             assert result.exit_code == 0
-
-            # TODO uncomment these to test success!
-            # assert process_one.returncode == 0
-            # assert process_two.returncode == 0
 
     @classmethod
     def teardown_class(cls):

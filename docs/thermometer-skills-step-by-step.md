@@ -192,7 +192,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating thermometer services on OEF.".format(
+            "[{}]: updating thermometer services on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -217,7 +217,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering thermometer station services from OEF.".format(
+            "[{}]: unregistering thermometer station services from OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -1352,8 +1352,8 @@ The reason is that we receive messages not only from the `my_thermometer` AEA bu
 To handle the [OEF search node](../oef-ledger) response on our search request adds the following code in the same file:
 
 ``` python 
-class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+class OEFSearchHandler(Handler):
+    """This class handles OEF search responses."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

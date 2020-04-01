@@ -299,7 +299,7 @@ class FIPAHandler(Handler):
 
 
 class OEFSearchHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class handles OEF search responses."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 
