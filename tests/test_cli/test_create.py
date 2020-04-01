@@ -69,11 +69,11 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         cls.agent_config = cls._load_config_file(cls.agent_name)
 
@@ -275,11 +275,11 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
     def test_exit_code_equal_to_1(self):
@@ -324,11 +324,11 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
     def test_exit_code_equal_to_1(self):
@@ -366,11 +366,11 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
     def test_exit_code_equal_to_1(self):
@@ -407,11 +407,11 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert cls.result.exit_code == 0
 
@@ -420,7 +420,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         os.mkdir("another_subdir")
         os.chdir("another_subdir")
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
     def test_exit_code_equal_to_1(self):
