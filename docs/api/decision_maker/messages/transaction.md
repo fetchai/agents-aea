@@ -184,15 +184,15 @@ Get the transaction digest.
 
 Get the signing payload.
 
-<a name=".aea.decision_maker.messages.transaction.TransactionMessage.tx_signature"></a>
-#### tx`_`signature
+<a name=".aea.decision_maker.messages.transaction.TransactionMessage.signed_payload"></a>
+#### signed`_`payload
 
 ```python
  | @property
- | tx_signature() -> str
+ | signed_payload() -> Dict[str, Any]
 ```
 
-Get the transaction signature.
+Get the signed payload.
 
 <a name=".aea.decision_maker.messages.transaction.TransactionMessage.amount"></a>
 #### amount
@@ -269,7 +269,7 @@ a transaction message object
 
 ```python
  | @classmethod
- | respond_signing(cls, other: "TransactionMessage", performative: Performative, tx_signature: Optional[str] = None) -> "TransactionMessage"
+ | respond_signing(cls, other: "TransactionMessage", performative: Performative, signed_payload: Optional[Dict[str, Any]] = None) -> "TransactionMessage"
 ```
 
 Create response message.
@@ -278,7 +278,7 @@ Create response message.
 
 - `other`: TransactionMessage
 - `performative`: the performative
-- `tx_digest`: the transaction digest
+- `signed_payload`: the signed payload
 
 **Returns**:
 

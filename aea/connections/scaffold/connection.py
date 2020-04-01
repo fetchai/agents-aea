@@ -19,13 +19,10 @@
 
 """Scaffold connection and channel."""
 
-import logging
 from typing import Optional
 
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
-
-logger = logging.getLogger(__name__)
 
 
 class MyScaffoldConnection(Connection):

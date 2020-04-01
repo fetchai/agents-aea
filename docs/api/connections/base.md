@@ -25,7 +25,7 @@ Initialize the connection status.
 ### Connection
 
 ```python
-class Connection(ABC)
+class Connection(Component,  ABC)
 ```
 
 Abstract definition of a connection.
@@ -34,16 +34,14 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
- | __init__(connection_id: Optional[PublicId] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None)
+ | __init__(configuration: ConnectionConfig, address: Optional["Address"] = None)
 ```
 
 Initialize the connection.
 
 **Arguments**:
 
-- `connection_id`: the connection identifier.
-- `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
-- `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
+- `configuration`: the connection configuration.
 
 <a name=".aea.connections.base.Connection.loop"></a>
 #### loop
@@ -63,6 +61,34 @@ Set the event loop.
 
 None
 
+<a name=".aea.connections.base.Connection.address"></a>
+#### address
+
+```python
+ | @address.setter
+ | address(address: "Address") -> None
+```
+
+Set the address to be used by the connection.
+
+**Arguments**:
+
+- `address`: a public key.
+
+**Returns**:
+
+None
+
+<a name=".aea.connections.base.Connection.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
 <a name=".aea.connections.base.Connection.connection_id"></a>
 #### connection`_`id
 
@@ -73,15 +99,15 @@ None
 
 Get the id of the connection.
 
-<a name=".aea.connections.base.Connection.restricted_to_protocols"></a>
-#### restricted`_`to`_`protocols
+<a name=".aea.connections.base.Connection.configuration"></a>
+#### configuration
 
 ```python
  | @property
- | restricted_to_protocols() -> Set[PublicId]
+ | configuration() -> ConnectionConfig
 ```
 
-Get the ids of the only supported protocols for this connection.
+Get the connection configuration.
 
 <a name=".aea.connections.base.Connection.excluded_protocols"></a>
 #### excluded`_`protocols
@@ -154,24 +180,4 @@ Receive an envelope.
 **Returns**:
 
 the received envelope, or None if an error occurred.
-
-<a name=".aea.connections.base.Connection.from_config"></a>
-#### from`_`config
-
-```python
- | @classmethod
- | @abstractmethod
- | from_config(cls, address: "Address", connection_configuration: ConnectionConfig) -> "Connection"
-```
-
-Initialize a connection instance from a configuration.
-
-**Arguments**:
-
-- `address`: the address of the agent.
-- `connection_configuration`: the connection configuration.
-
-**Returns**:
-
-an instance of the concrete connection class.
 

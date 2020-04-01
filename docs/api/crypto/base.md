@@ -88,11 +88,29 @@ Sign a message in bytes string form.
 
 **Arguments**:
 
-- `message`: the message we want to send
+- `message`: the message to be signed
 
 **Returns**:
 
-Signed message in bytes
+signature of the message in bytes form
+
+<a name=".aea.crypto.base.Crypto.sign_transaction"></a>
+#### sign`_`transaction
+
+```python
+ | @abstractmethod
+ | sign_transaction(transaction: Any) -> Any
+```
+
+Sign a transaction in bytes string form.
+
+**Arguments**:
+
+- `transaction`: the transaction to be signed
+
+**Returns**:
+
+signed transaction
 
 <a name=".aea.crypto.base.Crypto.recover_message"></a>
 #### recover`_`message
@@ -198,7 +216,7 @@ the balance.
 
 ```python
  | @abstractmethod
- | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, **kwargs) -> Optional[str]
+ | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, is_waiting_for_confirmation: bool = True, **kwargs) -> Optional[str]
 ```
 
 Submit a transaction to the ledger.
@@ -208,15 +226,33 @@ in the concrete ledger API, use keyword arguments for the additional parameters.
 
 **Arguments**:
 
-- `tx_nonce`: verifies the authenticity of the tx
 - `crypto`: the crypto object associated to the payer.
 - `destination_address`: the destination address of the payee.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
+- `tx_nonce`: verifies the authenticity of the tx
+- `is_waiting_for_confirmation`: whether or not to wait for confirmation
 
 **Returns**:
 
 tx digest if successful, otherwise None
+
+<a name=".aea.crypto.base.LedgerApi.send_signed_transaction"></a>
+#### send`_`signed`_`transaction
+
+```python
+ | @abstractmethod
+ | send_signed_transaction(is_waiting_for_confirmation: bool, tx_signed: Any) -> str
+```
+
+Send a signed transaction and wait for confirmation.
+
+Use keyword arguments for the specifying the signed transaction payload.
+
+**Arguments**:
+
+- `is_waiting_for_confirmation`: whether or not to wait for confirmation
+- `tx_signed`: the signed transaction
 
 <a name=".aea.crypto.base.LedgerApi.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
@@ -235,6 +271,43 @@ Check whether a transaction is settled or not.
 **Returns**:
 
 True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.base.LedgerApi.get_transaction_status"></a>
+#### get`_`transaction`_`status
+
+```python
+ | @abstractmethod
+ | get_transaction_status(tx_digest: str) -> Any
+```
+
+Get the transaction status for a transaction digest.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+the tx status, if present
+
+<a name=".aea.crypto.base.LedgerApi.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | @abstractmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a random str message.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
 
 <a name=".aea.crypto.base.LedgerApi.validate_transaction"></a>
 #### validate`_`transaction
@@ -257,23 +330,4 @@ Check whether a transaction is valid or not.
 **Returns**:
 
 True if the transaction referenced by the tx_digest matches the terms.
-
-<a name=".aea.crypto.base.LedgerApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
-
-```python
- | @abstractmethod
- | generate_tx_nonce(seller: Address, client: Address) -> str
-```
-
-Generate a random str message.
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-
-**Returns**:
-
-return the hash in hex.
 

@@ -258,7 +258,7 @@ the decoded message.
 ### Protocol
 
 ```python
-class Protocol(ABC)
+class Protocol(Component)
 ```
 
 This class implements a specifications for a protocol.
@@ -269,16 +269,14 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig)
+ | __init__(configuration: ProtocolConfig)
 ```
 
 Initialize the protocol manager.
 
 **Arguments**:
 
-- `protocol_id`: the protocol id.
-- `serializer`: the serializer.
-- `config`: the protocol configurations.
+- `configuration`: the protocol configurations.
 
 <a name=".aea.protocols.base.Protocol.id"></a>
 #### id
@@ -294,11 +292,11 @@ Get the name.
 #### serializer
 
 ```python
- | @property
- | serializer() -> Serializer
+ | @serializer.setter
+ | serializer(serializer: Serializer) -> None
 ```
 
-Get the serializer.
+Set the serializer.
 
 <a name=".aea.protocols.base.Protocol.config"></a>
 #### config
@@ -310,24 +308,21 @@ Get the serializer.
 
 Get the configuration.
 
-<a name=".aea.protocols.base.Protocol.from_dir"></a>
-#### from`_`dir
+<a name=".aea.protocols.base.Protocol.load"></a>
+#### load
 
 ```python
- | @classmethod
- | from_dir(cls, directory: str) -> "Protocol"
+ | load() -> None
 ```
 
-Load a protocol from a directory.
+Set the component up.
 
-**Arguments**:
-
-- `directory`: the skill directory.
-- `agent_context`: the agent's context
+In the case of a protocol, we load the 'serialization.py' module
+to instantiate an instance of the Serializer.
 
 **Returns**:
 
-the Protocol object.
+None
 
 **Raises**:
 
