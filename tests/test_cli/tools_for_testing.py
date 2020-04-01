@@ -50,6 +50,7 @@ class AgentConfigMock:
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
         self.private_key_paths.read_all = Mock(return_value=private_key_paths)
+        self.get = lambda x: getattr(self, x, None)
 
     registry_path = "registry"
     name = "name"
@@ -64,8 +65,10 @@ class ContextMock:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
+        self.config = self.agent_config
         self.connection_loader = ConfigLoaderMock()
         self.agent_loader = ConfigLoaderMock()
+        self.obj = self
 
 
 class PublicIdMock:

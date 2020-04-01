@@ -89,7 +89,12 @@ class TestBuildSkill:
         )
         cls.fetch_result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "fetch", "fetchai/simple_service_registration:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "fetch",
+                "--local",
+                "fetchai/simple_service_registration:0.1.0",
+            ],
             standalone_mode=False,
         )
         cls.create_result = cls.runner.invoke(
