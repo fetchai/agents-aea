@@ -374,7 +374,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
         config.registry_path = os.path.join(ROOT_DIR, "packages")
-        yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        yaml.safe_dump(dict(config.json), open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
         cls.patch = unittest.mock.patch.object(
@@ -449,7 +449,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
         config.registry_path = os.path.join(ROOT_DIR, "packages")
-        yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        yaml.safe_dump(dict(config.json), open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         Path(
             cls.t, cls.agent_name, "vendor", "fetchai", "skills", cls.skill_name
