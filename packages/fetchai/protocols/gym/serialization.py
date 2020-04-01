@@ -49,14 +49,14 @@ class GymSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == GymMessage.Performative.ACT:
-            performative = gym_pb2.GymMessage.Act()  # type: ignore
+            performative = gym_pb2.GymMessage.Act_Performative()  # type: ignore
             action = msg.action
             AnyObject.encode(performative.action, action)
             step_id = msg.step_id
             performative.step_id = step_id
             gym_msg.act.CopyFrom(performative)
         elif performative_id == GymMessage.Performative.PERCEPT:
-            performative = gym_pb2.GymMessage.Percept()  # type: ignore
+            performative = gym_pb2.GymMessage.Percept_Performative()  # type: ignore
             step_id = msg.step_id
             performative.step_id = step_id
             observation = msg.observation
@@ -69,10 +69,10 @@ class GymSerializer(Serializer):
             AnyObject.encode(performative.info, info)
             gym_msg.percept.CopyFrom(performative)
         elif performative_id == GymMessage.Performative.RESET:
-            performative = gym_pb2.GymMessage.Reset()  # type: ignore
+            performative = gym_pb2.GymMessage.Reset_Performative()  # type: ignore
             gym_msg.reset.CopyFrom(performative)
         elif performative_id == GymMessage.Performative.CLOSE:
-            performative = gym_pb2.GymMessage.Close()  # type: ignore
+            performative = gym_pb2.GymMessage.Close_Performative()  # type: ignore
             gym_msg.close.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
