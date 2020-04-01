@@ -30,12 +30,12 @@ class AnyObject:
         """Initialise an instance of AnyObject."""
         self.any = _any
 
-    @classmethod
-    def encode(cls, any_object_protobuf_object, any_object_object: "AnyObject") -> None:
+    @staticmethod
+    def encode(any_object_protobuf_object, any_object_object: "AnyObject") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the any_object_protobuf_object argument must be matched with the instance of this class in the 'any_object_object' argument.
+        The protocol buffer object in the any_object_protobuf_object argument is matched with the instance of this class in the 'any_object_object' argument.
 
         :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param any_object_object: an instance of this class to be encoded in the protocol buffer object.
@@ -48,7 +48,7 @@ class AnyObject:
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
+        A new instance of this class is created that matches the protocol buffer object in the 'any_object_protobuf_object' argument.
 
         :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'any_object_protobuf_object' argument.

@@ -21,20 +21,20 @@ message MlTradeMessage{
 
 
     // Performatives and contents
-    message Cfp{
+    message Cfp_Performative{
         Query query = 1;
     }
 
-    message Terms{
+    message Terms_Performative{
         Description terms = 1;
     }
 
-    message Accept{
+    message Accept_Performative{
         Description terms = 1;
         string tx_digest = 2;
     }
 
-    message Data{
+    message Data_Performative{
         Description terms = 1;
         bytes payload = 2;
     }
@@ -46,9 +46,9 @@ message MlTradeMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Accept accept = 5;
-        Cfp cfp = 6;
-        Data data = 7;
-        Terms terms = 8;
+        Accept_Performative accept = 5;
+        Cfp_Performative cfp = 6;
+        Data_Performative data = 7;
+        Terms_Performative terms = 8;
     }
 }

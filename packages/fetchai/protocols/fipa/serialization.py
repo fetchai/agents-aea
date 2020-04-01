@@ -50,38 +50,38 @@ class FipaSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == FipaMessage.Performative.CFP:
-            performative = fipa_pb2.FipaMessage.Cfp()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Cfp_Performative()  # type: ignore
             query = msg.query
             Query.encode(performative.query, query)
             fipa_msg.cfp.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.PROPOSE:
-            performative = fipa_pb2.FipaMessage.Propose()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Propose_Performative()  # type: ignore
             proposal = msg.proposal
             Description.encode(performative.proposal, proposal)
             fipa_msg.propose.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.ACCEPT_W_INFORM:
-            performative = fipa_pb2.FipaMessage.Accept_W_Inform()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Accept_W_Inform_Performative()  # type: ignore
             info = msg.info
             performative.info.update(info)
             fipa_msg.accept_w_inform.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            performative = fipa_pb2.FipaMessage.Match_Accept_W_Inform()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Match_Accept_W_Inform_Performative()  # type: ignore
             info = msg.info
             performative.info.update(info)
             fipa_msg.match_accept_w_inform.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.INFORM:
-            performative = fipa_pb2.FipaMessage.Inform()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Inform_Performative()  # type: ignore
             info = msg.info
             performative.info.update(info)
             fipa_msg.inform.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.ACCEPT:
-            performative = fipa_pb2.FipaMessage.Accept()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Accept_Performative()  # type: ignore
             fipa_msg.accept.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.DECLINE:
-            performative = fipa_pb2.FipaMessage.Decline()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Decline_Performative()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
         elif performative_id == FipaMessage.Performative.MATCH_ACCEPT:
-            performative = fipa_pb2.FipaMessage.Match_Accept()  # type: ignore
+            performative = fipa_pb2.FipaMessage.Match_Accept_Performative()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))

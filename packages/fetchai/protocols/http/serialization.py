@@ -48,7 +48,7 @@ class HttpSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == HttpMessage.Performative.REQUEST:
-            performative = http_pb2.HttpMessage.Request()  # type: ignore
+            performative = http_pb2.HttpMessage.Request_Performative()  # type: ignore
             method = msg.method
             performative.method = method
             url = msg.url
@@ -61,7 +61,7 @@ class HttpSerializer(Serializer):
             performative.bodyy = bodyy
             http_msg.request.CopyFrom(performative)
         elif performative_id == HttpMessage.Performative.RESPONSE:
-            performative = http_pb2.HttpMessage.Response()  # type: ignore
+            performative = http_pb2.HttpMessage.Response_Performative()  # type: ignore
             version = msg.version
             performative.version = version
             status_code = msg.status_code

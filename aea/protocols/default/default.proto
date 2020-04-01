@@ -18,11 +18,11 @@ message DefaultMessage{
 
 
     // Performatives and contents
-    message Bytes{
+    message Bytes_Performative{
         bytes content = 1;
     }
 
-    message Error{
+    message Error_Performative{
         ErrorCode error_code = 1;
         string error_msg = 2;
         map<string, bytes> error_data = 3;
@@ -35,7 +35,7 @@ message DefaultMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Bytes bytes = 5;
-        Error error = 6;
+        Bytes_Performative bytes = 5;
+        Error_Performative error = 6;
     }
 }
