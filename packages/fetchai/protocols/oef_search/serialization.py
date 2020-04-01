@@ -51,27 +51,27 @@ class OefSearchSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == OefSearchMessage.Performative.REGISTER_SERVICE:
-            performative = oef_search_pb2.OefSearchMessage.Register_Service()  # type: ignore
+            performative = oef_search_pb2.OefSearchMessage.Register_Service_Performative()  # type: ignore
             service_description = msg.service_description
             Description.encode(performative.service_description, service_description)
             oef_search_msg.register_service.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.UNREGISTER_SERVICE:
-            performative = oef_search_pb2.OefSearchMessage.Unregister_Service()  # type: ignore
+            performative = oef_search_pb2.OefSearchMessage.Unregister_Service_Performative()  # type: ignore
             service_description = msg.service_description
             Description.encode(performative.service_description, service_description)
             oef_search_msg.unregister_service.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.SEARCH_SERVICES:
-            performative = oef_search_pb2.OefSearchMessage.Search_Services()  # type: ignore
+            performative = oef_search_pb2.OefSearchMessage.Search_Services_Performative()  # type: ignore
             query = msg.query
             Query.encode(performative.query, query)
             oef_search_msg.search_services.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.SEARCH_RESULT:
-            performative = oef_search_pb2.OefSearchMessage.Search_Result()  # type: ignore
+            performative = oef_search_pb2.OefSearchMessage.Search_Result_Performative()  # type: ignore
             agents = msg.agents
             performative.agents.extend(agents)
             oef_search_msg.search_result.CopyFrom(performative)
         elif performative_id == OefSearchMessage.Performative.OEF_ERROR:
-            performative = oef_search_pb2.OefSearchMessage.Oef_Error()  # type: ignore
+            performative = oef_search_pb2.OefSearchMessage.Oef_Error_Performative()  # type: ignore
             oef_error_operation = msg.oef_error_operation
             OefErrorOperation.encode(
                 performative.oef_error_operation, oef_error_operation

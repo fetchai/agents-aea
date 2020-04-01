@@ -2,14 +2,14 @@ name: oef_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
+description: A protocol for interacting with an OEF search service.
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmS19cwrXWeHj97w4i11KamuWgUxwLoBE43yLGgz4kLAW1
-  custom_types.py: QmQJENMj1exBccGiHavUNJrUycRPB99ftWSv1AzdhbVA49
+  custom_types.py: QmR4TS6KhXpRtGqq78B8mXMiiFXcFe7JEkxB7jHvqPVkgD
   message.py: QmSSrQg7cckXrdKJ2CGufhXG53Hj8Z5rNSX7Got2sDJp8W
-  oef_search.proto: QmVB6bWkPRoejo4jJtGAuJvjmoEfx5stnZXCGNibHNmaw1
-  oef_search_pb2.py: QmVgEs1JWAVM5crA7Tj2mMArmMPcuYZZSXy8GZzz1t5xwU
-  serialization.py: QmRwYFqJzNpUJ3wereeDimApMXSrqja2syjAcDYVjyUFiD
-aea_version: 0.2.4
+  oef_search.proto: QmRg28H6bNo1PcyJiKLYjHe6FCwtE6nJ43DeJ4RFTcHm68
+  oef_search_pb2.py: QmYAG3XcTX7QKBw2k1F5gst9KQkeEu2Pfhjh4EwfzFki8Y
+  serialization.py: QmSdgUuFuU6dtX2Q4z8RyUcGnXrWBj3wc2VSFv1uq47kjU
 dependencies: 
-    protobuf: {} 
-description: A protocol for interacting with an OEF search service.
+    protobuf: {}

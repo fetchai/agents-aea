@@ -42,16 +42,16 @@ class OefErrorOperation(Enum):
         """Get string representation."""
         return str(self.value)
 
-    @classmethod
+    @staticmethod
     def encode(
-        cls,
         oef_error_operation_protobuf_object,
         oef_error_operation_object: "OefErrorOperation",
     ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the oef_error_operation_protobuf_object argument must be matched with the instance of this class in the 'oef_error_operation_object' argument.
+        The protocol buffer object in the oef_error_operation_protobuf_object argument is matched with the instance of this class in the 'oef_error_operation_object'
+        argument.
 
         :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param oef_error_operation_object: an instance of this class to be encoded in the protocol buffer object.
@@ -64,7 +64,7 @@ class OefErrorOperation(Enum):
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the protocol buffer object in the 'oef_error_operation_protobuf_object' argument.
+        A new instance of this class is created that matches the protocol buffer object in the 'oef_error_operation_protobuf_object' argument.
 
         :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'oef_error_operation_protobuf_object' argument.
