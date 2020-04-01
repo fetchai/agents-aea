@@ -25,7 +25,7 @@ from typing import Any, Dict, List
 
 from vyper.utils import keccak256
 
-from aea.configurations.base import ContractConfig, ContractId
+from aea.configurations.base import ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -48,22 +48,9 @@ class ERC1155Contract(Contract):
         CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
         CONTRACT_SIGN_HASH = "contract_sign_hash"
 
-    def __init__(
-        self,
-        contract_id: ContractId,
-        contract_config: ContractConfig,
-        contract_interface: Dict[str, Any],
-    ):
-        """Initialize.
-
-        super().__init__(contract_id, contract_config)
-
-
-        :param contract_id: the contract id.
-        :param config: the contract configurations.
-        :param contract_interface: the contract interface.
-        """
-        super().__init__(contract_id, contract_config, contract_interface)
+    def load(self) -> None:
+        """Load the contract."""
+        super().load()
         self._token_ids = {}  # type: Dict[int, int]
         self.nonce = 0
 

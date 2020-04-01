@@ -27,7 +27,7 @@ from typing import Optional, Set, Union, cast
 
 import requests
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
@@ -167,34 +167,16 @@ class HTTPClientChannel:
 class HTTPClientConnection(Connection):
     """Proxy to the functionality of the web client."""
 
-    def __init__(
-        self,
-        agent_address: Address,
-        provider_address: str,
-        provider_port: int,
-        *args,
-        **kwargs,
-    ):
-        """
-        Initialize a connection.
-
-        :param agent_address: the address of the agent.
-        :param provider_address: server hostname / IP address
-        :param provider_port: server port number
-        """
-
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "http_client", "0.1.0")
-
-        super().__init__(*args, **kwargs)
-        self.agent_address = agent_address
+    def load(self) -> None:
+        """Load the connection configuration."""
+        address = cast(str, self.configuration.config.get("address"))
+        port = cast(int, self.configuration.config.get("port"))
         self.channel = HTTPClientChannel(
-            agent_address,
-            provider_address,
-            provider_port,
+            self.address,
+            address,
+            port,
             connection_id=self.connection_id,
             excluded_protocols=self.excluded_protocols,
-            restricted_to_protocols=kwargs.get("restricted_to_protocols", {}),
         )
 
     async def connect(self) -> None:
@@ -250,31 +232,3 @@ class HTTPClientConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, agent_address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the HTTP connection from a connection configuration.
-
-        :param agent_address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        address = cast(str, connection_configuration.config.get("address"))
-        port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
-        return HTTPClientConnection(
-            agent_address,
-            address,
-            port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )

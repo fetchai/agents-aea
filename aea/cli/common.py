@@ -21,27 +21,21 @@
 import logging
 import logging.config
 import os
-import pprint
 import re
 import shutil
 import sys
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 import click
-
-from dotenv import load_dotenv
 
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
-from packaging.version import Version
-
 import yaml
 
-import aea
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
@@ -49,8 +43,9 @@ from aea.configurations.base import (
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
-    PackageConfiguration,
     PublicId,
+    _check_aea_version,
+    _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
@@ -65,7 +60,6 @@ from aea.crypto.helpers import (
     _try_validate_fet_private_key_path,
 )
 from aea.crypto.wallet import SUPPORTED_CRYPTOS
-from aea.helpers.ipfs.base import IPFSHashOnly
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
@@ -80,17 +74,6 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
-
-DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
-    ".DS_Store",
-    "*__pycache__/*",
-    "*.pyc",
-    "aea-config.yaml",
-    "protocol.yaml",
-    "connection.yaml",
-    "skill.yaml",
-    "contract.yaml",
-]
 
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
@@ -220,16 +203,6 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
                 )
             )
             sys.exit(1)
-
-
-def _load_env_file(env_file: str):
-    """
-    Load the content of the environment file into the process environment.
-
-    :param env_file: path to the env file.
-    :return: None.
-    """
-    load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:
@@ -566,94 +539,6 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
         sys.exit(1)
 
     return package_path
-
-
-def _compute_fingerprint(
-    package_directory: Path, ignore_patterns: Optional[Collection[str]] = None
-) -> Dict[str, str]:
-    ignore_patterns = ignore_patterns if ignore_patterns is not None else []
-    ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
-    hasher = IPFSHashOnly()
-    fingerprints = {}  # type: Dict[str, str]
-    # find all valid files of the package
-    all_files = [
-        x
-        for x in package_directory.glob("**/*")
-        if x.is_file()
-        and (
-            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
-        )
-    ]
-
-    for file in all_files:
-        file_hash = hasher.get(str(file))
-        key = str(file.relative_to(package_directory))
-        assert key not in fingerprints  # nosec
-        fingerprints[key] = file_hash
-
-    return fingerprints
-
-
-def _compare_fingerprints(
-    package_configuration: PackageConfiguration,
-    package_directory: Path,
-    is_vendor: bool,
-    item_type: ConfigurationType,
-):
-    """
-    Check fingerprints of a package directory against the fingerprints declared in the configuration file.
-
-    :param package_configuration: the package configuration object.
-    :param package_directory: the directory of the package.
-    :param is_vendor: whether the package is vendorized or not.
-    :param item_type: the type of the item.
-    :return: None
-    :raises ValueError: if the fingerprints do not match.
-    """
-    expected_fingerprints = package_configuration.fingerprint
-    ignore_patterns = package_configuration.fingerprint_ignore_patterns
-    actual_fingerprints = _compute_fingerprint(package_directory, ignore_patterns)
-    if expected_fingerprints != actual_fingerprints:
-        if is_vendor:
-            raise ValueError(
-                (
-                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                    "Vendorized projects should not be tampered with, please revert any changes to {} {}"
-                ).format(
-                    package_directory,
-                    pprint.pformat(expected_fingerprints),
-                    pprint.pformat(actual_fingerprints),
-                    str(item_type),
-                    package_configuration.public_id,
-                )
-            )
-        else:
-            raise ValueError(
-                (
-                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
-                    "Please fingerprint the package before continuing: 'aea fingerprint {} {}'"
-                ).format(
-                    package_directory,
-                    pprint.pformat(expected_fingerprints),
-                    pprint.pformat(actual_fingerprints),
-                    str(item_type),
-                    package_configuration.public_id,
-                )
-            )
-
-
-def _check_aea_version(package_configuration: PackageConfiguration):
-    """Check the package configuration version against the version of the framework."""
-    current_aea_version = Version(aea.__version__)
-    version_specifiers = package_configuration.aea_version_specifiers
-    if current_aea_version not in version_specifiers:
-        raise ValueError(
-            "The CLI version is {}, but package {} requires version {}".format(
-                current_aea_version,
-                package_configuration.public_id,
-                package_configuration.aea_version_specifiers,
-            )
-        )
 
 
 def _validate_config_consistency(ctx: Context):

@@ -22,7 +22,6 @@ import time
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -34,11 +33,13 @@ from aea.mail.base import AEAConnectionError, Envelope, InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
+
+from ....conftest import _make_local_connection
 
 DEFAULT_OEF = "default_oef"
 
@@ -54,13 +55,7 @@ class TestEmptySearch:
 
         cls.address_1 = "address_1"
         cls.multiplexer = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_1,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
         cls.multiplexer.connect()
@@ -112,13 +107,7 @@ class TestSimpleSearchResult:
 
         cls.address_1 = "address"
         cls.multiplexer = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_1,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
         cls.multiplexer.connect()
@@ -190,23 +179,11 @@ class TestUnregister:
 
         cls.address_1 = "address_1"
         cls.multiplexer1 = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_1,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
         cls.address_2 = "address_2"
         cls.multiplexer2 = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_2,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_2, cls.node,)]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
@@ -335,13 +312,7 @@ class TestAgentMessage:
 
         cls.address_1 = "address_1"
         cls.multiplexer1 = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_1,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
 
     @pytest.mark.asyncio
@@ -362,11 +333,7 @@ class TestAgentMessage:
             message=msg_bytes,
         )
         with pytest.raises(AEAConnectionError):
-            await OEFLocalConnection(
-                self.address_1,
-                self.node,
-                connection_id=PublicId("fetchai", "local", "0.1.0"),
-            ).send(envelope)
+            await _make_local_connection(self.address_1, self.node,).send(envelope)
 
         self.multiplexer1.connect()
         msg = FipaMessage(
@@ -399,29 +366,6 @@ class TestAgentMessage:
         cls.node.stop()
 
 
-class TestOEFConnectionFromJson:
-    """Test the the OEF will return a connection after reading the .json file."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test."""
-        cls.node = LocalNode()
-        cls.node.start()
-        cls.address_1 = "address_1"
-
-    def test_from_config(self):
-        """Test the configuration loading."""
-        con = OEFLocalConnection.from_config(
-            address="pk", connection_configuration=ConnectionConfig(),
-        )
-        assert not con.connection_status.is_connected, "We are connected..."
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        cls.node.stop()
-
-
 class TestFilteredSearchResult:
     """Test that the query system of the search gives the expected result."""
 
@@ -434,22 +378,10 @@ class TestFilteredSearchResult:
         cls.address_1 = "multiplexer1"
         cls.address_2 = "multiplexer2"
         cls.multiplexer1 = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_1,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_1, cls.node,)]
         )
         cls.multiplexer2 = Multiplexer(
-            [
-                OEFLocalConnection(
-                    cls.address_2,
-                    cls.node,
-                    connection_id=PublicId("fetchai", "local", "0.1.0"),
-                )
-            ]
+            [_make_local_connection(cls.address_2, cls.node,)]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()

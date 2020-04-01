@@ -24,15 +24,15 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from typing import cast
 
 import pytest
-
-import yaml
 
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import ComponentType, PublicId
+from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
@@ -44,7 +44,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ContractRegistry, ProtocolRegistry
 from aea.registries.resources import Resources
 
-from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection, ROOT_DIR
+from .conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
 
 class TestContractRegistry:
@@ -63,25 +63,19 @@ class TestContractRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        # make fake contract
-        cls.fake_contract_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("contracts").append(str(cls.fake_contract_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "contracts", cls.fake_contract_id.name).mkdir()
+        contract = Component.load_from_directory(
+            ComponentType.CONTRACT,
+            Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"),
+        )
+        contract.load()
 
         cls.registry = ContractRegistry()
-        cls.registry.populate(cls.agent_folder)
+        cls.registry.register(
+            contract.configuration.public_id, cast(Contract, contract)
+        )
         cls.expected_contract_ids = {
             PublicId("fetchai", "erc1155", "0.1.0"),
         }
-
-    def test_not_able_to_add_bad_formatted_contract(self):
-        """Test that the contract registry has not been able to add the contract 'fake'."""
-        self.mocked_logger.assert_called_with(
-            "Not able to add contract '{}'.".format("fake")
-        )
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
@@ -133,26 +127,22 @@ class TestProtocolRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        # make fake protocol
-        cls.fake_protocol_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("protocols").append(str(cls.fake_protocol_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "protocols", cls.fake_protocol_id.name).mkdir()
-
         cls.registry = ProtocolRegistry()
-        cls.registry.populate(cls.agent_folder)
+
+        protocol_1 = Component.load_from_directory(
+            ComponentType.PROTOCOL, Path(aea.AEA_DIR, "protocols", "default")
+        )
+        protocol_2 = Component.load_from_directory(
+            ComponentType.PROTOCOL,
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
+        )
+        cls.registry.register(protocol_1.public_id, protocol_1)
+        cls.registry.register(protocol_2.public_id, protocol_2)
+
         cls.expected_protocol_ids = {
             PublicId("fetchai", "default", "0.1.0"),
             PublicId("fetchai", "fipa", "0.1.0"),
         }
-
-    def test_not_able_to_add_bad_formatted_protocol_message(self):
-        """Test that the protocol registry has not been able to add the protocol 'bad'."""
-        self.mocked_logger.assert_called_with(
-            "Not able to add protocol '{}'.".format("fake")
-        )
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
@@ -213,32 +203,27 @@ class TestResources:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
+        cls.resources = Resources(os.path.join(cls.agent_folder))
+
+        cls.resources.add_component(
+            Component.load_from_directory(
+                ComponentType.PROTOCOL, Path(aea.AEA_DIR, "protocols", "default")
+            )
+        )
+        # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
+        cls.resources.add_component(
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
+            )
+        )
+        cls.resources.add_component(
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(aea.AEA_DIR, "skills", "error")
+            )
+        )
+
         cls.error_skill_public_id = PublicId("fetchai", "error", "0.1.0")
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
-
-        # # make fake skill
-        cls.fake_skill_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("skills").append(str(cls.fake_skill_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "skills", cls.fake_skill_id.name).mkdir()
-
-        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        cls.resources = Resources(os.path.join(cls.agent_folder))
-        identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
-        cls.aea = AEA(
-            identity,
-            connections,
-            wallet,
-            ledger_apis,
-            resources=cls.resources,
-            is_programmatic=False,
-        )
-        cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {
             PublicId("fetchai", "dummy", "0.1.0"),
@@ -314,10 +299,11 @@ class TestResources:
 
     def test_add_protocol(self):
         """Test that the 'add protocol' method works correctly."""
-        oef_protocol = Protocol.from_dir(
-            os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        oef_protocol = Component.load_from_directory(
+            ComponentType.PROTOCOL,
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"),
         )
-        self.resources.add_protocol(oef_protocol)
+        self.resources.add_protocol(cast(Protocol, oef_protocol))
         for protocol_id in self.expected_protocols:
             assert (
                 self.resources.get_protocol(protocol_id) is not None
@@ -426,17 +412,25 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        connections = [_make_dummy_connection()]
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
+        resources = Resources(cls.agent_folder)
+
+        resources.add_component(
+            Component.load_from_directory(
+                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
+            )
+        )
+
         cls.aea = AEA(
             identity,
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(cls.agent_folder),
+            resources=resources,
             is_programmatic=False,
         )
         cls.aea.setup()

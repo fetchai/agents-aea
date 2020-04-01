@@ -8,7 +8,8 @@
     "author",
     "version",
     "license",
-    "aea_version"
+    "aea_version",
+    "class_name"
   ],
   "properties": {
     "name": {
@@ -39,6 +40,9 @@
       "$ref": "definitions.json#/definitions/description"
     },
     "path_to_contract_interface": {
+      "type": "string"
+    },
+    "class_name": {
       "type": "string"
     }
   }

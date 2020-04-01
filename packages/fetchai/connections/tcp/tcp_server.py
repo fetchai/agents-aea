@@ -24,8 +24,6 @@ import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
@@ -38,15 +36,9 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
-        """
-        Initialize a TCP channel.
-
-        :param address: address.
-        :param host: the socket bind address.
-        """
-        super().__init__(address, host, port, *args, **kwargs)
-
+    def load(self):
+        """Load the connection configuration."""
+        super().load()
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
@@ -130,30 +122,3 @@ class TCPServerConnection(TCPConnection):
             return None
         _, writer = self.connections[to]
         return writer
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """Get the TCP server connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        server_address = cast(str, connection_configuration.config.get("address"))
-        port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
-        return TCPServerConnection(
-            address,
-            server_address,
-            port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )

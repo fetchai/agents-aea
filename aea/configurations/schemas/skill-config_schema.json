@@ -100,7 +100,7 @@
       ],
       "properties": {
         "class_name": {
-          "type": "string"
+          "$ref": "definitions.json#/definitions/class_name"
         },
         "args": {
           "type": "object"

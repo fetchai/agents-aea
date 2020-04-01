@@ -25,18 +25,17 @@ import unittest.mock
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 import packages
-from packages.fetchai.connections.tcp.connection import (
-    TCPClientConnection,
-    TCPServerConnection,
-)
 
-from ....conftest import get_unused_tcp_port
+from ....conftest import (
+    _make_tcp_client_connection,
+    _make_tcp_server_connection,
+    get_unused_tcp_port,
+)
 
 
 class TestTCPCommunication:
@@ -52,23 +51,14 @@ class TestTCPCommunication:
         cls.client_addr_1 = "client_addr_1"
         cls.client_addr_2 = "client_addr_2"
 
-        cls.server_conn = TCPServerConnection(
-            cls.server_addr,
-            cls.host,
-            cls.port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
+        cls.server_conn = _make_tcp_server_connection(
+            cls.server_addr, cls.host, cls.port,
         )
-        cls.client_conn_1 = TCPClientConnection(
-            cls.client_addr_1,
-            cls.host,
-            cls.port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
+        cls.client_conn_1 = _make_tcp_client_connection(
+            cls.client_addr_1, cls.host, cls.port,
         )
-        cls.client_conn_2 = TCPClientConnection(
-            cls.client_addr_2,
-            cls.host,
-            cls.port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
+        cls.client_conn_2 = _make_tcp_client_connection(
+            cls.client_addr_2, cls.host, cls.port,
         )
 
         cls.server_multiplexer = Multiplexer([cls.server_conn])
@@ -158,18 +148,8 @@ class TestTCPClientConnection:
     async def test_receive_cancelled(self):
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection(
-            "address_server",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
-        tcp_client = TCPClientConnection(
-            "address_client",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
+        tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
+        tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port,)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -193,18 +173,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_struct_error(self):
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection(
-            "address_server",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
-        tcp_client = TCPClientConnection(
-            "address_client",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
+        tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
+        tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port,)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -227,18 +197,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection(
-            "address_server",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
-        tcp_client = TCPClientConnection(
-            "address_client",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
+        tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
+        tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port,)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -254,14 +214,6 @@ class TestTCPClientConnection:
         await tcp_client.disconnect()
         await tcp_server.disconnect()
 
-    @pytest.mark.asyncio
-    async def test_from_config(self):
-        """Test the creation of the connection from a configuration."""
-        port = get_unused_tcp_port()
-        TCPClientConnection.from_config(
-            "address", ConnectionConfig(host="127.0.0.1", port=port),
-        )
-
 
 class TestTCPServerConnection:
     """Test TCP Server code."""
@@ -270,18 +222,8 @@ class TestTCPServerConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection(
-            "address_server",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
-        tcp_client = TCPClientConnection(
-            "address_client",
-            "127.0.0.1",
-            port,
-            connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-        )
+        tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port,)
+        tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port,)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -300,11 +242,3 @@ class TestTCPServerConnection:
 
         await tcp_client.disconnect()
         await tcp_server.disconnect()
-
-    @pytest.mark.asyncio
-    async def test_from_config(self):
-        """Test the creation of the connection from a configuration."""
-        port = get_unused_tcp_port()
-        TCPServerConnection.from_config(
-            "address", ConnectionConfig(host="127.0.0.1", port=port)
-        )

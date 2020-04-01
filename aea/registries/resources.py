@@ -21,20 +21,11 @@
 
 import logging
 import os
-import pprint
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
-from aea.configurations.base import (
-    AgentConfig,
-    ConfigurationType,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
-    PublicId,
-    SkillId,
-)
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import ComponentType, ContractId, PublicId, SkillId
+from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
@@ -45,8 +36,9 @@ from aea.registries.base import (
     ProtocolRegistry,
     Registry,
 )
-from aea.skills.base import AgentContext, Behaviour, Handler, Model, Skill
+from aea.skills.base import Behaviour, Handler, Model, Skill
 from aea.skills.tasks import Task
+
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +57,7 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Mod
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
+    # TODO the 'directory' argument to be removed
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """
         Instantiate the resources.
@@ -72,11 +65,6 @@ class Resources:
         :param directory: the path to the directory which contains the resources
              (skills, connections and protocols)
         """
-        self._directory = (
-            str(Path(directory).absolute())
-            if directory is not None
-            else str(Path(".").absolute())
-        )
         self._contract_registry = ContractRegistry()
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
@@ -92,111 +80,20 @@ class Resources:
             self._model_registry,
         ]  # type: List[Registry]
 
-    @property
-    def directory(self) -> str:
-        """Get the directory."""
-        return self._directory
-
-    def _load_agent_config(self) -> AgentConfig:
-        """Load the agent configuration."""
-        config_loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
-        agent_config = config_loader.load(
-            open(os.path.join(self.directory, DEFAULT_AEA_CONFIG_FILE))
-        )
-        return agent_config
-
-    def load(self, agent_context: AgentContext) -> None:
-        """
-        Load all the resources.
-
-        Performs the following:
-
-        - loads the agent configuration
-        - populates the resources with all protocols in the directory
-          and referenced in the configuration
-        - populates the resources with all skills in the directory
-          and referenced in the configuration
-
-        :param agent_context: the agent context
-        """
-        agent_configuration = self._load_agent_config()
-        self._contract_registry.populate(
-            self.directory, allowed_contracts=agent_configuration.contracts
-        )
-        self._protocol_registry.populate(
-            self.directory, allowed_protocols=agent_configuration.protocols
-        )
-        self._populate_skills(
-            self.directory, agent_context, allowed_skills=agent_configuration.skills
-        )
-
-    def _populate_skills(
-        self,
-        directory: str,
-        agent_context: AgentContext,
-        allowed_skills: Optional[Set[PublicId]] = None,
-    ) -> None:
-        """
-        Populate skills.
-
-        Processes all allowed_skills in the directory and calls add_skill() with them.
-
-        :param directory: the agent's resources directory.
-        :param agent_context: the agent's context object
-        :param allowed_skills: an optional set of allowed skills (public ids).
-                               If None, every skill is allowed.
-        :return: None
-        """
-        skill_directory_paths = set()  # type: ignore
-
-        # find all skill directories from vendor/*/skills
-        skill_directory_paths.update(Path(directory, "vendor").glob("./*/skills/*/"))
-        # find all skill directories from skills/
-        skill_directory_paths.update(Path(directory, "skills").glob("./*/"))
-
-        skills_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                skill_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following skill packages: {}".format(
-                pprint.pformat(map(str, skills_packages_paths))
-            )
-        )
-        for skill_directory in skills_packages_paths:
-            logger.debug(
-                "Processing the following skill directory: '{}".format(skill_directory)
-            )
-            try:
-                skill_loader = ConfigLoader.from_configuration_type(
-                    ConfigurationType.SKILL
+    def add_component(self, component: Component):
+        """Add a component to resources."""
+        if component.component_type == ComponentType.PROTOCOL:
+            self.add_protocol(cast(Protocol, component))
+        elif component.component_type == ComponentType.SKILL:
+            self.add_skill(cast(Skill, component))
+        elif component.component_type == ComponentType.CONTRACT:
+            self.add_contract(cast(Contract, component))
+        else:
+            raise ValueError(
+                "Component type {} not supported.".format(
+                    component.component_type.value
                 )
-                skill_config = skill_loader.load(
-                    open(skill_directory / DEFAULT_SKILL_CONFIG_FILE)
-                )
-                if (
-                    allowed_skills is not None
-                    and skill_config.public_id not in allowed_skills
-                ):
-                    logger.debug(
-                        "Ignoring skill {}, not declared in the configuration file.".format(
-                            skill_config.public_id
-                        )
-                    )
-                    continue
-                else:
-                    skill = Skill.from_dir(str(skill_directory), agent_context)
-                    assert skill is not None
-                    self.add_skill(skill)
-                    self.inject_contracts(skill)
-            except Exception as e:
-                logger.warning(
-                    "A problem occurred while parsing the skill directory {}. Exception: {}".format(
-                        skill_directory, str(e)
-                    )
-                )
+            )
 
     def add_protocol(self, protocol: Protocol) -> None:
         """
@@ -235,6 +132,43 @@ class Resources:
         """
         self._protocol_registry.unregister(protocol_id)
 
+    def add_contract(self, contract: Contract) -> None:
+        """
+        Add a contract to the set of resources.
+
+        :param contract: a contract
+        :return: None
+        """
+        self._contract_registry.register(contract.id, contract)
+
+    def get_contract(self, contract_id: ContractId) -> Optional[Contract]:
+        """
+        Get contract for given contract id.
+
+        :param contract_id: the contract id
+        :return: a matching contract, if present, else None
+        """
+        contract = self._contract_registry.fetch(contract_id)
+        return contract
+
+    def get_all_contracts(self) -> List[Contract]:
+        """
+        Get the list of all the contracts.
+
+        :return: the list of contracts.
+        """
+        contracts = self._contract_registry.fetch_all()
+        return contracts
+
+    def remove_contract(self, contract_id: ContractId) -> None:
+        """
+        Remove a contract from the set of resources.
+
+        :param contract_id: the contract id for the contract to be removed.
+        :return: None
+        """
+        self._contract_registry.unregister(contract_id)
+
     def add_skill(self, skill: Skill) -> None:
         """
         Add a skill to the set of resources.
@@ -253,6 +187,7 @@ class Resources:
         if skill.models is not None:
             for model in skill.models.values():
                 self._model_registry.register((skill_id, model.name), model)
+        self.inject_contracts(skill)
 
     def inject_contracts(self, skill: Skill) -> None:
         if skill.config.contracts is not None:

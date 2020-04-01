@@ -19,31 +19,22 @@
 
 """This module contains registries."""
 
-import importlib.util
-import inspect
-import json
 import logging
-import pprint
 import re
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, cast
 
 from aea.configurations.base import (
-    ContractConfig,
     ContractId,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    ProtocolConfig,
     ProtocolId,
     PublicId,
     SkillId,
 )
-from aea.configurations.loader import ConfigLoader
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
 from aea.skills.tasks import Task
+
 
 logger = logging.getLogger(__name__)
 
@@ -173,50 +164,6 @@ class ContractRegistry(Registry[PublicId, Contract]):
         """Fetch all the contracts."""
         return list(self._contracts.values())
 
-    def populate(
-        self, directory: str, allowed_contracts: Optional[Set[PublicId]] = None
-    ) -> None:
-        """
-        Load the contract from the directory
-
-        :param directory: the filepath to the agent's resource directory.
-        :param allowed_contracts: an optional set of allowed contracts (public ids).
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        contract_directory_paths = set()  # type: ignore
-
-        # find all contract directories from vendor/*/contracts
-        contract_directory_paths.update(
-            Path(directory, "vendor").glob("./*/contracts/*/")
-        )
-        # find all contract directories from contracts/
-        contract_directory_paths.update(Path(directory, "contracts").glob("./*/"))
-
-        contract_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                contract_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following contract packages: {}".format(
-                pprint.pformat(map(str, contract_directory_paths))
-            )
-        )
-        for contract_package_path in contract_packages_paths:
-            try:
-                logger.debug(
-                    "Processing the contract package '{}'".format(contract_package_path)
-                )
-                self._add_contract(
-                    contract_package_path, allowed_contracts=allowed_contracts
-                )
-            except Exception:
-                logger.exception(
-                    "Not able to add contract '{}'.".format(contract_package_path.name)
-                )
-
     def setup(self) -> None:
         """
         Set up the registry.
@@ -232,58 +179,6 @@ class ContractRegistry(Registry[PublicId, Contract]):
         :return: None
         """
         self._contracts = {}
-
-    def _add_contract(
-        self,
-        contract_directory: Path,
-        allowed_contracts: Optional[Set[PublicId]] = None,
-    ):
-        """
-        Add a contract.
-
-        :param contract_directory: the directory of the contract to be added.
-        :param allowed_contracts: an optional set of allowed contracts (public ids).
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        config_loader = ConfigLoader("contract-config_schema.json", ContractConfig)
-        contract_config = config_loader.load(
-            open(contract_directory / DEFAULT_CONTRACT_CONFIG_FILE)
-        )
-        contract_public_id = PublicId(
-            contract_config.author, contract_config.name, contract_config.version
-        )
-        if (
-            allowed_contracts is not None
-            and contract_public_id not in allowed_contracts
-        ):
-            logger.debug(
-                "Ignoring contract {}, not declared in the configuration file.".format(
-                    contract_public_id
-                )
-            )
-            return
-
-        contract_spec = importlib.util.spec_from_file_location(
-            "contracts", contract_directory / "contract.py"
-        )
-        contract_module = importlib.util.module_from_spec(contract_spec)
-        contract_spec.loader.exec_module(contract_module)  # type: ignore
-        classes = inspect.getmembers(contract_module, inspect.isclass)
-        contract_classes = list(
-            filter(lambda x: re.match("\\w+Contract", x[0]), classes)
-        )
-        contract_class = contract_classes[0][1]
-        path = Path(contract_directory, contract_config.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
-        contract = contract_class(
-            contract_id=contract_public_id,
-            contract_config=contract_config,
-            contract_interface=contract_interface,
-        )
-
-        self.register(contract_public_id, contract)
 
 
 class ProtocolRegistry(Registry[PublicId, Protocol]):
@@ -338,50 +233,6 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         """Fetch all the protocols."""
         return list(self._protocols.values())
 
-    def populate(
-        self, directory: str, allowed_protocols: Optional[Set[PublicId]] = None
-    ) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
-
-        :param directory: the filepath to the agent's resource directory.
-        :param allowed_protocols: an optional set of allowed protocols (public ids_.
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        protocol_directory_paths = set()  # type: ignore
-
-        # find all protocol directories from vendor/*/protocols
-        protocol_directory_paths.update(
-            Path(directory, "vendor").glob("./*/protocols/*/")
-        )
-        # find all protocol directories from protocols/
-        protocol_directory_paths.update(Path(directory, "protocols").glob("./*/"))
-
-        protocols_packages_paths = list(
-            filter(
-                lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(),
-                protocol_directory_paths,
-            )
-        )  # type: ignore
-        logger.debug(
-            "Found the following protocol packages: {}".format(
-                pprint.pformat(map(str, protocol_directory_paths))
-            )
-        )
-        for protocol_package_path in protocols_packages_paths:
-            try:
-                logger.debug(
-                    "Processing the protocol package '{}'".format(protocol_package_path)
-                )
-                self._add_protocol(
-                    protocol_package_path, allowed_protocols=allowed_protocols
-                )
-            except Exception:
-                logger.exception(
-                    "Not able to add protocol '{}'.".format(protocol_package_path.name)
-                )
-
     def setup(self) -> None:
         """
         Set up the registry.
@@ -397,61 +248,6 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         :return: None
         """
         self._protocols = {}
-
-    def _add_protocol(
-        self,
-        protocol_directory: Path,
-        allowed_protocols: Optional[Set[PublicId]] = None,
-    ):
-        """
-        Add a protocol. If the protocol is not allowed, it is ignored.
-
-        :param protocol_directory: the directory of the protocol to be added.
-        :param allowed_protocols: an optional set of allowed protocols.
-                                  If None, every protocol is allowed.
-        :return: None
-        """
-        protocol_name = protocol_directory.name
-        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(
-            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
-        )
-        protocol_public_id = PublicId(
-            protocol_config.author, protocol_config.name, protocol_config.version
-        )
-        if (
-            allowed_protocols is not None
-            and protocol_public_id not in allowed_protocols
-        ):
-            logger.debug(
-                "Ignoring protocol {}, not declared in the configuration file.".format(
-                    protocol_public_id
-                )
-            )
-            return
-
-        # get the serializer
-        serialization_spec = importlib.util.spec_from_file_location(
-            "serialization", protocol_directory / "serialization.py"
-        )
-        serialization_module = importlib.util.module_from_spec(serialization_spec)
-        serialization_spec.loader.exec_module(serialization_module)  # type: ignore
-        classes = inspect.getmembers(serialization_module, inspect.isclass)
-        serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
-        )
-        serializer_class = serializer_classes[0][1]
-
-        logger.debug(
-            "Found serializer class {serializer_class} for protocol {protocol_name}".format(
-                serializer_class=serializer_class, protocol_name=protocol_name
-            )
-        )
-        serializer = serializer_class()
-
-        # instantiate the protocol
-        protocol = Protocol(protocol_config.public_id, serializer, protocol_config)
-        self.register(protocol_public_id, protocol)
 
 
 class ComponentRegistry(
