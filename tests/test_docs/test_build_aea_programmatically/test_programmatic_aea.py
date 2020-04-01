@@ -68,14 +68,14 @@ class TestProgrammaticAEA:
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
         run()
-        assert os.path.exists(Path(self.t, "input.txt"))
-        assert os.path.exists(Path(self.t, "output.txt"))
+        assert os.path.exists(Path(self.t, "input_file"))
+        assert os.path.exists(Path(self.t, "output_file"))
         assert os.path.exists(Path(self.t, "fet_private_key.txt"))
 
         message_text = (
             "other_agent,my_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
         )
-        path = os.path.join(self.t, "output.txt")
+        path = os.path.join(self.t, "output_file")
         with open(path, "r") as file:
             msg = file.read()
         assert msg == message_text
