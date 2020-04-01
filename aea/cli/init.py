@@ -68,15 +68,14 @@ def _registry_init(author):
     return username
 
 
-@click.command()
-@click.option("--author", type=str, required=False)
-@click.option("--local", is_flag=True, help="For init AEA locally.")
-@pass_ctx
-def init(ctx: Context, author: str, local: bool):
-    """Initialize your AEA configurations."""
-    if not local:
-        author = _registry_init(author)
+def do_init(author: str) -> None:
+    """
+    Initialize your AEA configurations.
 
+    :param author: str author username.
+
+    :return: None.
+    """
     config = _get_or_create_cli_config()
     config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
     if config.get(AUTHOR, None) is None:
@@ -102,5 +101,18 @@ def init(ctx: Context, author: str, local: bool):
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
         success_msg = "AEA configurations already initialized: {}".format(config)
+
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(success_msg)
+
+
+@click.command()
+@click.option("--author", type=str, required=False)
+@click.option("--local", is_flag=True, help="For init AEA locally.")
+@pass_ctx
+def init(ctx: Context, author: str, local: bool):
+    """Initialize your AEA configurations."""
+    if not local:
+        author = _registry_init(author)
+
+    do_init(author)

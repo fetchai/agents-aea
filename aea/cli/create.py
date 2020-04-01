@@ -42,7 +42,7 @@ from aea.cli.common import (
     _get_or_create_cli_config,
     logger,
 )
-from aea.cli.init import init
+from aea.cli.init import do_init
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 
@@ -94,7 +94,7 @@ def create(click_context, agent_name, author, local):
 
     if author is not None:
         if local:
-            click_context.invoke(init, author=author)
+            do_init(author)
         else:
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."
