@@ -173,7 +173,7 @@ def search_registered_items(item_type: str, search_term: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
     pid = _call_aea_async(
-        ["aea", "search",  "--local", item_type + "s", "--query", search_term],
+        ["aea", "search", "--local", item_type + "s", "--query", search_term],
         os.path.join(app_context.agents_dir, "aea"),
     )
     ret = _sync_extract_items_from_tty(pid)
@@ -238,7 +238,8 @@ def add_item(agent_id: str, item_type: str, item_id: str):
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
     if (
         _call_aea(
-            [sys.executable, "-m", "aea.cli", "add", "--local", item_type, item_id], agent_dir
+            [sys.executable, "-m", "aea.cli", "add", "--local", item_type, item_id],
+            agent_dir,
         )
         == 0
     ):
