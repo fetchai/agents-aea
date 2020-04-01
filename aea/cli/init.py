@@ -105,7 +105,7 @@ def _registry_init(author: Optional[str] = None) -> str:
             email = click.prompt("Email", type=str)
             password = click.prompt("Password", type=str, hide_input=True)
 
-            password_confirmation = ""
+            password_confirmation = ""  # nosec
             while password_confirmation != password:
                 click.echo("Please make sure that passwords are equal.")
                 password_confirmation = click.prompt(
