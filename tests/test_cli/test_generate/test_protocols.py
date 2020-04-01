@@ -76,7 +76,7 @@ class TestGenerateProtocol:
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         os.chdir(cls.agent_name)
 
@@ -142,7 +142,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         os.chdir(cls.agent_name)
 
@@ -217,7 +217,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         os.chdir(cls.agent_name)
 
@@ -302,7 +302,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
         # change the dumping of yaml module to raise an exception.
@@ -372,7 +372,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
 
         # create an exception

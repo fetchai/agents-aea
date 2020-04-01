@@ -87,11 +87,11 @@ class TestWeatherSkillsFetchaiLedger:
 
         # create agent one and agent two
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one], standalone_mode=False
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two], standalone_mode=False
         )
         assert result.exit_code == 0
 

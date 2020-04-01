@@ -58,7 +58,7 @@ class TestRemoveConnectionWithPublicId:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -117,7 +117,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -171,7 +171,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)

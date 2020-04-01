@@ -68,7 +68,7 @@ class TestGymSkill:
 
         # create agent
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         agent_dir_path = os.path.join(self.t, self.agent_name)

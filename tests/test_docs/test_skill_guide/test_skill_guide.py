@@ -91,7 +91,7 @@ class TestBuildSkill:
             standalone_mode=False,
         )
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         if cls.create_result.exit_code == 0:
             os.chdir(Path(cls.t, cls.agent_name))

@@ -61,7 +61,7 @@ def test_run(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -113,7 +113,7 @@ def test_run_with_default_connection(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -168,7 +168,7 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -228,7 +228,7 @@ def test_run_unknown_private_key(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -294,7 +294,7 @@ def test_run_unknown_ledger(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -356,7 +356,7 @@ def test_run_fet_private_key_config(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -415,7 +415,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -474,7 +474,7 @@ def test_run_ledger_apis(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -558,7 +558,7 @@ def test_run_fet_ledger_apis(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -639,7 +639,7 @@ def test_run_with_install_deps(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -698,7 +698,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -764,7 +764,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
 
@@ -825,7 +825,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).unlink()
@@ -879,7 +879,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
 
@@ -936,7 +936,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
 
@@ -992,7 +992,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
@@ -1074,7 +1074,7 @@ class TestRunFailsWhenConnectionNotComplete:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
@@ -1155,7 +1155,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
@@ -1230,7 +1230,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
@@ -1307,7 +1307,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 #         assert result.exit_code == 0
 #
 #         result = cls.runner.invoke(
-#             cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+#             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
 #
 #         try:
 #             cli.main(

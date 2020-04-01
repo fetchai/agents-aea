@@ -47,7 +47,7 @@ class TestDelete:
         cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
         cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
@@ -122,7 +122,7 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
         )
         assert result.exit_code == 0
 

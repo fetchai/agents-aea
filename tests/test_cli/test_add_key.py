@@ -55,7 +55,7 @@ class TestAddFetchKey:
 
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -103,7 +103,7 @@ class TestAddEthereumhKey:
 
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -151,7 +151,7 @@ class TestAddManyKeys:
 
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -203,7 +203,7 @@ def test_add_key_fails_bad_key():
 
             result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
-            result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+            result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
             assert result.exit_code == 0
             os.chdir(Path(tmpdir, agent_name))
 
@@ -239,7 +239,7 @@ def test_add_key_fails_bad_ledger_id():
 
         result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+        result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
         assert result.exit_code == 0
         os.chdir(Path(tmpdir, agent_name))
 

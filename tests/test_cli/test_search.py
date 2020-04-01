@@ -184,7 +184,7 @@ class TestSearchAgentsLocal:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", "myagent"], standalone_mode=False
         )
         assert result.exit_code == 0
 
@@ -387,7 +387,7 @@ class TestSearchInAgentDirectoryLocal:
 
         # create an AEA proejct and enter into it.
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "create", "--local", "myagent"], standalone_mode=False
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, "myagent"))
