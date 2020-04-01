@@ -19,6 +19,8 @@
 
 """Implementation of the 'aea init' subcommand."""
 
+from typing import Optional
+
 import click
 
 from aea import __version__
@@ -26,8 +28,10 @@ from aea.cli.common import (
     AEA_LOGO,
     AUTHOR,
     Context,
+    NOT_PERMITTED_AUTHORS,
     _get_or_create_cli_config,
-    _is_validate_author_handle,
+    _is_permitted_author_handle,
+    _is_valid_author_handle,
     _update_cli_config,
     pass_ctx,
 )
@@ -38,11 +42,56 @@ from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_pres
 from aea.configurations.base import PublicId
 
 
-def _registry_init(author):
-    username = author
+def _local_init(author: Optional[str] = None) -> str:
+    """
+    Create an author name for local usage only.
 
-    if is_auth_token_present():
-        check_is_author_logged_in(username)
+    :param author: the author name (optional)
+    """
+    is_acceptable_author = False
+    if (
+        author is not None
+        and _is_valid_author_handle(author)
+        and _is_permitted_author_handle(author)
+    ):
+        is_acceptable_author = True
+        valid_author = author
+    while not is_acceptable_author:
+        author_prompt = click.prompt(
+            "Please enter the author handle you would like to use", type=str
+        )
+        valid_author = author_prompt
+        if _is_valid_author_handle(author_prompt) and _is_permitted_author_handle(
+            author_prompt
+        ):
+            is_acceptable_author = True
+        elif not _is_valid_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a valid author handle. Please try again. "
+                "Author handles must satisfy the following regex: {}".format(
+                    PublicId.AUTHOR_REGEX
+                )
+            )
+        elif not _is_permitted_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a permitted author handle. The following author handles are not allowed: {}".format(
+                    NOT_PERMITTED_AUTHORS
+                )
+            )
+
+    return valid_author
+
+
+def _registry_init(author: Optional[str] = None) -> str:
+    """
+    Create an author name on the registry.
+
+    :param author: the author name
+    """
+    if author is not None and is_auth_token_present():
+        check_is_author_logged_in(author)
     else:
         is_registered = click.confirm("Do you have a Registry account?")
 
@@ -56,7 +105,7 @@ def _registry_init(author):
             email = click.prompt("Email", type=str)
             password = click.prompt("Password", type=str, hide_input=True)
 
-            password_confirmation = None
+            password_confirmation = ""  # nosec
             while password_confirmation != password:
                 click.echo("Please make sure that passwords are equal.")
                 password_confirmation = click.prompt(
@@ -70,37 +119,24 @@ def _registry_init(author):
 
 @click.command()
 @click.option("--author", type=str, required=False)
+@click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--registry", is_flag=True, help="For AEA init with Registry.")
 @pass_ctx
-def init(ctx: Context, author: str, registry: bool):
+def init(ctx: Context, author: str, reset: bool, registry: bool):
     """Initialize your AEA configurations."""
-    if registry:
-        author = _registry_init(author)
-
     config = _get_or_create_cli_config()
-    config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
-    if config.get(AUTHOR, None) is None:
-        is_not_valid_author = True
-        if author is not None and _is_validate_author_handle(author):
-            is_not_valid_author = False
-        while is_not_valid_author:
-            author = click.prompt(
-                "Please enter the author handle you would like to use", type=str
-            )
-            if _is_validate_author_handle(author):
-                is_not_valid_author = False
-            else:
-                click.echo(
-                    "Not a valid author handle. Please try again. "
-                    "Author handles must satisfy the following regex: {}".format(
-                        PublicId.AUTHOR_REGEX
-                    )
-                )
+    if reset or config.get(AUTHOR, None) is None:
+        if registry:
+            author = _registry_init(author)
+        else:
+            author = _local_init(author)
         _update_cli_config({AUTHOR: author})
-        config = _get_or_create_cli_config()
         config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
-        success_msg = "AEA configurations already initialized: {}".format(config)
+        config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
+        success_msg = "AEA configurations already initialized: {}. To reset use '--reset'.".format(
+            config
+        )
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(success_msg)
