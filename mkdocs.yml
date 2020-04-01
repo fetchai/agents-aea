@@ -78,14 +78,19 @@ nav:
         - Deployment: 'deployment.md'
       - API:
         - AEA: 'api/aea.md'
+        - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
         - Configurations:
           - Base: 'api/configurations/base.md'
+          - Components: 'api/configurations/components.md'
           - Loader: 'api/configurations/loader.md'
         - Connections:
           - Base: 'api/connections/base.md'          
           - Stub Connection: 'api/connections/stub/connection.md'
         - Context: 'api/context/base.md'
+        - Contracts:
+          - Base: 'api/context/contracts/base.md'
+          - Ethereum: 'api/context/contracts/ethereum.md'
         - Crypto:
           - Base: 'api/crytpo/base.md'
           - Ethereum: 'api/crypto/ethereum.md'
@@ -101,6 +106,10 @@ nav:
         - Helpers:
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'
+          - IPFS:
+            - Base: 'api/helpers/ipfs/base.md'
+          - Preferences:
+            - Base: 'api/helpers/preference_representations/base.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
@@ -108,7 +117,9 @@ nav:
         - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
+          - Generator: 'api/protocol/generator.md'
           - Default Protocol:
+            - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
         - Resources: 'api/registries/resources.md'

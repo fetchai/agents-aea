@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the implementation of the handler for the 'default' protocol."""
+
 import base64
-import logging
 from typing import Optional
 
 from aea.configurations.base import ProtocolId
@@ -28,8 +28,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
-
-logger = logging.getLogger(__name__)
 
 
 class ErrorHandler(Handler):
@@ -65,7 +63,9 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
+        self.context.logger.warning(
+            "Unsupported protocol: {}".format(envelope.protocol_id)
+        )
         encoded_protocol_id = base64.b85encode(str.encode(str(envelope.protocol_id)))
         reply = DefaultMessage(
             dialogue_reference=("", ""),
@@ -90,7 +90,7 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        logger.warning("Decoding error: {}.".format(envelope))
+        self.context.logger.warning("Decoding error: {}.".format(envelope))
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
@@ -115,7 +115,9 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
+        self.context.logger.warning(
+            "Invalid message wrt protocol: {}.".format(envelope.protocol_id)
+        )
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
@@ -140,7 +142,7 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        logger.warning(
+        self.context.logger.warning(
             "Cannot handle envelope: no handler registered for the protocol '{}'.".format(
                 envelope.protocol_id
             )

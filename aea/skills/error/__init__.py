@@ -18,6 +18,3 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of the error skill."""
-from aea.configurations.base import PublicId
-
-ERROR_SKILL_ID = PublicId("fetchai", "error", "0.1.0")
