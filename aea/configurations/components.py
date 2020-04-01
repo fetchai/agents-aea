@@ -34,7 +34,7 @@ from aea.configurations.base import (
     ContractConfig,
     PublicId,
 )
-from aea.helpers.base import load_init_modules, load_module
+from aea.helpers.base import load_all_modules, load_module
 
 logger = logging.getLogger(__name__)
 
@@ -132,8 +132,8 @@ class Component(ABC):
         component_object = component_class(configuration)
         component_object._directory = directory
         import_prefix = configuration.component_id.prefix_import_path
-        init_modules = load_init_modules(directory, prefix=import_prefix)
-        component_object.importpath_to_module.update(init_modules)
+        package_modules = load_all_modules(directory, prefix=import_prefix)
+        component_object.importpath_to_module.update(package_modules)
         if component_type != ComponentType.CONNECTION:
             # load the component here, but only if it is not a connection
             # (we need the identity and the address of the agent).

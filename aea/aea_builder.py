@@ -230,7 +230,7 @@ class _DependenciesManager:
         """
         # get protocols first
         components = filter(
-            lambda x: x in self.dependencies_highest_version,
+            lambda x: x.component_id in self.dependencies_highest_version,
             itertools.chain(
                 self.protocols.values(),
                 self.contracts.values(),
