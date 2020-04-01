@@ -104,10 +104,9 @@ class TestPushLocalFailsArgumentNotPublicId:
             standalone_mode=False,
         )
 
-    def test_exit_code_2(self):
-        """Test the exit code is 2 (i.e. bad usage)."""
+    def test_exit_code_1(self):
+        """Test the exit code is 1 (SystemExit)."""
         assert self.result.exit_code == 1
-        assert self.result.exception.exit_code == 2
 
     @classmethod
     def teardown_class(cls):
@@ -128,12 +127,12 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push connection positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "connection", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "connection", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
 
@@ -141,12 +140,12 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push protocol positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "protocol", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "protocol", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
 
@@ -154,12 +153,12 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push skill positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "skill", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "skill", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
 
@@ -181,6 +180,7 @@ class PushContractCommandTestCase(TestCase):
                 *CLI_LOG_OPTION,
                 "--skip-consistency-check",
                 "push",
+                "--local",
                 "contract",
                 "author/name:0.1.0",
             ],
@@ -197,7 +197,6 @@ class PushContractCommandTestCase(TestCase):
                 *CLI_LOG_OPTION,
                 "--skip-consistency-check",
                 "push",
-                "--registry",
                 "contract",
                 "author/name:0.1.0",
             ],

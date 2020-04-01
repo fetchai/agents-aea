@@ -39,13 +39,13 @@ from aea.configurations.base import PublicId
 
 
 @click.group()
-@click.option("--registry", is_flag=True, help="For pushing items to Registry.")
+@click.option("--local", is_flag=True, help="For pushing items to local folder.")
 @click.pass_context
 @check_aea_project
-def push(click_context, registry):
+def push(click_context, local):
     """Push item to Registry or save it in local packages."""
     ctx = cast(Context, click_context.obj)
-    ctx.set_config("registry", registry)
+    ctx.set_config("local", local)
 
 
 @push.command(name="connection")
@@ -53,7 +53,7 @@ def push(click_context, registry):
 @pass_ctx
 def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "connection", connection_id)
     else:
         push_item(ctx, "connection", connection_id)
@@ -64,7 +64,7 @@ def connection(ctx: Context, connection_id):
 @pass_ctx
 def contract(ctx: Context, contract_id):
     """Push connection to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "contract", contract_id)
     else:
         push_item(ctx, "contract", contract_id)
@@ -75,7 +75,7 @@ def contract(ctx: Context, contract_id):
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "protocol", protocol_id)
     else:
         push_item(ctx, "protocol", protocol_id)
@@ -86,7 +86,7 @@ def protocol(ctx: Context, protocol_id):
 @pass_ctx
 def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "skill", skill_id)
     else:
         push_item(ctx, "skill", skill_id)

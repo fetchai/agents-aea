@@ -40,13 +40,13 @@ from aea.configurations.base import PublicId
 
 
 @click.command(name="publish")
-@click.option("--registry", is_flag=True, help="For publishing agent to Registry.")
+@click.option("--local", is_flag=True, help="For publishing agent to local folder.")
 @click.pass_context
 @check_aea_project
-def publish(click_context, registry):
+def publish(click_context, local):
     """Publish Agent to Registry."""
     ctx = cast(Context, click_context.obj)
-    if not registry:
+    if local:
         _save_agent_locally(ctx)
     else:
         # TODO: check agent dependencies are available in local packages dir.
