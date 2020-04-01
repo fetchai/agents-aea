@@ -22,10 +22,11 @@
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.base import Model
 
-DEFAULT_MAX_PRICE = 5
-DEFAULT_MAX_BUYER_TX_FEE = 2
-DEFAULT_LEDGER_ID = "ethereum"
-DEFAULT_IS_LEDGER_TX = True
+DEFAULT_SEARCH_QUERY = {
+    "search_term": "has_erc1155_contract",
+    "search_value": True,
+    "constraint_type": "==",
+}
 
 
 class Strategy(Model):
@@ -37,12 +38,10 @@ class Strategy(Model):
 
         :return: None
         """
-        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+        self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
-        self.search_query = kwargs.pop("search_query")
 
     def get_next_search_id(self) -> int:
         """

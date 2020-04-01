@@ -145,7 +145,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating weather station services on OEF.".format(
+            "[{}]: updating weather station services on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -170,7 +170,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering weather station services from OEF.".format(
+            "[{}]: unregistering weather station services from OEF service directory.".format(
                 self.context.agent_name
             )
         )

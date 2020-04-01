@@ -527,11 +527,12 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def get_balance_of_batch(self, address: Address):
+    def get_balance_of_batch(self, address: Address, token_ids: List[int]) -> List[int]:
         """Get the balance for a batch of items"""
-        return self.instance.functions.balanceOfBatch(
-            [address] * 10, self.token_ids
+        result = self.instance.functions.balanceOfBatch(
+            [address] * 10, token_ids
         ).call()
+        return result
 
     def get_atomic_swap_batch_transaction_proposal(
         self,
@@ -649,7 +650,7 @@ class ERC1155Contract(Contract):
 
         return tx_hash
 
-    def generate_trade_nonce(self, address: Address):  # nosec
+    def generate_trade_nonce(self, address: Address) -> int:  # nosec
         """Generate a valid trade nonce."""
         trade_nonce = random.randrange(0, 10000000)
         while self.instance.functions.is_nonce_used(address, trade_nonce).call():

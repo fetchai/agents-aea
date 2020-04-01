@@ -168,7 +168,7 @@ if __name__ == "__main__":
         process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
-        time.sleep(4.0)
+        time.sleep(10.0)
 
         # connect ipfs client
         client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")

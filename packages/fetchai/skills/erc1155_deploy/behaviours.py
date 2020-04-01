@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the behaviour of a erc1155 deploy skill AEA."""
-import time
+
 from typing import Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -26,6 +26,7 @@ from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
@@ -46,7 +47,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._registered_service_description = None  # type: Optional[Description]
         self.is_items_created = False
         self.is_items_minted = False
-        self.is_trade = False
+        self.token_ids = []  # List[int]
 
     def setup(self) -> None:
         """
@@ -92,25 +93,21 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
 
         self._register_service()
-        contract = self.context.contracts.erc1155
+        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         if strategy.contract_address is None:
-            self.context.logger.info("Loading details from json")
-            contract.set_instance(self.context.ledger_apis.apis.get("ethereum"))
-
+            self.context.logger.info("Preparing contract deployment transaction")
+            contract.set_instance(self.context.ledger_apis.ethereum_api)
             dm_message_for_deploy = contract.get_deploy_transaction(
                 deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
         else:
             self.context.logger.info("Setting the address of the deployed contract")
-            contract.set_instance_w_address(
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+            contract.set_address(
+                ledger_api=self.context.ledger_apis.ethereum_api,
                 contract_address=str(strategy.contract_address),
-            )
-            contract.create_token_ids(
-                token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
 
     def act(self) -> None:
@@ -119,33 +116,31 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        contract = self.context.contracts.erc1155
+        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         strategy = cast(Strategy, self.context.strategy)
         if contract.is_deployed and not self.is_items_created:
-            contract.create_token_ids(
+            self.token_ids = contract.create_token_ids(
                 token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
-
             self.context.logger.info("Creating a batch of items")
             creation_message = contract.get_create_batch_transaction(
                 deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
+                token_ids=self.token_ids,
             )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
-            self.is_items_created = True
-            time.sleep(10)
         if contract.is_deployed and self.is_items_created and not self.is_items_minted:
             self.context.logger.info("Minting a batch of items")
             mint_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
                 recipient_address=self.context.agent_address,
                 mint_quantities=strategy.mint_stock,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
+                token_ids=self.token_ids,
             )
             self.context.decision_maker_message_queue.put_nowait(mint_message)
-            self.is_items_minted = True
 
         self._unregister_service()
         self._register_service()
@@ -200,7 +195,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating erc1155 service on OEF.".format(self.context.agent_name)
+            "[{}]: updating erc1155 service on OEF search node.".format(
+                self.context.agent_name
+            )
         )
 
     def _unregister_service(self) -> None:
@@ -223,7 +220,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering erc1155 service from OEF.".format(
+            "[{}]: unregistering erc1155 service from OEF search node.".format(
                 self.context.agent_name
             )
         )

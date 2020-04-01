@@ -26,6 +26,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
@@ -81,28 +82,27 @@ class FIPAHandler(Handler):
         if len(msg.info.keys()) >= 1:
             data = msg.info
             if "contract" in data.keys():
-                contract = self.context.contracts.erc1155
-                contract.set_instance_w_address(
-                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+                contract.set_address(
+                    ledger_api=self.context.ledger_apis.ethereum_api,
                     contract_address=data["contract"],
                 )
-                contract.token_ids = data["token_ids"]
                 assert "from_supply" in data.keys(), "from supply is not set"
                 assert "to_supply" in data.keys(), "to supply is not set"
                 assert "value" in data.keys(), "value is not set"
                 assert "trade_nonce" in data.keys(), "trade_nonce is not set"
-                assert "token_ids" in data.keys(), "iten ids are not set"
+                assert "token_id" in data.keys(), "token id is not set"
 
-                self.context.shared_state["counterparty"] = msg.counterparty
+                self.counterparty = msg.counterparty
                 tx = contract.get_hash_single_transaction(
                     from_address=msg.counterparty,
                     to_address=self.context.agent_address,
-                    item_id=contract.token_ids[0],
-                    from_supply=data["from_supply"],
-                    to_supply=data["to_supply"],
-                    value=data["value"],
-                    trade_nonce=data["trade_nonce"],
-                    ledger_api=self.context.ledger_apis.apis.get("ethereum"),
+                    item_id=cast(int, data["token_id"]),
+                    from_supply=cast(int, data["from_supply"]),
+                    to_supply=cast(int, data["to_supply"]),
+                    value=cast(int, data["value"]),
+                    trade_nonce=cast(int, data["trade_nonce"]),
+                    ledger_api=self.context.ledger_apis.ethereum_api,
                     skill_callback_id=self.context.skill_id,
                 )
 
@@ -116,8 +116,8 @@ class FIPAHandler(Handler):
             )
 
 
-class OEFHandler(Handler):
-    """This class implements an OEF handler."""
+class OEFSearchHandler(Handler):
+    """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -173,7 +173,7 @@ class OEFHandler(Handler):
             )
             cfp_msg = FipaMessage(
                 message_id=FipaDialogue.STARTING_MESSAGE_ID,
-                dialogue_reference=(" ", " "),
+                dialogue_reference=("", ""),
                 performative=FipaMessage.Performative.CFP,
                 target=FipaDialogue.STARTING_TARGET,
                 query=query,
@@ -210,7 +210,10 @@ class TransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         self.context.logger.info(tx_msg_response)
-        if tx_msg_response.tx_id == "contract-sign-hash":
+        if (
+            tx_msg_response.tx_id
+            == ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value
+        ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signature")
             new_message_id = 2
             new_target = 1
@@ -222,9 +225,8 @@ class TransactionHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info={"signature": tx_signed},
             )
-            counterparty = cast(str, self.context.shared_state.get("counterparty"))
             self.context.outbox.put_message(
-                to=counterparty,
+                to=self.context.handlers.fipa.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(inform_msg),

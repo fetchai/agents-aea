@@ -6,7 +6,7 @@ fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: QmRxMPR6uZSgsfc1vR4mDKXkegDZGvFhmT9znBGoMaUstV
   dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
-  handlers.py: QmcvyoXcqX6oNNCWCJgUhCsz5ia2JHJRefXS3yEFfzUhCi
+  handlers.py: QmPC1Stm9PMNZG6gA9ijwKq5fiqvc45URfjRt6VFnsJonf
   strategy.py: QmPJa6dQhufDtM8RcaTX9RoQimPhwh8fmciVdegVCWihzr
 aea_version: 0.2.4
 description: "The weather client skill implements the skill to purchase weather data."
@@ -20,7 +20,7 @@ handlers:
     class_name: FIPAHandler
     args: {}
   oef:
-    class_name: OEFHandler
+    class_name: OEFSearchHandler
     args: {}
   transaction:
     class_name: MyTransactionHandler

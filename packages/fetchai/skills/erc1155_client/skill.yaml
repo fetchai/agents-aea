@@ -6,8 +6,8 @@ aea_version: 0.2.4
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
   behaviours.py: QmQRBZUhT8YmgkCeW8RXc2T8qWc5hVotWgMACwBDpFmyKY
-  handlers.py: QmRHX8jNe6bqzS7Dtbgwv3SwN6btrASJ4T95SJN2GppnTV
-  strategy.py: Qmf4pcqNZ3HRVtribUgNyAHvRk8gyzDbUYD6iFpJizRtsq
+  handlers.py: QmNP6CN33FLYX1rWzWPRMG4eEMRrrQJoiT3qpiDegM87JL
+  strategy.py: QmQEKLcMH6vQdCwAfDJngQMpn1vvkgqUssgxU8LPzCxsQ8
 description: "The weather client skill implements the skill to purchase weather data."
 contracts: ['fetchai/erc1155:0.1.0']
 behaviours:
@@ -20,7 +20,7 @@ handlers:
     class_name: FIPAHandler
     args: {}
   oef:
-    class_name: OEFHandler
+    class_name: OEFSearchHandler
     args: {}
   transaction:
     class_name: TransactionHandler
@@ -29,8 +29,6 @@ models:
   strategy:
     class_name: Strategy
     args:
-      ledger_id: 'ethereum'
-      is_ledger_tx: True
       search_query:
         search_term: has_erc1155_contract
         search_value: True

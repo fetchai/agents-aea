@@ -14,9 +14,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 The scope of the specific demo is to demonstrate how to deploy a smart contract and interact with it. For the specific use-case, we create two AEAs one that deploys and creates tokens inside the smart contract and the other that signs a transaction so we can complete an atomic swap. The smart contract we are using is an ERC1155 smart contract
 with a one-step atomic swap functionality. That means the trade between the two AEAs can be trustless.
 
-####Note:
-This demo serves demonstrative purposes only. Since the AEA deploying the contract also has the ability to mint tokens, 
-in reality the transfer of tokens from the AEA signing the transaction is worthless.
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>This demo serves demonstrative purposes only. Since the AEA deploying the contract also has the ability to mint tokens, in reality the transfer of tokens from the AEA signing the transaction is worthless.</p>
+</div>
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -26,39 +27,34 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo: Ledger payment
+## Demo
 
-A demo to run a scenario with a true ledger transaction on Ethereum `ropsten` network. This demo assumes the client
-does not trust the deployer AEA to make the trade.
-
-### Create the deployer AEA (ledger version)
+### Create the deployer AEA
 
 Create the AEA that will deploy the contract.
 
 ``` bash
-aea create my_erc1155_deploy
-cd my_erc1155_deploy
+aea create erc1155_deployer
+cd erc1155_deployer
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/erc1155_deploy:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
-Additionally, create the private key for the deployer AEA.
+Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
 
-Generate and add a key for Ethereum use:
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 
-
-### Create the client AEA (ledger version)
+### Create the client AEA
 
 In another terminal, create the AEA that will sign the transaction.
 
 ``` bash
-aea create my_erc1155_client
-cd my_erc1155_client
+aea create erc1155_client
+cd erc1155_client
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/erc1155_client:0.1.0
 aea add contract fetchai/erc1155:0.1.0
@@ -78,60 +74,10 @@ ledger_apis:
     chain_id: 3
     gas_price: 50
 ```
-
-### Update the deployer AEA skill configs
-
-In `my_erc1155_deploy/vendor/fetchai/skills/erc1155_deploy/skill.yaml`, update the details based on the following:
+And change the default ledger:
 ``` yaml
-name: erc1155_deploy
-author: fetchai
-version: 0.1.0
-license: Apache-2.0
-fingerprint:
-  __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: QmRPDq4oDTozx5BhqU1GEXCH2CcCC7N8sTRSraAq8zHJ6g
-  handlers.py: QmZpZ1aGpSD7CAjgJWYNWv97DN65Jeqkipes6RtZREan8E
-  strategy.py: QmWpc8aMte2vJ4akiKn6qTfXWavfE1vBtJqX1E7CFuLYaC
-description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
-contracts: ['fetchai/erc1155:0.1.0']
-behaviours:
-  service_registration:
-    class_name: ServiceRegistrationBehaviour
-    args:
-      services_interval: 60
-handlers:
-  default:
-    class_name: FIPAHandler
-    args: {}
-  transaction:
-    class_name: TransactionHandler
-    args: {}
-models:
-  strategy:
-    class_name: Strategy
-    args:
-      ledger_id: 'ethereum'
-      is_ledger_tx: True
-      nft: 1
-      ft: 2
-      nb_tokens: 10
-      from_supply: 10
-      to_supply: 0
-      value: 0
-      search_schema:
-        attribute_one:
-          name: has_erc1155_contract
-          type: bool
-          is_required: True
-      search_data:
-        has_erc1155_contract: True
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
-dependencies:
-  vyper: { version: "==0.1.0b12"}
+default_ledger: ethereum
 ```
-The `search_schema` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
-
 
 ### Fund the deployer AEA
 
@@ -141,36 +87,38 @@ To create some wealth for your deployer AEA for the Ethereum `ropsten` network. 
 aea generate-wealth ethereum
 ```
 
-## Run the AEAs
-
-You can change the endpoint's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
-
-Under config locate :
+To check the wealth use (after some time for the wealth creation to be mined on Ropsten):
 
 ``` bash
-addr: ${OEF_ADDR: 127.0.0.1}
+aea get-wealth ethereum
 ```
-and replace it with your ip (The ip of the machine that runs the oef image.)
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
+</div>
+
+## Run the AEAs
 
 Run both AEAs from their respective terminals. First, run the deployer and wait until it deploys and creates the items in the smart contract.
-Then in a separate terminal run the client AEA. You will see that upon discovery the two AEAs exchange information about the transaction and the client at
-the end signs and sends the signature to the deployer AEA to send it to the network.
 
+Then in a separate terminal run the client AEA. You will see that upon discovery the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.
 
 ``` bash 
 aea run --connections fetchai/oef:0.1.0
 ```
 
-
 ## Delete the AEAs
+
 When you're done, go up a level and delete the AEAs.
 ``` bash 
 cd ..
-aea delete my_seller_aea
-aea delete my_buyer_aea
+aea delete erc1155_deployer
+aea delete erc1155_client
 ```
 
 ## Communication
+
 This diagram shows the communication between the various entities as data is successfully trustless trade. 
 
 <div class="mermaid">

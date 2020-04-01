@@ -102,9 +102,21 @@ class LedgerApis:
         return FETCHAI in self.apis.keys()
 
     @property
+    def fetchai_api(self) -> FetchAIApi:
+        """Get the Fetchai API."""
+        assert self.has_fetchai, "Fetchai API not instantiated!"
+        return cast(FetchAIApi, self.apis[FETCHAI])
+
+    @property
     def has_ethereum(self) -> bool:
         """Check if it has the ethereum API."""
         return ETHEREUM in self.apis.keys()
+
+    @property
+    def ethereum_api(self) -> EthereumApi:
+        """Get the Ethereum API."""
+        assert self.has_ethereum, "Ethereum API not instantiated!"
+        return cast(EthereumApi, self.apis[ETHEREUM])
 
     @property
     def has_default_ledger(self) -> bool:

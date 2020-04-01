@@ -146,7 +146,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating generic seller services on OEF.".format(
+            "[{}]: updating generic seller services on OEF service directory.".format(
                 self.context.agent_name
             )
         )
@@ -171,7 +171,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering generic seller services from OEF.".format(
+            "[{}]: unregistering generic seller services from OEF service directory.".format(
                 self.context.agent_name
             )
         )

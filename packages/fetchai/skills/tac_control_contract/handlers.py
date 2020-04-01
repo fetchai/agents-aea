@@ -198,7 +198,7 @@ class TACHandler(Handler):
 
 
 class OEFRegistrationHandler(Handler):
-    """Handle the message exchange with the OEF."""
+    """Handle the message exchange with the OEF search node."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
