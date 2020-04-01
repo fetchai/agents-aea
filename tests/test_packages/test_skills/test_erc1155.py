@@ -113,21 +113,27 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/erc1155_deploy:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/erc1155_deploy:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -143,21 +149,27 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/erc1155_client:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/erc1155_client:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

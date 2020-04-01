@@ -81,13 +81,13 @@ class TestGymSkill:
         # add packages and install dependencies
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/gym:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/gym:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/gym:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/gym:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

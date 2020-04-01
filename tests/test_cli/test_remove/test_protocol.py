@@ -68,7 +68,7 @@ class TestRemoveProtocolWithPublicId:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -188,7 +188,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0

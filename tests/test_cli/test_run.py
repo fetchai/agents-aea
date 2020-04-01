@@ -69,7 +69,7 @@ def test_run(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -180,13 +180,13 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
     # stub is the default connection, so it should fail
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/stub:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/stub:0.1.0"]
     )
     assert result.exit_code == 1
 
@@ -242,7 +242,7 @@ def test_run_unknown_private_key(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -310,7 +310,7 @@ def test_run_unknown_ledger(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -374,7 +374,7 @@ def test_run_fet_private_key_config(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -435,7 +435,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -496,7 +496,7 @@ def test_run_ledger_apis(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -582,7 +582,7 @@ def test_run_fet_ledger_apis(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -665,7 +665,7 @@ def test_run_with_install_deps(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -726,7 +726,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -798,7 +798,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -1040,7 +1040,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -1126,7 +1126,7 @@ class TestRunFailsWhenConnectionNotComplete:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -1211,7 +1211,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0

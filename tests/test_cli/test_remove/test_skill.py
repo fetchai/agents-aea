@@ -72,7 +72,9 @@ class TestRemoveSkillWithPublicId:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(
@@ -197,7 +199,9 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

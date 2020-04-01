@@ -68,7 +68,7 @@ class TestRemoveConnectionWithPublicId:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -189,7 +189,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
