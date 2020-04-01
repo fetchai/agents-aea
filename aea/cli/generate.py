@@ -26,13 +26,13 @@ import sys
 
 import click
 
-from aea.cli.common import Context, DEFAULT_VERSION, check_aea_project, logger, pass_ctx
+from aea.cli.common import Context, check_aea_project, logger, pass_ctx
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
-)
+    DEFAULT_VERSION)
 from aea.configurations.loader import ConfigLoader
 from aea.protocols.generator import ProtocolGenerator
 

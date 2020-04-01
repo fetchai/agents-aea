@@ -41,6 +41,7 @@ from aea.configurations.base import (
     ProtocolSpecification,
     SkillConfig,
 )
+from aea.helpers.base import yaml_load, yaml_dump
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
@@ -119,12 +120,15 @@ class ConfigLoader(Generic[T]):
         :return: the configuration object.
         :raises
         """
-        configuration_file_json = yaml.safe_load(file_pointer)
+        configuration_file_json = yaml_load(file_pointer)
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        return self.configuration_class.from_json(configuration_file_json)
+        key_order = list(configuration_file_json.keys())
+        configuration_obj = self.configuration_class.from_json(configuration_file_json)
+        configuration_obj._key_order = key_order
+        return configuration_obj
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
@@ -133,9 +137,9 @@ class ConfigLoader(Generic[T]):
         :param file_pointer: the file pointer to the configuration file
         :return: None
         """
-        result = configuration.json
+        result = configuration.ordered_json
         self.validator.validate(instance=result)
-        yaml.safe_dump(result, file_pointer)
+        yaml_dump(result, file_pointer)
 
     @classmethod
     def from_configuration_type(

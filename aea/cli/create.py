@@ -38,12 +38,11 @@ from aea.cli.common import (
     DEFAULT_LICENSE,
     DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL,
-    DEFAULT_VERSION,
     _get_or_create_cli_config,
     logger,
 )
 from aea.cli.init import do_init
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION
 
 
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:

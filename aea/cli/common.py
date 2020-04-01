@@ -47,7 +47,7 @@ from aea.configurations.base import (
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
-)
+    DEFAULT_VERSION)
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -67,7 +67,6 @@ logger = default_logging_config(logger)
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-DEFAULT_VERSION = "0.1.0"
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
