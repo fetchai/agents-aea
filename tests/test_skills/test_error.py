@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """The test error skill module contains the tests of the error skill."""
 
+import logging
 import os
 import time
 from pathlib import Path
@@ -69,6 +70,10 @@ class TestSkillError:
             is_programmatic=False,
         )
         cls.skill_context = SkillContext(cls.my_aea._context)
+        logger_name = "aea.{}.skills.{}.{}".format(
+            cls.my_aea._context.agent_name, "fetchai", "error"
+        )
+        cls.skill_context._logger = logging.getLogger(logger_name)
         cls.my_error_handler = ErrorHandler(
             name="error", skill_context=cls.skill_context
         )

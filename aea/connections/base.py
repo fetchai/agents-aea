@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
-import logging
+
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from typing import Optional, Set, TYPE_CHECKING, cast
@@ -32,9 +32,6 @@ from aea.configurations.components import Component
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
-
-
-logger = logging.getLogger(__name__)
 
 
 # TODO refactoring: this should be an enum

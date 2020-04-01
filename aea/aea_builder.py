@@ -284,9 +284,9 @@ class AEABuilder:
         self._package_dependency_manager = _DependenciesManager()
 
         if with_default_packages:
-            self.add_default_packages()
+            self._add_default_packages()
 
-    def add_default_packages(self):
+    def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
         self.add_protocol(Path(AEA_DIR, "protocols", "default"))
@@ -295,7 +295,7 @@ class AEABuilder:
         # add error skill
         self.add_skill(Path(AEA_DIR, "skills", "error"))
 
-    def _check_can_remove(self, component_id: ComponentId):
+    def _check_can_remove(self, component_id: ComponentId) -> None:
         """
         Check if a component can be removed.
 
@@ -326,18 +326,20 @@ class AEABuilder:
         Set the name of the agent.
 
         :param name: the name of the agent.
+        :return: the AEABuilder
         """
         self._name = name
         return self
 
-    def set_default_connection(self, public_id: PublicId):
+    def set_default_connection(self, public_id: PublicId) -> "AEABuilder":
         """
         Set the default connection.
 
         :param public_id: the public id of the default connection package.
-        :return: None
+        :return: the AEABuilder
         """
         self._default_connection = public_id
+        return self
 
     def add_private_key(
         self, identifier: str, private_key_path: PathLike
@@ -347,6 +349,7 @@ class AEABuilder:
 
         :param identifier: the identifier for that private key path.
         :param private_key_path: path to the private key file.
+        :return: the AEABuilder
         """
         self._private_key_paths[identifier] = str(private_key_path)
         return self
@@ -356,7 +359,7 @@ class AEABuilder:
         Remove a private key path by identifier, if present.
 
         :param identifier: the identifier of the private key.
-
+        :return: the AEABuilder
         """
         self._private_key_paths.pop(identifier, None)
         return self
@@ -366,22 +369,41 @@ class AEABuilder:
         """Get the private key paths."""
         return self._private_key_paths
 
-    def add_ledger_api_config(self, identifier: str, config: Dict):
-        """Add a configuration for a ledger API to be supported by the agent."""
-        self._ledger_apis_configs[identifier] = config
+    def add_ledger_api_config(self, identifier: str, config: Dict) -> "AEABuilder":
+        """
+        Add a configuration for a ledger API to be supported by the agent.
 
-    def remove_ledger_api_config(self, identifier: str):
-        """Remove a ledger API configuration."""
+        :param identifier: the identifier of the ledger api
+        :param config: the configuration of the ledger api
+        :return: the AEABuilder
+        """
+        self._ledger_apis_configs[identifier] = config
+        return self
+
+    def remove_ledger_api_config(self, identifier: str) -> "AEABuilder":
+        """
+        Remove a ledger API configuration.
+
+        :param identifier: the identifier of the ledger api
+        :return: the AEABuilder
+        """
         self._ledger_apis_configs.pop(identifier, None)
+        return self
 
     @property
     def ledger_apis_config(self) -> Dict[str, Dict[str, Union[str, int]]]:
         """Get the ledger api configurations."""
         return self._ledger_apis_configs
 
-    def set_default_ledger_api_config(self, default: str):
-        """Set a default ledger API to use."""
-        self._default_ledger = default
+    def set_default_ledger(self, identifier: str) -> "AEABuilder":
+        """
+        Set a default ledger API to use.
+
+        :param identifier: the identifier of the ledger api
+        :return: the AEABuilder
+        """
+        self._default_ledger = identifier
+        return self
 
     def add_component(
         self,
@@ -396,6 +418,7 @@ class AEABuilder:
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
         :raises ValueError: if a component is already registered with the same component id.
+        :return: the AEABuilder
         """
         directory = Path(directory)
         configuration = ComponentConfiguration.load(
@@ -415,14 +438,14 @@ class AEABuilder:
 
         return self
 
-    def _add_component_to_resources(self, component: Component):
+    def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
         if component.component_type == ComponentType.CONNECTION:
             # Do nothing - we don't add connections to resources.
             return
         self._resources.add_component(component)
 
-    def _remove_component_from_resources(self, component_id: ComponentId):
+    def _remove_component_from_resources(self, component_id: ComponentId) -> None:
         """Remove a component from the resources."""
         if component_id.component_type == ComponentType.CONNECTION:
             return
@@ -433,7 +456,12 @@ class AEABuilder:
             self._resources.remove_skill(component_id.public_id)
 
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
-        """Remove a component."""
+        """
+        Remove a component.
+
+        :param component_id: the public id of the component.
+        :return: the AEABuilder
+        """
         self._check_can_remove(component_id)
         self._remove(component_id)
         return self
@@ -443,47 +471,92 @@ class AEABuilder:
         self._remove_component_from_resources(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
-        """Add a protocol to the agent."""
+        """
+        Add a protocol to the agent.
+
+        :param directory: the path to the protocol directory
+        :return: the AEABuilder
+        """
         self.add_component(ComponentType.PROTOCOL, directory)
         return self
 
     def remove_protocol(self, public_id: PublicId) -> "AEABuilder":
-        """Remove protocol"""
+        """
+        Remove protocol.
+
+        :param public_id: the public id of the protocol
+        :return: the AEABuilder
+        """
         self.remove_component(ComponentId(ComponentType.PROTOCOL, public_id))
         return self
 
     def add_connection(self, directory: PathLike) -> "AEABuilder":
-        """Add a protocol to the agent."""
+        """
+        Add a connection to the agent.
+
+        :param directory: the path to the connection directory
+        :return: the AEABuilder
+        """
         self.add_component(ComponentType.CONNECTION, directory)
         return self
 
     def remove_connection(self, public_id: PublicId) -> "AEABuilder":
-        """Remove a connection"""
+        """
+        Remove a connection.
+
+        :param public_id: the public id of the connection
+        :return: the AEABuilder
+        """
         self.remove_component(ComponentId(ComponentType.CONNECTION, public_id))
         return self
 
     def add_skill(self, directory: PathLike) -> "AEABuilder":
-        """Add a skill to the agent."""
+        """
+        Add a skill to the agent.
+
+        :param directory: the path to the skill directory
+        :return: the AEABuilder
+        """
         self.add_component(ComponentType.SKILL, directory)
         return self
 
     def remove_skill(self, public_id: PublicId) -> "AEABuilder":
-        """Remove protocol"""
+        """
+        Remove protocol.
+
+        :param public_id: the public id of the skill
+        :return: the AEABuilder
+        """
         self.remove_component(ComponentId(ComponentType.SKILL, public_id))
         return self
 
     def add_contract(self, directory: PathLike) -> "AEABuilder":
-        """Add a contract to the agent."""
+        """
+        Add a contract to the agent.
+
+        :param directory: the path to the contract directory
+        :return: the AEABuilder
+        """
         self.add_component(ComponentType.CONTRACT, directory)
         return self
 
     def remove_contract(self, public_id: PublicId) -> "AEABuilder":
-        """Remove protocol"""
+        """
+        Remove protocol.
+
+        :param public_id: the public id of the contract
+        :return: the AEABuilder
+        """
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
-        """Get the identity associated to a wallet."""
+        """
+        Get the identity associated to a wallet.
+
+        :param wallet: the wallet
+        :return: the identity
+        """
         assert self._name is not None, "You must set the name of the agent."
         if len(wallet.addresses) > 1:
             identity = Identity(
@@ -499,8 +572,13 @@ class AEABuilder:
 
     def _process_connection_ids(
         self, connection_ids: Optional[Collection[PublicId]] = None
-    ):
-        """Process connection ids."""
+    ) -> List[Connection]:
+        """
+        Process connection ids.
+
+        :param connection_ids: an optional list of connection ids
+        :return: a list of connections
+        """
         if connection_ids is not None:
             # check that all the connections are in the configuration file.
             connection_ids_set = set(connection_ids)
@@ -531,7 +609,7 @@ class AEABuilder:
         """
         Build the AEA.
 
-        :param connection_ids: select only these connections.
+        :param connection_ids: select only these connections to run the AEA.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
@@ -555,7 +633,7 @@ class AEABuilder:
         self._set_agent_context_to_all_skills(aea.context)
         return aea
 
-    def _set_agent_context_to_all_skills(self, context: AgentContext):
+    def _set_agent_context_to_all_skills(self, context: AgentContext) -> None:
         """Set a skill context to all skills"""
         for skill in self._resources.get_all_skills():
             logger_name = "aea.{}.skills.{}.{}".format(
@@ -564,7 +642,7 @@ class AEABuilder:
             skill.skill_context.set_agent_context(context)
             skill.skill_context._logger = logging.getLogger(logger_name)
 
-    def _check_configuration_not_already_added(self, configuration):
+    def _check_configuration_not_already_added(self, configuration) -> None:
         if (
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
@@ -581,7 +659,7 @@ class AEABuilder:
     @staticmethod
     def _find_component_directory_from_component_id(
         aea_project_directory: Path, component_id: ComponentId
-    ):
+    ) -> Path:
         """Find a component directory from component id."""
         # search in vendor first
         vendor_package_path = (
@@ -606,7 +684,7 @@ class AEABuilder:
         raise ValueError("Package {} not found.".format(component_id))
 
     @staticmethod
-    def _try_to_load_agent_configuration_file(aea_project_path: Path):
+    def _try_to_load_agent_configuration_file(aea_project_path: Path) -> None:
         """Try to load the agent configuration file.."""
         try:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
@@ -630,7 +708,7 @@ class AEABuilder:
     @classmethod
     def from_aea_project(
         cls, aea_project_path: PathLike, skip_consistency_check: bool = False
-    ):
+    ) -> "AEABuilder":
         """
         Construct the builder from an AEA project
 
@@ -643,7 +721,7 @@ class AEABuilder:
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :return: an AEA agent.
+        :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
         cls._try_to_load_agent_configuration_file(aea_project_path)
@@ -661,7 +739,7 @@ class AEABuilder:
 
         # set name and other configurations
         builder.set_name(agent_configuration.name)
-        builder.set_default_ledger_api_config(agent_configuration.default_ledger)
+        builder.set_default_ledger(agent_configuration.default_ledger)
         builder.set_default_connection(
             PublicId.from_str(agent_configuration.default_connection)
         )

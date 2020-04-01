@@ -24,6 +24,7 @@ from asyncio import AbstractEventLoop
 from typing import List, Optional, cast
 
 from aea.agent import Agent
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
@@ -34,11 +35,14 @@ from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.skills.error import ERROR_SKILL_ID
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
 logger = logging.getLogger(__name__)
+
+ERROR_SKILL_ID = PublicId(
+    "fetchai", "error", "0.1.0"
+)  # TODO; specify error handler in config
 
 
 class AEA(Agent):

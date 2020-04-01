@@ -26,36 +26,14 @@ Instantiate the resources.
 - `directory`: the path to the directory which contains the resources
 (skills, connections and protocols)
 
-<a name=".aea.registries.resources.Resources.directory"></a>
-#### directory
+<a name=".aea.registries.resources.Resources.add_component"></a>
+#### add`_`component
 
 ```python
- | @property
- | directory() -> str
+ | add_component(component: Component)
 ```
 
-Get the directory.
-
-<a name=".aea.registries.resources.Resources.load"></a>
-#### load
-
-```python
- | load(agent_context: AgentContext) -> None
-```
-
-Load all the resources.
-
-Performs the following:
-
-- loads the agent configuration
-- populates the resources with all protocols in the directory
-and referenced in the configuration
-- populates the resources with all skills in the directory
-and referenced in the configuration
-
-**Arguments**:
-
-- `agent_context`: the agent context
+Add a component to resources.
 
 <a name=".aea.registries.resources.Resources.add_protocol"></a>
 #### add`_`protocol
@@ -116,6 +94,70 @@ Remove a protocol from the set of resources.
 **Arguments**:
 
 - `protocol_id`: the protocol id for the protocol to be removed.
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.add_contract"></a>
+#### add`_`contract
+
+```python
+ | add_contract(contract: Contract) -> None
+```
+
+Add a contract to the set of resources.
+
+**Arguments**:
+
+- `contract`: a contract
+
+**Returns**:
+
+None
+
+<a name=".aea.registries.resources.Resources.get_contract"></a>
+#### get`_`contract
+
+```python
+ | get_contract(contract_id: ContractId) -> Optional[Contract]
+```
+
+Get contract for given contract id.
+
+**Arguments**:
+
+- `contract_id`: the contract id
+
+**Returns**:
+
+a matching contract, if present, else None
+
+<a name=".aea.registries.resources.Resources.get_all_contracts"></a>
+#### get`_`all`_`contracts
+
+```python
+ | get_all_contracts() -> List[Contract]
+```
+
+Get the list of all the contracts.
+
+**Returns**:
+
+the list of contracts.
+
+<a name=".aea.registries.resources.Resources.remove_contract"></a>
+#### remove`_`contract
+
+```python
+ | remove_contract(contract_id: ContractId) -> None
+```
+
+Remove a contract from the set of resources.
+
+**Arguments**:
+
+- `contract_id`: the contract id for the contract to be removed.
 
 **Returns**:
 
