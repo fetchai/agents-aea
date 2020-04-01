@@ -58,7 +58,9 @@ class TestSearchProtocolsLocal:
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "--local", "protocols"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "search", "--local", "protocols"],
+            standalone_mode=False,
         )
         assert self.result.output == (
             'Searching for ""...\n'
@@ -84,7 +86,9 @@ class TestSearchContractsLocal(TestCase):
     def test_search_contracts_positive(self, *mocks):
         """Test search contracts command positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "--local", "contracts"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "search", "--local", "contracts"],
+            standalone_mode=False,
         )
         assert result.output == (
             'Searching for ""...\n'
@@ -97,9 +101,7 @@ class TestSearchContractsLocal(TestCase):
     def test_search_contracts_registry_positive(self, *mocks):
         """Test search contracts in registry command positive result."""
         result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "search", "contracts"],
-            standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "search", "contracts"], standalone_mode=False,
         )
         assert result.output == (
             'Searching for ""...\n'
@@ -122,7 +124,9 @@ class TestSearchConnectionsLocal:
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "--local", "connections"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "search", "--local", "connections"],
+            standalone_mode=False,
         )
         assert self.result.output == (
             'Searching for ""...\n'
@@ -181,10 +185,14 @@ class TestSearchAgentsLocal:
 
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", "myagent"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", "myagent"],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -382,12 +390,16 @@ class TestSearchInAgentDirectoryLocal:
             if p.name != "echo" and p.is_dir()
         ]
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         # create an AEA proejct and enter into it.
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", "myagent"], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", "myagent"],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, "myagent"))

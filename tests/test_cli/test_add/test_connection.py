@@ -65,11 +65,15 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -154,11 +158,15 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -237,11 +245,15 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -293,11 +305,15 @@ class TestAddConnectionFailsWhenDifferentPublicId:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -346,11 +362,15 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -413,11 +433,15 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

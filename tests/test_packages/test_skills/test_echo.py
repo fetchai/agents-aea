@@ -65,13 +65,17 @@ class TestEchoSkill:
         shutil.copytree(packages_src, packages_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # create agent
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         agent_dir_path = os.path.join(self.t, self.agent_name)

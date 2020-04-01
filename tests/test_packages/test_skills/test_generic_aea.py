@@ -65,17 +65,23 @@ class TestGenericSkills:
         shutil.copytree(packages_src, packages_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

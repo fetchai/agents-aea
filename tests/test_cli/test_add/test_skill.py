@@ -63,11 +63,15 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         # this also by default adds the oef skill and error skill
         assert result.exit_code == 0
@@ -75,7 +79,9 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
         # add the error skill again
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
@@ -138,17 +144,23 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         # this also by default adds the oef skill and error skill
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert cls.result.exit_code == 0
 
@@ -168,7 +180,9 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         config["version"] = different_version
         yaml.safe_dump(config, config_path.open(mode="w"))
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", different_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", different_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
@@ -229,16 +243,22 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
@@ -282,16 +302,22 @@ class TestAddSkillFailsWhenDifferentPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
@@ -332,11 +358,15 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -355,7 +385,9 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
@@ -401,11 +433,15 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -419,7 +455,9 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
             cls.t, cls.agent_name, "vendor", "fetchai", "skills", cls.skill_name
         ).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
 
     def test_exit_code_equal_to_1(self):
