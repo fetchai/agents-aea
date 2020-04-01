@@ -70,11 +70,11 @@ def _registry_init(author):
 
 @click.command()
 @click.option("--author", type=str, required=False)
-@click.option("--registry", is_flag=True, help="For AEA init with Registry.")
+@click.option("--local", is_flag=True, help="For init AEA locally.")
 @pass_ctx
-def init(ctx: Context, author: str, registry: bool):
+def init(ctx: Context, author: str, local: bool):
     """Initialize your AEA configurations."""
-    if registry:
+    if not local:
         author = _registry_init(author)
 
     config = _get_or_create_cli_config()
