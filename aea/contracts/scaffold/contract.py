@@ -19,19 +19,13 @@
 
 """This module contains the scaffold contract definition."""
 
-from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 
 
 class MyScaffoldContract(Contract):
     """The scaffold contract class."""
 
-    contract_id = PublicId("fetchai", "scaffold", "0.1.0")
-
-    def __init__(self, **kwargs):
-        """
-        Initialize.
-
-        :param performative: the type of message.
-        """
-        super().__init__(**kwargs)
+    def load(self) -> None:
+        """Load the connection."""
+        super().load()
+        # Put your code here to initialize the contract.

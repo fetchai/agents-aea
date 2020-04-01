@@ -59,18 +59,18 @@ T = TypeVar(
 class ConfigLoader(Generic[T]):
     """This class implement parsing, serialization and validation functionalities for the 'aea' configuration files."""
 
-    def __init__(self, schema_filename: str, configuration_type: Type[T]):
+    def __init__(self, schema_filename: str, configuration_class: Type[T]):
         """
         Initialize the parser for configuration files.
 
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
-        :param configuration_type:
+        :param configuration_class: the configuration class (e.g. AgentConfig, SkillConfig etc.)
         """
         self._schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
         self._validator = Draft4Validator(self._schema, resolver=self._resolver)
-        self._configuration_type = configuration_type  # type: Type[T]
+        self._configuration_class = configuration_class  # type: Type[T]
 
     @property
     def validator(self) -> Draft4Validator:
@@ -78,9 +78,9 @@ class ConfigLoader(Generic[T]):
         return self._validator
 
     @property
-    def configuration_type(self) -> Type[T]:
+    def configuration_class(self) -> Type[T]:
         """Get the configuration type of the loader."""
-        return self._configuration_type
+        return self._configuration_class
 
     def load_protocol_specification(self, file_pointer: TextIO) -> T:
         """
@@ -105,7 +105,7 @@ class ConfigLoader(Generic[T]):
             self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        protocol_specification = self.configuration_type.from_json(
+        protocol_specification = self.configuration_class.from_json(
             configuration_file_json
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
@@ -124,7 +124,7 @@ class ConfigLoader(Generic[T]):
             self.validator.validate(instance=configuration_file_json)
         except Exception:
             raise
-        return self.configuration_type.from_json(configuration_file_json)
+        return self.configuration_class.from_json(configuration_file_json)
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.

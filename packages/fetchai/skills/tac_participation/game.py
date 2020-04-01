@@ -185,8 +185,9 @@ class Game(Model):
         ), "Expected controller address not assigned!"
         return self._expected_controller_addr
 
+    # TODO the name of this property conflicts with the Model.configuration property.
     @property
-    def configuration(self) -> Configuration:
+    def configuration(self) -> Configuration:  # type: ignore
         """Get the game configuration."""
         assert self._configuration is not None, "Game configuration not assigned!"
         return self._configuration

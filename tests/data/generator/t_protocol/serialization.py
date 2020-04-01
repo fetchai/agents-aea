@@ -49,12 +49,12 @@ class TProtocolSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Ct()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Ct_Performative()  # type: ignore
             content_ct = msg.content_ct
             DataModel.encode(performative.content_ct, content_ct)
             t_protocol_msg.performative_ct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PT:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Pt()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Pt_Performative()  # type: ignore
             content_bytes = msg.content_bytes
             performative.content_bytes = content_bytes
             content_int = msg.content_int
@@ -67,7 +67,7 @@ class TProtocolSerializer(Serializer):
             performative.content_str = content_str
             t_protocol_msg.performative_pt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PCT:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Pct()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Pct_Performative()  # type: ignore
             content_set_bytes = msg.content_set_bytes
             performative.content_set_bytes.extend(content_set_bytes)
             content_set_int = msg.content_set_int
@@ -90,14 +90,14 @@ class TProtocolSerializer(Serializer):
             performative.content_list_str.extend(content_list_str)
             t_protocol_msg.performative_pct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt_Performative()  # type: ignore
             content_dict_bool_bytes = msg.content_dict_bool_bytes
             performative.content_dict_bool_bytes.update(content_dict_bool_bytes)
             content_dict_str_float = msg.content_dict_str_float
             performative.content_dict_str_float.update(content_dict_str_float)
             t_protocol_msg.performative_pmt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Mt()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Mt_Performative()  # type: ignore
             if msg.is_set("content_union_1_type_DataModel"):
                 performative.content_union_1_type_DataModel_is_set = True
                 content_union_1_type_DataModel = msg.content_union_1_type_DataModel
@@ -217,7 +217,7 @@ class TProtocolSerializer(Serializer):
                 )
             t_protocol_msg.performative_mt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_O:
-            performative = t_protocol_pb2.TProtocolMessage.Performative_O()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_O_Performative()  # type: ignore
             if msg.is_set("content_o_ct"):
                 performative.content_o_ct_is_set = True
                 content_o_ct = msg.content_o_ct
@@ -284,7 +284,7 @@ class TProtocolSerializer(Serializer):
         elif (
             performative_id == TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS
         ):
-            performative = t_protocol_pb2.TProtocolMessage.Performative_Empty_Contents()  # type: ignore
+            performative = t_protocol_pb2.TProtocolMessage.Performative_Empty_Contents_Performative()  # type: ignore
             t_protocol_msg.performative_empty_contents.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))

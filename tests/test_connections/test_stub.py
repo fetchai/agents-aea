@@ -25,16 +25,17 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 
 import aea
-from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.stub.connection import StubConnection
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
+from ..conftest import _make_stub_connection
 
 
 class TestStubConnectionReception:
@@ -49,11 +50,10 @@ class TestStubConnectionReception:
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
         cls.output_file_path = d / "output_file.csv"
-
-        connection_id = PublicId("fetchai", "stub", "0.1.0")
-        cls.connection = StubConnection(
-            cls.input_file_path, cls.output_file_path, connection_id=connection_id
+        cls.connection = _make_stub_connection(
+            cls.input_file_path, cls.output_file_path
         )
+
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
         os.chdir(cls.tmpdir)
@@ -126,11 +126,10 @@ class TestStubConnectionSending:
         d.mkdir(parents=True)
         cls.input_file_path = d / "input_file.csv"
         cls.output_file_path = d / "output_file.csv"
-
-        connection_id = PublicId("fetchai", "stub", "0.1.0")
-        cls.connection = StubConnection(
-            cls.input_file_path, cls.output_file_path, connection_id=connection_id
+        cls.connection = _make_stub_connection(
+            cls.input_file_path, cls.output_file_path
         )
+
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
         os.chdir(cls.tmpdir)
@@ -157,13 +156,6 @@ class TestStubConnectionSending:
         assert (
             self.connection.in_queue.empty()
         ), "The inbox must be empty due to bad encoded message"
-
-    def test_connection_from_config(self):
-        """Test loading a connection from config file."""
-        stub_con = StubConnection.from_config(
-            address="pk", connection_configuration=ConnectionConfig()
-        )
-        assert not stub_con.connection_status.is_connected
 
     def test_send_message(self):
         """Test that the messages in the outbox are posted on the output file."""
@@ -211,23 +203,6 @@ class TestStubConnectionSending:
         cls.multiplexer.disconnect()
 
 
-def test_connection_from_config():
-    """Test loading a connection from config file."""
-    tmpdir = Path(tempfile.mkdtemp())
-    d = tmpdir / "test_stub"
-    d.mkdir(parents=True)
-    input_file_path = d / "input_file.csv"
-    output_file_path = d / "output_file.csv"
-    stub_con = StubConnection.from_config(
-        address="pk",
-        connection_configuration=ConnectionConfig(
-            input_file=input_file_path, output_file=output_file_path
-        ),
-    )
-    assert not stub_con.connection_status.is_connected
-    shutil.rmtree(tmpdir, ignore_errors=True)
-
-
 @pytest.mark.asyncio
 async def test_disconnection_when_already_disconnected():
     """Test the case when disconnecting a connection already disconnected."""
@@ -236,15 +211,11 @@ async def test_disconnection_when_already_disconnected():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "output_file.csv"
-    stub_con = StubConnection(
-        input_file_path,
-        output_file_path,
-        connection_id=PublicId("fetchai", "stub", "0.1.0"),
-    )
+    connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not stub_con.connection_status.is_connected
-    await stub_con.disconnect()
-    assert not stub_con.connection_status.is_connected
+    assert not connection.connection_status.is_connected
+    await connection.disconnect()
+    assert not connection.connection_status.is_connected
 
 
 @pytest.mark.asyncio
@@ -255,17 +226,13 @@ async def test_connection_when_already_connected():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "output_file.csv"
-    stub_con = StubConnection(
-        input_file_path,
-        output_file_path,
-        connection_id=PublicId("fetchai", "stub", "0.1.0"),
-    )
+    connection = _make_stub_connection(input_file_path, output_file_path)
 
-    assert not stub_con.connection_status.is_connected
-    await stub_con.connect()
-    assert stub_con.connection_status.is_connected
-    await stub_con.connect()
-    assert stub_con.connection_status.is_connected
+    assert not connection.connection_status.is_connected
+    await connection.connect()
+    assert connection.connection_status.is_connected
+    await connection.connect()
+    assert connection.connection_status.is_connected
 
 
 @pytest.mark.asyncio
@@ -276,23 +243,9 @@ async def test_receiving_returns_none_when_error_occurs():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "output_file.csv"
-    stub_con = StubConnection(
-        input_file_path,
-        output_file_path,
-        connection_id=PublicId("fetchai", "stub", "0.1.0"),
-    )
+    connection = _make_stub_connection(input_file_path, output_file_path)
 
-    await stub_con.connect()
-    with mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
-        ret = await stub_con.receive()
+    await connection.connect()
+    with mock.patch.object(connection.in_queue, "get", side_effect=Exception):
+        ret = await connection.receive()
         assert ret is None
-
-
-class StubConnectionTestCase(TestCase):
-    """Test case for StubConnection class."""
-
-    @mock.patch("aea.connections.stub.connection.Path.touch")
-    @mock.patch("builtins.open", mock.mock_open())
-    def test_init_no_connection_id(self, *mocks):
-        """Test init no connection ID."""
-        StubConnection("input_file_path", "output_file_path")

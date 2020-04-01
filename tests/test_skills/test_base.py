@@ -20,13 +20,11 @@
 """This module contains the tests for the base classes for the skills."""
 
 import os
-import shutil
-import tempfile
 from pathlib import Path
 from queue import Queue
 from unittest import TestCase, mock
+from unittest.mock import Mock
 
-import aea.registries.base
 from aea.aea import AEA
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ethereum import ETHEREUM
@@ -36,16 +34,16 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillComponent, SkillContext
+from aea.skills.base import SkillComponent, SkillContext
 
-from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
+from ..conftest import CUR_PATH, _make_dummy_connection
 
 
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     wallet = Wallet({FETCHAI: private_key_path})
-    connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    connections = [_make_dummy_connection()]
     ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
     identity = Identity("name", address=wallet.addresses[FETCHAI])
     my_aea = AEA(
@@ -72,7 +70,7 @@ class TestSkillContext:
             {ETHEREUM: eth_private_key_path, FETCHAI: fet_private_key_path}
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
-        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        cls.connections = [_make_dummy_connection()]
         cls.identity = Identity(
             "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI
         )
@@ -133,72 +131,6 @@ class TestSkillContext:
     def teardown_class(cls):
         """Test teardown."""
         pass
-
-
-class TestSkillFromDir:
-    """Test the 'Skill.from_dir' method."""
-
-    @classmethod
-    def _patch_logger(cls):
-        cls.patch_logger_warning = mock.patch.object(aea.skills.base.logger, "warning")
-        cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
-
-    @classmethod
-    def _unpatch_logger(cls):
-        cls.mocked_logger_warning.__exit__()
-
-    @classmethod
-    def setup_class(cls):
-        """Set the tests up."""
-        cls._patch_logger()
-
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.skill_directory = Path(cls.t, "dummy_skill")
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.skill_directory)
-        os.chdir(cls.t)
-
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        cls.identity = Identity("name", address=cls.wallet.addresses[FETCHAI])
-        cls.my_aea = AEA(
-            cls.identity,
-            cls.connections,
-            cls.wallet,
-            ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            is_programmatic=False,
-        )
-        cls.agent_context = cls.my_aea.context
-
-    def test_missing_components(self):
-        """Test log message for missing components."""
-        Path(self.skill_directory, "handlers.py").write_text("")
-        Path(self.skill_directory, "behaviours.py").write_text("")
-        Path(self.skill_directory, "dummy.py").write_text("")
-
-        Skill.from_dir(self.skill_directory, self.agent_context)
-        self.mocked_logger_warning.assert_any_call(
-            "Handler 'DummyInternalHandler' cannot be found."
-        )
-        self.mocked_logger_warning.assert_any_call(
-            "Behaviour 'DummyBehaviour' cannot be found."
-        )
-        self.mocked_logger_warning.assert_any_call(
-            "Model 'DummyModel' cannot be found."
-        )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the tests down."""
-        cls._unpatch_logger()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 class SkillContextTestCase(TestCase):
@@ -292,19 +224,23 @@ class SkillComponentTestCase(TestCase):
     def test_init_no_ctx(self):
         """Test init method no context provided."""
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             self.TestComponent()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             self.TestComponent(skill_context="skill_context")
 
     def test_skill_id_positive(self):
         """Test skill_id property positive."""
         ctx = mock.Mock()
         ctx.skill_id = "skill_id"
-        component = self.TestComponent(skill_context=ctx, name="name")
+        component = self.TestComponent(
+            configuration=Mock(), skill_context=ctx, name="name"
+        )
         component.skill_id
 
     def test_config_positive(self):
         """Test config property positive."""
-        component = self.TestComponent(skill_context="ctx", name="name")
+        component = self.TestComponent(
+            configuration=Mock(args={}), skill_context="ctx", name="name"
+        )
         component.config

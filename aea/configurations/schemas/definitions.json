@@ -87,6 +87,11 @@
         {"$ref":  "#/definitions/pep440_version"}
       ]
     },
+    "class_name": {
+      "type": "string",
+      "description": "The class name of a skill component.",
+      "pattern": "[A-Za-z_][A-Za-z0-9_]*"
+    },
     "fingerprint_ignore_patterns": {
       "type": "array",
       "uniqueItems": true,

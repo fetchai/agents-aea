@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,17 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the Scaffold connection.py."""
-from aea.connections.scaffold.connection import MyScaffoldConnection
-
-from ..conftest import UNKNOWN_CONNECTION_PUBLIC_ID
-
-
-class TestScaffold:
-    """Test the aea/connections/scaffold/connection.py."""
-
-    def test_scaffold_connection(self):
-        """Test the initialisation of the scaffold_connection."""
-        connection_id = UNKNOWN_CONNECTION_PUBLIC_ID
-        m_connection = MyScaffoldConnection(address="pk", connection_id=connection_id)
-        assert m_connection.address == "pk"
+"""This module contains the tests for the code-blocks in thermometer-skills-step-by-step.md file."""

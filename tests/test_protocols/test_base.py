@@ -22,17 +22,16 @@
 import os
 import shutil
 import tempfile
-from typing import cast
+from pathlib import Path
 
 from aea import AEA_DIR
-from aea.configurations.base import ProtocolConfig, PublicId
+from aea.configurations.base import ComponentType
+from aea.configurations.components import Component
 from aea.mail.base import Envelope
 from aea.protocols.base import (
     JSONSerializer,
     Message,
     ProtobufSerializer,
-    Protocol,
-    Serializer,
 )
 
 from ..conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
@@ -103,15 +102,6 @@ class TestBaseSerializations:
         self.message2.body = m_dict
         assert "Hello" in self.message2.body.keys()
 
-    def test_protocols_config(self):
-        """Test the protocol config."""
-        protocol = Protocol(
-            protocol_id=PublicId.from_str("author/my_own_protocol:0.1.0"),
-            serializer=cast(Serializer, ProtobufSerializer),
-            config=ProtocolConfig(),
-        )
-        assert protocol.config is not None
-
 
 class TestProtocolFromDir:
     """Test the 'Protocol.from_dir' method."""
@@ -125,11 +115,11 @@ class TestProtocolFromDir:
 
     def test_protocol_load_positive(self):
         """Test protocol loaded correctly."""
-        default_protocol = Protocol.from_dir(
-            os.path.join(AEA_DIR, "protocols", "default")
+        default_protocol = Component.load_from_directory(
+            ComponentType.PROTOCOL, Path(AEA_DIR, "protocols", "default")
         )
         assert (
-            str(default_protocol.id) == "fetchai/default:0.1.0"
+            str(default_protocol.public_id) == "fetchai/default:0.1.0"
         ), "Protocol not loaded correctly."
 
     @classmethod

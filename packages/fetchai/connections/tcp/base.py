@@ -22,11 +22,10 @@ import logging
 import struct
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamReader, StreamWriter
-from typing import Optional
+from typing import Optional, cast
 
-from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -34,21 +33,12 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
-        """
-        Initialize the TCP connection.
-
-        :param address: the address used for identification.
-        :param host: the host to connect to.
-        :param port: the port to connect to.
-        """
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "tcp", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self.address = address
-
-        self.host = host
-        self.port = port
+    def load(self) -> None:
+        """Load the connection configuration."""
+        # for the server, the listening address/port
+        # for the client, the server address/port
+        self.host = cast(str, self.configuration.config.get("address"))
+        self.port = cast(int, self.configuration.config.get("port"))
 
     @abstractmethod
     async def setup(self):

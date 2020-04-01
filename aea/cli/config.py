@@ -248,7 +248,7 @@ def set(ctx: Context, json_path: List[str], value, type):
         logger.error("Cannot convert {} to type {}".format(value, type_))
 
     try:
-        configuration_obj = config_loader.configuration_type.from_json(
+        configuration_obj = config_loader.configuration_class.from_json(
             configuration_dict
         )
         config_loader.validator.validate(instance=configuration_obj.json)

@@ -23,7 +23,6 @@ from typing import Any, Dict, Optional
 
 from web3.contract import Contract as EthereumContract
 
-from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.base import Contract as BaseContract
 from aea.crypto.ethereum import EthereumApi
 
@@ -31,22 +30,11 @@ from aea.crypto.ethereum import EthereumApi
 class Contract(BaseContract):
     """Definition of an ethereum contract."""
 
-    def __init__(
-        self,
-        contract_id: ContractId,
-        config: ContractConfig,
-        contract_interface: Dict[str, Any],
-    ):
-        """
-        Initialize the contract.
-
-        :param contract_id: the contract id.
-        :param config: the contract configurations.
-        :param contract_interface: the contract interface.
-        """
-        super().__init__(contract_id, config, contract_interface)
-        self._abi = contract_interface["abi"]
-        self._bytecode = contract_interface["bytecode"]
+    def load(self) -> None:
+        """Load the contract."""
+        super().load()
+        self._abi = self.contract_interface["abi"]
+        self._bytecode = self.contract_interface["bytecode"]
         self._instance = None  # type: Optional[EthereumContract]
 
     @property

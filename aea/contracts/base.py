@@ -18,44 +18,52 @@
 # ------------------------------------------------------------------------------
 
 """The base contract."""
-
-from abc import ABC
-from typing import Any, Dict
+import json
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 from aea.configurations.base import ContractConfig, ContractId
+from aea.configurations.components import Component
 
 
-class Contract(ABC):
+class Contract(Component):
     """Abstract definition of a contract."""
 
     def __init__(
-        self,
-        contract_id: ContractId,
-        config: ContractConfig,
-        contract_interface: Dict[str, Any],
+        self, config: ContractConfig,
     ):
         """
         Initialize the contract.
 
-        :param contract_id: the contract id.
         :param config: the contract configurations.
-        :param contract_interface: the contract interface
         """
-        self._contract_id = contract_id
-        self._config = config
-        self._contract_interface = contract_interface
+        super().__init__(config)
+        self._contract_interface = None  # type: Optional[Dict[str, Any]]
 
     @property
     def id(self) -> ContractId:
         """Get the name."""
-        return self._contract_id
+        return self.public_id
 
     @property
     def config(self) -> ContractConfig:
         """Get the configuration."""
-        return self._config
+        # return self._config
+        return self._configuration  # type: ignore
 
     @property
     def contract_interface(self) -> Dict[str, Any]:
         """Get the contract interface."""
+        assert self._contract_interface is not None, "Contract interface not set."
         return self._contract_interface
+
+    def load(self) -> None:
+        """
+        Load the contract.
+
+        - load the contract interface, specified in the contract.yaml
+          'path_to_contract_interface' field.
+        """
+        path = Path(self.directory, self.config.path_to_contract_interface)
+        with open(path, "r") as interface_file:
+            self._contract_interface = json.load(interface_file)

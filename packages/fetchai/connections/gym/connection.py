@@ -27,7 +27,7 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
@@ -145,20 +145,11 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def __init__(self, address: Address, gym_env: gym.Env, *args, **kwargs):
-        """
-        Initialize a connection to a local gym environment.
-
-        :param address: the address used in the protocols.
-        :param gym_env: the gym environment.
-        :param connection_id: the connection id.
-        """
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self.address = address
-        self.channel = GymChannel(address, gym_env)
-
+    def load(self) -> None:
+        """Load the connection configuration."""
+        gym_env_package = cast(str, self.configuration.config.get("env"))
+        gym_env_class = locate(gym_env_package)
+        self.channel = GymChannel(self.address, gym_env_class())
         self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
@@ -220,24 +211,3 @@ class GymConnection(Connection):
         :return: None
         """
         self._connection = None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the Gym connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
-        """
-        gym_env_package = cast(str, connection_configuration.config.get("env"))
-        gym_env = locate(gym_env_package)
-        return GymConnection(
-            address,
-            gym_env(),
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=connection_configuration.restricted_to_protocols,
-            excluded_protocols=connection_configuration.excluded_protocols,
-        )

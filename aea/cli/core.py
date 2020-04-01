@@ -31,7 +31,13 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import AgentDirectory, Context, check_aea_project, logger
+from aea.cli.common import (
+    AgentDirectory,
+    Context,
+    _verify_or_create_private_keys,
+    check_aea_project,
+    logger,
+)
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -48,7 +54,7 @@ from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
 from aea.cli.remove import remove
-from aea.cli.run import _verify_or_create_private_keys, run
+from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE

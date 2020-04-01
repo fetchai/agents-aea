@@ -23,10 +23,11 @@ import time
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
-from aea.configurations.base import PublicId
 from aea.mail.base import InBox, OutBox
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode
+
+from .conftest import _make_local_connection
 
 
 class DummyAgent(Agent):
@@ -63,14 +64,9 @@ def test_run_agent():
         agent_name = "dummyagent"
         agent_address = "some_address"
         identity = Identity(agent_name, address=agent_address)
-        agent = DummyAgent(
-            identity,
-            [
-                OEFLocalConnection(
-                    "mypbk", node, connection_id=PublicId("fetchai", "oef", "0.1.0")
-                )
-            ],
-        )
+        oef_local_connection = _make_local_connection(agent_address, node)
+        oef_local_connection._local_node = node
+        agent = DummyAgent(identity, [oef_local_connection],)
         assert agent.name == identity.name
         assert agent.tick == 0
         assert (

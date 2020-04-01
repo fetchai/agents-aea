@@ -23,9 +23,15 @@ import builtins
 import importlib.util
 import logging
 import os
+import re
 import sys
 import types
+from contextlib import contextmanager
 from pathlib import Path
+from threading import RLock
+from typing import Dict, Sequence, Tuple
+
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +79,70 @@ def locate(path):
     return object
 
 
-def load_module(dotted_path: str, filepath: os.PathLike):
+def load_init_modules(directory: Path, prefix: str = "") -> Dict[str, types.ModuleType]:
+    """
+    Load __init__.py modules of a directory, recursively.
+
+    :param directory: the directory where to search for __init__.py modules.
+    :param prefix: the prefix to apply in the import path.
+    :return: a mapping from import path to module objects.
+    """
+    if not directory.exists() or not directory.is_dir():
+        raise ValueError("The provided path does not exists or it is not a directory.")
+    result = {}  # type: Dict[str, types.ModuleType]
+    package_root_directory = directory
+    for init_module_path in directory.rglob("__init__.py"):
+        relative_path_directory = init_module_path.relative_to(
+            package_root_directory
+        ).parent
+        # relative_path_directory is "." if __init__.py is in the root of the package directory,
+        # and a path when it is a subpackage. We handle these cases separately.
+        relative_dotted_path = (
+            str(relative_path_directory).replace(os.path.sep, ".")
+            if str(relative_path_directory) != "."
+            else ""
+        )
+        init_module = load_module(relative_dotted_path, init_module_path)
+        full_dotted_path = ".".join([prefix, relative_dotted_path])
+        result[full_dotted_path] = init_module
+
+    return result
+
+
+class _SysModules:
+    """Helper class that load modules to sys.modules."""
+
+    __rlock = RLock()
+
+    @staticmethod
+    @contextmanager
+    def load_modules(modules: Sequence[Tuple[str, types.ModuleType]]):
+        """
+        Load modules as a context manager.
+
+        :param modules: a list of pairs (import path, module object).
+        :return: None.
+        """
+        with _SysModules.__rlock:
+            # save the current state of sys.modules
+            old_keys = set(sys.modules.keys())
+            try:
+                for import_path, module_obj in modules:
+                    assert import_path not in sys.modules
+                    sys.modules[import_path] = module_obj
+                yield
+            finally:
+                pass
+                # remove modules that:
+                # - whose import path prefix is "packages." and
+                # - were not loaded before us.
+                keys = set(sys.modules.keys())
+                for key in keys:
+                    if re.match("^packages.?", key) and key not in old_keys:
+                        sys.modules.pop(key, None)
+
+
+def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     """
     Load a module.
 
@@ -83,7 +152,7 @@ def load_module(dotted_path: str, filepath: os.PathLike):
     :raises ValueError: if the filepath provided is not a module.
     :raises Exception: if the execution of the module raises exception.
     """
-    spec = importlib.util.spec_from_file_location(dotted_path, filepath)
+    spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore
     return module
@@ -140,3 +209,13 @@ def add_agent_component_module_to_sys_modules(
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     import_module(dotted_path, module_obj)
+
+
+def load_env_file(env_file: str):
+    """
+    Load the content of the environment file into the process environment.
+
+    :param env_file: path to the env file.
+    :return: None.
+    """
+    load_dotenv(dotenv_path=Path(env_file), override=False)

@@ -21,9 +21,14 @@
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import Optional, Set, TYPE_CHECKING
+from typing import Optional, Set, TYPE_CHECKING, cast
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import (
+    ComponentType,
+    ConnectionConfig,
+    PublicId,
+)
+from aea.configurations.components import Component
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
@@ -43,60 +48,21 @@ class ConnectionStatus:
         self.is_connecting = False  # type: bool
 
 
-class Connection(ABC):
+class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
-        self,
-        connection_id: Optional[PublicId] = None,
-        restricted_to_protocols: Optional[Set[PublicId]] = None,
-        excluded_protocols: Optional[Set[PublicId]] = None,
+        self, configuration: ConnectionConfig, address: Optional["Address"] = None
     ):
         """
         Initialize the connection.
 
-        :param connection_id: the connection identifier.
-        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
-        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        :param configuration: the connection configuration.
         """
-        if connection_id is None:
-            raise ValueError("Connection public id is a mandatory argument.")
-        self._connection_id = connection_id
-        self._restricted_to_protocols = self._get_restricted_to_protocols(
-            restricted_to_protocols
-        )
-        self._excluded_protocols = self._get_excluded_protocols(excluded_protocols)
-
+        super().__init__(configuration)
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
-
-    def _get_restricted_to_protocols(
-        self, restricted_to_protocols: Optional[Set[PublicId]] = None
-    ) -> Set[PublicId]:
-        if restricted_to_protocols is not None:
-            return restricted_to_protocols
-        # never gonna reach next condition cause isinstance check will fail comparing type 'set' to type 'property'
-        # TODO: investigate and fix that
-        elif hasattr(type(self), "restricted_to_protocols") and isinstance(
-            getattr(type(self), "restricted_to_protocols"), set
-        ):  # pragma: no cover
-            return getattr(type(self), "restricted_to_protocols")
-        else:
-            return set()
-
-    def _get_excluded_protocols(
-        self, excluded_protocols: Optional[Set[PublicId]] = None
-    ) -> Set[PublicId]:
-        if excluded_protocols is not None:
-            return excluded_protocols
-        # never gonna reach next condition cause isinstance check will fail comparing type 'set' to type 'property'
-        # TODO: investigate and fix that
-        elif hasattr(type(self), "excluded_protocols") and isinstance(
-            getattr(type(self), "excluded_protocols"), set
-        ):  # pragma: no cover
-            return getattr(type(self), "excluded_protocols")
-        else:
-            return set()
+        self._address = address  # type: Optional[Address]
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -117,19 +83,44 @@ class Connection(ABC):
         self._loop = loop
 
     @property
+    def address(self) -> "Address":
+        """Get the address."""
+        assert self._address is not None, "Address not set."
+        return self._address
+
+    @address.setter
+    def address(self, address: "Address") -> None:
+        """
+        Set the address to be used by the connection.
+
+        :param address: a public key.
+        :return: None
+        """
+        self._address = address
+
+    @property
+    def component_type(self) -> ComponentType:
+        """Get the component type."""
+        return ComponentType.CONNECTION
+
+    @property
     def connection_id(self) -> PublicId:
         """Get the id of the connection."""
-        return self._connection_id
+        return self.public_id
+
+    @property
+    def configuration(self) -> ConnectionConfig:
+        """Get the connection configuration."""
+        return cast(ConnectionConfig, super().configuration)
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
-        """Get the ids of the only supported protocols for this connection."""
-        return self._restricted_to_protocols
+        return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
         """Get the ids of the excluded protocols for this connection."""
-        return self._excluded_protocols
+        return self.configuration.excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:
@@ -159,17 +150,4 @@ class Connection(ABC):
         Receive an envelope.
 
         :return: the received envelope, or None if an error occurred.
-        """
-
-    @classmethod
-    @abstractmethod
-    def from_config(
-        cls, address: "Address", connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Initialize a connection instance from a configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration.
-        :return: an instance of the concrete connection class.
         """

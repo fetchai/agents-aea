@@ -22,26 +22,21 @@
 import inspect
 import json
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
 from copy import copy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
-    DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
-from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
-    load_module,
-)
+from aea.configurations.components import Component
+from aea.helpers.base import load_module
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -231,7 +226,7 @@ class JSONSerializer(Serializer):
         return Message(json_msg)
 
 
-class Protocol(ABC):
+class Protocol(Component):
     """
     This class implements a specifications for a protocol.
 
@@ -239,61 +234,58 @@ class Protocol(ABC):
     """
 
     def __init__(
-        self, protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig
+        self, configuration: ProtocolConfig,
     ):
         """
         Initialize the protocol manager.
 
-        :param protocol_id: the protocol id.
-        :param serializer: the serializer.
-        :param config: the protocol configurations.
+        :param configuration: the protocol configurations.
         """
-        self._protocol_id = protocol_id
-        self._serializer = serializer
-        self._config = config
+        super().__init__(configuration)
+
+        self._serializer = None  # type: Optional[Serializer]
 
     @property
     def id(self) -> ProtocolId:
         """Get the name."""
-        return self._protocol_id
+        return self._configuration.public_id
 
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
+        assert self._serializer is not None, "Serializer not initialized yet."
         return self._serializer
+
+    @serializer.setter
+    def serializer(self, serializer: Serializer) -> None:
+        """Set the serializer."""
+        assert self._serializer is None, "Serializer already initialized."
+        self._serializer = serializer
 
     @property
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
-        return self._config
+        return cast(ProtocolConfig, self._configuration)
 
-    @classmethod
-    def from_dir(cls, directory: str) -> "Protocol":
+    def load(self) -> None:
         """
-        Load a protocol from a directory.
+        Set the component up.
 
-        :param directory: the skill directory.
-        :return: the Protocol object.
+        In the case of a protocol, we load the 'serialization.py' module
+        to instantiate an instance of the Serializer.
+
+        :return: None
         :raises Exception: if the parsing failed.
         """
-        # check if there is the config file. If not, then return None.
-        protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = protocol_loader.load(
-            open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE))
+        serialization_module = load_module(
+            "serialization", Path(self.directory, "serialization.py")
         )
-        protocol_module = load_module("protocols", Path(directory, "serialization.py"))
-        add_agent_component_module_to_sys_modules(
-            "protocol", protocol_config.name, protocol_config.author, protocol_module
-        )
-        classes = inspect.getmembers(protocol_module, inspect.isclass)
+        classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
         )
         assert len(serializer_classes) == 1, "Not exactly one serializer detected."
         serializer_class = serializer_classes[0][1]
 
-        protocol_id = PublicId(
-            protocol_config.author, protocol_config.name, protocol_config.version
-        )
-        protocol = Protocol(protocol_id, serializer_class(), protocol_config)
-        return protocol
+        # update attributes.
+        self._serializer = serializer_class()
