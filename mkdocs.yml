@@ -89,10 +89,10 @@ nav:
           - Stub Connection: 'api/connections/stub/connection.md'
         - Context: 'api/context/base.md'
         - Contracts:
-          - Base: 'api/context/contracts/base.md'
-          - Ethereum: 'api/context/contracts/ethereum.md'
+          - Base: 'api/contracts/base.md'
+          - Ethereum: 'api/contracts/ethereum.md'
         - Crypto:
-          - Base: 'api/crytpo/base.md'
+          - Base: 'api/crypto/base.md'
           - Ethereum: 'api/crypto/ethereum.md'
           - Fetchai: 'api/crypto/fetchai.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
@@ -117,7 +117,7 @@ nav:
         - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
-          - Generator: 'api/protocol/generator.md'
+          - Generator: 'api/protocols/generator.md'
           - Default Protocol:
             - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
