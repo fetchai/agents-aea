@@ -61,23 +61,27 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
 
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
 
@@ -102,7 +106,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         obj_type = "protocol"
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
+            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -143,17 +147,21 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -177,7 +185,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         yaml.safe_dump(config, config_path.open(mode="w"))
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", different_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", different_id],
             standalone_mode=False,
         )
 
@@ -202,7 +210,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         obj_type = "protocol"
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
+            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -238,17 +246,21 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
 
@@ -292,17 +304,21 @@ class TestAddProtocolFailsWhenDifferentPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
 
@@ -343,11 +359,15 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -362,7 +382,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
 
@@ -409,11 +429,15 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -423,7 +447,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         ).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id],
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", cls.protocol_id],
             standalone_mode=False,
         )
 

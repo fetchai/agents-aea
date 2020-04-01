@@ -117,13 +117,16 @@ def _registry_init(author: Optional[str] = None) -> str:
     return username
 
 
-@click.command()
-@click.option("--author", type=str, required=False)
-@click.option("--reset", is_flag=True, help="To reset the initialization.")
-@click.option("--registry", is_flag=True, help="For AEA init with Registry.")
-@pass_ctx
-def init(ctx: Context, author: str, reset: bool, registry: bool):
-    """Initialize your AEA configurations."""
+def do_init(author: str, reset: bool, registry: bool) -> None:
+    """
+    Initialize your AEA configurations.
+
+    :param author: str author username.
+    :param reset: True, if resetting the author name
+    :param registry: True, if registry is used
+
+    :return: None.
+    """
     config = _get_or_create_cli_config()
     if reset or config.get(AUTHOR, None) is None:
         if registry:
@@ -140,3 +143,13 @@ def init(ctx: Context, author: str, reset: bool, registry: bool):
         )
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(success_msg)
+
+
+@click.command()
+@click.option("--author", type=str, required=False)
+@click.option("--reset", is_flag=True, help="To reset the initialization.")
+@click.option("--local", is_flag=True, help="For init AEA locally.")
+@pass_ctx
+def init(ctx: Context, author: str, reset: bool, local: bool):
+    """Initialize your AEA configurations."""
+    do_init(author, reset, not local)

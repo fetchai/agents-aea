@@ -50,14 +50,14 @@ from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
-@click.option("--registry", is_flag=True, help="For adding from Registry.")
+@click.option("--local", is_flag=True, help="For adding from local folder.")
 @click.pass_context
 @check_aea_project
-def add(click_context, registry):
+def add(click_context, local):
     """Add a resource to the agent."""
     ctx = cast(Context, click_context.obj)
-    if registry:
-        ctx.set_config("is_registry", True)
+    if local:
+        ctx.set_config("is_local", True)
 
 
 def _is_item_present(item_type, item_public_id, ctx):
@@ -100,7 +100,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
     item_type_plural = item_type + "s"
     supported_items = getattr(ctx.agent_config, item_type_plural)
 
-    is_registry = ctx.config.get("is_registry")
+    is_local = ctx.config.get("is_local")
 
     click.echo(
         "Adding {} '{}' to the agent '{}'...".format(
@@ -123,10 +123,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         sys.exit(1)
 
     # find and add protocol
-    if is_registry:
-        # fetch from Registry
-        fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
-    else:
+    if is_local:
         package_path = _find_item_locally(ctx, item_type, item_public_id)
         _copy_package_directory(
             ctx, package_path, item_type, item_public_id.name, item_public_id.author
@@ -141,6 +138,8 @@ def _add_item(click_context, item_type, item_public_id) -> None:
             )
             item_configuration = configuration_loader.load(configuration_path.open())
             _add_protocols(click_context, item_configuration.protocols)
+    else:
+        fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
 
     # add the item to the configurations.
     logger.debug(

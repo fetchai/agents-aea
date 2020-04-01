@@ -44,3 +44,9 @@ class AddContractCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "author/name:0.1.0"],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)

@@ -40,8 +40,9 @@ def test_add_item():
         assert param_list[1] == "-m"
         assert param_list[2] == "aea.cli"
         assert param_list[3] == "add"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_id
+        assert param_list[4] == "--local"
+        assert param_list[5] == "connection"
+        assert param_list[6] == connection_id
         assert agent_name in dir
         return 0
 
@@ -72,8 +73,9 @@ def test_delete_agent_fail():
         assert param_list[1] == "-m"
         assert param_list[2] == "aea.cli"
         assert param_list[3] == "add"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_id
+        assert param_list[4] == "--local"
+        assert param_list[5] == "connection"
+        assert param_list[6] == connection_id
         assert agent_name in dir
         return 1
 

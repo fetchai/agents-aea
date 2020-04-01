@@ -65,17 +65,23 @@ class TestGenericSkills:
         shutil.copytree(packages_src, packages_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -107,21 +113,27 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/erc1155_deploy:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/erc1155_deploy:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -137,21 +149,27 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/erc1155_client:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/erc1155_client:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

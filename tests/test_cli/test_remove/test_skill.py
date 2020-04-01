@@ -53,11 +53,15 @@ class TestRemoveSkillWithPublicId:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -68,7 +72,9 @@ class TestRemoveSkillWithPublicId:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(
@@ -117,11 +123,15 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -170,11 +180,15 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -185,7 +199,9 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

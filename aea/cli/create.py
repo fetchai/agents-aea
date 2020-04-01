@@ -29,7 +29,7 @@ import click
 from jsonschema import ValidationError
 
 import aea
-from aea.cli.add import connection, skill
+from aea.cli.add import _add_item
 from aea.cli.common import (
     AUTHOR,
     Context,
@@ -42,7 +42,7 @@ from aea.cli.common import (
     _get_or_create_cli_config,
     logger,
 )
-from aea.cli.init import init
+from aea.cli.init import do_init
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 
@@ -80,8 +80,9 @@ def _setup_package_folder(path: Path):
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
+@click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
-def create(click_context, agent_name, author):
+def create(click_context, agent_name, author, local):
     """Create an agent."""
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
@@ -92,7 +93,12 @@ def create(click_context, agent_name, author):
         sys.exit(1)
 
     if author is not None:
-        click_context.invoke(init, author=author)
+        if local:
+            do_init(author, False, False)
+        else:
+            raise click.ClickException(
+                "Author is not set up. Please use 'aea init' to initialize."
+            )
 
     config = _get_or_create_cli_config()
     set_author = config.get(AUTHOR, None)
@@ -142,9 +148,10 @@ def create(click_context, agent_name, author):
         ctx.cwd = agent_config.agent_name
 
         click.echo("Adding default packages ...")
-        click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
-
-        click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)
+        if local:
+            ctx.set_config("is_local", True)
+        _add_item(click_context, "connection", DEFAULT_CONNECTION)
+        _add_item(click_context, "skill", DEFAULT_SKILL)
 
     except OSError:
         logger.error("Directory already exist. Aborting...")

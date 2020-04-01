@@ -83,15 +83,24 @@ class TestBuildSkill:
 
         os.chdir(cls.t)
         cls.init_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         cls.fetch_result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "fetch", "fetchai/simple_service_registration:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "fetch",
+                "--local",
+                "fetchai/simple_service_registration:0.1.0",
+            ],
             standalone_mode=False,
         )
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         if cls.create_result.exit_code == 0:
             os.chdir(Path(cls.t, cls.agent_name))

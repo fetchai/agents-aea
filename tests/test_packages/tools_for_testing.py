@@ -124,7 +124,7 @@ class AeaTestCase:
         :return: None
         """
         for name in agents_names:
-            self.run_cli_command("create", name, "--author", "fetchai")
+            self.run_cli_command("create", "--local", name, "--author", "fetchai")
 
     def delete_agents(self, *agents_names):
         """
@@ -147,7 +147,7 @@ class AeaTestCase:
 
         :return: None
         """
-        self.run_cli_command("add", item_type, public_id)
+        self.run_cli_command("add", "--local", item_type, public_id)
 
     def run_install(self):
         """

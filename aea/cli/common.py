@@ -74,7 +74,15 @@ DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
-NOT_PERMITTED_AUTHORS = ["skills", "connections", "protocols", "contracts", "vendor"]
+NOT_PERMITTED_AUTHORS = [
+    "skills",
+    "connections",
+    "protocols",
+    "contracts",
+    "vendor",
+    "packages",
+    "aea",
+]
 
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
