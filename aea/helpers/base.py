@@ -41,8 +41,8 @@ logger = logging.getLogger(__name__)
 
 
 def yaml_load(stream):
-    def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
-        class OrderedLoader(Loader):
+    def ordered_load(stream, object_pairs_hook=OrderedDict):
+        class OrderedLoader(yaml.SafeLoader):
             pass
 
         def construct_mapping(loader, node):
@@ -52,14 +52,14 @@ def yaml_load(stream):
         OrderedLoader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
         )
-        return yaml.load(stream, OrderedLoader)
+        return yaml.load(stream, OrderedLoader)  # nosec
 
-    return ordered_load(stream, yaml.SafeLoader)
+    return ordered_load(stream)
 
 
 def yaml_dump(data, stream):
-    def ordered_dump(data, stream=None, Dumper=yaml.SafeDumper, **kwds):
-        class OrderedDumper(Dumper):
+    def ordered_dump(data, stream=None, **kwds):
+        class OrderedDumper(yaml.SafeDumper):
             pass
 
         def _dict_representer(dumper, data):
@@ -68,9 +68,9 @@ def yaml_dump(data, stream):
             )
 
         OrderedDumper.add_representer(OrderedDict, _dict_representer)
-        return yaml.dump(data, stream, OrderedDumper, **kwds)
+        return yaml.dump(data, stream, OrderedDumper, **kwds)  # nosec
 
-    ordered_dump(data, stream, Dumper=yaml.SafeDumper)
+    ordered_dump(data, stream)
 
 
 def _get_module(spec):
