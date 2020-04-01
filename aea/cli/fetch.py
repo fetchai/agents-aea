@@ -81,20 +81,6 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> No
         for item_id in required_items:
             try:
                 _add_item(click_context, item_type, item_id)
-                # if item_type_plural == "connections":
-                #     click_context.invoke(
-                #         add_connection_command, connection_public_id=item_id
-                #     )
-                # elif item_type_plural == "contracts":
-                #     click_context.invoke(
-                #         add_contract_command, contract_public_id=item_id
-                #     )
-                # elif item_type_plural == "protocols":
-                #     click_context.invoke(
-                #         add_protocol_command, protocol_public_id=item_id
-                #     )
-                # elif item_type_plural == "skills":
-                #     click_context.invoke(add_skill_command, skill_public_id=item_id)
             except SystemExit:
                 continue
     click.echo("Agent {} successfully fetched.".format(public_id.name))
