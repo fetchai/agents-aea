@@ -1,6 +1,6 @@
 ## Description
 
-The HTTP connection allows you to run a server inside a connection which accepts requests from clients. The HTTP connection validates requests it receives against the provided OpenAPI file. It translates each valid request into an envelope, sends the envelope to the agent and if it receives, within a timeout window, a valid response envelope, serves the response to the client.
+The HTTP server connection allows you to run a server inside a connection which accepts requests from clients. The HTTP server connection validates requests it receives against the provided OpenAPI file. It translates each valid request into an envelope, sends the envelope to the agent and if it receives, within a timeout window, a valid response envelope, serves the response to the client.
 
 ## Steps
 
@@ -10,16 +10,16 @@ Create a new AEA:
 aea create my_aea
 ```
 
-Add the http connection package
+Add the http server connection package
 
 ``` bash
-aea add connection fetchai/http:0.1.0
+aea add connection fetchai/http_server:0.1.0
 ```
 
 Modify the `api_spec_path`:
 
 ``` bash
-aea config set vendor.fetchai.connections.http.config.api_spec_path "examples/http_ex/petstore.yaml"
+aea config set vendor.fetchai.connections.http_server.config.api_spec_path "examples/http_ex/petstore.yaml"
 ```
 
 Install the dependencies:
