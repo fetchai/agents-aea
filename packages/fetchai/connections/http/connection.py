@@ -470,7 +470,7 @@ class HTTPConnection(Connection):
             port,
             api_spec_path,
             connection_id=self.connection_id,
-            restricted_to_protocols=self.configuration.restricted_to_protocols,
+            restricted_to_protocols=self.restricted_to_protocols,
         )
 
     async def connect(self) -> None:

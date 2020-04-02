@@ -152,6 +152,9 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param kwargs: the keyword arguments of the parent class.
         """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
+
         super().__init__(**kwargs)
         self.channel = GymChannel(self.address, gym_env)
 

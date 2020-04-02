@@ -74,12 +74,15 @@ class Connection(Component, ABC):
         self._address = address  # type: Optional[Address]
 
         self._restricted_to_protocols = (
-            restricted_to_protocols if restricted_to_protocols is None else set()
+            restricted_to_protocols if restricted_to_protocols is not None else set()
         )
         self._excluded_protocols = (
-            excluded_protocols if excluded_protocols is None else set()
+            excluded_protocols if excluded_protocols is not None else set()
         )
         self._connection_id = connection_id
+        assert (self._connection_id is None) is not (
+            self._configuration is None
+        ), "Either provide the configuration or the connection id."
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -131,7 +134,7 @@ class Connection(Component, ABC):
     @property
     def configuration(self) -> ConnectionConfig:
         """Get the connection configuration."""
-        assert self._configuration is None, "Configuration not set."
+        assert self._configuration is not None, "Configuration not set."
         return cast(ConnectionConfig, super().configuration)
 
     @property
@@ -180,7 +183,6 @@ class Connection(Component, ABC):
         """
 
     @classmethod
-    @abstractmethod
     def from_config(
         cls, address: "Address", configuration: ConnectionConfig
     ) -> "Connection":
@@ -191,3 +193,4 @@ class Connection(Component, ABC):
         :param configuration: the connection configuration.
         :return: an instance of the concrete connection class.
         """
+        return cls(address=address, configuration=configuration)

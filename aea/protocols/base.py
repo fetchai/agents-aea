@@ -32,7 +32,6 @@ from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
     ProtocolConfig,
-    ProtocolId,
     PublicId,
     ComponentConfiguration,
     ComponentType,
@@ -263,6 +262,7 @@ class Protocol(Component):
             ProtocolConfig,
             ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
+        configuration._directory = Path(directory)
         return Protocol.from_config(configuration)
 
     @classmethod

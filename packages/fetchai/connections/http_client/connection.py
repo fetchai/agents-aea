@@ -176,6 +176,9 @@ class HTTPClientConnection(Connection):
         :param provider_address: server hostname / IP address
         :param provider_port: server port number
         """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "http_client", "0.1.0")
+
         super().__init__(**kwargs)
         self.channel = HTTPClientChannel(
             self.address,

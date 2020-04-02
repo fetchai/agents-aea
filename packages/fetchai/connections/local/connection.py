@@ -26,7 +26,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, ConnectionConfig
+from aea.configurations.base import ProtocolId, ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -323,6 +323,9 @@ class OEFLocalConnection(Connection):
 
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "local", "0.1.0")
+
         super().__init__(**kwargs)
         self._local_node = local_node
         self._reader = None  # type: Optional[Queue]

@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: QmSTVC7gnKxaC4TyGCKdhqcv1me6ym6hEgYTV9JkMfdWHW
+  connection.py: QmTuo6sBWYDLGm9Hsmi1WN89k8gSHSHP6C7UndHvUErGUE
 aea_version: 0.2.4
 description: "The HTTP connection that wraps a web-based, RESTful API specification."
 class_name: HTTPConnection

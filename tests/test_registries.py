@@ -63,11 +63,9 @@ class TestContractRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        contract = Component.load_from_directory(
-            ComponentType.CONTRACT,
-            Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"),
+        contract = Contract.from_dir(
+            str(Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"))
         )
-        contract.load()
 
         cls.registry = ContractRegistry()
         cls.registry.register(

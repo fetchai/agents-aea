@@ -7,7 +7,7 @@ description: The local connection provides a stub for an OEF node.
 excluded_protocols: []
 fingerprint:
   __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
-  connection.py: QmdZRmbjfbfuF5aidjZmuiNkFcubaUvoVbmZHbpTydDttX
+  connection.py: Qmd26kVQyU1jppSGeCVNYs8D3dSqSTQ3J4ayAoNZG7Tzdo
 fingerprint_ignore_patterns: []
 license: Apache-2.0
 name: local

@@ -23,16 +23,19 @@ import asyncio
 from concurrent.futures._base import CancelledError
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Initialize."""
-        super().__init__(*args, **kwargs)
+        super().__init__(
+            connection_id=PublicId("dummy_author", "dummy", "0.1.0"), **kwargs
+        )
         self.connection_status.is_connected = False
         self._queue = None
 
@@ -69,3 +72,16 @@ class DummyConnection(Connection):
         """Put an envelope in the queue."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)
+
+    @classmethod
+    def from_config(
+        cls, address: "Address", configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Initialize a connection instance from a configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration.
+        :return: an instance of the concrete connection class.
+        """
+        return DummyConnection(address=address, configuration=configuration)

@@ -20,14 +20,11 @@
 """This module contains utilities for building an AEA."""
 import inspect
 import itertools
-import json
 import logging
 import os
 import re
-import types
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -64,7 +61,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
-from aea.helpers.base import _SysModules, load_module
+from aea.helpers.base import load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
@@ -778,7 +775,7 @@ class AEABuilder:
             component_id,
             configuration,
         ) in self._package_dependency_manager.contracts.items():
-            contract = _load_contract(configuration)
+            contract = Contract.from_config(configuration)
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self) -> None:
@@ -876,36 +873,5 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
         return connection_class.from_config(
             address=address, configuration=configuration
         )
-    except AssertionError as e:
-        raise ValueError(str(e))
-
-
-def _load_contract(configuration: ContractConfig) -> Contract:
-    """
-    Load a contract class from a directory.
-
-    :param configuration: the contract configuration.
-    :return: the contract object.
-    """
-    try:
-        directory = configuration.directory
-        contract_module = load_module("contracts", directory / "contract.py")
-        classes = inspect.getmembers(contract_module, inspect.isclass)
-        contract_class_name = cast(str, configuration.class_name)
-        contract_classes = list(
-            filter(lambda x: re.match(contract_class_name, x[0]), classes)
-        )
-        name_to_class = dict(contract_classes)
-        logger.debug("Processing contract {}".format(contract_class_name))
-        contract_class = name_to_class.get(contract_class_name, None)
-        assert contract_class_name is not None, "Contract class '{}' not found.".format(
-            contract_class_name
-        )
-
-        path = Path(directory, configuration.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            contract_interface = json.load(interface_file)
-
-        return contract_class(configuration, contract_interface)
     except AssertionError as e:
         raise ValueError(str(e))

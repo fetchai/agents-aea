@@ -163,6 +163,8 @@ class PeerToPeerClientConnection(Connection):
         :param provider_port: the provider port.
         :param kwargs: keyword argument for the parent class.
         """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "p2p_client", "0.1.0")
         super().__init__(**kwargs)
         provider_addr = provider_addr
         provider_port = provider_port

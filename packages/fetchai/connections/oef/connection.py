@@ -614,6 +614,8 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "oef", "0.1.0")
         super().__init__(**kwargs)
         self.oef_addr = oef_addr
         self.oef_port = oef_port

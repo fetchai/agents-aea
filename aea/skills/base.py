@@ -31,12 +31,12 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
-    ComponentConfiguration,
-    ComponentType,
 )
 from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
@@ -625,6 +625,7 @@ class Skill(Component):
             SkillConfig,
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
+        configuration._directory = Path(directory)
         return Skill.from_config(configuration)
 
     @classmethod

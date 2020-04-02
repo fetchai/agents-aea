@@ -32,11 +32,12 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
+from packages.fetchai.connections.http.connection import HTTPConnection
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import ROOT_DIR, _make_http_connection, get_host, get_unused_tcp_port
+from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +57,13 @@ class TestHTTPConnectionConnectDisconnect:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         assert cls.http_connection.channel.is_stopped
 
@@ -89,11 +92,13 @@ class TestHTTPConnectionSend:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         loop = asyncio.get_event_loop()
         value = loop.run_until_complete(cls.http_connection.connect())
@@ -183,11 +188,13 @@ class TestHTTPConnectionGET404:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -253,11 +260,13 @@ class TestHTTPConnectionGET408:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -340,11 +349,13 @@ class TestHTTPConnectionGET200:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         # cls.loop.set_debug(enabled=True)
@@ -446,11 +457,13 @@ class TestHTTPConnectionPOST404:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
@@ -516,11 +529,13 @@ class TestHTTPConnectionPOST408:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
@@ -603,11 +618,13 @@ class TestHTTPConnectionPOST201:
         cls.connection_id = PublicId("fetchai", "http", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = _make_http_connection(
+        cls.http_connection = HTTPConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
+            connection_id=cls.connection_id,
+            restricted_to_protocols=set([cls.protocol_id]),
         )
         cls.loop = asyncio.new_event_loop()
         cls.http_connection.loop = cls.loop
