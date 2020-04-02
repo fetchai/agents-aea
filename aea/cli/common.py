@@ -707,7 +707,7 @@ def _load_yaml(filepath: str) -> Dict:
 
 def validate_author_name(author: Optional[str] = None) -> str:
     """
-    Create an author name for local usage only.
+    Validate an author name.
 
     :param author: the author name (optional)
     """
