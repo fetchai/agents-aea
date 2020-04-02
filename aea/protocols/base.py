@@ -234,17 +234,19 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, configuration: ProtocolConfig,
+        self, configuration: ProtocolConfig, serializer: Serializer
     ):
         """
         Initialize the protocol manager.
 
         :param configuration: the protocol configurations.
+        :param serializer: the serializer.
         """
         super().__init__(configuration)
 
-        self._serializer = None  # type: Optional[Serializer]
+        self._serializer = serializer  # type: Serializer
 
+    # TODO to remove, use self.public_id
     @property
     def id(self) -> ProtocolId:
         """Get the name."""
@@ -253,32 +255,20 @@ class Protocol(Component):
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
-        assert self._serializer is not None, "Serializer not initialized yet."
         return self._serializer
 
-    @serializer.setter
-    def serializer(self, serializer: Serializer) -> None:
-        """Set the serializer."""
-        assert self._serializer is None, "Serializer already initialized."
-        self._serializer = serializer
-
+    # TODO to remove, use self.configuration
     @property
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
         return cast(ProtocolConfig, self._configuration)
 
-    def load(self) -> None:
-        """
-        Set the component up.
-
-        In the case of a protocol, we load the 'serialization.py' module
-        to instantiate an instance of the Serializer.
-
-        :return: None
-        :raises Exception: if the parsing failed.
-        """
+    @classmethod
+    def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
+        """Load the protocol from configuration."""
+        directory = configuration.directory
         serialization_module = load_module(
-            "serialization", Path(self.directory, "serialization.py")
+            "serialization", Path(directory, "serialization.py")
         )
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
@@ -287,5 +277,5 @@ class Protocol(Component):
         assert len(serializer_classes) == 1, "Not exactly one serializer detected."
         serializer_class = serializer_classes[0][1]
 
-        # update attributes.
-        self._serializer = serializer_class()
+        serializer = serializer_class()
+        return Protocol(configuration, serializer)

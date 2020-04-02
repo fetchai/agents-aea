@@ -49,17 +49,31 @@ class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
-        self, configuration: ConnectionConfig, address: Optional["Address"] = None
+        self, configuration: Optional[ConnectionConfig] = None, address: Optional["Address"] = None,
+            restricted_to_protocols: Optional[Set[PublicId]] = None,
+            excluded_protocols: Optional[Set[PublicId]] = None,
+            connection_id: Optional[PublicId] = None,
     ):
         """
         Initialize the connection.
 
+        The configuration must be specified if and only if the following
+        parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
+
         :param configuration: the connection configuration.
+        :param address: the address.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        :param connection_id: the connection identifier.
         """
         super().__init__(configuration)
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
         self._address = address  # type: Optional[Address]
+
+        self._restricted_to_protocols = restricted_to_protocols
+        self._excluded_protocols = excluded_protocols
+        self._connection_id = connection_id
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -147,4 +161,16 @@ class Connection(Component, ABC):
         Receive an envelope.
 
         :return: the received envelope, or None if an error occurred.
+        """
+
+    @classmethod
+    @abstractmethod
+    def from_config(
+        cls, address: "Address", configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Initialize a connection instance from a configuration.
+        :param address: the address of the agent.
+        :param configuration: the connection configuration.
+        :return: an instance of the concrete connection class.
         """

@@ -26,7 +26,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -315,9 +315,16 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def load(self) -> None:
-        """Load the connection configuration."""
-        self._local_node = LocalNode()
+    def __init__(self, local_node: LocalNode, **kwargs):
+        """
+        Load the connection configuration.
+
+        Initialize a OEF proxy for a local OEF Node
+
+        :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        """
+        super().__init__(**kwargs)
+        self._local_node = local_node
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
 
@@ -365,3 +372,15 @@ class OEFLocalConnection(Connection):
             return envelope
         except Exception:
             return None
+
+    @classmethod
+    def from_config(
+        cls, address: "Address", configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Initialize a connection instance from a configuration.
+        :param address: the address of the agent.
+        :param configuration: the connection configuration.
+        :return: an instance of the concrete connection class.
+        """
+        return OEFLocalConnection(LocalNode(), address=address, configuration=configuration)

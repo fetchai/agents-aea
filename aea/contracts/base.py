@@ -30,15 +30,16 @@ class Contract(Component):
     """Abstract definition of a contract."""
 
     def __init__(
-        self, config: ContractConfig,
+        self, config: ContractConfig, contract_interface: Dict[str, Any],
     ):
         """
         Initialize the contract.
 
         :param config: the contract configurations.
+        :param contract_interface: the contract interface
         """
         super().__init__(config)
-        self._contract_interface = None  # type: Optional[Dict[str, Any]]
+        self._contract_interface = contract_interface  # type: Dict[str, Any]
 
     @property
     def id(self) -> ContractId:
@@ -54,16 +55,4 @@ class Contract(Component):
     @property
     def contract_interface(self) -> Dict[str, Any]:
         """Get the contract interface."""
-        assert self._contract_interface is not None, "Contract interface not set."
         return self._contract_interface
-
-    def load(self) -> None:
-        """
-        Load the contract.
-
-        - load the contract interface, specified in the contract.yaml
-          'path_to_contract_interface' field.
-        """
-        path = Path(self.directory, self.config.path_to_contract_interface)
-        with open(path, "r") as interface_file:
-            self._contract_interface = json.load(interface_file)

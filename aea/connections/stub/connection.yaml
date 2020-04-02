@@ -5,7 +5,7 @@ license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
-  connection.py: Qmd5DsX3hfqB9K4sLeXZHxujryShTLudwWDqxE5yZK83gG
+  connection.py: QmXcTYFFKuMjjjYKaVUKoXsRBJWCp5b8PidiR8eL83J4iw
 description: "The stub connection implements a connection stub which reads/writes messages from/to file."
 class_name: StubConnection
 protocols: []
