@@ -36,6 +36,7 @@ from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    PublicId,
 )
 
 from ...common.click_testing import CliRunner
@@ -98,20 +99,22 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    # @unittest.mock.patch("aea.cli.add.fetch_package")
-    # def test_add_skill_from_registry_positive(self, fetch_package_mock):
-    #     """Test add from registry positive result."""
-    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-    #     obj_type = "skill"
-    #     result = self.runner.invoke(
-    #         cli,
-    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-    #         standalone_mode=False,
-    #     )
-    #     assert result.exit_code == 0
-    #     fetch_package_mock.assert_called_once_with(
-    #         obj_type, public_id=public_id, cwd="."
-    #     )
+    @unittest.mock.patch("aea.cli.add.fetch_package")
+    def test_add_skill_from_registry_positive(self, fetch_package_mock):
+        """Test add from registry positive result."""
+        fetch_package_mock.return_value = Path(
+            "vendor/{}/skills/{}".format(self.skill_author, self.skill_name)
+        )
+        public_id = "{}/{}:{}".format(AUTHOR, self.skill_name, self.skill_version)
+        obj_type = "skill"
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        public_id_obj = PublicId.from_str(public_id)
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id_obj, cwd="."
+        )
 
     @classmethod
     def teardown_class(cls):

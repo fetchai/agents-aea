@@ -31,7 +31,7 @@ import yaml
 
 import aea.configurations.base
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 
 from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
@@ -91,20 +91,26 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             standalone_mode=False,
         )
 
-    # @unittest.mock.patch("aea.cli.add.fetch_package")
-    # def test_add_connection_from_registry_positive(self, fetch_package_mock):
-    #     """Test add from registry positive result."""
-    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-    #     obj_type = "connection"
-    #     result = self.runner.invoke(
-    #         cli,
-    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-    #         standalone_mode=False,
-    #     )
-    #     assert result.exit_code == 0
-    #     fetch_package_mock.assert_called_once_with(
-    #         obj_type, public_id=public_id, cwd="."
-    #     )
+    @unittest.mock.patch("aea.cli.add.fetch_package")
+    def test_add_connection_from_registry_positive(self, fetch_package_mock):
+        """Test add from registry positive result."""
+        fetch_package_mock.return_value = Path(
+            "vendor/{}/connections/{}".format(
+                self.connection_author, self.connection_name
+            )
+        )
+        public_id = "{}/{}:{}".format(
+            AUTHOR, self.connection_name, self.connection_version
+        )
+        obj_type = "connection"
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        public_id_obj = PublicId.from_str(public_id)
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id_obj, cwd="."
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
