@@ -73,7 +73,7 @@ TEST_PACKAGES = {
     "agents": ["dummy_aea"],
     "connections": ["dummy_connection"],
     "skills": ["dependencies_skill", "exception_skill", "dummy_skill"],
-    "protocols": [os.path.join("generator", "t_protocol")],
+    #  "protocols": [os.path.join("generator", "t_protocol")], ## DO NOT INCLUDE!
 }
 
 
