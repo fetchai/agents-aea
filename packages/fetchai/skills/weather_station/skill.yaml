@@ -11,7 +11,7 @@ fingerprint:
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
   dialogues.py: QmXL8fdTb4RHZtXn9uKjYr5JYyJxCiEDPGAze8BRWbnEsr
   dummy_weather_station_data.py: QmSGT2cEDyRNhw4ZCgCfKoy94na1wTmJp7Vbpdp6mMunVT
-  handlers.py: QmVBLL2mSbEPCNyi7Lhp98BFwrYkWi8W8J5c5g92ncCXnN
+  handlers.py: QmNjqj3bkFVEetpS4cKeNw4wk2NaT8FfLkqKFBLD4AgiyD
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:

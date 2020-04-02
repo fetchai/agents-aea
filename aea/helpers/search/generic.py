@@ -27,7 +27,7 @@ SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
 class GenericDataModel(DataModel):
-    """Data model for the generic seller aea."""
+    """Generic data model."""
 
     def __init__(self, data_model_name: str, data_model_attributes: Dict[str, Any]):
         """Initialise the dataModel."""
@@ -36,12 +36,10 @@ class GenericDataModel(DataModel):
             assert (
                 values["type"] in SUPPORTED_TYPES.keys()
             ), "Type is not supported. Use str, int, float or bool"
-            assert isinstance(
-                values["name"], (SUPPORTED_TYPES[values["type"]],)
-            ), "The datamodel values are of wrong type!"
+            assert isinstance(values["name"], str), "Name must be a string!"
             assert isinstance(
                 values["is_required"], bool
-            ), "Wrong type!! is_required must be bool"
+            ), "Wrong type for is_required. Must be bool!"
             self.attributes.append(
                 Attribute(
                     name=values["name"],  # type: ignore

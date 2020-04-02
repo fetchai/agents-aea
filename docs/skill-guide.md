@@ -344,55 +344,15 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._registered_service_description = None
 ```
 
-We create a generic data model to register the service. The following code is placed in `data_model.py`.
-
-``` python
-from typing import Any, Dict, List
-
-from aea.helpers.search.models import Attribute, DataModel
-
-SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
-
-
-class GenericDataModel(DataModel):
-    """Data model for the service."""
-
-    def __init__(self, datamodel_name: str, data_model_attributes: Dict[str, Any]):
-        """Initialise the data model."""
-        self.attributes = []  # type: List[Attribute]
-        for values in data_model_attributes.values():
-            assert (
-                values["type"] in SUPPORTED_TYPES.keys()
-            ), "Type is not supported. Use str, int, float or bool"
-            assert isinstance(
-                values["name"], (SUPPORTED_TYPES[values["type"]],)
-            ), "The datamodel values are of wrong type!"
-            assert isinstance(
-                values["is_required"], bool
-            ), "Wrong type!! is_required must be bool"
-            self.attributes.append(
-                Attribute(
-                    name=values["name"],  # type: ignore
-                    type=SUPPORTED_TYPES[values["type"]],
-                    is_required=values["is_required"],
-                )
-            )
-
-        super().__init__(datamodel_name, self.attributes)
-```
-
-We create a `model` type strategy class and place it in `strategy.py`.
+We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
 
 ``` python
 
 from typing import Any, Dict, Optional
 
+from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
-
-from packages.fetchai.skills.simple_service_registration.data_model import (
-    GenericDataModel,
-)
 
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {

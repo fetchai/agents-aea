@@ -41,6 +41,7 @@ aea add skill fetchai/erc1155_deploy:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
+
 Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
 
 ``` bash
@@ -61,6 +62,13 @@ aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 
+Additionally, create the private key for the client AEA. Generate and add a key for Ethereum use:
+
+``` bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+
 ### Update the AEA configs
 
 Both in `my_erc1155_deploy/aea-config.yaml` and
@@ -79,9 +87,9 @@ And change the default ledger:
 default_ledger: ethereum
 ```
 
-### Fund the deployer AEA
+### Fund the AEAs
 
-To create some wealth for your deployer AEA for the Ethereum `ropsten` network. Note that this needs to be executed from deployer AEA folder:
+To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:
 
 ``` bash
 aea generate-wealth ethereum
@@ -100,13 +108,37 @@ aea get-wealth ethereum
 
 ## Run the AEAs
 
-Run both AEAs from their respective terminals. First, run the deployer and wait until it deploys and creates the items in the smart contract.
-
-Then in a separate terminal run the client AEA. You will see that upon discovery the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.
+First, run the deployer AEA.
 
 ``` bash 
 aea run --connections fetchai/oef:0.1.0
 ```
+
+It will perform the following steps:
+- deploy the smart contract
+- create a batch of items in the smart contract
+- mint a batch of itemsin the smart contract
+
+At some point you should see the log output:
+``` bash
+Successfully minted items. Transaction digest: ...
+```
+
+Then, in the separate terminal run the client AEA.
+
+``` bash 
+aea run --connections fetchai/oef:0.1.0
+```
+
+You will see that upon discovery the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Transactions on Ropsten can take a significant amount of time! If you run the example a second time, and the previous transaction is still pending, it can lead to a failure.
+
+  The warning message `Cannot verify whether transaction improves utility. Assuming it does!` can be ignored.
+  </p>
+</div>
 
 ## Delete the AEAs
 
