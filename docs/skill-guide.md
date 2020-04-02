@@ -177,21 +177,24 @@ Based on our skill components above, we create the following config file.
 name: my_search
 author: fetchai
 version: 0.1.0
+description: 'A simple search skill utilising the OEF search and communication node.'
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
-description: 'A simple search skill utilising the OEF search and communication node.'
 fingerprint: {}
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- 'fetchai/oef_search:0.1.0'
 behaviours:
   my_search_behaviour:
-    class_name: MySearchBehaviour
     args:
       tick_interval: 5
+    class_name: MySearchBehaviour
 handlers:
   my_search_handler:
-    class_name: MySearchHandler
     args: {}
+    class_name: MySearchHandler
 models: {}
-protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 
@@ -243,7 +246,7 @@ This AEA will simply register a location service on the [OEF search node](../oef
 <details><summary>Click here to see full code</summary>
 <p>
 
-We use a ticker behaviour to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
+We use a ticker behaviour to update the service registration at regular intervals. The following code is placed in `behaviours.py`. 
 
 ``` python
 from typing import Optional, cast
@@ -296,7 +299,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
     def _register_service(self) -> None:
         """
-        Register to the OEF search node's service directory.
+        Register to the OEF Service Directory.
 
         :return: None
         """
@@ -316,12 +319,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating services on OEF search node's service directory.".format(self.context.agent_name)
+            "[{}]: updating services on OEF service directory.".format(
+                self.context.agent_name
+            )
         )
 
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF search node's service directory.
+        Unregister service from OEF Service Directory.
 
         :return: None
         """
@@ -339,7 +344,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering services from search OEF node's service directory.".format(self.context.agent_name)
+            "[{}]: unregistering services from OEF service directory.".format(
+                self.context.agent_name
+            )
         )
         self._registered_service_description = None
 ```
@@ -347,7 +354,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
 
 ``` python
-
 from typing import Any, Dict, Optional
 
 from aea.helpers.search.generic import GenericDataModel
@@ -405,14 +411,17 @@ The associated `skill.yaml` is:
 name: simple_service_registration
 author: fetchai
 version: 0.1.0
+description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmcYLWnWuB121Ghefv58GevCqAAetx1H7taMem94xwCjHQ
-  data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
-  strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
-aea_version: '>=0.3.0, <0.4.0'
-description: The simple service registration skills is a skill to register a service.
+  behaviours.py: QmWKGwRe8VGJ9VxutL8Ghy866pBKFhfo7k6Wrvab89tVQZ
+  strategy.py: QmRodUmyDFC9282pGnZ54nJfNCQYcLTJTETq8SBHKPf3to
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/oef_search:0.1.0
 behaviours:
   service:
     args:
@@ -421,22 +430,21 @@ behaviours:
 handlers: {}
 models:
   strategy:
-    class_name: Strategy
     args:
-      data_model_name: location
       data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
+      data_model_name: location
       service_data:
-        country: UK
         city: Cambridge
-protocols: ['fetchai/oef_search:0.1.0']
+        country: UK
+    class_name: Strategy
 dependencies: {}
 ```
 </p>

@@ -105,7 +105,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info=info if info is not None else {} if info is not None else {},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
