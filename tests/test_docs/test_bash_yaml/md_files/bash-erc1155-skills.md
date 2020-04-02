@@ -35,6 +35,12 @@ aea get-wealth ethereum
 aea run --connections fetchai/oef:0.1.0
 ```
 ``` bash
+Successfully minted items. Transaction digest: ...
+```
+``` bash
+aea run --connections fetchai/oef:0.1.0
+```
+``` bash
 cd ..
 aea delete erc1155_deployer
 aea delete erc1155_client

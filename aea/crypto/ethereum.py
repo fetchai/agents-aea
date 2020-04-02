@@ -113,7 +113,7 @@ class EthereumCrypto(Crypto):
         """
         signable_message = encode_defunct(primitive=message)
         signature = self.entity.sign_message(signable_message=signable_message)
-        return signature["signature"]
+        return signature["signature"].hex()
 
     def sign_transaction(self, transaction: Any) -> Any:
         """

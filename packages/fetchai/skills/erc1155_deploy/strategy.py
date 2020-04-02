@@ -21,7 +21,8 @@
 
 from typing import Any, Dict, Optional
 
-from aea.helpers.search.models import Description, GenericDataModel
+from aea.helpers.search.generic import GenericDataModel
+from aea.helpers.search.models import Description
 from aea.skills.base import Model
 
 DEFAULT_IS_LEDGER_TX = True

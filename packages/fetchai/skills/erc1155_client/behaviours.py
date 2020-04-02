@@ -56,7 +56,7 @@ class MySearchBehaviour(TickerBehaviour):
                 )
             else:
                 self.context.logger.warning(
-                    "[{}]: you have no starting balance on fetchai ledger!".format(
+                    "[{}]: you have no starting balance on fetchai ledger! Inactivating this skill now!".format(
                         self.context.agent_name
                     )
                 )
@@ -74,7 +74,7 @@ class MySearchBehaviour(TickerBehaviour):
                 )
             else:
                 self.context.logger.warning(
-                    "[{}]: you have no starting balance on ethereum ledger!".format(
+                    "[{}]: you have no starting balance on ethereum ledger! Inactivating this skill now!".format(
                         self.context.agent_name
                     )
                 )
