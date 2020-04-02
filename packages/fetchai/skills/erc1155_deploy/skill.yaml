@@ -1,6 +1,8 @@
 name: erc1155_deploy
 author: fetchai
 version: 0.1.0
+description: The ERC1155 deploy skill has the ability to deploy and interact with
+  the smart contract.
 license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
@@ -8,40 +10,54 @@ fingerprint:
   behaviours.py: QmUH2NiNMkyBPJkwGGN2uUML3ZL3Y2AN1YQdQGtk5Kd3mW
   handlers.py: Qma8MbqF5UCmu3kWubArQv4YqcmyaLAX4XWybqoCuKaQaK
   strategy.py: QmSq6KJQ6AktWk5ErDdtv2r2yu6ous6RXu8PEjddcXyA5h
-description: "The ERC1155 deploy skill has the ability to deploy and interact with the smart contract."
-contracts: ['fetchai/erc1155:0.1.0']
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.1.0
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
     args:
       services_interval: 60
+    class_name: ServiceRegistrationBehaviour
 handlers:
   default:
+    args: {}
     class_name: FIPAHandler
-    args: {}
   transaction:
-    class_name: TransactionHandler
     args: {}
+    class_name: TransactionHandler
 models:
   strategy:
-    class_name: Strategy
     args:
-      nft: 1
-      ft: 2
-      nb_tokens: 10
-      from_supply: 10
-      to_supply: 0
-      value: 0
-      mint_stock: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
-      data_model_name: "erc1155_deploy"
       data_model:
         attribute_one:
+          is_required: true
           name: has_erc1155_contract
           type: bool
-          is_required: True
+      data_model_name: erc1155_deploy
+      from_supply: 10
+      ft: 2
+      mint_stock:
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      nb_tokens: 10
+      nft: 1
       service_data:
-        has_erc1155_contract: True
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
+        has_erc1155_contract: true
+      to_supply: 0
+      value: 0
+    class_name: Strategy
 dependencies:
-  vyper: { version: "==0.1.0b12"}
+  vyper:
+    version: ==0.1.0b12

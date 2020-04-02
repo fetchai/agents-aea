@@ -1,8 +1,8 @@
 name: ml_trade
 author: fetchai
 version: 0.1.0
-license: Apache-2.0
 description: A protocol for trading data for training and prediction purposes.
+license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
   __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
@@ -11,5 +11,6 @@ fingerprint:
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
   ml_trade_pb2.py: QmWTsjtBgu7epfzSoJmAvkaiP74ErPibA3yGQXzk2VBRq4
   serialization.py: QmTR584SMeiALHpfhJkqPgtAVs24m8sRGd6z1N4WLPDbUw
-dependencies: 
-    protobuf: {}
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

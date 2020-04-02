@@ -1,20 +1,23 @@
 name: http
 author: fetchai
 version: 0.1.0
+description: The HTTP connection that wraps a web-based, RESTful API specification.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
   connection.py: QmRXeenmNEVNJv2twhSSv6aAt8ebtuBEEJw96wXUL54m7Q
-aea_version: 0.2.4
-description: "The HTTP connection that wraps a web-based, RESTful API specification."
+fingerprint_ignore_patterns: []
+protocols:
+- fetchai/http:0.1.0
 class_name: HTTPConnection
-protocols: ["fetchai/http:0.1.0"]
-restricted_to_protocols: ["fetchai/http:0.1.0"]
-excluded_protocols: []
 config:
+  api_spec_path: ''
   host: ${addr:127.0.0.1}
   port: ${port:8000}
-  api_spec_path: ''  # put here the dotted path to your API spec YAML path.
+excluded_protocols: []
+restricted_to_protocols:
+- fetchai/http:0.1.0
 dependencies:
   openapi-core:
     version: ==0.13.2

@@ -1,14 +1,18 @@
 name: simple_service_registration
 author: fetchai
 version: 0.1.0
+description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmWKGwRe8VGJ9VxutL8Ghy866pBKFhfo7k6Wrvab89tVQZ
   data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
   strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
-aea_version: 0.2.4
-description: The simple service registration skills is a skill to register a service.
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/oef_search:0.1.0
 behaviours:
   service:
     args:
@@ -17,20 +21,19 @@ behaviours:
 handlers: {}
 models:
   strategy:
-    class_name: Strategy
     args:
-      data_model_name: location
       data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
+      data_model_name: location
       service_data:
-        country: UK
         city: Cambridge
-protocols: ['fetchai/oef_search:0.1.0']
+        country: UK
+    class_name: Strategy
 dependencies: {}

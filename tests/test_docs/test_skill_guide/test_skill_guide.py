@@ -38,7 +38,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.cli import cli
-from aea.cli.common import DEFAULT_VERSION
+from aea.configurations.base import DEFAULT_VERSION
 
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner

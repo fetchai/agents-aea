@@ -1,7 +1,9 @@
 name: thermometer
 author: fetchai
 version: 0.1.0
+description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmZthbn7xGzCAXHZMUxSD2QNn3n2v1Ukk2asrH426nMcRu
@@ -9,32 +11,34 @@ fingerprint:
   handlers.py: QmNhSiHkQN27i1vsjD5FmxMdssYpBtD9fHFdovaqJVzy3J
   strategy.py: QmSoFFxMJhPejHaYztRtMFmgykThnSncV42kLChWeum5H7
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
-aea_version: 0.2.4
-description: "The thermometer skill implements the functionality to sell data."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
     args:
       services_interval: 60
+    class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
-    class_name: FIPAHandler
     args: {}
+    class_name: FIPAHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
-    class_name: Strategy
     args:
+      currency_id: FET
+      has_sensor: true
+      is_ledger_tx: true
+      ledger_id: fetchai
       price_per_row: 1
       seller_tx_fee: 0
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      has_sensor: True
-      is_ledger_tx: True
-  dialogues:
-    class_name: Dialogues
-    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
+    class_name: Strategy
 dependencies:
   pyserial: {}
   temper-py: {}
