@@ -43,6 +43,7 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ContractRegistry, ProtocolRegistry
 from aea.registries.resources import Resources
+from aea.skills.base import Skill
 
 from .conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
@@ -127,11 +128,8 @@ class TestProtocolRegistry:
 
         cls.registry = ProtocolRegistry()
 
-        protocol_1 = Component.load_from_directory(
-            ComponentType.PROTOCOL, Path(aea.AEA_DIR, "protocols", "default")
-        )
-        protocol_2 = Component.load_from_directory(
-            ComponentType.PROTOCOL,
+        protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+        protocol_2 = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
         )
         cls.registry.register(protocol_1.public_id, protocol_1)
@@ -207,20 +205,14 @@ class TestResources:
         cls.resources = Resources(os.path.join(cls.agent_folder))
 
         cls.resources.add_component(
-            Component.load_from_directory(
-                ComponentType.PROTOCOL, Path(aea.AEA_DIR, "protocols", "default")
-            )
+            Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
         )
         # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
         cls.resources.add_component(
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
-            )
+            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"))
         )
         cls.resources.add_component(
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(aea.AEA_DIR, "skills", "error")
-            )
+            Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
         )
 
         cls.error_skill_public_id = PublicId("fetchai", "error", "0.1.0")
@@ -300,8 +292,7 @@ class TestResources:
 
     def test_add_protocol(self):
         """Test that the 'add protocol' method works correctly."""
-        oef_protocol = Component.load_from_directory(
-            ComponentType.PROTOCOL,
+        oef_protocol = Protocol.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"),
         )
         self.resources.add_protocol(cast(Protocol, oef_protocol))
@@ -420,11 +411,7 @@ class TestFilter:
         identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
         resources = Resources(cls.agent_folder)
 
-        resources.add_component(
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
-            )
-        )
+        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
 
         cls.aea = AEA(
             identity,

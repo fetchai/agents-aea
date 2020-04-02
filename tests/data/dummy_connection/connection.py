@@ -34,7 +34,7 @@ class DummyConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize."""
         super().__init__(
-            connection_id=PublicId("dummy_author", "dummy", "0.1.0"), **kwargs
+            connection_id=PublicId("fetchai", "dummy", "0.1.0"), **kwargs
         )
         self.connection_status.is_connected = False
         self._queue = None

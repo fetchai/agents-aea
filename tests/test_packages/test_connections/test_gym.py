@@ -43,7 +43,7 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(None)
+        cls.gym_con = GymConnection(gym_env=cls.env, address="my_key")
         cls.gym_con.channel = GymChannel("my_key", gym.GoalEnv())
         cls.gym_con._connection = None
 

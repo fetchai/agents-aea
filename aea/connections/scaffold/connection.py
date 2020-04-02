@@ -23,7 +23,7 @@ from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 
 class MyScaffoldConnection(Connection):

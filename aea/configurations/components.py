@@ -18,9 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains definitions of agent components."""
-import inspect
 import logging
-import re
 import types
 from abc import ABC
 from pathlib import Path
@@ -30,11 +28,8 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConnectionConfig,
-    ContractConfig,
     PublicId,
 )
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 
 logger = logging.getLogger(__name__)
 

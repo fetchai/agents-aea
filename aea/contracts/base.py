@@ -26,10 +26,10 @@ from pathlib import Path
 from typing import Any, Dict, cast
 
 from aea.configurations.base import (
-    ContractConfig,
-    ContractId,
     ComponentConfiguration,
     ComponentType,
+    ContractConfig,
+    ContractId,
 )
 from aea.configurations.components import Component
 from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules

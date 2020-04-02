@@ -61,7 +61,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
-from aea.helpers.base import load_module
+from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
@@ -573,6 +573,9 @@ class AEABuilder:
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
+        self._load_and_add_protocols()
+        self._load_and_add_contracts()
+        self._load_and_add_skills()
         connections = self._load_connections(identity.address, connection_ids)
         aea = AEA(
             identity,
@@ -586,9 +589,6 @@ class AEABuilder:
             is_programmatic=True,
             max_reactions=20,
         )
-        self._load_and_add_protocols()
-        self._load_and_add_contracts()
-        self._load_and_add_skills()
         self._set_agent_context_to_all_skills(aea.context)
         return aea
 
@@ -852,6 +852,10 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
     """
     try:
         directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
         connection_module_path = directory / "connection.py"
         assert (
             connection_module_path.exists() and connection_module_path.is_file()

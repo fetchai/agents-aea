@@ -31,10 +31,10 @@ from typing import Any, Dict, Optional, cast
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
-    ProtocolConfig,
-    PublicId,
     ComponentConfiguration,
     ComponentType,
+    ProtocolConfig,
+    PublicId,
 )
 from aea.configurations.components import Component
 from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules

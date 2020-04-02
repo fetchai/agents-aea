@@ -55,7 +55,7 @@ class TestHTTPClientConnect:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = HTTPClientConnection(
-            address=cls.address, provider_address=cls.address, provider_port=cls.port,
+            address=cls.agent_address, provider_address=cls.address, provider_port=cls.port,
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 

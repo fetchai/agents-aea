@@ -89,7 +89,7 @@ class TestEchoSkill:
             "version": 1,
             "loggers": {"aea.echo_skill": {"level": "CRITICAL"}},
         }
-        yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
+        yaml.safe_dump(dict(aea_config.json), open(aea_config_path, "w"))
 
         # add skills
         result = self.runner.invoke(

@@ -32,6 +32,7 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
+from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
@@ -61,7 +62,7 @@ class TestHTTPServerConnectionConnectDisconnect:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -96,7 +97,7 @@ class TestHTTPServerConnectionSend:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -192,7 +193,7 @@ class TestHTTPServerConnectionGET404:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -264,7 +265,7 @@ class TestHTTPServerConnectionGET408:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -353,7 +354,7 @@ class TestHTTPServerConnectionGET200:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -461,7 +462,7 @@ class TestHTTPServerConnectionPOST404:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -533,7 +534,7 @@ class TestHTTPServerConnectionPOST408:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,
@@ -622,7 +623,7 @@ class TestHTTPServerConnectionPOST201:
         cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
-        cls.http_connection = HTTPConnection(
+        cls.http_connection = HTTPServerConnection(
             address=cls.address,
             host=cls.host,
             port=cls.port,

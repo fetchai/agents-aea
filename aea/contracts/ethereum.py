@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional
 
 from web3.contract import Contract as EthereumContract
 
-from aea.configurations.base import ContractConfig, ContractId
+from aea.configurations.base import ContractConfig
 from aea.contracts.base import Contract as BaseContract
 from aea.crypto.ethereum import EthereumApi
 

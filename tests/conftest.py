@@ -543,9 +543,10 @@ def _make_dummy_connection() -> Connection:
     return dummy_connection
 
 
-def _make_local_connection(address: Address, node: LocalNode) -> Connection:
+def _make_local_connection(address: Address, node: LocalNode, restricted_to_protocols=None, excluded_protocols=None) -> Connection:
     oef_local_connection = OEFLocalConnection(
-        node, address=address, connection_id=PublicId("fetchai", "local", "0.1.0")
+        node, address=address, connection_id=PublicId("fetchai", "local", "0.1.0"),
+        restricted_to_protocols=restricted_to_protocols, excluded_protocols=excluded_protocols
     )
     return oef_local_connection
 
