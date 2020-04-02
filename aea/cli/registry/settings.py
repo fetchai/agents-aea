@@ -19,7 +19,7 @@
 """Settings for operating Registry with CLI."""
 
 
-REGISTRY_API_URL = "https://agents-registry.sandbox.fetch-ai.com/"
+REGISTRY_API_URL = "https://agents-registry.sandbox.fetch-ai.com"
 # we ignore issue B105 because this is not an hard-coded authentication token,
 # but the name of the field in the configuration file.
 AUTH_TOKEN_KEY = "auth_token"  # nosec
