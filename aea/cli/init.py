@@ -19,8 +19,6 @@
 
 """Implementation of the 'aea init' subcommand."""
 
-from typing import Optional
-
 import click
 
 from aea import __version__
@@ -31,13 +29,12 @@ from aea.cli.common import (
     _get_or_create_cli_config,
     _update_cli_config,
     pass_ctx,
-    validate_author_name
+    validate_author_name,
 )
 from aea.cli.login import do_login
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
-from aea.configurations.base import PublicId
 
 
 def _registry_init(username: str) -> str:
