@@ -724,7 +724,7 @@ class TestFIPA:
             fipa_msg.dialogue_starter_reference = dialogue_reference[0]
             fipa_msg.dialogue_responder_reference = dialogue_reference[1]
             fipa_msg.target = cfp_msg.target
-            performative = fipa_pb2.FipaMessage.Cfp()
+            performative = fipa_pb2.FipaMessage.Cfp_Performative()
             fipa_msg.cfp.CopyFrom(performative)
             fipa_bytes = fipa_msg.SerializeToString()
 
@@ -748,7 +748,7 @@ class TestFIPA:
                 fipa_msg.dialogue_starter_reference = dialogue_reference[0]
                 fipa_msg.dialogue_responder_reference = dialogue_reference[1]
                 fipa_msg.target = cfp_msg.target
-                performative = fipa_pb2.FipaMessage.Cfp()
+                performative = fipa_pb2.FipaMessage.Cfp_Performative()
                 fipa_msg.cfp.CopyFrom(performative)
                 fipa_bytes = fipa_msg.SerializeToString()
 

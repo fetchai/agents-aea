@@ -26,9 +26,8 @@ import os
 import socket
 import sys
 import time
-from pathlib import Path
 from threading import Timer
-from typing import Optional, cast
+from typing import Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -39,14 +38,10 @@ from oef.agents import AsyncioCore, OEFAgent
 
 import pytest
 
-import aea
 from aea import AEA_DIR
 from aea.cli.common import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
-    ComponentConfiguration,
-    ComponentType,
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
@@ -54,13 +49,10 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Address
 
-from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_client.connection import (
@@ -68,6 +60,8 @@ from packages.fetchai.connections.p2p_client.connection import (
 )
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
+
+from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -538,139 +532,66 @@ def reset_aea_cli_config() -> None:
 
 
 def _make_dummy_connection() -> Connection:
-    dummy_connection = cast(
-        Connection,
-        Component.load_from_directory(
-            ComponentType.CONNECTION, Path(CUR_PATH, "data", "dummy_connection")
-        ),
-    )
+    dummy_connection = DummyConnection()
     return dummy_connection
 
 
-def _make_local_connection(address: Address, node: LocalNode) -> Connection:
-    oef_local_connection = cast(
-        OEFLocalConnection,
-        Component.load_from_directory(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
-        ),
+def _make_local_connection(
+    address: Address,
+    node: LocalNode,
+    restricted_to_protocols=None,
+    excluded_protocols=None,
+) -> Connection:
+    oef_local_connection = OEFLocalConnection(
+        node,
+        address=address,
+        connection_id=PublicId("fetchai", "local", "0.1.0"),
+        restricted_to_protocols=restricted_to_protocols,
+        excluded_protocols=excluded_protocols,
     )
-    oef_local_connection.load()
-    oef_local_connection._local_node = node
-    oef_local_connection.address = address
     return oef_local_connection
 
 
 def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
-        ),
+    oef_connection = OEFConnection(
+        oef_addr,
+        oef_port,
+        address=address,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
-    configuration.config["addr"] = oef_addr
-    configuration.config["port"] = oef_port
-    oef_connection = OEFConnection(configuration)
-    oef_connection.address = address
-    oef_connection.load()
     return oef_connection
 
 
-def _make_http_server_connection(
-    address: Address, host: str, port: int, api_spec_path: str
-):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "http_server"),
-        ),
-    )
-    configuration.config["host"] = host
-    configuration.config["port"] = port
-    configuration.config["api_spec_path"] = api_spec_path
-    http_connection = HTTPServerConnection(configuration)
-    http_connection.address = address
-    http_connection.load()
-    return http_connection
-
-
-def _make_http_client_connection(address: Address, host: str, port: int):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "http_client"),
-        ),
-    )
-    configuration.config["host"] = host
-    configuration.config["port"] = port
-    http_connection = HTTPClientConnection(configuration)
-    http_connection.address = address
-    http_connection.load()
-    return http_connection
-
-
 def _make_tcp_server_connection(address: str, host: str, port: int):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "tcp"),
-        ),
+    tcp_connection = TCPServerConnection(
+        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
     )
-    configuration.config["host"] = host
-    configuration.config["port"] = port
-    tcp_connection = TCPServerConnection(configuration)
-    tcp_connection.address = address
-    tcp_connection.load()
     return tcp_connection
 
 
 def _make_tcp_client_connection(address: str, host: str, port: int):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "tcp"),
-        ),
+    tcp_connection = TCPClientConnection(
+        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
     )
-    configuration.config["host"] = host
-    configuration.config["port"] = port
-    tcp_connection = TCPClientConnection(configuration)
-    tcp_connection.address = address
-    tcp_connection.load()
     return tcp_connection
 
 
 def _make_p2p_client_connection(
     address: Address, provider_addr: str, provider_port: int
 ):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "p2p_client"),
-        ),
+    p2p_client_connection = PeerToPeerClientConnection(
+        provider_addr,
+        provider_port,
+        address=address,
+        connection_id=PublicId("fetchai", "p2p", "0.1.0"),
     )
-    configuration.config["addr"] = provider_addr
-    configuration.config["port"] = provider_port
-    p2p_client_connection = PeerToPeerClientConnection(configuration)
-    p2p_client_connection.address = address
-    p2p_client_connection.load()
     return p2p_client_connection
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection_configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION, Path(aea.AEA_DIR, "connections", "stub")
-        ),
+    connection = StubConnection(
+        input_file_path=input_file_path,
+        output_file_path=output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
     )
-    connection_configuration.config["input_file"] = input_file_path
-    connection_configuration.config["output_file"] = output_file_path
-    connection = StubConnection(connection_configuration)
-    connection.load()
     return connection

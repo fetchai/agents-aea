@@ -120,7 +120,7 @@ class TestGymSkill:
         )
         skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
         skill_config.handlers.read("gym").args["nb_steps"] = 20
-        yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
+        yaml.safe_dump(dict(skill_config.json), open(skill_config_path, "w"))
 
         try:
             process = subprocess.Popen(  # nosec

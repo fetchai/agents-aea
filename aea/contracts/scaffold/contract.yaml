@@ -6,7 +6,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
-  contract.py: QmdNCqFy9fBg4QfgY62Sr6zY9Ph1Vc76DiYxTMdirAUCSU
+  contract.py: QmXvjkD7ZVEJDJspEz5YApe5bRUxvZHNi8vfyeVHPyQD5G
 fingerprint_ignore_patterns: []
 class_name: ''
 path_to_contract_interface: ''

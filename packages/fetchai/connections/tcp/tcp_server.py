@@ -24,6 +24,8 @@ import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
 from typing import Dict, Optional, Tuple, cast
 
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
@@ -36,9 +38,14 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def load(self):
-        """Load the connection configuration."""
-        super().load()
+    def __init__(self, host: str, port: int, *args, **kwargs):
+        """
+        Initialize a TCP channel.
+
+        :param address: address.
+        :param host: the socket bind address.
+        """
+        super().__init__(host, port, **kwargs)
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
@@ -122,3 +129,20 @@ class TCPServerConnection(TCPConnection):
             return None
         _, writer = self.connections[to]
         return writer
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the TCP server connection from the connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        server_address = cast(str, configuration.config.get("address"))
+        port = cast(int, configuration.config.get("port"))
+        return TCPServerConnection(
+            server_address, port, address=address, configuration=configuration
+        )

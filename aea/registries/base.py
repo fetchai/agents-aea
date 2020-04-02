@@ -203,10 +203,10 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
             raise ValueError(
                 "Protocol already registered with protocol id '{}'".format(item_id)
             )
-        if protocol.id != item_id:
+        if protocol.public_id != item_id:
             raise ValueError(
                 "Protocol id '{}' is different to the id '{}' specified.".format(
-                    protocol.id, item_id
+                    protocol.public_id, item_id
                 )
             )
         self._protocols[item_id] = protocol
@@ -218,7 +218,9 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
                 "No protocol registered with protocol id '{}'".format(protocol_id)
             )
         removed_protocol = self._protocols.pop(protocol_id)
-        logger.debug("Protocol '{}' has been removed.".format(removed_protocol.id))
+        logger.debug(
+            "Protocol '{}' has been removed.".format(removed_protocol.public_id)
+        )
 
     def fetch(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """

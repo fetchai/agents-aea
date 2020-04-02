@@ -1163,8 +1163,8 @@ class TestRunFailsWhenConnectionNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection module '{}' not found.".format(
-            self.relative_connection_module_path
+        s = "An error occurred while loading connection {}: Connection module '{}' not found.".format(
+            self.connection_id, self.relative_connection_module_path
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
@@ -1244,7 +1244,9 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection class '{}' not found.".format("OEFLocalConnection")
+        s = "An error occurred while loading connection {}: Connection class '{}' not found.".format(
+            self.connection_id, "OEFLocalConnection"
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1339,60 +1341,82 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             pass
 
 
-# class TestRunFailsWhenProtocolNotComplete:
-#     """Test that the command 'aea run' fails when a protocol directory is not complete."""
-#
-#     @classmethod
-#     def setup_class(cls):
-#         """Set the test up."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "myagent"
-#         cls.connection_id = "fetchai/local:0.1.0"
-#         cls.connection_name = "local"
-#         cls.patch = mock.patch.object(aea.cli.common.logger, "error")
-#         cls.mocked_logger_error = cls.patch.__enter__()
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
-#         # copy the 'packages' directory in the parent of the agent folder.
-#         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-#
-#         os.chdir(cls.t)
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
-#         assert result.exit_code == 0
-#
-#         result = cls.runner.invoke(
-#             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name], standalone_mode=False
-#
-#         try:
-#             cli.main(
-#                 [
-#                     "--skip-consistency-check",
-#                     *CLI_LOG_OPTION,
-#                     "run",
-#                     "--connections",
-#                     cls.connection_id,
-#                 ]
-#             )
-#         except SystemExit as e:
-#             cls.exit_code = e.code
-#
-#     def test_exit_code_equal_to_1(self):
-#         """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-#         assert self.exit_code == 1
-#
-#     def test_log_error_message(self):
-#         """Test that the log error message is fixed."""
-#         s = "Protocol configuration not found: {}".format(
-#             self.relative_configuration_file_path
-#         )
-#         self.mocked_logger_error.assert_called_once_with(s)
-#
-#     @classmethod
-#     def teardown_class(cls):
-#         """Tear the test down."""
-#         cls.patch.__exit__()
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+class TestRunFailsWhenProtocolNotComplete:
+    """Test that the command 'aea run' fails when a protocol directory is not complete."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
+        cls.mocked_logger_error = cls.patch.__enter__()
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        os.chdir(os.path.join(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.1.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        # remove protocol configuration
+        configuration_path = Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "protocols",
+            "fipa",
+            "protocol.yaml",
+        )
+        configuration_path.unlink()
+        cls.relative_configuration_file_path = configuration_path.relative_to(
+            Path(cls.t, cls.agent_name)
+        )
+
+        try:
+            cli.main(
+                ["--skip-consistency-check", *CLI_LOG_OPTION, "run"]
+            )
+        except SystemExit as e:
+            cls.exit_code = e.code
+
+    def test_exit_code_equal_to_1(self):
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.exit_code == 1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed."""
+        s = "Protocol configuration not found: {}".format(
+            self.relative_configuration_file_path
+        )
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

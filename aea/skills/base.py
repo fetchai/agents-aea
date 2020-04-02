@@ -31,6 +31,8 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ProtocolId,
     PublicId,
     SkillComponentConfiguration,
@@ -42,7 +44,7 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.helpers.base import load_module
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -611,36 +613,60 @@ class Skill(Component):
         """Get the handlers."""
         return self._models
 
-    def load(self):
+    @classmethod
+    def from_dir(cls, directory: str) -> "Skill":
         """
-        Set the component up.
+        Load the skill from a directory.
 
-        In the case of a skill, we load the 'serialization.py' module
-        to instantiate an instance of the Serializer.
+        :param directory: the directory to the skill package.
+        :return: the skill object.
         """
-        skill_context = SkillContext()
-        skill_configuration = cast(SkillConfig, self.configuration)
-        handlers_by_id = dict(skill_configuration.handlers.read_all())
+        configuration = cast(
+            SkillConfig,
+            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
+        )
+        configuration._directory = Path(directory)
+        return Skill.from_config(configuration)
+
+    @classmethod
+    def from_config(
+        cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None
+    ) -> "Skill":
+        """
+        Load the skill from configuration.
+
+        :param configuration: a skill configuration. Must be associated with a directory.
+        :return: the skill.
+        """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        skill_context = SkillContext() if skill_context is None else skill_context
+        handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
-            str(self.directory / "handlers.py"), handlers_by_id, skill_context
+            str(directory / "handlers.py"), handlers_by_id, skill_context
         )
 
-        behaviours_by_id = dict(skill_configuration.behaviours.read_all())
+        behaviours_by_id = dict(configuration.behaviours.read_all())
         behaviours = Behaviour.parse_module(
-            str(self.directory / "behaviours.py"), behaviours_by_id, skill_context,
+            str(directory / "behaviours.py"), behaviours_by_id, skill_context,
         )
 
-        models_by_id = dict(skill_configuration.models.read_all())
+        models_by_id = dict(configuration.models.read_all())
         model_instances = Model.parse_module(
-            str(self.directory), models_by_id, skill_context
+            str(directory), models_by_id, skill_context
         )
 
-        # update skill attributes
-        self._handlers = handlers
-        self._behaviours = behaviours
-        self._models = model_instances
-        self._skill_context = skill_context
-        skill_context._skill = self
+        skill = Skill(
+            configuration, skill_context, handlers, behaviours, model_instances
+        )
+        skill_context._skill = skill
+        return skill
 
 
 def _print_warning_message_for_non_declared_skill_components(

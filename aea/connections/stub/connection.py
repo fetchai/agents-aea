@@ -28,9 +28,9 @@ from typing import Optional, Union
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -108,16 +108,23 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def load(self):
-        """Set the connection up."""
-        input_file = self.configuration.config.get(
-            "input_file", "./input_file"
-        )  # type: str
-        output_file = self.configuration.config.get(
-            "output_file", "./output_file"
-        )  # type: str
-        input_file_path = Path(input_file)
-        output_file_path = Path(output_file)
+    def __init__(
+        self,
+        input_file_path: Union[str, Path],
+        output_file_path: Union[str, Path],
+        **kwargs
+    ):
+        """
+        Initialize a stub connection.
+
+        :param input_file_path: the input file for the incoming messages.
+        :param output_file_path: the output file for the outgoing messages.
+        """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
+        super().__init__(**kwargs)
+        input_file_path = Path(input_file_path)
+        output_file_path = Path(output_file_path)
         if not input_file_path.exists():
             input_file_path.touch()
 
@@ -216,3 +223,30 @@ class StubConnection(Connection):
         logger.debug("write {}".format(encoded_envelope))
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the stub connection from the connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        input_file = configuration.config.get("input_file", "./input_file")  # type: str
+        output_file = configuration.config.get(
+            "output_file", "./output_file"
+        )  # type: str
+        restricted_to_protocols_names = {
+            p.name for p in configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
+        return StubConnection(
+            input_file,
+            output_file,
+            connection_id=configuration.public_id,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

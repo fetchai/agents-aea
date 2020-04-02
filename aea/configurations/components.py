@@ -18,23 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains definitions of agent components."""
-import inspect
 import logging
-import re
 import types
 from abc import ABC
 from pathlib import Path
-from typing import Dict, Optional, Type, cast
+from typing import Dict, Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConnectionConfig,
-    ContractConfig,
     PublicId,
 )
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +37,11 @@ logger = logging.getLogger(__name__)
 class Component(ABC):
     """Abstract class for an agent component."""
 
-    def __init__(self, configuration: ComponentConfiguration, is_vendor: bool = False):
+    def __init__(
+        self,
+        configuration: Optional[ComponentConfiguration] = None,
+        is_vendor: bool = False,
+    ):
         """
         Initialize a package.
 
@@ -60,7 +59,7 @@ class Component(ABC):
     @property
     def component_type(self) -> ComponentType:
         """Get the component type."""
-        return self._configuration.component_type
+        return self.configuration.component_type
 
     @property
     def is_vendor(self) -> bool:
@@ -70,23 +69,22 @@ class Component(ABC):
     @property
     def prefix_import_path(self):
         """Get the prefix import path for this component."""
-        return "packages.{}.{}.{}".format(
-            self.public_id.author, self.component_type.to_plural(), self.public_id.name
-        )
+        return self.configuration.prefix_import_path
 
     @property
     def component_id(self) -> ComponentId:
         """Ge the package id."""
-        return self._configuration.component_id
+        return self.configuration.component_id
 
     @property
     def public_id(self) -> PublicId:
         """Get the public id."""
-        return self._configuration.public_id
+        return self.configuration.public_id
 
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
+        assert self._configuration is not None, "The component is not associated with "
         return self._configuration
 
     @property
@@ -100,130 +98,3 @@ class Component(ABC):
         """Set the directory. Raise error if already set."""
         assert self._directory is None, "Directory already set."
         self._directory = path
-
-    def load(self) -> None:
-        """
-        Set the component up.
-
-        This method is called by the framework before running the agent.
-        The implementation varies depending on the type of component.
-        Please check the concrete component classes.
-        """
-
-    @classmethod
-    def load_from_directory(
-        cls,
-        component_type: ComponentType,
-        directory: Path,
-        skip_consistency_check: bool = False,
-    ) -> "Component":
-        """
-        Load a component from the directory.
-
-        :param component_type: the component type.
-        :param directory: the directory of the package.
-        :param skip_consistency_check: if True, the consistency check are skipped.
-        :return: the loaded component.
-        """
-        configuration = ComponentConfiguration.load(
-            component_type, directory, skip_consistency_check
-        )
-        component_class = _get_component_class(component_type, configuration, directory)
-        component_object = component_class(configuration)
-        component_object._directory = directory
-        import_prefix = configuration.component_id.prefix_import_path
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=import_prefix
-        )
-        add_modules_to_sys_modules(package_modules)
-        component_object.importpath_to_module.update(package_modules)
-        if component_type != ComponentType.CONNECTION:
-            # load the component here, but only if it is not a connection
-            # (we need the identity and the address of the agent).
-            # with _SysModules.load_modules(list(init_modules.items())):
-            component_object.load()
-        return component_object
-
-
-def _load_connection_class(configuration: ConnectionConfig, directory: Path):
-    """
-    Load a connection class from a directory.
-
-    :param configuration: the connection configuration.
-    :param directory: the package directory.
-    :return: the connection class.
-    """
-    try:
-        connection_module_path = directory / "connection.py"
-        assert (
-            connection_module_path.exists() and connection_module_path.is_file()
-        ), "Connection module '{}' not found.".format(connection_module_path)
-        connection_module = load_module(
-            "connection_module", directory / "connection.py"
-        )
-        classes = inspect.getmembers(connection_module, inspect.isclass)
-        connection_class_name = cast(str, configuration.class_name)
-        connection_classes = list(
-            filter(lambda x: re.match(connection_class_name, x[0]), classes)
-        )
-        name_to_class = dict(connection_classes)
-        logger.debug("Processing connection {}".format(connection_class_name))
-        connection_class = name_to_class.get(connection_class_name, None)
-        assert connection_class is not None, "Connection class '{}' not found.".format(
-            connection_class_name
-        )
-        return connection_class
-    except AssertionError as e:
-        raise ValueError(str(e))
-
-
-def _load_contract_class(configuration: ContractConfig, directory: Path):
-    """
-    Load a contract class from a directory.
-
-    :param configuration: the contract configuration.
-    :param directory: the package directory.
-    :return: the contract class.
-    """
-    try:
-        contract_module = load_module("contracts", directory / "contract.py")
-        classes = inspect.getmembers(contract_module, inspect.isclass)
-        contract_class_name = cast(str, configuration.class_name)
-        contract_classes = list(
-            filter(lambda x: re.match(contract_class_name, x[0]), classes)
-        )
-        name_to_class = dict(contract_classes)
-        logger.debug("Processing connection {}".format(contract_class_name))
-        contract_class = name_to_class.get(contract_class_name, None)
-        assert contract_class_name is not None, "Contract class '{}' not found.".format(
-            contract_class_name
-        )
-        return contract_class
-    except AssertionError as e:
-        raise ValueError(str(e))
-
-
-def _get_component_class(
-    component_type: ComponentType,
-    configuration: ComponentConfiguration,
-    directory: Path,
-) -> Type["Component"]:
-    """
-    Get component class from component type.
-
-    For Protocols and Skills this is trivial.
-    For Connections, we have to parse the connection.py module.
-    """
-    from aea.protocols.base import Protocol
-    from aea.skills.base import Skill
-
-    if component_type == ComponentType.PROTOCOL:
-        return Protocol
-    elif component_type == ComponentType.CONNECTION:
-        return _load_connection_class(cast(ConnectionConfig, configuration), directory)
-    elif component_type == ComponentType.SKILL:
-        return Skill
-    elif component_type == ComponentType.CONTRACT:
-        return _load_contract_class(cast(ContractConfig, configuration), directory)
-    else:
-        raise ValueError
