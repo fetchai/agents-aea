@@ -37,7 +37,7 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
 
 
-def _registry_init(username: str) -> str:
+def _registry_init(username: str) -> None:
     """
     Create an author name on the registry.
 
@@ -64,8 +64,6 @@ def _registry_init(username: str) -> str:
 
             do_register(username, email, password, password_confirmation)
 
-    return username
-
 
 def do_init(author: str, reset: bool, registry: bool) -> None:
     """
@@ -81,7 +79,7 @@ def do_init(author: str, reset: bool, registry: bool) -> None:
     if reset or config.get(AUTHOR, None) is None:
         author = validate_author_name(author)
         if registry:
-            author = _registry_init(username=author)
+            _registry_init(username=author)
 
         _update_cli_config({AUTHOR: author})
         config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
