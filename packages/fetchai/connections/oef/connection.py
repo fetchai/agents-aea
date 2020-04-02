@@ -606,9 +606,7 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(
-        self, oef_addr: str, oef_port: int = 10000, **kwargs
-    ):
+    def __init__(self, oef_addr: str, oef_port: int = 10000, **kwargs):
         """
         Initialize.
 
@@ -748,8 +746,5 @@ class OEFConnection(Connection):
         oef_addr = cast(str, configuration.config.get("addr"))
         oef_port = cast(int, configuration.config.get("port"))
         return OEFConnection(
-            oef_addr,
-            oef_port,
-            address=address,
-            configuration=configuration
+            oef_addr, oef_port, address=address, configuration=configuration
         )

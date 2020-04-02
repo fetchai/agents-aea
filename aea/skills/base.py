@@ -35,6 +35,8 @@ from aea.configurations.base import (
     PublicId,
     SkillComponentConfiguration,
     SkillConfig,
+    ComponentConfiguration,
+    ComponentType,
 )
 from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
@@ -610,6 +612,20 @@ class Skill(Component):
     def models(self) -> Dict[str, Model]:
         """Get the handlers."""
         return self._models
+
+    @classmethod
+    def from_dir(cls, directory: str) -> "Skill":
+        """
+        Load the skill from a directory.
+
+        :param directory: the directory to the skill package.
+        :return: the skill object.
+        """
+        configuration = cast(
+            SkillConfig,
+            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
+        )
+        return Skill.from_config(configuration)
 
     @classmethod
     def from_config(cls, configuration: SkillConfig) -> "Skill":

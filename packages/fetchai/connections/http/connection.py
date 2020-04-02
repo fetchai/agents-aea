@@ -39,7 +39,7 @@ from openapi_spec_validator.schemas import read_yaml_file
 
 from werkzeug.datastructures import ImmutableMultiDict
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import PublicId, ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
@@ -452,11 +452,18 @@ def HTTPHandlerFactory(channel: HTTPChannel):
 class HTTPConnection(Connection):
     """Proxy to the functionality of the web RESTful API."""
 
-    def load(self) -> None:
-        """Load the connection configuration."""
-        host = cast(str, self.configuration.config.get("host"))
-        port = cast(int, self.configuration.config.get("port"))
-        api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
+    def __init__(
+        self, host: str, port: int, api_spec_path: Optional[str] = None, **kwargs,
+    ):
+        """
+        Initialize a connection to an RESTful API.
+
+        :param address: the address of the agent.
+        :param host: RESTful API hostname / IP address
+        :param port: RESTful API port number
+        :param api_spec_path: Directory API path and filename of the API spec YAML source file.
+        """
+        super().__init__(**kwargs)
         self.channel = HTTPChannel(
             self.address,
             host,
@@ -520,3 +527,21 @@ class HTTPConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the HTTP connection from the connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        host = cast(str, configuration.config.get("host"))
+        port = cast(int, configuration.config.get("port"))
+        api_spec_path = cast(str, configuration.config.get("api_spec_path"))
+        return HTTPConnection(
+            host, port, api_spec_path, address=address, configuration=configuration
+        )

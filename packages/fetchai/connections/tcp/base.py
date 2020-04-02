@@ -33,12 +33,18 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    def load(self) -> None:
-        """Load the connection configuration."""
+    def __init__(self, host: str, port: int, **kwargs):
+        """
+        Initialize a TCP connection.
+
+        :param host: the socket bind address.
+        :param port: the socket bind port.
+        """
+        super().__init__(**kwargs)
         # for the server, the listening address/port
         # for the client, the server address/port
-        self.host = cast(str, self.configuration.config.get("address"))
-        self.port = cast(int, self.configuration.config.get("port"))
+        self.host = host
+        self.port = port
 
     @abstractmethod
     async def setup(self):

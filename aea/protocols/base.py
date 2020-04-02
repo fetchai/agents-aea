@@ -34,6 +34,8 @@ from aea.configurations.base import (
     ProtocolConfig,
     ProtocolId,
     PublicId,
+    ComponentConfiguration,
+    ComponentType,
 )
 from aea.configurations.components import Component
 from aea.helpers.base import load_module
@@ -248,6 +250,20 @@ class Protocol(Component):
     def serializer(self) -> Serializer:
         """Get the serializer."""
         return self._serializer
+
+    @classmethod
+    def from_dir(cls, directory: str) -> "Protocol":
+        """
+        Load the protocol from a directory.
+
+        :param directory: the directory to the skill package.
+        :return: the protocol object.
+        """
+        configuration = cast(
+            ProtocolConfig,
+            ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
+        )
+        return Protocol.from_config(configuration)
 
     @classmethod
     def from_config(cls, configuration: ProtocolConfig) -> "Protocol":

@@ -73,8 +73,12 @@ class Connection(Component, ABC):
         self._connection_status = ConnectionStatus()
         self._address = address  # type: Optional[Address]
 
-        self._restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is None else set()
-        self._excluded_protocols = excluded_protocols if excluded_protocols is None else set()
+        self._restricted_to_protocols = (
+            restricted_to_protocols if restricted_to_protocols is None else set()
+        )
+        self._excluded_protocols = (
+            excluded_protocols if excluded_protocols is None else set()
+        )
         self._connection_id = connection_id
 
     @property

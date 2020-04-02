@@ -27,7 +27,7 @@ from typing import Optional, Set, Union, cast
 
 import requests
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import PublicId, ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
@@ -167,14 +167,20 @@ class HTTPClientChannel:
 class HTTPClientConnection(Connection):
     """Proxy to the functionality of the web client."""
 
-    def load(self) -> None:
-        """Load the connection configuration."""
-        address = cast(str, self.configuration.config.get("address"))
-        port = cast(int, self.configuration.config.get("port"))
+    def __init__(
+        self, provider_address: str, provider_port: int, **kwargs,
+    ):
+        """
+        Initialize a connection.
+
+        :param provider_address: server hostname / IP address
+        :param provider_port: server port number
+        """
+        super().__init__(**kwargs)
         self.channel = HTTPClientChannel(
             self.address,
-            address,
-            port,
+            provider_address,
+            provider_port,
             connection_id=self.connection_id,
             excluded_protocols=self.excluded_protocols,
         )
@@ -232,3 +238,23 @@ class HTTPClientConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the HTTP connection from a connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        provider_address = cast(str, configuration.config.get("address"))
+        provider_port = cast(int, configuration.config.get("port"))
+        return HTTPClientConnection(
+            provider_address,
+            provider_port,
+            address=address,
+            configuration=configuration,
+        )
