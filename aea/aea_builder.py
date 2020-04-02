@@ -66,7 +66,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill
+from aea.skills.base import Skill, SkillContext
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -575,7 +575,6 @@ class AEABuilder:
         identity = self._build_identity_from_wallet(wallet)
         self._load_and_add_protocols()
         self._load_and_add_contracts()
-        self._load_and_add_skills()
         connections = self._load_connections(identity.address, connection_ids)
         aea = AEA(
             identity,
@@ -589,17 +588,8 @@ class AEABuilder:
             is_programmatic=True,
             max_reactions=20,
         )
-        self._set_agent_context_to_all_skills(aea.context)
+        self._load_and_add_skills(aea.context)
         return aea
-
-    def _set_agent_context_to_all_skills(self, context: AgentContext) -> None:
-        """Set a skill context to all skills"""
-        for skill in self._resources.get_all_skills():
-            logger_name = "aea.{}.skills.{}.{}".format(
-                context.agent_name, skill.configuration.author, skill.configuration.name
-            )
-            skill.skill_context.set_agent_context(context)
-            skill.skill_context._logger = logging.getLogger(logger_name)
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
@@ -788,11 +778,17 @@ class AEABuilder:
                 )
             self._add_component_to_resources(contract)
 
-    def _load_and_add_skills(self) -> None:
+    def _load_and_add_skills(self, context: AgentContext) -> None:
         for configuration in self._package_dependency_manager.skills.values():
+            logger_name = "aea.{}.skills.{}.{}".format(
+                context.agent_name, configuration.author, configuration.name
+            )
+            skill_context = SkillContext()
+            skill_context.set_agent_context(context)
+            skill_context.logger = logging.getLogger(logger_name)
             configuration = cast(SkillConfig, configuration)
             try:
-                skill = Skill.from_config(configuration)
+                skill = Skill.from_config(configuration, skill_context=skill_context)
             except Exception as e:
                 raise Exception(
                     "An error occurred while loading skill {}: {}".format(

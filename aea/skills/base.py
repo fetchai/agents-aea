@@ -629,7 +629,9 @@ class Skill(Component):
         return Skill.from_config(configuration)
 
     @classmethod
-    def from_config(cls, configuration: SkillConfig) -> "Skill":
+    def from_config(
+        cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None
+    ) -> "Skill":
         """
         Load the skill from configuration.
 
@@ -644,7 +646,7 @@ class Skill(Component):
             directory, glob="__init__.py", prefix=configuration.prefix_import_path
         )
         add_modules_to_sys_modules(package_modules)
-        skill_context = SkillContext()
+        skill_context = SkillContext() if skill_context is None else skill_context
         handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
             str(directory / "handlers.py"), handlers_by_id, skill_context
