@@ -11,6 +11,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
+contracts: []
 protocols:
 - 'fetchai/oef_search:0.1.0'
 behaviours:
