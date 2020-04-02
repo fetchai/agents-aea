@@ -703,3 +703,45 @@ def _load_yaml(filepath: str) -> Dict:
             raise click.ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)
             )
+
+
+def validate_author_name(author: Optional[str] = None) -> str:
+    """
+    Create an author name for local usage only.
+
+    :param author: the author name (optional)
+    """
+    is_acceptable_author = False
+    if (
+        author is not None
+        and _is_valid_author_handle(author)
+        and _is_permitted_author_handle(author)
+    ):
+        is_acceptable_author = True
+        valid_author = author
+    while not is_acceptable_author:
+        author_prompt = click.prompt(
+            "Please enter the author handle you would like to use", type=str
+        )
+        valid_author = author_prompt
+        if _is_valid_author_handle(author_prompt) and _is_permitted_author_handle(
+            author_prompt
+        ):
+            is_acceptable_author = True
+        elif not _is_valid_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a valid author handle. Please try again. "
+                "Author handles must satisfy the following regex: {}".format(
+                    PublicId.AUTHOR_REGEX
+                )
+            )
+        elif not _is_permitted_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a permitted author handle. The following author handles are not allowed: {}".format(
+                    NOT_PERMITTED_AUTHORS
+                )
+            )
+
+    return valid_author
