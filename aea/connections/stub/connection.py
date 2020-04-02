@@ -119,9 +119,6 @@ class StubConnection(Connection):
 
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
-        :param connection_id: the identifier of the connection object.
-        :param restricted_to_protocols: the only supported protocols for this connection.
-        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         super().__init__(**kwargs)
         input_file_path = Path(input_file_path)
@@ -230,7 +227,8 @@ class StubConnection(Connection):
         cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
         """
-        Get the OEF connection from the connection configuration.
+        Get the stub connection from the connection configuration.
+
         :param address: the address of the agent.
         :param configuration: the connection configuration object.
         :return: the connection object

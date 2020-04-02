@@ -170,6 +170,7 @@ class Connection(Component, ABC):
     ) -> "Connection":
         """
         Initialize a connection instance from a configuration.
+
         :param address: the address of the agent.
         :param configuration: the connection configuration.
         :return: an instance of the concrete connection class.

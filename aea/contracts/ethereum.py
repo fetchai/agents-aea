@@ -45,6 +45,7 @@ class Contract(BaseContract):
         super().__init__(config, contract_interface)
         self._abi = contract_interface["abi"]
         self._bytecode = contract_interface["bytecode"]
+        self._instance = None  # type: Optional[EthereumContract]
 
     @property
     def abi(self) -> Dict[str, Any]:

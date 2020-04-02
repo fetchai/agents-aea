@@ -102,7 +102,7 @@ class Resources:
         :param protocol: a protocol
         :return: None
         """
-        self._protocol_registry.register(protocol.id, protocol)
+        self._protocol_registry.register(protocol.public_id, protocol)
 
     def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """

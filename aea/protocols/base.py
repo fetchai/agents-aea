@@ -246,26 +246,19 @@ class Protocol(Component):
 
         self._serializer = serializer  # type: Serializer
 
-    # TODO to remove, use self.public_id
-    @property
-    def id(self) -> ProtocolId:
-        """Get the name."""
-        return self._configuration.public_id
-
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
         return self._serializer
 
-    # TODO to remove, use self.configuration
-    @property
-    def config(self) -> ProtocolConfig:
-        """Get the configuration."""
-        return cast(ProtocolConfig, self._configuration)
-
     @classmethod
     def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
-        """Load the protocol from configuration."""
+        """
+        Load the protocol from configuration.
+
+        :param configuration: the protocol configuration.
+        :return: the protocol object.
+        """
         directory = configuration.directory
         serialization_module = load_module(
             "serialization", Path(directory, "serialization.py")
