@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The gym connection wraps an OpenAI gym.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
   connection.py: QmaNaWzNtASvBuMk4EUfGZ4LDTX7F2NTHaeb2BxTJDn5dY

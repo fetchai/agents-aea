@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The HTTP connection that wraps a web-based, RESTful API specification.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
   connection.py: QmRXeenmNEVNJv2twhSSv6aAt8ebtuBEEJw96wXUL54m7Q

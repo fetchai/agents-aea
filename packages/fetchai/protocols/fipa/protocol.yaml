@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: A protocol for FIPA ACL.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmVvJPY2M46VXxtFsXda4NHfYQFZ8LYi29fE9fJBqvASvG
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ

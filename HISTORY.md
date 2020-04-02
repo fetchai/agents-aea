@@ -1,5 +1,18 @@
 # Release History
 
+## 0.3.0 (2020-04-02)
+
+- Introduces IPFS based hashing of files to detect changes, ensure consistency and allow for content addressing
+- Introduces aea fingerprint command to CLI
+- Adds support for contract type packages which wrap smart contracts and their APIs
+- Introduces AEABuilder class for much improved programmatic usage of the framework
+- Moves protocol generator into alpha stage for light protocols
+- Switches CLI to use remote registry by default
+- Comprehensive documentation updates on new and existing features
+- Additional demos to introduce the contracts functionality
+- Multiple additional unit tests
+- Multiple additional minor fixes and changes
+
 ## 0.2.4 (2020-03-25)
 
 - Breaking change to all protocols as we transition to auto-generated protocols

@@ -70,6 +70,7 @@ PACKAGE_HASHES_PATH = "packages/hashes.csv"
 TEST_PACKAGE_HASHES_PATH = "tests/data/hashes.csv"
 TEST_PATH = "tests/data"
 TEST_PACKAGES = {
+    "agents": ["dummy_aea"],
     "connections": ["dummy_connection"],
     "skills": ["dependencies_skill", "exception_skill", "dummy_skill"],
 }

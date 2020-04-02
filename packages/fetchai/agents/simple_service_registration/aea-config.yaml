@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: A simple example of service registration.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint: ''
 fingerprint_ignore_patterns: []
 connections:

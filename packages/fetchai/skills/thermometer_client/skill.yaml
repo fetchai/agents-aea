@@ -4,7 +4,7 @@ version: 0.1.0
 description: The thermometer client skill implements the skill to purchase temperature
   data.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRLGnLmojPrafe41e1WrMpsGCdmfpWZ4sQTWgDSrsBHcu
