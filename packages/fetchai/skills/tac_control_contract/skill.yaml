@@ -4,7 +4,7 @@ version: 0.1.0
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
   behaviours.py: QmT6dQKSxAq1nFVXGste8xo3kvsXqEsBwkMHh4AcYJB9Hv

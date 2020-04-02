@@ -509,7 +509,7 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
 
 def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     """
-    Find an item in the registry or in the AEA directory.
+    Find an item in the local registry.
 
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
@@ -528,13 +528,56 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        # then check in aea dir
-        registry_path = AEA_DIR
-        package_path = Path(registry_path, item_type_plural, item_name)
-        item_configuration_filepath = package_path / config_file_name
-        if not item_configuration_filepath.exists():
-            logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-            sys.exit(1)
+        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
+        sys.exit(1)
+
+    # try to load the item configuration file
+    try:
+        item_configuration_loader = ConfigLoader.from_configuration_type(
+            ConfigurationType(item_type)
+        )
+        item_configuration = item_configuration_loader.load(
+            item_configuration_filepath.open()
+        )
+    except ValidationError as e:
+        logger.error(
+            "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
+        )
+        sys.exit(1)
+
+    # check that the configuration file of the found package matches the expected author and version.
+    version = item_configuration.version
+    author = item_configuration.author
+    if item_public_id.author != author or item_public_id.version != version:
+        logger.error(
+            "Cannot find {} with author and version specified.".format(item_type)
+        )
+        sys.exit(1)
+
+    return package_path
+
+
+def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
+    """
+    Find an item in the AEA directory.
+
+    :param ctx: the CLI context.
+    :param item_type: the type of the item to load. One of: protocols, connections, skills
+    :param item_public_id: the public id of the item to find.
+    :return: path to the package directory (either in registry or in aea directory).
+    :raises SystemExit: if the search fails.
+    """
+    item_type_plural = item_type + "s"
+    item_name = item_public_id.name
+
+    # check in aea dir
+    registry_path = AEA_DIR
+    package_path = Path(registry_path, item_type_plural, item_name)
+    config_file_name = _get_default_configuration_file_name_from_type(item_type)
+    item_configuration_filepath = package_path / config_file_name
+    if not item_configuration_filepath.exists():
+        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
+        sys.exit(1)
 
     # try to load the item configuration file
     try:

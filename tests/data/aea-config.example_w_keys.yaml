@@ -1,16 +1,14 @@
-aea_version: 0.2.4
 agent_name: myagent
 author: fetchai
 version: 0.1.0
+description: An example of agent configuration file for testing purposes.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}
+fingerprint_ignore_patterns: []
 connections:
 - fetchai/oef:0.1.0
-default_connection: fetchai/oef:0.1.0
-default_ledger: fetchai
-private_key_paths:
-   fetchai: 'fet_private_key.txt'
-   ethereum: 'eth_private_key.txt'
+contracts: []
 protocols:
 - fetchai/oef_search:0.1.0
 - fetchai/default:0.1.0
@@ -18,14 +16,18 @@ protocols:
 - fetchai/fipa:0.1.0
 skills:
 - fetchai/echo:0.1.0
-description: "An example of agent configuration file for testing purposes."
-logging_config:
-  disable_existing_loggers: false
-  version: 1
-registry_path: ../../packages
+default_connection: fetchai/oef:0.1.0
+default_ledger: fetchai
 ledger_apis:
    fetchai:
      addr: example.fetch-ai.com
      port: 8080
    ethereum:
      addr: example.ethereum.com
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths:
+   fetchai: 'fet_private_key.txt'
+   ethereum: 'eth_private_key.txt'
+registry_path: ../../packages

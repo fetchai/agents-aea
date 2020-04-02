@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw

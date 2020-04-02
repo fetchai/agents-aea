@@ -21,6 +21,7 @@
 
 import os
 import tarfile
+from pathlib import Path
 
 import click
 
@@ -162,7 +163,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
+def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> Path:
     """
     Fetch connection/protocol/skill from Registry.
 
@@ -171,7 +172,7 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
     :param public_id: str public ID of object.
     :param cwd: str path to current working directory.
 
-    :return: None
+    :return: package path
     """
     logger.debug(
         "Fetching {obj_type} {public_id} from Registry...".format(
@@ -204,6 +205,8 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
             public_id=public_id, obj_type=obj_type
         )
     )
+    package_path = os.path.join(target_folder, public_id.name)
+    return Path(package_path)
 
 
 def registry_login(username: str, password: str) -> str:

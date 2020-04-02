@@ -4,7 +4,7 @@ version: 0.1.0
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmRarc5Gjna1HZU2LvTRB7cPp5ungpBXEk6YqxFJWR2yMU

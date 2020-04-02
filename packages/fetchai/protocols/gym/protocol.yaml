@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmU11JgCkwmmWx3jgKaG6ze1o5cRgGhiQownbie2HqrhmP
   custom_types.py: QmfDaswopanUqsETQXMatKfwwDSSo7q2Edz9MXGimT5jbf

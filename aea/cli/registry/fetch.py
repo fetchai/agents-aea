@@ -23,12 +23,13 @@ from shutil import rmtree
 
 import click
 
-from aea.cli.common import Context
-from aea.cli.registry.utils import download_file, extract, fetch_package, request_api
+from aea.cli.add import _add_item
+from aea.cli.common import Context, try_to_load_agent_config
+from aea.cli.registry.utils import download_file, extract, request_api
 from aea.configurations.base import PublicId
 
 
-def fetch_agent(ctx: Context, public_id: PublicId) -> None:
+def fetch_agent(ctx: Context, public_id: PublicId, click_context) -> None:
     """
     Fetch Agent from Registry.
 
@@ -44,13 +45,18 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     target_folder = os.path.join(ctx.cwd, name)
     os.makedirs(target_folder, exist_ok=True)
 
+    filepath = download_file(file_url, ctx.cwd)
+    extract(filepath, target_folder)
+    ctx.cwd = target_folder
+    try_to_load_agent_config(ctx)
+
     click.echo("Fetching dependencies...")
     for item_type in ("connection", "contract", "skill", "protocol"):
         item_type_plural = item_type + "s"
         for item_public_id in resp[item_type_plural]:
             item_public_id = PublicId.from_str(item_public_id)
             try:
-                fetch_package(item_type, item_public_id, target_folder)
+                _add_item(click_context, item_type, item_public_id)
             except Exception as e:
                 rmtree(target_folder)
                 raise click.ClickException(
@@ -59,7 +65,4 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
                     )
                 )
     click.echo("Dependencies successfully fetched.")
-
-    filepath = download_file(file_url, ctx.cwd)
-    extract(filepath, target_folder)
     click.echo("Agent {} successfully fetched to {}.".format(name, target_folder))

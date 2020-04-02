@@ -3,7 +3,7 @@ author: fetchai
 version: 0.1.0
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
   base.py: QmTGQJGRTkuFQfXFKn67wunXMXNnLLz15yvLN6mbYB8Gb3

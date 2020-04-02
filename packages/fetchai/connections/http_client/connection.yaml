@@ -4,7 +4,7 @@ version: 0.1.0
 description: The HTTP_client connection that wraps a web-based client connecting to
   a RESTful API specification.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
   connection.py: QmVERFNWRftDBYDGpeGtWJt6aA3xSEAGkXvh4FCiRRbthX
