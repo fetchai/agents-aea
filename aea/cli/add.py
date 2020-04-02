@@ -83,7 +83,7 @@ def _add_protocols(click_context, protocols: Collection[PublicId]):
             logger.debug(
                 "Adding protocol '{}' to the agent...".format(protocol_public_id)
             )
-            click_context.invoke(protocol, protocol_public_id=protocol_public_id)
+            _add_item(click_context, "protocol", protocol_public_id)
 
 
 def _add_item(click_context, item_type, item_public_id) -> None:
