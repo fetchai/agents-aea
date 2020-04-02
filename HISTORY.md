@@ -10,6 +10,9 @@
 - Switches CLI to use remote registry by default
 - Comprehensive documentation updates on new and existing features
 - Additional demos to introduce the contracts functionality
+- Protocol, Contract, Skill and Connection inherits from the same class, Component
+- Improved APIs for Configuration classes
+- All protocols now generated with protocol generator
 - Multiple additional unit tests
 - Multiple additional minor fixes and changes
 
