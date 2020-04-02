@@ -98,20 +98,20 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_skill_from_registry_positive(self, fetch_package_mock):
-        """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-        obj_type = "skill"
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd="."
-        )
+    # @unittest.mock.patch("aea.cli.add.fetch_package")
+    # def test_add_skill_from_registry_positive(self, fetch_package_mock):
+    #     """Test add from registry positive result."""
+    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
+    #     obj_type = "skill"
+    #     result = self.runner.invoke(
+    #         cli,
+    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
+    #         standalone_mode=False,
+    #     )
+    #     assert result.exit_code == 0
+    #     fetch_package_mock.assert_called_once_with(
+    #         obj_type, public_id=public_id, cwd="."
+    #     )
 
     @classmethod
     def teardown_class(cls):
@@ -199,20 +199,20 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_skill_from_registry_positive(self, fetch_package_mock):
-        """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-        obj_type = "skill"
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd="."
-        )
+    # @unittest.mock.patch("aea.cli.add.fetch_package")
+    # def test_add_skill_from_registry_positive(self, fetch_package_mock):
+    #     """Test add from registry positive result."""
+    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
+    #     obj_type = "skill"
+    #     result = self.runner.invoke(
+    #         cli,
+    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
+    #         standalone_mode=False,
+    #     )
+    #     assert result.exit_code == 0
+    #     fetch_package_mock.assert_called_once_with(
+    #         obj_type, public_id=public_id, cwd="."
+    #     )
 
     @classmethod
     def teardown_class(cls):
@@ -326,7 +326,7 @@ class TestAddSkillFailsWhenDifferentPublicId:
 
     def test_error_message_skill_wrong_public_id(self):
         """Test that the log error message is fixed."""
-        s = "Cannot find skill with author and version specified."
+        s = "Cannot find skill: '{}'.".format(self.skill_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

@@ -1753,16 +1753,17 @@ class ProtocolGenerator:
         protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
         protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
         protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
-        protocol_yaml_str += "license: {}\n".format(self.protocol_specification.license)
-        protocol_yaml_str += "aea_version: {}\n".format(
-            self.protocol_specification.aea_version
-        )
-        protocol_yaml_str += "fingerprint: {}\n"
-        protocol_yaml_str += "dependencies: \n"
-        protocol_yaml_str += "    protobuf: {} \n"
         protocol_yaml_str += "description: {}\n".format(
             self.protocol_specification.description
         )
+        protocol_yaml_str += "license: {}\n".format(self.protocol_specification.license)
+        protocol_yaml_str += "aea_version: '{}'\n".format(
+            self.protocol_specification.aea_version
+        )
+        protocol_yaml_str += "fingerprint: {}\n"
+        protocol_yaml_str += "fingerprint_ignore_patterns: []\n"
+        protocol_yaml_str += "dependencies:\n"
+        protocol_yaml_str += "    protobuf: {}\n"
 
         return protocol_yaml_str
 

@@ -82,6 +82,7 @@ def do_init(author: str, reset: bool, registry: bool) -> None:
             _registry_init(username=author)
 
         _update_cli_config({AUTHOR: author})
+        config = _get_or_create_cli_config()
         config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
