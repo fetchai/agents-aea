@@ -11,7 +11,7 @@ fingerprint:
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmVhr7P8CXR8zFxwcimgaT8dGbiThFhNc4vQvfdjHNKwXm
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
-  handlers.py: QmaeBEix3fZnF9Ewaf1NAkbwvNnUNg8iJoPY7X41kBadNX
+  handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
   strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*

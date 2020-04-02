@@ -375,7 +375,7 @@ Below the `teardown` function, we continue by adding the following code:
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data="fipa_message",
+            error_data={"fipa_message": b""},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,
@@ -1144,7 +1144,7 @@ You will see that we are following similar logic when we develop the client’s 
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data="fipa_message",
+            error_data={"fipa_message": b""},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,

@@ -80,7 +80,8 @@ class Contract(BaseContract):
         :param ledger_api: the ledger_api we are using.
         :param contract_address: the contract address
         """
-        assert self.instance.address is None, "Address already set!"
+        if self._instance is not None:
+            assert self.instance.address is None, "Address already set!"
         self._instance = ledger_api.api.eth.contract(
             address=contract_address, abi=self.abi
         )

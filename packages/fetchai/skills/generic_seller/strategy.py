@@ -20,12 +20,10 @@
 """This module contains the strategy class."""
 from typing import Any, Dict, List, Optional, Tuple
 
+from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
 from aea.skills.base import Model
-
-from packages.fetchai.skills.generic_seller.data_model import GenericDataModel
-
 
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_TOTAL_PRICE = 10
