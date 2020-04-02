@@ -294,7 +294,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
-            "yaml.safe_dump", side_effect=ValidationError("test error message")
+            "yaml.dump", side_effect=ValidationError("test error message"),
         )
         cls.patch.__enter__()
 

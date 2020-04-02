@@ -1,8 +1,10 @@
-name: 'tac_control_contract'
+name: tac_control_contract
 author: fetchai
 version: 0.1.0
+description: The tac control skill implements the logic for an AEA to control an instance
+  of the TAC.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
   behaviours.py: QmT6dQKSxAq1nFVXGste8xo3kvsXqEsBwkMHh4AcYJB9Hv
@@ -10,43 +12,47 @@ fingerprint:
   handlers.py: QmS218R7tMQ5BbQg5G97VNtSu2JEdB2dDADsYHxB6QW9fJ
   helpers.py: QmbzyW7ESVSg4NFCi1DVG2StzKdKEgc8g6w1t57GPF8bq9
   parameters.py: QmWLKBsVYaCTskjVziz9UisCJXBVkN6jXdWRU64MqGB89Z
-description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
-contracts: ['fetchai/erc1155:0.1.0']
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.1.0
+protocols:
+- fetchai/oef_search:0.1.0
+- fetchai/tac:0.1.0
 behaviours:
   tac:
+    args: {}
     class_name: TACBehaviour
-    args: {}
 handlers:
-  tac:
-    class_name: TACHandler
-    args: {}
   oef:
+    args: {}
     class_name: OEFRegistrationHandler
+  tac:
     args: {}
+    class_name: TACHandler
   transaction:
-    class_name: TransactionHandler
     args: {}
+    class_name: TransactionHandler
 models:
+  game:
+    args: {}
+    class_name: Game
   parameters:
-    class_name: Parameters
     args:
+      base_good_endowment: 4
+      competition_timeout: 360
+      inactivity_timeout: 60
+      lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
-      tx_fee: 1
-      base_good_endowment: 4
-      lower_bound_factor: 1
-      upper_bound_factor: 1
-      start_time: 09 03 2020 15:15
       registration_timeout: 60
-      competition_timeout: 360
-      inactivity_timeout: 60
+      start_time: 09 03 2020 15:15
+      tx_fee: 1
+      upper_bound_factor: 1
+      version_id: v1
       whitelist: []
-      version_id: 'v1'
-  game:
-    class_name: Game
-    args: {}
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']
+    class_name: Parameters
 dependencies:
   numpy: {}
-  vyper: { version: "==0.1.0b12"}
+  vyper:
+    version: ==0.1.0b12

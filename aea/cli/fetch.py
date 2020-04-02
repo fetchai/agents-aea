@@ -48,7 +48,7 @@ def fetch(click_context, public_id, local):
         ctx.set_config("is_local", True)
         _fetch_agent_locally(ctx, public_id, click_context)
     else:
-        fetch_agent(ctx, public_id)
+        fetch_agent(ctx, public_id, click_context)
 
 
 def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> None:

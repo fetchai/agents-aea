@@ -34,7 +34,7 @@ from aea.configurations.base import (
     ContractConfig,
     PublicId,
 )
-from aea.helpers.base import load_all_modules, load_module
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +74,7 @@ class Component(ABC):
     @property
     def prefix_import_path(self):
         """Get the prefix import path for this component."""
-        return "packages.{}.{}.{}".format(
-            self.public_id.author, self.component_type.to_plural(), self.public_id.name
-        )
+        return self._configuration.prefix_import_path
 
     @property
     def component_id(self) -> ComponentId:

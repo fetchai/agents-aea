@@ -1,7 +1,10 @@
-name: 'tac_control'
+name: tac_control
 author: fetchai
 version: 0.1.0
+description: The tac control skill implements the logic for an AEA to control an instance
+  of the TAC.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qme9YfgfPXymvupw1EHMJWGUSMTT6JQZxk2qaeKE76pgyN
   behaviours.py: QmcghRjG726fvaUNTwxW2qSvGNFYDeXmfi9qsmGR48DKZK
@@ -9,39 +12,41 @@ fingerprint:
   handlers.py: QmWmfLM9Ccy3NBHbFMBCqnfJb17kRRgX4NFbsoxT9F5amJ
   helpers.py: QmSMkbDm2zeDoq9kqtw8eyXXyoaaw12vDZoZQm8nYsYZQa
   parameters.py: QmZFuam1iDkbsrND32wQz5vkcThp6SRSye54mofPQWdiNF
-aea_version: 0.2.4
-description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/oef_search:0.1.0
+- fetchai/tac:0.1.0
 behaviours:
   tac:
+    args: {}
     class_name: TACBehaviour
-    args: {}
 handlers:
-  tac:
-    class_name: TACHandler
-    args: {}
   oef:
-    class_name: OEFRegistrationHandler
     args: {}
+    class_name: OEFRegistrationHandler
+  tac:
+    args: {}
+    class_name: TACHandler
 models:
+  game:
+    args: {}
+    class_name: Game
   parameters:
-    class_name: Parameters
     args:
+      base_good_endowment: 2
+      competition_timeout: 180
+      inactivity_timeout: 60
+      lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
-      tx_fee: 1
-      base_good_endowment: 2
-      lower_bound_factor: 1
-      upper_bound_factor: 1
-      start_time: 12 11 2019  15:01
       registration_timeout: 60
-      competition_timeout: 180
-      inactivity_timeout: 60
-      whitelist: []
+      start_time: 12 11 2019  15:01
+      tx_fee: 1
+      upper_bound_factor: 1
       version_id: v1
-  game:
-    class_name: Game
-    args: {}
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']
+      whitelist: []
+    class_name: Parameters
 dependencies:
   numpy: {}

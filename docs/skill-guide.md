@@ -178,7 +178,7 @@ name: my_search
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 description: 'A simple search skill utilising the OEF search and communication node.'
 fingerprint: {}
 behaviours:
@@ -451,7 +451,7 @@ fingerprint:
   behaviours.py: QmcYLWnWuB121Ghefv58GevCqAAetx1H7taMem94xwCjHQ
   data_model.py: QmagLM4fo1Eh6zfoePCA22mgVVzA34DAzKGyQV5ZABRSHa
   strategy.py: QmbZhUVuKbEmiBEP7mygarGJPSVu13WiqtrWKeypcKpLHZ
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 description: The simple service registration skills is a skill to register a service.
 behaviours:
   service:

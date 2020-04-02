@@ -59,7 +59,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: {}
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
   service_registration:
@@ -95,7 +95,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 fingerprint: {}
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 description: "The thermometer client skill implements the skill to purchase temperature data."
 behaviours:
   search:

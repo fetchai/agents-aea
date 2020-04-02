@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 """Constants used for CLI testing."""
 
-from aea.cli.common import DEFAULT_VERSION
-
+from aea.configurations.base import DEFAULT_VERSION
 
 FORMAT_ITEMS_SAMPLE_OUTPUT = "Correct items"
 

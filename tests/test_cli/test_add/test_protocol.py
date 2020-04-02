@@ -31,7 +31,7 @@ import yaml
 
 import aea.configurations.base
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
 
 from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
@@ -99,20 +99,20 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_protocol_from_registry_positive(self, fetch_package_mock):
-        """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
-        obj_type = "protocol"
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd="."
-        )
+    # @unittest.mock.patch("aea.cli.add.fetch_package")
+    # def test_add_protocol_from_registry_positive(self, fetch_package_mock):
+    #     """Test add from registry positive result."""
+    #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
+    #     obj_type = "protocol"
+    #     result = self.runner.invoke(
+    #         cli,
+    #         [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
+    #         standalone_mode=False,
+    #     )
+    #     assert result.exit_code == 0
+    #     fetch_package_mock.assert_called_once_with(
+    #         obj_type, public_id=public_id, cwd="."
+    #     )
 
     @classmethod
     def teardown_class(cls):
@@ -206,16 +206,18 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
+        fetch_package_mock.return_value = Path(
+            "vendor/{}/protocols/{}".format(self.protocol_author, self.protocol_name)
+        )
+        public_id = "{}/{}:{}".format(AUTHOR, self.protocol_name, self.protocol_version)
         obj_type = "protocol"
         result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", obj_type, str(public_id)],
-            standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
         )
         assert result.exit_code == 0
+        public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd="."
+            obj_type, public_id=public_id_obj, cwd="."
         )
 
     @classmethod
@@ -328,7 +330,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
 
     def test_error_message_protocol_wrong_public_id(self):
         """Test that the log error message is fixed."""
-        s = "Cannot find protocol with author and version specified."
+        s = "Cannot find protocol: '{}'.".format(self.protocol_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

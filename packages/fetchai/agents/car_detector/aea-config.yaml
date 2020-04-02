@@ -1,27 +1,29 @@
-aea_version: 0.2.4
 agent_name: car_detector
 author: fetchai
+version: 0.1.0
+description: An agent which sells car park data to instances of `car_data_buyer` agents.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
 connections:
 - fetchai/oef:0.1.0
 - fetchai/stub:0.1.0
-default_connection: fetchai/stub:0.1.0
-default_ledger: fetchai
-description: 'An agent which sells car park data to instances of `car_data_buyer` agents.'
-fingerprint: {}
-ledger_apis:
-  fetchai:
-    network: testnet
-license: Apache-2.0
-logging_config:
-  disable_existing_loggers: False
-  version: 1
-private_key_paths: {}
+contracts: []
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
 - fetchai/oef_search:0.1.0
-registry_path: ../packages
 skills:
 - fetchai/carpark_detection:0.1.0
 - fetchai/error:0.1.0
-version: 0.1.0
+default_connection: fetchai/stub:0.1.0
+default_ledger: fetchai
+ledger_apis:
+  fetchai:
+    network: testnet
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+registry_path: ../packages

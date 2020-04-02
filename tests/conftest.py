@@ -59,8 +59,8 @@ from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Address
 
-from packages.fetchai.connections.http.connection import HTTPConnection
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_client.connection import (
@@ -558,6 +558,25 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     return oef_connection
+
+
+def _make_http_server_connection(
+    address: Address, host: str, port: int, api_spec_path: str
+):
+    configuration = cast(
+        ConnectionConfig,
+        ComponentConfiguration.load(
+            ComponentType.CONNECTION,
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "http_server"),
+        ),
+    )
+    configuration.config["host"] = host
+    configuration.config["port"] = port
+    configuration.config["api_spec_path"] = api_spec_path
+    http_connection = HTTPServerConnection(configuration)
+    http_connection.address = address
+    http_connection.load()
+    return http_connection
 
 
 def _make_http_client_connection(address: Address, host: str, port: int):

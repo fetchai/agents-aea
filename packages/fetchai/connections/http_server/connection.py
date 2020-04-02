@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""HTTP connection, channel, server, and handler"""
+"""HTTP server connection, channel, server, and handler"""
 
 import asyncio
 import logging
@@ -449,8 +449,8 @@ def HTTPHandlerFactory(channel: HTTPChannel):
     return HTTPHandler
 
 
-class HTTPConnection(Connection):
-    """Proxy to the functionality of the web RESTful API."""
+class HTTPServerConnection(Connection):
+    """Proxy to the functionality of the http server implementing a RESTful API specification."""
 
     def __init__(
         self, host: str, port: int, api_spec_path: Optional[str] = None, **kwargs,

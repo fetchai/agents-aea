@@ -1,21 +1,31 @@
 name: dummy
 author: fetchai
 version: 0.1.0
+description: dummy_connection connection description.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbjcWHRhRiYMqZbgeGkEGVYi8hQ1HnYM8pBYugGKx9YnK
+<<<<<<< HEAD
   connection.py: QmbTV6yG2G8ap1cXJgw696sehpHaLTNCBtmCyWgbwSYV3C
 aea_version: 0.2.4
 class_name: DummyConnection
+=======
+  connection.py: QmaBncs8C2YYGhpwEkomtWRj2LG9ntR9qMCawhkNcWgsFV
+fingerprint_ignore_patterns: []
+>>>>>>> develop
 protocols: []
-restricted_to_protocols:
-  - fetchai/default:0.1.0
-excluded_protocols: []
+class_name: DummyConnection
 config: {}
+excluded_protocols: []
+restricted_to_protocols:
+- fetchai/default:0.1.0
 dependencies:
-  dep1: {version: "==1.0.0"}
-  dep2: {version: "~=1.1.2"}
-  dep3: {version: ">=1.10.11a1"}
-  dep4: {version: "<=1.11.12b2"}
-
-description: "dummy_connection connection description."
+  dep1:
+    version: ==1.0.0
+  dep2:
+    version: ~=1.1.2
+  dep3:
+    version: '>=1.10.11a1'
+  dep4:
+    version: <=1.11.12b2

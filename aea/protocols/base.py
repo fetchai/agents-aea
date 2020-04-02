@@ -37,7 +37,7 @@ from aea.configurations.base import (
     ComponentType,
 )
 from aea.configurations.components import Component
-from aea.helpers.base import load_module
+from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -274,6 +274,10 @@ class Protocol(Component):
         :return: the protocol object.
         """
         directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
         serialization_module = load_module(
             "serialization", Path(directory, "serialization.py")
         )

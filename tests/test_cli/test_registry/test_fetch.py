@@ -35,6 +35,7 @@ def _raise_exception():
 
 
 @mock.patch("aea.cli.registry.fetch.PublicId", PublicIdMock)
+@mock.patch("aea.cli.registry.fetch.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.fetch.download_file", return_value="filepath")
 @mock.patch("aea.cli.registry.fetch.extract")
 class TestFetchAgent(TestCase):
@@ -58,11 +59,15 @@ class TestFetchAgent(TestCase):
         },
     )
     def test_fetch_agent_positive(
-        self, request_api_mock, extract_mock, download_file_mock,
+        self,
+        request_api_mock,
+        extract_mock,
+        download_file_mock,
+        try_to_load_agent_config_mock,
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
-        fetch_agent(ContextMock(), public_id_mock)
+        fetch_agent(ContextMock(), public_id_mock, ContextMock())
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -72,7 +77,7 @@ class TestFetchAgent(TestCase):
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", "cwd/name")
 
-    @mock.patch("aea.cli.registry.fetch.fetch_package")
+    @mock.patch("aea.cli.registry.fetch._add_item")
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
         return_value={
@@ -84,11 +89,16 @@ class TestFetchAgent(TestCase):
         },
     )
     def test_fetch_agent_with_dependencies_positive(
-        self, request_api_mock, fetch_package_mock, extract_mock, download_file_mock,
+        self,
+        request_api_mock,
+        add_item_mock,
+        extract_mock,
+        download_file_mock,
+        try_to_load_agent_config_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
         public_id_mock = PublicIdMock()
-        fetch_agent(ContextMock(), public_id_mock)
+        fetch_agent(ContextMock(), public_id_mock, ContextMock())
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -97,9 +107,9 @@ class TestFetchAgent(TestCase):
         )
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", "cwd/name")
-        fetch_package_mock.assert_called()
+        add_item_mock.assert_called()
 
-    @mock.patch("aea.cli.registry.fetch.fetch_package", _raise_exception)
+    @mock.patch("aea.cli.registry.fetch._add_item", _raise_exception)
     @mock.patch(
         "aea.cli.registry.fetch.request_api",
         return_value={
@@ -114,7 +124,7 @@ class TestFetchAgent(TestCase):
     def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
         """Test for fetch_agent method unable to fetch."""
         with self.assertRaises(ClickException):
-            fetch_agent(ContextMock(), PublicIdMock())
+            fetch_agent(ContextMock(), PublicIdMock(), ContextMock())
 
     @classmethod
     def teardown_class(cls):

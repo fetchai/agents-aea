@@ -1,37 +1,40 @@
 name: dummy
 author: dummy_author
 version: 0.1.0
+description: a dummy_skill for testing purposes.
 license: Apache-2.0
-aea_version: ">=0.2.0, <0.3.0"
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmd3mY5TSBA632qYRixRVELXkmBWMZtvnxJyQC1oHDTuEm
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
   dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
   handlers.py: QmVe1VGT7TBdjQ5xG8X9djY77f8hebHeUeX3eDrQ6FR3yt
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
 behaviours:
   dummy:
-    class_name: DummyBehaviour
     args:
       behaviour_arg_1: 1
-      behaviour_arg_2: "2"
+      behaviour_arg_2: '2'
+    class_name: DummyBehaviour
 handlers:
   dummy:
+    args:
+      handler_arg_1: 1
+      handler_arg_2: '2'
     class_name: DummyHandler
-    args:
-      handler_arg_1: 1
-      handler_arg_2: "2"
   dummy_internal:
-    class_name: DummyInternalHandler
     args:
       handler_arg_1: 1
-      handler_arg_2: "2"
+      handler_arg_2: '2'
+    class_name: DummyInternalHandler
 models:
   dummy:
-    class_name: DummyModel
     args:
       model_arg_1: 1
-      model_arg_2: "2"
-protocols: ["fetchai/default:0.1.0"]
+      model_arg_2: '2'
+    class_name: DummyModel
 dependencies: {}
-description: "a dummy_skill for testing purposes."

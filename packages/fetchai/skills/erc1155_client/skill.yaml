@@ -1,37 +1,42 @@
 name: erc1155_client
 author: fetchai
 version: 0.1.0
+description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: 0.2.4
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
   behaviours.py: QmQRBZUhT8YmgkCeW8RXc2T8qWc5hVotWgMACwBDpFmyKY
   handlers.py: QmNP6CN33FLYX1rWzWPRMG4eEMRrrQJoiT3qpiDegM87JL
   strategy.py: QmQEKLcMH6vQdCwAfDJngQMpn1vvkgqUssgxU8LPzCxsQ8
-description: "The weather client skill implements the skill to purchase weather data."
-contracts: ['fetchai/erc1155:0.1.0']
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.1.0
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   search:
-    class_name: MySearchBehaviour
     args:
       search_interval: 5
+    class_name: MySearchBehaviour
 handlers:
   fipa:
+    args: {}
     class_name: FIPAHandler
-    args: {}
   oef:
+    args: {}
     class_name: OEFSearchHandler
-    args: {}
   transaction:
-    class_name: TransactionHandler
     args: {}
+    class_name: TransactionHandler
 models:
   strategy:
-    class_name: Strategy
     args:
       search_query:
+        constraint_type: ==
         search_term: has_erc1155_contract
-        search_value: True
-        constraint_type: '=='
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
-ledgers: ['fetchai']
+        search_value: true
+    class_name: Strategy
+dependencies: {}

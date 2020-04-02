@@ -32,18 +32,22 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
-from packages.fetchai.connections.http.connection import HTTPConnection
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import ROOT_DIR, get_host, get_unused_tcp_port
+from ....conftest import (
+    ROOT_DIR,
+    _make_http_server_connection,
+    get_host,
+    get_unused_tcp_port,
+)
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionConnectDisconnect:
+class TestHTTPServerConnectionConnectDisconnect:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -54,7 +58,7 @@ class TestHTTPConnectionConnectDisconnect:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -78,7 +82,7 @@ class TestHTTPConnectionConnectDisconnect:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionSend:
+class TestHTTPServerConnectionSend:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -89,7 +93,7 @@ class TestHTTPConnectionSend:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -174,7 +178,7 @@ class TestHTTPConnectionSend:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionGET404:
+class TestHTTPServerConnectionGET404:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -185,7 +189,7 @@ class TestHTTPConnectionGET404:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -246,7 +250,7 @@ class TestHTTPConnectionGET404:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionGET408:
+class TestHTTPServerConnectionGET408:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -257,7 +261,7 @@ class TestHTTPConnectionGET408:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -335,7 +339,7 @@ class TestHTTPConnectionGET408:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionGET200:
+class TestHTTPServerConnectionGET200:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -346,7 +350,7 @@ class TestHTTPConnectionGET200:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -443,7 +447,7 @@ class TestHTTPConnectionGET200:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionPOST404:
+class TestHTTPServerConnectionPOST404:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -454,7 +458,7 @@ class TestHTTPConnectionPOST404:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -515,7 +519,7 @@ class TestHTTPConnectionPOST404:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionPOST408:
+class TestHTTPServerConnectionPOST408:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -526,7 +530,7 @@ class TestHTTPConnectionPOST408:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(
@@ -604,7 +608,7 @@ class TestHTTPConnectionPOST408:
 
 
 @pytest.mark.asyncio
-class TestHTTPConnectionPOST201:
+class TestHTTPServerConnectionPOST201:
     """Test the packages/fetchai/connection/http/connection.py."""
 
     @classmethod
@@ -615,7 +619,7 @@ class TestHTTPConnectionPOST201:
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
-        cls.connection_id = PublicId("fetchai", "http", "0.1.0")
+        cls.connection_id = PublicId("fetchai", "http_server", "0.1.0")
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPConnection(

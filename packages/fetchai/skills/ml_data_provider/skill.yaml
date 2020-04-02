@@ -1,36 +1,42 @@
-name: 'ml_data_provider'
+name: ml_data_provider
 author: fetchai
 version: 0.1.0
+description: The ml data provider skill implements a provider for Machine Learning
+  datasets in order to monetize data.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmQm7PtKp4zcbNVLJ7dT1ATWJj8Wzbhw3yqCDAyQpy17Ly
   handlers.py: QmQvjPtQDDtjXi7dc8jJUXjJyAZtDpWtT2dWDq2Wdr8opZ
   strategy.py: QmRPSMeGPzq1W26ppZhXxubfL4h1VT4v8Xecxx5dnLJpoc
-aea_version: 0.2.4
-description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/ml_trade:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
     args:
       services_interval: 30
+    class_name: ServiceRegistrationBehaviour
 handlers:
   ml_trade:
-    class_name: MLTradeHandler
     args: {}
+    class_name: MLTradeHandler
 models:
   strategy:
-    class_name: Strategy
     args:
-      price_per_data_batch: 100
       batch_size: 2
-      seller_tx_fee: 0
       buyer_tx_fee: 10
-      dataset_id: 'fmnist'
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: False
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/ml_trade:0.1.0']
+      currency_id: FET
+      dataset_id: fmnist
+      is_ledger_tx: false
+      ledger_id: fetchai
+      price_per_data_batch: 100
+      seller_tx_fee: 0
+    class_name: Strategy
 dependencies:
-  tensorflow: { version: "==1.14.0" }
   numpy: {}
+  tensorflow:
+    version: ==1.14.0

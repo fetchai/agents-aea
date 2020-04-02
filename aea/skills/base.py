@@ -44,7 +44,7 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.helpers.base import load_module
+from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
 from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -636,6 +636,11 @@ class Skill(Component):
         :param configuration: a skill configuration. Must be associated with a directory.
         :return: the skill.
         """
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
         directory = configuration.directory
         skill_context = SkillContext()
         handlers_by_id = dict(configuration.handlers.read_all())

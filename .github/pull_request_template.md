@@ -51,14 +51,17 @@ _Put an `x` in the boxes that apply._
 - [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
 - [ ] I am making a pull request against the `master` branch (left side), from `develop`
 - [ ] Lint and unit tests pass locally
+- [ ] I have checked the fingerprint hashes are correct by running (`scripts/generate_ipfs_hashes.py`)
+- [ ] I have regenerated the latest API docs
 - [ ] I built the documentation and updated it with the latest changes
-- [ ] I've added an item in `HISTORY.md` for this release
+- [ ] I have added an item in `HISTORY.md` for this release
 - [ ] I bumped the version number in the `aea/__version__.py` file.
 - [ ] I bumped the version number in the `docs/version.md` file
 - [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
       (check the READMEs of [`aea-develop`](../develop-image/README.md#publish) 
       and [`aea-deploy`](../deploy-image/README.md#publish))
 - [ ] I have checked that the documentation about the `aea cli` tool works
+- [ ] I have pushed the latest packages to the registry.
 
 ## Further comments
 

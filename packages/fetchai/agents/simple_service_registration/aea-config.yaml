@@ -1,25 +1,27 @@
-aea_version: 0.2.4
 agent_name: simple_service_registration
 author: fetchai
+version: 0.1.0
+description: A simple example of service registration.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint: ''
+fingerprint_ignore_patterns: []
 connections:
 - fetchai/oef:0.1.0
 - fetchai/stub:0.1.0
-default_connection: fetchai/oef:0.1.0
-default_ledger: fetchai
-description: 'A simple example of service registration.'
-fingerprint: ''
-ledger_apis: {}
-license: Apache-2.0
-logging_config:
-  disable_existing_loggers: false
-  version: 1
-private_key_paths: {}
+contracts: []
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
 - fetchai/oef_search:0.1.0
-registry_path: ../packages
 skills:
 - fetchai/error:0.1.0
 - fetchai/simple_service_registration:0.1.0
-version: 0.1.0
+default_connection: fetchai/oef:0.1.0
+default_ledger: fetchai
+ledger_apis: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+registry_path: ../packages

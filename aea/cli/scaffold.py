@@ -31,13 +31,12 @@ from jsonschema import ValidationError
 from aea import AEA_DIR
 from aea.cli.common import (
     Context,
-    DEFAULT_VERSION,
     _validate_package_name,
     check_aea_project,
     logger,
     pass_ctx,
 )
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,

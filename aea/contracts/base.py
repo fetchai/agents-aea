@@ -32,8 +32,7 @@ from aea.configurations.base import (
     ComponentType,
 )
 from aea.configurations.components import Component
-from aea.helpers.base import load_module
-
+from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +93,10 @@ class Contract(Component):
         """
         try:
             directory = configuration.directory
+            package_modules = load_all_modules(
+                directory, glob="__init__.py", prefix=configuration.prefix_import_path
+            )
+            add_modules_to_sys_modules(package_modules)
             contract_module = load_module("contracts", directory / "contract.py")
             classes = inspect.getmembers(contract_module, inspect.isclass)
             contract_class_name = cast(str, configuration.class_name)

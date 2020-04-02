@@ -1,45 +1,50 @@
 name: generic_buyer
 author: fetchai
 version: 0.1.0
+description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: QmRxMPR6uZSgsfc1vR4mDKXkegDZGvFhmT9znBGoMaUstV
   dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
   handlers.py: QmPC1Stm9PMNZG6gA9ijwKq5fiqvc45URfjRt6VFnsJonf
   strategy.py: QmPJa6dQhufDtM8RcaTX9RoQimPhwh8fmciVdegVCWihzr
-aea_version: 0.2.4
-description: "The weather client skill implements the skill to purchase weather data."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   search:
-    class_name: MySearchBehaviour
     args:
       search_interval: 5
+    class_name: MySearchBehaviour
 handlers:
   fipa:
+    args: {}
     class_name: FIPAHandler
-    args: {}
   oef:
+    args: {}
     class_name: OEFSearchHandler
-    args: {}
   transaction:
-    class_name: MyTransactionHandler
     args: {}
+    class_name: MyTransactionHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
-    class_name: Strategy
     args:
-      max_price: 4
+      currency_id: FET
+      is_ledger_tx: true
+      ledger_id: fetchai
       max_buyer_tx_fee: 1
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
+      max_price: 4
       search_query:
+        constraint_type: ==
         search_term: country
         search_value: UK
-        constraint_type: '=='
-  dialogues:
-    class_name: Dialogues
-    args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
-ledgers: ['fetchai']
+    class_name: Strategy
+dependencies: {}
