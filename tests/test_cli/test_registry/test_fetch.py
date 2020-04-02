@@ -18,16 +18,16 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
-# import os
-# import shutil
-# import tempfile
-# from unittest import TestCase, mock
+import os
+import shutil
+import tempfile
+from unittest import TestCase, mock
 
-# from click import ClickException
+from click import ClickException
 
-# from aea.cli.registry.fetch import fetch_agent
+from aea.cli.registry.fetch import fetch_agent
 
-# from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
+from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
 def _raise_exception():
