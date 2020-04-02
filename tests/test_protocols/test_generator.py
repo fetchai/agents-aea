@@ -176,7 +176,7 @@ class TestEndToEndGenerator:
         pb2_file_generated = Path(
             self.t, protocol_name, "{}_pb2.py".format(protocol_name)
         )
-        with open(ROOT_DIR + "/x_pb2.py", 'w') as fp:
+        with open(ROOT_DIR + "/x_pb2.py", "w") as fp:
             fp.write(pb2_file_generated.read_text())
         pb2_file_original = Path(
             path_to_original_protocol, "{}_pb2.py".format(protocol_name),

@@ -22,7 +22,7 @@ import logging
 import types
 from abc import ABC
 from pathlib import Path
-from typing import Dict, Optional, Type, cast
+from typing import Dict, Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -59,7 +59,7 @@ class Component(ABC):
     @property
     def component_type(self) -> ComponentType:
         """Get the component type."""
-        return self._configuration.component_type
+        return self.configuration.component_type
 
     @property
     def is_vendor(self) -> bool:
@@ -69,21 +69,22 @@ class Component(ABC):
     @property
     def prefix_import_path(self):
         """Get the prefix import path for this component."""
-        return self._configuration.prefix_import_path
+        return self.configuration.prefix_import_path
 
     @property
     def component_id(self) -> ComponentId:
         """Ge the package id."""
-        return self._configuration.component_id
+        return self.configuration.component_id
 
     @property
     def public_id(self) -> PublicId:
         """Get the public id."""
-        return self._configuration.public_id
+        return self.configuration.public_id
 
     @property
     def configuration(self) -> ComponentConfiguration:
         """Get the component configuration."""
+        assert self._configuration is not None, "The component is not associated with "
         return self._configuration
 
     @property

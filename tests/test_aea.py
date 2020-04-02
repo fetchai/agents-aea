@@ -23,15 +23,13 @@ import tempfile
 import time
 from pathlib import Path
 from threading import Thread
-from typing import cast
 
 import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.components import Component
+from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet

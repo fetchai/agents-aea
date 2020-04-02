@@ -73,13 +73,13 @@ class MyScaffoldConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, connection_configuration: ConnectionConfig, address: Address
+        cls, address: "Address", configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the scaffold connection from the connection configuration.
 
-        :param connection_configuration: the connection configuration object.
+        :param configuration: the connection configuration object.
         :param address: the address of the agent.
         :return: the connection object
         """
-        return MyScaffoldConnection(connection_configuration, address)
+        return MyScaffoldConnection(address=address, configuration=configuration)

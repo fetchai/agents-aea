@@ -36,13 +36,13 @@ from aea.configurations.base import (
     ComponentId,
     ComponentType,
     ConfigurationType,
+    ConnectionConfig,
+    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
-    PublicId,
     ProtocolConfig,
-    ConnectionConfig,
+    PublicId,
     SkillConfig,
-    ContractConfig,
 )
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
@@ -61,12 +61,12 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
-from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext, Handler, Behaviour, Model
+from aea.skills.base import Skill
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -187,7 +187,7 @@ class _DependenciesManager:
             component_id
         )
         # update inverse dependency graph
-        for dependency in component.configuration.package_dependencies:
+        for dependency in component.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
 
     def check_package_dependencies(
@@ -763,27 +763,42 @@ class AEABuilder:
         ]
 
     def _load_and_add_protocols(self) -> None:
-        for (
-            component_id,
-            configuration,
-        ) in self._package_dependency_manager.protocols.items():
-            protocol = Protocol.from_config(configuration)
+        for configuration in self._package_dependency_manager.protocols.values():
+            configuration = cast(ProtocolConfig, configuration)
+            try:
+                protocol = Protocol.from_config(configuration)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading protocol {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
-        for (
-            component_id,
-            configuration,
-        ) in self._package_dependency_manager.contracts.items():
-            contract = Contract.from_config(configuration)
+        for configuration in self._package_dependency_manager.contracts.values():
+            configuration = cast(ContractConfig, configuration)
+            try:
+                contract = Contract.from_config(configuration)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading contract {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self) -> None:
-        for (
-            component_id,
-            configuration,
-        ) in self._package_dependency_manager.skills.items():
-            skill = Skill.from_config(configuration)
+        for configuration in self._package_dependency_manager.skills.values():
+            configuration = cast(SkillConfig, configuration)
+            try:
+                skill = Skill.from_config(configuration)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading skill {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
             self._add_component_to_resources(skill)
 
 
@@ -851,7 +866,7 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
     :return: the connection.
     """
     try:
-        directory = configuration.directory
+        directory = cast(Path, configuration.directory)
         package_modules = load_all_modules(
             directory, glob="__init__.py", prefix=configuration.prefix_import_path
         )
@@ -877,5 +892,9 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
         return connection_class.from_config(
             address=address, configuration=configuration
         )
-    except AssertionError as e:
-        raise ValueError(str(e))
+    except Exception as e:
+        raise Exception(
+            "An error occurred while loading connection {}: {}".format(
+                configuration.public_id, str(e)
+            )
+        )

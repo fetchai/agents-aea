@@ -25,8 +25,6 @@ import tempfile
 from pathlib import Path
 
 from aea import AEA_DIR
-from aea.configurations.base import ComponentType
-from aea.configurations.components import Component
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
 

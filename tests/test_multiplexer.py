@@ -346,15 +346,11 @@ def test_multiple_connection():
         connection_2_id = PublicId.from_str("author/local_2:0.1.0")
 
         connection_1 = OEFLocalConnection(
-            node,
-            address=address_1,
-            connection_id=connection_1_id
+            node, address=address_1, connection_id=connection_1_id
         )
 
         connection_2 = OEFLocalConnection(
-            node,
-            address=address_2,
-            connection_id=connection_2_id
+            node, address=address_2, connection_id=connection_2_id
         )
 
         multiplexer = Multiplexer([connection_1, connection_2])
@@ -406,8 +402,12 @@ def test_send_message_no_supported_protocol():
     with LocalNode() as node:
         address_1 = "address_1"
         public_id = PublicId.from_str("fetchai/my_private_protocol:0.1.0")
-        connection_1 = _make_local_connection(address_1, node, restricted_to_protocols={public_id},
-                                              excluded_protocols={public_id})
+        connection_1 = _make_local_connection(
+            address_1,
+            node,
+            restricted_to_protocols={public_id},
+            excluded_protocols={public_id},
+        )
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()

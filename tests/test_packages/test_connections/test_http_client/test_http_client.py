@@ -29,14 +29,13 @@ import pytest
 import requests
 
 from aea.mail.base import Envelope
-from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 
+from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_http_client_connection,
     get_host,
     get_unused_tcp_port,
 )
@@ -55,7 +54,9 @@ class TestHTTPClientConnect:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = HTTPClientConnection(
-            address=cls.agent_address, provider_address=cls.address, provider_port=cls.port,
+            address=cls.agent_address,
+            provider_address=cls.address,
+            provider_port=cls.port,
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 

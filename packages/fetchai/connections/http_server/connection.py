@@ -39,7 +39,7 @@ from openapi_spec_validator.schemas import read_yaml_file
 
 from werkzeug.datastructures import ImmutableMultiDict
 
-from aea.configurations.base import PublicId, ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
@@ -542,6 +542,6 @@ class HTTPServerConnection(Connection):
         host = cast(str, configuration.config.get("host"))
         port = cast(int, configuration.config.get("port"))
         api_spec_path = cast(str, configuration.config.get("api_spec_path"))
-        return HTTPConnection(
+        return HTTPServerConnection(
             host, port, api_spec_path, address=address, configuration=configuration
         )

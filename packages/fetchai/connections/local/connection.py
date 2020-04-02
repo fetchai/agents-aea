@@ -26,7 +26,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope

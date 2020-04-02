@@ -127,7 +127,7 @@ class Connection(Component, ABC):
     def connection_id(self) -> PublicId:
         """Get the id of the connection."""
         if self._configuration is None:
-            return self._connection_id
+            return cast(PublicId, self._connection_id)
         else:
             return super().public_id
 

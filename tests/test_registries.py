@@ -31,8 +31,7 @@ import pytest
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.components import Component
+from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis

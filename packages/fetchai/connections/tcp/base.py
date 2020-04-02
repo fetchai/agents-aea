@@ -22,7 +22,7 @@ import logging
 import struct
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamReader, StreamWriter
-from typing import Optional, cast
+from typing import Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection

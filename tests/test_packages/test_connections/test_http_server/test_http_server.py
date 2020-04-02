@@ -32,14 +32,13 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
+from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
     ROOT_DIR,
-    _make_http_server_connection,
     get_host,
     get_unused_tcp_port,
 )

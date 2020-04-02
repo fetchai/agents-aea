@@ -26,9 +26,8 @@ import os
 import socket
 import sys
 import time
-from pathlib import Path
 from threading import Timer
-from typing import Optional, cast
+from typing import Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -39,14 +38,10 @@ from oef.agents import AsyncioCore, OEFAgent
 
 import pytest
 
-import aea
 from aea import AEA_DIR
 from aea.cli.common import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
-    ComponentConfiguration,
-    ComponentType,
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
@@ -54,13 +49,10 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Address
 
-from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_client.connection import (
@@ -68,7 +60,8 @@ from packages.fetchai.connections.p2p_client.connection import (
 )
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
-from .data.dummy_connection.connection import DummyConnection
+
+from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -543,10 +536,18 @@ def _make_dummy_connection() -> Connection:
     return dummy_connection
 
 
-def _make_local_connection(address: Address, node: LocalNode, restricted_to_protocols=None, excluded_protocols=None) -> Connection:
+def _make_local_connection(
+    address: Address,
+    node: LocalNode,
+    restricted_to_protocols=None,
+    excluded_protocols=None,
+) -> Connection:
     oef_local_connection = OEFLocalConnection(
-        node, address=address, connection_id=PublicId("fetchai", "local", "0.1.0"),
-        restricted_to_protocols=restricted_to_protocols, excluded_protocols=excluded_protocols
+        node,
+        address=address,
+        connection_id=PublicId("fetchai", "local", "0.1.0"),
+        restricted_to_protocols=restricted_to_protocols,
+        excluded_protocols=excluded_protocols,
     )
     return oef_local_connection
 
@@ -559,35 +560,6 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     return oef_connection
-
-
-def _make_http_server_connection(
-    address: Address, host: str, port: int, api_spec_path: str
-):
-    configuration = cast(
-        ConnectionConfig,
-        ComponentConfiguration.load(
-            ComponentType.CONNECTION,
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "http_server"),
-        ),
-    )
-    configuration.config["host"] = host
-    configuration.config["port"] = port
-    configuration.config["api_spec_path"] = api_spec_path
-    http_connection = HTTPServerConnection(configuration)
-    http_connection.address = address
-    http_connection.load()
-    return http_connection
-
-
-def _make_http_client_connection(address: Address, host: str, port: int):
-    http_connection = HTTPClientConnection(
-        host,
-        port,
-        address=address,
-        connection_id=PublicId("fetchai", "http_client", "0.1.0"),
-    )
-    return http_connection
 
 
 def _make_tcp_server_connection(address: str, host: str, port: int):

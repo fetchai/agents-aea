@@ -37,7 +37,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.components import Component
-from aea.helpers.base import load_module, load_all_modules, add_modules_to_sys_modules
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -273,6 +273,9 @@ class Protocol(Component):
         :param configuration: the protocol configuration.
         :return: the protocol object.
         """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
         directory = configuration.directory
         package_modules = load_all_modules(
             directory, glob="__init__.py", prefix=configuration.prefix_import_path

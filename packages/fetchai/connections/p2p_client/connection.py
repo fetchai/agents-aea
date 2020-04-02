@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
-from aea.configurations.base import PublicId, ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
@@ -231,7 +231,7 @@ class PeerToPeerClientConnection(Connection):
     ) -> "Connection":
         """
         Get the P2P connection from the connection configuration.
-        
+
         :param address: the address of the agent.
         :param configuration: the connection configuration object.
         :return: the connection object
