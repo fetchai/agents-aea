@@ -116,11 +116,14 @@ def locate(path):
     return object
 
 
-def load_all_modules(directory: Path, prefix: str = "") -> Dict[str, types.ModuleType]:
+def load_all_modules(
+    directory: Path, glob: str = "*.py", prefix: str = ""
+) -> Dict[str, types.ModuleType]:
     """
     Load all modules of a directory, recursively.
 
     :param directory: the directory where to search for .py modules.
+    :param glob: the glob pattern to match. By default *.py
     :param prefix: the prefix to apply in the import path.
     :return: a mapping from import path to module objects.
     """
@@ -128,7 +131,7 @@ def load_all_modules(directory: Path, prefix: str = "") -> Dict[str, types.Modul
         raise ValueError("The provided path does not exists or it is not a directory.")
     result = {}  # type: Dict[str, types.ModuleType]
     package_root_directory = directory
-    for module_path in directory.rglob("*.py"):
+    for module_path in directory.rglob(glob):
         relative_path_directory = module_path.relative_to(package_root_directory).parent
         # handle the case when relative_dotted_path is "."
         relative_dotted_path = (
@@ -140,11 +143,9 @@ def load_all_modules(directory: Path, prefix: str = "") -> Dict[str, types.Modul
             prefix = prefix + "." + relative_dotted_path
 
         if module_path.name == "__init__.py":
-            full_dotted_path = ".".join([prefix, relative_dotted_path])
+            full_dotted_path = prefix
         else:
-            full_dotted_path = ".".join(
-                [prefix, relative_dotted_path, module_path.name[:-3]]
-            )
+            full_dotted_path = ".".join([prefix, module_path.name[:-3]])
 
         module_obj = load_module(full_dotted_path, module_path)
         result[full_dotted_path] = module_obj
@@ -236,21 +237,17 @@ def load_agent_component_package(
     return load_module(dotted_path, filepath)
 
 
-def add_agent_component_module_to_sys_modules(
-    item_type: str, item_name: str, author_name: str, module_obj
+def add_modules_to_sys_modules(
+    modules_by_import_path: Dict[str, types.ModuleType]
 ) -> None:
     """
-    Add an agent component module to sys.modules.
+    Load all modules in sys.modules.
 
-    :param item_type: the type of the item. One of "protocol", "connection", "skill"
-    :param item_name: the name of the item to load
-    :param author_name: the name of the author of the item to load.
-    :param module_obj: the module object. It is assumed it has been already executed.
-    :return:
+    :param modules_by_import_path: a dictionary from import path to module objects.
+    :return: None
     """
-    item_type_plural = item_type + "s"
-    dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
-    import_module(dotted_path, module_obj)
+    for import_path, module_obj in modules_by_import_path.items():
+        import_module(import_path, module_obj)
 
 
 def load_env_file(env_file: str):
