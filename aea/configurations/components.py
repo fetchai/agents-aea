@@ -42,7 +42,11 @@ logger = logging.getLogger(__name__)
 class Component(ABC):
     """Abstract class for an agent component."""
 
-    def __init__(self, configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False):
+    def __init__(
+        self,
+        configuration: Optional[ComponentConfiguration] = None,
+        is_vendor: bool = False,
+    ):
         """
         Initialize a package.
 

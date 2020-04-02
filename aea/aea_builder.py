@@ -42,7 +42,11 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
     PublicId,
-    ProtocolConfig, ConnectionConfig, SkillConfig, ContractConfig)
+    ProtocolConfig,
+    ConnectionConfig,
+    SkillConfig,
+    ContractConfig,
+)
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
@@ -557,7 +561,9 @@ class AEABuilder:
                 if component_id.public_id in connection_ids_set
             ]
         else:
-            selected_connections_ids = [k.public_id for k in self._package_dependency_manager.connections.keys()]
+            selected_connections_ids = [
+                k.public_id for k in self._package_dependency_manager.connections.keys()
+            ]
 
         return selected_connections_ids
 
@@ -744,24 +750,42 @@ class AEABuilder:
 
         return builder
 
-    def _load_connections(self, address: Address, connection_ids: Optional[Collection[PublicId]] = None):
+    def _load_connections(
+        self, address: Address, connection_ids: Optional[Collection[PublicId]] = None
+    ):
         connections_ids = self._process_connection_ids(connection_ids)
+
         def get_connection_configuration(connection_id):
-            return self._package_dependency_manager.connections[ComponentId(ComponentType.CONNECTION, connection_id)]
-        return [_load_connection(address, get_connection_configuration(connection_id)) for connection_id in connections_ids]
+            return self._package_dependency_manager.connections[
+                ComponentId(ComponentType.CONNECTION, connection_id)
+            ]
+
+        return [
+            _load_connection(address, get_connection_configuration(connection_id))
+            for connection_id in connections_ids
+        ]
 
     def _load_and_add_protocols(self) -> None:
-        for component_id, configuration in self._package_dependency_manager.protocols.items():
+        for (
+            component_id,
+            configuration,
+        ) in self._package_dependency_manager.protocols.items():
             protocol = Protocol.from_config(configuration)
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
-        for component_id, configuration in self._package_dependency_manager.contracts.items():
+        for (
+            component_id,
+            configuration,
+        ) in self._package_dependency_manager.contracts.items():
             contract = _load_contract(configuration)
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self) -> None:
-        for component_id, configuration in self._package_dependency_manager.skills.items():
+        for (
+            component_id,
+            configuration,
+        ) in self._package_dependency_manager.skills.items():
             skill = Skill.from_config(configuration)
             self._add_component_to_resources(skill)
 
@@ -849,7 +873,9 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
         assert connection_class is not None, "Connection class '{}' not found.".format(
             connection_class_name
         )
-        return connection_class.from_config(address=address, configuration=configuration)
+        return connection_class.from_config(
+            address=address, configuration=configuration
+        )
     except AssertionError as e:
         raise ValueError(str(e))
 

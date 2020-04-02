@@ -383,4 +383,6 @@ class OEFLocalConnection(Connection):
         :param configuration: the connection configuration.
         :return: an instance of the concrete connection class.
         """
-        return OEFLocalConnection(LocalNode(), address=address, configuration=configuration)
+        return OEFLocalConnection(
+            LocalNode(), address=address, configuration=configuration
+        )

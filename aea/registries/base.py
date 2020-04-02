@@ -218,7 +218,9 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
                 "No protocol registered with protocol id '{}'".format(protocol_id)
             )
         removed_protocol = self._protocols.pop(protocol_id)
-        logger.debug("Protocol '{}' has been removed.".format(removed_protocol.public_id))
+        logger.debug(
+            "Protocol '{}' has been removed.".format(removed_protocol.public_id)
+        )
 
     def fetch(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """

@@ -636,7 +636,9 @@ class Skill(Component):
             str(directory), models_by_id, skill_context
         )
 
-        skill = Skill(configuration, skill_context, handlers, behaviours, model_instances)
+        skill = Skill(
+            configuration, skill_context, handlers, behaviours, model_instances
+        )
         skill_context._skill = skill
         return skill
 

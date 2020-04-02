@@ -32,9 +32,7 @@ class Contract(BaseContract):
     """Definition of an ethereum contract."""
 
     def __init__(
-        self,
-        config: ContractConfig,
-        contract_interface: Dict[str, Any],
+        self, config: ContractConfig, contract_interface: Dict[str, Any],
     ):
         """
         Initialize the contract.
@@ -100,4 +98,3 @@ class Contract(BaseContract):
         self._instance = ledger_api.api.eth.contract(
             address=contract_address, abi=self._abi, bytecode=self.bytecode
         )
-

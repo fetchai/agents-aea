@@ -49,9 +49,7 @@ class ERC1155Contract(Contract):
         CONTRACT_SIGN_HASH = "contract_sign_hash"
 
     def __init__(
-        self,
-        contract_config: ContractConfig,
-        contract_interface: Dict[str, Any],
+        self, contract_config: ContractConfig, contract_interface: Dict[str, Any],
     ):
         """Initialize.
 

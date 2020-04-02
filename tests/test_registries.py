@@ -158,7 +158,10 @@ class TestProtocolRegistry:
         expected_protocols_ids = set(self.expected_protocol_ids)
         expected_protocols_ids.remove(protocol_id_removed)
 
-        assert set(p.public_id for p in self.registry.fetch_all()) == expected_protocols_ids
+        assert (
+            set(p.public_id for p in self.registry.fetch_all())
+            == expected_protocols_ids
+        )
 
         # restore the protocol
         self.registry.register(protocol_id_removed, protocol_removed)

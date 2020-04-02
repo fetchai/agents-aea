@@ -49,10 +49,12 @@ class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
     def __init__(
-        self, configuration: Optional[ConnectionConfig] = None, address: Optional["Address"] = None,
-            restricted_to_protocols: Optional[Set[PublicId]] = None,
-            excluded_protocols: Optional[Set[PublicId]] = None,
-            connection_id: Optional[PublicId] = None,
+        self,
+        configuration: Optional[ConnectionConfig] = None,
+        address: Optional["Address"] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
+        connection_id: Optional[PublicId] = None,
     ):
         """
         Initialize the connection.
@@ -71,8 +73,8 @@ class Connection(Component, ABC):
         self._connection_status = ConnectionStatus()
         self._address = address  # type: Optional[Address]
 
-        self._restricted_to_protocols = restricted_to_protocols
-        self._excluded_protocols = excluded_protocols
+        self._restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is None else set()
+        self._excluded_protocols = excluded_protocols if excluded_protocols is None else set()
         self._connection_id = connection_id
 
     @property
@@ -117,21 +119,31 @@ class Connection(Component, ABC):
     @property
     def connection_id(self) -> PublicId:
         """Get the id of the connection."""
-        return self.public_id
+        if self._configuration is None:
+            return self._connection_id
+        else:
+            return super().public_id
 
     @property
     def configuration(self) -> ConnectionConfig:
         """Get the connection configuration."""
+        assert self._configuration is None, "Configuration not set."
         return cast(ConnectionConfig, super().configuration)
 
     @property
     def restricted_to_protocols(self) -> Set[PublicId]:
-        return self.configuration.restricted_to_protocols
+        if self._configuration is None:
+            return self._restricted_to_protocols
+        else:
+            return self.configuration.restricted_to_protocols
 
     @property
     def excluded_protocols(self) -> Set[PublicId]:
         """Get the ids of the excluded protocols for this connection."""
-        return self.configuration.excluded_protocols
+        if self._configuration is None:
+            return self._excluded_protocols
+        else:
+            return self.configuration.excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint:
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmQKV82Z2oY3Emiu1JGfNHpx2GXzxgewRCtiTUJbpm7LgT
+  connection.py: QmWFMxmCPhKxFyQa3r4YxSgVVv961vUT9H57L8XDYWiigX
 aea_version: 0.2.4
 description: "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
 class_name: OEFConnection

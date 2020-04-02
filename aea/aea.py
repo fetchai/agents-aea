@@ -207,7 +207,9 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        handlers = self._filter.get_active_handlers(protocol.public_id, envelope.context)
+        handlers = self._filter.get_active_handlers(
+            protocol.public_id, envelope.context
+        )
         if len(handlers) == 0:
             if error_handler is not None:
                 error_handler.send_unsupported_skill(envelope)

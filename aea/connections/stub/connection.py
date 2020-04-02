@@ -233,18 +233,14 @@ class StubConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = configuration.config.get(
-            "input_file", "./input_file"
-        )  # type: str
+        input_file = configuration.config.get("input_file", "./input_file")  # type: str
         output_file = configuration.config.get(
             "output_file", "./output_file"
         )  # type: str
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
         }
-        excluded_protocols_names = {
-            p.name for p in configuration.excluded_protocols
-        }
+        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
         return StubConnection(
             input_file,
             output_file,

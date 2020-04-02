@@ -53,7 +53,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,
@@ -606,10 +606,19 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def load(self) -> None:
-        """Load the connection configuration."""
-        self.oef_addr = cast(str, self.configuration.config.get("addr"))
-        self.oef_port = cast(int, self.configuration.config.get("port"))
+    def __init__(
+        self, oef_addr: str, oef_port: int = 10000, **kwargs
+    ):
+        """
+        Initialize.
+
+        :param oef_addr: the OEF IP address.
+        :param oef_port: the OEF port.
+        :param kwargs: the keyword arguments (check the parent constructor)
+        """
+        super().__init__(**kwargs)
+        self.oef_addr = oef_addr
+        self.oef_port = oef_port
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
@@ -725,3 +734,22 @@ class OEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the OEF connection from the connection configuration.
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        oef_addr = cast(str, configuration.config.get("addr"))
+        oef_port = cast(int, configuration.config.get("port"))
+        return OEFConnection(
+            oef_addr,
+            oef_port,
+            address=address,
+            configuration=configuration
+        )

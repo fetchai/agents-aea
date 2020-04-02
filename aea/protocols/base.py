@@ -233,9 +233,7 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(
-        self, configuration: ProtocolConfig, serializer: Serializer
-    ):
+    def __init__(self, configuration: ProtocolConfig, serializer: Serializer):
         """
         Initialize the protocol manager.
 
