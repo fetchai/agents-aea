@@ -1,7 +1,10 @@
 name: generic_seller
 author: fetchai
 version: 0.1.0
+description: The weather station skill implements the functionality to sell weather
+  data.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmbfkeFnZVKppLEHpBrTXUXBwg2dpPABJWSLND8Lf1cmpG
   behaviours.py: QmNor5VAcBJyQcTn9kv8WP3tkwU392HNL6nK77Lrc3veL7
@@ -9,46 +12,49 @@ fingerprint:
   dialogues.py: QmaBzfmtEZssDWrHsYT1ovCsQ4qmFHvFSkzPBvHiR2Et44
   handlers.py: QmTbKaBPrFiD8RWGpV6AAQnGg66vVohvLgkzHiUrqUew6U
   strategy.py: QmW4TJsYTPhvmVBawWB2g8mUZ7Kap5V5LThH4wK6JbVis6
-aea_version: 0.2.4
-description: "The weather station skill implements the functionality to sell weather data."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
     args:
       services_interval: 60
+    class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
-    class_name: FIPAHandler
     args: {}
+    class_name: FIPAHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
-    class_name: Strategy
     args:
-      total_price: 10
-      seller_tx_fee: 0
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
-      has_data_source: False
+      currency_id: FET
       data_for_sale:
-        wind: 10
         pressure: 20
         temperature: 26
-      data_model_name: "location"
+        wind: 10
       data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
+      data_model_name: location
+      has_data_source: false
+      is_ledger_tx: true
+      ledger_id: fetchai
+      seller_tx_fee: 0
       service_data:
-        country: UK
         city: Cambridge
-  dialogues:
-    class_name: Dialogues
-    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
+        country: UK
+      total_price: 10
+    class_name: Strategy
+dependencies: {}

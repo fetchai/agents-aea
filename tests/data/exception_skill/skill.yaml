@@ -1,19 +1,21 @@
 name: exception
 author: fetchai
 version: 0.1.0
+description: Raise an exception, at some point.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
   behaviours.py: QmSXH168c4LK8h68eeAbykL6gV7VPsFPhYzJrhtj73SCux
   handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
   tasks.py: QmfJznzp11PWpBzpEaftq3h2BYHfXbnoitdMcFQsLCqZnL
-aea_version: 0.2.4
+fingerprint_ignore_patterns: []
+contracts: []
+protocols: []
 behaviours:
   exception:
-    class_name: ExceptionBehaviour
     args: {}
+    class_name: ExceptionBehaviour
 handlers: {}
 models: {}
-protocols: []
 dependencies: {}
-description: "Raise an exception, at some point."

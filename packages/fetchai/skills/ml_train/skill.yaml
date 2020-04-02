@@ -1,7 +1,10 @@
-name: 'ml_train'
+name: ml_train
 author: fetchai
 version: 0.1.0
+description: The ml train and predict skill implements a simple skill which buys training
+  data, trains a model and sells predictions.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmbQigh7SV7dD2hLTGv3k9tnvpYWN1otG5yjiM7F3bbGEQ
   behaviours.py: QmRarc5Gjna1HZU2LvTRB7cPp5ungpBXEk6YqxFJWR2yMU
@@ -10,38 +13,41 @@ fingerprint:
   model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
   strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
   tasks.py: QmbVq8VTXo8gEWUHBRmv5oUSSjtqY8659neL9AdyHMjE4i
-aea_version: 0.2.4
-description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/ml_trade:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   search:
-    class_name: MySearchBehaviour
     args:
       search_interval: 10
+    class_name: MySearchBehaviour
 handlers:
   oef:
+    args: {}
     class_name: OEFSearchHandler
-    args: {}
   train:
+    args: {}
     class_name: TrainHandler
-    args: {}
   transaction:
-    class_name: MyTransactionHandler
     args: {}
+    class_name: MyTransactionHandler
 models:
-  strategy:
-    class_name: Strategy
-    args:
-      dataset_id: 'fmnist'
-      max_unit_price: 70
-      max_buyer_tx_fee: 20
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: False
   ml_model:
-    class_name: MLModel
     args:
-      model_config_path: "./skills/ml_train/model.json"
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/ml_trade:0.1.0']
+      model_config_path: ./skills/ml_train/model.json
+    class_name: MLModel
+  strategy:
+    args:
+      currency_id: FET
+      dataset_id: fmnist
+      is_ledger_tx: false
+      ledger_id: fetchai
+      max_buyer_tx_fee: 20
+      max_unit_price: 70
+    class_name: Strategy
 dependencies:
-  tensorflow: { version: "==1.14.0" }
   numpy: {}
+  tensorflow:
+    version: ==1.14.0

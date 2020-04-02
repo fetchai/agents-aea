@@ -40,7 +40,20 @@ import ipfshttpclient
 
 import yaml
 
-from aea.configurations.base import _compute_fingerprint
+from aea.configurations.base import (
+    AgentConfig,
+    ConnectionConfig,
+    ContractConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    ProtocolConfig,
+    SkillConfig,
+    _compute_fingerprint,
+)
+from aea.helpers.base import yaml_dump
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
@@ -72,7 +85,38 @@ def ipfs_hashing(
     """Hashes a package and its components."""
     print("Processing package {} of type {}".format(package_name, package_type))
 
-    # load config file to get ignore patterns
+    # load config file to get ignore patterns, dump again immediately to impose ordering
+    if package_type == "agents":
+        config = AgentConfig.from_json(
+            yaml.safe_load(open(Path(target_dir, DEFAULT_AEA_CONFIG_FILE)))
+        )
+        yaml_dump(config.json, open(Path(target_dir, DEFAULT_AEA_CONFIG_FILE), "w"))
+    elif package_type == "connections":
+        config = ConnectionConfig.from_json(
+            yaml.safe_load(open(Path(target_dir, DEFAULT_CONNECTION_CONFIG_FILE)))
+        )
+        yaml_dump(
+            config.json, open(Path(target_dir, DEFAULT_CONNECTION_CONFIG_FILE), "w")
+        )
+    elif package_type == "contracts":
+        config = ContractConfig.from_json(
+            yaml.safe_load(open(Path(target_dir, DEFAULT_CONTRACT_CONFIG_FILE)))
+        )
+        yaml_dump(
+            config.json, open(Path(target_dir, DEFAULT_CONTRACT_CONFIG_FILE), "w")
+        )
+    elif package_type == "protocols":
+        config = ProtocolConfig.from_json(
+            yaml.safe_load(open(Path(target_dir, DEFAULT_PROTOCOL_CONFIG_FILE)))
+        )
+        yaml_dump(
+            config.json, open(Path(target_dir, DEFAULT_PROTOCOL_CONFIG_FILE), "w")
+        )
+    elif package_type == "skills":
+        config = SkillConfig.from_json(
+            yaml.safe_load(open(Path(target_dir, DEFAULT_SKILL_CONFIG_FILE)))
+        )
+        yaml_dump(config.json, open(Path(target_dir, DEFAULT_SKILL_CONFIG_FILE), "w"))
     config = yaml.safe_load(next(Path(target_dir).glob("*.yaml")).open())
     ignore_patterns = config.get("fingerprint_ignore_patterns", [])
     if package_type != "agents":

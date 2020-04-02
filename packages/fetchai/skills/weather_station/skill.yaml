@@ -1,7 +1,10 @@
 name: weather_station
 author: fetchai
 version: 0.1.0
+description: The weather station skill implements the functionality to sell weather
+  data.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmYVSCKhqonH1jVUqCLJBkh8sNXp8NnMo8dDzzYH683koa
@@ -11,32 +14,34 @@ fingerprint:
   handlers.py: QmVBLL2mSbEPCNyi7Lhp98BFwrYkWi8W8J5c5g92ncCXnN
   strategy.py: Qmca2DWfxuhcnoWLH5aNLsMFwm9g6QqD5VEP9EzGpRMNy5
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
-aea_version: 0.2.4
 fingerprint_ignore_patterns:
-  - "*.db"
-description: "The weather station skill implements the functionality to sell weather data."
+- '*.db'
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
-    class_name: ServiceRegistrationBehaviour
     args:
       services_interval: 60
+    class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
-    class_name: FIPAHandler
     args: {}
+    class_name: FIPAHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
-    class_name: Strategy
     args:
-      date_one: "1/10/2019"
-      date_two: "1/12/2019"
+      currency_id: FET
+      date_one: 1/10/2019
+      date_two: 1/12/2019
+      is_ledger_tx: true
+      ledger_id: fetchai
       price_per_row: 1
       seller_tx_fee: 0
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
-  dialogues:
-    class_name: Dialogues
-    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
+    class_name: Strategy
+dependencies: {}

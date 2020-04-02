@@ -1,19 +1,22 @@
 name: p2p_client
 author: fetchai
 version: 0.1.0
+description: The p2p_client connection provides a connection with the fetch.ai mail
+  provider.
 license: Apache-2.0
+aea_version: 0.2.4
 fingerprint:
   __init__.py: QmdwnPo8iC2uqf9CmB4ocbh6HP2jcgCtuFdS4djuajp6Li
   connection.py: Qmf1YtakA7Qx8SXEhpEtPL5uqE3xpj6NoxXzUFuKWPfNCS
-aea_version: 0.2.4
-description: "The p2p_client connection provides a connection with the fetch.ai mail provider."
-class_name: PeerToPeerConnection
+fingerprint_ignore_patterns: []
 protocols: []
-restricted_to_protocols: []
-excluded_protocols: ["fetchai/gym:0.1.0"]
+class_name: PeerToPeerConnection
 config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
+excluded_protocols:
+- fetchai/gym:0.1.0
+restricted_to_protocols: []
 dependencies:
   fetch:
-    git: "https://github.com/fetchai/peer-to-peer-api.git"
+    git: https://github.com/fetchai/peer-to-peer-api.git

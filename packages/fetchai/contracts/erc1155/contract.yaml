@@ -1,6 +1,7 @@
 name: erc1155
 author: fetchai
 version: 0.1.0
+description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
 aea_version: 0.2.4
 fingerprint:
@@ -12,8 +13,9 @@ fingerprint:
   contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
   migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7
   migrations/2_deploy_contracts.js: QmeLraUZBgtJK5KAhsf4Bb5S9amcYugfMJsjbhZgfmEfuP
-description: "The erc1155 contract implements an ERC1155 contract package."
-path_to_contract_interface: "build/erc1155.json"
-dependencies:
-  vyper: { version: "==0.1.0b12"}
+fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
+path_to_contract_interface: build/erc1155.json
+dependencies:
+  vyper:
+    version: ==0.1.0b12

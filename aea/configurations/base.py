@@ -871,14 +871,14 @@ class ConnectionConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "class_name": self.class_name,
                 "protocols": sorted(map(str, self.protocols)),
+                "class_name": self.class_name,
+                "config": self.config,
+                "excluded_protocols": sorted(map(str, self.excluded_protocols)),
                 "restricted_to_protocols": sorted(
                     map(str, self.restricted_to_protocols)
                 ),
-                "excluded_protocols": sorted(map(str, self.excluded_protocols)),
                 "dependencies": self.dependencies,
-                "config": self.config,
             }
         )
 
@@ -1079,12 +1079,12 @@ class SkillConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "protocols": sorted(map(str, self.protocols)),
                 "contracts": sorted(map(str, self.contracts)),
-                "dependencies": self.dependencies,
-                "handlers": {key: h.json for key, h in self.handlers.read_all()},
+                "protocols": sorted(map(str, self.protocols)),
                 "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
+                "handlers": {key: h.json for key, h in self.handlers.read_all()},
                 "models": {key: m.json for key, m in self.models.read_all()},
+                "dependencies": self.dependencies,
             }
         )
 
@@ -1270,16 +1270,16 @@ class AgentConfig(PackageConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "registry_path": self.registry_path,
-                "private_key_paths": self.private_key_paths_dict,
-                "ledger_apis": self.ledger_apis_dict,
-                "logging_config": self.logging_config,
-                "default_ledger": self.default_ledger,
-                "default_connection": self.default_connection,
                 "connections": sorted(map(str, self.connections)),
+                "contracts": sorted(map(str, self.contracts)),
                 "protocols": sorted(map(str, self.protocols)),
                 "skills": sorted(map(str, self.skills)),
-                "contracts": sorted(map(str, self.contracts)),
+                "default_connection": self.default_connection,
+                "default_ledger": self.default_ledger,
+                "ledger_apis": self.ledger_apis_dict,
+                "logging_config": self.logging_config,
+                "private_key_paths": self.private_key_paths_dict,
+                "registry_path": self.registry_path,
             }
         )
 
@@ -1520,9 +1520,9 @@ class ContractConfig(ComponentConfiguration):
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
-                "dependencies": self.dependencies,
-                "path_to_contract_interface": self.path_to_contract_interface,
                 "class_name": self.class_name,
+                "path_to_contract_interface": self.path_to_contract_interface,
+                "dependencies": self.dependencies,
             }
         )
 
