@@ -27,7 +27,7 @@ from typing import cast
 
 import click
 
-from aea.cli.common import Context, check_aea_project, logger, pass_ctx
+from aea.cli.common import Context, check_aea_project, logger
 from aea.cli.fingerprint import _fingerprint_item
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
