@@ -27,7 +27,7 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
@@ -145,12 +145,18 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def load(self) -> None:
-        """Load the connection configuration."""
-        gym_env_package = cast(str, self.configuration.config.get("env"))
-        gym_env_class = locate(gym_env_package)
-        self.channel = GymChannel(self.address, gym_env_class())
-        self._connection = None  # type: Optional[asyncio.Queue]
+    def __init__(self, gym_env: gym.Env, **kwargs):
+        """
+        Initialize a connection to a local gym environment.
+
+        :param gym_env: the gym environment.
+        :param kwargs: the keyword arguments of the parent class.
+        """
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
+
+        super().__init__(**kwargs)
+        self.channel = GymChannel(self.address, gym_env)
 
     async def connect(self) -> None:
         """
@@ -211,3 +217,18 @@ class GymConnection(Connection):
         :return: None
         """
         self._connection = None
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the Gym connection from the connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        gym_env_package = cast(str, configuration.config.get("env"))
+        gym_env = locate(gym_env_package)
+        return GymConnection(gym_env(), address=address, configuration=configuration,)

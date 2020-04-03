@@ -1,9 +1,16 @@
 name: t_protocol
 author: fetchai
 version: 0.1.0
+description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
-fingerprint: {}
-dependencies: 
-    protobuf: {} 
-description: A protocol for testing purposes.
+fingerprint:
+  __init__.py: QmaarNrn5mcEYupCdQxpzpvH4PY5Wto7rtkjUjmHTUShiH
+  custom_types.py: Qmd5CrULVdtcNQLz5R1i9LpJi9Nhzd7nQnwN737FqibgLs
+  message.py: QmZDjKrRRrfidEg2rxGC2Qoo4DBaEEfEvLu3bdeBbKL1tf
+  serialization.py: QmZDHQcL5KbDLuqm9dsWeS5e3xwBxVC9sBLehWeDGpgysr
+  t_protocol.proto: QmNryKk13EDZhx2m4YMFFMF33qEy41u7eNfWuhcadKowJF
+  t_protocol_pb2.py: QmfJDyZ8U5Ay81pc991sf7asZ9QCFVUhwEWEXfWyY3yP8h
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

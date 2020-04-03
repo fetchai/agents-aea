@@ -18,14 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the erc1155 contract definition."""
+
 import logging
 import random
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from vyper.utils import keccak256
 
-from aea.configurations.base import ContractId
+from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -48,9 +49,17 @@ class ERC1155Contract(Contract):
         CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
         CONTRACT_SIGN_HASH = "contract_sign_hash"
 
-    def load(self) -> None:
-        """Load the contract."""
-        super().load()
+    def __init__(
+        self, contract_config: ContractConfig, contract_interface: Dict[str, Any],
+    ):
+        """Initialize.
+
+        super().__init__(contract_id, contract_config)
+
+        :param config: the contract configurations.
+        :param contract_interface: the contract interface.
+        """
+        super().__init__(contract_config, contract_interface)
         self._token_ids = {}  # type: Dict[int, int]
         self.nonce = 0
 
@@ -81,6 +90,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
         Deploy a smart contract.
@@ -103,7 +113,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -144,6 +154,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_ids: List[int],
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
         Create an mint a batch of items.
@@ -170,7 +181,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -203,6 +214,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_id: int,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
 
         """
@@ -228,7 +240,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -262,6 +274,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_ids: List[int],
+        info: Optional[Dict[str, Any]] = None,
     ):
         assert len(mint_quantities) == len(token_ids), "Wrong number of items."
         tx = self._create_mint_batch_tx(
@@ -282,7 +295,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -332,6 +345,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
         token_id: int,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
 
         tx = self._create_mint_single_tx(
@@ -351,7 +365,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -494,6 +508,7 @@ class ERC1155Contract(Contract):
         signature: str,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """Make a trustless trade between to agents for a single token."""
         # assert self.address == terms.from_address, "Wrong from address"
@@ -520,7 +535,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -547,6 +562,7 @@ class ERC1155Contract(Contract):
         signature: str,
         skill_callback_id: ContractId,
         ledger_api: LedgerApi,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """Make a trust-less trade for a batch of items between 2 agents."""
         assert deployer_address == from_address, "Wrong 'from' address"
@@ -572,7 +588,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx": tx},
         )
@@ -590,6 +606,7 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """Sign the transaction before send them to agent1."""
         # assert self.address == terms.to_address
@@ -616,7 +633,7 @@ class ERC1155Contract(Contract):
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
-            info={},
+            info=info if info is not None else {},
             ledger_id="ethereum",
             signing_payload={"tx_hash": tx_hash},
         )

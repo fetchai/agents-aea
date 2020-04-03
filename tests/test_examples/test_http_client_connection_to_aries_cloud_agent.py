@@ -102,7 +102,7 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
         http_client_connection = HTTPClientConnection(
-            agent_address=self.aea_address,
+            address=self.aea_address,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -171,7 +171,7 @@ class TestAEAToACA:
             default_address_key=FETCHAI,
         )
         http_client_connection = HTTPClientConnection(
-            agent_address=self.aea_address,
+            address=self.aea_address,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -195,9 +195,7 @@ class TestAEAToACA:
                 )
             )
         )
-        http_protocol = Protocol(
-            HttpMessage.protocol_id, HttpSerializer(), http_protocol_configuration,
-        )
+        http_protocol = Protocol(http_protocol_configuration, HttpSerializer(),)
         resources.add_protocol(http_protocol)
 
         # Request message & envelope
@@ -233,9 +231,7 @@ class TestAEAToACA:
         resources.add_skill(simple_skill)
 
         # add error skill to AEA
-        error_skill = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea.context
-        )
+        error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
         resources.add_skill(error_skill)
 
         # start AEA thread

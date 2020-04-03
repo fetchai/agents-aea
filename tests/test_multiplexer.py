@@ -36,7 +36,7 @@ from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multipl
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 
 from .conftest import (
     UNKNOWN_CONNECTION_PUBLIC_ID,
@@ -345,15 +345,13 @@ def test_multiple_connection():
         connection_1_id = PublicId.from_str("author/local_1:0.1.0")
         connection_2_id = PublicId.from_str("author/local_2:0.1.0")
 
-        connection_1 = _make_local_connection(address_1, node)
-        connection_1.configuration.author = connection_1_id.author
-        connection_1.configuration.name = connection_1_id.name
-        connection_1.configuration.version = connection_1_id.version
+        connection_1 = OEFLocalConnection(
+            node, address=address_1, connection_id=connection_1_id
+        )
 
-        connection_2 = _make_local_connection(address_2, node)
-        connection_2.configuration.author = connection_2_id.author
-        connection_2.configuration.name = connection_2_id.name
-        connection_2.configuration.version = connection_2_id.version
+        connection_2 = OEFLocalConnection(
+            node, address=address_2, connection_id=connection_2_id
+        )
 
         multiplexer = Multiplexer([connection_1, connection_2])
 
@@ -403,9 +401,13 @@ def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
         address_1 = "address_1"
-        connection_1 = _make_local_connection(address_1, node)
-        connection_1.configuration.restricted_to_protocols = ({"my_private_protocol"},)
-        connection_1.configuration.excluded_protocols = ({"my_other_protocol"},)
+        public_id = PublicId.from_str("fetchai/my_private_protocol:0.1.0")
+        connection_1 = _make_local_connection(
+            address_1,
+            node,
+            restricted_to_protocols={public_id},
+            excluded_protocols={public_id},
+        )
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()
@@ -422,7 +424,7 @@ def test_send_message_no_supported_protocol():
             time.sleep(0.5)
             mock_logger_warning.assert_called_with(
                 "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection_1.public_id, protocol_id
+                    connection_1.connection_id, protocol_id
                 )
             )
 

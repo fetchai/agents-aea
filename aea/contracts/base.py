@@ -18,27 +18,39 @@
 # ------------------------------------------------------------------------------
 
 """The base contract."""
+import inspect
 import json
+import logging
+import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, cast
 
-from aea.configurations.base import ContractConfig, ContractId
+from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
+    ContractConfig,
+    ContractId,
+)
 from aea.configurations.components import Component
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+
+logger = logging.getLogger(__name__)
 
 
 class Contract(Component):
     """Abstract definition of a contract."""
 
     def __init__(
-        self, config: ContractConfig,
+        self, config: ContractConfig, contract_interface: Dict[str, Any],
     ):
         """
         Initialize the contract.
 
         :param config: the contract configurations.
+        :param contract_interface: the contract interface
         """
         super().__init__(config)
-        self._contract_interface = None  # type: Optional[Dict[str, Any]]
+        self._contract_interface = contract_interface  # type: Dict[str, Any]
 
     @property
     def id(self) -> ContractId:
@@ -54,16 +66,54 @@ class Contract(Component):
     @property
     def contract_interface(self) -> Dict[str, Any]:
         """Get the contract interface."""
-        assert self._contract_interface is not None, "Contract interface not set."
         return self._contract_interface
 
-    def load(self) -> None:
+    @classmethod
+    def from_dir(cls, directory: str) -> "Contract":
         """
-        Load the contract.
+        Load the protocol from a directory.
 
-        - load the contract interface, specified in the contract.yaml
-          'path_to_contract_interface' field.
+        :param directory: the directory to the skill package.
+        :return: the contract object.
         """
-        path = Path(self.directory, self.config.path_to_contract_interface)
+        configuration = cast(
+            ContractConfig,
+            ComponentConfiguration.load(ComponentType.CONTRACT, Path(directory)),
+        )
+        configuration._directory = Path(directory)
+        return Contract.from_config(configuration)
+
+    @classmethod
+    def from_config(cls, configuration: ContractConfig) -> "Contract":
+        """
+        Load contract from configuration
+
+        :param configuration: the contract configuration.
+        :return: the contract object.
+        """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        contract_module = load_module("contracts", directory / "contract.py")
+        classes = inspect.getmembers(contract_module, inspect.isclass)
+        contract_class_name = cast(str, configuration.class_name)
+        contract_classes = list(
+            filter(lambda x: re.match(contract_class_name, x[0]), classes)
+        )
+        name_to_class = dict(contract_classes)
+        logger.debug("Processing contract {}".format(contract_class_name))
+        contract_class = name_to_class.get(contract_class_name, None)
+        assert contract_class_name is not None, "Contract class '{}' not found.".format(
+            contract_class_name
+        )
+
+        path = Path(directory, configuration.path_to_contract_interface)
         with open(path, "r") as interface_file:
-            self._contract_interface = json.load(interface_file)
+            contract_interface = json.load(interface_file)
+
+        return contract_class(configuration, contract_interface)

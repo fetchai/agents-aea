@@ -655,6 +655,13 @@ class PackageConfiguration(Configuration, ABC):
         self.aea_version = aea_version if aea_version != "" else aea.__version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
+        self._directory = None  # type: Optional[Path]
+
+    @property
+    def directory(self) -> Optional[Path]:
+        """The path to the configuration file associated to this file, if any."""
+        return self._directory
+
     def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
         try:
             Version(aea_version_specifiers)
@@ -718,6 +725,13 @@ class ComponentConfiguration(PackageConfiguration, ABC):
     def component_id(self) -> ComponentId:
         """Get the component id."""
         return ComponentId(self.component_type, self.public_id)
+
+    @property
+    def prefix_import_path(self) -> str:
+        """Get the prefix import path for this component."""
+        return "packages.{}.{}.{}".format(
+            self.public_id.author, self.component_type.to_plural(), self.public_id.name
+        )
 
     @staticmethod
     def load(

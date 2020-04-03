@@ -18,13 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
+import inspect
 import itertools
 import logging
 import os
-import types
-from contextlib import contextmanager
+import re
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -36,14 +36,19 @@ from aea.configurations.base import (
     ComponentId,
     ComponentType,
     ConfigurationType,
+    ConnectionConfig,
+    ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    ProtocolConfig,
     PublicId,
+    SkillConfig,
 )
 from aea.configurations.components import Component
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
+from aea.contracts.base import Contract
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
@@ -56,11 +61,12 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
-from aea.helpers.base import _SysModules
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
+from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill
+from aea.skills.base import Skill, SkillContext
 
 PathLike = Union[os.PathLike, Path, str]
 
@@ -74,10 +80,10 @@ class _DependenciesManager:
         """Initialize the dependency graph."""
         # adjacency list of the dependency DAG
         # an arc means "depends on"
-        self._dependencies = {}  # type: Dict[ComponentId, Component]
+        self._dependencies = {}  # type: Dict[ComponentId, ComponentConfiguration]
         self._all_dependencies_by_type = (
             {}
-        )  # type: Dict[ComponentType, Dict[ComponentId, Component]]
+        )  # type: Dict[ComponentType, Dict[ComponentId, ComponentConfiguration]]
         self._prefix_to_components = (
             {}
         )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
@@ -95,58 +101,58 @@ class _DependenciesManager:
         return {max(ids) for _, ids in self._prefix_to_components.items()}
 
     @property
-    def protocols(self) -> Dict[ComponentId, Protocol]:
+    def protocols(self) -> Dict[ComponentId, ProtocolConfig]:
         """Get the protocols."""
         return cast(
-            Dict[ComponentId, Protocol],
+            Dict[ComponentId, ProtocolConfig],
             self._all_dependencies_by_type.get(ComponentType.PROTOCOL, {}),
         )
 
     @property
-    def connections(self) -> Dict[ComponentId, Connection]:
+    def connections(self) -> Dict[ComponentId, ConnectionConfig]:
         """Get the connections."""
         return cast(
-            Dict[ComponentId, Connection],
+            Dict[ComponentId, ConnectionConfig],
             self._all_dependencies_by_type.get(ComponentType.CONNECTION, {}),
         )
 
     @property
-    def skills(self) -> Dict[ComponentId, Skill]:
+    def skills(self) -> Dict[ComponentId, SkillConfig]:
         """Get the skills."""
         return cast(
-            Dict[ComponentId, Skill],
+            Dict[ComponentId, SkillConfig],
             self._all_dependencies_by_type.get(ComponentType.SKILL, {}),
         )
 
     @property
-    def contracts(self) -> Dict[ComponentId, Any]:
+    def contracts(self) -> Dict[ComponentId, ContractConfig]:
         """Get the contracts."""
         return cast(
-            Dict[ComponentId, Any],
+            Dict[ComponentId, ContractConfig],
             self._all_dependencies_by_type.get(ComponentType.CONTRACT, {}),
         )
 
-    def add_component(self, component: Component) -> None:
+    def add_component(self, configuration: ComponentConfiguration) -> None:
         """
         Add a component to the dependency manager..
 
-        :param component: the component to add.
+        :param configuration: the component configuration to add.
         :return: None
         """
         # add to main index
-        self._dependencies[component.component_id] = component
+        self._dependencies[configuration.component_id] = configuration
         # add to index by type
-        self._all_dependencies_by_type.setdefault(component.component_type, {})[
-            component.component_id
-        ] = component
+        self._all_dependencies_by_type.setdefault(configuration.component_type, {})[
+            configuration.component_id
+        ] = configuration
         # add to prefix to id index
         self._prefix_to_components.setdefault(
-            component.component_id.component_prefix, set()
-        ).add(component.component_id)
+            configuration.component_id.component_prefix, set()
+        ).add(configuration.component_id)
         # populate inverse dependency
-        for dependency in component.configuration.package_dependencies:
+        for dependency in configuration.package_dependencies:
             self._inverse_dependency_graph.setdefault(dependency, set()).add(
-                component.component_id
+                configuration.component_id
             )
 
     def remove_component(self, component_id: ComponentId):
@@ -181,7 +187,7 @@ class _DependenciesManager:
             component_id
         )
         # update inverse dependency graph
-        for dependency in component.configuration.package_dependencies:
+        for dependency in component.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
 
     def check_package_dependencies(
@@ -201,52 +207,10 @@ class _DependenciesManager:
     def pypi_dependencies(self) -> Dependencies:
         """Get all the PyPI dependencies."""
         all_pypi_dependencies = {}  # type: Dependencies
-        for component in self._dependencies.values():
+        for configuration in self._dependencies.values():
             # TODO implement merging of two PyPI dependencies.
-            all_pypi_dependencies.update(component.configuration.pypi_dependencies)
+            all_pypi_dependencies.update(configuration.pypi_dependencies)
         return all_pypi_dependencies
-
-    @contextmanager
-    def load_dependencies(self):
-        """
-        Load dependencies of a component, so its modules can be loaded.
-
-        :return: None
-        """
-        modules = self._get_import_order()
-        with _SysModules.load_modules(modules):
-            yield
-
-    def _get_import_order(self) -> List[Tuple[str, types.ModuleType]]:
-        """
-        Get the import order.
-
-        At the moment:
-        - protocols and contracts don't have dependencies.
-        - a connection can depend on protocols.
-        - a skill can depend on protocols and contracts.
-
-        :return: a list of pairs: (import path, module object)
-        """
-        # get protocols first
-        components = filter(
-            lambda x: x.component_id in self.dependencies_highest_version,
-            itertools.chain(
-                self.protocols.values(),
-                self.contracts.values(),
-                self.connections.values(),
-                self.skills.values(),
-            ),
-        )
-        module_by_import_path = [
-            (self._build_dotted_part(component, relative_import_path), module_obj)
-            for component in components
-            for (
-                relative_import_path,
-                module_obj,
-            ) in component.importpath_to_module.items()
-        ]
-        return cast(List[Tuple[str, types.ModuleType]], module_by_import_path)
 
     @staticmethod
     def _build_dotted_part(component, relative_import_path) -> str:
@@ -425,16 +389,9 @@ class AEABuilder:
             component_type, directory, skip_consistency_check
         )
         self._check_can_add(configuration)
-
-        # with self._package_dependency_manager.load_dependencies():
-        component = Component.load_from_directory(
-            component_type, directory, skip_consistency_check
-        )
-
         # update dependency graph
-        self._package_dependency_manager.add_component(component)
-        # register new package in resources
-        self._add_component_to_resources(component)
+        self._package_dependency_manager.add_component(configuration)
+        configuration._directory = directory
 
         return self
 
@@ -572,7 +529,7 @@ class AEABuilder:
 
     def _process_connection_ids(
         self, connection_ids: Optional[Collection[PublicId]] = None
-    ) -> List[Connection]:
+    ) -> List[PublicId]:
         """
         Process connection ids.
 
@@ -595,15 +552,17 @@ class AEABuilder:
                         sorted(map(str, non_supported_connections))
                     )
                 )
-            connections = [
-                connection
-                for id_, connection in self._package_dependency_manager.connections.items()
-                if id_.public_id in connection_ids_set
+            selected_connections_ids = [
+                component_id.public_id
+                for component_id in self._package_dependency_manager.connections.keys()
+                if component_id.public_id in connection_ids_set
             ]
         else:
-            connections = list(self._package_dependency_manager.connections.values())
+            selected_connections_ids = [
+                k.public_id for k in self._package_dependency_manager.connections.keys()
+            ]
 
-        return connections
+        return selected_connections_ids
 
     def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
         """
@@ -614,10 +573,9 @@ class AEABuilder:
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
-        connections = self._process_connection_ids(connection_ids)
-        for connection in connections:
-            connection.address = identity.address
-            connection.load()
+        self._load_and_add_protocols()
+        self._load_and_add_contracts()
+        connections = self._load_connections(identity.address, connection_ids)
         aea = AEA(
             identity,
             connections,
@@ -630,17 +588,8 @@ class AEABuilder:
             is_programmatic=True,
             max_reactions=20,
         )
-        self._set_agent_context_to_all_skills(aea.context)
+        self._load_and_add_skills(aea.context)
         return aea
-
-    def _set_agent_context_to_all_skills(self, context: AgentContext) -> None:
-        """Set a skill context to all skills"""
-        for skill in self._resources.get_all_skills():
-            logger_name = "aea.{}.skills.{}.{}".format(
-                context.agent_name, skill.configuration.author, skill.configuration.name
-            )
-            skill.skill_context.set_agent_context(context)
-            skill.skill_context._logger = logging.getLogger(logger_name)
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
@@ -788,6 +737,66 @@ class AEABuilder:
 
         return builder
 
+    def _load_connections(
+        self, address: Address, connection_ids: Optional[Collection[PublicId]] = None
+    ):
+        connections_ids = self._process_connection_ids(connection_ids)
+
+        def get_connection_configuration(connection_id):
+            return self._package_dependency_manager.connections[
+                ComponentId(ComponentType.CONNECTION, connection_id)
+            ]
+
+        return [
+            _load_connection(address, get_connection_configuration(connection_id))
+            for connection_id in connections_ids
+        ]
+
+    def _load_and_add_protocols(self) -> None:
+        for configuration in self._package_dependency_manager.protocols.values():
+            configuration = cast(ProtocolConfig, configuration)
+            try:
+                protocol = Protocol.from_config(configuration)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading protocol {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
+            self._add_component_to_resources(protocol)
+
+    def _load_and_add_contracts(self) -> None:
+        for configuration in self._package_dependency_manager.contracts.values():
+            configuration = cast(ContractConfig, configuration)
+            try:
+                contract = Contract.from_config(configuration)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading contract {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
+            self._add_component_to_resources(contract)
+
+    def _load_and_add_skills(self, context: AgentContext) -> None:
+        for configuration in self._package_dependency_manager.skills.values():
+            logger_name = "aea.{}.skills.{}.{}".format(
+                context.agent_name, configuration.author, configuration.name
+            )
+            skill_context = SkillContext()
+            skill_context.set_agent_context(context)
+            skill_context.logger = logging.getLogger(logger_name)
+            configuration = cast(SkillConfig, configuration)
+            try:
+                skill = Skill.from_config(configuration, skill_context=skill_context)
+            except Exception as e:
+                raise Exception(
+                    "An error occurred while loading skill {}: {}".format(
+                        configuration.public_id, str(e)
+                    )
+                )
+            self._add_component_to_resources(skill)
+
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     """Verify or create private keys."""
@@ -842,3 +851,46 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
+
+
+def _load_connection(address: Address, configuration: ConnectionConfig) -> Connection:
+    """
+    Load a connection from a directory.
+
+    :param address: the connection address.
+    :param configuration: the connection configuration.
+    :return: the connection.
+    """
+    try:
+        directory = cast(Path, configuration.directory)
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        connection_module_path = directory / "connection.py"
+        assert (
+            connection_module_path.exists() and connection_module_path.is_file()
+        ), "Connection module '{}' not found.".format(connection_module_path)
+        connection_module = load_module(
+            "connection_module", directory / "connection.py"
+        )
+        classes = inspect.getmembers(connection_module, inspect.isclass)
+        connection_class_name = cast(str, configuration.class_name)
+        connection_classes = list(
+            filter(lambda x: re.match(connection_class_name, x[0]), classes)
+        )
+        name_to_class = dict(connection_classes)
+        logger.debug("Processing connection {}".format(connection_class_name))
+        connection_class = name_to_class.get(connection_class_name, None)
+        assert connection_class is not None, "Connection class '{}' not found.".format(
+            connection_class_name
+        )
+        return connection_class.from_config(
+            address=address, configuration=configuration
+        )
+    except Exception as e:
+        raise Exception(
+            "An error occurred while loading connection {}: {}".format(
+                configuration.public_id, str(e)
+            )
+        )

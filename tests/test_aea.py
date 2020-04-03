@@ -23,15 +23,13 @@ import tempfile
 import time
 from pathlib import Path
 from threading import Thread
-from typing import cast
 
 import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.components import Component
+from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -338,26 +336,13 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
 
-        cls.default_protocol = cast(
-            Protocol,
-            Component.load_from_directory(
-                ComponentType.PROTOCOL, Path(AEA_DIR, "protocols", "default")
-            ),
+        cls.default_protocol = Protocol.from_dir(
+            str(Path(AEA_DIR, "protocols", "default"))
         )
         cls.resources.add_protocol(cls.default_protocol)
 
-        cls.error_skill = cast(
-            Skill,
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(AEA_DIR, "skills", "error")
-            ),
-        )
-        cls.dummy_skill = cast(
-            Skill,
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
-            ),
-        )
+        cls.error_skill = Skill.from_dir(str(Path(AEA_DIR, "skills", "error")))
+        cls.dummy_skill = Skill.from_dir(str(Path(CUR_PATH, "data", "dummy_skill")))
         cls.resources.add_skill(cls.dummy_skill)
         cls.resources.add_skill(cls.error_skill)
 
@@ -446,11 +431,7 @@ class TestAddBehaviourDynamically:
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources()
-        resources.add_component(
-            Component.load_from_directory(
-                ComponentType.SKILL, Path(CUR_PATH, "data", "dummy_skill")
-            )
-        )
+        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         cls.input_file = tempfile.mkstemp()[1]
         cls.output_file = tempfile.mkstemp()[1]

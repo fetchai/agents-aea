@@ -6,8 +6,9 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmRXXJsv5bfvb7qsyxQtVzXwn6PMLJKkbm6kg4DNkT1NtW
-  behaviours.py: QmQRBZUhT8YmgkCeW8RXc2T8qWc5hVotWgMACwBDpFmyKY
-  handlers.py: QmNP6CN33FLYX1rWzWPRMG4eEMRrrQJoiT3qpiDegM87JL
+  behaviours.py: QmSN73725J7vStiehwfbEFfSmepyAgCNoqSbApgjsjB91L
+  dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
+  handlers.py: QmX5ZWSN1gZaD5qCqzr3K7xt5JkQkEQDj7GvxQNfpHgFAW
   strategy.py: QmQEKLcMH6vQdCwAfDJngQMpn1vvkgqUssgxU8LPzCxsQ8
 fingerprint_ignore_patterns: []
 contracts:
@@ -32,6 +33,9 @@ handlers:
     args: {}
     class_name: TransactionHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
     args:
       search_query:

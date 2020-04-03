@@ -25,7 +25,10 @@ from aea.contracts.base import Contract
 class MyScaffoldContract(Contract):
     """The scaffold contract class."""
 
-    def load(self) -> None:
-        """Load the connection."""
-        super().load()
-        # Put your code here to initialize the contract.
+    def __init__(self, **kwargs):
+        """
+        Initialize the contract.
+
+        :param kwargs: keyword arguments for the parent constructor.
+        """
+        super().__init__(**kwargs)

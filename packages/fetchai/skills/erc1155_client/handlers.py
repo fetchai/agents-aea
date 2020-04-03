@@ -19,11 +19,14 @@
 
 """This package contains handlers for the erc1155-client skill."""
 
-from typing import Optional, Tuple, cast
+from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
@@ -31,6 +34,7 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.erc1155_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 
 
@@ -55,9 +59,30 @@ class FIPAHandler(Handler):
         :return: None
         """
         fipa_msg = cast(FipaMessage, message)
+        dialogue_reference = fipa_msg.dialogue_reference
 
-        if fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg)
+        dialogues = cast(Dialogues, self.context.dialogues)
+        if dialogues.is_belonging_to_registered_dialogue(
+            fipa_msg, self.context.agent_address
+        ):
+            dialogue = cast(
+                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
+            )
+            dialogue.incoming_extend(fipa_msg)
+        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
+            dialogue = cast(
+                Dialogue,
+                dialogues.create_opponent_initiated(
+                    fipa_msg.counterparty, dialogue_reference, is_seller=True
+                ),
+            )
+            dialogue.incoming_extend(fipa_msg)
+        else:
+            self._handle_unidentified_dialogue(fipa_msg)
+            return
+
+        if fipa_msg.performative == FipaMessage.Performative.PROPOSE:
+            self._handle_propose(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """
@@ -67,50 +92,78 @@ class FIPAHandler(Handler):
         """
         pass
 
-    def _handle_inform(self, msg: FipaMessage) -> None:
+    def _handle_unidentified_dialogue(self, msg: FipaMessage) -> None:
         """
-        Handle the match inform.
+        Handle an unidentified dialogue.
+
+        Respond to the sender with a default message containing the appropriate error information.
 
         :param msg: the message
         :return: None
         """
         self.context.logger.info(
-            "[{}]: received INFORM from sender={}".format(
+            "[{}]: unidentified dialogue.".format(self.context.agent_name)
+        )
+        default_msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Invalid dialogue.",
+            error_data={"fipa_message": b""},
+        )
+        self.context.outbox.put_message(
+            to=msg.counterparty,
+            sender=self.context.agent_address,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(default_msg),
+        )
+
+    def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
+        """
+        Handle the propose.
+
+        :param msg: the message
+        :param dialogue: the dialogue object
+        :return: None
+        """
+        data = msg.proposal.values
+        self.context.logger.info(
+            "[{}]: received PROPOSE from sender={}".format(
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
-        if len(msg.info.keys()) >= 1:
-            data = msg.info
-            if "contract" in data.keys():
-                contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-                contract.set_address(
-                    ledger_api=self.context.ledger_apis.ethereum_api,
-                    contract_address=data["contract"],
-                )
-                assert "from_supply" in data.keys(), "from supply is not set"
-                assert "to_supply" in data.keys(), "to supply is not set"
-                assert "value" in data.keys(), "value is not set"
-                assert "trade_nonce" in data.keys(), "trade_nonce is not set"
-                assert "token_id" in data.keys(), "token id is not set"
+        if "contract" in data.keys():
+            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            contract.set_address(
+                ledger_api=self.context.ledger_apis.ethereum_api,
+                contract_address=data["contract"],
+            )
+            assert "from_supply" in data.keys(), "from supply is not set"
+            assert "to_supply" in data.keys(), "to supply is not set"
+            assert "value" in data.keys(), "value is not set"
+            assert "trade_nonce" in data.keys(), "trade_nonce is not set"
+            assert "token_id" in data.keys(), "token id is not set"
 
-                self.counterparty = msg.counterparty
-                tx = contract.get_hash_single_transaction(
-                    from_address=msg.counterparty,
-                    to_address=self.context.agent_address,
-                    item_id=cast(int, data["token_id"]),
-                    from_supply=cast(int, data["from_supply"]),
-                    to_supply=cast(int, data["to_supply"]),
-                    value=cast(int, data["value"]),
-                    trade_nonce=cast(int, data["trade_nonce"]),
-                    ledger_api=self.context.ledger_apis.ethereum_api,
-                    skill_callback_id=self.context.skill_id,
-                )
+            self.counterparty = msg.counterparty
+            tx = contract.get_hash_single_transaction(
+                from_address=msg.counterparty,
+                to_address=self.context.agent_address,
+                item_id=int(data["token_id"]),
+                from_supply=int(data["from_supply"]),
+                to_supply=int(data["to_supply"]),
+                value=int(data["value"]),
+                trade_nonce=int(data["trade_nonce"]),
+                ledger_api=self.context.ledger_apis.ethereum_api,
+                skill_callback_id=self.context.skill_id,
+                info={"dialogue_label": dialogue.dialogue_label.json},
+            )
 
-                self.context.decision_maker_message_queue.put_nowait(tx)
-
+            self.context.decision_maker_message_queue.put_nowait(tx)
         else:
             self.context.logger.info(
-                "[{}]: received no data from sender={}".format(
+                "[{}]: received invalid data from sender={}".format(
                     self.context.agent_name, msg.counterparty[-5:]
                 )
             )
@@ -164,7 +217,11 @@ class OEFSearchHandler(Handler):
             strategy.is_searching = False
             # pick first agent found
             opponent_addr = agents[0]
-
+            # create self_initiated_dialogue
+            dialogues = cast(Dialogues, self.context.dialogues)
+            dialogue = dialogues.create_self_initiated(
+                opponent_addr, self.context.agent_address, is_seller=False
+            )
             query = strategy.get_service_query()
             self.context.logger.info(
                 "[{}]: sending CFP to agent={}".format(
@@ -173,11 +230,12 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg = FipaMessage(
                 message_id=FipaDialogue.STARTING_MESSAGE_ID,
-                dialogue_reference=("", ""),
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 performative=FipaMessage.Performative.CFP,
                 target=FipaDialogue.STARTING_TARGET,
                 query=query,
             )
+            dialogue.outgoing_extend(cfp_msg)
             self.context.outbox.put_message(
                 to=opponent_addr,
                 sender=self.context.agent_address,
@@ -209,24 +267,30 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        self.context.logger.info(tx_msg_response)
         if (
             tx_msg_response.tx_id
             == ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value
         ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signature")
-            new_message_id = 2
-            new_target = 1
-
+            info = tx_msg_response.info
+            dialogue_label = DialogueLabel.from_json(
+                cast(Dict[str, str], info.get("dialogue_label"))
+            )
+            dialogues = cast(Dialogues, self.context.dialogues)
+            dialogue = dialogues.dialogues[dialogue_label]
+            fipa_msg = cast(FipaMessage, dialogue.last_incoming_message)
+            new_message_id = fipa_msg.message_id + 1
+            new_target = fipa_msg.message_id
+            counterparty_addr = dialogue.dialogue_label.dialogue_opponent_addr
             inform_msg = FipaMessage(
                 message_id=new_message_id,
-                dialogue_reference=("", ""),
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target,
-                performative=FipaMessage.Performative.INFORM,
-                info={"signature": tx_signed},
+                performative=FipaMessage.Performative.ACCEPT_W_INFORM,
+                info={"tx_signature": tx_signed},
             )
             self.context.outbox.put_message(
-                to=self.context.handlers.fipa.counterparty,
+                to=counterparty_addr,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(inform_msg),

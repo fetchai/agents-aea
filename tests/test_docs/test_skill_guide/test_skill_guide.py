@@ -58,6 +58,10 @@ logger = logging.getLogger(__name__)
 class TestBuildSkill:
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
+
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
@@ -108,6 +112,12 @@ class TestBuildSkill:
             cls.result = cls.runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+                standalone_mode=False,
+            )
+            # add oef connection
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
                 standalone_mode=False,
             )
 
@@ -172,7 +182,14 @@ class TestBuildSkill:
         try:
             # run service agent
             process_one = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )
@@ -180,7 +197,14 @@ class TestBuildSkill:
             # run the agent
             os.chdir(Path(self.t, self.agent_name))
             process_two = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )

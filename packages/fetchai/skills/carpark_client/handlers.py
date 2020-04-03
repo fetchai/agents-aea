@@ -115,7 +115,7 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data="fipa_message",
+            error_data={"fipa_message": b""},
         )  # FipaSerializer().encode(msg))
         self.context.outbox.put_message(
             to=msg.counterparty,

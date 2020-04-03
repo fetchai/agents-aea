@@ -31,12 +31,13 @@ from typing import Any, Dict, Optional, cast
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
+    ComponentConfiguration,
+    ComponentType,
     ProtocolConfig,
-    ProtocolId,
     PublicId,
 )
 from aea.configurations.components import Component
-from aea.helpers.base import load_module
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -233,52 +234,55 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(
-        self, configuration: ProtocolConfig,
-    ):
+    def __init__(self, configuration: ProtocolConfig, serializer: Serializer):
         """
         Initialize the protocol manager.
 
         :param configuration: the protocol configurations.
+        :param serializer: the serializer.
         """
         super().__init__(configuration)
 
-        self._serializer = None  # type: Optional[Serializer]
-
-    @property
-    def id(self) -> ProtocolId:
-        """Get the name."""
-        return self._configuration.public_id
+        self._serializer = serializer  # type: Serializer
 
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
-        assert self._serializer is not None, "Serializer not initialized yet."
         return self._serializer
 
-    @serializer.setter
-    def serializer(self, serializer: Serializer) -> None:
-        """Set the serializer."""
-        assert self._serializer is None, "Serializer already initialized."
-        self._serializer = serializer
-
-    @property
-    def config(self) -> ProtocolConfig:
-        """Get the configuration."""
-        return cast(ProtocolConfig, self._configuration)
-
-    def load(self) -> None:
+    @classmethod
+    def from_dir(cls, directory: str) -> "Protocol":
         """
-        Set the component up.
+        Load the protocol from a directory.
 
-        In the case of a protocol, we load the 'serialization.py' module
-        to instantiate an instance of the Serializer.
-
-        :return: None
-        :raises Exception: if the parsing failed.
+        :param directory: the directory to the skill package.
+        :return: the protocol object.
         """
+        configuration = cast(
+            ProtocolConfig,
+            ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
+        )
+        configuration._directory = Path(directory)
+        return Protocol.from_config(configuration)
+
+    @classmethod
+    def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
+        """
+        Load the protocol from configuration.
+
+        :param configuration: the protocol configuration.
+        :return: the protocol object.
+        """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
         serialization_module = load_module(
-            "serialization", Path(self.directory, "serialization.py")
+            "serialization", Path(directory, "serialization.py")
         )
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
@@ -287,5 +291,5 @@ class Protocol(Component):
         assert len(serializer_classes) == 1, "Not exactly one serializer detected."
         serializer_class = serializer_classes[0][1]
 
-        # update attributes.
-        self._serializer = serializer_class()
+        serializer = serializer_class()
+        return Protocol(configuration, serializer)

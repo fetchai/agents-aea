@@ -70,10 +70,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
             else:
                 self.context.logger.warning(
-                    "[{}]: you have no starting balance on fetchai ledger!".format(
+                    "[{}]: you have no starting balance on fetchai ledger! Inactivating this skill now!".format(
                         self.context.agent_name
                     )
                 )
+                self.context.is_active = False
 
         if self.context.ledger_apis.has_ethereum:
             eth_balance = self.context.ledger_apis.token_balance(
@@ -87,10 +88,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
             else:
                 self.context.logger.warning(
-                    "[{}]: you have no starting balance on ethereum ledger!".format(
+                    "[{}]: you have no starting balance on ethereum ledger! Inactivating this skill now!".format(
                         self.context.agent_name
                     )
                 )
+                self.context.is_active = False
 
         self._register_service()
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)

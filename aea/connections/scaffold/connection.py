@@ -21,16 +21,22 @@
 
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope
 
 
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def load(self) -> None:
-        """Load the connection."""
-        # Put your code here to initialize the connection.
+    def __init__(self, configuration: ConnectionConfig, address: Address):
+        """
+        Initialize a connection to an SDK or API.
+
+        :param configuration: the connection configuration.
+        :param address: the address used in the protocols.
+        """
+        super().__init__(configuration=configuration, address=address)
 
     async def connect(self) -> None:
         """
@@ -64,3 +70,16 @@ class MyScaffoldConnection(Connection):
         :return: the envelope received, or None.
         """
         raise NotImplementedError  # pragma: no cover
+
+    @classmethod
+    def from_config(
+        cls, address: "Address", configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the scaffold connection from the connection configuration.
+
+        :param configuration: the connection configuration object.
+        :param address: the address of the agent.
+        :return: the connection object
+        """
+        return MyScaffoldConnection(address=address, configuration=configuration)
