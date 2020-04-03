@@ -35,6 +35,7 @@ def _raise_exception():
 
 
 @mock.patch("aea.cli.registry.fetch.PublicId", PublicIdMock)
+@mock.patch("aea.cli.registry.fetch.os.makedirs")
 @mock.patch("aea.cli.registry.fetch.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.fetch.download_file", return_value="filepath")
 @mock.patch("aea.cli.registry.fetch.extract")
@@ -64,6 +65,7 @@ class TestFetchAgent(TestCase):
         extract_mock,
         download_file_mock,
         try_to_load_agent_config_mock,
+        makedirs_mock,
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
@@ -75,7 +77,7 @@ class TestFetchAgent(TestCase):
             ),
         )
         download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", "cwd/name")
+        extract_mock.assert_called_once_with("filepath", "cwd")
 
     @mock.patch("aea.cli.registry.fetch._add_item")
     @mock.patch(
@@ -95,6 +97,7 @@ class TestFetchAgent(TestCase):
         extract_mock,
         download_file_mock,
         try_to_load_agent_config_mock,
+        makedirs_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
         public_id_mock = PublicIdMock()
@@ -106,7 +109,7 @@ class TestFetchAgent(TestCase):
             ),
         )
         download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", "cwd/name")
+        extract_mock.assert_called_once_with("filepath", "cwd")
         add_item_mock.assert_called()
 
     @mock.patch("aea.cli.registry.fetch._add_item", _raise_exception)

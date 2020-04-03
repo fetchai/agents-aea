@@ -42,17 +42,21 @@ def fetch_agent(ctx: Context, public_id: PublicId, click_context) -> None:
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
-    target_folder = os.path.join(ctx.cwd, name)
-    os.makedirs(target_folder, exist_ok=True)
-
     filepath = download_file(file_url, ctx.cwd)
-    extract(filepath, target_folder)
+    extract(filepath, ctx.cwd)
+
+    target_folder = os.path.join(ctx.cwd, name)
     ctx.cwd = target_folder
     try_to_load_agent_config(ctx)
 
     click.echo("Fetching dependencies...")
     for item_type in ("connection", "contract", "skill", "protocol"):
         item_type_plural = item_type + "s"
+
+        # initialize fetched agent with empty folders for custom packages
+        custom_items_folder = os.path.join(ctx.cwd, item_type_plural)
+        os.makedirs(custom_items_folder)
+
         for item_public_id in resp[item_type_plural]:
             item_public_id = PublicId.from_str(item_public_id)
             try:
