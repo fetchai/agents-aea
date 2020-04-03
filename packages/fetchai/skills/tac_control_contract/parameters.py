@@ -20,12 +20,9 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
-import logging
 from typing import List, Optional, Set
 
 from aea.skills.base import Model
-
-logger = logging.getLogger("aea.tac_control_skill")
 
 
 class Parameters(Model):

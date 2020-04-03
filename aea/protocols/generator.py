@@ -939,7 +939,7 @@ class ProtocolGenerator:
             cls_str += self._import_from_custom_types_module()
         else:
             cls_str += "\n{}\n".format(self._import_from_custom_types_module())
-        cls_str += '\nlogger = logging.getLogger("packages.{}.protocols.{}.message")\n'.format(
+        cls_str += '\nlogger = logging.getLogger("aea.packages.{}.protocols.{}.message")\n'.format(
             self.protocol_specification.author, self.protocol_specification.name
         )
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"

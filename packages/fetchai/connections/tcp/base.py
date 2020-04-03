@@ -28,7 +28,7 @@ from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
 
 class TCPConnection(Connection, ABC):

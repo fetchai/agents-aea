@@ -35,7 +35,7 @@ from aea.mail.base import Address, Envelope
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 
 """default 'to' field for Gym envelopes."""

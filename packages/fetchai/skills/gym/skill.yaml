@@ -8,8 +8,8 @@ fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
   handlers.py: QmRy12BcZnhbdT2eYVRGf2gWHq5SEXDC9j8vPWMC8RXu32
   helpers.py: Qmc69Gbuh9qjEURnbYUfv6ywYUiPhqnDMC4quyaYyx9cKb
-  rl_agent.py: QmSVQVywGv5ZPqmARqQ4tttyGz3iJamFRKBFUG34ZU6Wt6
-  tasks.py: QmbJSjPzfBq5dnnysgHamyJSxTft7tJUnbKGK3b1bYTvWP
+  rl_agent.py: QmU9qMEamGZCTcX28zzY8G7gBeCdTttHnnZJWu7JqPhN7y
+  tasks.py: QmUU2efW21H5LADMcTDBBa4Erz4REyzNehEe1zGVNMHEL4
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

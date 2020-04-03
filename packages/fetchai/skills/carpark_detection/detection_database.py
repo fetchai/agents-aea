@@ -26,7 +26,9 @@ import time
 
 import skimage  # type: ignore
 
-logger = logging.getLogger("aea.carpark_detection_skill")
+logger = logging.getLogger(
+    "aea.packages.fetchai.skills.carpark_detection.detection_database"
+)
 
 
 class DetectionDatabase:

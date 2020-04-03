@@ -77,7 +77,7 @@ from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.oef")
 
 TARGET = 0
 MESSAGE_ID = 1
