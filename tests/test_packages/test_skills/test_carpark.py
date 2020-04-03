@@ -128,7 +128,7 @@ class TestCarPark:
         )
         assert result.exit_code == 0
 
-        # Load the agent yaml file and manually insert the things we need
+        # Load the skill yaml file and manually insert the things we need
         yaml_path = os.path.join(
             "vendor", "fetchai", "skills", "carpark_detection", "skill.yaml"
         )
@@ -148,6 +148,26 @@ class TestCarPark:
         file.close()
 
         with open(yaml_path, "w") as f:
+            f.write(whole_file)
+
+        # Load the agent yaml file and manually insert the things we need (ledger APIs)
+        file = open("aea-config.yaml", mode="r")
+
+        # read all lines at once
+        whole_file = file.read()
+
+        # add in the ledger address
+        find_text = "ledger_apis: {}"
+        replace_text = """ledger_apis:
+        fetchai:
+            network: testnet"""
+
+        whole_file = whole_file.replace(find_text, replace_text)
+
+        # close the file
+        file.close()
+
+        with open("aea-config.yaml", "w") as f:
             f.write(whole_file)
 
         os.chdir(self.t)

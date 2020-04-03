@@ -23,10 +23,12 @@ import os
 import shutil
 import subprocess  # nosec
 import sys
+from typing import cast
 
 import click
 
-from aea.cli.common import Context, check_aea_project, logger, pass_ctx
+from aea.cli.common import Context, check_aea_project, logger
+from aea.cli.fingerprint import _fingerprint_item
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_VERSION,
@@ -45,9 +47,10 @@ def generate(click_context):
     """Generate a resource for the agent."""
 
 
-def _generate_item(ctx: Context, item_type, specification_path):
+def _generate_item(click_context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
     # check protocol buffer compiler is installed
+    ctx = cast(Context, click_context.obj)
     res = shutil.which("protoc")
     if res is None:
         logger.error(
@@ -171,10 +174,12 @@ def _generate_item(ctx: Context, item_type, specification_path):
             subp.terminate()
             subp.wait(5)
 
+    _fingerprint_item(click_context, "protocol", protocol_spec.public_id)
+
 
 @generate.command()
 @click.argument("protocol_specification_path", type=str, required=True)
-@pass_ctx
-def protocol(ctx: Context, protocol_specification_path: str):
+@click.pass_context
+def protocol(click_context, protocol_specification_path: str):
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
-    _generate_item(ctx, "protocol", protocol_specification_path)
+    _generate_item(click_context, "protocol", protocol_specification_path)

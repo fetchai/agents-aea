@@ -47,7 +47,7 @@ def _read_error(pid: subprocess.Popen):
         print("stderr: " + line.replace("\n", ""))
 
 
-class TestWeatherSkillsFetchaiLedger:
+class TestThermometerSkill:
     """Test that thermometer skills work."""
 
     @pytest.fixture(autouse=True)
@@ -118,6 +118,25 @@ class TestWeatherSkillsFetchaiLedger:
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
+        file = open("aea-config.yaml", mode="r")
+
+        # read all lines at once
+        whole_file = file.read()
+
+        # add in the ledger address
+        find_text = "ledger_apis: {}"
+        replace_text = """ledger_apis:
+        fetchai:
+            network: testnet"""
+
+        whole_file = whole_file.replace(find_text, replace_text)
+
+        file.close()
+
+        with open("aea-config.yaml", "w") as f:
+            f.write(whole_file)
+
+        # Load the skill yaml file and manually insert the things we need
         yaml_path = os.path.join(
             "vendor", "fetchai", "skills", "thermometer", "skill.yaml"
         )
@@ -126,7 +145,7 @@ class TestWeatherSkillsFetchaiLedger:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("has_sensor: True", "has_sensor: False")
+        whole_file = whole_file.replace("has_sensor: true", "has_sensor: false")
 
         # close the file
         file.close()
@@ -256,7 +275,7 @@ class TestWeatherSkillsFetchaiLedger:
             )
             error_read_thread.start()
 
-            time.sleep(10)
+            time.sleep(20)
             process_one.send_signal(signal.SIGINT)
             process_two.send_signal(signal.SIGINT)
 

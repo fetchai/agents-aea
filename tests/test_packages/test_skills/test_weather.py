@@ -115,7 +115,7 @@ class TestWeatherSkills:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
+        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
 
         # close the file
         file.close()
@@ -163,7 +163,7 @@ class TestWeatherSkills:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
+        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
 
         # close the file
         file.close()
@@ -204,7 +204,8 @@ class TestWeatherSkills:
                 env=os.environ.copy(),
             )
 
-            time.sleep(10.0)
+            # TODO increase timeout so we are sure they work until the end of negotiation.
+            time.sleep(5.0)
             process_one.send_signal(signal.SIGINT)
             process_one.wait(timeout=10)
             process_two.send_signal(signal.SIGINT)

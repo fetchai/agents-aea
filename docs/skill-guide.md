@@ -238,7 +238,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ```
 aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registration
-aea run
+aea run --connections fetchai/oef:0.1.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.

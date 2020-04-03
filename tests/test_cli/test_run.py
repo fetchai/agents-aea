@@ -1394,9 +1394,7 @@ class TestRunFailsWhenProtocolNotComplete:
         )
 
         try:
-            cli.main(
-                ["--skip-consistency-check", *CLI_LOG_OPTION, "run"]
-            )
+            cli.main(["--skip-consistency-check", *CLI_LOG_OPTION, "run"])
         except SystemExit as e:
             cls.exit_code = e.code
 
