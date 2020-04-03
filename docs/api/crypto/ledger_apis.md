@@ -56,6 +56,16 @@ Get the apis.
 
 Check if it has the fetchai API.
 
+<a name=".aea.crypto.ledger_apis.LedgerApis.fetchai_api"></a>
+#### fetchai`_`api
+
+```python
+ | @property
+ | fetchai_api() -> FetchAIApi
+```
+
+Get the Fetchai API.
+
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_ethereum"></a>
 #### has`_`ethereum
 
@@ -65,6 +75,16 @@ Check if it has the fetchai API.
 ```
 
 Check if it has the ethereum API.
+
+<a name=".aea.crypto.ledger_apis.LedgerApis.ethereum_api"></a>
+#### ethereum`_`api
+
+```python
+ | @property
+ | ethereum_api() -> EthereumApi
+```
+
+Get the Ethereum API.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_default_ledger"></a>
 #### has`_`default`_`ledger

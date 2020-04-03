@@ -10,7 +10,7 @@ This module contains a generic data model.
 class GenericDataModel(DataModel)
 ```
 
-Data model for the generic seller aea.
+Generic data model.
 
 <a name=".aea.helpers.search.generic.GenericDataModel.__init__"></a>
 #### `__`init`__`

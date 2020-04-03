@@ -67,7 +67,7 @@ a display_address str
 #### sign`_`message
 
 ```python
- | sign_message(message: bytes) -> bytes
+ | sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
 ```
 
 Sign a message in bytes string form.
@@ -75,10 +75,11 @@ Sign a message in bytes string form.
 **Arguments**:
 
 - `message`: the message we want to send
+- `is_deprecated_mode`: if the deprecated signing is used
 
 **Returns**:
 
-Signed message in bytes
+signature of the message in string form
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.sign_transaction"></a>
 #### sign`_`transaction

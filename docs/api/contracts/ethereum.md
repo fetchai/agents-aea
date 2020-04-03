@@ -12,14 +12,19 @@ class Contract(BaseContract)
 
 Definition of an ethereum contract.
 
-<a name=".aea.contracts.ethereum.Contract.load"></a>
-#### load
+<a name=".aea.contracts.ethereum.Contract.__init__"></a>
+#### `__`init`__`
 
 ```python
- | load() -> None
+ | __init__(config: ContractConfig, contract_interface: Dict[str, Any])
 ```
 
-Load the contract.
+Initialize the contract.
+
+**Arguments**:
+
+- `config`: the contract configurations.
+- `contract_interface`: the contract interface.
 
 <a name=".aea.contracts.ethereum.Contract.set_instance"></a>
 #### set`_`instance

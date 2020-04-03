@@ -16,7 +16,7 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ComponentConfiguration, is_vendor: bool = False)
+ | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False)
 ```
 
 Initialize a package.
@@ -95,37 +95,4 @@ Get the component configuration.
 ```
 
 Set the directory. Raise error if already set.
-
-<a name=".aea.configurations.components.Component.load"></a>
-#### load
-
-```python
- | load() -> None
-```
-
-Set the component up.
-
-This method is called by the framework before running the agent.
-The implementation varies depending on the type of component.
-Please check the concrete component classes.
-
-<a name=".aea.configurations.components.Component.load_from_directory"></a>
-#### load`_`from`_`directory
-
-```python
- | @classmethod
- | load_from_directory(cls, component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> "Component"
-```
-
-Load a component from the directory.
-
-**Arguments**:
-
-- `component_type`: the component type.
-- `directory`: the directory of the package.
-- `skip_consistency_check`: if True, the consistency check are skipped.
-
-**Returns**:
-
-the loaded component.
 

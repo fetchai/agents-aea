@@ -57,8 +57,8 @@ def fetch_agent(ctx: Context, public_id: PublicId, click_context) -> None:
         custom_items_folder = os.path.join(ctx.cwd, item_type_plural)
         os.makedirs(custom_items_folder)
 
-        for item_public_id in resp[item_type_plural]:
-            item_public_id = PublicId.from_str(item_public_id)
+        config = getattr(ctx.agent_config, item_type_plural)
+        for item_public_id in config:
             try:
                 _add_item(click_context, item_type, item_public_id)
             except Exception as e:
