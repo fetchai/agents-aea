@@ -65,7 +65,7 @@ class TestFetchAgent(TestCase):
         extract_mock,
         download_file_mock,
         try_to_load_agent_config_mock,
-        makedirs_mock
+        makedirs_mock,
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
@@ -97,7 +97,7 @@ class TestFetchAgent(TestCase):
         extract_mock,
         download_file_mock,
         try_to_load_agent_config_mock,
-        makedirs_mock
+        makedirs_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
         public_id_mock = PublicIdMock()
