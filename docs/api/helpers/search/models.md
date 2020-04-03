@@ -69,24 +69,6 @@ Initialize a data model.
 
 Compare with another object.
 
-<a name=".aea.helpers.search.models.GenericDataModel"></a>
-### GenericDataModel
-
-```python
-class GenericDataModel(DataModel)
-```
-
-Data model for the the erc1155 deploy skill aea.
-
-<a name=".aea.helpers.search.models.GenericDataModel.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(data_model_attributes: Dict[str, Dict[str, Union[str, bool]]], data_model_name: str)
-```
-
-Initialise the dataModel.
-
 <a name=".aea.helpers.search.models.Description"></a>
 ### Description
 

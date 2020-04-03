@@ -606,15 +606,39 @@ Get the handlers.
 
 Get the handlers.
 
-<a name=".aea.skills.base.Skill.load"></a>
-#### load
+<a name=".aea.skills.base.Skill.from_dir"></a>
+#### from`_`dir
 
 ```python
- | load()
+ | @classmethod
+ | from_dir(cls, directory: str) -> "Skill"
 ```
 
-Set the component up.
+Load the skill from a directory.
 
-In the case of a skill, we load the 'serialization.py' module
-to instantiate an instance of the Serializer.
+**Arguments**:
+
+- `directory`: the directory to the skill package.
+
+**Returns**:
+
+the skill object.
+
+<a name=".aea.skills.base.Skill.from_config"></a>
+#### from`_`config
+
+```python
+ | @classmethod
+ | from_config(cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None) -> "Skill"
+```
+
+Load the skill from configuration.
+
+**Arguments**:
+
+- `configuration`: a skill configuration. Must be associated with a directory.
+
+**Returns**:
+
+the skill.
 

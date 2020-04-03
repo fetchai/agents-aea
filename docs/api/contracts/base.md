@@ -16,7 +16,7 @@ Abstract definition of a contract.
 #### `__`init`__`
 
 ```python
- | __init__(config: ContractConfig)
+ | __init__(config: ContractConfig, contract_interface: Dict[str, Any])
 ```
 
 Initialize the contract.
@@ -24,6 +24,7 @@ Initialize the contract.
 **Arguments**:
 
 - `config`: the contract configurations.
+- `contract_interface`: the contract interface
 
 <a name=".aea.contracts.base.Contract.id"></a>
 #### id
@@ -55,15 +56,39 @@ Get the configuration.
 
 Get the contract interface.
 
-<a name=".aea.contracts.base.Contract.load"></a>
-#### load
+<a name=".aea.contracts.base.Contract.from_dir"></a>
+#### from`_`dir
 
 ```python
- | load() -> None
+ | @classmethod
+ | from_dir(cls, directory: str) -> "Contract"
 ```
 
-Load the contract.
+Load the protocol from a directory.
 
-- load the contract interface, specified in the contract.yaml
-  'path_to_contract_interface' field.
+**Arguments**:
+
+- `directory`: the directory to the skill package.
+
+**Returns**:
+
+the contract object.
+
+<a name=".aea.contracts.base.Contract.from_config"></a>
+#### from`_`config
+
+```python
+ | @classmethod
+ | from_config(cls, configuration: ContractConfig) -> "Contract"
+```
+
+Load contract from configuration
+
+**Arguments**:
+
+- `configuration`: the contract configuration.
+
+**Returns**:
+
+the contract object.
 

@@ -34,14 +34,21 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ConnectionConfig, address: Optional["Address"] = None)
+ | __init__(configuration: Optional[ConnectionConfig] = None, address: Optional["Address"] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, connection_id: Optional[PublicId] = None)
 ```
 
 Initialize the connection.
 
+The configuration must be specified if and only if the following
+parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
+
 **Arguments**:
 
 - `configuration`: the connection configuration.
+- `address`: the address.
+- `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
+- `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
+- `connection_id`: the connection identifier.
 
 <a name=".aea.connections.base.Connection.loop"></a>
 #### loop
@@ -180,4 +187,23 @@ Receive an envelope.
 **Returns**:
 
 the received envelope, or None if an error occurred.
+
+<a name=".aea.connections.base.Connection.from_config"></a>
+#### from`_`config
+
+```python
+ | @classmethod
+ | from_config(cls, address: "Address", configuration: ConnectionConfig) -> "Connection"
+```
+
+Initialize a connection instance from a configuration.
+
+**Arguments**:
+
+- `address`: the address of the agent.
+- `configuration`: the connection configuration.
+
+**Returns**:
+
+an instance of the concrete connection class.
 

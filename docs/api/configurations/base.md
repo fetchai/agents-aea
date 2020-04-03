@@ -136,6 +136,49 @@ class Configuration(JSONSerializable,  ABC)
 
 Configuration class.
 
+<a name=".aea.configurations.base.Configuration.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize a configuration object.
+
+<a name=".aea.configurations.base.Configuration.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict) -> "Configuration"
+```
+
+Build from a JSON object.
+
+<a name=".aea.configurations.base.Configuration.ordered_json"></a>
+#### ordered`_`json
+
+```python
+ | @property
+ | ordered_json() -> OrderedDict
+```
+
+Reorder the dictionary according to a key ordering.
+
+This method takes all the keys in the key_order list and
+get the associated value in the dictionary (if present).
+For the remaining keys not considered in the order,
+it will use alphanumerical ordering.
+
+In particular, if key_order is an empty sequence, this reduces to
+alphanumerical sorting.
+
+It does not do side-effect.
+
+**Returns**:
+
+the ordered dictionary.
+
 <a name=".aea.configurations.base.CRUDCollection"></a>
 ### CRUDCollection
 
@@ -669,6 +712,16 @@ The fixed version is interpreted with the specifier '=='.
 - `fingerprint`: the fingerprint.
 - `fingerprint_ignore_patterns`: a list of file patterns to ignore files to fingerprint.
 
+<a name=".aea.configurations.base.PackageConfiguration.directory"></a>
+#### directory
+
+```python
+ | @property
+ | directory() -> Optional[Path]
+```
+
+The path to the configuration file associated to this file, if any.
+
 <a name=".aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
 #### aea`_`version`_`specifiers
 
@@ -739,6 +792,16 @@ Get the component type.
 ```
 
 Get the component id.
+
+<a name=".aea.configurations.base.ComponentConfiguration.prefix_import_path"></a>
+#### prefix`_`import`_`path
+
+```python
+ | @property
+ | prefix_import_path() -> str
+```
+
+Get the prefix import path for this component.
 
 <a name=".aea.configurations.base.ComponentConfiguration.load"></a>
 #### load

@@ -16,13 +16,13 @@ This class represents an instance of ErrorCode.
 #### encode
 
 ```python
- | @classmethod
- | encode(cls, error_code_protobuf_object, error_code_object: "ErrorCode") -> None
+ | @staticmethod
+ | encode(error_code_protobuf_object, error_code_object: "ErrorCode") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
 
-The protocol buffer object in the error_code_protobuf_object argument must be matched with the instance of this class in the 'error_code_object' argument.
+The protocol buffer object in the error_code_protobuf_object argument is matched with the instance of this class in the 'error_code_object' argument.
 
 **Arguments**:
 
@@ -43,7 +43,7 @@ None
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-A new instance of this class must be created that matches the protocol buffer object in the 'error_code_protobuf_object' argument.
+A new instance of this class is created that matches the protocol buffer object in the 'error_code_protobuf_object' argument.
 
 **Arguments**:
 
