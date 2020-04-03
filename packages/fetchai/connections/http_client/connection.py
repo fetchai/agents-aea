@@ -39,7 +39,7 @@ NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 
@@ -168,33 +168,24 @@ class HTTPClientConnection(Connection):
     """Proxy to the functionality of the web client."""
 
     def __init__(
-        self,
-        agent_address: Address,
-        provider_address: str,
-        provider_port: int,
-        *args,
-        **kwargs,
+        self, provider_address: str, provider_port: int, **kwargs,
     ):
         """
         Initialize a connection.
 
-        :param agent_address: the address of the agent.
         :param provider_address: server hostname / IP address
         :param provider_port: server port number
         """
-
-        if kwargs.get("connection_id") is None:
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http_client", "0.1.0")
 
-        super().__init__(*args, **kwargs)
-        self.agent_address = agent_address
+        super().__init__(**kwargs)
         self.channel = HTTPClientChannel(
-            agent_address,
+            self.address,
             provider_address,
             provider_port,
             connection_id=self.connection_id,
             excluded_protocols=self.excluded_protocols,
-            restricted_to_protocols=kwargs.get("restricted_to_protocols", {}),
         )
 
     async def connect(self) -> None:
@@ -253,28 +244,20 @@ class HTTPClientConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, agent_address: Address, connection_configuration: ConnectionConfig
+        cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the HTTP connection from a connection configuration.
 
-        :param agent_address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
         :return: the connection object
         """
-        address = cast(str, connection_configuration.config.get("address"))
-        port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
+        provider_address = cast(str, configuration.config.get("address"))
+        provider_port = cast(int, configuration.config.get("port"))
         return HTTPClientConnection(
-            agent_address,
-            address,
-            port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            provider_address,
+            provider_port,
+            address=address,
+            configuration=configuration,
         )

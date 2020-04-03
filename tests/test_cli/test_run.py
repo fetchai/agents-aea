@@ -27,7 +27,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 
@@ -35,19 +35,12 @@ import yaml
 
 import aea.cli.common
 from aea.cli import cli
-from aea.cli.run import _setup_connection
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 
-from .tools_for_testing import (
-    ContextMock,
-    PublicIdMock,
-    StopTest,
-    raise_stoptest,
-)
 from ..common.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
@@ -65,29 +58,24 @@ def test_run(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
     try:
         process = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/local:0.1.0",
-            ],
+            [sys.executable, "-m", "aea.cli", "run"],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )
@@ -124,10 +112,12 @@ def test_run_with_default_connection(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
@@ -179,22 +169,24 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
     # stub is the default connection, so it should fail
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/stub:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/stub:0.1.0"]
     )
     assert result.exit_code == 1
 
@@ -229,6 +221,8 @@ def test_run_unknown_private_key(pytestconfig):
     if pytestconfig.getoption("ci"):
         pytest.skip("Skipping the test since it doesn't work in CI.")
 
+    patch = mock.patch.object(aea.cli.common.logger, "error")
+    mocked_logger_error = patch.__enter__()
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -237,16 +231,18 @@ def test_run_unknown_private_key(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -272,13 +268,14 @@ def test_run_unknown_private_key(pytestconfig):
     with open("fet_private_key.txt", "w") as f:
         f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
 
-    error_msg = ""
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
-    except Exception as e:
-        error_msg = str(e)
+    except SystemExit:
+        pass
 
-    assert error_msg == "Unsupported identifier in private key paths."
+    mocked_logger_error.assert_called_with(
+        "Unsupported identifier in private key paths."
+    )
 
     os.chdir(cwd)
     try:
@@ -292,6 +289,8 @@ def test_run_unknown_ledger(pytestconfig):
     if pytestconfig.getoption("ci"):
         pytest.skip("Skipping the test since it doesn't work in CI.")
 
+    patch = mock.patch.object(aea.cli.common.logger, "error")
+    mocked_logger_error = patch.__enter__()
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -300,16 +299,18 @@ def test_run_unknown_ledger(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -335,13 +336,12 @@ def test_run_unknown_ledger(pytestconfig):
     with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    error_msg = ""
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
-    except Exception as e:
-        error_msg = str(e)
+    except SystemExit:
+        pass
 
-    assert error_msg == "Unsupported identifier in ledger apis."
+    mocked_logger_error.assert_called_with("Unsupported identifier in ledger apis.")
 
     os.chdir(cwd)
     try:
@@ -363,16 +363,18 @@ def test_run_fet_private_key_config(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -422,16 +424,18 @@ def test_run_ethereum_private_key_config(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -481,16 +485,18 @@ def test_run_ledger_apis(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -565,16 +571,18 @@ def test_run_fet_ledger_apis(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -646,16 +654,18 @@ def test_run_with_install_deps(pytestconfig):
     shutil.copytree(packages_src, packages_dst)
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -705,16 +715,18 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+    )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
 
@@ -770,11 +782,15 @@ class TestRunFailsWhenExceptionOccursInSkill:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -782,14 +798,14 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         shutil.copytree(
             Path(CUR_PATH, "data", "exception_skill"),
-            Path(cls.t, cls.agent_name, "skills", "exception"),
+            Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", "exception"),
         )
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
@@ -831,11 +847,15 @@ class TestRunFailsWhenConfigurationFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).unlink()
@@ -843,7 +863,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run"])
+            cli.main(["--skip-consistency-check", *CLI_LOG_OPTION, "run"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -885,11 +905,15 @@ class TestRunFailsWhenConfigurationFileInvalid:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -942,11 +966,15 @@ class TestRunFailsWhenConnectionNotDeclared:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -963,7 +991,7 @@ class TestRunFailsWhenConnectionNotDeclared:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection id '{}' not declared in the configuration file.".format(
+        s = "Connection ids ['{}'] not declared in the configuration file.".format(
             self.connection_id
         )
         self.mocked_logger_error.assert_called_once_with(s)
@@ -998,21 +1026,25 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
-        Path(
+        cls.connection_configuration_path = Path(
             cls.t,
             cls.agent_name,
             "vendor",
@@ -1020,10 +1052,22 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             "connections",
             cls.connection_name,
             DEFAULT_CONNECTION_CONFIG_FILE,
-        ).unlink()
+        )
+        cls.connection_configuration_path.unlink()
+        cls.relative_connection_configuration_path = cls.connection_configuration_path.relative_to(
+            Path(cls.t, cls.agent_name)
+        )
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    str(cls.connection_id),
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1033,7 +1077,9 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection config for '{}' not found.".format(self.connection_id)
+        s = "Connection configuration not found: {}".format(
+            self.relative_connection_configuration_path
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1066,21 +1112,25 @@ class TestRunFailsWhenConnectionNotComplete:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
-        Path(
+        connection_module_path = Path(
             cls.t,
             cls.agent_name,
             "vendor",
@@ -1088,10 +1138,22 @@ class TestRunFailsWhenConnectionNotComplete:
             "connections",
             cls.connection_name,
             "connection.py",
-        ).unlink()
+        )
+        connection_module_path.unlink()
+        cls.relative_connection_module_path = connection_module_path.relative_to(
+            Path(cls.t, cls.agent_name)
+        )
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    str(cls.connection_id),
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1101,7 +1163,9 @@ class TestRunFailsWhenConnectionNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection '{}' not found.".format(self.connection_id)
+        s = "An error occurred while loading connection {}: Connection module '{}' not found.".format(
+            self.connection_id, self.relative_connection_module_path
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1133,17 +1197,21 @@ class TestRunFailsWhenConnectionClassNotPresent:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -1158,7 +1226,15 @@ class TestRunFailsWhenConnectionClassNotPresent:
         ).write_text("")
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    cls.connection_id,
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1168,7 +1244,9 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection class '{}' not found.".format("OEFLocalConnection")
+        s = "An error occurred while loading connection {}: Connection class '{}' not found.".format(
+            self.connection_id, "OEFLocalConnection"
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1190,7 +1268,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = "fetchai/local:0.1.0"
+        cls.connection_id = "fetchai/stub:0.1.0"
         cls.connection_name = "local"
         cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -1200,16 +1278,20 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(
+        configuration_file_path = Path(
             cls.t,
             cls.agent_name,
             "vendor",
@@ -1217,10 +1299,23 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             "protocols",
             "default",
             "protocol.yaml",
-        ).unlink()
+        )
+
+        configuration_file_path.unlink()
+        cls.relative_configuration_file_path = configuration_file_path.relative_to(
+            Path(cls.t, cls.agent_name)
+        )
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(
+                [
+                    "--skip-consistency-check",
+                    *CLI_LOG_OPTION,
+                    "run",
+                    "--connections",
+                    cls.connection_id,
+                ]
+            )
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1230,7 +1325,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Protocol configuration file for protocol {} not found.".format("default")
+        s = "Protocol configuration not found: {}".format(
+            self.relative_configuration_file_path
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1252,8 +1349,6 @@ class TestRunFailsWhenProtocolNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = "fetchai/local:0.1.0"
-        cls.connection_name = "local"
         cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
@@ -1262,27 +1357,44 @@ class TestRunFailsWhenProtocolNotComplete:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
-        os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(
+        os.chdir(os.path.join(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "protocol", "fetchai/fipa:0.1.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        # remove protocol configuration
+        configuration_path = Path(
             cls.t,
             cls.agent_name,
             "vendor",
             "fetchai",
             "protocols",
-            "default",
-            "__init__.py",
-        ).unlink()
+            "fipa",
+            "protocol.yaml",
+        )
+        configuration_path.unlink()
+        cls.relative_configuration_file_path = configuration_path.relative_to(
+            Path(cls.t, cls.agent_name)
+        )
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
+            cli.main(["--skip-consistency-check", *CLI_LOG_OPTION, "run"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1292,8 +1404,8 @@ class TestRunFailsWhenProtocolNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "A problem occurred while processing protocol {}.".format(
-            "fetchai/default:0.1.0"
+        s = "Protocol configuration not found: {}".format(
+            self.relative_configuration_file_path
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
@@ -1306,17 +1418,3 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-@mock.patch("builtins.open", mock.mock_open())
-class SetupConnectionTestCase(TestCase):
-    """Test case for _setup_connection method."""
-
-    @mock.patch("aea.cli.run.Path.exists", return_value=False)
-    @mock.patch("aea.cli.run.load_agent_component_package", raise_stoptest)
-    def test__setup_connection_no_dir(self, *mocks):
-        """Test for _setup_connection no connection dir."""
-        public_id = PublicIdMock.from_str("author/name:version")
-        ctx = ContextMock(connections=[public_id])
-        with self.assertRaises(StopTest):
-            _setup_connection(public_id, "address", ctx)

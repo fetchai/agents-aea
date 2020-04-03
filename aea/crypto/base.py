@@ -70,12 +70,22 @@ class Crypto(ABC):
         """
 
     @abstractmethod
-    def sign_message(self, message: bytes) -> bytes:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
         Sign a message in bytes string form.
 
-        :param message: the message we want to send
-        :return: Signed message in bytes
+        :param message: the message to be signed
+        :param is_deprecated_mode: if the deprecated signing is used
+        :return: signature of the message in string form
+        """
+
+    @abstractmethod
+    def sign_transaction(self, transaction: Any) -> Any:
+        """
+        Sign a transaction in bytes string form.
+
+        :param transaction: the transaction to be signed
+        :return: signed transaction
         """
 
     @abstractmethod
@@ -142,6 +152,7 @@ class LedgerApi(ABC):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
+        is_waiting_for_confirmation: bool = True,
         **kwargs
     ) -> Optional[str]:
         """
@@ -150,12 +161,26 @@ class LedgerApi(ABC):
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
-        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :return: tx digest if successful, otherwise None
+        """
+
+    @abstractmethod
+    def send_signed_transaction(
+        self, is_waiting_for_confirmation: bool, tx_signed: Any
+    ) -> str:
+        """
+        Send a signed transaction and wait for confirmation.
+
+        Use keyword arguments for the specifying the signed transaction payload.
+
+        :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        :param tx_signed: the signed transaction
         """
 
     @abstractmethod
@@ -165,6 +190,25 @@ class LedgerApi(ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
+        """
+
+    @abstractmethod
+    def get_transaction_status(self, tx_digest: str) -> Any:
+        """
+        Get the transaction status for a transaction digest.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx status, if present
+        """
+
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """
 
     @abstractmethod
@@ -186,14 +230,4 @@ class LedgerApi(ABC):
         :param tx_digest: the transaction digest.
 
         :return: True if the transaction referenced by the tx_digest matches the terms.
-        """
-
-    @abstractmethod
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-        """
-        Generate a random str message.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
         """

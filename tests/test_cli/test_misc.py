@@ -50,9 +50,12 @@ def test_flag_help():
   Command-line tool for setting up an Autonomous Economic Agent.
 
 Options:
-  --version            Show the version and exit.
-  -v, --verbosity LVL  One of NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL, OFF
-  --help               Show this message and exit.
+  --version                 Show the version and exit.
+  -v, --verbosity LVL       One of NOTSET, DEBUG, INFO, WARNING, ERROR,
+                            CRITICAL, OFF
+
+  --skip-consistency-check  Skip consistency check.
+  --help                    Show this message and exit.
 
 Commands:
   add              Add a resource to the agent.
@@ -61,6 +64,7 @@ Commands:
   create           Create an agent.
   delete           Delete an agent.
   fetch            Fetch Agent from Registry.
+  fingerprint      Fingerprint a resource.
   freeze           Get the dependencies.
   generate         Generate a resource for the agent.
   generate-key     Generate private keys.
@@ -72,9 +76,11 @@ Commands:
   install          Install the dependencies.
   launch           Launch many agents.
   list             List the installed resources.
-  login            Login to Registry account
+  login            Login to Registry account.
+  logout           Logout from Registry account.
   publish          Publish Agent to Registry.
   push             Push item to Registry or save it in local packages.
+  register         Register a new Registry account.
   remove           Remove a resource from the agent.
   run              Run the agent.
   scaffold         Scaffold a resource for the agent.

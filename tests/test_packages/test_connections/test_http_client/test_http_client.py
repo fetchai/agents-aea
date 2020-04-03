@@ -28,14 +28,17 @@ import pytest
 
 import requests
 
-from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-from ....conftest import UNKNOWN_PROTOCOL_PUBLIC_ID, get_host, get_unused_tcp_port
+from ....conftest import (
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+    get_host,
+    get_unused_tcp_port,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +54,7 @@ class TestHTTPClientConnect:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = HTTPClientConnection(
-            agent_address=cls.agent_address,
+            address=cls.agent_address,
             provider_address=cls.address,
             provider_port=cls.port,
         )
@@ -60,7 +63,7 @@ class TestHTTPClientConnect:
     @pytest.mark.asyncio
     async def test_initialization(self):
         """Test the initialisation of the class."""
-        assert self.http_client_connection.agent_address == self.agent_address
+        assert self.http_client_connection.address == self.agent_address
 
     @pytest.mark.asyncio
     async def test_connection(self):
@@ -86,7 +89,7 @@ class TestHTTPClientDisconnection:
         cls.port = get_unused_tcp_port()
         cls.agent_address = "some string"
         cls.http_client_connection = HTTPClientConnection(
-            agent_address=cls.agent_address,
+            address=cls.agent_address,
             provider_address=cls.address,
             provider_port=cls.port,
         )
@@ -116,7 +119,7 @@ async def test_http_send():
     agent_address = "some agent address"
 
     http_client_connection = HTTPClientConnection(
-        agent_address=agent_address, provider_address=address, provider_port=port,
+        address=agent_address, provider_address=address, provider_port=port,
     )
     http_client_connection.loop = asyncio.get_event_loop()
 
@@ -158,11 +161,3 @@ async def test_http_send():
 
     await http_client_connection.disconnect()
     assert http_client_connection.connection_status.is_connected is False
-
-
-def test_http_client_from_config():
-    """Test the Connection from a config file."""
-    con = HTTPClientConnection.from_config(
-        agent_address="pk", connection_configuration=ConnectionConfig()
-    )
-    assert not con.connection_status.is_connected, "We are connected..."

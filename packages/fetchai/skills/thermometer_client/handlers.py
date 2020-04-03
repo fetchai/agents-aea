@@ -108,7 +108,7 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data="fipa_message",
+            error_data={"fipa_message": b""},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,
@@ -298,8 +298,8 @@ class FIPAHandler(Handler):
             )
 
 
-class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+class OEFSearchHandler(Handler):
+    """This class handles OEF search responses."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

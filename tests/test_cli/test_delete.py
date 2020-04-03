@@ -44,10 +44,12 @@ class TestDelete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
 
         cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
@@ -118,11 +120,15 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

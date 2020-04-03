@@ -12,14 +12,13 @@ A dependency is a dictionary with the following (optional) keys:
     - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
     - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
 If the 'git' field is set, the 'version' field will be ignored.
-They are supposed to be forwarded to the 'pip' command.
+These fields will be forwarded to the 'pip' command.
 
 <a name=".aea.configurations.base.Dependencies"></a>
 #### Dependencies
 
 A dictionary from package name to dependency data structure (see above).
-The package name must satisfy the constraints on Python packages names.
-For details, see https://www.python.org/dev/peps/pep-0426/`name`.
+The package name must satisfy [the constraints on Python packages names](https://www.python.org/dev/peps/pep-0426/`name`).
 
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
@@ -32,6 +31,62 @@ class ConfigurationType(Enum)
 ```
 
 Configuration types.
+
+<a name=".aea.configurations.base.ConfigurationType.to_plural"></a>
+#### to`_`plural
+
+```python
+ | to_plural() -> str
+```
+
+Get the plural name.
+
+>>> ConfigurationType.AGENT.to_plural()
+'agents'
+>>> ConfigurationType.PROTOCOL.to_plural()
+'protocols'
+>>> ConfigurationType.CONNECTION.to_plural()
+'connections'
+>>> ConfigurationType.SKILL.to_plural()
+'skills'
+>>> ConfigurationType.CONTRACT.to_plural()
+'contracts'
+
+<a name=".aea.configurations.base.ConfigurationType.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Convert to string.
+
+<a name=".aea.configurations.base.ComponentType.to_plural"></a>
+#### to`_`plural
+
+```python
+ | to_plural() -> str
+```
+
+Get the plural version of the component type.
+
+>>> ComponentType.PROTOCOL.to_plural()
+'protocols'
+>>> ComponentType.CONNECTION.to_plural()
+'connections'
+>>> ComponentType.SKILL.to_plural()
+'skills'
+>>> ComponentType.CONTRACT.to_plural()
+'contracts'
+
+<a name=".aea.configurations.base.ComponentType.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__() -> str
+```
+
+Get the string representation.
 
 <a name=".aea.configurations.base.ProtocolSpecificationParseError"></a>
 ### ProtocolSpecificationParseError
@@ -80,6 +135,49 @@ class Configuration(JSONSerializable,  ABC)
 ```
 
 Configuration class.
+
+<a name=".aea.configurations.base.Configuration.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__()
+```
+
+Initialize a configuration object.
+
+<a name=".aea.configurations.base.Configuration.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict) -> "Configuration"
+```
+
+Build from a JSON object.
+
+<a name=".aea.configurations.base.Configuration.ordered_json"></a>
+#### ordered`_`json
+
+```python
+ | @property
+ | ordered_json() -> OrderedDict
+```
+
+Reorder the dictionary according to a key ordering.
+
+This method takes all the keys in the key_order list and
+get the associated value in the dictionary (if present).
+For the remaining keys not considered in the order,
+it will use alphanumerical ordering.
+
+In particular, if key_order is an empty sequence, this reduces to
+alphanumerical sorting.
+
+It does not do side-effect.
+
+**Returns**:
+
+the ordered dictionary.
 
 <a name=".aea.configurations.base.CRUDCollection"></a>
 ### CRUDCollection
@@ -204,7 +302,7 @@ The concatenation of those three elements gives the public identifier:
 #### `__`init`__`
 
 ```python
- | __init__(author: str, name: str, version: str)
+ | __init__(author: str, name: str, version: PackageVersionLike)
 ```
 
 Initialize the public identifier.
@@ -214,7 +312,7 @@ Initialize the public identifier.
 
 ```python
  | @property
- | author()
+ | author() -> str
 ```
 
 Get the author.
@@ -224,7 +322,7 @@ Get the author.
 
 ```python
  | @property
- | name()
+ | name() -> str
 ```
 
 Get the name.
@@ -234,10 +332,20 @@ Get the name.
 
 ```python
  | @property
- | version()
+ | version() -> str
 ```
 
 Get the version.
+
+<a name=".aea.configurations.base.PublicId.version_info"></a>
+#### version`_`info
+
+```python
+ | @property
+ | version_info() -> PackageVersion
+```
+
+Get the package version.
 
 <a name=".aea.configurations.base.PublicId.from_str"></a>
 #### from`_`str
@@ -371,6 +479,201 @@ Compare with another object.
 
 Compare two public ids.
 
+>>> public_id_1 = PublicId("author_1", "name_1", "0.1.0")
+>>> public_id_2 = PublicId("author_1", "name_1", "0.1.1")
+>>> public_id_3 = PublicId("author_1", "name_2", "0.1.0")
+>>> public_id_1 > public_id_2
+False
+>>> public_id_1 < public_id_2
+True
+
+>>> public_id_1 < public_id_3
+Traceback (most recent call last):
+...
+ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author and name attributes are different.
+
+<a name=".aea.configurations.base.PackageId"></a>
+### PackageId
+
+```python
+class PackageId()
+```
+
+A package identifier.
+
+<a name=".aea.configurations.base.PackageId.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(package_type: Union[ConfigurationType, str], public_id: PublicId)
+```
+
+Initialize the package id.
+
+**Arguments**:
+
+- `package_type`: the package type.
+- `public_id`: the public id.
+
+<a name=".aea.configurations.base.PackageId.package_type"></a>
+#### package`_`type
+
+```python
+ | @property
+ | package_type() -> ConfigurationType
+```
+
+Get the package type.
+
+<a name=".aea.configurations.base.PackageId.public_id"></a>
+#### public`_`id
+
+```python
+ | @property
+ | public_id() -> PublicId
+```
+
+Get the public id.
+
+<a name=".aea.configurations.base.PackageId.author"></a>
+#### author
+
+```python
+ | @property
+ | author() -> str
+```
+
+Get the author of the package.
+
+<a name=".aea.configurations.base.PackageId.name"></a>
+#### name
+
+```python
+ | @property
+ | name() -> str
+```
+
+Get the name of the package.
+
+<a name=".aea.configurations.base.PackageId.version"></a>
+#### version
+
+```python
+ | @property
+ | version() -> str
+```
+
+Get the version of the package.
+
+<a name=".aea.configurations.base.PackageId.package_prefix"></a>
+#### package`_`prefix
+
+```python
+ | @property
+ | package_prefix() -> Tuple[ConfigurationType, str, str]
+```
+
+Get the package identifier without the version.
+
+<a name=".aea.configurations.base.PackageId.__hash__"></a>
+#### `__`hash`__`
+
+```python
+ | __hash__()
+```
+
+Get the hash.
+
+<a name=".aea.configurations.base.PackageId.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation.
+
+<a name=".aea.configurations.base.PackageId.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Compare with another object.
+
+<a name=".aea.configurations.base.PackageId.__lt__"></a>
+#### `__`lt`__`
+
+```python
+ | __lt__(other)
+```
+
+Compare two public ids.
+
+<a name=".aea.configurations.base.ComponentId"></a>
+### ComponentId
+
+```python
+class ComponentId(PackageId)
+```
+
+Class to represent a component identifier.
+
+A component id is a package id, but excludes the case when the package is an agent.
+>>> pacakge_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+>>> component_id = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+>>> pacakge_id == component_id
+True
+
+>>> component_id2 = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.1"))
+>>> pacakge_id == component_id2
+False
+
+<a name=".aea.configurations.base.ComponentId.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(component_type: Union[ComponentType, str], public_id: PublicId)
+```
+
+Initialize the component id.
+
+**Arguments**:
+
+- `component_type`: the component type.
+- `public_id`: the public id.
+
+<a name=".aea.configurations.base.ComponentId.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
+<a name=".aea.configurations.base.ComponentId.component_prefix"></a>
+#### component`_`prefix
+
+```python
+ | @property
+ | component_prefix() -> Tuple[ComponentType, str, str]
+```
+
+Get the component identifier without the version.
+
+<a name=".aea.configurations.base.ComponentId.prefix_import_path"></a>
+#### prefix`_`import`_`path
+
+```python
+ | @property
+ | prefix_import_path() -> str
+```
+
+Get the prefix import path for this component.
+
 <a name=".aea.configurations.base.PackageConfiguration"></a>
 ### PackageConfiguration
 
@@ -380,14 +683,54 @@ class PackageConfiguration(Configuration,  ABC)
 
 This class represent a package configuration.
 
+A package can be one of:
+- agents
+- protocols
+- connections
+- skills
+- contracts
+
 <a name=".aea.configurations.base.PackageConfiguration.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(name: str, author: str, version: str, license: str, aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None)
+ | __init__(name: str, author: str, version: str, license: str, aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None)
 ```
 
 Initialize a package configuration.
+
+**Arguments**:
+
+- `name`: the name of the package.
+- `author`: the author of the package.
+- `version`: the version of the package (SemVer format).
+- `license`: the license.
+- `aea_version`: either a fixed version, or a set of specifiers
+describing the AEA versions allowed.
+(default: empty string - no constraint).
+The fixed version is interpreted with the specifier '=='.
+- `fingerprint`: the fingerprint.
+- `fingerprint_ignore_patterns`: a list of file patterns to ignore files to fingerprint.
+
+<a name=".aea.configurations.base.PackageConfiguration.directory"></a>
+#### directory
+
+```python
+ | @property
+ | directory() -> Optional[Path]
+```
+
+The path to the configuration file associated to this file, if any.
+
+<a name=".aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
+#### aea`_`version`_`specifiers
+
+```python
+ | @property
+ | aea_version_specifiers() -> SpecifierSet
+```
+
+Get the AEA version set specifier.
 
 <a name=".aea.configurations.base.PackageConfiguration.public_id"></a>
 #### public`_`id
@@ -399,11 +742,116 @@ Initialize a package configuration.
 
 Get the public id.
 
+<a name=".aea.configurations.base.PackageConfiguration.package_dependencies"></a>
+#### package`_`dependencies
+
+```python
+ | @property
+ | package_dependencies() -> Set[ComponentId]
+```
+
+Get the package dependencies.
+
+<a name=".aea.configurations.base.ComponentConfiguration"></a>
+### ComponentConfiguration
+
+```python
+class ComponentConfiguration(PackageConfiguration,  ABC):
+ |  ComponentConfiguration(name: str, author: str, version: str, license: str, aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None)
+```
+
+Class to represent an agent component configuration.
+
+<a name=".aea.configurations.base.ComponentConfiguration.pypi_dependencies"></a>
+#### pypi`_`dependencies
+
+```python
+ | @property
+ | pypi_dependencies() -> Dependencies
+```
+
+Get PyPI dependencies.
+
+<a name=".aea.configurations.base.ComponentConfiguration.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | @abstractmethod
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
+<a name=".aea.configurations.base.ComponentConfiguration.component_id"></a>
+#### component`_`id
+
+```python
+ | @property
+ | component_id() -> ComponentId
+```
+
+Get the component id.
+
+<a name=".aea.configurations.base.ComponentConfiguration.prefix_import_path"></a>
+#### prefix`_`import`_`path
+
+```python
+ | @property
+ | prefix_import_path() -> str
+```
+
+Get the prefix import path for this component.
+
+<a name=".aea.configurations.base.ComponentConfiguration.load"></a>
+#### load
+
+```python
+ | @staticmethod
+ | load(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> "ComponentConfiguration"
+```
+
+Load configuration and check that it is consistent against the directory.
+
+**Arguments**:
+
+- `component_type`: the component type.
+- `directory`: the root of the package
+- `skip_consistency_check`: if True, the consistency check are skipped.
+
+**Returns**:
+
+the configuration object.
+
+<a name=".aea.configurations.base.ComponentConfiguration.check_fingerprint"></a>
+#### check`_`fingerprint
+
+```python
+ | check_fingerprint(directory: Path) -> None
+```
+
+Check that the fingerprint are correct against a directory path.
+
+:raises ValueError if:
+- the argument is not a valid package directory
+- the fingerprints do not match.
+
+<a name=".aea.configurations.base.ComponentConfiguration.check_aea_version"></a>
+#### check`_`aea`_`version
+
+```python
+ | check_aea_version()
+```
+
+Check that the AEA version matches the specifier set.
+
+:raises ValueError if the version of the aea framework falls within a specifier.
+
 <a name=".aea.configurations.base.ConnectionConfig"></a>
 ### ConnectionConfig
 
 ```python
-class ConnectionConfig(PackageConfiguration)
+class ConnectionConfig(ComponentConfiguration)
 ```
 
 Handle connection configuration.
@@ -412,10 +860,30 @@ Handle connection configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", **config)
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, class_name: str = "", protocols: Optional[Set[PublicId]] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, dependencies: Optional[Dependencies] = None, description: str = "", **config)
 ```
 
 Initialize a connection configuration object.
+
+<a name=".aea.configurations.base.ConnectionConfig.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
+<a name=".aea.configurations.base.ConnectionConfig.package_dependencies"></a>
+#### package`_`dependencies
+
+```python
+ | @property
+ | package_dependencies() -> Set[ComponentId]
+```
+
+Get the connection dependencies.
 
 <a name=".aea.configurations.base.ConnectionConfig.json"></a>
 #### json
@@ -441,7 +909,7 @@ Initialize from a JSON object.
 ### ProtocolConfig
 
 ```python
-class ProtocolConfig(PackageConfiguration)
+class ProtocolConfig(ComponentConfiguration)
 ```
 
 Handle protocol configuration.
@@ -450,10 +918,20 @@ Handle protocol configuration.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, dependencies: Optional[Dependencies] = None, description: str = "")
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, aea_version: str = "", dependencies: Optional[Dependencies] = None, description: str = "")
 ```
 
 Initialize a connection configuration object.
+
+<a name=".aea.configurations.base.ProtocolConfig.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
 
 <a name=".aea.configurations.base.ProtocolConfig.json"></a>
 #### json
@@ -475,25 +953,31 @@ Return the JSON representation.
 
 Initialize from a JSON object.
 
-<a name=".aea.configurations.base.HandlerConfig"></a>
-### HandlerConfig
+<a name=".aea.configurations.base.SkillComponentConfiguration"></a>
+### SkillComponentConfiguration
 
 ```python
-class HandlerConfig(Configuration)
+class SkillComponentConfiguration()
 ```
 
-Handle a skill handler configuration.
+This class represent a skill component configuration.
 
-<a name=".aea.configurations.base.HandlerConfig.__init__"></a>
+<a name=".aea.configurations.base.SkillComponentConfiguration.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(class_name: str = "", **args)
+ | __init__(class_name: str, **args)
 ```
 
-Initialize a handler configuration.
+Initialize a skill component configuration.
 
-<a name=".aea.configurations.base.HandlerConfig.json"></a>
+**Arguments**:
+
+- `skill_component_type`: the skill component type.
+- `class_name`: the class name of the component.
+- `args`: keyword arguments.
+
+<a name=".aea.configurations.base.SkillComponentConfiguration.json"></a>
 #### json
 
 ```python
@@ -503,83 +987,7 @@ Initialize a handler configuration.
 
 Return the JSON representation.
 
-<a name=".aea.configurations.base.HandlerConfig.from_json"></a>
-#### from`_`json
-
-```python
- | @classmethod
- | from_json(cls, obj: Dict)
-```
-
-Initialize from a JSON object.
-
-<a name=".aea.configurations.base.BehaviourConfig"></a>
-### BehaviourConfig
-
-```python
-class BehaviourConfig(Configuration)
-```
-
-Handle a skill behaviour configuration.
-
-<a name=".aea.configurations.base.BehaviourConfig.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(class_name: str = "", **args)
-```
-
-Initialize a behaviour configuration.
-
-<a name=".aea.configurations.base.BehaviourConfig.json"></a>
-#### json
-
-```python
- | @property
- | json() -> Dict
-```
-
-Return the JSON representation.
-
-<a name=".aea.configurations.base.BehaviourConfig.from_json"></a>
-#### from`_`json
-
-```python
- | @classmethod
- | from_json(cls, obj: Dict)
-```
-
-Initialize from a JSON object.
-
-<a name=".aea.configurations.base.ModelConfig"></a>
-### ModelConfig
-
-```python
-class ModelConfig(Configuration)
-```
-
-Handle a skill model configuration.
-
-<a name=".aea.configurations.base.ModelConfig.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(class_name: str = "", **args)
-```
-
-Initialize a model configuration.
-
-<a name=".aea.configurations.base.ModelConfig.json"></a>
-#### json
-
-```python
- | @property
- | json() -> Dict
-```
-
-Return the JSON representation.
-
-<a name=".aea.configurations.base.ModelConfig.from_json"></a>
+<a name=".aea.configurations.base.SkillComponentConfiguration.from_json"></a>
 #### from`_`json
 
 ```python
@@ -593,7 +1001,7 @@ Initialize from a JSON object.
 ### SkillConfig
 
 ```python
-class SkillConfig(PackageConfiguration)
+class SkillConfig(ComponentConfiguration)
 ```
 
 Class to represent a skill configuration file.
@@ -602,10 +1010,30 @@ Class to represent a skill configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license: str = "", fingerprint: Optional[Dict[str, str]] = None, aea_version: str = "", protocols: List[PublicId] = None, dependencies: Optional[Dependencies] = None, description: str = "")
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, protocols: List[PublicId] = None, contracts: List[PublicId] = None, dependencies: Optional[Dependencies] = None, description: str = "")
 ```
 
 Initialize a skill configuration.
+
+<a name=".aea.configurations.base.SkillConfig.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
+<a name=".aea.configurations.base.SkillConfig.package_dependencies"></a>
+#### package`_`dependencies
+
+```python
+ | @property
+ | package_dependencies() -> Set[ComponentId]
+```
+
+Get the connection dependencies.
 
 <a name=".aea.configurations.base.SkillConfig.json"></a>
 #### json
@@ -640,10 +1068,20 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str = "", aea_version: str = "", author: str = "", version: str = "", license: str = "", fingerprint: Optional[Dict[str, str]] = None, registry_path: str = "", description: str = "", logging_config: Optional[Dict] = None)
+ | __init__(agent_name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = "", description: str = "", logging_config: Optional[Dict] = None)
 ```
 
 Instantiate the agent configuration object.
+
+<a name=".aea.configurations.base.AgentConfig.package_dependencies"></a>
+#### package`_`dependencies
+
+```python
+ | @property
+ | package_dependencies() -> Set[ComponentId]
+```
+
+Get the package dependencies.
 
 <a name=".aea.configurations.base.AgentConfig.private_key_paths_dict"></a>
 #### private`_`key`_`paths`_`dict
@@ -772,7 +1210,7 @@ Handle protocol specification.
 #### `__`init`__`
 
 ```python
- | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, description: str = "")
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", description: str = "")
 ```
 
 Initialize a protocol specification configuration object.
@@ -798,6 +1236,54 @@ Set the protobuf snippets.
 Return the JSON representation.
 
 <a name=".aea.configurations.base.ProtocolSpecification.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict)
+```
+
+Initialize from a JSON object.
+
+<a name=".aea.configurations.base.ContractConfig"></a>
+### ContractConfig
+
+```python
+class ContractConfig(ComponentConfiguration)
+```
+
+Handle contract configuration.
+
+<a name=".aea.configurations.base.ContractConfig.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: str = "", author: str = "", version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, dependencies: Optional[Dependencies] = None, description: str = "", path_to_contract_interface: str = "", class_name: str = "")
+```
+
+Initialize a protocol configuration object.
+
+<a name=".aea.configurations.base.ContractConfig.component_type"></a>
+#### component`_`type
+
+```python
+ | @property
+ | component_type() -> ComponentType
+```
+
+Get the component type.
+
+<a name=".aea.configurations.base.ContractConfig.json"></a>
+#### json
+
+```python
+ | @property
+ | json() -> Dict
+```
+
+Return the JSON representation.
+
+<a name=".aea.configurations.base.ContractConfig.from_json"></a>
 #### from`_`json
 
 ```python

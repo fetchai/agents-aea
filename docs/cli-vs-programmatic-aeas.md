@@ -72,7 +72,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -82,7 +82,6 @@ HOST = "127.0.0.1"
 PORT = 10000
 ROOT_DIR = os.getcwd()
 
-# Not sure what level of logging to specify to get the logging to be displayed?
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
 

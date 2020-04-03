@@ -21,7 +21,7 @@
 
 import os
 import tarfile
-from typing import Dict
+from pathlib import Path
 
 import click
 
@@ -32,9 +32,26 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.configurations.base import PublicId
 
 
+def get_auth_token() -> str:
+    """
+    Get current auth token.
+
+    :return: str auth token
+    """
+    config = _get_or_create_cli_config()
+    return config.get(AUTH_TOKEN_KEY, None)
+
+
 def request_api(
-    method: str, path: str, params=None, data=None, is_auth=False, filepath=None
-) -> Dict:
+    method: str,
+    path: str,
+    params=None,
+    data=None,
+    is_auth=False,
+    filepath=None,
+    handle_400=True,
+    return_code=False,
+):
     """
     Request Registry API.
 
@@ -45,12 +62,11 @@ def request_api(
     :param is_auth: bool is auth requied (default False).
     :param filepath: str path to file to upload (default None).
 
-    :return: dict response from Registry API
+    :return: dict response from Registry API or tuple (dict response, status code).
     """
     headers = {}
     if is_auth:
-        config = _get_or_create_cli_config()
-        token = config.get(AUTH_TOKEN_KEY, None)
+        token = get_auth_token()
         if token is None:
             raise click.ClickException(
                 "Unable to read authentication config. "
@@ -93,12 +109,16 @@ def request_api(
             "Conflict in Registry. {}".format(resp_json["detail"])
         )
     elif resp.status_code == 400:
-        raise click.ClickException(resp.json())
+        if handle_400:
+            raise click.ClickException(resp_json)
     else:
         raise click.ClickException(
             "Wrong server response. Status code: {}".format(resp.status_code)
         )
-    return resp_json
+    if return_code:
+        return resp_json, resp.status_code
+    else:
+        return resp_json
 
 
 def download_file(url: str, cwd: str) -> str:
@@ -143,7 +163,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
+def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> Path:
     """
     Fetch connection/protocol/skill from Registry.
 
@@ -152,7 +172,7 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
     :param public_id: str public ID of object.
     :param cwd: str path to current working directory.
 
-    :return: None
+    :return: package path
     """
     logger.debug(
         "Fetching {obj_type} {public_id} from Registry...".format(
@@ -185,6 +205,8 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
             public_id=public_id, obj_type=obj_type
         )
     )
+    package_path = os.path.join(target_folder, public_id.name)
+    return Path(package_path)
 
 
 def registry_login(username: str, password: str) -> str:
@@ -200,6 +222,15 @@ def registry_login(username: str, password: str) -> str:
         "POST", "/rest-auth/login/", data={"username": username, "password": password}
     )
     return resp["key"]
+
+
+def registry_logout() -> None:
+    """
+    Logout from Registry account.
+
+    :return: None
+    """
+    request_api("POST", "/rest-auth/logout/")
 
 
 def _rm_tarfiles():
@@ -239,8 +270,16 @@ def check_is_author_logged_in(author_name: str) -> None:
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "
-            "(logged in: {}, author: {}). "
-            "You are allowed to push only items of your authorship.".format(
+            "(logged in: {}, author: {}). Please logout and then login correctly.".format(
                 resp["username"], author_name
             )
         )
+
+
+def is_auth_token_present():
+    """
+    Check if any user is currently logged in.
+
+    :return: bool is logged in.
+    """
+    return get_auth_token() is not None

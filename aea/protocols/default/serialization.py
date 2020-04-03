@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 """Serialization module for default protocol."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -48,14 +48,14 @@ class DefaultSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == DefaultMessage.Performative.BYTES:
-            performative = default_pb2.DefaultMessage.Bytes()  # type: ignore
+            performative = default_pb2.DefaultMessage.Bytes_Performative()  # type: ignore
             content = msg.content
             performative.content = content
             default_msg.bytes.CopyFrom(performative)
         elif performative_id == DefaultMessage.Performative.ERROR:
-            performative = default_pb2.DefaultMessage.Error()  # type: ignore
+            performative = default_pb2.DefaultMessage.Error_Performative()  # type: ignore
             error_code = msg.error_code
-            performative = ErrorCode.encode(performative, error_code)
+            ErrorCode.encode(performative.error_code, error_code)
             error_msg = msg.error_msg
             performative.error_msg = error_msg
             error_data = msg.error_data
@@ -85,7 +85,7 @@ class DefaultSerializer(Serializer):
 
         performative = default_pb.WhichOneof("performative")
         performative_id = DefaultMessage.Performative(str(performative))
-        performative_content = dict()
+        performative_content = dict()  # type: Dict[str, Any]
         if performative_id == DefaultMessage.Performative.BYTES:
             content = default_pb.bytes.content
             performative_content["content"] = content

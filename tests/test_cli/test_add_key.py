@@ -53,9 +53,13 @@ class TestAddFetchKey:
         cls.agent_folder = Path(cls.t, cls.agent_name)
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name]
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -101,9 +105,13 @@ class TestAddEthereumhKey:
         cls.agent_folder = Path(cls.t, cls.agent_name)
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name]
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -149,9 +157,13 @@ class TestAddManyKeys:
         cls.agent_folder = Path(cls.t, cls.agent_name)
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name]
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -201,9 +213,13 @@ def test_add_key_fails_bad_key():
         with mock.patch.object(aea.crypto.helpers.logger, "error") as mock_logger_error:
             os.chdir(tmpdir)
 
-            result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+            result = runner.invoke(
+                cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            )
 
-            result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+            result = runner.invoke(
+                cli, [*CLI_LOG_OPTION, "create", "--local", agent_name]
+            )
             assert result.exit_code == 0
             os.chdir(Path(tmpdir, agent_name))
 
@@ -237,9 +253,11 @@ def test_add_key_fails_bad_ledger_id():
     with tempfile.TemporaryDirectory() as tmpdir:
         os.chdir(tmpdir)
 
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
 
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+        result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
         assert result.exit_code == 0
         os.chdir(Path(tmpdir, agent_name))
 

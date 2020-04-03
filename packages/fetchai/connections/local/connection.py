@@ -36,7 +36,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.local")
 
 TARGET = 0
 MESSAGE_ID = 1
@@ -315,35 +315,27 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, address: Address, local_node: LocalNode, *args, **kwargs):
+    def __init__(self, local_node: LocalNode, **kwargs):
         """
-        Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
+        Load the connection configuration.
 
-        :param address: the address used in the protocols.
+        Initialize a OEF proxy for a local OEF Node
+
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
-        :param connection_id: the connection id.
-        :param restricted_to_protocols: the only supported protocols for this connection.
-        :param excluded_protocols: the excluded protocols for this connection.
         """
-        if kwargs.get("connection_id") is None:
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "local", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self._address = address
-        self._local_node = local_node
 
+        super().__init__(**kwargs)
+        self._local_node = local_node
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
-
-    @property
-    def address(self) -> str:
-        """Get the address."""
-        return self._address
 
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         if not self.connection_status.is_connected:
             self._reader = Queue()
-            self._writer = await self._local_node.connect(self._address, self._reader)
+            self._writer = await self._local_node.connect(self.address, self._reader)
             self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
@@ -386,25 +378,14 @@ class OEFLocalConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+        cls, address: "Address", configuration: ConnectionConfig
     ) -> "Connection":
-        """Get the Local OEF connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
-        :return: the connection object
         """
-        local_node = LocalNode()
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
+        Initialize a connection instance from a configuration.
+        :param address: the address of the agent.
+        :param configuration: the connection configuration.
+        :return: an instance of the concrete connection class.
+        """
         return OEFLocalConnection(
-            address,
-            local_node,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            LocalNode(), address=address, configuration=configuration
         )

@@ -19,7 +19,7 @@
 
 """Serialization module for http protocol."""
 
-from typing import cast
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -48,7 +48,7 @@ class HttpSerializer(Serializer):
 
         performative_id = msg.performative
         if performative_id == HttpMessage.Performative.REQUEST:
-            performative = http_pb2.HttpMessage.Request()  # type: ignore
+            performative = http_pb2.HttpMessage.Request_Performative()  # type: ignore
             method = msg.method
             performative.method = method
             url = msg.url
@@ -61,7 +61,7 @@ class HttpSerializer(Serializer):
             performative.bodyy = bodyy
             http_msg.request.CopyFrom(performative)
         elif performative_id == HttpMessage.Performative.RESPONSE:
-            performative = http_pb2.HttpMessage.Response()  # type: ignore
+            performative = http_pb2.HttpMessage.Response_Performative()  # type: ignore
             version = msg.version
             performative.version = version
             status_code = msg.status_code
@@ -97,7 +97,7 @@ class HttpSerializer(Serializer):
 
         performative = http_pb.WhichOneof("performative")
         performative_id = HttpMessage.Performative(str(performative))
-        performative_content = dict()
+        performative_content = dict()  # type: Dict[str, Any]
         if performative_id == HttpMessage.Performative.REQUEST:
             method = http_pb.request.method
             performative_content["method"] = method

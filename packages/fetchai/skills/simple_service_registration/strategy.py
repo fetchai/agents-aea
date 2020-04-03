@@ -21,12 +21,9 @@
 
 from typing import Any, Dict, Optional
 
+from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
-
-from packages.fetchai.skills.simple_service_registration.data_model import (
-    GenericDataModel,
-)
 
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {

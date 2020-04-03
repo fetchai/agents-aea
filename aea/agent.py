@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of a template agent."""
+"""This module contains the implementation of a generic agent."""
 
 import logging
 import time
@@ -34,7 +34,14 @@ logger = logging.getLogger(__name__)
 
 
 class AgentState(Enum):
-    """Enumeration for an agent state."""
+    """Enumeration for an agent state.
+
+    In particular, it can be one of the following states:
+
+    - AgentState.INITIATED: when the Agent object has been created.
+    - AgentState.CONNECTED: when the agent is connected.
+    - AgentState.RUNNING: when the agent is running.
+    """
 
     INITIATED = "initiated"
     CONNECTED = "connected"
@@ -63,7 +70,7 @@ class Liveness:
 
 
 class Agent(ABC):
-    """This class implements a template agent."""
+    """This class provides an abstract base class for a generic agent."""
 
     def __init__(
         self,
@@ -72,7 +79,7 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
-        is_programmatic: bool = True,
+        is_programmatic: bool = True,  # TODO to remove
     ) -> None:
         """
         Instantiate the agent.
@@ -81,7 +88,7 @@ class Agent(ABC):
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param is_debug: if True, run the agent in debug mode.
+        :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
@@ -98,7 +105,6 @@ class Agent(ABC):
         self._tick = 0
 
         self.is_debug = is_debug
-        self.is_programmatic = is_programmatic
 
     @property
     def identity(self) -> Identity:
@@ -112,12 +118,22 @@ class Agent(ABC):
 
     @property
     def inbox(self) -> InBox:
-        """Get the inbox."""
+        """
+        Get the inbox.
+
+        The inbox contains Envelopes from the Multiplexer.
+        The agent can pick these messages for processing.
+        """
         return self._inbox
 
     @property
     def outbox(self) -> OutBox:
-        """Get the outbox."""
+        """
+        Get the outbox.
+
+        The outbox contains Envelopes for the Multiplexer.
+        Envelopes placed in the Outbox are processed by the Multiplexer.
+        """
         return self._outbox
 
     @property
@@ -132,7 +148,11 @@ class Agent(ABC):
 
     @property
     def tick(self) -> int:
-        """Get the tick."""
+        """
+        Get the tick (or agent loop count).
+
+        Each agent loop (one call to each one of act(), react(), update()) increments the tick.
+        """
         return self._tick
 
     @property
@@ -140,13 +160,8 @@ class Agent(ABC):
         """
         Get the state of the agent.
 
-        In particular, it can be one of the following states:
-        - AgentState.INITIATED: when the Agent object has been created.
-        - AgentState.CONNECTED: when the agent is connected.
-        - AgentState.RUNNING: when the agent is running.
-
-        :return the agent state.
         :raises ValueError: if the state does not satisfy any of the foreseen conditions.
+        :return: None
         """
         if (
             self.multiplexer is not None
@@ -168,6 +183,21 @@ class Agent(ABC):
     def start(self) -> None:
         """
         Start the agent.
+
+        Performs the following:
+
+        - calls connect() on the multiplexer (unless in debug mode), and
+        - calls setup(), and
+        - calls start() on the liveness, and
+        - enters the agent main loop.
+
+        While the liveness of the agent is not stopped it continues to loop over:
+
+        - increment the tick,
+        - call to act(),
+        - sleep for specified timeout,
+        - call to react(),
+        - call to update().
 
         :return: None
         """
@@ -199,6 +229,12 @@ class Agent(ABC):
         """
         Stop the agent.
 
+        Performs the following:
+
+        - calls stop() on the liveness, and
+        - calls teardown(), and
+        - calls disconnect() on the multiplexer.
+
         :return: None
         """
         self.liveness.stop()
@@ -227,14 +263,15 @@ class Agent(ABC):
     @abstractmethod
     def react(self) -> None:
         """
-        React to incoming events.
+        React to events.
 
         :return: None
         """
 
     @abstractmethod
     def update(self) -> None:
-        """Update the current state of the agent.
+        """
+        Update the internal state of the agent.
 
         :return None
         """

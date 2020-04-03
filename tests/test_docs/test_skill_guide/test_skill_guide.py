@@ -38,6 +38,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_VERSION
 
 from ..helper import extract_code_blocks
 from ...common.click_testing import CliRunner
@@ -57,6 +58,10 @@ logger = logging.getLogger(__name__)
 class TestBuildSkill:
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
+
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
@@ -65,6 +70,7 @@ class TestBuildSkill:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.resource_name = "my_search"
+        cls.skill_id = AUTHOR + "/" + cls.resource_name + ":" + DEFAULT_VERSION
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
 
@@ -81,15 +87,24 @@ class TestBuildSkill:
 
         os.chdir(cls.t)
         cls.init_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         cls.fetch_result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "fetch", "fetchai/simple_service_registration:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "fetch",
+                "--local",
+                "fetchai/simple_service_registration:0.1.0",
+            ],
             standalone_mode=False,
         )
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         if cls.create_result.exit_code == 0:
             os.chdir(Path(cls.t, cls.agent_name))
@@ -97,6 +112,12 @@ class TestBuildSkill:
             cls.result = cls.runner.invoke(
                 cli,
                 [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+                standalone_mode=False,
+            )
+            # add oef connection
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
                 standalone_mode=False,
             )
 
@@ -138,9 +159,6 @@ class TestBuildSkill:
         with open(path, "w") as file:
             file.write(self.code_blocks[1])
 
-        path = Path(self.t, self.agent_name, "skills", self.resource_name, "tasks.py")
-        os.remove(path)
-
         path = Path(
             self.t, self.agent_name, "skills", self.resource_name, "my_model.py"
         )
@@ -152,11 +170,26 @@ class TestBuildSkill:
         with open(path, "w") as file:
             file.write(yaml_code_block[0])
 
+        # update fingerprint
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "fingerprint", "skill", self.skill_id],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0, "Fingerprinting not successful"
+
         os.chdir(Path(self.t, "simple_service_registration"))
         try:
             # run service agent
             process_one = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )
@@ -164,7 +197,14 @@ class TestBuildSkill:
             # run the agent
             os.chdir(Path(self.t, self.agent_name))
             process_two = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )

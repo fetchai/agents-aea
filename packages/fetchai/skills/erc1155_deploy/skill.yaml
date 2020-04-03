@@ -1,0 +1,67 @@
+name: erc1155_deploy
+author: fetchai
+version: 0.1.0
+description: The ERC1155 deploy skill has the ability to deploy and interact with
+  the smart contract.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
+  behaviours.py: QmUDhbDeqSfy3TFXubz3urgtRFPcSjW4aHvDSy4fddrHkA
+  dialogues.py: QmeVn1B82tMUqH4mJkKUn28eZHUQHVWn6idtDv4xbWVE66
+  handlers.py: QmWR3eVN5HNSz7SNHHfSMEbhkPcLNzbaVgXmSkStBc1amm
+  strategy.py: QmPUs2LGKJeCrMqeZsv9X1WBuoKDUkbMhAWoxsD6LtfyiG
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.1.0
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
+behaviours:
+  service_registration:
+    args:
+      services_interval: 60
+    class_name: ServiceRegistrationBehaviour
+handlers:
+  default:
+    args: {}
+    class_name: FIPAHandler
+  transaction:
+    args: {}
+    class_name: TransactionHandler
+models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
+  strategy:
+    args:
+      data_model:
+        attribute_one:
+          is_required: true
+          name: has_erc1155_contract
+          type: bool
+      data_model_name: erc1155_deploy
+      from_supply: 10
+      ft: 2
+      mint_stock:
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      - 100
+      nb_tokens: 10
+      nft: 1
+      service_data:
+        has_erc1155_contract: true
+      to_supply: 0
+      value: 0
+    class_name: Strategy
+dependencies:
+  vyper:
+    version: ==0.1.0b12

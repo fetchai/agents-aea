@@ -117,3 +117,6 @@ temp_private_key.pem
 
 input_file
 output_file
+
+!packages/fetchai/contracts/erc1155/build
+

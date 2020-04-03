@@ -1,12 +1,18 @@
 name: scaffold
 author: fetchai
 version: 0.1.0
+description: The scaffold connection provides a scaffold for a connection to be implemented
+  by the developer.
 license: Apache-2.0
-fingerprint: ""
-description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
-class_name: MyScaffoldConnection
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
+  connection.py: QmagwVgaPgfeXqVTgcpFESA4DYsteSbojz94SLtmnHNAze
+fingerprint_ignore_patterns: []
 protocols: []
-restricted_to_protocols: []
-excluded_protocols: []
+class_name: MyScaffoldConnection
 config:
   foo: bar
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies: {}

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the common utils of the aea cli."""
-
 import logging
 import logging.config
 import os
@@ -26,12 +25,11 @@ import re
 import shutil
 import sys
 from collections import OrderedDict
+from functools import update_wrapper
 from pathlib import Path
 from typing import Dict, List, Optional, cast
 
 import click
-
-from dotenv import load_dotenv
 
 import jsonschema  # type: ignore
 from jsonschema import ValidationError
@@ -43,15 +41,15 @@ from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_VERSION,
     Dependencies,
-    ProtocolConfig,
     PublicId,
-    SkillConfig,
+    _check_aea_version,
+    _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
@@ -70,13 +68,22 @@ logger = default_logging_config(logger)
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-DEFAULT_VERSION = "0.1.0"
 DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
+NOT_PERMITTED_AUTHORS = [
+    "skills",
+    "connections",
+    "protocols",
+    "contracts",
+    "vendor",
+    "packages",
+    "aea",
+]
+
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
@@ -86,18 +93,36 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(self, cwd: str = "."):
+    def __init__(self, cwd: str = ".", verbosity: str = "INFO"):
         """Init the context."""
         self.config = dict()  # type: Dict
-        self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        self.connection_loader = ConfigLoader(
-            "connection-config_schema.json", ConnectionConfig
-        )
-        self.protocol_loader = ConfigLoader(
-            "protocol-config_schema.json", ProtocolConfig
-        )
         self.cwd = cwd
+        self.verbosity = verbosity
+
+    @property
+    def agent_loader(self) -> ConfigLoader:
+        """Get the agent loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+
+    @property
+    def protocol_loader(self) -> ConfigLoader:
+        """Get the protocol loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.PROTOCOL)
+
+    @property
+    def connection_loader(self) -> ConfigLoader:
+        """Get the connection loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONNECTION)
+
+    @property
+    def skill_loader(self) -> ConfigLoader:
+        """Get the skill loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.SKILL)
+
+    @property
+    def contract_loader(self) -> ConfigLoader:
+        """Get the contract loader."""
+        return ConfigLoader.from_configuration_type(ConfigurationType.CONTRACT)
 
     def set_config(self, key, value) -> None:
         """
@@ -148,6 +173,9 @@ class Context:
         for skill_id in self.agent_config.skills:
             dependencies.update(self._get_item_dependencies("skill", skill_id))
 
+        for contract_id in self.agent_config.contracts:
+            dependencies.update(self._get_item_dependencies("contract", contract_id))
+
         return dependencies
 
 
@@ -184,16 +212,6 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
                 )
             )
             sys.exit(1)
-
-
-def _load_env_file(env_file: str):
-    """
-    Load the content of the environment file into the process environment.
-
-    :param env_file: path to the env file.
-    :return: None.
-    """
-    load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:
@@ -265,29 +283,6 @@ def _format_items(items):
                 description=item["description"],
                 author=item["author"],
                 version=item["version"],
-                line="-" * 30,
-            )
-        )
-    return list_str
-
-
-def _format_skills(items):
-    """Format list of skills to a string for CLI output."""
-    list_str = ""
-    for item in items:
-        list_str += (
-            "{line}\n"
-            "Public ID: {public_id}\n"
-            "Name: {name}\n"
-            "Description: {description}\n"
-            "Protocols: {protocols}\n"
-            "Version: {version}\n"
-            "{line}\n".format(
-                name=item["name"],
-                public_id=item["public_id"],
-                description=item["description"],
-                version=item["version"],
-                protocols="".join(name + " | " for name in item["protocol_names"]),
                 line="-" * 30,
             )
         )
@@ -414,19 +409,31 @@ def _validate_package_name(package_name: str):
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
 
 
-def _is_validate_author_handle(author: str) -> bool:
-    """Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
+def _is_valid_author_handle(author: str) -> bool:
+    """
+    Check that the author matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
-    >>> _is_validate_author_handle("this_is_a_good_author_name")
+    >>> _is_valid_author_handle("this_is_a_good_author_name")
     ...
     True
-    >>> _is_validate_author_handle("this-is-not")
+    >>> _is_valid_author_handle("this-is-not")
     ...
     False
     """
     if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
         return False
     return True
+
+
+def _is_permitted_author_handle(author: str) -> bool:
+    """
+    Check that the author handle is permitted.
+
+    :param author: the author
+    :retun: bool
+    """
+    result = author not in NOT_PERMITTED_AUTHORS
+    return result
 
 
 def _try_get_item_source_path(
@@ -502,7 +509,7 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
 
 def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     """
-    Find an item in the registry or in the AEA directory.
+    Find an item in the local registry.
 
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
@@ -521,13 +528,8 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        # then check in aea dir
-        registry_path = AEA_DIR
-        package_path = Path(registry_path, item_type_plural, item_name)
-        item_configuration_filepath = package_path / config_file_name
-        if not item_configuration_filepath.exists():
-            logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-            sys.exit(1)
+        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
+        sys.exit(1)
 
     # try to load the item configuration file
     try:
@@ -553,6 +555,140 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
         sys.exit(1)
 
     return package_path
+
+
+def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
+    """
+    Find an item in the AEA directory.
+
+    :param ctx: the CLI context.
+    :param item_type: the type of the item to load. One of: protocols, connections, skills
+    :param item_public_id: the public id of the item to find.
+    :return: path to the package directory (either in registry or in aea directory).
+    :raises SystemExit: if the search fails.
+    """
+    item_type_plural = item_type + "s"
+    item_name = item_public_id.name
+
+    # check in aea dir
+    registry_path = AEA_DIR
+    package_path = Path(registry_path, item_type_plural, item_name)
+    config_file_name = _get_default_configuration_file_name_from_type(item_type)
+    item_configuration_filepath = package_path / config_file_name
+    if not item_configuration_filepath.exists():
+        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
+        sys.exit(1)
+
+    # try to load the item configuration file
+    try:
+        item_configuration_loader = ConfigLoader.from_configuration_type(
+            ConfigurationType(item_type)
+        )
+        item_configuration = item_configuration_loader.load(
+            item_configuration_filepath.open()
+        )
+    except ValidationError as e:
+        logger.error(
+            "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
+        )
+        sys.exit(1)
+
+    # check that the configuration file of the found package matches the expected author and version.
+    version = item_configuration.version
+    author = item_configuration.author
+    if item_public_id.author != author or item_public_id.version != version:
+        logger.error(
+            "Cannot find {} with author and version specified.".format(item_type)
+        )
+        sys.exit(1)
+
+    return package_path
+
+
+def _validate_config_consistency(ctx: Context):
+    """
+    Validate fingerprints for every agent component.
+
+    :raise ValueError: if there is a missing configuration file.
+                       or if the configuration file is not valid.
+                       or if the fingerprints do not match
+    """
+
+    packages_public_ids_to_types = dict(
+        [
+            *map(lambda x: (x, ConfigurationType.PROTOCOL), ctx.agent_config.protocols),
+            *map(
+                lambda x: (x, ConfigurationType.CONNECTION),
+                ctx.agent_config.connections,
+            ),
+            *map(lambda x: (x, ConfigurationType.SKILL), ctx.agent_config.skills),
+            *map(lambda x: (x, ConfigurationType.CONTRACT), ctx.agent_config.contracts),
+        ]
+    )  # type: Dict[PublicId, ConfigurationType]
+
+    for public_id, item_type in packages_public_ids_to_types.items():
+
+        # find the configuration file.
+        try:
+            # either in vendor/ or in personal packages.
+            # we give precedence to custom agent components (i.e. not vendorized).
+            package_directory = Path(item_type.to_plural(), public_id.name)
+            is_vendor = False
+            if not package_directory.exists():
+                package_directory = Path(
+                    "vendor", public_id.author, item_type.to_plural(), public_id.name
+                )
+                is_vendor = True
+            # we fail if none of the two alternative works.
+            assert package_directory.exists()
+
+            loader = ConfigLoaders.from_configuration_type(item_type)
+            config_file_name = _get_default_configuration_file_name_from_type(item_type)
+            configuration_file_path = package_directory / config_file_name
+            assert configuration_file_path.exists()
+        except Exception:
+            raise ValueError(
+                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
+            )
+
+        # load the configuration file.
+        try:
+            package_configuration = loader.load(configuration_file_path.open("r"))
+        except ValidationError as e:
+            raise ValueError(
+                "{} configuration file not valid: {}".format(
+                    item_type.value.capitalize(), str(e)
+                )
+            )
+
+        _check_aea_version(package_configuration)
+        _compare_fingerprints(
+            package_configuration, package_directory, is_vendor, item_type
+        )
+
+
+def check_aea_project(f):
+    """
+    Decorator that checks the consistency of the project.
+
+    - try to load agent configuration file
+    - iterate over all the agent packages and check for consistency.
+    """
+
+    def wrapper(*args, **kwargs):
+        try:
+            click_context = args[0]
+            ctx = cast(Context, click_context.obj)
+            try_to_load_agent_config(ctx)
+            skip_consistency_check = ctx.config["skip_consistency_check"]
+            if not skip_consistency_check:
+                _validate_config_consistency(ctx)
+        except Exception as e:
+            logger.error(str(e))
+            sys.exit(1)
+        return f(*args, **kwargs)
+
+    return update_wrapper(wrapper, f)
 
 
 def _init_cli_config() -> None:
@@ -610,3 +746,45 @@ def _load_yaml(filepath: str) -> Dict:
             raise click.ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)
             )
+
+
+def validate_author_name(author: Optional[str] = None) -> str:
+    """
+    Validate an author name.
+
+    :param author: the author name (optional)
+    """
+    is_acceptable_author = False
+    if (
+        author is not None
+        and _is_valid_author_handle(author)
+        and _is_permitted_author_handle(author)
+    ):
+        is_acceptable_author = True
+        valid_author = author
+    while not is_acceptable_author:
+        author_prompt = click.prompt(
+            "Please enter the author handle you would like to use", type=str
+        )
+        valid_author = author_prompt
+        if _is_valid_author_handle(author_prompt) and _is_permitted_author_handle(
+            author_prompt
+        ):
+            is_acceptable_author = True
+        elif not _is_valid_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a valid author handle. Please try again. "
+                "Author handles must satisfy the following regex: {}".format(
+                    PublicId.AUTHOR_REGEX
+                )
+            )
+        elif not _is_permitted_author_handle(author_prompt):
+            is_acceptable_author = False
+            click.echo(
+                "Not a permitted author handle. The following author handles are not allowed: {}".format(
+                    NOT_PERMITTED_AUTHORS
+                )
+            )
+
+    return valid_author

@@ -19,6 +19,7 @@
 
 """This module contains ml_trade's message definition."""
 
+import logging
 from enum import Enum
 from typing import Set, Tuple, cast
 
@@ -29,6 +30,8 @@ from packages.fetchai.protocols.ml_trade.custom_types import (
     Description as CustomDescription,
 )
 from packages.fetchai.protocols.ml_trade.custom_types import Query as CustomQuery
+
+logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -78,9 +81,6 @@ class MlTradeMessage(Message):
             **kwargs,
         )
         self._performatives = {"accept", "cfp", "data", "terms"}
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'ml_trade' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -235,7 +235,7 @@ class MlTradeMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True

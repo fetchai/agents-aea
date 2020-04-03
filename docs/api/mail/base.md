@@ -39,6 +39,8 @@ URI following RFC3986.
 
 Initialize the URI.
 
+Must follow: https://tools.ietf.org/html/rfc3986.html
+
 **Arguments**:
 
 - `uri_raw`: the raw form uri
@@ -183,6 +185,11 @@ Extra information for the handling of an envelope.
 
 Initialize the envelope context.
 
+**Arguments**:
+
+- `connection_id`: the connection id used for routing the outgoing envelope in the multiplexer.
+- `uri`: the URI sent with the envelope.
+
 <a name=".aea.mail.base.EnvelopeContext.uri_raw"></a>
 #### uri`_`raw
 
@@ -192,6 +199,15 @@ Initialize the envelope context.
 ```
 
 Get uri in string format.
+
+<a name=".aea.mail.base.EnvelopeContext.__str__"></a>
+#### `__`str`__`
+
+```python
+ | __str__()
+```
+
+Get the string representation.
 
 <a name=".aea.mail.base.EnvelopeContext.__eq__"></a>
 #### `__`eq`__`
@@ -209,7 +225,7 @@ Compare with another object.
 class EnvelopeSerializer(ABC)
 ```
 
-This abstract class let the devloper to specify serialization layer for the envelope.
+Abstract class to specify the serialization layer for the envelope.
 
 <a name=".aea.mail.base.EnvelopeSerializer.encode"></a>
 #### encode
@@ -221,6 +237,14 @@ This abstract class let the devloper to specify serialization layer for the enve
 
 Encode the envelope.
 
+**Arguments**:
+
+- `envelope`: the envelope to encode
+
+**Returns**:
+
+the encoded envelope
+
 <a name=".aea.mail.base.EnvelopeSerializer.decode"></a>
 #### decode
 
@@ -230,6 +254,14 @@ Encode the envelope.
 ```
 
 Decode the envelope.
+
+**Arguments**:
+
+- `envelope_bytes`: the encoded envelope
+
+**Returns**:
+
+the envelope
 
 <a name=".aea.mail.base.ProtobufEnvelopeSerializer"></a>
 ### ProtobufEnvelopeSerializer
@@ -249,6 +281,14 @@ Envelope serializer using Protobuf.
 
 Encode the envelope.
 
+**Arguments**:
+
+- `envelope`: the envelope to encode
+
+**Returns**:
+
+the encoded envelope
+
 <a name=".aea.mail.base.ProtobufEnvelopeSerializer.decode"></a>
 #### decode
 
@@ -258,6 +298,14 @@ Encode the envelope.
 
 Decode the envelope.
 
+**Arguments**:
+
+- `envelope_bytes`: the encoded envelope
+
+**Returns**:
+
+the envelope
+
 <a name=".aea.mail.base.Envelope"></a>
 ### Envelope
 
@@ -265,7 +313,7 @@ Decode the envelope.
 class Envelope()
 ```
 
-The top level message class.
+The top level message class for agent to agent communication.
 
 <a name=".aea.mail.base.Envelope.__init__"></a>
 #### `__`init`__`
@@ -281,7 +329,8 @@ Initialize a Message object.
 - `to`: the address of the receiver.
 - `sender`: the address of the sender.
 - `protocol_id`: the protocol id.
-- `message`: the protocol-specific message
+- `message`: the protocol-specific message.
+- `context`: the optional envelope context.
 
 <a name=".aea.mail.base.Envelope.to"></a>
 #### to
@@ -321,14 +370,14 @@ Set the protocol id.
  | message(message: bytes) -> None
 ```
 
-Set the message.
+Set the protocol-specific message.
 
 <a name=".aea.mail.base.Envelope.context"></a>
 #### context
 
 ```python
  | @property
- | context() -> Optional[EnvelopeContext]
+ | context() -> EnvelopeContext
 ```
 
 Get the envelope context.
@@ -451,7 +500,7 @@ Get the connections.
  | is_connected() -> bool
 ```
 
-Check whether the multiplexer is processing messages.
+Check whether the multiplexer is processing envelopes.
 
 <a name=".aea.mail.base.Multiplexer.connection_status"></a>
 #### connection`_`status
@@ -526,7 +575,7 @@ None
 class InBox()
 ```
 
-A queue from where you can only consume messages.
+A queue from where you can only consume envelopes.
 
 <a name=".aea.mail.base.InBox.__init__"></a>
 #### `__`init`__`
@@ -552,7 +601,7 @@ Check for a envelope on the in queue.
 
 **Returns**:
 
-boolean indicating whether there is a message or not
+boolean indicating whether there is an envelope or not
 
 <a name=".aea.mail.base.InBox.get"></a>
 #### get
@@ -574,7 +623,7 @@ the envelope object.
 
 **Raises**:
 
-- `Empty`: if the attempt to get a message fails.
+- `Empty`: if the attempt to get an envelope fails.
 
 <a name=".aea.mail.base.InBox.get_nowait"></a>
 #### get`_`nowait
@@ -596,7 +645,7 @@ the envelope object
 class OutBox()
 ```
 
-A queue from where you can only enqueue messages.
+A queue from where you can only enqueue envelopes.
 
 <a name=".aea.mail.base.OutBox.__init__"></a>
 #### `__`init`__`
@@ -622,7 +671,7 @@ Check for a envelope on the in queue.
 
 **Returns**:
 
-boolean indicating whether there is a message or not
+boolean indicating whether there is an envelope or not
 
 <a name=".aea.mail.base.OutBox.put"></a>
 #### put
@@ -650,10 +699,12 @@ None
 
 Put a message in the outbox.
 
+This constructs an envelope with the input arguments.
+
 **Arguments**:
 
-- `to`: the recipient of the message.
-- `sender`: the sender of the message.
+- `to`: the recipient of the envelope.
+- `sender`: the sender of the envelope.
 - `protocol_id`: the protocol id.
 - `message`: the content of the message.
 

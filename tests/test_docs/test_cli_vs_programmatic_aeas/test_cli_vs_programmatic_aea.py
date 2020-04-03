@@ -45,6 +45,7 @@ MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 
 
+# TODO this test does not work properly...
 class TestCliVsProgrammaticAEA:
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
@@ -82,7 +83,7 @@ class TestCliVsProgrammaticAEA:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "fetch", "fetchai/weather_station:0.1.0"],
+            [*CLI_LOG_OPTION, "fetch", "--local", "fetchai/weather_station:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -109,6 +110,7 @@ class TestCliVsProgrammaticAEA:
                 sys.executable,
                 "-m",
                 "aea.cli",
+                "--skip-consistency-check",
                 "run",
                 "--connections",
                 "fetchai/oef:0.1.0",

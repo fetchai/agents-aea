@@ -29,7 +29,7 @@ from aea.skills.tasks import Task
 from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, MyRLAgent, NB_GOODS
 
-logger = logging.getLogger("aea.gym_skill")
+logger = logging.getLogger("aea.packages.fetchai.skills.gym.tasks")
 
 
 class GymTask(Task):

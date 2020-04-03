@@ -33,7 +33,7 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
 
 class PeerToPeerChannel:
@@ -155,24 +155,20 @@ class PeerToPeerChannel:
 class PeerToPeerClientConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(
-        self,
-        address: Address,
-        provider_addr: str,
-        provider_port: int = 8000,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, provider_addr: str, provider_port: int = 8000, **kwargs):
         """
         Initialize a connection to an SDK or API.
 
-        :param address: the address used in the protocols.
+        :param provider_addr: the provider address.
+        :param provider_port: the provider port.
+        :param kwargs: keyword argument for the parent class.
         """
-        if kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "p2p", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
-        self.address = address
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "p2p_client", "0.1.0")
+        super().__init__(**kwargs)
+        provider_addr = provider_addr
+        provider_port = provider_port
+        self.channel = PeerToPeerChannel(self.address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
 
     async def connect(self) -> None:
         """
@@ -231,28 +227,17 @@ class PeerToPeerClientConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+        cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the P2P connection from the connection configuration.
 
         :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
+        :param configuration: the connection configuration object.
         :return: the connection object
         """
-        addr = cast(str, connection_configuration.config.get("addr"))
-        port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
+        addr = cast(str, configuration.config.get("addr"))
+        port = cast(int, configuration.config.get("port"))
         return PeerToPeerClientConnection(
-            address,
-            addr,
-            port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            addr, port, address=address, configuration=configuration
         )

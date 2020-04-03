@@ -24,15 +24,15 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from typing import cast
 
 import pytest
-
-import yaml
 
 import aea
 import aea.registries.base
 from aea.aea import AEA
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import PublicId
+from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -40,9 +40,73 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
-from aea.registries.base import ProtocolRegistry, Resources
+from aea.registries.base import ContractRegistry, ProtocolRegistry
+from aea.registries.resources import Resources
+from aea.skills.base import Skill
 
-from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection, ROOT_DIR
+from .conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
+
+
+class TestContractRegistry:
+    """Test the contract registry."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
+        cls.mocked_logger = cls.patch.__enter__()
+
+        cls.oldcwd = os.getcwd()
+        cls.agent_name = "agent_dir_test"
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = os.path.join(cls.t, cls.agent_name)
+        shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
+
+        contract = Contract.from_dir(
+            str(Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"))
+        )
+
+        cls.registry = ContractRegistry()
+        cls.registry.register(
+            contract.configuration.public_id, cast(Contract, contract)
+        )
+        cls.expected_contract_ids = {
+            PublicId("fetchai", "erc1155", "0.1.0"),
+        }
+
+    def test_fetch_all(self):
+        """Test that the 'fetch_all' method works as expected."""
+        contracts = self.registry.fetch_all()
+        assert all(isinstance(c, Contract) for c in contracts)
+        assert set(c.id for c in contracts) == self.expected_contract_ids
+
+    def test_fetch(self):
+        """ Test that the `fetch` method works as expected."""
+        contract_id = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract = self.registry.fetch(contract_id)
+        assert isinstance(contract, Contract)
+        assert contract.id == contract_id
+
+    def test_unregister(self):
+        """Test that the 'unregister' method works as expected."""
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.1.0")
+        contract_removed = self.registry.fetch(contract_id_removed)
+        self.registry.unregister(contract_id_removed)
+        expected_contract_ids = set(self.expected_contract_ids)
+        expected_contract_ids.remove(contract_id_removed)
+
+        assert set(c.id for c in self.registry.fetch_all()) == expected_contract_ids
+
+        # restore the contract
+        self.registry.register(contract_id_removed, contract_removed)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the tests."""
+        cls.mocked_logger.__exit__()
+        os.chdir(cls.oldcwd)
+        shutil.rmtree(cls.t, ignore_errors=True)
 
 
 class TestProtocolRegistry:
@@ -61,32 +125,25 @@ class TestProtocolRegistry:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        # make fake protocol
-        cls.fake_protocol_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("protocols").append(str(cls.fake_protocol_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "protocols", cls.fake_protocol_id.name).mkdir()
-
         cls.registry = ProtocolRegistry()
-        cls.registry.populate(cls.agent_folder)
+
+        protocol_1 = Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+        protocol_2 = Protocol.from_dir(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
+        )
+        cls.registry.register(protocol_1.public_id, protocol_1)
+        cls.registry.register(protocol_2.public_id, protocol_2)
+
         cls.expected_protocol_ids = {
             PublicId("fetchai", "default", "0.1.0"),
             PublicId("fetchai", "fipa", "0.1.0"),
         }
 
-    def test_not_able_to_add_bad_formatted_protocol_message(self):
-        """Test that the protocol registry has not been able to add the protocol 'bad'."""
-        self.mocked_logger.assert_called_with(
-            "Not able to add protocol '{}'.".format("fake")
-        )
-
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
         protocols = self.registry.fetch_all()
         assert all(isinstance(p, Protocol) for p in protocols)
-        assert set(p.id for p in protocols) == self.expected_protocol_ids
+        assert set(p.public_id for p in protocols) == self.expected_protocol_ids
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
@@ -96,7 +153,10 @@ class TestProtocolRegistry:
         expected_protocols_ids = set(self.expected_protocol_ids)
         expected_protocols_ids.remove(protocol_id_removed)
 
-        assert set(p.id for p in self.registry.fetch_all()) == expected_protocols_ids
+        assert (
+            set(p.public_id for p in self.registry.fetch_all())
+            == expected_protocols_ids
+        )
 
         # restore the protocol
         self.registry.register(protocol_id_removed, protocol_removed)
@@ -141,32 +201,21 @@ class TestResources:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
+        cls.resources = Resources(os.path.join(cls.agent_folder))
+
+        cls.resources.add_component(
+            Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
+        )
+        # cls.resources.add_component(Component.load_from_directory(ComponentType.PROTOCOL, Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")))
+        cls.resources.add_component(
+            Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"))
+        )
+        cls.resources.add_component(
+            Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
+        )
+
         cls.error_skill_public_id = PublicId("fetchai", "error", "0.1.0")
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
-
-        # # make fake skill
-        cls.fake_skill_id = PublicId.from_str("fake_author/fake:0.1.0")
-        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
-        agent_config = yaml.safe_load(agent_config_path.read_text())
-        agent_config.get("skills").append(str(cls.fake_skill_id))
-        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
-        Path(cls.agent_folder, "skills", cls.fake_skill_id.name).mkdir()
-
-        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        cls.resources = Resources(os.path.join(cls.agent_folder))
-        identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
-        cls.aea = AEA(
-            identity,
-            connections,
-            wallet,
-            ledger_apis,
-            resources=cls.resources,
-            is_programmatic=False,
-        )
-        cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {
             PublicId("fetchai", "dummy", "0.1.0"),
@@ -180,55 +229,57 @@ class TestResources:
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
-        assert len(self.resources.handler_registry.fetch_all()) == 3
+        assert len(self.resources.get_all_handlers()) == 3
 
         # unregister the error handler and test that it has been actually unregistered.
         # TODO shouldn't we prevent the unregistration of this?
-        error_handler = self.resources.handler_registry.fetch(
+        error_handler = self.resources._handler_registry.fetch(
             (self.error_skill_public_id, "error_handler")
         )
         assert error_handler is not None
-        self.resources.handler_registry.unregister(
+        self.resources._handler_registry.unregister(
             (self.error_skill_public_id, "error_handler")
         )
         assert (
-            self.resources.handler_registry.fetch(
+            self.resources._handler_registry.fetch(
                 (self.error_skill_public_id, "error_handler")
             )
             is None
         )
 
         # unregister the dummy handler and test that it has been actually unregistered.
-        dummy_handler = self.resources.handler_registry.fetch(
+        dummy_handler = self.resources._handler_registry.fetch(
             (self.dummy_skill_public_id, "dummy")
         )
         assert dummy_handler is not None
-        self.resources.handler_registry.unregister(
+        self.resources._handler_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
         assert (
-            self.resources.handler_registry.fetch((self.dummy_skill_public_id, "dummy"))
+            self.resources._handler_registry.fetch(
+                (self.dummy_skill_public_id, "dummy")
+            )
             is None
         )
 
         # restore the handlers
-        self.resources.handler_registry.register(
+        self.resources._handler_registry.register(
             (self.error_skill_public_id, "error"), error_handler
         )
-        self.resources.handler_registry.register(
+        self.resources._handler_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_handler
         )
-        assert len(self.resources.handler_registry.fetch_all()) == 3
+        assert len(self.resources.get_all_handlers()) == 3
 
-    def test_fake_skill_loading_failed(self):
-        """Test that when the skill is bad formatted, we print a log message."""
-        s = "A problem occurred while parsing the skill directory {}. Exception: {}".format(
-            os.path.join(self.agent_folder, "skills", "fake"),
-            "[Errno 2] No such file or directory: '"
-            + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml")
-            + "'",
-        )
-        self.mocked_logger_warning.assert_called_once_with(s)
+    # def test_fake_skill_loading_failed(self):
+    #     """Test that when the skill is bad formatted, we print a log message."""
+    #     s = "A problem occurred while parsing the skill directory {}. Exception: {}".format(
+    #         os.path.join(self.agent_folder, "skills", "fake"),
+    #         "[Errno 2] No such file or directory: '"
+    #         + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml")
+    #         + "'",
+    #     )
+    #     self.mocked_logger_warning.assert_called_once_with(s)
 
     def test_remove_skill(self):
         """Test that the 'remove skill' and 'add skill' method works correctly."""
@@ -241,12 +292,12 @@ class TestResources:
     def test_add_protocol(self):
         """Test that the 'add protocol' method works correctly."""
         oef_protocol = Protocol.from_dir(
-            os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"),
         )
-        self.resources.add_protocol(oef_protocol)
+        self.resources.add_protocol(cast(Protocol, oef_protocol))
         for protocol_id in self.expected_protocols:
             assert (
-                self.resources.protocol_registry.fetch(protocol_id) is not None
+                self.resources.get_protocol(protocol_id) is not None
             ), "Protocol missing!"
 
     def test_register_behaviour_with_already_existing_skill_id(self):
@@ -258,30 +309,25 @@ class TestResources:
                 self.dummy_skill_public_id, "dummy"
             ),
         ):
-            self.resources.behaviour_registry.register(
+            self.resources._behaviour_registry.register(
                 (self.dummy_skill_public_id, "dummy"), None
             )
 
     def test_behaviour_registry(self):
         """Test that the behaviour registry behaves as expected."""
-        dummy_behaviour = self.resources.behaviour_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
+        dummy_behaviour = self.resources.get_behaviour(
+            self.dummy_skill_public_id, "dummy"
         )
-        assert len(self.resources.behaviour_registry.fetch_all()) == 1
+        assert len(self.resources.get_all_behaviours()) == 1
         assert dummy_behaviour is not None
 
-        self.resources.behaviour_registry.unregister(
+        self.resources._behaviour_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
-        assert (
-            self.resources.behaviour_registry.fetch(
-                (self.dummy_skill_public_id, "dummy")
-            )
-            is None
-        )
-        assert len(self.resources.behaviour_registry.fetch_all()) == 0
+        assert self.resources.get_behaviour(self.dummy_skill_public_id, "dummy") is None
+        assert len(self.resources.get_all_behaviours()) == 0
 
-        self.resources.behaviour_registry.register(
+        self.resources._behaviour_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_behaviour
         )
 
@@ -307,9 +353,7 @@ class TestResources:
 
     def test_handler_configuration_loading(self):
         """Test that the handler configurations are loaded correctly."""
-        default_handlers = self.resources.handler_registry.fetch_by_protocol(
-            DefaultMessage.protocol_id
-        )
+        default_handlers = self.resources.get_handlers(DefaultMessage.protocol_id)
         assert len(default_handlers) == 2
         handler1, handler2 = default_handlers[0], default_handlers[1]
         dummy_handler = (
@@ -320,8 +364,8 @@ class TestResources:
 
     def test_behaviour_configuration_loading(self):
         """Test that the behaviour configurations are loaded correctly."""
-        dummy_behaviour = self.resources.behaviour_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
+        dummy_behaviour = self.resources.get_behaviour(
+            self.dummy_skill_public_id, "dummy"
         )
         assert dummy_behaviour.config == {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}
 
@@ -359,17 +403,21 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        connections = [_make_dummy_connection()]
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
+        resources = Resources(cls.agent_folder)
+
+        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
+
         cls.aea = AEA(
             identity,
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(cls.agent_folder),
+            resources=resources,
             is_programmatic=False,
         )
         cls.aea.setup()
@@ -391,9 +439,9 @@ class TestFilter:
             tx_digest="some_tx_digest",
         )
         self.aea.decision_maker.message_out_queue.put(t)
-        self.aea.filter.handle_internal_messages()
+        self.aea._filter.handle_internal_messages()
 
-        internal_handlers_list = self.aea.resources.handler_registry.fetch_by_protocol(
+        internal_handlers_list = self.aea.resources.get_handlers(
             PublicId("fetchai", "internal", "0.1.0")
         )
         assert len(internal_handlers_list) == 1

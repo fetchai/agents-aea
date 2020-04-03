@@ -35,7 +35,7 @@ from aea.mail.base import Address, Envelope
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
 
 """default 'to' field for Gym envelopes."""
@@ -145,21 +145,18 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def __init__(self, address: Address, gym_env: gym.Env, *args, **kwargs):
+    def __init__(self, gym_env: gym.Env, **kwargs):
         """
         Initialize a connection to a local gym environment.
 
-        :param address: the address used in the protocols.
         :param gym_env: the gym environment.
-        :param connection_id: the connection id.
+        :param kwargs: the keyword arguments of the parent class.
         """
-        if kwargs.get("connection_id") is None:
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self.address = address
-        self.channel = GymChannel(address, gym_env)
 
-        self._connection = None  # type: Optional[asyncio.Queue]
+        super().__init__(**kwargs)
+        self.channel = GymChannel(self.address, gym_env)
 
     async def connect(self) -> None:
         """
@@ -223,21 +220,15 @@ class GymConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+        cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the Gym connection from the connection configuration.
 
         :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
+        :param configuration: the connection configuration object.
         :return: the connection object
         """
-        gym_env_package = cast(str, connection_configuration.config.get("env"))
+        gym_env_package = cast(str, configuration.config.get("env"))
         gym_env = locate(gym_env_package)
-        return GymConnection(
-            address,
-            gym_env(),
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=connection_configuration.restricted_to_protocols,
-            excluded_protocols=connection_configuration.excluded_protocols,
-        )
+        return GymConnection(gym_env(), address=address, configuration=configuration,)

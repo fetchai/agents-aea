@@ -7,7 +7,7 @@ This module contains the stub connection.
 #### `__`init`__`
 
 ```python
- | __init__(input_file_path: Union[str, Path], output_file_path: Union[str, Path], *args, **kwargs)
+ | __init__(input_file_path: Union[str, Path], output_file_path: Union[str, Path], **kwargs)
 ```
 
 Initialize a stub connection.
@@ -16,9 +16,6 @@ Initialize a stub connection.
 
 - `input_file_path`: the input file for the incoming messages.
 - `output_file_path`: the output file for the outgoing messages.
-- `connection_id`: the identifier of the connection object.
-- `restricted_to_protocols`: the only supported protocols for this connection.
-- `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
 
 <a name=".aea.connections.stub.connection.StubConnection.read_envelopes"></a>
 #### read`_`envelopes
@@ -76,15 +73,15 @@ None
 
 ```python
  | @classmethod
- | from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> "Connection"
+ | from_config(cls, address: Address, configuration: ConnectionConfig) -> "Connection"
 ```
 
-Get the OEF connection from the connection configuration.
+Get the stub connection from the connection configuration.
 
 **Arguments**:
 
 - `address`: the address of the agent.
-- `connection_configuration`: the connection configuration object.
+- `configuration`: the connection configuration object.
 
 **Returns**:
 

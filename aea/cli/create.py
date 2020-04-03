@@ -25,12 +25,11 @@ from pathlib import Path
 from typing import cast
 
 import click
-from click import pass_context
 
 from jsonschema import ValidationError
 
 import aea
-from aea.cli.add import connection, skill
+from aea.cli.add import _add_item
 from aea.cli.common import (
     AUTHOR,
     Context,
@@ -39,12 +38,15 @@ from aea.cli.common import (
     DEFAULT_LICENSE,
     DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL,
-    DEFAULT_VERSION,
     _get_or_create_cli_config,
     logger,
 )
-from aea.cli.init import init
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.cli.init import do_init
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_VERSION,
+)
 
 
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:
@@ -65,12 +67,12 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
         current = current.parent.resolve()
 
 
-def _setup_package_folder(ctx, item_type_plural):
+def _setup_package_folder(path: Path):
     """Set a package folder up."""
-    Path(ctx.cwd, item_type_plural).mkdir()
-    connections_init_module = os.path.join(ctx.cwd, item_type_plural, "__init__.py")
-    logger.debug("Creating {}".format(connections_init_module))
-    Path(connections_init_module).touch(exist_ok=True)
+    path.mkdir(exist_ok=False)
+    init_module = path / "__init__.py"
+    logger.debug("Creating {}".format(init_module))
+    Path(init_module).touch(exist_ok=False)
 
 
 @click.command()
@@ -81,8 +83,9 @@ def _setup_package_folder(ctx, item_type_plural):
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
-@pass_context
-def create(click_context, agent_name, author):
+@click.option("--local", is_flag=True, help="For using local folder.")
+@click.pass_context
+def create(click_context, agent_name, author, local):
     """Create an agent."""
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
@@ -93,7 +96,12 @@ def create(click_context, agent_name, author):
         sys.exit(1)
 
     if author is not None:
-        click_context.invoke(init, author=author)
+        if local:
+            do_init(author, False, False)
+        else:
+            raise click.ClickException(
+                "Author is not set up. Please use 'aea init' to initialize."
+            )
 
     config = _get_or_create_cli_config()
     set_author = config.get(AUTHOR, None)
@@ -113,6 +121,16 @@ def create(click_context, agent_name, author):
     try:
         path.mkdir(exist_ok=False)
 
+        # set up packages directories.
+        _setup_package_folder(Path(agent_name, "protocols"))
+        _setup_package_folder(Path(agent_name, "contracts"))
+        _setup_package_folder(Path(agent_name, "connections"))
+        _setup_package_folder(Path(agent_name, "skills"))
+
+        # set up a vendor directory
+        Path(agent_name, "vendor").mkdir(exist_ok=False)
+        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
+
         # create a config file inside it
         click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
@@ -122,7 +140,6 @@ def create(click_context, agent_name, author):
             author=set_author,
             version=DEFAULT_VERSION,
             license=DEFAULT_LICENSE,
-            fingerprint="",
             registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
             description="",
         )
@@ -134,19 +151,11 @@ def create(click_context, agent_name, author):
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        # set up packages directories.
-        _setup_package_folder(ctx, "protocols")
-        _setup_package_folder(ctx, "connections")
-        _setup_package_folder(ctx, "skills")
-
-        # set up a vendor directory
-        Path(ctx.cwd, "vendor").mkdir()
-        Path(ctx.cwd, "vendor", "__init__.py").touch()
-
         click.echo("Adding default packages ...")
-        click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
-
-        click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)
+        if local:
+            ctx.set_config("is_local", True)
+        _add_item(click_context, "connection", DEFAULT_CONNECTION)
+        _add_item(click_context, "skill", DEFAULT_SKILL)
 
     except OSError:
         logger.error("Directory already exist. Aborting...")

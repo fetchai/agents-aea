@@ -67,7 +67,7 @@ a display_address str
 #### sign`_`message
 
 ```python
- | sign_message(message: bytes) -> bytes
+ | sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
 ```
 
 Sign a message in bytes string form.
@@ -75,10 +75,28 @@ Sign a message in bytes string form.
 **Arguments**:
 
 - `message`: the message we want to send
+- `is_deprecated_mode`: if the deprecated signing is used
 
 **Returns**:
 
-Signed message in bytes
+signature of the message in string form
+
+<a name=".aea.crypto.fetchai.FetchAICrypto.sign_transaction"></a>
+#### sign`_`transaction
+
+```python
+ | sign_transaction(transaction: Any) -> Any
+```
+
+Sign a transaction in bytes string form.
+
+**Arguments**:
+
+- `transaction`: the transaction to be signed
+
+**Returns**:
+
+signed transaction
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.recover_message"></a>
 #### recover`_`message
@@ -196,10 +214,19 @@ Get the balance of a given account.
 #### send`_`transaction
 
 ```python
- | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, **kwargs) -> Optional[str]
+ | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, is_waiting_for_confirmation: bool = True, **kwargs) -> Optional[str]
 ```
 
 Submit a transaction to the ledger.
+
+<a name=".aea.crypto.fetchai.FetchAIApi.send_raw_transaction"></a>
+#### send`_`raw`_`transaction
+
+```python
+ | send_raw_transaction(tx_signed) -> Optional[Dict]
+```
+
+Send a signed transaction and wait for confirmation.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
@@ -209,6 +236,55 @@ Submit a transaction to the ledger.
 ```
 
 Check whether a transaction is settled or not.
+
+<a name=".aea.crypto.fetchai.FetchAIApi.send_signed_transaction"></a>
+#### send`_`signed`_`transaction
+
+```python
+ | send_signed_transaction(is_waiting_for_confirmation: bool, tx_signed: Any, **kwargs) -> str
+```
+
+Send a signed transaction and wait for confirmation.
+
+**Arguments**:
+
+- `is_waiting_for_confirmation`: whether or not to wait for confirmation
+- `tx_signed`: the signed transaction
+
+<a name=".aea.crypto.fetchai.FetchAIApi.get_transaction_status"></a>
+#### get`_`transaction`_`status
+
+```python
+ | get_transaction_status(tx_digest: str) -> Any
+```
+
+Get the transaction status for a transaction digest.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+the tx status, if present
+
+<a name=".aea.crypto.fetchai.FetchAIApi.generate_tx_nonce"></a>
+#### generate`_`tx`_`nonce
+
+```python
+ | generate_tx_nonce(seller: Address, client: Address) -> str
+```
+
+Generate a random str message.
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+
+**Returns**:
+
+return the hash in hex.
 
 <a name=".aea.crypto.fetchai.FetchAIApi.validate_transaction"></a>
 #### validate`_`transaction
@@ -230,22 +306,4 @@ Check whether a transaction is valid or not.
 **Returns**:
 
 True if the random_message is equals to tx['input']
-
-<a name=".aea.crypto.fetchai.FetchAIApi.generate_tx_nonce"></a>
-#### generate`_`tx`_`nonce
-
-```python
- | generate_tx_nonce(seller: Address, client: Address) -> str
-```
-
-Generate a random str message.
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-
-**Returns**:
-
-return the hash in hex.
 

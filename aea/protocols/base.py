@@ -22,26 +22,22 @@
 import inspect
 import json
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
 from copy import copy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import (
-    DEFAULT_PROTOCOL_CONFIG_FILE,
+    ComponentConfiguration,
+    ComponentType,
     ProtocolConfig,
-    ProtocolId,
     PublicId,
 )
-from aea.configurations.loader import ConfigLoader
-from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
-    load_module,
-)
+from aea.configurations.components import Component
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -231,70 +227,69 @@ class JSONSerializer(Serializer):
         return Message(json_msg)
 
 
-class Protocol(ABC):
+class Protocol(Component):
     """
     This class implements a specifications for a protocol.
 
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(
-        self, protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig
-    ):
+    def __init__(self, configuration: ProtocolConfig, serializer: Serializer):
         """
         Initialize the protocol manager.
 
-        :param protocol_id: the protocol id.
+        :param configuration: the protocol configurations.
         :param serializer: the serializer.
-        :param config: the protocol configurations.
         """
-        self._protocol_id = protocol_id
-        self._serializer = serializer
-        self._config = config
+        super().__init__(configuration)
 
-    @property
-    def id(self) -> ProtocolId:
-        """Get the name."""
-        return self._protocol_id
+        self._serializer = serializer  # type: Serializer
 
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
         return self._serializer
 
-    @property
-    def config(self) -> ProtocolConfig:
-        """Get the configuration."""
-        return self._config
-
     @classmethod
     def from_dir(cls, directory: str) -> "Protocol":
         """
-        Load a protocol from a directory.
+        Load the protocol from a directory.
 
-        :param directory: the skill directory.
-        :param agent_context: the agent's context
-        :return: the Protocol object.
-        :raises Exception: if the parsing failed.
+        :param directory: the directory to the skill package.
+        :return: the protocol object.
         """
-        # check if there is the config file. If not, then return None.
-        protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = protocol_loader.load(
-            open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE))
+        configuration = cast(
+            ProtocolConfig,
+            ComponentConfiguration.load(ComponentType.PROTOCOL, Path(directory)),
         )
-        protocol_module = load_module("protocols", Path(directory, "serialization.py"))
-        add_agent_component_module_to_sys_modules(
-            "protocol", protocol_config.name, protocol_config.author, protocol_module
+        configuration._directory = Path(directory)
+        return Protocol.from_config(configuration)
+
+    @classmethod
+    def from_config(cls, configuration: ProtocolConfig) -> "Protocol":
+        """
+        Load the protocol from configuration.
+
+        :param configuration: the protocol configuration.
+        :return: the protocol object.
+        """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
         )
-        classes = inspect.getmembers(protocol_module, inspect.isclass)
+        add_modules_to_sys_modules(package_modules)
+        serialization_module = load_module(
+            "serialization", Path(directory, "serialization.py")
+        )
+        classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(
             filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
         )
         assert len(serializer_classes) == 1, "Not exactly one serializer detected."
         serializer_class = serializer_classes[0][1]
 
-        protocol_id = PublicId(
-            protocol_config.author, protocol_config.name, protocol_config.version
-        )
-        protocol = Protocol(protocol_id, serializer_class(), protocol_config)
-        return protocol
+        serializer = serializer_class()
+        return Protocol(configuration, serializer)

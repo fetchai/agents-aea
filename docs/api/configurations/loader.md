@@ -16,7 +16,7 @@ This class implement parsing, serialization and validation functionalities for t
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str, configuration_type: Type[T])
+ | __init__(schema_filename: str, configuration_class: Type[T])
 ```
 
 Initialize the parser for configuration files.
@@ -24,7 +24,27 @@ Initialize the parser for configuration files.
 **Arguments**:
 
 - `schema_filename`: the path to the JSON-schema file in 'aea/configurations/schemas'.
-- `configuration_type`: 
+- `configuration_class`: the configuration class (e.g. AgentConfig, SkillConfig etc.)
+
+<a name=".aea.configurations.loader.ConfigLoader.validator"></a>
+#### validator
+
+```python
+ | @property
+ | validator() -> Draft4Validator
+```
+
+Get the json schema validator.
+
+<a name=".aea.configurations.loader.ConfigLoader.configuration_class"></a>
+#### configuration`_`class
+
+```python
+ | @property
+ | configuration_class() -> Type[T]
+```
+
+Get the configuration type of the loader.
 
 <a name=".aea.configurations.loader.ConfigLoader.load_protocol_specification"></a>
 #### load`_`protocol`_`specification

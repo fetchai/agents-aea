@@ -29,10 +29,10 @@ import yaml
 
 from aea.cli.common import (
     Context,
+    check_aea_project,
     from_string_to_type,
     logger,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -169,10 +169,10 @@ def _get_parent_object(obj: dict, dotted_path: List[str]):
 
 
 @click.group()
-@pass_ctx
-def config(ctx: Context):
+@click.pass_context
+@check_aea_project
+def config(click_context):
     """Read or modify a configuration."""
-    try_to_load_agent_config(ctx)
 
 
 @config.command()
@@ -248,7 +248,7 @@ def set(ctx: Context, json_path: List[str], value, type):
         logger.error("Cannot convert {} to type {}".format(value, type_))
 
     try:
-        configuration_obj = config_loader.configuration_type.from_json(
+        configuration_obj = config_loader.configuration_class.from_json(
             configuration_dict
         )
         config_loader.validator.validate(instance=configuration_obj.json)

@@ -175,51 +175,51 @@ class TestLedgerApis:
                 assert tx_digest is None
                 assert ledger_apis.last_tx_statuses[FETCHAI] == "ERROR"
 
-    def test_transfer_ethereum(self):
-        """Test the transfer function for ethereum token."""
-        private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        eth_obj = EthereumCrypto(private_key_path=private_key_path)
-        ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
-            FETCHAI,
-        )
-        with mock.patch.object(
-            ledger_apis.apis.get(ETHEREUM).api.eth,
-            "getTransactionCount",
-            return_value=5,
-        ):
-            with mock.patch.object(
-                ledger_apis.apis.get(ETHEREUM).api.eth.account,
-                "signTransaction",
-                return_value=mock.Mock(),
-            ):
-                result = HexBytes(
-                    "0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a"
-                )
-                with mock.patch.object(
-                    ledger_apis.apis.get(ETHEREUM).api.eth,
-                    "sendRawTransaction",
-                    return_value=result,
-                ):
-                    with mock.patch.object(
-                        ledger_apis.apis.get(ETHEREUM).api.eth,
-                        "getTransactionReceipt",
-                        return_value=b"0xa13f2f926233bc4638a20deeb8aaa7e8d6a96e487392fa55823f925220f6efed",
-                    ):
-                        with mock.patch.object(
-                            ledger_apis.apis.get(ETHEREUM).api.eth,
-                            "estimateGas",
-                            return_value=100000,
-                        ):
-                            tx_digest = ledger_apis.transfer(
-                                eth_obj,
-                                eth_address,
-                                amount=10,
-                                tx_fee=200000,
-                                tx_nonce="transaction nonce",
-                            )
-                            assert tx_digest is not None
-                            assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
+    # def test_transfer_ethereum(self):
+    #     """Test the transfer function for ethereum token."""
+    #     private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+    #     eth_obj = EthereumCrypto(private_key_path=private_key_path)
+    #     ledger_apis = LedgerApis(
+    #         {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+    #         FETCHAI,
+    #     )
+    #     with mock.patch.object(
+    #         ledger_apis.apis.get(ETHEREUM).api.eth,
+    #         "getTransactionCount",
+    #         return_value=5,
+    #     ):
+    #         with mock.patch.object(
+    #             ledger_apis.apis.get(ETHEREUM).api.eth.account,
+    #             "signTransaction",
+    #             return_value=mock.Mock(),
+    #         ):
+    #             result = HexBytes(
+    #                 "0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a"
+    #             )
+    #             with mock.patch.object(
+    #                 ledger_apis.apis.get(ETHEREUM).api.eth,
+    #                 "sendRawTransaction",
+    #                 return_value=result,
+    #             ):
+    #                 with mock.patch.object(
+    #                     ledger_apis.apis.get(ETHEREUM).api.eth,
+    #                     "getTransactionReceipt",
+    #                     return_value=b"0xa13f2f926233bc4638a20deeb8aaa7e8d6a96e487392fa55823f925220f6efed",
+    #                 ):
+    #                     with mock.patch.object(
+    #                         ledger_apis.apis.get(ETHEREUM).api.eth,
+    #                         "estimateGas",
+    #                         return_value=100000,
+    #                     ):
+    #                         tx_digest = ledger_apis.transfer(
+    #                             eth_obj,
+    #                             eth_address,
+    #                             amount=10,
+    #                             tx_fee=200000,
+    #                             tx_nonce="transaction nonce",
+    #                         )
+    #                         assert tx_digest is not None
+    #                         assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
 
     def test_failed_transfer_ethereum(self):
         """Test the transfer function for ethereum token fails."""

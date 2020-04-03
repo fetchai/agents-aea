@@ -62,17 +62,23 @@ class TestWeatherSkills:
         shutil.copytree(packages_src, packages_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -82,14 +88,20 @@ class TestWeatherSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/weather_station:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -103,7 +115,7 @@ class TestWeatherSkills:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
+        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
 
         # close the file
         file.close()
@@ -124,14 +136,20 @@ class TestWeatherSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/weather_client:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -145,7 +163,7 @@ class TestWeatherSkills:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("is_ledger_tx: True", "is_ledger_tx: False")
+        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
 
         # close the file
         file.close()
@@ -186,7 +204,8 @@ class TestWeatherSkills:
                 env=os.environ.copy(),
             )
 
-            time.sleep(10.0)
+            # TODO increase timeout so we are sure they work until the end of negotiation.
+            time.sleep(5.0)
             process_one.send_signal(signal.SIGINT)
             process_one.wait(timeout=10)
             process_two.send_signal(signal.SIGINT)

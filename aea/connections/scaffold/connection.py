@@ -19,28 +19,24 @@
 
 """Scaffold connection and channel."""
 
-import logging
 from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
-logger = logging.getLogger(__name__)
-
 
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, address: Address, *args, **kwargs):
+    def __init__(self, configuration: ConnectionConfig, address: Address):
         """
         Initialize a connection to an SDK or API.
 
-        :param connection_id: the identifier of the connection object.
+        :param configuration: the connection configuration.
         :param address: the address used in the protocols.
         """
-        super().__init__(*args, **kwargs)
-        self.address = address
+        super().__init__(configuration=configuration, address=address)
 
     async def connect(self) -> None:
         """
@@ -77,13 +73,13 @@ class MyScaffoldConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+        cls, address: "Address", configuration: ConnectionConfig
     ) -> "Connection":
         """
-        Get the Gym connection from the connection configuration.
+        Get the scaffold connection from the connection configuration.
 
+        :param configuration: the connection configuration object.
         :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        raise NotImplementedError  # pragma: no cover
+        return MyScaffoldConnection(address=address, configuration=configuration)

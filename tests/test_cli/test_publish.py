@@ -83,7 +83,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
             _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
 
 
-@mock.patch("aea.cli.publish.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 class PublishCommandTestCase(TestCase):
@@ -96,8 +96,8 @@ class PublishCommandTestCase(TestCase):
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--registry"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
         )
         self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )

@@ -30,7 +30,7 @@ from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.tcp_server")
 
 STUB_DIALOGUE_ID = 0
 
@@ -38,15 +38,14 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
+    def __init__(self, host: str, port: int, *args, **kwargs):
         """
         Initialize a TCP channel.
 
         :param address: address.
         :param host: the socket bind address.
         """
-        super().__init__(address, host, port, *args, **kwargs)
-
+        super().__init__(host, port, **kwargs)
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
@@ -133,27 +132,17 @@ class TCPServerConnection(TCPConnection):
 
     @classmethod
     def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
+        cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
-        """Get the TCP server connection from the connection configuration.
+        """
+        Get the TCP server connection from the connection configuration.
 
         :param address: the address of the agent.
-        :param connection_configuration: the connection configuration object.
+        :param configuration: the connection configuration object.
         :return: the connection object
         """
-        server_address = cast(str, connection_configuration.config.get("address"))
-        port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
+        server_address = cast(str, configuration.config.get("address"))
+        port = cast(int, configuration.config.get("port"))
         return TCPServerConnection(
-            address,
-            server_address,
-            port,
-            connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            server_address, port, address=address, configuration=configuration
         )

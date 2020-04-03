@@ -72,11 +72,15 @@ class TestGenerateProtocol:
 
         # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         os.chdir(cls.agent_name)
 
@@ -102,7 +106,7 @@ class TestGenerateProtocol:
             self.t,
             self.agent_name,
             "protocols",
-            "test_protocol",
+            "t_protocol",
             DEFAULT_PROTOCOL_CONFIG_FILE,
         )
         config_file = yaml.safe_load(open(p))
@@ -125,7 +129,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.protocol_name = "test_protocol"
+        cls.protocol_name = "t_protocol"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         shutil.copyfile(
@@ -138,11 +142,15 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
 
         # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         os.chdir(cls.agent_name)
 
@@ -213,11 +221,15 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         os.chdir(cls.agent_name)
 
@@ -231,7 +243,13 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         # generate protocol second time
         cls.generate_result_2 = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "generate",
+                "protocol",
+                cls.path_to_specification,
+            ],
             standalone_mode=False,
         )
         os.chdir(cls.cwd)
@@ -253,7 +271,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name 'test_protocol' already exists. Aborting..."
+        s = "A protocol with name 't_protocol' already exists. Aborting..."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
@@ -261,7 +279,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
     @classmethod
     def teardown_class(cls):
@@ -292,16 +310,20 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
-            "yaml.safe_dump", side_effect=ValidationError("test error message")
+            "yaml.dump", side_effect=ValidationError("test error message")
         )
         cls.patch.__enter__()
 
@@ -327,7 +349,16 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert not Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
+
+    def test_configuration_file_not_valid(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'Cannot find protocol: '{protocol_name}'
+        """
+        self.mocked_logger_error.assert_called_once_with(
+            "There was an error while generating the protocol. The protocol is NOT generated."
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -353,11 +384,15 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         # create an agent
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         cls.create_result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
 
         # create an exception
@@ -388,7 +423,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", "test_protocol").exists()
+        assert not Path(self.t, self.agent_name, "protocols", "t_protocol").exists()
 
     @classmethod
     def teardown_class(cls):

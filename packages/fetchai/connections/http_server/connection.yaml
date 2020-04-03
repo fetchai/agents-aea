@@ -1,0 +1,26 @@
+name: http_server
+author: fetchai
+version: 0.1.0
+description: The HTTP server connection that wraps http server implementing a RESTful
+  API specification.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
+  connection.py: QmcDtwiTUyfpxJPAHG6LCFeXE3W7W77DiBEqYPURDwTam9
+fingerprint_ignore_patterns: []
+protocols:
+- fetchai/http:0.1.0
+class_name: HTTPServerConnection
+config:
+  api_spec_path: ''
+  host: ${addr:127.0.0.1}
+  port: ${port:8000}
+excluded_protocols: []
+restricted_to_protocols:
+- fetchai/http:0.1.0
+dependencies:
+  openapi-core:
+    version: ==0.13.2
+  openapi-spec-validator:
+    version: ==0.2.8

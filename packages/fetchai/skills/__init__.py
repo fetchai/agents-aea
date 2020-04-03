@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the skill registry for the AEA framework."""
+"""This module contains the skill packages authored by Fetch.ai."""

@@ -42,32 +42,34 @@ class OefErrorOperation(Enum):
         """Get string representation."""
         return str(self.value)
 
-    @classmethod
+    @staticmethod
     def encode(
-        cls, performative_content, oef_error_operation_from_message: "OefErrorOperation"
+        oef_error_operation_protobuf_object,
+        oef_error_operation_object: "OefErrorOperation",
     ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The content in the 'performative' argument must be matched with the message content in the 'oef_error_operation_from_message' argument.
+        The protocol buffer object in the oef_error_operation_protobuf_object argument is matched with the instance of this class in the 'oef_error_operation_object'
+        argument.
 
-        :param performative_content: the performative protocol buffer object containing a content whose type is this class.
-        :param oef_error_operation_from_message: the message content to be encoded in the protocol buffer object.
+        :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :param oef_error_operation_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        performative_content.oef_error = oef_error_operation_from_message.value
+        oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
 
     @classmethod
-    def decode(cls, oef_error_operation_from_pb2) -> "OefErrorOperation":
+    def decode(cls, oef_error_operation_protobuf_object) -> "OefErrorOperation":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the content in the 'oef_error_operation_from_pb2' argument.
+        A new instance of this class is created that matches the protocol buffer object in the 'oef_error_operation_protobuf_object' argument.
 
-        :param oef_error_operation_from_pb2: the protocol buffer content object whose type corresponds with this class.
-        :return: A new instance of this class that matches the protocol buffer object in the 'oef_error_operation_from_pb2' argument.
+        :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        :return: A new instance of this class that matches the protocol buffer object in the 'oef_error_operation_protobuf_object' argument.
         """
-        enum_value_from_pb2 = oef_error_operation_from_pb2.oef_error
+        enum_value_from_pb2 = oef_error_operation_protobuf_object.oef_error
         return OefErrorOperation(enum_value_from_pb2)
 
 

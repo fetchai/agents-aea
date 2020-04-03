@@ -160,6 +160,12 @@ class Game(Model):
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._configuration = None  # type: Optional[Configuration]
+        self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
+
+    @property
+    def is_using_contract(self) -> bool:
+        """Returns the is_using_contract."""
+        return self._is_using_contract
 
     @property
     def expected_version_id(self) -> str:
@@ -179,8 +185,9 @@ class Game(Model):
         ), "Expected controller address not assigned!"
         return self._expected_controller_addr
 
+    # TODO the name of this property conflicts with the Model.configuration property.
     @property
-    def configuration(self) -> Configuration:
+    def configuration(self) -> Configuration:  # type: ignore
         """Get the game configuration."""
         assert self._configuration is not None, "Game configuration not assigned!"
         return self._configuration

@@ -1,40 +1,52 @@
 name: carpark_detection
 author: fetchai
 version: 0.1.0
+description: The carpark detection skill implements the detection and trading functionality
+  for a carpark agent.
 license: Apache-2.0
-fingerprint: ""
-aea_version: 0.2.4
-description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
+  behaviours.py: QmQf5q2aFExYXn6JXhXNM1nV8j3eTYJioHmBsB9GR1dxkt
+  carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
+  detection_database.py: QmPxtPHs9x8jQ3ByM62NwE2ehGvHqATWPDMrKCEJkoRGtj
+  dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
+  handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
+  strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
+fingerprint_ignore_patterns:
+- temp_files_placeholder/*
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef_search:0.1.0
 behaviours:
-  service_registration:
-    class_name: ServiceRegistrationBehaviour
-    args: {}
   car_park_detection:
-    class_name: CarParkDetectionAndGUIBehaviour
     args:
-      default_longitude: -73.967491
       default_latitude: 40.780343
+      default_longitude: -73.967491
       image_capture_interval: 120
+    class_name: CarParkDetectionAndGUIBehaviour
+  service_registration:
+    args: {}
+    class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
-    class_name: FIPAHandler
     args: {}
+    class_name: FIPAHandler
 models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
-    class_name: Strategy
     args:
+      currency_id: FET
       data_price_fet: 200000000
       db_is_rel_to_cwd: true
       db_rel_dir: ../temp_files
-      currency_id: 'FET'
-      ledger_id: 'fetchai'
-      is_ledger_tx: True
+      is_ledger_tx: true
+      ledger_id: fetchai
       seller_tx_fee: 0
-
-  dialogues:
-    class_name: Dialogues
-    args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
-ledgers: ['fetchai']
+    class_name: Strategy
 dependencies:
   scikit-image: {}

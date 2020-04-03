@@ -25,26 +25,23 @@ from asyncio import CancelledError
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 
 import packages
-from packages.fetchai.connections.tcp.connection import (
-    TCPClientConnection,
-    TCPServerConnection,
-)
 
-from ....conftest import get_unused_tcp_port
+from ....conftest import (
+    _make_tcp_client_connection,
+    _make_tcp_server_connection,
+    get_unused_tcp_port,
+)
 
 
 @pytest.mark.asyncio
 async def test_connect_twice():
     """Test that connecting twice the tcp connection works correctly."""
     port = get_unused_tcp_port()
-    tcp_connection = TCPServerConnection(
-        "address", "127.0.0.1", port, connection_id=PublicId("fetchai", "tcp", "0.1.0")
-    )
+    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
@@ -64,9 +61,7 @@ async def test_connect_twice():
 async def test_connect_raises_exception():
     """Test the case that a connection attempt raises an exception."""
     port = get_unused_tcp_port()
-    tcp_connection = TCPServerConnection(
-        "address", "127.0.0.1", port, connection_id=PublicId("fetchai", "tcp", "0.1.0")
-    )
+    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
@@ -85,9 +80,7 @@ async def test_connect_raises_exception():
 async def test_disconnect_when_already_disconnected():
     """Test that disconnecting a connection already disconnected works correctly."""
     port = get_unused_tcp_port()
-    tcp_connection = TCPServerConnection(
-        "address", "127.0.0.1", port, connection_id=PublicId("fetchai", "tcp", "0.1.0")
-    )
+    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
 
     with unittest.mock.patch.object(
         packages.fetchai.connections.tcp.base.logger, "warning"
@@ -101,9 +94,7 @@ async def test_send_to_unknown_destination():
     """Test that a message to an unknown destination logs an error."""
     address = "address"
     port = get_unused_tcp_port()
-    tcp_connection = TCPServerConnection(
-        address, "127.0.0.1", port, connection_id=PublicId("fetchai", "tcp", "0.1.0")
-    )
+    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
     envelope = Envelope(
         to="non_existing_destination",
         sender="address",
@@ -123,18 +114,8 @@ async def test_send_to_unknown_destination():
 async def test_send_cancelled():
     """Test that cancelling a send works correctly."""
     port = get_unused_tcp_port()
-    tcp_server = TCPServerConnection(
-        "address_server",
-        "127.0.0.1",
-        port,
-        connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-    )
-    tcp_client = TCPClientConnection(
-        "address_client",
-        "127.0.0.1",
-        port,
-        connection_id=PublicId("fetchai", "tcp", "0.1.0"),
-    )
+    tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port)
+    tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port)
 
     await tcp_server.connect()
     await tcp_client.connect()

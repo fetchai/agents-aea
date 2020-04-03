@@ -11,12 +11,12 @@ message GymMessage{
 
 
     // Performatives and contents
-    message Act{
+    message Act_Performative{
         AnyObject action = 1;
         int32 step_id = 2;
     }
 
-    message Percept{
+    message Percept_Performative{
         int32 step_id = 1;
         AnyObject observation = 2;
         float reward = 3;
@@ -24,9 +24,9 @@ message GymMessage{
         AnyObject info = 5;
     }
 
-    message Reset{}
+    message Reset_Performative{}
 
-    message Close{}
+    message Close_Performative{}
 
 
     // Standard GymMessage fields
@@ -35,9 +35,9 @@ message GymMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Act act = 5;
-        Close close = 6;
-        Percept percept = 7;
-        Reset reset = 8;
+        Act_Performative act = 5;
+        Close_Performative close = 6;
+        Percept_Performative percept = 7;
+        Reset_Performative reset = 8;
     }
 }

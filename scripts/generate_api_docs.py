@@ -22,34 +22,46 @@
 This tool generates the API docs.
 """
 
-# Install https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop
-
+import shutil
 import subprocess  # nosec
+import sys
 from pathlib import Path
 
 DOCS_DIR = "docs/"
 MODULES_TO_PATH = {
     "aea.aea": "api/aea.md",
+    "aea.aea_builder": "api/aea_builder.md",
     "aea.agent": "api/agent.md",
     "aea.configurations.base": "api/configurations/base.md",
+    "aea.configurations.components": "api/configurations/components.md",
     "aea.configurations.loader": "api/configurations/loader.md",
     "aea.connections.base": "api/connections/base.md",
     "aea.connections.stub.connection": "api/connections/stub/connection.md",
     "aea.context.base": "api/context/base.md",
-    "aea.crypto.base": "api/crytpo/base.md",
+    "aea.contracts.base": "api/contracts/base.md",
+    "aea.contracts.ethereum": "api/contracts/ethereum.md",
+    "aea.crypto.base": "api/crypto/base.md",
     "aea.crypto.ethereum": "api/crypto/ethereum.md",
     "aea.crypto.fetchai": "api/crypto/fetchai.md",
     "aea.crypto.ledger_apis": "api/crypto/ledger_apis.md",
     "aea.crypto.wallet": "api/crypto/wallet.md",
+    "aea.decision_maker.base": "api/decision_maker/base.md",
+    "aea.decision_maker.messages.base": "api/decision_maker/messages/base.md",
+    "aea.decision_maker.messages.state_update": "api/decision_maker/messages/state_update.md",
+    "aea.decision_maker.messages.transaction": "api/decision_maker/messages/transaction.md",
     "aea.helpers.dialogue.base": "api/helpers/dialogue/base.md",
+    "aea.helpers.ipfs.base": "api/helpers/ipfs/base.md",
+    "aea.helpers.preference_representations.base": "api/helpers/preference_representations/base.md",
     "aea.helpers.search.generic": "api/helpers/search/generic.md",
     "aea.helpers.search.models": "api/helpers/search/models.md",
     "aea.identity.base": "api/identity/base.md",
     "aea.mail.base": "api/mail/base.md",
     "aea.protocols.base": "api/protocols/base.md",
+    "aea.protocols.generator": "api/protocols/generator.md",
+    "aea.protocols.default.custom_types": "api/protocols/default/custom_types.md",
     "aea.protocols.default.message": "api/protocols/default/message.md",
     "aea.protocols.default.serialization": "api/protocols/default/serialization.md",
-    "aea.registries.base": "api/registries/base.md",
+    "aea.registries.resources": "api/registries/resources.md",
     "aea.skills.base": "api/skills/base.md",
     "aea.skills.behaviours": "api/skills/behaviours.md",
     "aea.skills.tasks": "api/skills/tasks.md",
@@ -88,4 +100,10 @@ def generate_api_docs():
 
 
 if __name__ == "__main__":
+    res = shutil.which("pydoc-markdown")
+    if res is None:
+        print(
+            "Please install pydoc-markdown first! See the following link: https://github.com/NiklasRosenstein/pydoc-markdown/tree/develop"
+        )
+        sys.exit(1)
     generate_api_docs()

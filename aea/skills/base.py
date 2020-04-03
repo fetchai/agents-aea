@@ -21,7 +21,6 @@
 
 import inspect
 import logging
-import os
 import queue
 import re
 from abc import ABC, abstractmethod
@@ -32,24 +31,20 @@ from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
-    BehaviourConfig,
-    DEFAULT_SKILL_CONFIG_FILE,
-    HandlerConfig,
-    ModelConfig,
+    ComponentConfiguration,
+    ComponentType,
     ProtocolId,
     PublicId,
+    SkillComponentConfiguration,
     SkillConfig,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.components import Component
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
+from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.helpers.base import (
-    add_agent_component_module_to_sys_modules,
-    load_agent_component_package,
-    load_module,
-)
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -60,34 +55,57 @@ logger = logging.getLogger(__name__)
 class SkillContext:
     """This class implements the context of a skill."""
 
-    def __init__(self, agent_context: AgentContext):
+    def __init__(
+        self,
+        agent_context: Optional[AgentContext] = None,
+        skill: Optional["Skill"] = None,
+    ):
         """
         Initialize a skill context.
-
-        :param agent_context: the agent's context
         """
-        self._agent_context = agent_context
+        self._agent_context = agent_context  # type: Optional[AgentContext]
         self._in_queue = Queue()  # type: Queue
-        self._skill = None  # type: Optional[Skill]
+        self._skill = skill  # type: Optional[Skill]
 
         self._is_active = True  # type: bool
         self._new_behaviours_queue = queue.Queue()  # type: Queue
         self._logger = None  # type: Optional[Logger]
 
     @property
+    def logger(self) -> Logger:
+        """Get the logger."""
+        assert self._logger is not None, "Logger not set."
+        return self._logger
+
+    @logger.setter
+    def logger(self, logger_: Logger) -> None:
+        assert self._logger is None, "Logger already set."
+        self._logger = logger_
+
+    def _get_agent_context(self) -> AgentContext:
+        """Get the agent context."""
+        assert self._agent_context is not None, "Agent context not set yet."
+        return self._agent_context
+
+    def set_agent_context(self, agent_context: AgentContext) -> None:
+        """Set the agent context."""
+        self._agent_context = agent_context
+
+    @property
     def shared_state(self) -> Dict[str, Any]:
         """Get the shared state dictionary."""
-        return self._agent_context.shared_state
+        return self._get_agent_context().shared_state
 
     @property
     def agent_name(self) -> str:
         """Get agent name."""
-        return self._agent_context.agent_name
+        return self._get_agent_context().agent_name
 
     @property
     def skill_id(self):
         """Get the skill id of the skill context."""
-        return self._skill.config.public_id
+        assert self._skill is not None, "Skill not set yet."
+        return self._skill.configuration.public_id
 
     @property
     def is_active(self):
@@ -119,22 +137,22 @@ class SkillContext:
     @property
     def agent_addresses(self) -> Dict[str, str]:
         """Get addresses."""
-        return self._agent_context.addresses
+        return self._get_agent_context().addresses
 
     @property
     def agent_address(self) -> str:
         """Get address."""
-        return self._agent_context.address
+        return self._get_agent_context().address
 
     @property
     def connection_status(self) -> ConnectionStatus:
         """Get connection status."""
-        return self._agent_context.connection_status
+        return self._get_agent_context().connection_status
 
     @property
     def outbox(self) -> OutBox:
         """Get outbox."""
-        return self._agent_context.outbox
+        return self._get_agent_context().outbox
 
     @property
     def message_in_queue(self) -> Queue:
@@ -144,38 +162,38 @@ class SkillContext:
     @property
     def decision_maker_message_queue(self) -> Queue:
         """Get message queue of decision maker."""
-        return self._agent_context.decision_maker_message_queue
+        return self._get_agent_context().decision_maker_message_queue
 
     @property
     def agent_ownership_state(self) -> OwnershipState:
         """Get ownership state."""
-        return self._agent_context.ownership_state
+        return self._get_agent_context().ownership_state
 
     @property
     def agent_preferences(self) -> Preferences:
         """Get preferences."""
-        return self._agent_context.preferences
+        return self._get_agent_context().preferences
 
     @property
     def agent_goal_pursuit_readiness(self) -> GoalPursuitReadiness:
         """Get the goal pursuit readiness."""
-        return self._agent_context.goal_pursuit_readiness
+        return self._get_agent_context().goal_pursuit_readiness
 
     @property
     def task_manager(self) -> TaskManager:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._agent_context.task_manager
+        return self._get_agent_context().task_manager
 
     @property
     def ledger_apis(self) -> LedgerApis:
         """Get ledger APIs."""
-        return self._agent_context.ledger_apis
+        return self._get_agent_context().ledger_apis
 
     @property
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
-        return self._agent_context.search_service_address
+        return self._get_agent_context().search_service_address
 
     @property
     def handlers(self) -> SimpleNamespace:
@@ -190,10 +208,10 @@ class SkillContext:
         return SimpleNamespace(**self._skill.behaviours)
 
     @property
-    def logger(self) -> Logger:
-        """Get the logger."""
-        assert self._logger is not None, "Logger not set."
-        return self._logger
+    def contracts(self) -> SimpleNamespace:
+        """Get contracts the skill has access to."""
+        assert self._skill is not None, "Skill not initialized."
+        return SimpleNamespace(**self._skill.contracts)
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
@@ -203,26 +221,26 @@ class SkillContext:
 class SkillComponent(ABC):
     """This class defines an abstract interface for skill component classes."""
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        configuration: Optional[SkillComponentConfiguration] = None,
+        skill_context: Optional[SkillContext] = None,
+    ):
         """
-        Initialize a behaviour.
+        Initialize a skill component.
 
-        :param skill_context: the skill context
-        :param kwargs: keyword arguments
+        :param name: the name of the component.
+        :param configuration: the configuration for the component.
+        :param skill_context: the skill context.
         """
-        try:
-            self._context = kwargs.pop("skill_context")  # type: SkillContext
-            assert self._context is not None
-        except Exception:
-            raise ValueError("Skill context not provided.")
-
-        try:
-            self._name = kwargs.pop("name")
-            assert self._name is not None
-        except Exception:
-            raise ValueError("Missing name of skill component.")
-
-        self._config = kwargs
+        assert name is not None
+        # TODO solve it
+        # assert configuration is not None
+        # assert skill_context is not None
+        self._configuration = configuration
+        self._name = name
+        self._context = skill_context
 
     @property
     def name(self) -> str:
@@ -232,6 +250,7 @@ class SkillComponent(ABC):
     @property
     def context(self) -> SkillContext:
         """Get the context of the behaviour."""
+        assert self._context is not None, "Skill context not set yet."
         return self._context
 
     @property
@@ -240,14 +259,21 @@ class SkillComponent(ABC):
         return self.context.skill_id
 
     @property
+    def configuration(self) -> SkillComponentConfiguration:
+        """Get the skill component configuration."""
+        assert self._configuration is not None, "Configuration not set."
+        return self._configuration
+
+    # TODO consider rename this property
+    @property
     def config(self) -> Dict[Any, Any]:
         """Get the config of the behaviour."""
-        return self._config
+        return self.configuration.args
 
     @abstractmethod
     def setup(self) -> None:
         """
-        Implement the behaviour setup.
+        Implement the setup.
 
         :return: None
         """
@@ -255,7 +281,7 @@ class SkillComponent(ABC):
     @abstractmethod
     def teardown(self) -> None:
         """
-        Implement the behaviour teardown.
+        Implement the teardown.
 
         :return: None
         """
@@ -263,17 +289,16 @@ class SkillComponent(ABC):
     @classmethod
     @abstractmethod
     def parse_module(
-        cls, path: str, configs: Dict[str, Any], skill_context: SkillContext
+        cls,
+        path: str,
+        configs: Dict[str, SkillComponentConfiguration],
+        skill_context: SkillContext,
     ):
         """Parse the component module."""
 
 
-class Behaviour(SkillComponent):
+class Behaviour(SkillComponent, ABC):
     """This class implements an abstract behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize a behaviour."""
-        super().__init__(**kwargs)
 
     @abstractmethod
     def act(self) -> None:
@@ -295,7 +320,7 @@ class Behaviour(SkillComponent):
     def parse_module(
         cls,
         path: str,
-        behaviour_configs: Dict[str, BehaviourConfig],
+        behaviour_configs: Dict[str, SkillComponentConfiguration],
         skill_context: SkillContext,
     ) -> Dict[str, "Behaviour"]:
         """
@@ -344,26 +369,20 @@ class Behaviour(SkillComponent):
                     "Behaviour '{}' cannot be found.".format(behaviour_class_name)
                 )
             else:
-                args = behaviour_config.args
-                assert (
-                    "skill_context" not in args.keys()
-                ), "'skill_context' is a reserved key. Please rename your arguments!"
-                args["skill_context"] = skill_context
-                args["name"] = behaviour_id
-                behaviour = behaviour_class(**args)
+                behaviour = behaviour_class(
+                    name=behaviour_id,
+                    configuration=behaviour_config,
+                    skill_context=skill_context,
+                )
                 behaviours[behaviour_id] = behaviour
 
         return behaviours
 
 
-class Handler(SkillComponent):
+class Handler(SkillComponent, ABC):
     """This class implements an abstract behaviour."""
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
-
-    def __init__(self, **kwargs):
-        """Initialize a handler object."""
-        super().__init__(**kwargs)
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -378,7 +397,7 @@ class Handler(SkillComponent):
     def parse_module(
         cls,
         path: str,
-        handler_configs: Dict[str, HandlerConfig],
+        handler_configs: Dict[str, SkillComponentConfiguration],
         skill_context: SkillContext,
     ) -> Dict[str, "Handler"]:
         """
@@ -426,19 +445,17 @@ class Handler(SkillComponent):
                     "Handler '{}' cannot be found.".format(handler_class_name)
                 )
             else:
-                args = handler_config.args
-                assert (
-                    "skill_context" not in args.keys()
-                ), "'skill_context' is a reserved key. Please rename your arguments!"
-                args["skill_context"] = skill_context
-                args["name"] = handler_id
-                handler = handler_class(**args)
+                handler = handler_class(
+                    name=handler_id,
+                    configuration=handler_config,
+                    skill_context=skill_context,
+                )
                 handlers[handler_id] = handler
 
         return handlers
 
 
-class Model(SkillComponent):
+class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
 
     def __init__(self, **kwargs):
@@ -447,7 +464,9 @@ class Model(SkillComponent):
 
         :param kwargs: keyword arguments.
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context")
+        )
 
     def setup(self) -> None:
         """Set the class up."""
@@ -459,7 +478,7 @@ class Model(SkillComponent):
     def parse_module(
         cls,
         path: str,
-        model_configs: Dict[str, ModelConfig],
+        model_configs: Dict[str, SkillComponentConfiguration],
         skill_context: SkillContext,
     ) -> Dict[str, "Model"]:
         """
@@ -523,95 +542,130 @@ class Model(SkillComponent):
             if model is None:
                 logger.warning("Model '{}' cannot be found.".format(model_class_name))
             else:
-                args = model_config.args
-                assert (
-                    "skill_context" not in args.keys()
-                ), "'skill_context' is a reserved key. Please rename your arguments!"
-                args["skill_context"] = skill_context
-                args["name"] = model_id
-                model_instance = model(**args)
+                model_instance = model(
+                    name=model_id,
+                    skill_context=skill_context,
+                    configuration=model_config,
+                    **dict(model_config.args)
+                )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)
         return instances
 
 
-class Skill:
+class Skill(Component):
     """This class implements a skill."""
 
     def __init__(
         self,
-        config: SkillConfig,
-        skill_context: SkillContext,
-        handlers: Optional[Dict[str, Handler]],
-        behaviours: Optional[Dict[str, Behaviour]],
-        models: Optional[Dict[str, Model]],
+        configuration: SkillConfig,
+        skill_context: Optional[SkillContext] = None,
+        handlers: Optional[Dict[str, Handler]] = None,
+        behaviours: Optional[Dict[str, Behaviour]] = None,
+        models: Optional[Dict[str, Model]] = None,
     ):
         """
         Initialize a skill.
 
-        :param config: the skill configuration.
-        :param handlers: the list of handlers to handle incoming envelopes.
-        :param behaviours: the list of behaviours that defines the proactive component of the agent.
-        :param models: the list of models shared across tasks, behaviours and
+        :param configuration: the skill configuration.
         """
-        self.config = config
-        self.skill_context = skill_context
-        self.handlers = handlers if handlers is not None else {}
-        self.behaviours = behaviours if behaviours is not None else {}
-        self.models = models if models is not None else {}
+
+        super().__init__(configuration)
+        self.config = configuration
+        self._skill_context = skill_context  # type: Optional[SkillContext]
+        self._handlers = (
+            {} if handlers is None else handlers
+        )  # type: Dict[str, Handler]
+        self._behaviours = (
+            {} if behaviours is None else behaviours
+        )  # type: Dict[str, Behaviour]
+        self._models = {} if models is None else models  # type: Dict[str, Model]
+
+        self._contracts = {}  # type: Dict[str, Contract]
+
+    @property
+    def contracts(self) -> Dict[str, Contract]:
+        """Get the contracts associated with the skill."""
+        return self._contracts
+
+    def inject_contracts(self, contracts: Dict[str, Contract]) -> None:
+        """Add the contracts to the skill."""
+        self._contracts = contracts
+
+    @property
+    def skill_context(self) -> SkillContext:
+        """Get the skill context."""
+        assert self._skill_context is not None, "Skill context not set."
+        return self._skill_context
+
+    @property
+    def handlers(self) -> Dict[str, Handler]:
+        """Get the handlers."""
+        return self._handlers
+
+    @property
+    def behaviours(self) -> Dict[str, Behaviour]:
+        """Get the handlers."""
+        return self._behaviours
+
+    @property
+    def models(self) -> Dict[str, Model]:
+        """Get the handlers."""
+        return self._models
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
+    def from_dir(cls, directory: str) -> "Skill":
         """
-        Load a skill from a directory.
+        Load the skill from a directory.
 
-        :param directory: the skill directory.
-        :param agent_context: the agent's context
-        :return: the Skill object.
-        :raises Exception: if the parsing failed.
+        :param directory: the directory to the skill package.
+        :return: the skill object.
         """
-        # check if there is the config file. If not, then return None.
-        skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        skill_config = skill_loader.load(
-            open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE))
+        configuration = cast(
+            SkillConfig,
+            ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
-        skill_module = load_agent_component_package(
-            "skill", skill_config.name, skill_config.author, Path(directory)
-        )
-        add_agent_component_module_to_sys_modules(
-            "skill", skill_config.name, skill_config.author, skill_module
-        )
-        loader_contents = [path.name for path in Path(directory).iterdir()]
-        skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
-        logger.debug(
-            "Processing the following skill package: {}".format(skills_packages)
-        )
+        configuration._directory = Path(directory)
+        return Skill.from_config(configuration)
 
-        skill_context = SkillContext(agent_context)
-        # set the logger of the skill context.
-        logger_name = "aea.{}.skills.{}.{}".format(
-            agent_context.agent_name, skill_config.author, skill_config.name
-        )
-        skill_context._logger = logging.getLogger(logger_name)
+    @classmethod
+    def from_config(
+        cls, configuration: SkillConfig, skill_context: Optional[SkillContext] = None
+    ) -> "Skill":
+        """
+        Load the skill from configuration.
 
-        handlers_by_id = dict(skill_config.handlers.read_all())
+        :param configuration: a skill configuration. Must be associated with a directory.
+        :return: the skill.
+        """
+        assert (
+            configuration.directory is not None
+        ), "Configuration must be associated with a directory."
+        directory = configuration.directory
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        skill_context = SkillContext() if skill_context is None else skill_context
+        handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
-            os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
+            str(directory / "handlers.py"), handlers_by_id, skill_context
         )
 
-        behaviours_by_id = dict(skill_config.behaviours.read_all())
+        behaviours_by_id = dict(configuration.behaviours.read_all())
         behaviours = Behaviour.parse_module(
-            os.path.join(directory, "behaviours.py"), behaviours_by_id, skill_context,
+            str(directory / "behaviours.py"), behaviours_by_id, skill_context,
         )
 
-        models_by_id = dict(skill_config.models.read_all())
-        model_instances = Model.parse_module(directory, models_by_id, skill_context)
+        models_by_id = dict(configuration.models.read_all())
+        model_instances = Model.parse_module(
+            str(directory), models_by_id, skill_context
+        )
 
         skill = Skill(
-            skill_config, skill_context, handlers, behaviours, model_instances
+            configuration, skill_context, handlers, behaviours, model_instances
         )
         skill_context._skill = skill
-
         return skill
 
 

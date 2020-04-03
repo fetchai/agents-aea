@@ -68,10 +68,14 @@ class TestScaffoldSkill:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -96,12 +100,6 @@ class TestScaffoldSkill:
         """Test that the resource folder contains scaffold behaviours.py module."""
         p = Path(self.t, self.agent_name, "skills", self.resource_name, "behaviours.py")
         original = Path(AEA_DIR, "skills", "scaffold", "behaviours.py")
-        assert filecmp.cmp(p, original)
-
-    def test_resource_folder_contains_module_tasks(self):
-        """Test that the resource folder contains scaffold tasks.py module."""
-        p = Path(self.t, self.agent_name, "skills", self.resource_name, "tasks.py")
-        original = Path(AEA_DIR, "skills", "scaffold", "tasks.py")
         assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_module_model(self):
@@ -147,10 +145,14 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -208,10 +210,14 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -275,16 +281,20 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
-            "yaml.safe_dump", side_effect=ValidationError("test error message")
+            "yaml.dump", side_effect=ValidationError("test error message"),
         )
         cls.patch.__enter__()
 
@@ -339,10 +349,14 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

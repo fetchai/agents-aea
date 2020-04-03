@@ -163,11 +163,11 @@ Also note, how we have access to other objects in the skill via `self.context`.
 
 We place this code in `my_aea/skills/my_search/handlers.py`.
 
-## Step 4: Remove unused Task and Model
+## Step 4: Remove unused Model
 
-We have implemented a behaviour and a handler. We could also implement a `task` and a `model`, but instead we delete these files in this case, to keep it simple.
+We have implemented a behaviour and a handler. We could also implement a `model`, but instead we delete this file in this case, to keep it simple.
 
-We remove the files `my_aea/skills/my_search/tasks.py` and `my_aea/skills/my_search/my_model.py`.
+We remove the file `my_aea/skills/my_search/my_model.py`.
 
 ## Step 5: Create the config file
 
@@ -177,20 +177,24 @@ Based on our skill components above, we create the following config file.
 name: my_search
 author: fetchai
 version: 0.1.0
-license: Apache-2.0
 description: 'A simple search skill utilising the OEF search and communication node.'
-fingerprint: ''
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- 'fetchai/oef_search:0.1.0'
 behaviours:
   my_search_behaviour:
-    class_name: MySearchBehaviour
     args:
       tick_interval: 5
+    class_name: MySearchBehaviour
 handlers:
   my_search_handler:
-    class_name: MySearchHandler
     args: {}
+    class_name: MySearchHandler
 models: {}
-protocols: ['fetchai/oef_search:0.1.0']
 dependencies: {}
 ```
 
@@ -200,7 +204,15 @@ Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in 
 
 We place this code in `my_aea/skills/my_search/skill.yaml`.
 
-## Step 6: Add the oef protocol and connection
+## Step 6: Update fingerprint
+
+We need to update the fingerprint of our skill next:
+``` bash
+aea fingerprint skill fetchai/my_search:0.1.0
+```
+Ensure, you use the correct author name to reference your skill (here we use `fetchai` as the author.)
+
+## Step 7: Add the oef protocol and connection
 
 Our AEA does not have the oef protocol yet so let's add it.
 ``` bash
@@ -215,7 +227,7 @@ aea add connection fetchai/oef:0.1.0
 aea install
 ```
 
-## Step 7: Run a service provider AEA
+## Step 8: Run a service provider AEA
 
 We first start a local [OEF search and communication node](../oef-ledger) in a separate terminal window.
 
@@ -226,7 +238,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ```
 aea fetch fetchai/simple_service_registration:0.1.0 && cd simple_service_registration
-aea run
+aea run --connections fetchai/oef:0.1.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
@@ -234,7 +246,7 @@ This AEA will simply register a location service on the [OEF search node](../oef
 <details><summary>Click here to see full code</summary>
 <p>
 
-We use a ticker behaviour to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
+We use a ticker behaviour to update the service registration at regular intervals. The following code is placed in `behaviours.py`. 
 
 ``` python
 from typing import Optional, cast
@@ -287,7 +299,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
     def _register_service(self) -> None:
         """
-        Register to the OEF search node's service directory.
+        Register to the OEF Service Directory.
 
         :return: None
         """
@@ -307,12 +319,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating services on OEF search node's service directory.".format(self.context.agent_name)
+            "[{}]: updating services on OEF service directory.".format(
+                self.context.agent_name
+            )
         )
 
     def _unregister_service(self) -> None:
         """
-        Unregister service from OEF search node's service directory.
+        Unregister service from OEF Service Directory.
 
         :return: None
         """
@@ -330,60 +344,21 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering services from search OEF node's service directory.".format(self.context.agent_name)
+            "[{}]: unregistering services from OEF service directory.".format(
+                self.context.agent_name
+            )
         )
         self._registered_service_description = None
 ```
 
-We create a generic data model to register the service. The following code is placed in `data_model.py`.
+We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
 
 ``` python
-from typing import Any, Dict, List
-
-from aea.helpers.search.models import Attribute, DataModel
-
-SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
-
-
-class GenericDataModel(DataModel):
-    """Data model for the service."""
-
-    def __init__(self, datamodel_name: str, data_model_attributes: Dict[str, Any]):
-        """Initialise the data model."""
-        self.attributes = []  # type: List[Attribute]
-        for values in data_model_attributes.values():
-            assert (
-                values["type"] in SUPPORTED_TYPES.keys()
-            ), "Type is not supported. Use str, int, float or bool"
-            assert isinstance(
-                values["name"], (SUPPORTED_TYPES[values["type"]],)
-            ), "The datamodel values are of wrong type!"
-            assert isinstance(
-                values["is_required"], bool
-            ), "Wrong type!! is_required must be bool"
-            self.attributes.append(
-                Attribute(
-                    name=values["name"],  # type: ignore
-                    type=SUPPORTED_TYPES[values["type"]],
-                    is_required=values["is_required"],
-                )
-            )
-
-        super().__init__(datamodel_name, self.attributes)
-```
-
-We create a `model` type strategy class and place it in `strategy.py`.
-
-``` python
-
 from typing import Any, Dict, Optional
 
+from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description
 from aea.skills.base import Model
-
-from packages.fetchai.skills.simple_service_registration.data_model import (
-    GenericDataModel,
-)
 
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {
@@ -436,9 +411,17 @@ The associated `skill.yaml` is:
 name: simple_service_registration
 author: fetchai
 version: 0.1.0
+description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-description: The scaffold skill is a scaffold for your own skill implementation.
-fingerprint: ''
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: QmWKGwRe8VGJ9VxutL8Ghy866pBKFhfo7k6Wrvab89tVQZ
+  strategy.py: QmRodUmyDFC9282pGnZ54nJfNCQYcLTJTETq8SBHKPf3to
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/oef_search:0.1.0
 behaviours:
   service:
     args:
@@ -447,28 +430,27 @@ behaviours:
 handlers: {}
 models:
   strategy:
-    class_name: Strategy
     args:
-      data_model_name: location
       data_model:
         attribute_one:
+          is_required: true
           name: country
           type: str
-          is_required: True
         attribute_two:
+          is_required: true
           name: city
           type: str
-          is_required: True
+      data_model_name: location
       service_data:
-        country: UK
         city: Cambridge
-protocols: ['fetchai/oef_search:0.1.0']
+        country: UK
+    class_name: Strategy
 dependencies: {}
 ```
 </p>
 </details>
 
-## Step 8: Run the Search AEA
+## Step 9: Run the Search AEA
 
 We can then launch our AEA.
 

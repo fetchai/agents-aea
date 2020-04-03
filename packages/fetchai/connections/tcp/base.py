@@ -26,27 +26,26 @@ from typing import Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
 
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
+    def __init__(self, host: str, port: int, **kwargs):
         """
-        Initialize the TCP connection.
+        Initialize a TCP connection.
 
-        :param address: the address used for identification.
-        :param host: the host to connect to.
-        :param port: the port to connect to.
+        :param host: the socket bind address.
+        :param port: the socket bind port.
         """
-        if kwargs.get("connection_id") is None:
+        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "tcp", "0.1.0")
-        super().__init__(*args, **kwargs)
-        self.address = address
-
+        super().__init__(**kwargs)
+        # for the server, the listening address/port
+        # for the client, the server address/port
         self.host = host
         self.port = port
 

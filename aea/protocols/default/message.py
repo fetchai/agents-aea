@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2020 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@
 
 """This module contains default's message definition."""
 
+import logging
 from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.custom_types import ErrorCode as CustomErrorCode
+
+logger = logging.getLogger("aea.protocols.default.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -48,10 +51,10 @@ class DefaultMessage(Message):
 
     def __init__(
         self,
-        dialogue_reference: Tuple[str, str],
-        message_id: int,
-        target: int,
         performative: Performative,
+        dialogue_reference: Tuple[str, str] = ("", ""),
+        message_id: int = 1,
+        target: int = 0,
         **kwargs,
     ):
         """
@@ -70,9 +73,6 @@ class DefaultMessage(Message):
             **kwargs,
         )
         self._performatives = {"bytes", "error"}
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'default' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -224,7 +224,7 @@ class DefaultMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True

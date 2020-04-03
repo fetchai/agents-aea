@@ -87,6 +87,13 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         "description": item_config["description"],
         "version": item_config["version"],
     }
+
+    # dependencies
+    for key in ["connections", "contracts", "protocols", "skills"]:
+        deps_list = item_config.get(key)
+        if deps_list:
+            data.update({key: deps_list})
+
     path = "/{}/create".format(item_type_plural)
     logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
     resp = request_api("POST", path, data=data, is_auth=True, filepath=output_filepath)

@@ -1,26 +1,35 @@
 name: dummy
 author: fetchai
 version: 0.1.0
+description: a skill for testing purposes.
 license: Apache-2.0
-aea_version: 0.2.4
-fingerprint: ""
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
 behaviours: {}
 handlers: {}
 models: {}
-protocols: ["fetchai/default:0.1.0"]
 dependencies:
-  dep1: {version: "==1.0.0"}
-  dep2: {version: "~=1.1.2"}
-  dep3: {version: ">=1.10.11a1"}
-  dep4: {version: "==1.11.12b2"}
-  dep5: {version: ">=1.4.5.0"}
+  dep1:
+    version: ==1.0.0
+  dep2:
+    version: ~=1.1.2
+  dep3:
+    version: '>=1.10.11a1'
+  dep4:
+    version: ==1.11.12b2
+  dep5:
+    version: '>=1.4.5.0'
   dep6:
     index: https://test.pypi.org/simple
   dep7:
     git: https://github.com/a-random-username/a-repository.git
     ref: master
-  dep8:  # if both 'index' and 'git' are specified, 'git' will be preferred.
-    index: https://test.pypi.org/simple
+  dep8:
     git: https://github.com/a-random-username/a-repository.git
+    index: https://test.pypi.org/simple
     ref: master
-description: "a skill for testing purposes."

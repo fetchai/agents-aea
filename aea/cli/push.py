@@ -21,6 +21,7 @@
 
 import os
 from shutil import copytree
+from typing import cast
 
 import click
 
@@ -30,20 +31,21 @@ from aea.cli.common import (
     _load_yaml,
     _try_get_item_source_path,
     _try_get_item_target_path,
+    check_aea_project,
     pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.cli.registry.push import push_item
 from aea.configurations.base import PublicId
 
 
 @click.group()
-@click.option("--registry", is_flag=True, help="For pushing items to Registry.")
-@pass_ctx
-def push(ctx: Context, registry):
+@click.option("--local", is_flag=True, help="For pushing items to local folder.")
+@click.pass_context
+@check_aea_project
+def push(click_context, local):
     """Push item to Registry or save it in local packages."""
-    try_to_load_agent_config(ctx)
-    ctx.set_config("registry", registry)
+    ctx = cast(Context, click_context.obj)
+    ctx.set_config("local", local)
 
 
 @push.command(name="connection")
@@ -51,10 +53,21 @@ def push(ctx: Context, registry):
 @pass_ctx
 def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "connection", connection_id)
     else:
         push_item(ctx, "connection", connection_id)
+
+
+@push.command(name="contract")
+@click.argument("contract-id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_id):
+    """Push connection to Registry or save it in local packages."""
+    if ctx.config.get("local"):
+        _save_item_locally(ctx, "contract", contract_id)
+    else:
+        push_item(ctx, "contract", contract_id)
 
 
 @push.command(name="protocol")
@@ -62,7 +75,7 @@ def connection(ctx: Context, connection_id):
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "protocol", protocol_id)
     else:
         push_item(ctx, "protocol", protocol_id)
@@ -73,7 +86,7 @@ def protocol(ctx: Context, protocol_id):
 @pass_ctx
 def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
-    if not ctx.config.get("registry"):
+    if ctx.config.get("local"):
         _save_item_locally(ctx, "skill", skill_id)
     else:
         push_item(ctx, "skill", skill_id)

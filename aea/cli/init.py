@@ -27,39 +27,78 @@ from aea.cli.common import (
     AUTHOR,
     Context,
     _get_or_create_cli_config,
-    _is_validate_author_handle,
     _update_cli_config,
     pass_ctx,
+    validate_author_name,
 )
-from aea.configurations.base import PublicId
+from aea.cli.login import do_login
+from aea.cli.register import do_register
+from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
+
+
+def _registry_init(username: str) -> None:
+    """
+    Create an author name on the registry.
+
+    :param author: the author name
+    """
+    if username is not None and is_auth_token_present():
+        check_is_author_logged_in(username)
+    else:
+        is_registered = click.confirm("Do you have a Registry account?")
+        if is_registered:
+            password = click.prompt("Password", type=str, hide_input=True)
+            do_login(username, password)
+        else:
+            click.echo("Create a new account on the Registry now:")
+            email = click.prompt("Email", type=str)
+            password = click.prompt("Password", type=str, hide_input=True)
+
+            password_confirmation = ""  # nosec
+            while password_confirmation != password:
+                click.echo("Please make sure that passwords are equal.")
+                password_confirmation = click.prompt(
+                    "Confirm password", type=str, hide_input=True
+                )
+
+            do_register(username, email, password, password_confirmation)
+
+
+def do_init(author: str, reset: bool, registry: bool) -> None:
+    """
+    Initialize your AEA configurations.
+
+    :param author: str author username.
+    :param reset: True, if resetting the author name
+    :param registry: True, if registry is used
+
+    :return: None.
+    """
+    config = _get_or_create_cli_config()
+    if reset or config.get(AUTHOR, None) is None:
+        author = validate_author_name(author)
+        if registry:
+            _registry_init(username=author)
+
+        _update_cli_config({AUTHOR: author})
+        config = _get_or_create_cli_config()
+        config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
+        success_msg = "AEA configurations successfully initialized: {}".format(config)
+    else:
+        config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
+        success_msg = "AEA configurations already initialized: {}. To reset use '--reset'.".format(
+            config
+        )
+    click.echo(AEA_LOGO + "v" + __version__ + "\n")
+    click.echo(success_msg)
 
 
 @click.command()
 @click.option("--author", type=str, required=False)
+@click.option("--reset", is_flag=True, help="To reset the initialization.")
+@click.option("--local", is_flag=True, help="For init AEA locally.")
 @pass_ctx
-def init(ctx: Context, author: str):
+def init(ctx: Context, author: str, reset: bool, local: bool):
     """Initialize your AEA configurations."""
-    config = _get_or_create_cli_config()
-    if config.get(AUTHOR, None) is None:
-        is_not_valid_author = True
-        if author is not None and _is_validate_author_handle(author):
-            is_not_valid_author = False
-        while is_not_valid_author:
-            author = click.prompt(
-                "Please enter the author handle you would like to use", type=str
-            )
-            if _is_validate_author_handle(author):
-                is_not_valid_author = False
-            else:
-                click.echo(
-                    "Not a valid author handle. Please try again. Author handles must satisfy the following regex: {}".format(
-                        PublicId.AUTHOR_REGEX
-                    )
-                )
-        _update_cli_config({AUTHOR: author})
-        config = _get_or_create_cli_config()
-        success_msg = "AEA configurations successfully initialized: {}".format(config)
-    else:
-        success_msg = "AEA configurations already initialized: {}".format(config)
-    click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo(success_msg)
+    do_init(author, reset, not local)

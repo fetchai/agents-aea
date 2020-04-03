@@ -504,7 +504,7 @@ class TransactionHandler(Handler):
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                     target=fipa_message.message_id,
                     info={
-                        "tx_signature": tx_message.tx_signature,
+                        "tx_signature": tx_message.signed_payload.get("tx_signature"),
                         "tx_id": tx_message.tx_id,
                     },
                 )

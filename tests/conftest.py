@@ -26,7 +26,6 @@ import os
 import socket
 import sys
 import time
-from asyncio import CancelledError
 from threading import Timer
 from typing import Optional
 
@@ -43,15 +42,26 @@ from aea import AEA_DIR
 from aea.cli.common import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
-    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.connections.stub.connection import StubConnection
+from aea.mail.base import Address
+
+from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.p2p_client.connection import (
+    PeerToPeerClientConnection,
+)
+from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
+from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
+
+from .data.dummy_connection.connection import DummyConnection  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +99,11 @@ DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
 
+contract_config_files = [
+    os.path.join(
+        ROOT_DIR, "aea", "contracts", "scaffold", DEFAULT_CONTRACT_CONFIG_FILE
+    ),
+]
 
 protocol_config_files = [
     os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),
@@ -309,57 +324,6 @@ def tcpping(ip, port) -> bool:
         return False
 
 
-class DummyConnection(Connection):
-    """A dummy connection that just stores the messages."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize."""
-        super().__init__(*args, **kwargs)
-        self.connection_status.is_connected = False
-        self._queue = None
-
-    async def connect(self, *args, **kwargs):
-        """Connect."""
-        self._queue = asyncio.Queue(loop=self.loop)
-        self.connection_status.is_connected = True
-
-    async def disconnect(self, *args, **kwargs):
-        """Disconnect."""
-        await self._queue.put(None)
-        self.connection_status.is_connected = False
-
-    async def send(self, envelope: "Envelope"):
-        """Send an envelope."""
-        assert self._queue is not None
-        self._queue.put_nowait(envelope)
-
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
-        """Receive an envelope."""
-        try:
-            assert self._queue is not None
-            envelope = await self._queue.get()
-            if envelope is None:
-                logger.debug("Received none envelope.")
-                return None
-            return envelope
-        except CancelledError:
-            return None
-        except Exception as e:
-            print(str(e))
-            return None
-
-    def put(self, envelope: Envelope):
-        """Put an envelope in the queue."""
-        assert self._queue is not None
-        self._queue.put_nowait(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, connection_configuration: ConnectionConfig
-    ) -> "Connection":
-        """Return a connection obj fom a configuration."""
-
-
 class OEFHealthCheck(object):
     """A health check class."""
 
@@ -565,3 +529,69 @@ def get_host():
 def reset_aea_cli_config() -> None:
     """Resets the cli config."""
     _init_cli_config()
+
+
+def _make_dummy_connection() -> Connection:
+    dummy_connection = DummyConnection()
+    return dummy_connection
+
+
+def _make_local_connection(
+    address: Address,
+    node: LocalNode,
+    restricted_to_protocols=None,
+    excluded_protocols=None,
+) -> Connection:
+    oef_local_connection = OEFLocalConnection(
+        node,
+        address=address,
+        connection_id=PublicId("fetchai", "local", "0.1.0"),
+        restricted_to_protocols=restricted_to_protocols,
+        excluded_protocols=excluded_protocols,
+    )
+    return oef_local_connection
+
+
+def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+    oef_connection = OEFConnection(
+        oef_addr,
+        oef_port,
+        address=address,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    )
+    return oef_connection
+
+
+def _make_tcp_server_connection(address: str, host: str, port: int):
+    tcp_connection = TCPServerConnection(
+        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+    )
+    return tcp_connection
+
+
+def _make_tcp_client_connection(address: str, host: str, port: int):
+    tcp_connection = TCPClientConnection(
+        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+    )
+    return tcp_connection
+
+
+def _make_p2p_client_connection(
+    address: Address, provider_addr: str, provider_port: int
+):
+    p2p_client_connection = PeerToPeerClientConnection(
+        provider_addr,
+        provider_port,
+        address=address,
+        connection_id=PublicId("fetchai", "p2p", "0.1.0"),
+    )
+    return p2p_client_connection
+
+
+def _make_stub_connection(input_file_path: str, output_file_path: str):
+    connection = StubConnection(
+        input_file_path=input_file_path,
+        output_file_path=output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
+    )
+    return connection

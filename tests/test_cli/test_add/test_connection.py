@@ -31,7 +31,7 @@ import yaml
 
 import aea.configurations.base
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 
 from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
@@ -65,41 +65,51 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
         # add connection again
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
 
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_connection_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
+        fetch_package_mock.return_value = Path(
+            "vendor/{}/connections/{}".format(
+                self.connection_author, self.connection_name
+            )
+        )
+        public_id = "{}/{}:{}".format(
+            AUTHOR, self.connection_name, self.connection_version
+        )
         obj_type = "connection"
         result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
-            standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
         )
         assert result.exit_code == 0
+        public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd="."
+            obj_type, public_id=public_id_obj, cwd="."
         )
 
     def test_exit_code_equal_to_1(self):
@@ -154,18 +164,22 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -189,7 +203,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         yaml.safe_dump(config, config_path.open(mode="w"))
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", different_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", different_id],
             standalone_mode=False,
         )
 
@@ -237,17 +251,21 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
 
@@ -293,17 +311,21 @@ class TestAddConnectionFailsWhenDifferentPublicId:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
 
@@ -346,11 +368,15 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -365,7 +391,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
 
@@ -376,7 +402,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
 
-        The expected message is: 'Cannot find connection: '{connection_name}''
+        The expected message is: 'Connection configuration file not valid: '{connection_name}''
         """
         self.mocked_logger_error.assert_called_once_with(
             "Connection configuration file not valid: test error message"
@@ -413,11 +439,15 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -432,7 +462,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         ).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
         )
 

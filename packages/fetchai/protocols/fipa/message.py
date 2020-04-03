@@ -19,6 +19,7 @@
 
 """This module contains fipa's message definition."""
 
+import logging
 from enum import Enum
 from typing import Dict, Set, Tuple, cast
 
@@ -29,6 +30,8 @@ from packages.fetchai.protocols.fipa.custom_types import (
     Description as CustomDescription,
 )
 from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
+
+logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -91,9 +94,6 @@ class FipaMessage(Message):
             "match_accept_w_inform",
             "propose",
         }
-        assert (
-            self._is_consistent()
-        ), "This message is invalid according to the 'fipa' protocol."
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -278,7 +278,7 @@ class FipaMessage(Message):
                     self.message_id - 1, self.target,
                 )
         except (AssertionError, ValueError, KeyError) as e:
-            print(str(e))
+            logger.error(str(e))
             return False
 
         return True

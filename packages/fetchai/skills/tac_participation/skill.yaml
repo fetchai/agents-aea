@@ -1,32 +1,44 @@
 name: tac_participation
 author: fetchai
 version: 0.1.0
+description: The tac participation skill implements the logic for an AEA to participate
+  in the TAC.
 license: Apache-2.0
-fingerprint: ""
-aea_version: 0.2.4
-description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
+  behaviours.py: QmTBRm5rneqkYirRZcdgaWaptgPLgk4kTPd1Eb9dM9iK3W
+  game.py: QmZG7qnNqfewMBGSFEiuH8J6xaysGXBj3ZLkb2w6gD6BQo
+  handlers.py: QmNZSnx8LYZdnQ55wnEgVGk9KdTJVRnnTbbpCSQNEBG25a
+  search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.1.0
+protocols:
+- fetchai/oef_search:0.1.0
+- fetchai/tac:0.1.0
 behaviours:
   tac:
-    class_name: TACBehaviour
     args: {}
+    class_name: TACBehaviour
 handlers:
   oef:
-    class_name: OEFHandler
     args: {}
+    class_name: OEFSearchHandler
   tac:
+    args: {}
     class_name: TACHandler
-    args: {}
   transaction:
-    class_name: TransactionHandler
     args: {}
+    class_name: TransactionHandler
 models:
-  search:
-    class_name: Search
-    args:
-      search_interval: 5
   game:
-    class_name: Game
     args:
       expected_version_id: v1
-      # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/tac:0.1.0']
+      is_using_contract: false
+    class_name: Game
+  search:
+    args:
+      search_interval: 5
+    class_name: Search
+dependencies: {}

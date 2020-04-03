@@ -23,21 +23,13 @@ import os
 import time
 from threading import Thread
 
-from aea import AEA_DIR
-from aea.aea import AEA
-from aea.connections.stub.connection import StubConnection
+from aea.aea_builder import AEABuilder
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet
-from aea.identity.base import Identity
-from aea.protocols.base import Protocol
-from aea.registries.base import Resources
-from aea.skills.base import Skill
 
 ROOT_DIR = "./"
-INPUT_FILE = "input.txt"
-OUTPUT_FILE = "output.txt"
+INPUT_FILE = "input_file"
+OUTPUT_FILE = "output_file"
 
 
 def run():
@@ -50,36 +42,21 @@ def run():
     if os.path.isfile(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
-    # Set up the Wallet, stub connection, ledger and (empty) resources
-    wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-    stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
-    )
-    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, "fetchai")
-    resources = Resources()
-    # Create an identity
-    identity = Identity(
-        name="my_aea",
-        address=wallet.addresses.get(FETCHAI),
-        default_address_key=FETCHAI,
-    )
+    # Instantiate the builder and build the AEA
+    # By default, the default protocol, error skill and stub connection are added
+    builder = AEABuilder()
+
+    builder.set_name("my_aea")
+
+    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+
+    builder.add_ledger_api_config(FETCHAI, {"network": "testnet"})
+
+    # Add the echo skill (assuming it is present in the local directory 'packages')
+    builder.add_skill("./packages/fetchai/skills/echo")
 
     # Create our AEA
-    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
-
-    # Add the default protocol (which is part of the AEA distribution)
-    default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
-    resources.add_protocol(default_protocol)
-
-    # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
-    echo_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), my_aea.context,
-    )
-    resources.add_skill(echo_skill)
-    error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), my_aea.context
-    )
-    resources.add_skill(error_skill)
+    my_aea = builder.build()
 
     # Set the AEA running in a different thread
     try:

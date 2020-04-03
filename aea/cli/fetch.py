@@ -25,11 +25,7 @@ from typing import cast
 
 import click
 
-from aea.cli.add import (
-    connection as add_connection_command,
-    protocol as add_protocol_command,
-    skill as add_skill_command,
-)
+from aea.cli.add import _add_item
 from aea.cli.common import (
     Context,
     DEFAULT_REGISTRY_PATH,
@@ -42,16 +38,17 @@ from aea.configurations.base import PublicId
 
 
 @click.command(name="fetch")
-@click.option("--registry", is_flag=True, help="For fetching agent from Registry.")
+@click.option("--local", is_flag=True, help="For fetching agent from local folder.")
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, registry):
+def fetch(click_context, public_id, local):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
-    if not registry:
+    if local:
+        ctx.set_config("is_local", True)
         _fetch_agent_locally(ctx, public_id, click_context)
     else:
-        fetch_agent(ctx, public_id)
+        fetch_agent(ctx, public_id, click_context)
 
 
 def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> None:
@@ -78,20 +75,12 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> No
     ctx.cwd = target_path
     try_to_load_agent_config(ctx)
 
-    for item_type_plural in ("skills", "connections", "protocols"):
+    for item_type in ("skill", "connection", "contract", "protocol"):
+        item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
             try:
-                if item_type_plural == "connections":
-                    click_context.invoke(
-                        add_connection_command, connection_public_id=item_id
-                    )
-                elif item_type_plural == "protocols":
-                    click_context.invoke(
-                        add_protocol_command, protocol_public_id=item_id
-                    )
-                elif item_type_plural == "skills":
-                    click_context.invoke(add_skill_command, skill_public_id=item_id)
+                _add_item(click_context, item_type, item_id)
             except SystemExit:
                 continue
     click.echo("Agent {} successfully fetched.".format(public_id.name))

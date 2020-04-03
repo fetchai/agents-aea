@@ -23,13 +23,13 @@ message TacMessage{
 
 
     // Performatives and contents
-    message Register{
+    message Register_Performative{
         string agent_name = 1;
     }
 
-    message Unregister{}
+    message Unregister_Performative{}
 
-    message Transaction{
+    message Transaction_Performative{
         string tx_id = 1;
         string tx_sender_addr = 2;
         string tx_counterparty_addr = 3;
@@ -42,30 +42,34 @@ message TacMessage{
         bytes tx_counterparty_signature = 10;
     }
 
-    message Get_State_Update{}
+    message Get_State_Update_Performative{}
 
-    message Cancelled{}
+    message Cancelled_Performative{}
 
-    message Game_Data{
+    message Game_Data_Performative{
         map<string, int32> amount_by_currency_id = 1;
         map<string, float> exchange_params_by_currency_id = 2;
         map<string, int32> quantities_by_good_id = 3;
         map<string, float> utility_params_by_good_id = 4;
         int32 tx_fee = 5;
         map<string, string> agent_addr_to_name = 6;
-        map<string, string> good_id_to_name = 7;
-        string version_id = 8;
+        map<string, string> currency_id_to_name = 7;
+        map<string, string> good_id_to_name = 8;
+        string version_id = 9;
+        map<string, string> info = 10;
+        bool info_is_set = 11;
     }
 
-    message Transaction_Confirmation{
+    message Transaction_Confirmation_Performative{
         string tx_id = 1;
         map<string, int32> amount_by_currency_id = 2;
         map<string, int32> quantities_by_good_id = 3;
     }
 
-    message Tac_Error{
+    message Tac_Error_Performative{
         ErrorCode error_code = 1;
         map<string, string> info = 2;
+        bool info_is_set = 3;
     }
 
 
@@ -75,13 +79,13 @@ message TacMessage{
     string dialogue_responder_reference = 3;
     int32 target = 4;
     oneof performative{
-        Cancelled cancelled = 5;
-        Game_Data game_data = 6;
-        Get_State_Update get_state_update = 7;
-        Register register = 8;
-        Tac_Error tac_error = 9;
-        Transaction transaction = 10;
-        Transaction_Confirmation transaction_confirmation = 11;
-        Unregister unregister = 12;
+        Cancelled_Performative cancelled = 5;
+        Game_Data_Performative game_data = 6;
+        Get_State_Update_Performative get_state_update = 7;
+        Register_Performative register = 8;
+        Tac_Error_Performative tac_error = 9;
+        Transaction_Performative transaction = 10;
+        Transaction_Confirmation_Performative transaction_confirmation = 11;
+        Unregister_Performative unregister = 12;
     }
 }

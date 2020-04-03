@@ -39,7 +39,8 @@ def test_create_agent():
         assert param_list[1] == "-m"
         assert param_list[2] == "aea.cli"
         assert param_list[3] == "create"
-        assert param_list[4] == agent_name
+        assert param_list[4] == "--local"
+        assert param_list[5] == agent_name
         return 0
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
@@ -62,7 +63,8 @@ def test_create_agent_fail():
         assert param_list[1] == "-m"
         assert param_list[2] == "aea.cli"
         assert param_list[3] == "create"
-        assert param_list[4] == agent_name
+        assert param_list[4] == "--local"
+        assert param_list[5] == agent_name
         return 1
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):

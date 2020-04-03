@@ -1,14 +1,21 @@
 name: tcp
 author: fetchai
 version: 0.1.0
+description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
-fingerprint: ""
-aea_version: 0.2.4
-description: "The tcp connection implements a tcp server and client."
-class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
+  base.py: QmUfEKv5FiTvbnuTDB83SaXeKQFYEvoGgdRR4mYXiJt2sd
+  connection.py: QmcG4q5Hg55aXRPiYi6zXAPDCJGchj7xUMxUHoYRS6G1J5
+  tcp_client.py: Qma2uLye6sKBLD22uTrFinJfsWsDjD7SvpajDhhmExD7xF
+  tcp_server.py: QmQoFA9c5gi515Y5StyAJxJiXfD2V8XmqizMhRWrZcYoKJ
+fingerprint_ignore_patterns: []
 protocols: []
-restricted_to_protocols: []
-excluded_protocols: []
+class_name: TCPClientConnection
 config:
   address: 127.0.0.1
   port: 8082
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies: {}

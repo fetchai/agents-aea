@@ -32,28 +32,27 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 ### Installing docker
 
-At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
-(e.g. to run an [OEF search and communication node](../oef-ledger)).
-
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
 </div>
- 
-### Download the scripts and packages directories
 
-Download folders containing examples, scripts and packages:
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-```
-You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
+At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
+(e.g. to run an [OEF search and communication node](../oef-ledger)).
+ 
+### Download the scripts and examples directories
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>We will soon make packages available on our agent registry. For now you still have to download them manually.</p>
+  <p>For the purpose of the quickstart only, you can skip downloading the scripts and examples directories.</p>
 </div>
+
+Download folders containing examples and scripts:
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+```
+You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
 
 ## Installation
 
@@ -88,24 +87,27 @@ You can now setup your author name:
 aea init
 ```
 
-You should see a similar output:
+This is your unique author name in the Fetch.ai ecosystem.
+
+You should see a similar output (with your input replacing the sample input):
 ``` bash
-Please enter the author handle you would like to use: fetchai
+Do you have a Registry account? [y/N]: n
+Create a new account on the Registry now:
+Username: fetchai
+Email: hello@fetch.ai
+Password:
+Please make sure that passwords are equal.
+Confirm password:
     _     _____     _    
    / \   | ____|   / \   
   / _ \  |  _|    / _ \  
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.4
+v0.3.0
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>Once our agent registry becomes available you will have a unique author name in the Fetch.ai ecosystem.</p>
-</div>
 
 ## Echo skill demo
 
@@ -164,11 +166,9 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.2.4
+v0.3.0
 
 my_first_aea starting ...
-info: EchoHandler.__init__: arguments: {'foo': 'bar', 'skill_context': ..., 'name': 'echo'}
-info: EchoBehaviour.__init__: arguments: {'tick_interval': 1.0, 'skill_context': ..., 'name': 'echo'}
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
 info: Echo Behaviour: act method called.
@@ -201,6 +201,17 @@ info: Echo Behaviour: act method called.
 ## Stop the AEA
 
 Stop the AEA by pressing `CTRL C`
+
+You should see the AEA being interrupted and then calling the `teardown()` methods:
+
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+^C my_first_aea interrupted!
+my_first_aea stopping ...
+info: Echo Handler: teardown method called.
+info: Echo Behaviour: teardown method called.
+```
 
 ## Delete the AEA
 
@@ -238,5 +249,5 @@ Second, add the echo skill to the project.
 ```bash
 aea add skill fetchai/echo:0.1.0		
 ```		
-This copies the `echo` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
+This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
 </details>

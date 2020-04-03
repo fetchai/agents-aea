@@ -47,7 +47,7 @@ def _read_error(pid: subprocess.Popen):
         print("stderr: " + line.replace("\n", ""))
 
 
-class TestWeatherSkillsFetchaiLedger:
+class TestThermometerSkill:
     """Test that thermometer skills work."""
 
     @pytest.fixture(autouse=True)
@@ -79,17 +79,23 @@ class TestWeatherSkillsFetchaiLedger:
         shutil.copytree(scripts_src, scripts_dst)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # create agent one and agent two
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -99,19 +105,38 @@ class TestWeatherSkillsFetchaiLedger:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/thermometer:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/thermometer:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
+        file = open("aea-config.yaml", mode="r")
+
+        # read all lines at once
+        whole_file = file.read()
+
+        # add in the ledger address
+        find_text = "ledger_apis: {}"
+        replace_text = """ledger_apis:
+        fetchai:
+            network: testnet"""
+
+        whole_file = whole_file.replace(find_text, replace_text)
+
+        file.close()
+
+        with open("aea-config.yaml", "w") as f:
+            f.write(whole_file)
+
+        # Load the skill yaml file and manually insert the things we need
         yaml_path = os.path.join(
             "vendor", "fetchai", "skills", "thermometer", "skill.yaml"
         )
@@ -120,7 +145,7 @@ class TestWeatherSkillsFetchaiLedger:
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("has_sensor: True", "has_sensor: False")
+        whole_file = whole_file.replace("has_sensor: true", "has_sensor: false")
 
         # close the file
         file.close()
@@ -141,14 +166,20 @@ class TestWeatherSkillsFetchaiLedger:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "skill", "fetchai/thermometer_client:0.1.0"],
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "skill",
+                "fetchai/thermometer_client:0.1.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -244,7 +275,7 @@ class TestWeatherSkillsFetchaiLedger:
             )
             error_read_thread.start()
 
-            time.sleep(10)
+            time.sleep(20)
             process_one.send_signal(signal.SIGINT)
             process_two.send_signal(signal.SIGINT)
 

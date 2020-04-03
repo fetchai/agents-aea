@@ -2,8 +2,10 @@
 name: tac
 author: fetchai
 version: 0.1.0
+description: The tac protocol implements the messages an AEA needs to participate
+  in the TAC.
 license: Apache-2.0
-description: The tac protocol implements the messages an AEA needs to participate in the TAC
+aea_version: '>=0.3.0, <0.4.0'
 speech_acts:
   register:
     agent_name: pt:str
@@ -28,15 +30,17 @@ speech_acts:
     utility_params_by_good_id: pt:dict[pt:str, pt:float]
     tx_fee: pt:int
     agent_addr_to_name: pt:dict[pt:str, pt:str]
+    currency_id_to_name: pt:dict[pt:str, pt:str]
     good_id_to_name: pt:dict[pt:str, pt:str]
     version_id: pt:str
+    info: pt:optional[pt:dict[pt:str, pt:str]]
   transaction_confirmation:
     tx_id: pt:str
     amount_by_currency_id: pt:dict[pt:str, pt:int]
     quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
     error_code: ct:ErrorCode
-    info: pt:dict[pt:str, pt:str]
+    info: pt:optional[pt:dict[pt:str, pt:str]]
 ...
 ---
 ct:ErrorCode: |

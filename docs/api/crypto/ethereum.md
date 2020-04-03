@@ -67,18 +67,36 @@ a display_address str
 #### sign`_`message
 
 ```python
- | sign_message(message: bytes) -> bytes
+ | sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
 ```
 
 Sign a message in bytes string form.
 
 **Arguments**:
 
-- `message`: the message we want to send
+- `message`: the message to be signed
+- `is_deprecated_mode`: if the deprecated signing is used
 
 **Returns**:
 
-Signed message in bytes
+signature of the message in string form
+
+<a name=".aea.crypto.ethereum.EthereumCrypto.sign_transaction"></a>
+#### sign`_`transaction
+
+```python
+ | sign_transaction(transaction: Any) -> Any
+```
+
+Sign a transaction in bytes string form.
+
+**Arguments**:
+
+- `transaction`: the transaction to be signed
+
+**Returns**:
+
+signed transaction
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.recover_message"></a>
 #### recover`_`message
@@ -196,23 +214,38 @@ Get the balance of a given account.
 #### send`_`transaction
 
 ```python
- | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, chain_id: int = 3, **kwargs) -> Optional[str]
+ | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, is_waiting_for_confirmation: bool = True, chain_id: int = 1, **kwargs) -> Optional[str]
 ```
 
 Submit a transaction to the ledger.
 
 **Arguments**:
 
-- `tx_nonce`: verifies the authenticity of the tx
 - `crypto`: the crypto object associated to the payer.
 - `destination_address`: the destination address of the payee.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
+- `tx_nonce`: verifies the authenticity of the tx
+- `is_waiting_for_confirmation`: whether or not to wait for confirmation
 - `chain_id`: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
 
 **Returns**:
 
-the transaction digest, or None if not available.
+tx digest if successful, otherwise None
+
+<a name=".aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
+#### send`_`signed`_`transaction
+
+```python
+ | send_signed_transaction(is_waiting_for_confirmation: bool, tx_signed: Any) -> str
+```
+
+Send a signed transaction and wait for confirmation.
+
+**Arguments**:
+
+- `tx_signed`: the signed transaction
+- `is_waiting_for_confirmation`: whether or not to wait for confirmation
 
 <a name=".aea.crypto.ethereum.EthereumApi.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
@@ -222,6 +255,31 @@ the transaction digest, or None if not available.
 ```
 
 Check whether a transaction is settled or not.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+True if the transaction has been settled, False o/w.
+
+<a name=".aea.crypto.ethereum.EthereumApi.get_transaction_status"></a>
+#### get`_`transaction`_`status
+
+```python
+ | get_transaction_status(tx_digest: str) -> Any
+```
+
+Get the transaction status for a transaction digest.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+
+**Returns**:
+
+the tx status, if present
 
 <a name=".aea.crypto.ethereum.EthereumApi.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce

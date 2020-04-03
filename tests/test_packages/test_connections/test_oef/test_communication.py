@@ -32,7 +32,6 @@ from oef.query import ConstraintExpr
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -48,15 +47,14 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 import packages
-from packages.fetchai.connections.oef.connection import (
-    OEFConnection,
-    OEFObjectTranslator,
-)
+from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
+
+from ....conftest import _make_oef_connection
 
 DEFAULT_OEF = "default_oef"
 
@@ -74,11 +72,8 @@ class TestDefault:
     def setup_class(cls):
         """Set the test up."""
         cls.crypto1 = FetchAICrypto()
-        cls.connection = OEFConnection(
-            cls.crypto1.address,
-            oef_addr="127.0.0.1",
-            oef_port=10000,
-            connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        cls.connection = _make_oef_connection(
+            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
@@ -123,11 +118,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = FetchAICrypto()
-            cls.connection = OEFConnection(
-                cls.crypto1.address,
-                oef_addr="127.0.0.1",
-                oef_port=10000,
-                connection_id=PublicId("fetchai", "oef", "0.1.0"),
+            cls.connection = _make_oef_connection(
+                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -209,11 +201,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = FetchAICrypto()
-            cls.connection = OEFConnection(
-                cls.crypto1.address,
-                oef_addr="127.0.0.1",
-                oef_port=10000,
-                connection_id=PublicId("fetchai", "oef", "0.1.0"),
+            cls.connection = _make_oef_connection(
+                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -287,11 +276,8 @@ class TestOEF:
             - Check that the registration worked.
             """
             cls.crypto1 = FetchAICrypto()
-            cls.connection = OEFConnection(
-                cls.crypto1.address,
-                oef_addr="127.0.0.1",
-                oef_port=10000,
-                connection_id=PublicId("fetchai", "oef", "0.1.0"),
+            cls.connection = _make_oef_connection(
+                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -412,11 +398,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the tests up."""
             cls.crypto1 = FetchAICrypto()
-            cls.connection = OEFConnection(
-                cls.crypto1.address,
-                oef_addr="127.0.0.1",
-                oef_port=10000,
-                connection_id=PublicId("fetchai", "oef", "0.1.0"),
+            cls.connection = _make_oef_connection(
+                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -471,17 +454,11 @@ class TestFIPA:
         """Set up the test class."""
         cls.crypto1 = FetchAICrypto()
         cls.crypto2 = FetchAICrypto()
-        cls.connection1 = OEFConnection(
-            cls.crypto1.address,
-            oef_addr="127.0.0.1",
-            oef_port=10000,
-            connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        cls.connection1 = _make_oef_connection(
+            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
         )
-        cls.connection2 = OEFConnection(
-            cls.crypto2.address,
-            oef_addr="127.0.0.1",
-            oef_port=10000,
-            connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        cls.connection2 = _make_oef_connection(
+            cls.crypto2.address, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer2 = Multiplexer([cls.connection2])
@@ -747,7 +724,7 @@ class TestFIPA:
             fipa_msg.dialogue_starter_reference = dialogue_reference[0]
             fipa_msg.dialogue_responder_reference = dialogue_reference[1]
             fipa_msg.target = cfp_msg.target
-            performative = fipa_pb2.FipaMessage.Cfp()
+            performative = fipa_pb2.FipaMessage.Cfp_Performative()
             fipa_msg.cfp.CopyFrom(performative)
             fipa_bytes = fipa_msg.SerializeToString()
 
@@ -771,7 +748,7 @@ class TestFIPA:
                 fipa_msg.dialogue_starter_reference = dialogue_reference[0]
                 fipa_msg.dialogue_responder_reference = dialogue_reference[1]
                 fipa_msg.target = cfp_msg.target
-                performative = fipa_pb2.FipaMessage.Cfp()
+                performative = fipa_pb2.FipaMessage.Cfp_Performative()
                 fipa_msg.cfp.CopyFrom(performative)
                 fipa_bytes = fipa_msg.SerializeToString()
 
@@ -828,11 +805,8 @@ class TestOefConnection:
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
         crypto = FetchAICrypto()
-        connection = OEFConnection(
-            crypto.address,
-            oef_addr="127.0.0.1",
-            oef_port=10000,
-            connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        connection = _make_oef_connection(
+            crypto.address, oef_addr="127.0.0.1", oef_port=10000,
         )
         multiplexer = Multiplexer([connection])
         multiplexer.connect()
@@ -846,13 +820,6 @@ class TestOefConnection:
     #     assert not con.connection_status.is_connected
     #     with pytest.raises(ConnectionError):
     #         await con.connect()
-
-    def test_oef_from_config(self):
-        """Test the Connection from config File."""
-        con = OEFConnection.from_config(
-            address="pk", connection_configuration=ConnectionConfig()
-        )
-        assert not con.connection_status.is_connected, "We are connected..."
 
 
 class TestOefConstraint:
@@ -985,11 +952,8 @@ class DummyConstrainExpr(ConstraintExpr):
 async def test_send_oef_message(network_node):
     """Test the send oef message."""
     address = FetchAICrypto().address
-    oef_connection = OEFConnection(
-        address=address,
-        oef_addr="127.0.0.1",
-        oef_port=10000,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    oef_connection = _make_oef_connection(
+        address=address, oef_addr="127.0.0.1", oef_port=10000,
     )
     request_id = 1
     oef_connection.loop = asyncio.get_event_loop()
@@ -1036,11 +1000,8 @@ async def test_send_oef_message(network_node):
 async def test_cancelled_receive(network_node):
     """Test the case when a receive request is cancelled."""
     address = FetchAICrypto().address
-    oef_connection = OEFConnection(
-        address=address,
-        oef_addr="127.0.0.1",
-        oef_port=10000,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    oef_connection = _make_oef_connection(
+        address=address, oef_addr="127.0.0.1", oef_port=10000,
     )
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -1066,11 +1027,8 @@ async def test_cancelled_receive(network_node):
 async def test_exception_during_receive(network_node):
     """Test the case when there is an exception during a receive request."""
     address = FetchAICrypto().address
-    oef_connection = OEFConnection(
-        address=address,
-        oef_addr="127.0.0.1",
-        oef_port=10000,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    oef_connection = _make_oef_connection(
+        address=address, oef_addr="127.0.0.1", oef_port=10000,
     )
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -1091,11 +1049,8 @@ async def test_exception_during_receive(network_node):
 async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     address = FetchAICrypto().address
-    oef_connection = OEFConnection(
-        address=address,
-        oef_addr="a_fake_address",
-        oef_port=10000,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    oef_connection = _make_oef_connection(
+        address=address, oef_addr="a_fake_address", oef_port=10000,
     )
     oef_connection.loop = asyncio.get_event_loop()
 
@@ -1120,11 +1075,8 @@ async def test_cannot_connect_to_oef():
 async def test_connecting_twice_is_ok(network_node):
     """Test that calling 'connect' twice works as expected."""
     address = FetchAICrypto().address
-    oef_connection = OEFConnection(
-        address=address,
-        oef_addr="127.0.0.1",
-        oef_port=10000,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+    oef_connection = _make_oef_connection(
+        address=address, oef_addr="127.0.0.1", oef_port=10000,
     )
     oef_connection.loop = asyncio.get_event_loop()
 

@@ -54,6 +54,8 @@ class URI:
         """
         Initialize the URI.
 
+        Must follow: https://tools.ietf.org/html/rfc3986.html
+
         :param uri_raw: the raw form uri
         :raises ValueError: if uri_raw is not RFC3986 compliant
         """
@@ -147,14 +149,25 @@ class EnvelopeContext:
     def __init__(
         self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None
     ):
-        """Initialize the envelope context."""
+        """
+        Initialize the envelope context.
+
+        :param connection_id: the connection id used for routing the outgoing envelope in the multiplexer.
+        :param uri: the URI sent with the envelope.
+        """
         self.connection_id = connection_id
-        self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
+        self.uri = uri
 
     @property
     def uri_raw(self) -> str:
         """Get uri in string format."""
         return str(self.uri)
+
+    def __str__(self):
+        """Get the string representation."""
+        return "EnvelopeContext(connection_id={connection_id}, uri_raw={uri_raw})".format(
+            connection_id=str(self.connection_id), uri_raw=str(self.uri),
+        )
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -166,33 +179,55 @@ class EnvelopeContext:
 
 
 class EnvelopeSerializer(ABC):
-    """This abstract class let the devloper to specify serialization layer for the envelope."""
+    """Abstract class to specify the serialization layer for the envelope."""
 
     @abstractmethod
     def encode(self, envelope: "Envelope") -> bytes:
-        """Encode the envelope."""
+        """
+        Encode the envelope.
+
+        :param envelope: the envelope to encode
+        :return: the encoded envelope
+        """
 
     @abstractmethod
     def decode(self, envelope_bytes: bytes) -> "Envelope":
-        """Decode the envelope."""
+        """
+        Decode the envelope.
+
+        :param envelope_bytes: the encoded envelope
+        :return: the envelope
+        """
 
 
 class ProtobufEnvelopeSerializer(EnvelopeSerializer):
     """Envelope serializer using Protobuf."""
 
     def encode(self, envelope: "Envelope") -> bytes:
-        """Encode the envelope."""
+        """
+        Encode the envelope.
+
+        :param envelope: the envelope to encode
+        :return: the encoded envelope
+        """
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message
+        if envelope.context is not None:
+            envelope_pb.uri = envelope.context.uri_raw
 
         envelope_bytes = envelope_pb.SerializeToString()
         return envelope_bytes
 
     def decode(self, envelope_bytes: bytes) -> "Envelope":
-        """Decode the envelope."""
+        """
+        Decode the envelope.
+
+        :param envelope_bytes: the encoded envelope
+        :return: the envelope
+        """
         envelope_pb = base_pb2.Envelope()
         envelope_pb.ParseFromString(envelope_bytes)
 
@@ -200,10 +235,22 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         sender = envelope_pb.sender
         protocol_id = PublicId.from_str(envelope_pb.protocol_id)
         message = envelope_pb.message
+        if envelope_pb.uri == "":  # empty string means this field is not set in proto3
+            uri_raw = envelope_pb.uri
+            uri = URI(uri_raw=uri_raw)
+            context = EnvelopeContext(uri=uri)
+            envelope = Envelope(
+                to=to,
+                sender=sender,
+                protocol_id=protocol_id,
+                message=message,
+                context=context,
+            )
+        else:
+            envelope = Envelope(
+                to=to, sender=sender, protocol_id=protocol_id, message=message,
+            )
 
-        envelope = Envelope(
-            to=to, sender=sender, protocol_id=protocol_id, message=message
-        )
         return envelope
 
 
@@ -211,7 +258,7 @@ DefaultEnvelopeSerializer = ProtobufEnvelopeSerializer
 
 
 class Envelope:
-    """The top level message class."""
+    """The top level message class for agent to agent communication."""
 
     default_serializer = DefaultEnvelopeSerializer()
 
@@ -229,15 +276,14 @@ class Envelope:
         :param to: the address of the receiver.
         :param sender: the address of the sender.
         :param protocol_id: the protocol id.
-        :param message: the protocol-specific message
+        :param message: the protocol-specific message.
+        :param context: the optional envelope context.
         """
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        self._context = (
-            context if context is not None else EnvelopeContext()
-        )  # type: Optional[EnvelopeContext]
+        self._context = context if context is not None else EnvelopeContext()
 
     @property
     def to(self) -> Address:
@@ -271,16 +317,16 @@ class Envelope:
 
     @property
     def message(self) -> bytes:
-        """Get the Message."""
+        """Get the protocol-specific message."""
         return self._message
 
     @message.setter
     def message(self, message: bytes) -> None:
-        """Set the message."""
+        """Set the protocol-specific message."""
         self._message = message
 
     @property
-    def context(self) -> Optional[EnvelopeContext]:
+    def context(self) -> EnvelopeContext:
         """Get the envelope context."""
         return self._context
 
@@ -399,7 +445,7 @@ class Multiplexer:
 
     @property
     def is_connected(self) -> bool:
-        """Check whether the multiplexer is processing messages."""
+        """Check whether the multiplexer is processing envelopes."""
         return self._loop.is_running() and all(
             c.connection_status.is_connected for c in self._connections
         )
@@ -478,7 +524,7 @@ class Multiplexer:
             self._recv_loop_task.cancel()
 
         if self._send_loop_task is not None and not self._send_loop_task.done():
-            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
+            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
             asyncio.run_coroutine_threadsafe(
                 self.out_queue.put(None), self._loop
             ).result()
@@ -588,10 +634,12 @@ class Multiplexer:
 
         while self.is_connected:
             try:
-                logger.debug("Waiting for outgoing messages...")
+                logger.debug("Waiting for outgoing envelopes...")
                 envelope = await self.out_queue.get()
                 if envelope is None:
-                    logger.debug("Received empty message. Quitting the sending loop...")
+                    logger.debug(
+                        "Received empty envelope. Quitting the sending loop..."
+                    )
                     return None
                 logger.debug("Sending envelope {}".format(str(envelope)))
                 await self._send(envelope)
@@ -605,7 +653,7 @@ class Multiplexer:
                 return
 
     async def _receiving_loop(self):
-        """Process incoming messages."""
+        """Process incoming envelopes."""
         logger.debug("Starting receving loop...")
         task_to_connection = {
             asyncio.ensure_future(conn.receive()): conn for conn in self.connections
@@ -613,7 +661,7 @@ class Multiplexer:
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
-                logger.debug("Waiting for incoming messages...")
+                logger.debug("Waiting for incoming envelopes...")
                 done, _pending = await asyncio.wait(
                     task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
                 )
@@ -672,7 +720,7 @@ class Multiplexer:
             and envelope.protocol_id not in connection.restricted_to_protocols
         ):
             logger.warning(
-                "Connection {} cannot handle protocol {}. Cannot send the message.".format(
+                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
                     connection.connection_id, envelope.protocol_id
                 )
             )
@@ -713,7 +761,7 @@ class Multiplexer:
 
 
 class InBox:
-    """A queue from where you can only consume messages."""
+    """A queue from where you can only consume envelopes."""
 
     def __init__(self, multiplexer: Multiplexer):
         """
@@ -728,7 +776,7 @@ class InBox:
         """
         Check for a envelope on the in queue.
 
-        :return: boolean indicating whether there is a message or not
+        :return: boolean indicating whether there is an envelope or not
         """
         return self._multiplexer.in_queue.empty()
 
@@ -740,14 +788,14 @@ class InBox:
         :param timeout: times out the block after timeout seconds.
 
         :return: the envelope object.
-        :raises Empty: if the attempt to get a message fails.
+        :raises Empty: if the attempt to get an envelope fails.
         """
-        logger.debug("Checks for message from the in queue...")
+        logger.debug("Checks for envelope from the in queue...")
         envelope = self._multiplexer.get(block=block, timeout=timeout)
         if envelope is None:
             raise Empty()
         logger.debug(
-            "Incoming message: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
+            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
                 envelope.to, envelope.sender, envelope.protocol_id, envelope.message
             )
         )
@@ -767,7 +815,7 @@ class InBox:
 
 
 class OutBox:
-    """A queue from where you can only enqueue messages."""
+    """A queue from where you can only enqueue envelopes."""
 
     def __init__(self, multiplexer: Multiplexer):
         """
@@ -782,7 +830,7 @@ class OutBox:
         """
         Check for a envelope on the in queue.
 
-        :return: boolean indicating whether there is a message or not
+        :return: boolean indicating whether there is an envelope or not
         """
         return self._multiplexer.out_queue.empty()
 
@@ -806,8 +854,10 @@ class OutBox:
         """
         Put a message in the outbox.
 
-        :param to: the recipient of the message.
-        :param sender: the sender of the message.
+        This constructs an envelope with the input arguments.
+
+        :param to: the recipient of the envelope.
+        :param sender: the sender of the envelope.
         :param protocol_id: the protocol id.
         :param message: the content of the message.
         :return: None

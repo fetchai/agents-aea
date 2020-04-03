@@ -44,21 +44,21 @@ nav:
         - AEAs vs agents: 'agent-vs-aea.md'
         - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - Step by step guides:
-        - Thermometer skills step by step: 'thermometer-skills-step-by-step.md'
+        - Thermometer skills step-by-step: 'thermometer-skills-step-by-step.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
         - ORM integration: 'orm-integration-to-generic.md'
         - Frontend intergration: 'connect-a-frontend.md'
+        - ERC1155 deploy and interact: 'erc1155-skills.md'
         - HTTP Connection: 'http-connection-and-skill.md'
       - Architecture:
         - Design principles: 'design-principles.md'
         - Architectural diagram: 'diagram.md'
         - Core components: 'core-components.md'
-        - File structure: 'file-structure.md'
       - CLI:
         - Installation: 'cli-how-to.md'
         - Commands: 'cli-commands.md'
-        - Package structure: 'package-imports.md'
+        - File structure: 'package-imports.md'
         - GUI: 'cli-gui.md'
         - Generating wealth: 'wealth.md'
       - Developer guides:
@@ -75,39 +75,54 @@ nav:
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
+        - Known limitations: 'known-limits.md'
       - API:
         - AEA: 'api/aea.md'
+        - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
         - Configurations:
           - Base: 'api/configurations/base.md'
+          - Components: 'api/configurations/components.md'
           - Loader: 'api/configurations/loader.md'
         - Connections:
           - Base: 'api/connections/base.md'          
           - Stub Connection: 'api/connections/stub/connection.md'
         - Context: 'api/context/base.md'
+        - Contracts:
+          - Base: 'api/contracts/base.md'
+          - Ethereum: 'api/contracts/ethereum.md'
         - Crypto:
-          - Base: 'api/crytpo/base.md'
+          - Base: 'api/crypto/base.md'
           - Ethereum: 'api/crypto/ethereum.md'
           - Fetchai: 'api/crypto/fetchai.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
           - Wallet: 'api/crypto/wallet.md'
+        - Decision Maker:
+          - Base: 'api/decision_maker/base.md'
+          - Messages:
+            - Base: 'api/decision_maker/messages/base.md'
+            - State Update: 'api/decision_maker/messages/state_update.md'
+            - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'
+          - IPFS:
+            - Base: 'api/helpers/ipfs/base.md'
+          - Preferences:
+            - Base: 'api/helpers/preference_representations/base.md'
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
-        - Identity:
-          - Base: 'api/identity/base.md'
-        - Mail:
-          - Base: 'api/mail/base.md'
+        - Identity: 'api/identity/base.md'
+        - Mail: 'api/mail/base.md'
         - Protocols:
           - Base: 'api/protocols/base.md'
+          - Generator: 'api/protocols/generator.md'
           - Default Protocol:
+            - Custom Types: 'api/protocols/default/custom_types.md'
             - Message: 'api/protocols/default/message.md'
             - Serialization: 'api/protocols/default/serialization.md'
-        - Registries:
-          - Base: 'api/registries/base.md'
+        - Resources: 'api/registries/resources.md'
         - Skills:
           - Base: 'api/skills/base.md'
           - Error Skill: 'api/skills/error/handlers.md'

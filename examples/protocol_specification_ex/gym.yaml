@@ -2,8 +2,9 @@
 name: gym
 author: fetchai
 version: 0.1.0
+description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-description: 'A protocol for interacting with a gym connection.'
+aea_version: '>=0.3.0, <0.4.0'
 speech_acts:
   act:
     action: ct:AnyObject

@@ -25,16 +25,18 @@ from pathlib import Path
 from typing import Collection, cast
 
 import click
-from click import pass_context
 
 from aea.cli.common import (
     Context,
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
     PublicIdParameter,
     _copy_package_directory,
+    _find_item_in_distribution,
     _find_item_locally,
+    check_aea_project,
     logger,
-    pass_ctx,
-    try_to_load_agent_config,
 )
 from aea.cli.registry.utils import fetch_package
 from aea.configurations.base import (
@@ -52,13 +54,14 @@ from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
-@click.option("--registry", is_flag=True, help="For adding from Registry.")
-@pass_ctx
-def add(ctx: Context, registry):
+@click.option("--local", is_flag=True, help="For adding from local folder.")
+@click.pass_context
+@check_aea_project
+def add(click_context, local):
     """Add a resource to the agent."""
-    if registry:
-        ctx.set_config("is_registry", True)
-    try_to_load_agent_config(ctx)
+    ctx = cast(Context, click_context.obj)
+    if local:
+        ctx.set_config("is_local", True)
 
 
 def _is_item_present(item_type, item_public_id, ctx):
@@ -84,7 +87,7 @@ def _add_protocols(click_context, protocols: Collection[PublicId]):
             logger.debug(
                 "Adding protocol '{}' to the agent...".format(protocol_public_id)
             )
-            click_context.invoke(protocol, protocol_public_id=protocol_public_id)
+            _add_item(click_context, "protocol", protocol_public_id)
 
 
 def _add_item(click_context, item_type, item_public_id) -> None:
@@ -101,7 +104,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
     item_type_plural = item_type + "s"
     supported_items = getattr(ctx.agent_config, item_type_plural)
 
-    is_registry = ctx.config.get("is_registry")
+    is_local = ctx.config.get("is_local")
 
     click.echo(
         "Adding {} '{}' to the agent '{}'...".format(
@@ -124,24 +127,28 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         sys.exit(1)
 
     # find and add protocol
-    if is_registry:
-        # fetch from Registry
-        fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
-    else:
+    if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
+        package_path = _find_item_in_distribution(ctx, item_type, item_public_id)
+        _copy_package_directory(
+            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+        )
+    elif is_local:
         package_path = _find_item_locally(ctx, item_type, item_public_id)
         _copy_package_directory(
             ctx, package_path, item_type, item_public_id.name, item_public_id.author
         )
-        if item_type in {"connection", "skill"}:
-            configuration_file_name = _get_default_configuration_file_name_from_type(
-                item_type
-            )
-            configuration_path = package_path / configuration_file_name
-            configuration_loader = ConfigLoader.from_configuration_type(
-                ConfigurationType(item_type)
-            )
-            item_configuration = configuration_loader.load(configuration_path.open())
-            _add_protocols(click_context, item_configuration.protocols)
+    else:
+        package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
+    if item_type in {"connection", "skill"}:
+        configuration_file_name = _get_default_configuration_file_name_from_type(
+            item_type
+        )
+        configuration_path = package_path / configuration_file_name
+        configuration_loader = ConfigLoader.from_configuration_type(
+            ConfigurationType(item_type)
+        )
+        item_configuration = configuration_loader.load(configuration_path.open())
+        _add_protocols(click_context, item_configuration.protocols)
 
     # add the item to the configurations.
     logger.debug(
@@ -155,15 +162,23 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
 @add.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def connection(click_context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
     _add_item(click_context, "connection", connection_public_id)
 
 
 @add.command()
+@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def contract(click_context, contract_public_id: PublicId):
+    """Add a contract to the configuration file."""
+    _add_item(click_context, "contract", contract_public_id)
+
+
+@add.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def protocol(click_context, protocol_public_id):
     """Add a protocol to the agent."""
     _add_item(click_context, "protocol", protocol_public_id)
@@ -171,7 +186,7 @@ def protocol(click_context, protocol_public_id):
 
 @add.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@pass_context
+@click.pass_context
 def skill(click_context, skill_public_id: PublicId):
     """Add a skill to the agent."""
     _add_item(click_context, "skill", skill_public_id)

@@ -19,7 +19,7 @@
 
 """This package contains the handlers."""
 
-from typing import Optional, Tuple, cast
+from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -35,7 +35,7 @@ from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
 
-class OEFHandler(Handler):
+class OEFSearchHandler(Handler):
     """This class handles oef messages."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
@@ -63,7 +63,7 @@ class OEFHandler(Handler):
         oef_message = cast(OefSearchMessage, message)
 
         self.context.logger.debug(
-            "[{}]: Handling OEF message. performative={}".format(
+            "[{}]: Handling OEFSearch message. performative={}".format(
                 self.context.agent_name, oef_message.performative
             )
         )
@@ -89,7 +89,7 @@ class OEFHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
+            "[{}]: Received OEFSearch error: answer_id={}, oef_error_operation={}".format(
                 self.context.agent_name,
                 oef_error.message_id,
                 oef_error.oef_error_operation,
@@ -98,7 +98,7 @@ class OEFHandler(Handler):
 
     def _on_search_result(self, search_result: OefSearchMessage) -> None:
         """
-        Split the search results from the OEF.
+        Split the search results from the OEF search node.
 
         :param search_result: the search result
 
@@ -288,10 +288,10 @@ class TACHandler(Handler):
             )
         )
         if error_code == TacMessage.ErrorCode.TRANSACTION_NOT_VALID:
-            info = tac_message.info
+            info = cast(Dict[str, str], tac_message.info)
             transaction_id = (
                 cast(str, info.get("transaction_id"))
-                if (info.get("transaction_id") is not None)
+                if (info is not None and info.get("transaction_id") is not None)
                 else "NO_TX_ID"
             )
             self.context.logger.warning(
@@ -316,6 +316,18 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
+
+        if game.is_using_contract:
+            contract = self.context.contracts.erc1155
+            contract.set_deployed_instance(
+                self.context.ledger_apis.apis.get("ethereum"),
+                tac_message.get("contract_address"),
+            )
+
+            self.context.logger.info(
+                "We received a contract address: {}".format(contract.instance.address)
+            )
+
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=tac_message.amount_by_currency_id,
@@ -435,6 +447,9 @@ class TransactionHandler(Handler):
             tx_message.performative
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
+
+            # TODO: // Need to modify here and add the contract option in case we are using one.
+
             self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker, sending to controller.".format(
                     self.context.agent_name
@@ -458,7 +473,7 @@ class TransactionHandler(Handler):
                     tx_sender_fee=tx_message.tx_sender_fee,
                     tx_counterparty_fee=tx_message.tx_counterparty_fee,
                     quantities_by_good_id=tx_message.tx_quantities_by_good_id,
-                    tx_sender_signature=tx_message.tx_signature,
+                    tx_sender_signature=tx_message.signed_payload.get("tx_signature"),
                     tx_counterparty_signature=tx_message.info.get(
                         "tx_counterparty_signature"
                     ),

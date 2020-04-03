@@ -37,7 +37,7 @@ from aea.aea import AEA
 from aea.configurations.base import (
     ProtocolConfig,
     ProtocolId,
-    PublicId,
+    SkillConfig,
 )
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
@@ -46,7 +46,7 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
-from aea.registries.base import Resources
+from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
@@ -102,7 +102,7 @@ class TestAEAToACA:
     @pytest.mark.asyncio
     async def test_connecting_to_aca(self):
         http_client_connection = HTTPClientConnection(
-            agent_address=self.aea_address,
+            address=self.aea_address,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -171,7 +171,7 @@ class TestAEAToACA:
             default_address_key=FETCHAI,
         )
         http_client_connection = HTTPClientConnection(
-            agent_address=self.aea_address,
+            address=self.aea_address,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -195,10 +195,8 @@ class TestAEAToACA:
                 )
             )
         )
-        http_protocol = Protocol(
-            HttpMessage.protocol_id, HttpSerializer(), http_protocol_configuration,
-        )
-        resources.protocol_registry.register(HttpMessage.protocol_id, http_protocol)
+        http_protocol = Protocol(http_protocol_configuration, HttpSerializer(),)
+        resources.add_protocol(http_protocol)
 
         # Request message & envelope
         request_http_message = HttpMessage(
@@ -221,19 +219,19 @@ class TestAEAToACA:
             message=HttpSerializer().encode(request_http_message),
         )
 
-        # add handlers to AEA resources
-        aea_handler = AEAHandler(
-            skill_context=SkillContext(aea.context), name="fake_skill"
+        # add a simple skill with handler
+        skill_context = SkillContext(aea.context)
+        skill_config = SkillConfig(
+            name="simple_skill", author="fetchai", version="0.1.0"
         )
-        resources.handler_registry.register(
-            (PublicId.from_str("fetchai/fake_skill:0.1.0"), HttpMessage.protocol_id,),
-            aea_handler,
+        aea_handler = AEAHandler(skill_context=skill_context, name="aea_handler")
+        simple_skill = Skill(
+            skill_config, skill_context, handlers={aea_handler.name: aea_handler}
         )
+        resources.add_skill(simple_skill)
 
         # add error skill to AEA
-        error_skill = Skill.from_dir(
-            os.path.join(AEA_DIR, "skills", "error"), aea.context
-        )
+        error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
         resources.add_skill(error_skill)
 
         # start AEA thread

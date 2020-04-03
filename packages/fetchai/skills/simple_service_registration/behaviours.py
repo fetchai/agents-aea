@@ -89,7 +89,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: updating services on OEF.".format(self.context.agent_name)
+            "[{}]: updating services on OEF service directory.".format(
+                self.context.agent_name
+            )
         )
 
     def _unregister_service(self) -> None:
@@ -112,6 +114,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             message=OefSearchSerializer().encode(msg),
         )
         self.context.logger.info(
-            "[{}]: unregistering services from OEF.".format(self.context.agent_name)
+            "[{}]: unregistering services from OEF service directory.".format(
+                self.context.agent_name
+            )
         )
         self._registered_service_description = None

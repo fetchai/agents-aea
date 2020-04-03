@@ -53,11 +53,15 @@ class TestRemoveSkillWithPublicId:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -65,10 +69,12 @@ class TestRemoveSkillWithPublicId:
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
         config.registry_path = os.path.join(ROOT_DIR, "packages")
-        yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        yaml.safe_dump(dict(config.json), open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(
@@ -117,11 +123,15 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -170,11 +180,15 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -182,10 +196,12 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
         config.registry_path = os.path.join(ROOT_DIR, "packages")
-        yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        yaml.safe_dump(dict(config.json), open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 

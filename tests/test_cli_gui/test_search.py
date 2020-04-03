@@ -145,16 +145,16 @@ def test_real_search():
     assert data[i]["id"] == "fetchai/gym:0.1.0"
     assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
     i += 1
-    assert data[i]["id"] == "fetchai/http:0.1.0"
-    assert (
-        data[i]["description"]
-        == "The HTTP connection that wraps a web-based, RESTful API specification."
-    )
-    i += 1
     assert data[i]["id"] == "fetchai/http_client:0.1.0"
     assert (
         data[i]["description"]
         == "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/http_server:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The HTTP server connection that wraps http server implementing a RESTful API specification."
     )
     i += 1
     assert data[i]["id"] == "fetchai/local:0.1.0"

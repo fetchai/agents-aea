@@ -104,17 +104,16 @@ class TestPushLocalFailsArgumentNotPublicId:
             standalone_mode=False,
         )
 
-    def test_exit_code_2(self):
-        """Test the exit code is 2 (i.e. bad usage)."""
+    def test_exit_code_1(self):
+        """Test the exit code is 1 (SystemExit)."""
         assert self.result.exit_code == 1
-        assert self.result.exception.exit_code == 2
 
     @classmethod
     def teardown_class(cls):
         """Tear the tests down."""
 
 
-@mock.patch("aea.cli.push.try_to_load_agent_config")
+@mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.push._save_item_locally")
 @mock.patch("aea.cli.push.push_item")
 class PushCommandTestCase(TestCase):
@@ -128,12 +127,12 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push connection positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "connection", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "connection", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
 
@@ -141,12 +140,12 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push protocol positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "protocol", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "protocol", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
 
@@ -154,11 +153,53 @@ class PushCommandTestCase(TestCase):
         """Test for CLI push skill positive result."""
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "--registry", "skill", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
         self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "push", "skill", "author/name:0.1.0"],
+            [*CLI_LOG_OPTION, "push", "--local", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
+
+
+@mock.patch("aea.cli.common.try_to_load_agent_config")
+class PushContractCommandTestCase(TestCase):
+    """Test that the command 'aea push contract' works as expected."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    @mock.patch("aea.cli.push._save_item_locally")
+    def test_push_contract_positive(self, *mocks):
+        """Test push contract command positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "push",
+                "--local",
+                "contract",
+                "author/name:0.1.0",
+            ],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    @mock.patch("aea.cli.push.push_item")
+    def test_push_contract_registry_positive(self, *mocks):
+        """Test push contract to registry command positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "push",
+                "contract",
+                "author/name:0.1.0",
+            ],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)

@@ -258,7 +258,7 @@ the decoded message.
 ### Protocol
 
 ```python
-class Protocol(ABC)
+class Protocol(Component)
 ```
 
 This class implements a specifications for a protocol.
@@ -269,26 +269,15 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig)
+ | __init__(configuration: ProtocolConfig, serializer: Serializer)
 ```
 
 Initialize the protocol manager.
 
 **Arguments**:
 
-- `protocol_id`: the protocol id.
+- `configuration`: the protocol configurations.
 - `serializer`: the serializer.
-- `config`: the protocol configurations.
-
-<a name=".aea.protocols.base.Protocol.id"></a>
-#### id
-
-```python
- | @property
- | id() -> ProtocolId
-```
-
-Get the name.
 
 <a name=".aea.protocols.base.Protocol.serializer"></a>
 #### serializer
@@ -300,16 +289,6 @@ Get the name.
 
 Get the serializer.
 
-<a name=".aea.protocols.base.Protocol.config"></a>
-#### config
-
-```python
- | @property
- | config() -> ProtocolConfig
-```
-
-Get the configuration.
-
 <a name=".aea.protocols.base.Protocol.from_dir"></a>
 #### from`_`dir
 
@@ -318,18 +297,31 @@ Get the configuration.
  | from_dir(cls, directory: str) -> "Protocol"
 ```
 
-Load a protocol from a directory.
+Load the protocol from a directory.
 
 **Arguments**:
 
-- `directory`: the skill directory.
-- `agent_context`: the agent's context
+- `directory`: the directory to the skill package.
 
 **Returns**:
 
-the Protocol object.
+the protocol object.
 
-**Raises**:
+<a name=".aea.protocols.base.Protocol.from_config"></a>
+#### from`_`config
 
-- `Exception`: if the parsing failed.
+```python
+ | @classmethod
+ | from_config(cls, configuration: ProtocolConfig) -> "Protocol"
+```
+
+Load the protocol from configuration.
+
+**Arguments**:
+
+- `configuration`: the protocol configuration.
+
+**Returns**:
+
+the protocol object.
 
