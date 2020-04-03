@@ -780,7 +780,7 @@ class AEABuilder:
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
         for configuration in self._package_dependency_manager.skills.values():
-            logger_name = "aea.{}.skills.{}.{}".format(
+            logger_name = "aea.packages.{}.{}.skills.{}".format(
                 context.agent_name, configuration.author, configuration.name
             )
             skill_context = SkillContext()
