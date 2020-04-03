@@ -182,8 +182,14 @@ class TestBuildSkill:
         try:
             # run service agent
             process_one = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run",
-                 "--connections", "fetchai/oef:0.1.0"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )
