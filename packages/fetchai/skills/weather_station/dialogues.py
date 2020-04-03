@@ -24,7 +24,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
@@ -46,7 +46,7 @@ class Dialogue(FipaDialogue):
         :return: None
         """
         FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
-        self.weather_data = None  # type: Optional[Dict[str, Any]]
+        self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
 
 
