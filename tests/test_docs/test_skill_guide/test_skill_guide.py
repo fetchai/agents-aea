@@ -114,6 +114,12 @@ class TestBuildSkill:
                 [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
                 standalone_mode=False,
             )
+            # add oef connection
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+                standalone_mode=False,
+            )
 
     def test_agent_is_fetched(self):
         """Test that the setup was successful."""
@@ -176,7 +182,14 @@ class TestBuildSkill:
         try:
             # run service agent
             process_one = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    "fetchai/oef:0.1.0",
+                ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
             )

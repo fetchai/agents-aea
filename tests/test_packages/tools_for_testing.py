@@ -83,7 +83,7 @@ class AeaTestCase:
         """
         Run AEA CLI command.
 
-        :param *args: CLI args
+        :param args: CLI args
 
         :return: None
         """
