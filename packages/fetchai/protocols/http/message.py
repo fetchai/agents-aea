@@ -26,7 +26,7 @@ from typing import Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-logger = logging.getLogger("packages.fetchai.protocols.http.message")
+logger = logging.getLogger("aea.packages.fetchai.protocols.http.message")
 
 DEFAULT_BODY_SIZE = 4
 

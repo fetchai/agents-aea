@@ -7,7 +7,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmS19cwrXWeHj97w4i11KamuWgUxwLoBE43yLGgz4kLAW1
   custom_types.py: QmR4TS6KhXpRtGqq78B8mXMiiFXcFe7JEkxB7jHvqPVkgD
-  message.py: QmSSrQg7cckXrdKJ2CGufhXG53Hj8Z5rNSX7Got2sDJp8W
+  message.py: QmXKkZzrMpoBeNqMaMov3crm4C1uuXo2rfwesCrFfX42MV
   oef_search.proto: QmRg28H6bNo1PcyJiKLYjHe6FCwtE6nJ43DeJ4RFTcHm68
   oef_search_pb2.py: QmYAG3XcTX7QKBw2k1F5gst9KQkeEu2Pfhjh4EwfzFki8Y
   serialization.py: QmSdgUuFuU6dtX2Q4z8RyUcGnXrWBj3wc2VSFv1uq47kjU

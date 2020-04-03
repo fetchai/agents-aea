@@ -20,7 +20,6 @@
 """This package contains the behaviours."""
 
 import datetime
-import logging
 import time
 from typing import Dict, List, Optional, Union, cast
 
@@ -43,8 +42,6 @@ CONTROLLER_DATAMODEL = DataModel(
     "tac",
     [Attribute("version", str, True, "Version number of the TAC Controller Agent.")],
 )
-
-logger = logging.getLogger("aea.tac_control_skill")
 
 
 class TACBehaviour(Behaviour):

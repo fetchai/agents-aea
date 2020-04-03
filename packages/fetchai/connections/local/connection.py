@@ -36,7 +36,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.local")
 
 TARGET = 0
 MESSAGE_ID = 1

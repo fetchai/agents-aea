@@ -39,7 +39,7 @@ NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 

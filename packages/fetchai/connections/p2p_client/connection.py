@@ -33,7 +33,7 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
 
 class PeerToPeerChannel:
