@@ -33,7 +33,7 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
-logger = logging.getLogger("packages.fetchai.contracts.erc1155")
+logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 
 
 class ERC1155Contract(Contract):
@@ -157,7 +157,7 @@ class ERC1155Contract(Contract):
 
         # estimate the gas and update the transaction dict
         gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-        logger.info("gas estimate deploy: {}".format(gas_estimate))
+        logger.debug("gas estimate deploy: {}".format(gas_estimate))
         tx["gas"] = gas_estimate
         return tx
 
