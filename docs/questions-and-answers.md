@@ -74,7 +74,7 @@ You can find more details about the CLI commands <a href="/cli-commands/">here</
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
 All AEA projects by default hold the `stub` connection, the `default` protocol and the `error` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
-You can find more details about the file structure <a href="/file-structure/">here</a>
+You can find more details about the file structure <a href="/package-imports/">here</a>
 </details>
 
 <details><summary>Is there a standardization for private key files?</summary>
