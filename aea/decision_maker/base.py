@@ -952,7 +952,8 @@ class DecisionMaker:
         else:
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get("tx_hash")
-        tx_signature = crypto_object.sign_message(tx_hash)
+        is_deprecated_mode = tx_message.signing_payload.get("is_deprecated_mode", False)
+        tx_signature = crypto_object.sign_message(tx_hash, is_deprecated_mode)
         return tx_signature
 
     def _sign_ledger_tx(self, tx_message: TransactionMessage) -> Any:

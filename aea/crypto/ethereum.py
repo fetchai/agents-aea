@@ -104,16 +104,22 @@ class EthereumCrypto(Crypto):
         except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
-    def sign_message(self, message: bytes) -> bytes:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
         Sign a message in bytes string form.
 
         :param message: the message to be signed
-        :return: signature of the message in bytes form
+        :param is_deprecated_mode: if the deprecated signing is used
+        :return: signature of the message in string form
         """
-        signable_message = encode_defunct(primitive=message)
-        signature = self.entity.sign_message(signable_message=signable_message)
-        return signature["signature"].hex()
+        if is_deprecated_mode:
+            signature_dict = self.entity.signHash(message)
+            signed_msg = signature_dict["signature"].hex()
+        else:
+            signable_message = encode_defunct(primitive=message)
+            signature = self.entity.sign_message(signable_message=signable_message)
+            signed_msg = signature["signature"].hex()
+        return signed_msg
 
     def sign_transaction(self, transaction: Any) -> Any:
         """
@@ -123,6 +129,7 @@ class EthereumCrypto(Crypto):
         :return: signed transaction
         """
         signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
+        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
         return signed_transaction
 
     def recover_message(self, message: bytes, signature: bytes) -> Address:
