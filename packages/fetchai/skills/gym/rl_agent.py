@@ -30,7 +30,7 @@ from packages.fetchai.skills.gym.helpers import ProxyEnv, RLAgent
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10
 
-logger = logging.getLogger("aea.gym_skill")
+logger = logging.getLogger("aea.packages.fetchai.skills.gym.rl_agent")
 
 
 class PriceBandit(object):

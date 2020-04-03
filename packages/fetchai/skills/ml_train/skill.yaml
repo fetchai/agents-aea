@@ -12,7 +12,7 @@ fingerprint:
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   model.py: QmS2o3zp1BZMnZMci7EHrTKhoD1dVToy3wrPTbMU7YHP9h
   strategy.py: QmZzumJDNDx554qJLb3yEj6MFh3ChpancQYE2nzLxt7F8n
-  tasks.py: QmbVq8VTXo8gEWUHBRmv5oUSSjtqY8659neL9AdyHMjE4i
+  tasks.py: QmS5pGbxvMXSh1Vmuvq26e5APnheQJJ3r3BK6GEyUBUpAf
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

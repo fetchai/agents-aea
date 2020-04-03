@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmdwnPo8iC2uqf9CmB4ocbh6HP2jcgCtuFdS4djuajp6Li
-  connection.py: QmbR9cwSX8nWFqdpKuajE9NZztEzgpLk93AKv47HbjUSVm
+  connection.py: QmTKRKmnHfDEB7uTjEF4PYKZ6Voj81GrK43SZbvzB2Jokq
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: PeerToPeerConnection

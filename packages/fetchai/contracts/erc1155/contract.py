@@ -33,7 +33,7 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
-logger = logging.getLogger("packages.fetchai.contracts.erc1155")
+logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155")
 
 
 class ERC1155Contract(Contract):

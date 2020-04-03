@@ -31,7 +31,7 @@ from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.tcp_client")
 
 STUB_DIALOGUE_ID = 0
 
