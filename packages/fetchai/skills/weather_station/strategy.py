@@ -19,8 +19,9 @@
 
 """This module contains the strategy class."""
 
+import json
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
@@ -94,7 +95,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
@@ -129,15 +130,15 @@ class Strategy(Model):
 
     def _build_data_payload(
         self, fetched_data: Dict[str, int]
-    ) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:
+    ) -> Tuple[Dict[str, str], int]:
         """
         Build the data payload.
 
         :param fetched_data: the fetched data
         :return: a tuple of the data and the rows
         """
-        weather_data = {}  # type: Dict[str, List[Dict[str, Any]]]
-        weather_data["weather_data"] = []
+        weather_data = {}  # type: Dict[str, str]
+        row_data = {}  # type: Dict[int, Dict[str, Any]]
         counter = 0
         for items in fetched_data:
             if counter > 10:
@@ -156,5 +157,6 @@ class Strategy(Model):
                 "wind_dir": items[9],
                 "wind_gust": items[10],
             }
-            weather_data["weather_data"].append(dict_of_data)
+            row_data[counter] = dict_of_data
+        weather_data["weather_data"] = json.dumps(row_data)
         return weather_data, counter

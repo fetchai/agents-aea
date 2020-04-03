@@ -127,9 +127,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self.context.logger.info("Creating a batch of items")
             creation_message = contract.get_create_batch_transaction(
                 deployer_address=self.context.agent_address,
+                token_ids=self.token_ids,
                 ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
-                token_ids=self.token_ids,
             )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
         if contract.is_deployed and self.is_items_created and not self.is_items_minted:
@@ -137,10 +137,10 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             mint_message = contract.get_mint_batch_transaction(
                 deployer_address=self.context.agent_address,
                 recipient_address=self.context.agent_address,
+                token_ids=self.token_ids,
                 mint_quantities=strategy.mint_stock,
                 ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
-                token_ids=self.token_ids,
             )
             self.context.decision_maker_message_queue.put_nowait(mint_message)
 

@@ -46,7 +46,17 @@ class Dialogue(FipaDialogue):
         :return: None
         """
         FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
-        self.proposal = None  # type: Optional[Description]
+        self._proposal = None  # type: Optional[Description]
+
+    @property
+    def proposal(self) -> Description:
+        assert self._proposal is not None, "Proposal not set!"
+        return self._proposal
+
+    @proposal.setter
+    def proposal(self, proposal: Description) -> None:
+        """Set the proposal."""
+        self._proposal = proposal
 
 
 class Dialogues(Model, FipaDialogues):

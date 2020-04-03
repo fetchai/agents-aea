@@ -134,16 +134,16 @@ class FIPAHandler(Handler):
             )
         )
         if self.context.behaviours.service_registration.is_items_minted:
+            # simply send the same proposal, independent of the query
             strategy = cast(Strategy, self.context.strategy)
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            contract_nonce = contract.generate_trade_nonce(self.context.agent_address)
-            self.context.shared_state["contract_nonce"] = contract_nonce
-            self.token_id = self.context.behaviours.service_registration.token_ids[0]
+            trade_nonce = contract.generate_trade_nonce(self.context.agent_address)
+            token_id = self.context.behaviours.service_registration.token_ids[0]
             proposal = Description(
                 {
-                    "contract": str(contract.instance.address),
-                    "token_id": str(self.token_id),
-                    "trade_nonce": str(contract_nonce),
+                    "contract_address": contract.instance.address,
+                    "token_id": str(token_id),
+                    "trade_nonce": str(trade_nonce),
                     "from_supply": str(strategy.from_supply),
                     "to_supply": str(strategy.to_supply),
                     "value": str(strategy.value),
@@ -157,17 +157,12 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
+            dialogue.outgoing_extend(proposal_msg)
             self.context.logger.info(
-                "Sending proposal: contract={}, token_id={}, trade_nonce={}, from_supply={}, to_supply={}, value={}".format(
-                    str(contract.instance.address),
-                    str(self.token_id),
-                    str(contract_nonce),
-                    str(strategy.from_supply),
-                    str(strategy.to_supply),
-                    str(strategy.value),
+                "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
+                    self.context.agent_name, msg.counterparty[-5:], proposal.values
                 )
             )
-            dialogue.outgoing_extend(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -175,7 +170,7 @@ class FIPAHandler(Handler):
                 message=FipaSerializer().encode(proposal_msg),
             )
         else:
-            self.context.logger.info("Contract items not minted yet.")
+            self.context.logger.info("Contract items not minted yet. Try again later.")
 
     def _handle_accept_w_inform(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -187,29 +182,38 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        self.context.logger.info(
-            "[{}]: received ACCEPT_W_INFORM from sender={}".format(
-                self.context.agent_name, msg.counterparty[-5:]
+        tx_signature = msg.info.get("tx_signature", None)
+        if tx_signature is not None:
+            self.context.logger.info(
+                "[{}]: received ACCEPT_W_INFORM from sender={}: tx_signature={}".format(
+                    self.context.agent_name, msg.counterparty[-5:], tx_signature
+                )
             )
-        )
-        signature = msg.info.get("tx_signature", None)
-        if signature is not None:
-            strategy = cast(Strategy, self.context.strategy)
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            contract_nonce = cast(int, self.context.shared_state.get("contract_nonce"))
-            tx = contract.get_atomic_swap_single_proposal(
+            tx = contract.get_atomic_swap_single_transaction_proposal(
                 from_address=self.context.agent_address,
                 to_address=msg.counterparty,
-                item_id=self.token_id,
-                from_supply=strategy.from_supply,
-                to_supply=strategy.to_supply,
-                value=strategy.value,
-                trade_nonce=contract_nonce,
+                token_id=int(dialogue.proposal.values["token_id"]),
+                from_supply=int(dialogue.proposal.values["from_supply"]),
+                to_supply=int(dialogue.proposal.values["to_supply"]),
+                value=int(dialogue.proposal.values["value"]),
+                trade_nonce=int(dialogue.proposal.values["trade_nonce"]),
                 ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
-                signature=signature,
+                signature=tx_signature,
+            )
+            self.context.logger.debug(
+                "[{}]: sending single atomic swap to decision maker.".format(
+                    self.context.agent_name
+                )
             )
             self.context.decision_maker_message_queue.put(tx)
+        else:
+            self.context.logger.info(
+                "[{}]: received ACCEPT_W_INFORM from sender={} with no signature.".format(
+                    self.context.agent_name, msg.counterparty[-5:]
+                )
+            )
 
 
 class TransactionHandler(Handler):
@@ -240,14 +244,18 @@ class TransactionHandler(Handler):
             )
             if transaction.status != 1:
                 self.context.is_active = False
-                self.context.logger.info("Failed to deploy. Aborting...")
+                self.context.logger.info(
+                    "[{}]: Failed to deploy. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
             else:
                 contract.set_address(
                     self.context.ledger_apis.ethereum_api, transaction.contractAddress
                 )
                 self.context.logger.info(
-                    "Successfully deployed the contract. Transaction digest: {}".format(
-                        tx_digest
+                    "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
+                        self.context.agent_name, tx_digest
                     )
                 )
 
@@ -261,12 +269,16 @@ class TransactionHandler(Handler):
             )
             if transaction.status != 1:
                 self.context.is_active = False
-                self.context.logger.info("Failed to create items. Aborting...")
+                self.context.logger.info(
+                    "[{}]: Failed to create items. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
             else:
                 self.context.behaviours.service_registration.is_items_created = True
                 self.context.logger.info(
-                    "Successfully created items. Transaction digest: {}".format(
-                        tx_digest
+                    "[{}]: Successfully created items. Transaction digest: {}".format(
+                        self.context.agent_name, tx_digest
                     )
                 )
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
@@ -279,19 +291,25 @@ class TransactionHandler(Handler):
             )
             if transaction.status != 1:
                 self.context.is_active = False
-                self.context.logger.info("Failed to mint items. Aborting...")
+                self.context.logger.info(
+                    "[{}]: Failed to mint items. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
             else:
                 self.context.behaviours.service_registration.is_items_minted = True
                 self.context.logger.info(
-                    "Successfully minted items. Transaction digest: {}".format(
-                        tx_digest
+                    "[{}]: Successfully minted items. Transaction digest: {}".format(
+                        self.context.agent_name, tx_digest
                     )
                 )
                 result = contract.get_balance_of_batch(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )
-                self.context.logger.info("Current balances: {}".format(result))
+                self.context.logger.info(
+                    "[{}]: Current balances: {}".format(self.context.agent_name, result)
+                )
         elif (
             tx_msg_response.tx_id
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
@@ -305,19 +323,24 @@ class TransactionHandler(Handler):
             )
             if transaction.status != 1:
                 self.context.is_active = False
-                self.context.logger.info("Failed to create items. Aborting.")
-            else:
                 self.context.logger.info(
-                    "Successfully conducted atomic swap. Transaction digest: {}".format(
-                        tx_digest
+                    "[{}]: Failed to conduct atomic swap. Aborting...".format(
+                        self.context.agent_name
                     )
                 )
-                self.context.logger.info("Ask the contract about my balances:")
+            else:
+                self.context.logger.info(
+                    "[{}]: Successfully conducted atomic swap. Transaction digest: {}".format(
+                        self.context.agent_name, tx_digest
+                    )
+                )
                 result = contract.get_balance_of_batch(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )
-                self.context.logger.info(result)
+                self.context.logger.info(
+                    "[{}]: Current balances: {}".format(self.context.agent_name, result)
+                )
 
     def teardown(self) -> None:
         """

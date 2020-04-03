@@ -129,28 +129,34 @@ class FIPAHandler(Handler):
         :return: None
         """
         data = msg.proposal.values
-        self.context.logger.info(
-            "[{}]: received PROPOSE from sender={}".format(
-                self.context.agent_name, msg.counterparty[-5:]
+
+        if all(
+            key
+            in [
+                "contract_address",
+                "from_supply",
+                "to_supply",
+                "value",
+                "trade_nonce",
+                "token_id",
+            ]
+            for key in data.keys()
+        ):
+            # accept any proposal with the correct keys
+            self.context.logger.info(
+                "[{}]: received valid PROPOSE from sender={}: proposal={}".format(
+                    self.context.agent_name, msg.counterparty[-5:], data
+                )
             )
-        )
-        if "contract" in data.keys():
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
             contract.set_address(
                 ledger_api=self.context.ledger_apis.ethereum_api,
-                contract_address=data["contract"],
+                contract_address=data["contract_address"],
             )
-            assert "from_supply" in data.keys(), "from supply is not set"
-            assert "to_supply" in data.keys(), "to supply is not set"
-            assert "value" in data.keys(), "value is not set"
-            assert "trade_nonce" in data.keys(), "trade_nonce is not set"
-            assert "token_id" in data.keys(), "token id is not set"
-
-            self.counterparty = msg.counterparty
-            tx = contract.get_hash_single_transaction(
+            tx_msg = contract.get_hash_single_transaction(
                 from_address=msg.counterparty,
                 to_address=self.context.agent_address,
-                item_id=int(data["token_id"]),
+                token_id=int(data["token_id"]),
                 from_supply=int(data["from_supply"]),
                 to_supply=int(data["to_supply"]),
                 value=int(data["value"]),
@@ -159,12 +165,16 @@ class FIPAHandler(Handler):
                 skill_callback_id=self.context.skill_id,
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )
-
-            self.context.decision_maker_message_queue.put_nowait(tx)
+            self.context.logger.debug(
+                "[{}]: sending transaction to decision maker for signing. tx_msg={}".format(
+                    self.context.agent_name, tx_msg
+                )
+            )
+            self.context.decision_maker_message_queue.put_nowait(tx_msg)
         else:
             self.context.logger.info(
-                "[{}]: received invalid data from sender={}".format(
-                    self.context.agent_name, msg.counterparty[-5:]
+                "[{}]: received invalid PROPOSE from sender={}: proposal={}".format(
+                    self.context.agent_name, msg.counterparty[-5:], data
                 )
             )
 
@@ -223,11 +233,6 @@ class OEFSearchHandler(Handler):
                 opponent_addr, self.context.agent_address, is_seller=False
             )
             query = strategy.get_service_query()
-            self.context.logger.info(
-                "[{}]: sending CFP to agent={}".format(
-                    self.context.agent_name, opponent_addr[-5:]
-                )
-            )
             cfp_msg = FipaMessage(
                 message_id=FipaDialogue.STARTING_MESSAGE_ID,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
@@ -236,6 +241,11 @@ class OEFSearchHandler(Handler):
                 query=query,
             )
             dialogue.outgoing_extend(cfp_msg)
+            self.context.logger.info(
+                "[{}]: sending CFP to agent={}".format(
+                    self.context.agent_name, opponent_addr[-5:]
+                )
+            )
             self.context.outbox.put_message(
                 to=opponent_addr,
                 sender=self.context.agent_address,
@@ -268,13 +278,16 @@ class TransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if (
-            tx_msg_response.tx_id
-            == ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value
+            tx_msg_response.performative
+            == TransactionMessage.Performative.SUCCESSFUL_SIGNING
+            and (
+                tx_msg_response.tx_id
+                == ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value
+            )
         ):
-            tx_signed = tx_msg_response.signed_payload.get("tx_signature")
-            info = tx_msg_response.info
+            tx_signature = tx_msg_response.signed_payload.get("tx_signature")
             dialogue_label = DialogueLabel.from_json(
-                cast(Dict[str, str], info.get("dialogue_label"))
+                cast(Dict[str, str], tx_msg_response.info.get("dialogue_label"))
             )
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
@@ -287,13 +300,24 @@ class TransactionHandler(Handler):
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target,
                 performative=FipaMessage.Performative.ACCEPT_W_INFORM,
-                info={"tx_signature": tx_signed},
+                info={"tx_signature": tx_signature},
+            )
+            self.context.logger.info(
+                "[{}]: sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
+                    self.context.agent_name, counterparty_addr[-5:], tx_signature
+                )
             )
             self.context.outbox.put_message(
                 to=counterparty_addr,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(inform_msg),
+            )
+        else:
+            self.context.logger.info(
+                "[{}]: signing failed: tx_msg_response={}".format(
+                    self.context.agent_name, tx_msg_response
+                )
             )
 
     def teardown(self) -> None:
