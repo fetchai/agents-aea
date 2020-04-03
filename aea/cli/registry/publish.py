@@ -19,7 +19,9 @@
 """Methods for CLI publish functionality."""
 
 import os
+import shutil
 import tarfile
+import tempfile
 
 import click
 
@@ -46,9 +48,16 @@ def publish_agent(ctx: Context):
     check_is_author_logged_in(ctx.agent_config.author)
 
     name = ctx.agent_config.agent_name
-    agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
+    config_file_source_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     output_tar = os.path.join(ctx.cwd, "{}.tar.gz".format(name))
-    _compress(output_tar, agent_config_path)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        package_dir = os.path.join(temp_dir, name)
+        os.makedirs(package_dir)
+        config_file_target_path = os.path.join(package_dir, DEFAULT_AEA_CONFIG_FILE)
+        shutil.copy(config_file_source_path, config_file_target_path)
+
+        _compress(output_tar, package_dir)
 
     data = {
         "name": name,
