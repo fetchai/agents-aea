@@ -106,12 +106,13 @@ class FetchAICrypto(Crypto):
         entity = Entity()
         return entity
 
-    def sign_message(self, message: bytes) -> bytes:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
         Sign a message in bytes string form.
 
         :param message: the message we want to send
-        :return: Signed message in bytes
+        :param is_deprecated_mode: if the deprecated signing is used
+        :return: signature of the message in string form
         """
         signature = self.entity.sign(message)
         return signature

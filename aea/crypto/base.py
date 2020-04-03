@@ -70,12 +70,13 @@ class Crypto(ABC):
         """
 
     @abstractmethod
-    def sign_message(self, message: bytes) -> bytes:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
         Sign a message in bytes string form.
 
         :param message: the message to be signed
-        :return: signature of the message in bytes form
+        :param is_deprecated_mode: if the deprecated signing is used
+        :return: signature of the message in string form
         """
 
     @abstractmethod

@@ -788,6 +788,18 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
+        assert (
+            tx_hash
+            == self.instance.functions.getSingleHash(
+                from_address,
+                to_address,
+                token_id,
+                from_supply,
+                to_supply,
+                value_eth_wei,
+                trade_nonce,
+            ).call()
+        )
         logger.debug(
             "get_hash_single_transaction: from_address={}, to_address={}, token_id={}, from_supply={}, to_supply={}, value_eth_wei={}, trade_nonce={}, tx_hash={!r}".format(
                 from_address,
@@ -812,7 +824,7 @@ class ERC1155Contract(Contract):
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
-            signing_payload={"tx_hash": tx_hash},
+            signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
         )
         return tx_message
 
