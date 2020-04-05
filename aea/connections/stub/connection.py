@@ -22,6 +22,7 @@
 import asyncio
 import logging
 import os
+import fcntl
 from pathlib import Path
 from typing import Optional, Union
 
@@ -141,15 +142,31 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        line = self.input_file.readline()
-        logger.debug("read line: {!r}".format(line))
-        lines = b""
-        while len(line) > 0:
-            lines += line
-            line = self.input_file.readline()
-        if lines != b"":
-            self._process_line(lines)
+        try:
+            fcntl.flock(self.input_file, fcntl.LOCK_EX)
+        except OSError as e:
+            logger.error("Couldn't acquire lock for input file")
+            return None
+        else:
+            logger.debug("Lock successfully acquired for input file")
+
+        lines = self.input_file.readlines()
+        if len(lines) > 0:
             self.input_file.truncate(0)
+            self.input_file.seek(0)
+        
+        try:
+            fcntl.flock(self.input_file, fcntl.LOCK_UN)
+        except OSError as e:
+            logger.error("Couldn't free lock for input file")
+            # TOFIX(LR) how to deal with such error?
+            #return None
+        else:
+            logger.debug("Lock successfully freed for input file")
+    
+        for line in lines:
+            logger.debug("read line: {!r}".format(line))
+            self._process_line(line)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
