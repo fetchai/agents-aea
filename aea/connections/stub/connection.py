@@ -24,7 +24,7 @@ import logging
 import os
 import fcntl
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, IO, AnyStr
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -79,6 +79,25 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     message = split[3].decode("unicode_escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+
+def _lock_fd(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+    except OSError as e:
+        logger.error("Couldn't acquire lock for file {}".format(fd.name))
+        return False
+    else:
+        logger.debug("Lock successfully acquired for file {}".format(fd.name))
+        return True
+
+def _unlock_fd(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError as e:
+        logger.error("Couldn't free lock for file {}".format(fd.name))
+        return False
+    else:
+        logger.debug("Lock successfully freed for file {}".format(fd.name))
 
 
 class StubConnection(Connection):
@@ -142,32 +161,24 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        try:
-            fcntl.flock(self.input_file, fcntl.LOCK_EX)
-        except OSError as e:
-            logger.error("Couldn't acquire lock for input file")
-            return None
-        else:
-            logger.debug("Lock successfully acquired for input file")
+        ok = _lock_fd(self.input_file)
+        if not ok:
+            # TOFIX(LR) how to handle locking errors
+            return
 
         lines = self.input_file.readlines()
         if len(lines) > 0:
             self.input_file.truncate(0)
             self.input_file.seek(0)
         
-        try:
-            fcntl.flock(self.input_file, fcntl.LOCK_UN)
-        except OSError as e:
-            logger.error("Couldn't free lock for input file")
-            # TOFIX(LR) how to deal with such error?
-            #return None
-        else:
-            logger.debug("Lock successfully freed for input file")
+        ok = _unlock_fd(self.input_file)
+        if not ok:
+            # TOFIX(LR) how to handle locking errors
     
         for line in lines:
             logger.debug("read line: {!r}".format(line))
             self._process_line(line)
-
+    
     def _process_line(self, line) -> None:
         """Process a line of the file.
 
