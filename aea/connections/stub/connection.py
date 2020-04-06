@@ -57,8 +57,12 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    # TOFIX(LR) properly handle bytes encoding with \n escaping
+    #  - parse based on ',' separators, not \n
+    #  - use size-data format --> need to write an echo script
+    result += str(e.message)[2:-1].encode('latin-1')
     result += separator
+    result += b"\n"
 
     return result
 
@@ -172,8 +176,7 @@ class StubConnection(Connection):
             self.input_file.seek(0)
         
         ok = _unlock_fd(self.input_file)
-        if not ok:
-            # TOFIX(LR) how to handle locking errors
+        # TOFIX(LR) how to handle locking errors
     
         for line in lines:
             logger.debug("read line: {!r}".format(line))
@@ -247,6 +250,7 @@ class StubConnection(Connection):
 
         :return: None
         """
+
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
         self.output_file.write(encoded_envelope)
