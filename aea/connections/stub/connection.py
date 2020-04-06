@@ -253,8 +253,11 @@ class StubConnection(Connection):
 
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
+        ok = _lock_fd(self.output_file)
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
+        ok = _unlock_fd(self.output_file)
+        # TOFIX(LR) handle (un)locking errors
 
     @classmethod
     def from_config(
