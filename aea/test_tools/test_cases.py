@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains tools for testing the packages."""
+"""This module contains test case classes based on pytest for AEA end-to-end testing."""
 
 import os
 import shutil
@@ -27,18 +27,16 @@ import tempfile
 
 import pytest
 
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.cli import cli
+from aea.test_tools.exceptions import AEATestingException
 
 from tests.common.click_testing import CliRunner
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class AeaTestCase:
     """Test case for AEA end-to-end tests."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     @classmethod
     def setup_class(cls):
@@ -79,6 +77,25 @@ class AeaTestCase:
         )
         self.run_cli_command("config", "set", json_path, False)
 
+    def disable_aea_logging(self):
+        """
+        Disable AEA logging of specific agent.
+        Run from agent's directory.
+
+        :return: None
+        """
+        # logging_config = {
+        #     "disable_existing_loggers": False,
+        #     "version": 1,
+        #     "loggers": {"aea.echo_skill": {"level": "CRITICAL"}},
+        # }
+        config_update_dict = {
+            "agent.logging_config.disable_existing_loggers": "False",
+            "agent.logging_config.version": "1",
+        }
+        for path, value in config_update_dict.items():
+            self.run_cli_command("config", "set", path, value)
+
     def run_cli_command(self, *args):
         """
         Run AEA CLI command.
@@ -90,7 +107,15 @@ class AeaTestCase:
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, *args], standalone_mode=False
         )
-        assert result.exit_code == 0
+        try:
+            assert result.exit_code == 0
+        except AssertionError:
+            raise AEATestingException(
+                "Failed to execute AEA CLI command with args {}.\n"
+                "Exit code: {}\nException:\n{}".format(
+                    args, result.exit_code, result.exception
+                )
+            )
 
     def run_oef_subprocess(self):
         """
@@ -114,6 +139,14 @@ class AeaTestCase:
             env=os.environ.copy(),
         )
         return process
+
+    def initialize_aea(self, author=AUTHOR):
+        """
+        Initialize AEA locally with author name.
+
+        :return: None
+        """
+        self.run_cli_command("init", "--local", "--author", author)
 
     def create_agents(self, *agents_names):
         """
@@ -157,3 +190,9 @@ class AeaTestCase:
         :return: None
         """
         self.run_cli_command("install")
+
+
+class AeaWithOefTestCase(AeaTestCase):
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
