@@ -58,7 +58,7 @@ jobs:
       run: tox -e mypy
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }}
+        tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
     # optionally, use flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
