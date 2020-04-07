@@ -32,8 +32,8 @@ jobs:
         pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
-    # use sudo rm /var/lib/apt/lists/lock above above update if failures persist
-    # use sudo apt-get dist-upgrade above below update if failures persist
+    # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+    # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
