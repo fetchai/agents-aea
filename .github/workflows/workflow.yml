@@ -23,12 +23,19 @@ jobs:
     - uses: actions/setup-python@master
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install dependencies (ubuntu-latest)
       run: |
         pip install pipenv
         pip install tox
         sudo apt-get clean
         sudo apt-get install -y protobuf-compiler
+      if: ${{ matrix.os }} == ubuntu-latest
+    - name: Install dependencies (macos-latest)
+      run: |
+        pip install pipenv
+        pip install tox
+        brew install protobuf
+      if: ${{ matrix.os }} == macos-latest
     - name: Security Check - Main
       run: tox -e bandit-main
     - name: Security Check - Tests
