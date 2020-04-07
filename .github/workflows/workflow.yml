@@ -26,14 +26,14 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
-        sudo rm /var/lib/apt/lists/lock
         sudo apt-get update --fix-missing
-        sudo apt-get dist-upgrade
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
+    # use sudo rm /var/lib/apt/lists/lock above above update if failures persist
+    # use sudo apt-get dist-upgrade above below update if failures persist
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
@@ -58,7 +58,8 @@ jobs:
       run: tox -e mypy
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
+        tox -e py${{ matrix.python-version }}
+    # optionally, use flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
