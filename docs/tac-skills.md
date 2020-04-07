@@ -64,8 +64,8 @@ You must set the start time to a point in the future `start_time: 12 11 2019  15
 Alternatively, use the command line to get and set the start time:
 
 ``` bash
-aea config get skills.tac_control.models.parameters.args.start_time
-aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
 ```
 
 ### Run the TAC controller AEA

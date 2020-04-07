@@ -42,7 +42,7 @@ models:
       money_endowment: 2000000
       nb_goods: 10
       registration_timeout: 60
-      start_time: 12 11 2019  15:01
+      start_time: 01 01 2020  00:01
       tx_fee: 1
       upper_bound_factor: 1
       version_id: v1
