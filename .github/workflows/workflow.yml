@@ -26,9 +26,9 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
+        sudo apt-get clean
         pip install pipenv
         pip install tox
-        sudo apt-get clean
         sudo apt-get install -y protobuf-compiler
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
