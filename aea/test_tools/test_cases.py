@@ -24,11 +24,15 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
+from pathlib import Path
 
 import pytest
 
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.cli import cli
+from aea.configurations.base import PublicId
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.exceptions import AEATestingException
 
 from tests.common.click_testing import CliRunner
@@ -84,11 +88,6 @@ class AeaTestCase:
 
         :return: None
         """
-        # logging_config = {
-        #     "disable_existing_loggers": False,
-        #     "version": 1,
-        #     "loggers": {"aea.echo_skill": {"level": "CRITICAL"}},
-        # }
         config_update_dict = {
             "agent.logging_config.disable_existing_loggers": "False",
             "agent.logging_config.version": "1",
@@ -107,19 +106,17 @@ class AeaTestCase:
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, *args], standalone_mode=False
         )
-        try:
-            assert result.exit_code == 0
-        except AssertionError:
+        if result.exit_code != 0:
             raise AEATestingException(
                 "Failed to execute AEA CLI command with args {}.\n"
-                "Exit code: {}\nException:\n{}".format(
+                "Exit code: {}\nException: {}".format(
                     args, result.exit_code, result.exception
                 )
             )
 
-    def run_oef_subprocess(self):
+    def run_agent(self, *args):
         """
-        Run OEF connection as subprocess.
+        Run agent as subprocess.
         Run from agent's directory.
 
         :param *args: CLI args
@@ -127,14 +124,7 @@ class AeaTestCase:
         :return: subprocess object.
         """
         process = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "run",
-                "--connections",
-                "fetchai/oef:0.1.0",
-            ],
+            [sys.executable, "-m", "aea.cli", "run", *args],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )
@@ -191,8 +181,109 @@ class AeaTestCase:
         """
         self.run_cli_command("install")
 
+    @staticmethod
+    def create_default_message(
+        content, dialogue_reference=("", ""), message_id=1, target=0,
+    ):
+        """
+        Create a default message.
+
+        :param content: bytes str message content.
+
+        :return: DefaultMessage
+        """
+        return DefaultMessage(
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=DefaultMessage.Performative.BYTES,
+            content=content,
+        )
+
+    @staticmethod
+    def create_envelope(
+        agent_name, message, sender="sender", protocol_id=DefaultMessage.protocol_id,
+    ):
+        """
+        Create an envelope.
+
+        :param agent_name: str agent name.
+        :param message: str or DefaultMessage object message.
+
+        :return: Envelope
+        """
+        if type(message) == DefaultMessage:
+            message = DefaultSerializer().encode(message)
+
+        return Envelope(
+            to=agent_name, sender=sender, protocol_id=protocol_id, message=message
+        )
+
+    @staticmethod
+    def encode_envelope(envelope):
+        """
+        Encode an envelope.
+
+        :param envelope: Envelope.
+
+        :return: str encoded envelope.
+        """
+        encoded_envelope = "{},{},{},{},".format(
+            envelope.to,
+            envelope.sender,
+            envelope.protocol_id,
+            envelope.message.decode("utf-8"),
+        )
+        return encoded_envelope.encode("utf-8")
+
+    def write_envelope(self, envelope):
+        """
+        Write an envelope to input_file.
+        Run from agent's directory.
+
+        :param envelope: Envelope.
+
+        :return: None
+        """
+        encoded_envelope = self.encode_envelope(envelope)
+        with open(Path("input_file"), "ab+") as f:
+            f.write(encoded_envelope)
+            f.flush()
+
+    def readlines_output_file(self):
+        """
+        Readlines the output_file.
+        Run from agent's directory.
+
+        :return: list lines content of output_file.
+        """
+        with open(Path("output_file"), "rb+") as f:
+            return f.readlines()
+
+    @staticmethod
+    def create_public_id(from_str):
+        """
+        Create PublicId from string.
+
+        :param from_str: str public ID.
+
+        :return: PublicId
+        """
+        return PublicId.from_str(from_str)
+
 
 class AeaWithOefTestCase(AeaTestCase):
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
         """Start an oef node."""
+
+    def run_oef_subprocess(self):
+        """
+        Run agent with OEF connection as subprocess.
+        Run from agent's directory.
+
+        :param *args: CLI args
+
+        :return: subprocess object.
+        """
+        return self.run_agent("--connections", "fetchai/oef:0.1.0")

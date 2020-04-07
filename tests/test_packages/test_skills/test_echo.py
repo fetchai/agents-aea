@@ -20,134 +20,54 @@
 """This test module contains the integration test for the echo skill."""
 
 import os
-import shutil
 import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
-from pathlib import Path
 
 import pytest
 
-import yaml
-
-from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
-
-from ...common.click_testing import CliRunner
-from ...conftest import AUTHOR, CLI_LOG_OPTION
+from aea.test_tools.test_cases import AeaTestCase
 
 
-class TestEchoSkill:
+class TestEchoSkill(AeaTestCase):
     """Test that echo skill works."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name = "my_first_agent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
 
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
 
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        self.initialize_aea()
+        agent_name = "my_first_agent"
+        self.create_agents(agent_name)
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # create agent
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        agent_dir_path = os.path.join(self.t, self.agent_name)
+        agent_dir_path = os.path.join(self.t, agent_name)
         os.chdir(agent_dir_path)
 
-        # disable logging
-        aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
-        aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
-        aea_config.logging_config = {
-            "disable_existing_loggers": False,
-            "version": 1,
-            "loggers": {"aea.echo_skill": {"level": "CRITICAL"}},
-        }
-        yaml.safe_dump(dict(aea_config.json), open(aea_config_path, "w"))
-
-        # add skills
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/echo:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        self.add_item("skill", "fetchai/echo:0.1.0")
 
         try:
-            # run the agent
-            process = subprocess.Popen(  # nosec
-                [sys.executable, "-m", "aea.cli", "run"],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
+            process = self.run_agent()
             time.sleep(2.0)
 
             # add sending and receiving envelope from input/output files
-            message = DefaultMessage(
-                dialogue_reference=("", ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=b"hello",
-            )
-            expected_envelope = Envelope(
-                to=self.agent_name,
-                sender="sender",
-                protocol_id=DefaultMessage.protocol_id,
-                message=DefaultSerializer().encode(message),
-            )
-            encoded_envelope = "{},{},{},{},".format(
-                expected_envelope.to,
-                expected_envelope.sender,
-                expected_envelope.protocol_id,
-                expected_envelope.message.decode("utf-8"),
-            )
-            encoded_envelope = encoded_envelope.encode("utf-8")
+            message = self.create_default_message(b"hello")
+            expected_envelope = self.create_envelope(agent_name, message)
 
-            with open(Path(self.t, self.agent_name, "input_file"), "ab+") as f:
-                f.write(encoded_envelope)
-                f.flush()
+            self.write_envelope(expected_envelope)
 
             time.sleep(2.0)
-            with open(Path(self.t, self.agent_name, "output_file"), "rb+") as f:
-                lines = f.readlines()
+            lines = self.readlines_output_file()
 
             assert len(lines) == 2
             line = lines[0] + lines[1]
             to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
             to = to.decode("utf-8")
             sender = sender.decode("utf-8")
-            protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+            protocol_id = self.create_public_id(protocol_id.decode("utf-8"))
             assert end in [b"", b"\n"]
 
-            actual_envelope = Envelope(
-                to=to, sender=sender, protocol_id=protocol_id, message=message
+            actual_envelope = self.create_envelope(
+                agent_name=to, message=message, sender=sender, protocol_id=protocol_id
             )
             assert expected_envelope.to == actual_envelope.sender
             assert expected_envelope.sender == actual_envelope.to
@@ -164,16 +84,4 @@ class TestEchoSkill:
                     process.wait(2)
 
             os.chdir(self.t)
-            result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
-            )
-            assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+            self.delete_agents(agent_name)
