@@ -25,10 +25,10 @@ import time
 
 import pytest
 
-from aea.test_tools.test_cases import AeaWithOefTestCase
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
-class TestTacSkills(AeaWithOefTestCase):
+class TestTacSkills(AEAWithOefTestCase):
     """Test that tac skills work."""
 
     def test_tac(self, pytestconfig):

@@ -25,10 +25,10 @@ import time
 
 import pytest
 
-from aea.test_tools.test_cases import AeaTestCase
+from aea.test_tools.test_cases import AEATestCase
 
 
-class TestEchoSkill(AeaTestCase):
+class TestEchoSkill(AEATestCase):
     """Test that echo skill works."""
 
     def test_echo(self, pytestconfig):

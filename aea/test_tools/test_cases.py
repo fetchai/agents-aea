@@ -39,7 +39,7 @@ from tests.common.click_testing import CliRunner
 from tests.conftest import AUTHOR, CLI_LOG_OPTION
 
 
-class AeaTestCase:
+class AEATestCase:
     """Test case for AEA end-to-end tests."""
 
     @classmethod
@@ -272,7 +272,7 @@ class AeaTestCase:
         return PublicId.from_str(from_str)
 
 
-class AeaWithOefTestCase(AeaTestCase):
+class AEAWithOefTestCase(AEATestCase):
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
         """Start an oef node."""
