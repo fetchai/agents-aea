@@ -30,7 +30,7 @@ jobs:
         pip install tox
         sudo apt-get clean
         sudo apt-get install -y protobuf-compiler
-    - if: matrix.os == 'macos-lates
+    - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
         pip install pipenv
