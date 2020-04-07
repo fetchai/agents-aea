@@ -26,6 +26,7 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
+        sudo apt-get update --fix-missing
         sudo apt-get clean
         pip install pipenv
         pip install tox
