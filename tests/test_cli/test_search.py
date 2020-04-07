@@ -196,11 +196,11 @@ class TestSearchAgentsLocal:
         )
         assert result.exit_code == 0
 
-        Path(cls.t, "packages", "agents").mkdir(parents=True)
-        shutil.copytree(
-            Path(cls.t, "myagent"), Path(cls.t, "packages", "agents", "myagent")
-        )
         os.chdir(Path(cls.t, "myagent"))
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False
+        )
+        assert result.exit_code == 0
         cls.result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "search", "--local", "agents"], standalone_mode=False
         )

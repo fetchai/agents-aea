@@ -65,7 +65,7 @@ class TestMLSkills:
         os.chdir(cls.t)
 
     @pytest.mark.skipif(
-        sys.version_info == (3, 8),
+        sys.version_info > (3, 7),
         reason="cannot run on 3.8 as tensorflow not installable",
     )
     def test_ml_skills(self, pytestconfig):
