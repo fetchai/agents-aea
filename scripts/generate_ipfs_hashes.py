@@ -36,7 +36,7 @@ import subprocess  # nosec
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, Tuple, Type, cast
 
 import ipfshttpclient
 
@@ -44,14 +44,13 @@ import yaml
 
 from aea.configurations.base import (
     AgentConfig,
+    ConfigurationType,
     ConnectionConfig,
+    ContractConfig,
+    PackageConfiguration,
     ProtocolConfig,
     SkillConfig,
     _compute_fingerprint,
-    PackageConfiguration,
-    ConfigurationType,
-    ContractConfig,
-    Configuration,
 )
 from aea.helpers.base import yaml_dump
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -68,7 +67,7 @@ type_to_class_config = {
     ConfigurationType.CONNECTION: ConnectionConfig,
     ConfigurationType.SKILL: SkillConfig,
     ConfigurationType.CONTRACT: ContractConfig,
-}
+}  # type: Dict[ConfigurationType, Type[PackageConfiguration]]
 
 
 def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
@@ -126,6 +125,7 @@ def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
 def sort_configuration_file(config: PackageConfiguration):
     """Sort the order of the fields in the configuration files."""
     # load config file to get ignore patterns, dump again immediately to impose ordering
+    assert config.directory is not None
     configuration_filepath = config.directory / config.default_configuration_filename
     yaml_dump(config.ordered_json, configuration_filepath.open("w"))
 
@@ -214,8 +214,9 @@ def load_configuration(
     configuration_filepath = (
         package_path / configuration_class.default_configuration_filename
     )
-    configuration_obj = configuration_class.from_json(
-        yaml.safe_load(configuration_filepath.open())
+    configuration_obj = cast(
+        PackageConfiguration,
+        configuration_class.from_json(yaml.safe_load(configuration_filepath.open())),
     )
     configuration_obj._directory = package_path
     return cast(PackageConfiguration, configuration_obj)
@@ -252,7 +253,10 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
     :param fingerprint_dict: the fingerprint dictionary.
     :return:
     """
-    to_row = lambda x: x[0] + ": " + x[1]
+
+    def to_row(x):
+        return x[0] + ": " + x[1]
+
     replacement = "\nfingerprint:\n  {}\n".format(
         "\n  ".join(map(to_row, sorted(fingerprint_dict.items())))
     )
@@ -269,6 +273,7 @@ def update_fingerprint(configuration: PackageConfiguration) -> None:
     # we don't process agent configurations
     if isinstance(configuration, AgentConfig):
         return
+    assert configuration.directory is not None
     fingerprint = _compute_fingerprint(
         configuration.directory,
         ignore_patterns=configuration.fingerprint_ignore_patterns,
