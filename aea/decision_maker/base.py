@@ -20,9 +20,11 @@
 """This module contains the decision maker class."""
 
 import copy
+import hashlib
 import logging
 import math
 import threading
+import uuid
 from enum import Enum
 from queue import Queue
 from threading import Thread
@@ -50,6 +52,17 @@ QUANTITY_SHIFT = 100
 OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
+
+
+def _hash(access_code: str) -> str:
+    """
+    Get the hash of the access code.
+
+    :param access_code: the access code
+    :return: the hash
+    """
+    result = hashlib.sha224(access_code.encode("utf-8")).hexdigest()
+    return result
 
 
 class GoalPursuitReadiness:
@@ -90,21 +103,57 @@ class GoalPursuitReadiness:
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
-    def __init__(
-        self,
-        amount_by_currency_id: Optional[CurrencyHoldings] = None,
-        quantities_by_good_id: Optional[GoodHoldings] = None,
-        agent_name: str = "",
-    ):
+    def __init__(self):
         """
         Instantiate an ownership state object.
 
+        :param decision_maker: the decision maker
+        """
+        self._amount_by_currency_id = None  # type: Optional[CurrencyHoldings]
+        self._quantities_by_good_id = None  # type: Optional[GoodHoldings]
+
+    def _set(
+        self,
+        amount_by_currency_id: CurrencyHoldings,
+        quantities_by_good_id: GoodHoldings,
+    ) -> None:
+        """
+        Set values on the ownership state.
+
         :param amount_by_currency_id: the currency endowment of the agent in this state.
         :param quantities_by_good_id: the good endowment of the agent in this state.
-        :param agent_name: the agent name
         """
+        assert (
+            not self.is_initialized
+        ), "Cannot apply state update, current state is already initialized!"
+
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
+
+    def _apply_delta(
+        self,
+        delta_amount_by_currency_id: Dict[str, int],
+        delta_quantities_by_good_id: Dict[str, int],
+    ) -> None:
+        """
+        Apply a state update to the ownership state.
+
+        This method is used to apply a raw state update without a transaction.
+
+        :param delta_amount_by_currency_id: the delta in the currency amounts
+        :param delta_quantities_by_good_id: the delta in the quantities by good
+        :return: the final state.
+        """
+        assert (
+            self._amount_by_currency_id is not None
+            and self._quantities_by_good_id is not None
+        ), "Cannot apply state update, current state is not initialized!"
+
+        for currency_id, amount_delta in delta_amount_by_currency_id.items():
+            self._amount_by_currency_id[currency_id] += amount_delta
+
+        for good_id, quantity_delta in delta_quantities_by_good_id.items():
+            self._quantities_by_good_id[good_id] += quantity_delta
 
     @property
     def is_initialized(self) -> bool:
@@ -172,7 +221,6 @@ class OwnershipState:
             self._amount_by_currency_id is not None
             and self._quantities_by_good_id is not None
         ), "Cannot apply state update, current state is not initialized!"
-        assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
 
@@ -194,41 +242,10 @@ class OwnershipState:
 
         return new_state
 
-    def apply_state_update(
-        self,
-        amount_by_currency_id: Dict[str, int],
-        quantities_by_good_id: Dict[str, int],
-    ) -> "OwnershipState":
-        """
-        Apply a state update to (a copy of) the current state.
-
-        This method is used to apply a raw state update without a transaction.
-
-        :param amount_by_currency_id: the delta in the currency amounts
-        :param quantities_by_good_id: the delta in the quantities by good
-        :return: the final state.
-        """
-        new_state = copy.copy(self)
-        assert (
-            new_state._amount_by_currency_id is not None
-            and new_state._quantities_by_good_id is not None
-        ), "Cannot apply state update, current state is not initialized!"
-
-        for currency, amount_delta in amount_by_currency_id.items():
-            new_state._amount_by_currency_id[currency] += amount_delta
-
-        for good_id, quantity_delta in quantities_by_good_id.items():
-            new_state._quantities_by_good_id[good_id] += quantity_delta
-
-        return new_state
-
     def __copy__(self) -> "OwnershipState":
         """Copy the object."""
         state = OwnershipState()
-        if (
-            self.amount_by_currency_id is not None
-            and self.quantities_by_good_id is not None
-        ):
+        if self.is_initialized:
             state._amount_by_currency_id = self.amount_by_currency_id
             state._quantities_by_good_id = self.quantities_by_good_id
         return state
@@ -277,23 +294,35 @@ class LedgerStateProxy:
 class Preferences:
     """Class to represent the preferences."""
 
-    def __init__(
-        self,
-        exchange_params_by_currency_id: Optional[ExchangeParams] = None,
-        utility_params_by_good_id: Optional[UtilityParams] = None,
-        tx_fee: int = 1,
-    ):
+    def __init__(self):
         """
         Instantiate an agent preference object.
+        """
+        self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
+        self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
+        self._transaction_fees = None  # type: Optional[Dict[str, int]]
+        self._quantity_shift = QUANTITY_SHIFT
+
+    def _set(
+        self,
+        exchange_params_by_currency_id: ExchangeParams,
+        utility_params_by_good_id: UtilityParams,
+        tx_fee: int,
+    ) -> None:
+        """
+        Set values on the preferences.
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
         :param tx_fee: the acceptable transaction fee.
         """
+        assert (
+            not self.is_initialized
+        ), "Cannot apply preferences update, preferences already initialized!"
+
         self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
         self._transaction_fees = self._split_tx_fees(tx_fee)  # TODO: update
-        self._quantity_shift = QUANTITY_SHIFT
 
     @property
     def is_initialized(self) -> bool:
@@ -335,9 +364,7 @@ class Preferences:
         :param quantities_by_good_id: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
-        assert (
-            self.is_initialized
-        ), "Preferences must be initialized with non-None values!"
+        assert self.is_initialized, "Preferences params not set!"
         result = logarithmic_utility(
             self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift
         )
@@ -350,9 +377,7 @@ class Preferences:
         :param amount_by_currency_id: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        assert (
-            self.is_initialized
-        ), "Preferences must be initialized with non-None values!"
+        assert self.is_initialized, "Preferences params not set!"
         result = linear_utility(
             self.exchange_params_by_currency_id, amount_by_currency_id
         )
@@ -370,9 +395,7 @@ class Preferences:
         :param amount_by_currency_id: the currency holdings
         :return: the utility value.
         """
-        assert (
-            self.is_initialized
-        ), "Preferences must be initialized with non-None values!"
+        assert self.is_initialized, "Preferences params not set!"
         goods_score = self.logarithmic_utility(quantities_by_good_id)
         currency_score = self.linear_utility(amount_by_currency_id)
         score = goods_score + currency_score
@@ -392,9 +415,7 @@ class Preferences:
         :param delta_amount_by_currency_id: the change in money holdings
         :return: the marginal utility score
         """
-        assert (
-            self.is_initialized
-        ), "Preferences must be initialized with non-None values!"
+        assert self.is_initialized, "Preferences params not set!"
         current_goods_score = self.logarithmic_utility(
             ownership_state.quantities_by_good_id
         )
@@ -433,9 +454,7 @@ class Preferences:
         :param tx_message: a transaction message.
         :return: the score.
         """
-        assert (
-            self.is_initialized
-        ), "Preferences must be initialized with non-None values!"
+        assert self.is_initialized, "Preferences params not set!"
         current_score = self.utility(
             quantities_by_good_id=ownership_state.quantities_by_good_id,
             amount_by_currency_id=ownership_state.amount_by_currency_id,
@@ -467,19 +486,14 @@ class Preferences:
 class ProtectedQueue(Queue):
     """A wrapper of a queue to protect which object can read from it."""
 
-    def __init__(self, permitted_caller):
+    def __init__(self, access_code: str):
         """
         Initialize the protected queue.
 
-        :param permitted_caller: the permitted caller to the get method
+        :param access_code: the access code to read from the queue
         """
         super().__init__()
-        self._permitted_caller = permitted_caller
-
-    @property
-    def permitted_caller(self) -> "DecisionMaker":
-        """Get the permitted caller."""
-        return self._permitted_caller
+        self._access_code_hash = _hash(access_code)
 
     def put(
         self, internal_message: Optional[InternalMessage], block=True, timeout=None
@@ -544,19 +558,19 @@ class ProtectedQueue(Queue):
         raise ValueError("Access not permitted!")
 
     def protected_get(
-        self, caller: "DecisionMaker", block=True, timeout=None
+        self, access_code: str, block=True, timeout=None
     ) -> Optional[InternalMessage]:
         """
         Access protected get method.
 
-        :param caller: the permitted caller
+        :param access_code: the access code
         :param block: If optional args block is true and timeout is None (the default), block if necessary until an item is available.
         :param timeout: If timeout is a positive number, it blocks at most timeout seconds and raises the Empty exception if no item was available within that time.
         :raises: ValueError, if caller is not permitted
         :return: internal message
         """
-        if not caller == self.permitted_caller:
-            raise ValueError("Caller not permitted!")
+        if not self._access_code_hash == _hash(access_code):
+            raise ValueError("Wrong code, access not permitted!")
         internal_message = super().get(
             block=block, timeout=timeout
         )  # type: Optional[InternalMessage]
@@ -579,7 +593,10 @@ class DecisionMaker:
         self._agent_name = identity.name
         self._wallet = wallet
         self._ledger_apis = ledger_apis
-        self._message_in_queue = ProtectedQueue(self)  # type: ProtectedQueue
+        self._queue_access_code = uuid.uuid4().hex
+        self._message_in_queue = ProtectedQueue(
+            self._queue_access_code
+        )  # type: ProtectedQueue
         self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._ledger_state_proxy = LedgerStateProxy(ledger_apis)
@@ -663,7 +680,7 @@ class DecisionMaker:
         """
         while not self._stopped:
             message = self.message_in_queue.protected_get(
-                self, block=True
+                self._queue_access_code, block=True
             )  # type: Optional[InternalMessage]
 
             if message is None:
@@ -990,11 +1007,11 @@ class DecisionMaker:
                     self._agent_name
                 )
             )
-            self._ownership_state = OwnershipState(
+            self._ownership_state._set(
                 amount_by_currency_id=state_update_message.amount_by_currency_id,
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
             )
-            self._preferences = Preferences(
+            self._preferences._set(
                 exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
                 utility_params_by_good_id=state_update_message.utility_params_by_good_id,
                 tx_fee=state_update_message.tx_fee,
@@ -1002,8 +1019,7 @@ class DecisionMaker:
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:
             logger.info("[{}]: Applying state update!".format(self._agent_name))
-            new_ownership_state = self.ownership_state.apply_state_update(
-                amount_by_currency_id=state_update_message.amount_by_currency_id,
-                quantities_by_good_id=state_update_message.quantities_by_good_id,
+            self._ownership_state._apply_delta(
+                delta_amount_by_currency_id=state_update_message.amount_by_currency_id,
+                delta_quantities_by_good_id=state_update_message.quantities_by_good_id,
             )
-            self._ownership_state = new_ownership_state

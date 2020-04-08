@@ -69,7 +69,7 @@ def run():
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
     resources.add_protocol(default_protocol)
 
-    # Add the oef protocol (which is a package)
+    # Add the oef search protocol (which is a package)
     oef_protocol = Protocol.from_dir(
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
     )

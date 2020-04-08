@@ -43,8 +43,8 @@ def test_tac_message_instantiation():
         tx_counterparty_fee=10,
         quantities_by_good_id={"123": 0, "1234": 10},
         tx_nonce=1,
-        tx_sender_signature=b"some_signature",
-        tx_counterparty_signature=b"some_other_signature",
+        tx_sender_signature="some_signature",
+        tx_counterparty_signature="some_other_signature",
     )
     assert TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
     assert TacMessage(performative=TacMessage.Performative.CANCELLED)
@@ -100,8 +100,8 @@ def test_tac_serialization():
         tx_counterparty_fee=10,
         quantities_by_good_id={"123": 0, "1234": 10},
         tx_nonce=1,
-        tx_sender_signature=b"some_signature",
-        tx_counterparty_signature=b"some_other_signature",
+        tx_sender_signature="some_signature",
+        tx_counterparty_signature="some_other_signature",
     )
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
