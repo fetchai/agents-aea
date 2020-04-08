@@ -32,6 +32,7 @@ import pytest
 from aea.cli import cli
 from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.configurations.base import PublicId
+from aea.mail.base import Envelope
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import encode_envelope
 
@@ -43,7 +44,7 @@ class AEATestCase:
     """Test case for AEA end-to-end tests."""
 
     @classmethod
-    def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
+    def setup_class(cls, packages_dir_path=DEFAULT_REGISTRY_PATH):
         """Set up the test class."""
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
@@ -81,7 +82,7 @@ class AEATestCase:
                     process.terminate()
                     process.wait(2)
 
-    def disable_ledger_tx(self, author, item_type, item_name):
+    def disable_ledger_tx(self, author: str, item_type: str, item_name: str) -> None:
         """
         Disable ledger tx by modifying item yaml settings.
         Run from agent's directory and only for item with present strategy is_ledger_tx setting.
@@ -116,6 +117,7 @@ class AEATestCase:
         Run AEA CLI command.
 
         :param args: CLI args
+        :raises AEATestingException: if command fails.
 
         :return: None
         """
@@ -155,7 +157,7 @@ class AEATestCase:
         """
         return self._run_python_subprocess("-m", "aea.cli", "run", *args)
 
-    def initialize_aea(self, author=AUTHOR):
+    def initialize_aea(self, author: str = AUTHOR) -> None:
         """
         Initialize AEA locally with author name.
 
@@ -185,7 +187,7 @@ class AEATestCase:
         for name in agents_names:
             self.run_cli_command("delete", name)
 
-    def add_item(self, item_type, public_id):
+    def add_item(self, item_type: str, public_id: str) -> None:
         """
         Add an item to the agent.
         Run from agent's directory.
@@ -206,7 +208,7 @@ class AEATestCase:
         """
         self.run_cli_command("install")
 
-    def write_envelope(self, envelope):
+    def write_envelope(self, envelope: Envelope) -> None:
         """
         Write an envelope to input_file.
         Run from agent's directory.
@@ -231,7 +233,7 @@ class AEATestCase:
             return f.readlines()
 
     @staticmethod
-    def create_public_id(from_str):
+    def create_public_id(from_str: str) -> PublicId:
         """
         Create PublicId from string.
 
