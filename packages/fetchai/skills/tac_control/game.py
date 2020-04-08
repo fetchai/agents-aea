@@ -22,11 +22,12 @@
 import copy
 import datetime
 import pprint
-from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
 from eth_account.messages import encode_defunct
+
+from hexbytes import HexBytes
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
@@ -40,6 +41,7 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,
+    generate_currency_id_to_name,
     generate_equilibrium_prices_and_holdings,
     generate_good_endowments,
     generate_good_id_to_name,
@@ -95,6 +97,7 @@ class Configuration:
         self._version_id = version_id
         self._tx_fee = tx_fee
         self._agent_addr_to_name = agent_addr_to_name
+        self._currency_id_to_name = generate_currency_id_to_name()
         self._good_id_to_name = generate_good_id_to_name(nb_goods)
 
         self._check_consistency()
@@ -113,6 +116,11 @@ class Configuration:
     def agent_addr_to_name(self) -> Dict[Address, str]:
         """Map agent addresses to names."""
         return self._agent_addr_to_name
+
+    @property
+    def currency_id_to_name(self) -> Dict[str, str]:
+        """Map currency ids to names."""
+        return self._currency_id_to_name
 
     @property
     def good_id_to_name(self) -> Dict[str, str]:
@@ -255,8 +263,8 @@ class Transaction:
         counterparty_fee: int,
         quantities_by_good_id: Dict[str, int],
         nonce: int,
-        sender_signature: bytes,
-        counterparty_signature: bytes,
+        sender_signature: str,
+        counterparty_signature: str,
     ) -> None:
         """
         Instantiate transaction request.
@@ -326,12 +334,12 @@ class Transaction:
         return self._nonce
 
     @property
-    def sender_signature(self) -> bytes:
+    def sender_signature(self) -> str:
         """Get the sender signature."""
         return self._sender_signature
 
     @property
-    def counterparty_signature(self) -> bytes:
+    def counterparty_signature(self) -> str:
         """Get the counterparty signature."""
         return self._counterparty_signature
 
@@ -413,8 +421,8 @@ class Transaction:
             self.amount <= 0
             and all(quantity >= 0 for quantity in self.quantities_by_good_id.values())
         )
-        assert isinstance(self.sender_signature, bytes) and isinstance(
-            self.counterparty_signature, bytes
+        assert isinstance(self.sender_signature, str) and isinstance(
+            self.counterparty_signature, str
         )
         if self.amount >= 0:
             assert (
@@ -434,7 +442,8 @@ class Transaction:
         singable_message = encode_defunct(primitive=self.sender_hash)
         result = (
             api.api.eth.account.recover_message(
-                signable_message=singable_message, signature=self.sender_signature
+                signable_message=singable_message,
+                signature=HexBytes(self.sender_signature),
             )
             == self.sender_addr
         )
@@ -443,7 +452,7 @@ class Transaction:
             result
             and api.api.eth.account.recover_message(
                 signable_message=counterparty_signable_message,
-                signature=self.counterparty_signature,
+                signature=HexBytes(self.counterparty_signature),
             )
             == self.counterparty_addr
         )
@@ -744,7 +753,7 @@ class Registration:
 
     def __init__(self):
         """Instantiate the registration class."""
-        self._agent_addr_to_name = defaultdict()  # type: Dict[str, str]
+        self._agent_addr_to_name = {}  # type: Dict[str, str]
 
     @property
     def agent_addr_to_name(self) -> Dict[str, str]:

@@ -48,7 +48,8 @@ class TestTacSkills(AeaTestCase):
         # prepare tac controller for test
         tac_controller_dir_path = os.path.join(self.t, tac_controller_name)
         os.chdir(tac_controller_dir_path)
-        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("contract", "fetchai/erc1155:0.1.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
         self.run_install()
@@ -60,7 +61,8 @@ class TestTacSkills(AeaTestCase):
         for agent_path in (agent_one_dir_path, agent_two_dir_path):
             os.chdir(agent_path)
 
-            self.add_item("connection", "fetchai/oef:0.1.0")
+            self.add_item("connection", "fetchai/oef:0.2.0")
+            self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
             self.add_item("contract", "fetchai/erc1155:0.1.0")
             self.add_item("skill", "fetchai/tac_participation:0.1.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.1.0")

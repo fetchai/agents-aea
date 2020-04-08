@@ -73,6 +73,18 @@ def test_run(pytestconfig):
     )
     assert result.exit_code == 0
 
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
+    )
+    assert result.exit_code == 0
+
     try:
         process = subprocess.Popen(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],
@@ -245,6 +257,17 @@ def test_run_unknown_private_key(pytestconfig):
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
+    )
+    assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
     file = open("aea-config.yaml", mode="r")
@@ -311,6 +334,17 @@ def test_run_unknown_ledger(pytestconfig):
 
     result = runner.invoke(
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
+    )
+    assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
     )
     assert result.exit_code == 0
 
@@ -499,6 +533,17 @@ def test_run_ledger_apis(pytestconfig):
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
+    )
+    assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
     file = open("aea-config.yaml", mode="r")
@@ -585,6 +630,17 @@ def test_run_fet_ledger_apis(pytestconfig):
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
+    )
+    assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
     file = open("aea-config.yaml", mode="r")
@@ -668,6 +724,17 @@ def test_run_with_install_deps(pytestconfig):
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
     )
     assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
+    )
+    assert result.exit_code == 0
 
     try:
         process = subprocess.Popen(  # nosec
@@ -727,6 +794,17 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
 
     result = runner.invoke(
         cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/local:0.1.0"]
+    )
+    assert result.exit_code == 0
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_connection",
+            "fetchai/local:0.1.0",
+        ],
     )
     assert result.exit_code == 0
 
@@ -1044,6 +1122,17 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             standalone_mode=False,
         )
         assert result.exit_code == 0
+        result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/local:0.1.0",
+            ],
+        )
+        assert result.exit_code == 0
         cls.connection_configuration_path = Path(
             cls.t,
             cls.agent_name,
@@ -1130,6 +1219,17 @@ class TestRunFailsWhenConnectionNotComplete:
             standalone_mode=False,
         )
         assert result.exit_code == 0
+        result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/local:0.1.0",
+            ],
+        )
+        assert result.exit_code == 0
         connection_module_path = Path(
             cls.t,
             cls.agent_name,
@@ -1213,6 +1313,17 @@ class TestRunFailsWhenConnectionClassNotPresent:
             cli,
             [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
             standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/local:0.1.0",
+            ],
         )
         assert result.exit_code == 0
         Path(

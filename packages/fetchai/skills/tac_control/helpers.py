@@ -32,6 +32,16 @@ from web3 import Web3
 from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
+DEFAULT_CURRENCY_ID_TO_NAME = {"FET": "FET Native Token"}
+
+
+def generate_currency_id_to_name() -> Dict[str, str]:
+    """
+    Generate ids for currencies.
+
+    :return: a dictionary mapping currency' ids to names.
+    """
+    return DEFAULT_CURRENCY_ID_TO_NAME
 
 
 def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
