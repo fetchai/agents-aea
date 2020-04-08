@@ -152,6 +152,7 @@ cd my_weather_station
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Create the weather client (ledger version)
@@ -164,6 +165,7 @@ cd my_weather_client
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Additionally, create the private key for the weather_client AEA based on the network you want to transact.

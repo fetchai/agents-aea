@@ -110,6 +110,7 @@ cd ml_data_provider
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_data_provider:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Create the model trainer AEA
@@ -122,6 +123,7 @@ cd ml_model_trainer
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_train:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Additionally, create the private key for the model trainer AEA based on the network you want to transact.

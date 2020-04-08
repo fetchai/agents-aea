@@ -260,7 +260,6 @@ addr: ${OEF_ADDR: 127.0.0.1}
 Run both AEAs from their respective terminals
 
 ```bash 
-aea add connection fetchai/oef:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 aea run --connections fetchai/oef:0.2.0

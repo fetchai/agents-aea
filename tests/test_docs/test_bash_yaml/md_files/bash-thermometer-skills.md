@@ -43,6 +43,7 @@ aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.led
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash

@@ -225,6 +225,7 @@ We also need to add the oef connection and install its dependencies:
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ## Step 8: Run a service provider AEA
