@@ -69,14 +69,14 @@ class TestTacSkills(AEAWithOefTestCase):
 
         # run tac controller
         os.chdir(tac_controller_dir_path)
-        tac_controller_process = self.run_oef_subprocess()
+        tac_controller_process = self.run_oef()
 
         # run two agents (participants)
         os.chdir(agent_one_dir_path)
-        agent_one_process = self.run_oef_subprocess()
+        agent_one_process = self.run_oef()
 
         os.chdir(agent_two_dir_path)
-        agent_two_process = self.run_oef_subprocess()
+        agent_two_process = self.run_oef()
 
         time.sleep(10.0)
         agent_one_process.send_signal(signal.SIGINT)

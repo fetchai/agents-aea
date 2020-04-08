@@ -96,7 +96,7 @@ class AEATestCase:
         json_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
             author, item_type, item_name
         )
-        self.run_cli_command("config", "set", json_path, False)
+        self.run_cli_command("config", "set", json_path, "False")
 
     def disable_aea_logging(self):
         """
@@ -249,7 +249,7 @@ class AEAWithOefTestCase(AEATestCase):
     def _start_oef_node(self, network_node):
         """Start an oef node."""
 
-    def run_oef_subprocess(self):
+    def run_oef(self):
         """
         Run agent with OEF connection as subprocess.
         Run from agent's directory.
