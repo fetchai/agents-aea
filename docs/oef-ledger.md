@@ -28,7 +28,7 @@ When it is live you will see the sentence 'A thing of beauty is a joy forever...
 
 To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
 
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.1.0`).
+To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.2.0`).
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

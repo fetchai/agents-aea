@@ -37,15 +37,16 @@ Create the AEA that will provide the data.
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_data_provider:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Alternatively, install the AEA directly
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_data_provider:0.1.0
+aea fetch fetchai/ml_data_provider:0.2.0
 cd ml_data_provider
 ```
 The `aea fetch` command creates the entire AEA, including its dependencies for you.
@@ -58,7 +59,7 @@ aea install
 
 ### Run the data provider AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the model trainer AEA
@@ -67,15 +68,16 @@ In a separate terminal, in the root directory, create the model trainer AEA.
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_train:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Alternatively, install the AEA directly
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.1.0
+aea fetch fetchai/ml_model_trainer:0.2.0
 cd ml_model_trainer
 ```
 
@@ -87,7 +89,7 @@ aea install
 
 ### Run the model trainer AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 After some time, you should see the AEAs transact and the model trainer train its model.
@@ -105,7 +107,7 @@ Create the AEA that will provide the data.
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_data_provider:0.1.0
 aea install
 ```
@@ -117,7 +119,7 @@ In a separate terminal, in the root directory, create the model trainer AEA.
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_train:0.1.0
 aea install
 ```
@@ -232,7 +234,7 @@ aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id eth
 
 From their respective directories, run both AEAs
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Clean up

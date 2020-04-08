@@ -37,7 +37,7 @@ cd tac_controller
 
 ### Add the tac control skill
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
@@ -71,7 +71,7 @@ aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_ti
 
 ### Run the TAC controller AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the TAC participants AEA
@@ -84,7 +84,7 @@ aea create tac_participant_two
 ### Add the tac participation skill to participant one
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea add contract fetchai/erc1155:0.1.0
@@ -99,7 +99,7 @@ aea config set agent.default_ledger ethereum
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea add contract fetchai/erc1155:0.1.0
@@ -113,7 +113,7 @@ aea config set agent.default_ledger ethereum
 
 ### Run both the TAC participant AEAs
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 	
 ## Using `aea fetch` and `aea launch`
@@ -130,7 +130,7 @@ at once.
 For example, assuming you followed the tutorial, you
 can launch the TAC agents as follows:
 
-- set the default connection `fetchai/oef:0.1.0` for every
+- set the default connection `fetchai/oef:0.2.0` for every
 agent;
 - run:
 ```bash

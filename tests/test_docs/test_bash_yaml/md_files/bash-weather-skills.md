@@ -6,27 +6,29 @@ aea create my_weather_station
 ```
 ``` bash
 cd my_weather_station
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 aea create my_weather_client
 ```
 ``` bash
 cd my_weather_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 cd ..
@@ -36,14 +38,14 @@ aea delete my_weather_client
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
@@ -68,7 +70,7 @@ aea config set vendor.fetchai.skills.weather_client.models.strategy.args.ledger_
 aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx True --type bool
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 cd ..

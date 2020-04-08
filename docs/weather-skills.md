@@ -40,9 +40,10 @@ aea create my_weather_station
 ### Add the oef connection and the weather station skill 
 ``` bash
 cd my_weather_station
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Update the AEA configs
@@ -55,7 +56,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the weather client AEA
@@ -68,9 +69,10 @@ aea create my_weather_client
 ### Add the oef connection and the weather client skill 
 ``` bash
 cd my_weather_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Update the AEA configs
@@ -84,7 +86,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather client AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Observe the logs of both AEAs
@@ -147,7 +149,7 @@ Create the AEA that will provide weather measurements.
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
@@ -159,7 +161,7 @@ In another terminal, create the AEA that will query the weather station.
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
@@ -265,7 +267,7 @@ aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledg
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.

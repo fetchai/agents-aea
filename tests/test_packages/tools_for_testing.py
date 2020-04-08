@@ -108,7 +108,7 @@ class AeaTestCase:
                 "aea.cli",
                 "run",
                 "--connections",
-                "fetchai/oef:0.1.0",
+                "fetchai/oef:0.2.0",
             ],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
@@ -157,3 +157,14 @@ class AeaTestCase:
         :return: None
         """
         self.run_cli_command("install")
+
+    def set_config(self, dotted_path: str, value: str):
+        """
+        Execute AEA CLI set config command.
+        Run from agent's directory.
+
+        :param dotted_path: the dotted path to the config
+        :param value: the value to be set
+        :return: None
+        """
+        self.run_cli_command("config", "set", dotted_path, value)

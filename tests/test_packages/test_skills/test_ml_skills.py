@@ -110,7 +110,20 @@ class TestMLSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/oef:0.2.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -139,7 +152,20 @@ class TestMLSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/oef:0.2.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -165,7 +191,7 @@ class TestMLSkills:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -180,7 +206,7 @@ class TestMLSkills:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

@@ -53,7 +53,6 @@ Options:
   --version                 Show the version and exit.
   -v, --verbosity LVL       One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                             CRITICAL, OFF
-
   --skip-consistency-check  Skip consistency check.
   --help                    Show this message and exit.
 

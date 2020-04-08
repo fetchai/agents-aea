@@ -6,10 +6,11 @@ aea create tac_controller
 cd tac_controller
 ```
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -19,7 +20,7 @@ aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_ti
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 aea create tac_participant_one
@@ -27,28 +28,30 @@ aea create tac_participant_two
 ```
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ```bash
 aea launch tac_controller tac_participant_one tac_participant_two
