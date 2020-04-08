@@ -39,9 +39,10 @@ Create the AEA that will provide thermometer measurements.
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Create the thermometer client
@@ -51,9 +52,10 @@ In another terminal, create the AEA that will query the thermometer AEA.
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Additionally, create the private key for the weather_client AEA based on the network you want to transact.
@@ -176,9 +178,10 @@ addr: ${OEF_ADDR: 127.0.0.1}
 Run both AEAs from their respective terminals
 
 ```bash 
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea install
-aea run --connections fetchai/oef:0.1.0
+aea config set agent.default_connection fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.2.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 

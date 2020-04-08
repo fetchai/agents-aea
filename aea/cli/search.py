@@ -125,22 +125,21 @@ def _search_items(ctx, item_type_plural):
             "config_file": DEFAULT_SKILL_CONFIG_FILE,
         },
     }
-    if item_type_plural == "agents":
-        lookup_dir = registry
-    else:
-        lookup_dir = AEA_DIR
+    if item_type_plural != "agents":
+        # look in aea distribution for default packages
         _get_details_from_dir(
             configs[item_type_plural]["loader"],
-            registry,
-            "*/{}".format(item_type_plural),
+            AEA_DIR,
+            item_type_plural,
             configs[item_type_plural]["config_file"],
             result,
         )
 
+    # look in packages dir for all other packages
     _get_details_from_dir(
         configs[item_type_plural]["loader"],
-        lookup_dir,
-        item_type_plural,
+        registry,
+        "*/{}".format(item_type_plural),
         configs[item_type_plural]["config_file"],
         result,
     )

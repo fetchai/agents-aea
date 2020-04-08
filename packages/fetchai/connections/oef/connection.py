@@ -534,7 +534,7 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(
             to=self.address,
             sender=DEFAULT_OEF,
-            protocol_id=OefSearchMessage.protocol_id,
+            protocol_id=DefaultMessage.protocol_id,
             message=msg_bytes,
         )
         asyncio.run_coroutine_threadsafe(

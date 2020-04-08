@@ -34,7 +34,7 @@ If you want to create the weather station AEA step by step you can follow this g
 
 Fetch the weather station AEA with the following command :
 
-`aea fetch fetchai/weather_station:0.1.0`
+`aea fetch fetchai/weather_station:0.2.0`
 
 ### Update the AEA configs
 
@@ -46,7 +46,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
 ```bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the weather client AEA
@@ -108,7 +108,7 @@ def run():
     default_protocol = Protocol.from_dir(os.path.join(AEA_DIR, "protocols", "default"))
     resources.add_protocol(default_protocol)
 
-    # Add the oef protocol (which is a package)
+    # Add the oef search protocol (which is a package)
     oef_protocol = Protocol.from_dir(
         os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
     )

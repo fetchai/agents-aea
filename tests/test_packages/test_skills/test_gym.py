@@ -141,7 +141,7 @@ class TestGymSkill:
 
         finally:
             process.send_signal(signal.SIGINT)
-            process.wait(timeout=5)
+            process.wait(timeout=20)
 
             if not process.returncode == 0:
                 poll = process.poll()

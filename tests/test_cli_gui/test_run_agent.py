@@ -96,11 +96,11 @@ def test_create_and_run_agent():
         assert response_stop.status_code == 200
         time.sleep(2)
 
-        # run the agent with local connection (as no OEF node is running)
+        # run the agent with stub connection (as no OEF node is running)
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/local:0.1.0"),
+            data=json.dumps("fetchai/stub:0.1.0"),
         )
         assert response_run.status_code == 201
 
@@ -110,7 +110,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/local:0.1.0"),
+            data=json.dumps("fetchai/stub:0.1.0"),
         )
         assert response_run.status_code == 400
 
@@ -159,7 +159,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/local:0.1.0"),
+            data=json.dumps("fetchai/stub:0.1.0"),
         )
         assert response_run.status_code == 201
 
@@ -223,6 +223,6 @@ def test_create_and_run_agent():
             response_run = app.post(
                 "api/agent/" + agent_id + "/run",
                 content_type="application/json",
-                data=json.dumps("fetchai/local:0.1.0"),
+                data=json.dumps("fetchai/stub:0.1.0"),
             )
         assert response_run.status_code == 400
