@@ -39,6 +39,7 @@ cd tac_controller
 ``` bash
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_control:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 
@@ -65,7 +66,7 @@ Alternatively, use the command line to get and set the start time:
 
 ``` bash
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 
 ### Run the TAC controller AEA
@@ -86,6 +87,7 @@ cd tac_participant_one
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 
@@ -100,6 +102,7 @@ cd tac_participant_two
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 
@@ -113,7 +116,13 @@ aea config set agent.default_ledger ethereum
 aea run --connections fetchai/oef:0.1.0
 ```
 	
-## Using `aea launch`
+## Using `aea fetch` and `aea launch`
+
+You can fetch the finished agents:
+``` bash
+aea fetch fetchai/tac_controller:0.1.0
+aea fetch fetchai/tac_participant:0.1.0
+```
 
 The CLI tool supports the launch of several agents
 at once.
@@ -223,7 +232,7 @@ behaviours:
       args:
         services_interval: 5
   clean_up:
-    class_name: TransactionCleanUpTask
+    class_name: TransactionCleanUpBehaviour
     args:
       tick_interval: 5.0
 handlers:
@@ -268,7 +277,7 @@ The `TransactionHandler` deals with `TransactionMessage`s received from the deci
 
 The `OEFSearchHandler` deals with `OefSearchMessage` types returned from the [OEF search node](../oef-ledger)
 
-The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
+The `TransactionCleanUpBehaviour` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
 ### Models
 

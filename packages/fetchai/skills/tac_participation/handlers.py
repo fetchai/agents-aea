@@ -457,7 +457,7 @@ class TransactionHandler(Handler):
             )
             game = cast(Game, self.context.game)
             tx_counterparty_signature = cast(
-                bytes, tx_message.info.get("tx_counterparty_signature")
+                str, tx_message.info.get("tx_counterparty_signature")
             )
             tx_counterparty_id = cast(str, tx_message.info.get("tx_counterparty_id"))
             if (tx_counterparty_signature is not None) and (

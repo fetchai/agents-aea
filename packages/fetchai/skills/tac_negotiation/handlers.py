@@ -22,7 +22,7 @@
 import pprint
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Query
@@ -209,7 +209,7 @@ class FIPANegotiationHandler(Handler):
                 dialogue.dialogue_label, new_msg_id, transaction_msg
             )
             self.context.logger.info(
-                "[{}]: sending to {} a Propose{}".format(
+                "[{}]: sending to {} a Propose {}".format(
                     self.context.agent_name,
                     dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                     pprint.pformat(
@@ -230,7 +230,7 @@ class FIPANegotiationHandler(Handler):
                 message_id=new_msg_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=cfp.message_id,
-                proposal=[proposal_description],
+                proposal=proposal_description,
             )
         dialogue.outgoing_extend(fipa_msg)
         self.context.outbox.put_message(
@@ -429,7 +429,10 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = transactions.pop_pending_initial_acceptance(
                 dialogue.dialogue_label, match_accept.target
             )
-            transaction_msg.set("skill_callback_ids", ["tac_participation"])
+            transaction_msg.set(
+                "skill_callback_ids",
+                [PublicId("fetchai", "tac_participation", "0.1.0")],
+            )
             transaction_msg.set(
                 "info",
                 {
@@ -564,7 +567,7 @@ class OEFSearchHandler(Handler):
             search = cast(Search, self.context.search)
             if self.context.agent_address in agents:
                 agents.remove(self.context.agent_address)
-                agents_less_self = tuple(agents)
+            agents_less_self = tuple(agents)
             if search_id in search.ids_for_sellers:
                 self._handle_search(
                     agents_less_self, search_id, is_searching_for_sellers=True

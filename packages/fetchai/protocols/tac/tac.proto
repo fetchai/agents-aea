@@ -38,8 +38,8 @@ message TacMessage{
         int32 tx_counterparty_fee = 6;
         map<string, int32> quantities_by_good_id = 7;
         int32 tx_nonce = 8;
-        bytes tx_sender_signature = 9;
-        bytes tx_counterparty_signature = 10;
+        string tx_sender_signature = 9;
+        string tx_counterparty_signature = 10;
     }
 
     message Get_State_Update_Performative{}

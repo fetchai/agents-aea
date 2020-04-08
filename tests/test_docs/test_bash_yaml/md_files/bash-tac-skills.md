@@ -8,14 +8,15 @@ cd tac_controller
 ``` bash
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_control:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea config get skills.tac_control.models.parameters.args.start_time
-aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 ``` bash
 aea run --connections fetchai/oef:0.1.0
@@ -29,6 +30,7 @@ cd tac_participant_one
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 ``` bash
@@ -39,6 +41,7 @@ cd tac_participant_two
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
 ```
 ``` bash
@@ -49,6 +52,10 @@ aea run --connections fetchai/oef:0.1.0
 ```
 ```bash
 aea launch tac_controller tac_participant_one tac_participant_two
+```
+``` bash
+aea fetch fetchai/tac_controller:0.1.0
+aea fetch fetchai/tac_participant:0.1.0
 ```
 ``` yaml
 ledger_apis:
@@ -69,7 +76,7 @@ behaviours:
       args:
         services_interval: 5
   clean_up:
-    class_name: TransactionCleanUpTask
+    class_name: TransactionCleanUpBehaviour
     args:
       tick_interval: 5.0
 handlers:

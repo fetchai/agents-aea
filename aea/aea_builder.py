@@ -559,10 +559,22 @@ class AEABuilder:
             ]
         else:
             selected_connections_ids = [
-                k.public_id for k in self._package_dependency_manager.connections.keys()
+                component_id.public_id
+                for component_id in self._package_dependency_manager.connections.keys()
             ]
 
-        return selected_connections_ids
+        # sort default id to be first
+        if self._default_connection in selected_connections_ids:
+            selected_connections_ids.remove(self._default_connection)
+            sorted_selected_connections_ids = [
+                self._default_connection
+            ] + selected_connections_ids
+        else:
+            raise ValueError(
+                "Default connection not a dependency. Please add it and retry."
+            )
+
+        return sorted_selected_connections_ids
 
     def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
         """
