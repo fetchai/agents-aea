@@ -21,6 +21,7 @@
 
 import os
 import shutil
+import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -29,11 +30,10 @@ from pathlib import Path
 import pytest
 
 from aea.cli import cli
+from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.configurations.base import PublicId
-from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.exceptions import AEATestingException
+from aea.test_tools.generic import encode_envelope
 
 from tests.common.click_testing import CliRunner
 from tests.conftest import AUTHOR, CLI_LOG_OPTION
@@ -43,41 +43,57 @@ class AEATestCase:
     """Test case for AEA end-to-end tests."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
         """Set up the test class."""
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
 
         # add packages folder
-        packages_src = os.path.join(cls.cwd, "packages")
-        packages_dst = os.path.join(cls.t, "packages")
+        packages_src = os.path.join(cls.cwd, packages_dir_path)
+        packages_dst = os.path.join(cls.t, packages_dir_path)
         shutil.copytree(packages_src, packages_dst)
+
+        cls.subprocesses = []
 
         os.chdir(cls.t)
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Teardown the test."""
+        cls._terminate_subprocesses()
+
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
 
-    def disable_ledger_tx(self, vendor_name, item_type, item_name):
+    @classmethod
+    def _terminate_subprocesses(cls):
+        """Terminate all launched subprocesses."""
+        for process in cls.subprocesses:
+            process.send_signal(signal.SIGINT)
+            process.wait(timeout=20)
+            if not process.returncode == 0:
+                poll = process.poll()
+                if poll is None:
+                    process.terminate()
+                    process.wait(2)
+
+    def disable_ledger_tx(self, author, item_type, item_name):
         """
         Disable ledger tx by modifying item yaml settings.
         Run from agent's directory and only for item with present strategy is_ledger_tx setting.
 
-        :param vendor_name: str vendor name.
+        :param author: str author name (equals to a vendor folder name).
         :param item_type: str item type.
         :param item_name: str item name.
 
         :return: None
         """
         json_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
-            vendor_name, item_type, item_name
+            author, item_type, item_name
         )
         self.run_cli_command("config", "set", json_path, False)
 
@@ -114,6 +130,20 @@ class AEATestCase:
                 )
             )
 
+    def _run_python_subprocess(self, *args):
+        """
+        Run python with args as subprocess.
+
+        :param *args: CLI args
+
+        :return: subprocess object.
+        """
+        process = subprocess.Popen(  # nosec
+            [sys.executable, *args], stdout=subprocess.PIPE, env=os.environ.copy(),
+        )
+        self.subprocesses.append(process)
+        return process
+
     def run_agent(self, *args):
         """
         Run agent as subprocess.
@@ -123,12 +153,7 @@ class AEATestCase:
 
         :return: subprocess object.
         """
-        process = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", "run", *args],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
-        )
-        return process
+        return self._run_python_subprocess("-m", "aea.cli", "run", *args)
 
     def initialize_aea(self, author=AUTHOR):
         """
@@ -181,61 +206,6 @@ class AEATestCase:
         """
         self.run_cli_command("install")
 
-    @staticmethod
-    def create_default_message(
-        content, dialogue_reference=("", ""), message_id=1, target=0,
-    ):
-        """
-        Create a default message.
-
-        :param content: bytes str message content.
-
-        :return: DefaultMessage
-        """
-        return DefaultMessage(
-            dialogue_reference=dialogue_reference,
-            message_id=message_id,
-            target=target,
-            performative=DefaultMessage.Performative.BYTES,
-            content=content,
-        )
-
-    @staticmethod
-    def create_envelope(
-        agent_name, message, sender="sender", protocol_id=DefaultMessage.protocol_id,
-    ):
-        """
-        Create an envelope.
-
-        :param agent_name: str agent name.
-        :param message: str or DefaultMessage object message.
-
-        :return: Envelope
-        """
-        if type(message) == DefaultMessage:
-            message = DefaultSerializer().encode(message)
-
-        return Envelope(
-            to=agent_name, sender=sender, protocol_id=protocol_id, message=message
-        )
-
-    @staticmethod
-    def encode_envelope(envelope):
-        """
-        Encode an envelope.
-
-        :param envelope: Envelope.
-
-        :return: str encoded envelope.
-        """
-        encoded_envelope = "{},{},{},{},".format(
-            envelope.to,
-            envelope.sender,
-            envelope.protocol_id,
-            envelope.message.decode("utf-8"),
-        )
-        return encoded_envelope.encode("utf-8")
-
     def write_envelope(self, envelope):
         """
         Write an envelope to input_file.
@@ -245,7 +215,7 @@ class AEATestCase:
 
         :return: None
         """
-        encoded_envelope = self.encode_envelope(envelope)
+        encoded_envelope = encode_envelope(envelope)
         with open(Path("input_file"), "ab+") as f:
             f.write(encoded_envelope)
             f.flush()

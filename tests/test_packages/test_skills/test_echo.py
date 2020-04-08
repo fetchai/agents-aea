@@ -20,11 +20,11 @@
 """This test module contains the integration test for the echo skill."""
 
 import os
-import signal
 import time
 
 import pytest
 
+from aea.test_tools.generic import create_default_message, create_envelope
 from aea.test_tools.test_cases import AEATestCase
 
 
@@ -45,43 +45,34 @@ class TestEchoSkill(AEATestCase):
 
         self.add_item("skill", "fetchai/echo:0.1.0")
 
-        try:
-            process = self.run_agent()
-            time.sleep(2.0)
+        self.run_agent()
+        time.sleep(2.0)
 
-            # add sending and receiving envelope from input/output files
-            message = self.create_default_message(b"hello")
-            expected_envelope = self.create_envelope(agent_name, message)
+        # add sending and receiving envelope from input/output files
+        message = create_default_message(b"hello")
+        expected_envelope = create_envelope(agent_name, message)
 
-            self.write_envelope(expected_envelope)
+        self.write_envelope(expected_envelope)
 
-            time.sleep(2.0)
-            lines = self.readlines_output_file()
+        time.sleep(2.0)
+        lines = self.readlines_output_file()
 
-            assert len(lines) == 2
-            line = lines[0] + lines[1]
-            to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
-            to = to.decode("utf-8")
-            sender = sender.decode("utf-8")
-            protocol_id = self.create_public_id(protocol_id.decode("utf-8"))
-            assert end in [b"", b"\n"]
+        assert len(lines) == 2
+        line = lines[0] + lines[1]
+        to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
+        to = to.decode("utf-8")
+        sender = sender.decode("utf-8")
+        protocol_id = self.create_public_id(protocol_id.decode("utf-8"))
+        assert end in [b"", b"\n"]
 
-            actual_envelope = self.create_envelope(
-                agent_name=to, message=message, sender=sender, protocol_id=protocol_id
-            )
-            assert expected_envelope.to == actual_envelope.sender
-            assert expected_envelope.sender == actual_envelope.to
-            assert expected_envelope.protocol_id == actual_envelope.protocol_id
-            assert expected_envelope.message == actual_envelope.message
-            time.sleep(2.0)
-        finally:
-            process.send_signal(signal.SIGINT)
-            process.wait(timeout=20)
-            if not process.returncode == 0:
-                poll = process.poll()
-                if poll is None:
-                    process.terminate()
-                    process.wait(2)
+        actual_envelope = create_envelope(
+            agent_name=to, message=message, sender=sender, protocol_id=protocol_id
+        )
+        assert expected_envelope.to == actual_envelope.sender
+        assert expected_envelope.sender == actual_envelope.to
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message == actual_envelope.message
+        time.sleep(2.0)
 
-            os.chdir(self.t)
-            self.delete_agents(agent_name)
+        os.chdir(self.t)
+        self.delete_agents(agent_name)

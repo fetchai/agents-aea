@@ -67,46 +67,30 @@ class TestTacSkills(AEAWithOefTestCase):
 
             self.run_install()
 
-        try:
-            # run tac controller
-            os.chdir(tac_controller_dir_path)
-            tac_controller_process = self.run_oef_subprocess()
+        # run tac controller
+        os.chdir(tac_controller_dir_path)
+        tac_controller_process = self.run_oef_subprocess()
 
-            # run two agents (participants)
-            os.chdir(agent_one_dir_path)
-            agent_one_process = self.run_oef_subprocess()
+        # run two agents (participants)
+        os.chdir(agent_one_dir_path)
+        agent_one_process = self.run_oef_subprocess()
 
-            os.chdir(agent_two_dir_path)
-            agent_two_process = self.run_oef_subprocess()
+        os.chdir(agent_two_dir_path)
+        agent_two_process = self.run_oef_subprocess()
 
-            time.sleep(10.0)
-            agent_one_process.send_signal(signal.SIGINT)
-            agent_one_process.wait(timeout=10)
+        time.sleep(10.0)
+        agent_one_process.send_signal(signal.SIGINT)
+        agent_one_process.wait(timeout=10)
 
-            agent_two_process.send_signal(signal.SIGINT)
-            agent_two_process.wait(timeout=10)
+        agent_two_process.send_signal(signal.SIGINT)
+        agent_two_process.wait(timeout=10)
 
-            tac_controller_process.send_signal(signal.SIGINT)
-            tac_controller_process.wait(timeout=10)
+        tac_controller_process.send_signal(signal.SIGINT)
+        tac_controller_process.wait(timeout=10)
 
-            assert agent_one_process.returncode == 0
-            assert agent_two_process.returncode == 0
-            assert tac_controller_process.returncode == 0
-        finally:
-            poll_one = agent_one_process.poll()
-            if poll_one is None:
-                agent_one_process.terminate()
-                agent_one_process.wait(2)
-
-            poll_two = agent_two_process.poll()
-            if poll_two is None:
-                agent_two_process.terminate()
-                agent_two_process.wait(2)
-
-            poll_tac = tac_controller_process.poll()
-            if poll_tac is None:
-                tac_controller_process.terminate()
-                tac_controller_process.wait(2)
+        assert agent_one_process.returncode == 0
+        assert agent_two_process.returncode == 0
+        assert tac_controller_process.returncode == 0
 
         os.chdir(self.t)
         self.delete_agents(agent_name_one, agent_name_two)
