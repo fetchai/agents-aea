@@ -27,43 +27,27 @@ from typing import Union
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.mail.base import Address, Envelope
 
-from aea.connections.stub.connection import StubConnection, _encode, _lock_fd, _unlock_fd
+from aea.connections.stub.connection import (
+    StubConnection,
+    _encode,
+    _lock_file,
+    _unlock_file,
+)
 
 logger = logging.getLogger(__name__)
+
 
 class P2PStubConnection(StubConnection):
     r"""A p2p stub connection.
 
-    This connection uses two files to communicate: one for the incoming messages and
-    the other for the outgoing messages. Each line contains an encoded envelope.
-
-    The format of each line is the following:
-
-        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
-
-    e.g.:
-
-        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+    This connection uses an existing directory as a Rendez-Vous point for agents to communicate locally.
+    Each connected agent will create a file named after its address/identity where it can receive messages.
 
     The connection detects new messages by watchdogging the input file looking for new lines.
-
-    To post a message on the input file, you can use e.g.
-
-        echo "..." >> input_file
-
-    or:
-
-        #>>> fp = open("input_file", "ab+")
-        #>>> fp.write(b"...\n")
-
-    It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
     def __init__(
-        self,
-        address: Address,
-        namespace_dir_path: Union[str, Path],
-        **kwargs
+        self, address: Address, namespace_dir_path: Union[str, Path], **kwargs
     ):
         """
         Initialize a stub connection.
@@ -73,34 +57,36 @@ class P2PStubConnection(StubConnection):
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "p2p-stub", "0.1.0")
-        
+
         self.namespace = os.path.abspath(namespace_dir_path)
-        
+
         input_file_path = os.path.join(self.namespace, "{}.in".format(address))
         output_file_path = os.path.join(self.namespace, "{}.out".format(address))
         super().__init__(input_file_path, output_file_path, **kwargs)
-    
+
     async def send(self, envelope: Envelope):
         """
         Send messages.
 
         :return: None
         """
-        
+
         target_file = Path(os.path.join(self.namespace, "{}.in".format(envelope.to)))
         if not target_file.is_file():
-          target_file.touch()
-          logger.warn("file {} doesn't exist, creating it ...".format(target_file))
+            target_file.touch()
+            logger.warn("file {} doesn't exist, creating it ...".format(target_file))
 
         encoded_envelope = _encode(envelope)
         logger.debug("write to {}: {}".format(target_file, encoded_envelope))
 
         with open(target_file, "ab") as file:
-          ok = _lock_fd(file)
-          file.write(encoded_envelope)
-          file.flush()
-          ok = _unlock_fd(file)
-          # TOFIX(LR) handle (un)locking errors
+            ok = _lock_file(file)
+            file.write(encoded_envelope)
+            file.flush()
+            ok = _unlock_file(file)
+            # TOFIX(LR) handle (un)locking errors.
+            #  Functions return boolean to indicate
+            #  the success of the operation.
 
     @classmethod
     def from_config(
