@@ -19,6 +19,8 @@
 
 """This module contains generic tools for AEA end-to-end testing."""
 
+from pathlib import Path
+
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -77,3 +79,29 @@ def encode_envelope(envelope):
         envelope.message.decode("utf-8"),
     )
     return encoded_envelope.encode("utf-8")
+
+
+def write_envelope(envelope: Envelope) -> None:
+    """
+    Write an envelope to input_file.
+    Run from agent's directory.
+
+    :param envelope: Envelope.
+
+    :return: None
+    """
+    encoded_envelope = encode_envelope(envelope)
+    with open(Path("input_file"), "ab+") as f:
+        f.write(encoded_envelope)
+        f.flush()
+
+
+def readlines_output_file():
+    """
+    Readlines the output_file.
+    Run from agent's directory.
+
+    :return: list lines content of output_file.
+    """
+    with open(Path("output_file"), "rb+") as f:
+        return f.readlines()

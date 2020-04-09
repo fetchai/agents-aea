@@ -16,4 +16,4 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""A package with test tools for AEA framework."""
+"""This module contains the implementation of the AEA test framework."""
