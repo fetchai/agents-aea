@@ -22,6 +22,7 @@
 import logging
 import os
 from pathlib import Path
+import tempfile
 from typing import Union
 
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -88,6 +89,10 @@ class P2PStubConnection(StubConnection):
             #  Functions return boolean to indicate
             #  the success of the operation.
 
+    async def disconnect(self) -> None:
+        super().disconnect()
+        os.rmdir(self.namespace)
+
     @classmethod
     def from_config(
         cls, address: Address, configuration: ConnectionConfig
@@ -99,7 +104,9 @@ class P2PStubConnection(StubConnection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        namespace_dir = configuration.config.get("namespace_dir", "/tmp")  # type: str
+        namespace_dir = configuration.config.get(
+            "namespace_dir", tempfile.mkdtemp()
+        )  # type: str
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
         }
