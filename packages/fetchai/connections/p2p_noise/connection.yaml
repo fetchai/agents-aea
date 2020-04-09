@@ -1,0 +1,23 @@
+name: p2p_noise
+author: fetchai
+version: 0.1.0
+description: The p2p noise connection implements an interface to standalone golang
+  noise node that can exchange aea envelopes with other agents participating in the
+  same p2p network.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
+  connection.py: QmeTeiceuNVLBP1nKDPXLiUsWPTt18xEfh1wCsyFi3iQ8j
+fingerprint_ignore_patterns: []
+protocols: []
+class_name: P2PNoiseConnection
+config:
+  entry_addr: 192.168.1.200
+  entry_port: 9999
+  noise_addr: 127.0.0.1
+  noise_port: 9999
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  watchdog: {}
