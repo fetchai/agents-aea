@@ -196,7 +196,6 @@ class NoiseNode:
                 print("[py] recved size: {}".format(size))
                 data = os.read(self._noise_to_aea, size)
                 print("[py] recved data: {}".format(data))
-                # TOFIX(LR) needs to check if there is more messages
                 # asyncio.run_coroutine_threadsafe(
                 self._in_queue.put_nowait(data), self._loop
                 # ).result() # TOFIX(LR) check race conditions
@@ -246,29 +245,7 @@ def GET_NOISE_NODE_CLARGS() -> List[str]:
 class P2PNoiseConnection(Connection):
     r"""A noise p2p library connection.
 
-    This connection uses two files to communicate: one for the incoming messages and
-    the other for the outgoing messages. Each line contains an encoded envelope.
-
-    The format of each line is the following:
-
-        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
-
-    e.g.:
-
-        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
-
-    The connection detects new messages by watchdogging the input file looking for new lines.
-
-    To post a message on the input file, you can use e.g.
-
-        echo "..." >> input_file
-
-    or:
-
-        #>>> fp = open("input_file", "ab+")
-        #>>> fp.write(b"...\n")
-
-    It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
+    This connection deploys a noise p2p node as a subprocess and exchange envelopes with it through named pipes.
     """
     # TOFIX(LR) add local node ip address and port number
     def __init__(
