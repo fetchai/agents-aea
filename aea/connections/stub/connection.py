@@ -20,9 +20,9 @@
 """This module contains the stub connection."""
 
 import asyncio
+import fcntl
 import logging
 import os
-import fcntl
 from pathlib import Path
 from typing import Optional, Union, IO, AnyStr
 
@@ -89,7 +89,7 @@ def _lock_file(fd: IO[AnyStr]) -> bool:
     try:
         fcntl.flock(fd, fcntl.LOCK_EX)
     except OSError as e:
-        logger.error("Couldn't acquire lock for file {}".format(fd.name))
+        logger.error("Couldn't acquire lock for file {}: {}".format(fd.name, e))
         return False
     else:
         logger.debug("Lock successfully acquired for file {}".format(fd.name))
@@ -100,7 +100,7 @@ def _unlock_file(fd: IO[AnyStr]) -> bool:
     try:
         fcntl.flock(fd, fcntl.LOCK_UN)
     except OSError as e:
-        logger.error("Couldn't free lock for file {}".format(fd.name))
+        logger.error("Couldn't free lock for file {}: {}".format(fd.name, e))
         return False
     else:
         logger.debug("Lock successfully freed for file {}".format(fd.name))
@@ -259,7 +259,10 @@ class StubConnection(Connection):
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
         ok = _unlock_file(self.output_file)
-        # TOFIX(LR) handle (un)locking errors
+        # TOFIX(LR) handle (un)locking errors.
+        #  should exception be propagated?
+        if not ok:
+            logger.error("while locking/unlocking file")
 
     @classmethod
     def from_config(
