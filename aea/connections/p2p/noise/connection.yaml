@@ -1,0 +1,23 @@
+name: stub
+author: fetchai
+version: 0.1.0
+description: The p2p noise connection implements an interface to standalone golang noise node
+  that can exchange aea envelopes with other agents participating in the same p2p network.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+# TOFIX(LR) which algo is used to generate fingerprints?
+#fingerprint:
+#  __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC
+#  connection.py: QmcER6rmvBWMSqaS2gG9GSZjHsDWpZUNugL6b9VedmgvSo
+fingerprint_ignore_patterns: []
+protocols: []
+class_name: StubConnection
+config:
+  noise_addr: '127.0.0.1'
+  noise_port: 9999
+  entry_addr: '192.168.1.200'
+  entry_port: 9999
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  watchdog: {}
