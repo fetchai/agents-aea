@@ -25,15 +25,15 @@ CLIRunner.invoke, in the 'finally' clause. More precisely, before reading from
 the testing outstream, it checks whether it has been already closed.
 """
 
-import os
-import sys
-import shutil
-import tempfile
 import contextlib
+import os
 import shlex
+import shutil
+import sys
+import tempfile
 
 import click
-from click._compat import iteritems, PY2, string_types  # type: ignore
+from click._compat import PY2, iteritems, string_types  # type: ignore
 
 clickpkg = click
 

@@ -53,6 +53,7 @@ from aea.protocols.generator import (
     _union_sub_type_to_protobuf_variable_name,
 )
 from aea.skills.base import Handler, SkillContext
+from aea.test_tools.click_testing import CliRunner
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
@@ -61,7 +62,6 @@ from tests.data.generator.t_protocol.serialization import (  # type: ignore
     TProtocolSerializer,
 )
 
-from ..common.click_testing import CliRunner
 from ..conftest import ROOT_DIR
 
 logger = logging.getLogger("aea")
