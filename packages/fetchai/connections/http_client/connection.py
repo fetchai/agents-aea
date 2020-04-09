@@ -25,12 +25,10 @@ import logging
 from asyncio import CancelledError
 from typing import Optional, Set, Union, cast
 
-from aiohttp import (
-    web)
+from aiohttp import web
 
 import requests
-from aiohttp.web_runner import AppRunner, TCPSite
-from aiohttp.web import Application
+
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
@@ -277,7 +275,7 @@ class WebhookChannel:
         webhook_address: Address,
         webhook_port: int,
         # webhook_host: Address,
-        connection_id: PublicId
+        connection_id: PublicId,
     ):
         """
         Initialize a webhook channel.
@@ -294,9 +292,9 @@ class WebhookChannel:
         # self.webhook_host = webhook_host
         # self.webhook_url = "http://{}:{}/webhooks".format(self.webhook_host, str(self.webhook_port))
 
-        self.webhook_site = None  # type: Optional[TCPSite]
-        self.runner = None  # type: Optional[AppRunner]
-        self.app = None  # type: Optional[Application]
+        self.webhook_site = None  # type: Optional[web.TCPSite]
+        self.runner = None  # type: Optional[web.AppRunner]
+        self.app = None  # type: Optional[web.Application]
 
         self.is_stopped = True
         self.connection_id = connection_id
@@ -315,10 +313,14 @@ class WebhookChannel:
         """
         if self.is_stopped:
             self.app = web.Application()
-            self.app.add_routes([web.post("/webhooks/topic/{topic}/", self._receive_webhook)])
+            self.app.add_routes(
+                [web.post("/webhooks/topic/{topic}/", self._receive_webhook)]
+            )
             self.runner = web.AppRunner(self.app)
             await self.runner.setup()
-            self.webhook_site = web.TCPSite(self.runner, self.webhook_address, self.webhook_port)
+            self.webhook_site = web.TCPSite(
+                self.runner, self.webhook_address, self.webhook_port
+            )
             await self.webhook_site.start()
             self.is_stopped = False
 
@@ -328,7 +330,9 @@ class WebhookChannel:
 
         Shut-off and cleanup the webhook site, the runner and the web app, then stop the channel.
         """
-        assert self.webhook_site is not None, "Application not connected, call connect first!"
+        assert (
+            self.webhook_site is not None
+        ), "Application not connected, call connect first!"
 
         if not self.is_stopped:
             logger.info("Webhook app is shutdown.")
@@ -339,24 +343,20 @@ class WebhookChannel:
             await self.app.cleanup()
             self.is_stopped = True
 
-    def _receive_webhook(self, request: web.Request):
+    async def _receive_webhook(self, request: web.Request):
         """
         Receive a webhook request
 
         Get webhook request, turn it to envelop and send it to the agent to be picked up.
         """
-        webhook_envelop = self.to_envelope(self.connection_id, request)
+        webhook_envelop = await self.to_envelope(self.connection_id, request)
         self.in_queue.put_nowait(webhook_envelop)  # type: ignore
         return web.Response(status=200)
 
     def send(self, request_envelope: Envelope) -> None:
         pass
 
-    def to_envelope(
-        self,
-        connection_id: PublicId,
-        request: web.Request,
-    ) -> Envelope:
+    async def to_envelope(self, connection_id: PublicId, request: web.Request,) -> Envelope:
         """
         Convert a webhook request object into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
