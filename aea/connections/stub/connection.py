@@ -104,6 +104,7 @@ def _unlock_file(fd: IO[AnyStr]) -> bool:
         return False
     else:
         logger.debug("Lock successfully freed for file {}".format(fd.name))
+        return True
 
 
 class StubConnection(Connection):
