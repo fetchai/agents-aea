@@ -29,7 +29,6 @@ import pytest
 
 from aea.cli import cli
 from aea.cli.common import DEFAULT_REGISTRY_PATH
-from aea.configurations.base import PublicId
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.config import AUTHOR, CLI_LOG_OPTION
 from aea.test_tools.exceptions import AEATestingException
@@ -200,17 +199,6 @@ class AEATestCase:
         :return: None
         """
         self.run_cli_command("install")
-
-    @staticmethod
-    def create_public_id(from_str: str) -> PublicId:
-        """
-        Create PublicId from string.
-
-        :param from_str: str public ID.
-
-        :return: PublicId
-        """
-        return PublicId.from_str(from_str)
 
 
 class AEAWithOefTestCase(AEATestCase):

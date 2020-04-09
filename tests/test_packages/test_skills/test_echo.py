@@ -25,6 +25,7 @@ import time
 
 import pytest
 
+from aea.configurations.base import PublicId
 from aea.test_tools.generic import (
     create_default_message,
     create_envelope,
@@ -68,7 +69,7 @@ class TestEchoSkill(AEATestCase):
         to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
-        protocol_id = self.create_public_id(protocol_id.decode("utf-8"))
+        protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
         assert end in [b"", b"\n"]
 
         actual_envelope = create_envelope(
