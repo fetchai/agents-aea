@@ -20,11 +20,18 @@
 """This test module contains the integration test for the echo skill."""
 
 import os
+import signal
 import time
 
 import pytest
 
-from aea.test_tools.generic import create_default_message, create_envelope
+from aea.configurations.base import PublicId
+from aea.test_tools.generic import (
+    create_default_message,
+    create_envelope,
+    readlines_output_file,
+    write_envelope,
+)
 from aea.test_tools.test_cases import AEATestCase
 
 
@@ -45,24 +52,24 @@ class TestEchoSkill(AEATestCase):
 
         self.add_item("skill", "fetchai/echo:0.1.0")
 
-        self.run_agent()
+        process = self.run_agent()
         time.sleep(2.0)
 
         # add sending and receiving envelope from input/output files
         message = create_default_message(b"hello")
         expected_envelope = create_envelope(agent_name, message)
 
-        self.write_envelope(expected_envelope)
+        write_envelope(expected_envelope)
 
         time.sleep(2.0)
-        lines = self.readlines_output_file()
+        lines = readlines_output_file()
 
         assert len(lines) == 2
         line = lines[0] + lines[1]
         to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
-        protocol_id = self.create_public_id(protocol_id.decode("utf-8"))
+        protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
         assert end in [b"", b"\n"]
 
         actual_envelope = create_envelope(
@@ -74,5 +81,6 @@ class TestEchoSkill(AEATestCase):
         assert expected_envelope.message == actual_envelope.message
         time.sleep(2.0)
 
-        os.chdir(self.t)
-        self.delete_agents(agent_name)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+        assert process.returncode == 0

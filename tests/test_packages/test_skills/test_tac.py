@@ -91,6 +91,3 @@ class TestTacSkills(AEAWithOefTestCase):
         assert agent_one_process.returncode == 0
         assert agent_two_process.returncode == 0
         assert tac_controller_process.returncode == 0
-
-        os.chdir(self.t)
-        self.delete_agents(agent_name_one, agent_name_two)

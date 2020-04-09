@@ -16,4 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of the AEA test framework."""
+"""This module contains the config of the AEA test framework."""
+
+from aea.cli_gui import DEFAULT_AUTHOR
+
+AUTHOR = DEFAULT_AUTHOR
+CLI_LOG_OPTION = ["-v", "OFF"]

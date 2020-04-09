@@ -21,23 +21,17 @@
 
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
-from pathlib import Path
 
 import pytest
 
 from aea.cli import cli
 from aea.cli.common import DEFAULT_REGISTRY_PATH
-from aea.configurations.base import PublicId
-from aea.mail.base import Envelope
+from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.config import AUTHOR, CLI_LOG_OPTION
 from aea.test_tools.exceptions import AEATestingException
-from aea.test_tools.generic import encode_envelope
-
-from tests.common.click_testing import CliRunner
-from tests.conftest import AUTHOR, CLI_LOG_OPTION
 
 
 class AEATestCase:
@@ -74,8 +68,6 @@ class AEATestCase:
     def _terminate_subprocesses(cls):
         """Terminate all launched subprocesses."""
         for process in cls.subprocesses:
-            process.send_signal(signal.SIGINT)
-            process.wait(timeout=20)
             if not process.returncode == 0:
                 poll = process.poll()
                 if poll is None:
@@ -174,7 +166,7 @@ class AEATestCase:
         :return: None
         """
         for name in agents_names:
-            self.run_cli_command("create", "--local", name, "--author", "fetchai")
+            self.run_cli_command("create", "--local", name, "--author", AUTHOR)
 
     def delete_agents(self, *agents_names):
         """
@@ -207,41 +199,6 @@ class AEATestCase:
         :return: None
         """
         self.run_cli_command("install")
-
-    def write_envelope(self, envelope: Envelope) -> None:
-        """
-        Write an envelope to input_file.
-        Run from agent's directory.
-
-        :param envelope: Envelope.
-
-        :return: None
-        """
-        encoded_envelope = encode_envelope(envelope)
-        with open(Path("input_file"), "ab+") as f:
-            f.write(encoded_envelope)
-            f.flush()
-
-    def readlines_output_file(self):
-        """
-        Readlines the output_file.
-        Run from agent's directory.
-
-        :return: list lines content of output_file.
-        """
-        with open(Path("output_file"), "rb+") as f:
-            return f.readlines()
-
-    @staticmethod
-    def create_public_id(from_str: str) -> PublicId:
-        """
-        Create PublicId from string.
-
-        :param from_str: str public ID.
-
-        :return: PublicId
-        """
-        return PublicId.from_str(from_str)
 
 
 class AEAWithOefTestCase(AEATestCase):
