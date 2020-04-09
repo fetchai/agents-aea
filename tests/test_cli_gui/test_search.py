@@ -175,7 +175,7 @@ def test_real_search():
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/stub:0.1.0"
+    assert data[i]["id"] == "fetchai/stub:0.2.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."

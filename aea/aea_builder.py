@@ -243,7 +243,7 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = PublicId("fetchai", "stub", "0.1.0")
+        self._default_connection = PublicId.from_str("fetchai/stub:0.2.0")
 
         self._package_dependency_manager = _DependenciesManager()
 

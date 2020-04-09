@@ -130,11 +130,11 @@ class TestCreate:
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        assert self.agent_config["connections"] == ["fetchai/stub:0.1.0"]
+        assert self.agent_config["connections"] == ["fetchai/stub:0.2.0"]
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
-        assert self.agent_config["default_connection"] == "fetchai/stub:0.1.0"
+        assert self.agent_config["default_connection"] == "fetchai/stub:0.2.0"
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""

@@ -163,9 +163,9 @@ def test_run_with_default_connection(pytestconfig):
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
-        ["fetchai/local:0.1.0,fetchai/stub:0.1.0"],
-        ["'fetchai/local:0.1.0, fetchai/stub:0.1.0'"],
-        ["fetchai/local:0.1.0,,fetchai/stub:0.1.0,"],
+        ["fetchai/local:0.1.0,fetchai/stub:0.2.0"],
+        ["'fetchai/local:0.1.0, fetchai/stub:0.2.0'"],
+        ["fetchai/local:0.1.0,,fetchai/stub:0.2.0,"],
     ],
 )
 def test_run_multiple_connections(pytestconfig, connection_ids):
@@ -198,7 +198,7 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
 
     # stub is the default connection, so it should fail
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/stub:0.1.0"]
+        cli, [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/stub:0.2.0"]
     )
     assert result.exit_code == 1
 
@@ -1379,7 +1379,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = "fetchai/stub:0.1.0"
+        cls.connection_id = "fetchai/stub:0.2.0"
         cls.connection_name = "local"
         cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
