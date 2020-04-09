@@ -20,10 +20,11 @@
 """This module contains the stub connection."""
 
 import asyncio
+import fcntl
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import AnyStr, IO, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -56,8 +57,12 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    # TOFIX(LR) properly handle bytes encoding with \n escaping
+    #  - parse based on ',' separators, not \n
+    #  - use size-data format --> need to write an echo script
+    result += str(e.message)[2:-1].encode("latin-1")
     result += separator
+    result += b"\n"
 
     return result
 
@@ -78,6 +83,28 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     message = split[3].decode("unicode_escape").encode("utf-8")
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+
+
+def _lock_file(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+    except OSError as e:
+        logger.error("Couldn't acquire lock for file {}: {}".format(fd.name, e))
+        return False
+    else:
+        logger.debug("Lock successfully acquired for file {}".format(fd.name))
+        return True
+
+
+def _unlock_file(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError as e:
+        logger.error("Couldn't free lock for file {}: {}".format(fd.name, e))
+        return False
+    else:
+        logger.debug("Lock successfully freed for file {}".format(fd.name))
+        return True
 
 
 class StubConnection(Connection):
@@ -141,15 +168,22 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        line = self.input_file.readline()
-        logger.debug("read line: {!r}".format(line))
-        lines = b""
-        while len(line) > 0:
-            lines += line
-            line = self.input_file.readline()
-        if lines != b"":
-            self._process_line(lines)
+        ok = _lock_file(self.input_file)
+        if not ok:
+            # TOFIX(LR) how to handle locking errors
+            return
+
+        lines = self.input_file.readlines()
+        if len(lines) > 0:
             self.input_file.truncate(0)
+            self.input_file.seek(0)
+
+        ok = _unlock_file(self.input_file)
+        # TOFIX(LR) how to handle locking errors
+
+        for line in lines:
+            logger.debug("read line: {!r}".format(line))
+            self._process_line(line)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
@@ -219,10 +253,17 @@ class StubConnection(Connection):
 
         :return: None
         """
+
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
+        ok = _lock_file(self.output_file)
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
+        ok = _unlock_file(self.output_file)
+        # TOFIX(LR) handle (un)locking errors.
+        #  should exception be propagated?
+        if not ok:
+            logger.error("while locking/unlocking file")
 
     @classmethod
     def from_config(
