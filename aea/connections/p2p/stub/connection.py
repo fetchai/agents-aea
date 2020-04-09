@@ -26,6 +26,7 @@ import tempfile
 from typing import Union
 
 from aea.configurations.base import ConnectionConfig, PublicId
+from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
 from aea.connections.stub.connection import (
@@ -88,6 +89,8 @@ class P2PStubConnection(StubConnection):
             # TOFIX(LR) handle (un)locking errors.
             #  Functions return boolean to indicate
             #  the success of the operation.
+            if not ok:
+                logger.error("while locking/unlocking file")
 
     async def disconnect(self) -> None:
         super().disconnect()
