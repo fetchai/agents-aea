@@ -24,7 +24,7 @@ import fcntl
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Union, IO, AnyStr
+from typing import AnyStr, IO, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
