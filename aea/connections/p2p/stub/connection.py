@@ -21,20 +21,20 @@
 
 import logging
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from typing import Union
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
-
 from aea.connections.stub.connection import (
     StubConnection,
     _encode,
     _lock_file,
     _unlock_file,
 )
+from aea.mail.base import Address, Envelope
+
 
 logger = logging.getLogger(__name__)
 
