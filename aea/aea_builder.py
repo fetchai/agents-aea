@@ -229,6 +229,8 @@ class AEABuilder:
     returns the instance of the builder itself.
     """
 
+    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+
     def __init__(self, with_default_packages: bool = True):
         """
         Initialize the builder.
@@ -595,12 +597,15 @@ class AEABuilder:
             LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
-            timeout=0.0,
+            timeout=self._get_agent_loop_timeout(),
             is_debug=False,
             max_reactions=20,
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _get_agent_loop_timeout(self) -> float:
+        return self.DEFAULT_AGENT_LOOP_TIMEOUT
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (

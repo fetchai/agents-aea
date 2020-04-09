@@ -199,6 +199,18 @@ class Agent(ABC):
 
         :return: None
         """
+        self._start_setup()
+        self._run_main_loop()
+
+    def _start_setup(self) -> None:
+        """
+        setup Agent on start:
+        - up multiplexer
+        - call agent.setup
+        - set started
+
+        :return: None
+        """
         if not self.is_debug:
             self.multiplexer.connect()
 
@@ -206,7 +218,6 @@ class Agent(ABC):
         self.setup()
 
         self.liveness.start()
-        self._run_main_loop()
 
     def _run_main_loop(self) -> None:
         """
@@ -217,11 +228,19 @@ class Agent(ABC):
         logger.debug("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self._tick += 1
-            self.act()
-            time.sleep(self._timeout)
-            self.react()
-            self.update()
+            self._spin_main_loop()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
+
+    def _spin_main_loop(self) -> None:
+        """
+        Run one cycle of agent's main loop
+
+        :return: None
+        """
+        self.act()
+        time.sleep(self._timeout)
+        self.react()
+        self.update()
 
     def stop(self) -> None:
         """
