@@ -120,3 +120,8 @@ output_file
 
 !packages/fetchai/contracts/erc1155/build
 
+# vim-related
+*.swp
+*.swo
+*.swn
+

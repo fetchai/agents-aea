@@ -22,8 +22,9 @@
 import asyncio
 import logging
 import os
+import fcntl
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, IO, AnyStr
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -56,8 +57,12 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    # TOFIX(LR) properly handle bytes encoding with \n escaping
+    #  - parse based on ',' separators, not \n
+    #  - use size-data format --> need to write an echo script
+    result += str(e.message)[2:-1].encode("latin-1")
     result += separator
+    result += b"\n"
 
     return result
 
@@ -77,7 +82,30 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     message = split[3].decode("unicode_escape").encode("utf-8")
 
-    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+    return Envelope(
+        to=to, sender=sender, protocol_id=protocol_id, message=message
+    )
+
+
+def _lock_file(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+    except OSError as e:
+        logger.error("Couldn't acquire lock for file {}".format(fd.name))
+        return False
+    else:
+        logger.debug("Lock successfully acquired for file {}".format(fd.name))
+        return True
+
+
+def _unlock_file(fd: IO[AnyStr]) -> bool:
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError as e:
+        logger.error("Couldn't free lock for file {}".format(fd.name))
+        return False
+    else:
+        logger.debug("Lock successfully freed for file {}".format(fd.name))
 
 
 class StubConnection(Connection):
@@ -120,7 +148,10 @@ class StubConnection(Connection):
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
+        if (
+            kwargs.get("configuration") is None
+            and kwargs.get("connection_id") is None
+        ):
             kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
         super().__init__(**kwargs)
         input_file_path = Path(input_file_path)
@@ -136,20 +167,29 @@ class StubConnection(Connection):
         self._observer = Observer()
 
         directory = os.path.dirname(input_file_path.absolute())
-        self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
+        self._event_handler = _ConnectionFileSystemEventHandler(
+            self, input_file_path
+        )
         self._observer.schedule(self._event_handler, directory)
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        line = self.input_file.readline()
-        logger.debug("read line: {!r}".format(line))
-        lines = b""
-        while len(line) > 0:
-            lines += line
-            line = self.input_file.readline()
-        if lines != b"":
-            self._process_line(lines)
+        ok = _lock_file(self.input_file)
+        if not ok:
+            # TOFIX(LR) how to handle locking errors
+            return
+
+        lines = self.input_file.readlines()
+        if len(lines) > 0:
             self.input_file.truncate(0)
+            self.input_file.seek(0)
+
+        ok = _unlock_file(self.input_file)
+        # TOFIX(LR) how to handle locking errors
+
+        for line in lines:
+            logger.debug("read line: {!r}".format(line))
+            self._process_line(line)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
@@ -160,11 +200,15 @@ class StubConnection(Connection):
             envelope = _decode(line, separator=SEPARATOR)
             assert self.in_queue is not None, "Input queue not initialized."
             assert self._loop is not None, "Loop not initialized."
-            asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
+            asyncio.run_coroutine_threadsafe(
+                self.in_queue.put(envelope), self._loop
+            )
         except ValueError as e:
             logger.error("Bad formatted line: {}. {}".format(line, e))
         except Exception as e:
-            logger.error("Error when processing a line. Message: {}".format(str(e)))
+            logger.error(
+                "Error when processing a line. Message: {}".format(str(e))
+            )
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
@@ -219,10 +263,14 @@ class StubConnection(Connection):
 
         :return: None
         """
+
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
+        ok = _lock_file(self.output_file)
         self.output_file.write(encoded_envelope)
         self.output_file.flush()
+        ok = _unlock_file(self.output_file)
+        # TOFIX(LR) handle (un)locking errors
 
     @classmethod
     def from_config(
@@ -235,14 +283,18 @@ class StubConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = configuration.config.get("input_file", "./input_file")  # type: str
+        input_file = configuration.config.get(
+            "input_file", "./input_file"
+        )  # type: str
         output_file = configuration.config.get(
             "output_file", "./output_file"
         )  # type: str
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
         }
-        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
+        excluded_protocols_names = {
+            p.name for p in configuration.excluded_protocols
+        }
         return StubConnection(
             input_file,
             output_file,
