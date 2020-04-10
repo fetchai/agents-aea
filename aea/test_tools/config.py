@@ -22,3 +22,6 @@ from aea.cli_gui import DEFAULT_AUTHOR
 
 AUTHOR = DEFAULT_AUTHOR
 CLI_LOG_OPTION = ["-v", "OFF"]
+
+DEFAULT_INPUT_FILE_NAME = "input_file"
+DEFAULT_OUTPUT_FILE_NAME = "output_file"

@@ -21,9 +21,11 @@
 
 from pathlib import Path
 
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.config import DEFAULT_INPUT_FILE_NAME, DEFAULT_OUTPUT_FILE_NAME
 
 
 def create_default_message(
@@ -64,7 +66,7 @@ def create_envelope(
     )
 
 
-def encode_envelope(envelope):
+def encode_envelope(envelope: Envelope) -> bytes:
     """
     Encode an envelope.
 
@@ -81,7 +83,7 @@ def encode_envelope(envelope):
     return encoded_envelope.encode("utf-8")
 
 
-def write_envelope(envelope: Envelope) -> None:
+def write_envelope_to_file(envelope: Envelope) -> None:
     """
     Write an envelope to input_file.
     Run from agent's directory.
@@ -91,17 +93,30 @@ def write_envelope(envelope: Envelope) -> None:
     :return: None
     """
     encoded_envelope = encode_envelope(envelope)
-    with open(Path("input_file"), "ab+") as f:
+    with open(Path(DEFAULT_INPUT_FILE_NAME), "ab+") as f:
         f.write(encoded_envelope)
         f.flush()
 
 
-def readlines_output_file():
+def read_envelope_from_file():
     """
     Readlines the output_file.
     Run from agent's directory.
 
     :return: list lines content of output_file.
     """
-    with open(Path("output_file"), "rb+") as f:
-        return f.readlines()
+    lines = []
+    with open(Path(DEFAULT_OUTPUT_FILE_NAME), "rb+") as f:
+        lines.extend(f.readlines())
+
+    assert len(lines) == 2
+    line = lines[0] + lines[1]
+    to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
+    to = to.decode("utf-8")
+    sender = sender.decode("utf-8")
+    protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+    assert end in [b"", b"\n"]
+
+    return create_envelope(
+        agent_name=to, message=message, sender=sender, protocol_id=protocol_id
+    )

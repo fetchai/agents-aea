@@ -25,12 +25,11 @@ import time
 
 import pytest
 
-from aea.configurations.base import PublicId
 from aea.test_tools.generic import (
     create_default_message,
     create_envelope,
-    readlines_output_file,
-    write_envelope,
+    read_envelope_from_file,
+    write_envelope_to_file,
 )
 from aea.test_tools.test_cases import AEATestCase
 
@@ -59,22 +58,10 @@ class TestEchoSkill(AEATestCase):
         message = create_default_message(b"hello")
         expected_envelope = create_envelope(agent_name, message)
 
-        write_envelope(expected_envelope)
+        write_envelope_to_file(expected_envelope)
 
         time.sleep(2.0)
-        lines = readlines_output_file()
-
-        assert len(lines) == 2
-        line = lines[0] + lines[1]
-        to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
-        to = to.decode("utf-8")
-        sender = sender.decode("utf-8")
-        protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
-        assert end in [b"", b"\n"]
-
-        actual_envelope = create_envelope(
-            agent_name=to, message=message, sender=sender, protocol_id=protocol_id
-        )
+        actual_envelope = read_envelope_from_file()
         assert expected_envelope.to == actual_envelope.sender
         assert expected_envelope.sender == actual_envelope.to
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
