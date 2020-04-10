@@ -24,14 +24,21 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
-from typing import Any, List
+from io import TextIOWrapper
+from threading import Thread
+from typing import Any, Callable, List
 
 import pytest
 
 from aea.cli import cli
 from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.test_tools.click_testing import CliRunner
-from aea.test_tools.config import AUTHOR, CLI_LOG_OPTION
+from aea.test_tools.config import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    DEFAULT_PRIVATE_KEY_FILE_NAME,
+    FETCHAI_NAME,
+)
 from aea.test_tools.exceptions import AEATestingException
 
 
@@ -43,6 +50,7 @@ class AEATestCase:
     runner: CliRunner  # CLI runner
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
+    threads: List  # list of started threads
 
     @classmethod
     def setup_class(cls, packages_dir_path=DEFAULT_REGISTRY_PATH):
@@ -57,6 +65,8 @@ class AEATestCase:
         shutil.copytree(packages_src, packages_dst)
 
         cls.subprocesses = []
+        cls.threads = []
+
         cls.author = AUTHOR
 
         os.chdir(cls.t)
@@ -65,6 +75,7 @@ class AEATestCase:
     def teardown_class(cls):
         """Teardown the test."""
         cls._terminate_subprocesses()
+        cls._join_threads()
 
         os.chdir(cls.cwd)
         try:
@@ -81,6 +92,12 @@ class AEATestCase:
                 if poll is None:
                     process.terminate()
                     process.wait(2)
+
+    @classmethod
+    def _join_threads(cls):
+        """Join all started threads."""
+        for thread in cls.threads:
+            thread.join()
 
     def set_config(self, dotted_path: str, value: Any) -> None:
         """
@@ -158,6 +175,19 @@ class AEATestCase:
         self.subprocesses.append(process)
         return process
 
+    def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
+        """
+        Start python Thread.
+
+        :param target: target method.
+        :param process: subprocess passed to thread args.
+
+        :return: None.
+        """
+        thread = Thread(target=target, args=(process,))
+        thread.start()
+        self.threads.append(thread)
+
     def run_agent(self, *args: str) -> subprocess.Popen:
         """
         Run agent as subprocess.
@@ -222,11 +252,70 @@ class AEATestCase:
         """
         self.run_cli_command("install")
 
+    def generate_private_key(self) -> None:
+        """
+        Generate AEA private key with CLI command.
+        Run from agent's directory.
+
+        :return: None
+        """
+        self.run_cli_command("generate-key", FETCHAI_NAME)
+
+    def add_private_key(self) -> None:
+        """
+        Add private key with CLI command.
+        Run from agent's directory.
+
+        :return: None
+        """
+        self.run_cli_command("add-key", FETCHAI_NAME, DEFAULT_PRIVATE_KEY_FILE_NAME)
+
+    def generate_wealth(self) -> None:
+        """
+        Generate wealth with CLI command.
+        Run from agent's directory.
+
+        :return: None
+        """
+        self.run_cli_command("generate-wealth", FETCHAI_NAME)
+
 
 class AEAWithOefTestCase(AEATestCase):
+    """Test case for AEA end-to-end tests with OEF node."""
+
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
         """Start an oef node."""
+
+    @staticmethod
+    def _read_tty(pid: subprocess.Popen):
+        for line in TextIOWrapper(pid.stdout, encoding="utf-8"):
+            print("stdout: " + line.replace("\n", ""))
+
+    @staticmethod
+    def _read_error(pid: subprocess.Popen):
+        for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
+            print("stderr: " + line.replace("\n", ""))
+
+    def start_tty_read_thread(self, process: subprocess.Popen) -> None:
+        """
+        Start a tty reading thread.
+
+        :param process: target process passed to a thread args.
+
+        :return: None.
+        """
+        self.start_thread(target=self._read_tty, process=process)
+
+    def start_error_read_thread(self, process: subprocess.Popen) -> None:
+        """
+        Start an error reading thread.
+
+        :param process: target process passed to a thread args.
+
+        :return: None.
+        """
+        self.start_thread(target=self._read_error, process=process)
 
     def run_agent_with_oef(self) -> subprocess.Popen:
         """

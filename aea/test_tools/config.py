@@ -19,9 +19,13 @@
 """This module contains the config of the AEA test framework."""
 
 from aea.cli_gui import DEFAULT_AUTHOR
+from aea.crypto.fetchai import FETCHAI
 
 AUTHOR = DEFAULT_AUTHOR
 CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_INPUT_FILE_NAME = "input_file"
 DEFAULT_OUTPUT_FILE_NAME = "output_file"
+DEFAULT_PRIVATE_KEY_FILE_NAME = "fet_private_key.txt"
+
+FETCHAI_NAME = FETCHAI
