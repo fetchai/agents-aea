@@ -24,6 +24,7 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
+from typing import Any, List
 
 import pytest
 
@@ -36,6 +37,12 @@ from aea.test_tools.exceptions import AEATestingException
 
 class AEATestCase:
     """Test case for AEA end-to-end tests."""
+
+    author: str  # author name
+    cwd: str  # current working directory path
+    runner: CliRunner  # CLI runner
+    subprocesses: List  # list of launched subprocesses
+    t: str  # temporary directory path
 
     @classmethod
     def setup_class(cls, packages_dir_path=DEFAULT_REGISTRY_PATH):
@@ -50,6 +57,7 @@ class AEATestCase:
         shutil.copytree(packages_src, packages_dst)
 
         cls.subprocesses = []
+        cls.author = AUTHOR
 
         os.chdir(cls.t)
 
@@ -74,6 +82,18 @@ class AEATestCase:
                     process.terminate()
                     process.wait(2)
 
+    def set_config(self, dotted_path: str, value: Any) -> None:
+        """
+        Set a config.
+        Run from agent's directory.
+
+        :param dotted_path: str dotted path to config param.
+        :param value: a new value to set.
+
+        :return: None
+        """
+        self.run_cli_command("config", "set", dotted_path, str(value))
+
     def disable_ledger_tx(self, author: str, item_type: str, item_name: str) -> None:
         """
         Disable ledger tx by modifying item yaml settings.
@@ -85,10 +105,10 @@ class AEATestCase:
 
         :return: None
         """
-        json_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
+        dotted_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
             author, item_type, item_name
         )
-        self.run_cli_command("config", "set", json_path, "False")
+        self.set_config(dotted_path, False)
 
     def disable_aea_logging(self):
         """
@@ -104,7 +124,7 @@ class AEATestCase:
         for path, value in config_update_dict.items():
             self.run_cli_command("config", "set", path, value)
 
-    def run_cli_command(self, *args):
+    def run_cli_command(self, *args: str) -> None:
         """
         Run AEA CLI command.
 
@@ -124,7 +144,7 @@ class AEATestCase:
                 )
             )
 
-    def _run_python_subprocess(self, *args):
+    def _run_python_subprocess(self, *args: str) -> subprocess.Popen:
         """
         Run python with args as subprocess.
 
@@ -138,7 +158,7 @@ class AEATestCase:
         self.subprocesses.append(process)
         return process
 
-    def run_agent(self, *args):
+    def run_agent(self, *args: str) -> subprocess.Popen:
         """
         Run agent as subprocess.
         Run from agent's directory.
@@ -149,15 +169,17 @@ class AEATestCase:
         """
         return self._run_python_subprocess("-m", "aea.cli", "run", *args)
 
-    def initialize_aea(self, author: str = AUTHOR) -> None:
+    def initialize_aea(self, author=None) -> None:
         """
         Initialize AEA locally with author name.
 
         :return: None
         """
+        if author is None:
+            author = self.author
         self.run_cli_command("init", "--local", "--author", author)
 
-    def create_agents(self, *agents_names):
+    def create_agents(self, *agents_names: str) -> None:
         """
         Create agents in current working directory.
 
@@ -166,9 +188,9 @@ class AEATestCase:
         :return: None
         """
         for name in agents_names:
-            self.run_cli_command("create", "--local", name, "--author", AUTHOR)
+            self.run_cli_command("create", "--local", name, "--author", self.author)
 
-    def delete_agents(self, *agents_names):
+    def delete_agents(self, *agents_names: str) -> None:
         """
         Delete agents in current working directory.
 
@@ -206,7 +228,7 @@ class AEAWithOefTestCase(AEATestCase):
     def _start_oef_node(self, network_node):
         """Start an oef node."""
 
-    def run_oef(self):
+    def run_agent_with_oef(self) -> subprocess.Popen:
         """
         Run agent with OEF connection as subprocess.
         Run from agent's directory.
