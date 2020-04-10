@@ -110,7 +110,7 @@ def _launch_threads(click_context: click.Context, agents: List[Path]):
         for idx, agent in enumerate(aeas):
             if not agent.liveness.is_stopped:
                 agent.stop()
-                threads[idx].join()
+            threads[idx].join()
             logger.info("Agent {} has been stopped.".format(agent.name))
 
 
