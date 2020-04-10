@@ -1,13 +1,13 @@
 agent_name: erc1155_deployer
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: An AEA to deploy and interact with an ERC1155
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/oef:0.1.0
+- fetchai/oef:0.2.0
 - fetchai/stub:0.1.0
 contracts:
 - fetchai/erc1155:0.1.0
@@ -17,8 +17,8 @@ protocols:
 - fetchai/oef_search:0.1.0
 skills:
 - fetchai/erc1155_deploy:0.1.0
-- fetchai/error:0.1.0
-default_connection: fetchai/stub:0.1.0
+- fetchai/error:0.2.0
+default_connection: fetchai/oef:0.2.0
 default_ledger: ethereum
 ledger_apis:
   ethereum:

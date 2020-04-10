@@ -28,13 +28,13 @@ import click
 from aea.cli.add import _add_item
 from aea.cli.common import (
     Context,
-    DEFAULT_REGISTRY_PATH,
     PublicIdParameter,
     _try_get_item_source_path,
     try_to_load_agent_config,
 )
 from aea.cli.registry.fetch import fetch_agent
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.command(name="fetch")

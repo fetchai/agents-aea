@@ -28,9 +28,6 @@ import click
 
 from aea.cli.common import (
     Context,
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     PublicIdParameter,
     _copy_package_directory,
     _find_item_in_distribution,
@@ -49,6 +46,11 @@ from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+)
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
 

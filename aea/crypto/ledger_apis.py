@@ -21,6 +21,7 @@
 
 import logging
 import sys
+import time
 from typing import Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
@@ -34,6 +35,7 @@ SUPPORTED_CURRENCIES = {ETHEREUM: "ETH", FETCHAI: "FET"}
 
 logger = logging.getLogger(__name__)
 
+MAX_CONNECTION_RETRY = 3
 GAS_PRICE = "50"
 GAS_ID = "gwei"
 UNKNOWN = "UNKNOWN"
@@ -60,22 +62,50 @@ class LedgerApis:
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
+            retry = 0
+            is_connected = False
             if identifier == FETCHAI:
-                try:
-                    api = FetchAIApi(**config)  # type: LedgerApi
-                except Exception:
+                while retry < MAX_CONNECTION_RETRY:
+                    try:
+                        api = FetchAIApi(**config)  # type: LedgerApi
+                        is_connected = True
+                        break
+                    except Exception:
+                        retry += 1
+                        logger.debug(
+                            "Connection attempt {} to fetchai ledger with provided config failed.".format(
+                                retry
+                            )
+                        )
+                        time.sleep(0.5)
+                if not is_connected:
                     logger.error(
-                        "Cannot connect to fetchai ledger with provided config."
+                        "Cannot connect to fetchai ledger with provided config after {} attemps. Giving up!".format(
+                            MAX_CONNECTION_RETRY
+                        )
                     )
                     sys.exit(1)
             elif identifier == ETHEREUM:
-                try:
-                    api = EthereumApi(
-                        cast(str, config["address"]), cast(str, config["gas_price"])
-                    )
-                except Exception:
+                while retry < MAX_CONNECTION_RETRY:
+                    try:
+                        api = EthereumApi(
+                            cast(str, config["address"]), cast(str, config["gas_price"])
+                        )
+                        is_connected = True
+                        break
+                    except Exception:
+                        retry += 1
+                        logger.debug(
+                            "Connection attempt {} to ethereum ledger with provided config failed.".format(
+                                retry
+                            )
+                        )
+                        time.sleep(0.5)
+                if not is_connected:
                     logger.error(
-                        "Cannot connect to ethereum ledger with provided config."
+                        "Cannot connect to ethereum ledger with provided config after {} attemps. Giving up!".format(
+                            MAX_CONNECTION_RETRY
+                        )
                     )
                     sys.exit(1)
             else:

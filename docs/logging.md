@@ -32,7 +32,7 @@ protocols:
 - fetchai/default:0.1.0
 registry_path: ../packages
 skills:
-- fetchai/error:0.1.0
+- fetchai/error:0.2.0
 version: 0.1.0
 ```
 

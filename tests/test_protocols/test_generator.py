@@ -261,6 +261,7 @@ class TestEndToEndGenerator:
         builder_1.set_name("my_aea_1")
         builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_1.set_default_ledger(FETCHAI)
+        builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_1.add_component(
             ComponentType.PROTOCOL,
             Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
@@ -274,6 +275,7 @@ class TestEndToEndGenerator:
         builder_2.set_name("my_aea_2")
         builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_2.set_default_ledger(FETCHAI)
+        builder_2.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_2.add_component(
             ComponentType.PROTOCOL,
             Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
@@ -284,8 +286,8 @@ class TestEndToEndGenerator:
         )
 
         # create AEAs
-        aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
-        aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
+        aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.2.0")])
+        aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.2.0")])
 
         # message 1
         message = TProtocolMessage(

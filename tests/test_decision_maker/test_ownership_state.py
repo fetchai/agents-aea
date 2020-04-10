@@ -44,7 +44,8 @@ def test_initialisation():
     """Test the initialisation of the ownership_state."""
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 2}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id is not None
@@ -75,7 +76,8 @@ def test_transaction_is_affordable_agent_is_buyer():
     """Check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)."""
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 20}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -102,7 +104,8 @@ def test_transaction_is_affordable_there_is_no_wealth():
     """Reject the transaction when there is no wealth exchange."""
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -129,7 +132,8 @@ def tests_transaction_is_affordable_agent_is_the_seller():
     """Check if the agent has the goods (the agent=sender is the seller)."""
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -156,7 +160,8 @@ def tests_transaction_is_affordable_else_statement():
     """Check that the function returns false if we cannot satisfy any if/elif statements."""
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -183,7 +188,8 @@ def test_apply():
     """Test the apply function."""
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 2}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -213,7 +219,8 @@ def test_transaction_update():
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 20}
 
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id == currency_endowment
@@ -243,7 +250,8 @@ def test_transaction_update_receive():
     """Test the transaction update when receiving tokens."""
     currency_endowment = {"FET": 75}
     good_endowment = {"good_id": 30}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id == currency_endowment

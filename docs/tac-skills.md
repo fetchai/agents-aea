@@ -37,9 +37,11 @@ cd tac_controller
 
 ### Add the tac control skill
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Add the following configs to the aea config:
@@ -64,13 +66,13 @@ You must set the start time to a point in the future `start_time: 12 11 2019  15
 Alternatively, use the command line to get and set the start time:
 
 ``` bash
-aea config get skills.tac_control.models.parameters.args.start_time
-aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 
 ### Run the TAC controller AEA
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the TAC participants AEA
@@ -83,10 +85,12 @@ aea create tac_participant_two
 ### Add the tac participation skill to participant one
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Set the default ledger to ethereum:
@@ -97,10 +101,12 @@ aea config set agent.default_ledger ethereum
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
+aea add contract fetchai/erc1155:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Set the default ledger to ethereum:
@@ -110,10 +116,16 @@ aea config set agent.default_ledger ethereum
 
 ### Run both the TAC participant AEAs
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 	
-## Using `aea launch`
+## Using `aea fetch` and `aea launch`
+
+You can fetch the finished agents:
+``` bash
+aea fetch fetchai/tac_controller:0.1.0
+aea fetch fetchai/tac_participant:0.1.0
+```
 
 The CLI tool supports the launch of several agents
 at once.
@@ -121,7 +133,7 @@ at once.
 For example, assuming you followed the tutorial, you
 can launch the TAC agents as follows:
 
-- set the default connection `fetchai/oef:0.1.0` for every
+- set the default connection `fetchai/oef:0.2.0` for every
 agent;
 - run:
 ```bash
@@ -223,7 +235,7 @@ behaviours:
       args:
         services_interval: 5
   clean_up:
-    class_name: TransactionCleanUpTask
+    class_name: TransactionCleanUpBehaviour
     args:
       tick_interval: 5.0
 handlers:
@@ -268,7 +280,7 @@ The `TransactionHandler` deals with `TransactionMessage`s received from the deci
 
 The `OEFSearchHandler` deals with `OefSearchMessage` types returned from the [OEF search node](../oef-ledger)
 
-The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
+The `TransactionCleanUpBehaviour` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
 ### Models
 

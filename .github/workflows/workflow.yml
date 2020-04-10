@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
 
     timeout-minutes: 30
@@ -23,12 +23,23 @@ jobs:
     - uses: actions/setup-python@master
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - if: matrix.os == 'ubuntu-latest'
+      name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install pipenv
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+    # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
+    - if: matrix.os == 'macos-latest'
+      name: Install dependencies (macos-latest)
       run: |
         pip install pipenv
         pip install tox
-        sudo apt-get clean
-        sudo apt-get install -y protobuf-compiler
+        brew install protobuf  
     - name: Security Check - Main
       run: tox -e bandit-main
     - name: Security Check - Tests
@@ -48,6 +59,7 @@ jobs:
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
+    # optionally, use flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -4,16 +4,18 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -39,9 +41,10 @@ aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.cur
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
 ```
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea install
-aea run --connections fetchai/oef:0.1.0
+aea config set agent.default_connection fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 cd ..
