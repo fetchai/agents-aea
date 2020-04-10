@@ -8,7 +8,44 @@ on:
   pull_request:
 
 jobs:
-  run:
+  common_checks:
+     runs-on: ubuntu-latest
+
+     timeout-minutes: 30
+
+     steps:
+       - uses: actions/checkout@master
+       - uses: actions/setup-python@master
+         with:
+           python-version: 3.6
+       - name: Install dependencies (ubuntu-latest)
+         run: |
+           sudo apt-get update --fix-missing
+           sudo apt-get autoremove
+           sudo apt-get autoclean
+           pip install pipenv
+           pip install tox
+           sudo apt-get install -y protobuf-compiler
+       - name: Security Check - Main
+         run: tox -e bandit-main
+       - name: Security Check - Tests
+         run: tox -e bandit-tests
+       - name: Safety Check
+         run: tox -e safety
+       - name: License Check
+         run: tox -e liccheck
+       - name: Copyright Check
+         run: tox -e copyright_check
+       - name: Code style check
+         run: |
+           tox -e black-check
+           tox -e flake8
+       - name: Static type check
+         run: tox -e mypy
+       - name: Generate Documentation
+         run: tox -e docs
+
+  platform_checks:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -39,23 +76,7 @@ jobs:
       run: |
         pip install pipenv
         pip install tox
-        brew install protobuf  
-    - name: Security Check - Main
-      run: tox -e bandit-main
-    - name: Security Check - Tests
-      run: tox -e bandit-tests
-    - name: Safety Check
-      run: tox -e safety
-    - name: License Check
-      run: tox -e liccheck
-    - name: Copyright Check
-      run: tox -e copyright_check
-    - name: Code style check
-      run: |
-        tox -e black-check
-        tox -e flake8
-    - name: Static type check
-      run: tox -e mypy
+        brew install protobuf
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
@@ -69,6 +90,3 @@ jobs:
         name: codecov-umbrella
         yml: ./codecov.yml
         fail_ci_if_error: true
-    - name: Generate Documentation
-      run: tox -e docs
-
