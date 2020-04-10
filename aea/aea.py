@@ -167,9 +167,13 @@ class AEA(Agent):
         counter = 0
         while not self.inbox.empty() and counter < self.max_reactions:
             counter += 1
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
-                self._handle(envelope)
+            self._react_one()
+
+    def _react_one(self):
+        """ get and process one envelop from inbox """
+        envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
+        if envelope is not None:
+            self._handle(envelope)
 
     def _handle(self, envelope: Envelope) -> None:
         """

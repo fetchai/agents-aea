@@ -39,7 +39,7 @@ jobs:
       run: |
         pip install pipenv
         pip install tox
-        brew install protobuf  
+        brew install protobuf
     - name: Security Check - Main
       run: tox -e bandit-main
     - name: Security Check - Tests
@@ -71,4 +71,3 @@ jobs:
         fail_ci_if_error: true
     - name: Generate Documentation
       run: tox -e docs
-
