@@ -45,10 +45,10 @@ import yaml
 
 from aea.configurations.base import (
     AgentConfig,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     PackageConfiguration,
+    PackageType,
     ProtocolConfig,
     SkillConfig,
     _compute_fingerprint,
@@ -62,15 +62,15 @@ PACKAGE_HASHES_PATH = "packages/hashes.csv"
 TEST_PACKAGE_HASHES_PATH = "tests/data/hashes.csv"
 
 type_to_class_config = {
-    ConfigurationType.AGENT: AgentConfig,
-    ConfigurationType.PROTOCOL: ProtocolConfig,
-    ConfigurationType.CONNECTION: ConnectionConfig,
-    ConfigurationType.SKILL: SkillConfig,
-    ConfigurationType.CONTRACT: ContractConfig,
-}  # type: Dict[ConfigurationType, Type[PackageConfiguration]]
+    PackageType.AGENT: AgentConfig,
+    PackageType.PROTOCOL: ProtocolConfig,
+    PackageType.CONNECTION: ConnectionConfig,
+    PackageType.SKILL: SkillConfig,
+    PackageType.CONTRACT: ContractConfig,
+}  # type: Dict[PackageType, Type[PackageConfiguration]]
 
 
-def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
+def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     """
     Get all the hashable package of the repository.
 
@@ -82,11 +82,11 @@ def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
     :return: pairs of (package-type, path-to-the-package)
     """
 
-    def package_type_and_path(package_path: Path) -> Tuple[ConfigurationType, Path]:
-        """Extract the configuration type from the path."""
+    def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
+        """Extract the package type from the path."""
         item_type_plural = package_path.parent.name
         item_type_singular = item_type_plural[:-1]
-        return ConfigurationType(item_type_singular), package_path
+        return PackageType(item_type_singular), package_path
 
     CORE_PACKAGES = list(
         map(
@@ -111,11 +111,11 @@ def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
     )
 
     TEST_PACKAGES = [
-        (ConfigurationType.AGENT, TEST_PATH / "dummy_aea"),
-        (ConfigurationType.CONNECTION, TEST_PATH / "dummy_connection"),
-        (ConfigurationType.SKILL, TEST_PATH / "dependencies_skill"),
-        (ConfigurationType.SKILL, TEST_PATH / "exception_skill"),
-        (ConfigurationType.SKILL, TEST_PATH / "dummy_skill"),
+        (PackageType.AGENT, TEST_PATH / "dummy_aea"),
+        (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
+        (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
+        (PackageType.SKILL, TEST_PATH / "exception_skill"),
+        (PackageType.SKILL, TEST_PATH / "dummy_skill"),
     ]
 
     ALL_PACKAGES = CORE_PACKAGES + PACKAGES + TEST_PACKAGES
@@ -133,7 +133,7 @@ def sort_configuration_file(config: PackageConfiguration):
 def ipfs_hashing(
     client: ipfshttpclient.Client,
     configuration: PackageConfiguration,
-    package_type: ConfigurationType,
+    package_type: PackageType,
 ) -> Tuple[str, str]:
     """
     Hashes a package and its components.
@@ -215,7 +215,7 @@ class IPFSDaemon:
 
 
 def load_configuration(
-    package_type: ConfigurationType, package_path: Path
+    package_type: PackageType, package_path: Path
 ) -> PackageConfiguration:
     """
     Load a configuration, knowing the type and the path to the package root.
