@@ -189,8 +189,9 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self):
+    def __init__(self, timeout: float = 10.0):
         # check we have ipfs
+        self.timeout = timeout
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
@@ -200,8 +201,8 @@ class IPFSDaemon:
         self.process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
-        print("Waiting for the IPFS daemon to be up.")
-        time.sleep(10.0)
+        print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
+        time.sleep(self.timeout)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # terminate the ipfs daemon
@@ -365,12 +366,18 @@ def parse_arguments() -> argparse.Namespace:
         default=False,
         help="Only check if the hashes are up-to-date.",
     )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=10.0,
+        help="Time to wait before IPFS daemon is up and running.",
+    )
 
     arguments = parser.parse_args()
     return arguments
 
 
-def update_hashes() -> int:
+def update_hashes(arguments: argparse.Namespace) -> int:
     """
     Process all AEA packages, update fingerprint, and update hashes.csv files.
 
@@ -380,7 +387,7 @@ def update_hashes() -> int:
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
     # run the ipfs daemon
-    with IPFSDaemon():
+    with IPFSDaemon(arguments.timeout):
         try:
             # connect ipfs client
             client = ipfshttpclient.connect(
@@ -439,7 +446,7 @@ def check_same_ipfs_hash(client, configuration, package_type, all_expected_hashe
     return result
 
 
-def check_hashes() -> int:
+def check_hashes(arguments: argparse.Namespace) -> int:
     """
     Check fingerprints and outer hash of all AEA packages.
 
@@ -453,7 +460,7 @@ def check_hashes() -> int:
         TEST_PACKAGE_HASHES_PATH
     )  # type: Dict[str, str]
     all_expected_hashes = {**expected_package_hashes, **expected_test_package_hashes}
-    with IPFSDaemon():
+    with IPFSDaemon(timeout=arguments.timeout):
         try:
             # connect ipfs client
             client = ipfshttpclient.connect(
@@ -469,7 +476,7 @@ def check_hashes() -> int:
                 )
         except Exception:
             traceback.print_exc()
-            return_code = 1
+            failed = True
 
     if failed:
         return_code = 1
@@ -482,8 +489,8 @@ def check_hashes() -> int:
 if __name__ == "__main__":
     arguments = parse_arguments()
     if arguments.check:
-        return_code = check_hashes()
+        return_code = check_hashes(arguments)
     else:
-        return_code = update_hashes()
+        return_code = update_hashes(arguments)
 
     sys.exit(return_code)
