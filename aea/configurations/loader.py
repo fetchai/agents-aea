@@ -194,4 +194,6 @@ def _config_loader():
     yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
 
 
+# TODO: instead of this, create custom loader and use it
+#       by wrapping yaml.safe_load to use it
 _config_loader()
