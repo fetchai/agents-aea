@@ -24,7 +24,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -244,6 +244,7 @@ class AEABuilder:
             "fetchai"  # set by the user, or instantiate a default one.
         )
         self._default_connection = PublicId("fetchai", "stub", "0.1.0")
+        self.context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -598,6 +599,7 @@ class AEABuilder:
             timeout=0.0,
             is_debug=False,
             max_reactions=20,
+            **self.context_namespace
         )
         self._load_and_add_skills(aea.context)
         return aea
