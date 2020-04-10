@@ -222,7 +222,7 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-def assert_hash_consistency(fingerprint, path_prefix) -> None:
+def assert_hash_consistency(fingerprint, path_prefix, client: ipfshttpclient.Client) -> None:
     """
     Check that our implementation of IPFS hashing for a package is correct
     against the true IPFS.
@@ -235,8 +235,8 @@ def assert_hash_consistency(fingerprint, path_prefix) -> None:
     # confirm ipfs only generates same hash:
     for file_name, ipfs_hash in fingerprint.items():
         path = path_prefix / file_name
-        ipfsho_hash = ipfs_hash_only.get(str(path))
-        assert ipfsho_hash == ipfs_hash, "WARNING, hashes don't match for: {}".format(
+        expected_ipfs_hash = client.add(path)["Hash"]
+        assert expected_ipfs_hash == ipfs_hash, "WARNING, hashes don't match for: {}".format(
             path
         )
 
@@ -263,11 +263,13 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
     return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
 
 
-def update_fingerprint(configuration: PackageConfiguration) -> None:
+def update_fingerprint(configuration: PackageConfiguration, client: ipfshttpclient.Client) -> None:
     """
     Update the fingerprint of a package.
 
     :param configuration: the configuration object.
+    :param client: the IPFS Client. It is used to compare our implementation
+                |  with the true implementation of IPFS hashing.
     :return: None
     """
     # we don't process agent configurations
@@ -278,7 +280,7 @@ def update_fingerprint(configuration: PackageConfiguration) -> None:
         configuration.directory,
         ignore_patterns=configuration.fingerprint_ignore_patterns,
     )
-    assert_hash_consistency(fingerprint, configuration.directory)
+    assert_hash_consistency(fingerprint, configuration.directory, client)
 
     config_filepath = (
         configuration.directory / configuration.default_configuration_filename
@@ -295,8 +297,8 @@ if __name__ == "__main__":
     # run the ipfs daemon
     with IPFSDaemon():
         try:
-            # # connect ipfs client
-            client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")
+            # connect ipfs client
+            client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")  # type: ipfshttpclient.Client
             ipfs_hash_only = IPFSHashOnly()
 
             # ipfs hash the packages
@@ -308,7 +310,7 @@ if __name__ == "__main__":
                 )
                 configuration_obj = load_configuration(package_type, package_path)
                 sort_configuration_file(configuration_obj)
-                update_fingerprint(configuration_obj)
+                update_fingerprint(configuration_obj, client)
                 key, package_hash = ipfs_hashing(
                     client, configuration_obj, package_type
                 )
