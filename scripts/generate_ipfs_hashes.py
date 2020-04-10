@@ -222,7 +222,9 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-def assert_hash_consistency(fingerprint, path_prefix, client: ipfshttpclient.Client) -> None:
+def assert_hash_consistency(
+    fingerprint, path_prefix, client: ipfshttpclient.Client
+) -> None:
     """
     Check that our implementation of IPFS hashing for a package is correct
     against the true IPFS.
@@ -236,9 +238,9 @@ def assert_hash_consistency(fingerprint, path_prefix, client: ipfshttpclient.Cli
     for file_name, ipfs_hash in fingerprint.items():
         path = path_prefix / file_name
         expected_ipfs_hash = client.add(path)["Hash"]
-        assert expected_ipfs_hash == ipfs_hash, "WARNING, hashes don't match for: {}".format(
-            path
-        )
+        assert (
+            expected_ipfs_hash == ipfs_hash
+        ), "WARNING, hashes don't match for: {}".format(path)
 
 
 def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
@@ -263,7 +265,9 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
     return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
 
 
-def update_fingerprint(configuration: PackageConfiguration, client: ipfshttpclient.Client) -> None:
+def update_fingerprint(
+    configuration: PackageConfiguration, client: ipfshttpclient.Client
+) -> None:
     """
     Update the fingerprint of a package.
 
@@ -298,7 +302,9 @@ if __name__ == "__main__":
     with IPFSDaemon():
         try:
             # connect ipfs client
-            client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")  # type: ipfshttpclient.Client
+            client = ipfshttpclient.connect(
+                "/ip4/127.0.0.1/tcp/5001/http"
+            )  # type: ipfshttpclient.Client
             ipfs_hash_only = IPFSHashOnly()
 
             # ipfs hash the packages
