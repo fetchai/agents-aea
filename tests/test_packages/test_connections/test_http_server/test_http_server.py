@@ -304,7 +304,7 @@ class TestHTTPServerConnectionGET408:
 
         async def agent_processing(http_connection, address) -> bool:
             # we block here to give it some time for the envelope to make it to the queue
-            await asyncio.sleep(8)
+            await asyncio.sleep(10)
             envelope = await http_connection.receive()
             is_exiting_correctly = (
                 envelope is not None
@@ -573,7 +573,7 @@ class TestHTTPServerConnectionPOST408:
 
         async def agent_processing(http_connection, address) -> bool:
             # we block here to give it some time for the envelope to make it to the queue
-            await asyncio.sleep(8)
+            await asyncio.sleep(10)
             envelope = await http_connection.receive()
             is_exiting_correctly = (
                 envelope is not None

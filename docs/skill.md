@@ -241,7 +241,8 @@ handlers:
       foo: bar
 models: {}
 dependencies: {}
-protocols: ["fetchai/default:0.1.0"]
+protocols:
+- fetchai/default:0.1.0
 ```
 
 
