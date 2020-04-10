@@ -140,6 +140,9 @@ agent;
 aea launch tac_controller tac_participant_one tac_participant_two
 ```
 
+You may want to try `--multithreaded`
+option in order to run the agents
+in the same process.
 	
 ## Communication
 
