@@ -32,6 +32,13 @@ jobs:
         pip install pipenv
         pip install tox
         sudo apt-get install -y protobuf-compiler
+
+        # install IPFS
+        sudo apt-get install -y wget
+        wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
+        tar xvfz go-ipfs.tar.gz
+        sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+        ipfs init
     # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
     # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
     - if: matrix.os == 'macos-latest'
@@ -39,7 +46,14 @@ jobs:
       run: |
         pip install pipenv
         pip install tox
-        brew install protobuf  
+        brew install protobuf
+
+        # install IPFS
+        brew install wget
+        wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_darwin-amd64.tar.gz 
+        tar xvfz go-ipfs.tar.gz
+        sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+        ipfs init
     - name: Security Check - Main
       run: tox -e bandit-main
     - name: Security Check - Tests
@@ -50,6 +64,8 @@ jobs:
       run: tox -e liccheck
     - name: Copyright Check
       run: tox -e copyright_check
+    - name: AEA Package Hashes Check
+      run: tox -e hash_check -- --timeout 20.0
     - name: Code style check
       run: |
         tox -e black-check
