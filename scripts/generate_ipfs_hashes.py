@@ -147,15 +147,15 @@ def ipfs_hashing(
     # TODO we still need to ignore some files
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns]
+    assert configuration.directory is not None
     result_list = client.add(configuration.directory)
-    for result_dict in result_list:
-        if configuration.directory.name == result_dict["Name"]:
-            key = os.path.join(
-                configuration.author,
-                package_type.to_plural(),
-                configuration.directory.name,
-            )
-            return key, result_dict["Hash"]
+    key = os.path.join(
+        configuration.author, package_type.to_plural(), configuration.directory.name,
+    )
+    # check that the last result of the list is for the whole package directory
+    assert result_list[-1]["Name"] == configuration.directory.name
+    directory_hash = result_list[-1]["Hash"]
+    return key, directory_hash
 
 
 def to_csv(package_hashes: Dict[str, str], path: str):
