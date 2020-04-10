@@ -30,7 +30,7 @@ We cannot have two items with the same package name since the keys of a YAML obj
 class PackageType(Enum)
 ```
 
-Configuration types.
+Package types.
 
 <a name=".aea.configurations.base.PackageType.to_plural"></a>
 #### to`_`plural

@@ -83,7 +83,7 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     """
 
     def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
-        """Extract the configuration type from the path."""
+        """Extract the package type from the path."""
         item_type_plural = package_path.parent.name
         item_type_singular = item_type_plural[:-1]
         return PackageType(item_type_singular), package_path

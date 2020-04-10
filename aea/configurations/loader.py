@@ -80,7 +80,7 @@ class ConfigLoader(Generic[T]):
 
     @property
     def configuration_class(self) -> Type[T]:
-        """Get the configuration type of the loader."""
+        """Get the configuration class of the loader."""
         return self._configuration_class
 
     def load_protocol_specification(self, file_pointer: TextIO) -> T:

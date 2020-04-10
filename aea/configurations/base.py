@@ -96,7 +96,7 @@ PackageVersionLike = Union[str, semver.VersionInfo]
 
 
 class PackageType(Enum):
-    """Configuration types."""
+    """Package types."""
 
     AGENT = "agent"
     PROTOCOL = "protocol"
@@ -488,9 +488,7 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A package identifier."""
 
-    def __init__(
-        self, package_type: Union[PackageType, str], public_id: PublicId
-    ):
+    def __init__(self, package_type: Union[PackageType, str], public_id: PublicId):
         """
         Initialize the package id.
 
