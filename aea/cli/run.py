@@ -38,6 +38,8 @@ from aea.cli.install import install
 from aea.configurations.base import PublicId
 from aea.helpers.base import load_env_file
 
+AEA_DIR = str(Path("."))
+
 
 def _prepare_environment(click_context, env_file: str, is_install_deps: bool) -> None:
     """

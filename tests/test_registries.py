@@ -32,6 +32,7 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
 from aea.contracts.base import Contract
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
@@ -135,7 +136,7 @@ class TestProtocolRegistry:
         cls.registry.register(protocol_2.public_id, protocol_2)
 
         cls.expected_protocol_ids = {
-            PublicId.from_str("fetchai/default:0.1.0"),
+            DEFAULT_PROTOCOL,
             PublicId.from_str("fetchai/fipa:0.1.0"),
         }
 
@@ -147,7 +148,7 @@ class TestProtocolRegistry:
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        protocol_id_removed = PublicId.from_str("fetchai/default:0.1.0")
+        protocol_id_removed = DEFAULT_PROTOCOL
         protocol_removed = self.registry.fetch(protocol_id_removed)
         self.registry.unregister(protocol_id_removed)
         expected_protocols_ids = set(self.expected_protocol_ids)
@@ -214,16 +215,16 @@ class TestResources:
             Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
         )
 
-        cls.error_skill_public_id = PublicId.from_str("fetchai/error:0.2.0")
+        cls.error_skill_public_id = DEFAULT_SKILL
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
         cls.expected_skills = {
             PublicId.from_str("fetchai/dummy:0.1.0"),
-            PublicId.from_str("fetchai/error:0.2.0"),
+            DEFAULT_SKILL,
         }
 
         cls.expected_protocols = {
-            PublicId.from_str("fetchai/default:0.1.0"),
+            DEFAULT_PROTOCOL,
             PublicId.from_str("fetchai/oef_search:0.1.0"),
         }
 

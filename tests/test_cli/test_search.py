@@ -355,7 +355,7 @@ class TestSearchWithRegistryInSubfolderLocal:
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
 
@@ -429,7 +429,7 @@ class TestSearchInAgentDirectoryLocal:
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
 
