@@ -110,6 +110,7 @@ def test_react():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
@@ -167,6 +168,7 @@ async def test_handle():
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
@@ -253,6 +255,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
+        builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         cls.aea = builder.build(
             connection_ids=[PublicId.from_str("fetchai/local:0.1.0")]

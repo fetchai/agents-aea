@@ -9,7 +9,7 @@ fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmRrHMEja2Q41RKeWULNcanqE2mGZzy9ZMaH2jg4JQZ6uw
   dialogues.py: QmceDUEb1tmtTQZw2WxjQyTNKn6Zni7ZCUuDdznNN7nRzh
-  handlers.py: QmdaNWNunxtW445GefP9aQtihqYurJAKU59WX59rAwEsNH
+  handlers.py: QmbdUZw3nWFdtQUcbb4ELTFX99Ed3vXyp8Gy9CsapTNoqL
   helpers.py: QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
@@ -25,7 +25,7 @@ behaviours:
   clean_up:
     args:
       tick_interval: 5.0
-    class_name: TransactionCleanUpTask
+    class_name: TransactionCleanUpBehaviour
   tac_negotiation:
     args:
       services_interval: 5

@@ -5,19 +5,12 @@ if [ -z ${AGENT_REPO_URL+x} ] ; then
         rm myagent -rf
         aea create myagent
         cd myagent
-        aea add skill echo
+        aea add skill fetchai/echo:0.1.0
     else
         echo "cloning $AGENT_REPO_URL inside '$(pwd)/myagent'"
-        #git clone $AGENT_REPO_URL myagent
         echo git clone $AGENT_REPO_URL myagent
+        git clone $AGENT_REPO_URL myagent && cd myagent
     fi
 
-#/usr/local/bin/aea run
 echo /usr/local/bin/aea run
-
-while :
-do
-	sleep 10
-    echo some log entries....
-done
-
+/usr/local/bin/aea run
