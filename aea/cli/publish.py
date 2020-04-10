@@ -28,15 +28,17 @@ import click
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     _try_get_item_source_path,
     _try_get_item_target_path,
     check_aea_project,
 )
 from aea.cli.registry.publish import publish_agent
 from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 
 
 @click.command(name="publish")

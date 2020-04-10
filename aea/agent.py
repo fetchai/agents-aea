@@ -79,7 +79,6 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
-        is_programmatic: bool = True,  # TODO to remove
     ) -> None:
         """
         Instantiate the agent.
@@ -89,7 +88,6 @@ class Agent(ABC):
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
-        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """

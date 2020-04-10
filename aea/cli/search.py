@@ -29,7 +29,6 @@ from aea import AEA_DIR
 from aea.cli.common import (
     ConfigLoader,
     Context,
-    DEFAULT_REGISTRY_PATH,
     _format_items,
     _retrieve_details,
     logger,
@@ -44,6 +43,7 @@ from aea.configurations.base import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
+from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.group()
