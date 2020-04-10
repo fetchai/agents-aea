@@ -26,6 +26,7 @@ import unittest.mock
 from pathlib import Path
 
 import aea
+from aea.configurations.constants import DEFAULT_CONNECTION
 
 from .test_base import TempCWD, create_app
 from ..conftest import CUR_PATH
@@ -100,7 +101,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/stub:0.1.0"),
+            data=json.dumps(str(DEFAULT_CONNECTION)),
         )
         assert response_run.status_code == 201
 
@@ -110,7 +111,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/stub:0.1.0"),
+            data=json.dumps(str(DEFAULT_CONNECTION)),
         )
         assert response_run.status_code == 400
 
@@ -159,7 +160,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             "api/agent/" + agent_id + "/run",
             content_type="application/json",
-            data=json.dumps("fetchai/stub:0.1.0"),
+            data=json.dumps(str(DEFAULT_CONNECTION)),
         )
         assert response_run.status_code == 201
 
@@ -223,6 +224,6 @@ def test_create_and_run_agent():
             response_run = app.post(
                 "api/agent/" + agent_id + "/run",
                 content_type="application/json",
-                data=json.dumps("fetchai/stub:0.1.0"),
+                data=json.dumps(str(DEFAULT_CONNECTION)),
             )
         assert response_run.status_code == 400

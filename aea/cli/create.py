@@ -31,13 +31,8 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import _add_item
 from aea.cli.common import (
-    AUTHOR,
+    AUTHOR_KEY,
     Context,
-    DEFAULT_CONNECTION,
-    DEFAULT_LEDGER,
-    DEFAULT_LICENSE,
-    DEFAULT_REGISTRY_PATH,
-    DEFAULT_SKILL,
     _get_or_create_cli_config,
     logger,
 )
@@ -46,6 +41,13 @@ from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_VERSION,
+)
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
+    DEFAULT_LICENSE,
+    DEFAULT_REGISTRY_PATH,
+    DEFAULT_SKILL,
 )
 
 
@@ -104,7 +106,7 @@ def create(click_context, agent_name, author, local):
             )
 
     config = _get_or_create_cli_config()
-    set_author = config.get(AUTHOR, None)
+    set_author = config.get(AUTHOR_KEY, None)
     if set_author is None:
         click.echo(
             "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
