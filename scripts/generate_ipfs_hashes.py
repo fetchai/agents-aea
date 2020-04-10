@@ -134,28 +134,26 @@ def ipfs_hashing(
     client: ipfshttpclient.Client,
     configuration: PackageConfiguration,
     package_type: ConfigurationType,
-):
+) -> Tuple[str, str]:
     """
     Hashes a package and its components.
 
     :param client: a connected IPFS client.
     :param configuration: the package configuration.
     :param package_type: the package type.
-    :return: the hash of the whole package.
+    :return: the identifier of the hash (e.g. 'fetchai/protocols/default') and the hash of the whole package.
     """
-    print("Processing package {} of type {}".format(configuration.name, package_type))
-
     # hash again to get outer hash (this time all files):
     # TODO we still need to ignore some files
     #      use ignore patterns somehow
-    # ignore_patterns = configuration.fingerprint_ignore_patterns
+    # ignore_patterns = configuration.fingerprint_ignore_patterns]
     result_list = client.add(configuration.directory)
     for result_dict in result_list:
-        if configuration.name == result_dict["Name"]:
+        if configuration.directory.name == result_dict["Name"]:
             key = os.path.join(
                 configuration.author, package_type.to_plural(), configuration.name
             )
-            package_hashes[key] = result_dict["Hash"]
+            return key, result_dict["Hash"]
 
 
 def to_csv(package_hashes: Dict[str, str], path: str):
@@ -188,7 +186,7 @@ class IPFSDaemon:
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         print("Waiting for the IPFS daemon to be up.")
-        time.sleep(5.0)
+        time.sleep(10.0)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # terminate the ipfs daemon
@@ -292,28 +290,38 @@ if __name__ == "__main__":
     return_code = 0
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
-    try:
-        # run the ipfs daemon
-        with IPFSDaemon():
-
+    # run the ipfs daemon
+    with IPFSDaemon():
+        try:
             # # connect ipfs client
             client = ipfshttpclient.connect("/ip4/127.0.0.1/tcp/5001/http")
             ipfs_hash_only = IPFSHashOnly()
 
             # ipfs hash the packages
             for package_type, package_path in _get_all_packages():
+                print(
+                    "Processing package {} of type {}".format(
+                        package_path.name, package_type
+                    )
+                )
                 configuration_obj = load_configuration(package_type, package_path)
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj)
-                ipfs_hashing(client, configuration_obj, package_type)
+                key, package_hash = ipfs_hashing(
+                    client, configuration_obj, package_type
+                )
+                if package_path.parent == Path("tests", "data"):
+                    test_package_hashes[key] = package_hash
+                else:
+                    package_hashes[key] = package_hash
 
             # output the package hashes
             to_csv(package_hashes, PACKAGE_HASHES_PATH)
             to_csv(test_package_hashes, TEST_PACKAGE_HASHES_PATH)
 
             print("Done!")
-    except Exception as e:
-        return_code = 1
-        print(str(e))
+        except Exception:
+            return_code = 1
+            raise
 
     sys.exit(return_code)
