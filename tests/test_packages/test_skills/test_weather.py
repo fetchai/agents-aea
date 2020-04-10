@@ -75,7 +75,4 @@ class TestWeatherSkills(AEAWithOefTestCase):
         process_two.wait(timeout=10)
 
         assert process_one.returncode == 0
-        assert process_two.returncode == 0
-
-        os.chdir(self.t)
-        self.delete_agents(agent_name_one, agent_name_two)
+        assert process_two.returncode == 0q
