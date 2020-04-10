@@ -26,7 +26,6 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
-from aea.contracts.ethereum import Contract
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
@@ -39,7 +38,6 @@ from packages.fetchai.skills.tac_control_contract.helpers import (
     determine_scaling_factor,
     generate_equilibrium_prices_and_holdings,
     generate_good_endowments,
-    generate_good_id_to_name,
     generate_money_endowments,
     generate_utility_params,
 )
@@ -66,6 +64,9 @@ class Phase(Enum):
     PRE_GAME = "pre_game"
     GAME_REGISTRATION = "game_registration"
     GAME_SETUP = "game_setup"
+    GAME_TOKEN_CREATION = "game_token_creation"
+    GAME_TOKENS_CREATED = "game_tokens_created"
+    GAME_TOKEN_MINTING = "game_token_minting"
     GAME = "game"
     POST_GAME = "post_game"
 
@@ -82,8 +83,9 @@ class Configuration:
         """
         self._version_id = version_id
         self._tx_fee = tx_fee
-        self._agent_addr_to_name: Dict[str, str] = defaultdict()
-        self._good_id_to_name = defaultdict()  # type: Dict[str, str]
+        self._agent_addr_to_name = {}  # type: Optional[Dict[str, str]]
+        self._good_id_to_name = {}  # type: Optional[Dict[str, str]]
+        self._currency_id_to_name = {}  # type: Optional[Dict[str, str]]
 
     @property
     def version_id(self) -> str:
@@ -98,11 +100,12 @@ class Configuration:
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
         """Return the map agent addresses to names."""
+        assert self._agent_addr_to_name is not None, "Agent_addr_to_name not set yet!"
         return self._agent_addr_to_name
 
     @agent_addr_to_name.setter
-    def agent_addr_to_name(self, agent_addr_to_name):
-        """Map agent addresses to names"""
+    def agent_addr_to_name(self, agent_addr_to_name: Dict[Address, str]) -> None:
+        """Set map of agent addresses to names"""
         self._agent_addr_to_name = agent_addr_to_name
 
     @property
@@ -111,11 +114,23 @@ class Configuration:
         assert self._good_id_to_name is not None, "Good_id_to_name not set yet!"
         return self._good_id_to_name
 
-    def set_good_id_to_name(self, nb_goods: int, contract: Contract) -> None:
-        """Generate the good ids for the game."""
-        self._good_id_to_name = generate_good_id_to_name(nb_goods, contract)
+    @good_id_to_name.setter
+    def good_id_to_name(self, good_id_to_name: Dict[str, str]) -> None:
+        """Set map of goods ids to names."""
+        self._good_id_to_name = good_id_to_name
 
-    def _check_consistency(self):
+    @property
+    def currency_id_to_name(self) -> Dict[str, str]:
+        """Map currency id to name."""
+        assert self._currency_id_to_name is not None, "Currency_id_to_name not set yet!"
+        return self._currency_id_to_name
+
+    @currency_id_to_name.setter
+    def currency_id_to_name(self, currency_id_to_name: Dict[str, str]) -> None:
+        """Set map of currency id to name."""
+        self._currency_id_to_name = currency_id_to_name
+
+    def check_consistency(self):
         """
         Check the consistency of the game configuration.
 
@@ -124,8 +139,9 @@ class Configuration:
         """
         assert self.version_id is not None, "A version id must be set."
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
-        assert len(self.agent_addr_to_name) >= 1, "Must have at least two agents."
-        assert len(self.good_id_to_name) >= 1, "Must have at least two goods."
+        assert len(self.agent_addr_to_name) >= 2, "Must have at least two agents."
+        assert len(self.good_id_to_name) >= 2, "Must have at least two goods."
+        assert len(self.currency_id_to_name) == 1, "Must have exactly one currency."
 
 
 class Initialization:
@@ -728,11 +744,12 @@ class Game(Model):
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._registration = Registration()
-        self._configuration = None  # type: Optional[Configuration]
+        self._conf = None  # type: Optional[Configuration]
         self._initialization = None  # type: Optional[Initialization]
         self._initial_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._current_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._transactions = Transactions()
+        self.successful_mint_count = 0
 
     @property
     def phase(self) -> Phase:
@@ -750,12 +767,15 @@ class Game(Model):
         return self._registration
 
     @property
-    def configuration(self) -> Configuration:  # type: ignore
+    def conf(self) -> Configuration:  # type: ignore
         """Get game configuration."""
-        assert (
-            self._configuration is not None
-        ), "Call create before calling configuration."
-        return self._configuration
+        assert self._conf is not None, "Call create before calling configuration."
+        return self._conf
+
+    @conf.setter
+    def conf(self, configuration: Configuration):
+        """Set the configuration."""
+        self._conf = configuration
 
     @property
     def initialization(self) -> Initialization:
@@ -795,30 +815,28 @@ class Game(Model):
     def _generate(self):
         """Generate a TAC game."""
         parameters = cast(Parameters, self.context.parameters)
-        self._configuration = self.context.configuration
-        self._configuration.agent_addr_to_name = self.registration.agent_addr_to_name
-        self.configuration._check_consistency()
+        self.conf.agent_addr_to_name = self.registration.agent_addr_to_name
+        self.conf.check_consistency()
 
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
 
         # Gives me game currency per address.
         agent_addr_to_money_endowments = generate_money_endowments(
-            list(self.configuration.agent_addr_to_name.keys()),
-            parameters.money_endowment,
+            list(self.conf.agent_addr_to_name.keys()), parameters.money_endowment,
         )
 
         # Gives me game stock per good id.
         agent_addr_to_good_endowments = generate_good_endowments(
-            list(self.configuration.agent_addr_to_name.keys()),
-            list(self.configuration.good_id_to_name.keys()),
+            list(self.conf.agent_addr_to_name.keys()),
+            list(self.conf.good_id_to_name.keys()),
             parameters.base_good_endowment,
             parameters.lower_bound_factor,
             parameters.upper_bound_factor,
         )
 
         agent_addr_to_utility_params = generate_utility_params(
-            list(self.configuration.agent_addr_to_name.keys()),
-            list(self.configuration.good_id_to_name.keys()),
+            list(self.conf.agent_addr_to_name.keys()),
+            list(self.conf.good_id_to_name.keys()),
             scaling_factor,
         )
         (
@@ -855,7 +873,7 @@ class Game(Model):
                     self.initialization.agent_addr_to_utility_params[agent_addr],
                 ),
             )
-            for agent_addr in self.configuration.agent_addr_to_name.keys()
+            for agent_addr in self.conf.agent_addr_to_name.keys()
         )
 
         self._current_agent_states = dict(
@@ -873,7 +891,7 @@ class Game(Model):
                     self.initialization.agent_addr_to_utility_params[agent_addr],
                 ),
             )
-            for agent_addr in self.configuration.agent_addr_to_name.keys()
+            for agent_addr in self.conf.agent_addr_to_name.keys()
         )
 
     @property
@@ -882,11 +900,7 @@ class Game(Model):
         result = "\n" + "Current good & money allocation & score: \n"
         for agent_addr, agent_state in self.current_agent_states.items():
             result = (
-                result
-                + "- "
-                + self.configuration.agent_addr_to_name[agent_addr]
-                + ":"
-                + "\n"
+                result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":" + "\n"
             )
             for good_id, quantity in agent_state.quantities_by_good_id.items():
                 result += "    " + good_id + ": " + str(quantity) + "\n"
@@ -908,12 +922,7 @@ class Game(Model):
             agent_addr,
             eq_allocations,
         ) in self.initialization.agent_addr_to_eq_good_holdings.items():
-            result = (
-                result
-                + "- "
-                + self.configuration.agent_addr_to_name[agent_addr]
-                + ":\n"
-            )
+            result = result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":\n"
             for good_id, quantity in eq_allocations.items():
                 result = result + "    " + good_id + ": " + str(quantity) + "\n"
         result = result + "\n"
@@ -924,7 +933,7 @@ class Game(Model):
         ) in self.initialization.agent_addr_to_eq_money_holdings.items():
             result = (
                 result
-                + self.configuration.agent_addr_to_name[agent_addr]
+                + self.conf.agent_addr_to_name[agent_addr]
                 + " "
                 + str(eq_allocation)
                 + "\n"

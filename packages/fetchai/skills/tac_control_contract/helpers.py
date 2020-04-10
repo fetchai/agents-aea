@@ -25,25 +25,61 @@ from typing import Dict, List, Tuple, cast
 
 import numpy as np
 
-from aea.contracts.ethereum import Contract
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
-TOKEN_TYPE = 2
+FT_NAME = "FT"
+FT_ID = 1
+NFT_NAME = "NFT"
+NFT_ID = 2
+NB_CURRENCIES = 1
 
 
-def generate_good_id_to_name(nb_goods: int, contract: Contract) -> Dict[str, str]:
+def generate_good_id_to_name(good_ids: List[int]) -> Dict[str, str]:
+    """
+    Generate a dictionary mapping good ids to names.
+
+    :param good_ids: a list of good ids
+    :return: a dictionary mapping goods' ids to names.
+    """
+    good_id_to_name = {
+        str(good_id): "{}_{}".format(NFT_NAME, good_id) for good_id in good_ids
+    }
+    return good_id_to_name
+
+
+def generate_good_ids(nb_goods: int, contract: ERC1155Contract) -> List[int]:
     """
     Generate ids for things.
 
     :param nb_goods: the number of things.
     :param contract: the instance of the contract
+    """
+    good_ids = contract.create_token_ids(NFT_ID, nb_goods)  # type: ignore
+    assert len(good_ids) == nb_goods
+    return good_ids
+
+
+def generate_currency_id_to_name(currency_id: int) -> Dict[str, str]:
+    """
+    Generate a dictionary mapping good ids to names.
+
+    :param currency_id: the currency id
     :return: a dictionary mapping goods' ids to names.
     """
-    token_ids = contract.create_token_ids(TOKEN_TYPE, nb_goods)  # type: ignore
-    token_ids_dict = {
-        str(token_id): "NFT_{}".format(token_id) for token_id in token_ids
-    }
-    return token_ids_dict
+    currency_id_to_name = {str(currency_id): "{}_{}".format(FT_NAME, currency_id)}
+    return currency_id_to_name
+
+
+def generate_currency_id(contract: ERC1155Contract) -> int:
+    """
+    Generate currency id
+
+    :param contract: the instance of the contract
+    """
+    currency_ids = contract.create_token_ids(FT_ID, NB_CURRENCIES)  # type: ignore
+    assert len(currency_ids) == NB_CURRENCIES
+    return currency_ids[0]
 
 
 def determine_scaling_factor(money_endowment: int) -> float:
@@ -246,14 +282,3 @@ def generate_equilibrium_prices_and_holdings(
         )
     }
     return eq_prices_dict, eq_good_holdings_dict, eq_money_holdings_dict
-
-
-def _recover_uid(good_id) -> int:
-    """
-    Get the uid part of the good id.
-
-    :param str good_id: the good id
-    :return: the uid
-    """
-    uid = int(good_id.split("_")[-2])
-    return uid

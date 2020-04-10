@@ -38,19 +38,22 @@ models:
     class_name: Game
   parameters:
     args:
-      base_good_endowment: 4
-      competition_timeout: 360
-      inactivity_timeout: 60
-      lower_bound_factor: 1
+      ledger: ethereum
+      good_ids: []
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
-      registration_timeout: 60
-      start_time: 09 03 2020 15:15
       tx_fee: 1
+      base_good_endowment: 4
+      lower_bound_factor: 1
       upper_bound_factor: 1
-      version_id: v1
+      start_time: 09 03 2020 15:15
+      registration_timeout: 60
+      item_setup_timeout: 120
+      competition_timeout: 360
+      inactivity_timeout: 60
       whitelist: []
+      version_id: v1
     class_name: Parameters
 dependencies:
   numpy: {}
