@@ -42,7 +42,6 @@ from aea.configurations.base import (
     AgentConfig,
     ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_VERSION,
     Dependencies,
     PublicId,
     _check_aea_version,
@@ -66,14 +65,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
-AUTHOR = "author"
+AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
-DEFAULT_LEDGER = FETCHAI
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
 NOT_PERMITTED_AUTHORS = [
     "skills",
     "connections",

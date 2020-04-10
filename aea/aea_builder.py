@@ -597,7 +597,6 @@ class AEABuilder:
             loop=None,
             timeout=0.0,
             is_debug=False,
-            is_programmatic=True,
             max_reactions=20,
         )
         self._load_and_add_skills(aea.context)

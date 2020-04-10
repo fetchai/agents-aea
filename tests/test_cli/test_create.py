@@ -150,11 +150,11 @@ class TestCreate:
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
+        assert self.agent_config["skills"] == ["fetchai/error:0.2.0"]
 
     def test_connections_field_is_not_empty_list(self):
         """Check that the 'connections' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
+        assert self.agent_config["skills"] == ["fetchai/error:0.2.0"]
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""

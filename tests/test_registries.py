@@ -72,7 +72,7 @@ class TestContractRegistry:
             contract.configuration.public_id, cast(Contract, contract)
         )
         cls.expected_contract_ids = {
-            PublicId("fetchai", "erc1155", "0.1.0"),
+            PublicId.from_str("fetchai/erc1155:0.1.0"),
         }
 
     def test_fetch_all(self):
@@ -135,8 +135,8 @@ class TestProtocolRegistry:
         cls.registry.register(protocol_2.public_id, protocol_2)
 
         cls.expected_protocol_ids = {
-            PublicId("fetchai", "default", "0.1.0"),
-            PublicId("fetchai", "fipa", "0.1.0"),
+            PublicId.from_str("fetchai/default:0.1.0"),
+            PublicId.from_str("fetchai/fipa:0.1.0"),
         }
 
     def test_fetch_all(self):
@@ -214,17 +214,17 @@ class TestResources:
             Skill.from_dir(Path(aea.AEA_DIR, "skills", "error"))
         )
 
-        cls.error_skill_public_id = PublicId("fetchai", "error", "0.1.0")
+        cls.error_skill_public_id = PublicId.from_str("fetchai/error:0.2.0")
         cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
         cls.expected_skills = {
-            PublicId("fetchai", "dummy", "0.1.0"),
-            PublicId("fetchai", "error", "0.1.0"),
+            PublicId.from_str("fetchai/dummy:0.1.0"),
+            PublicId.from_str("fetchai/error:0.2.0"),
         }
 
         cls.expected_protocols = {
-            PublicId("fetchai", "default", "0.1.0"),
-            PublicId("fetchai", "oef_search", "0.1.0"),
+            PublicId.from_str("fetchai/default:0.1.0"),
+            PublicId.from_str("fetchai/oef_search:0.1.0"),
         }
 
     def test_unregister_handler(self):
@@ -412,14 +412,7 @@ class TestFilter:
 
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
 
-        cls.aea = AEA(
-            identity,
-            connections,
-            wallet,
-            ledger_apis,
-            resources=resources,
-            is_programmatic=False,
-        )
+        cls.aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
         cls.aea.setup()
 
     def test_handle_internal_messages(self):
@@ -442,7 +435,7 @@ class TestFilter:
         self.aea._filter.handle_internal_messages()
 
         internal_handlers_list = self.aea.resources.get_handlers(
-            PublicId("fetchai", "internal", "0.1.0")
+            PublicId.from_str("fetchai/internal:0.1.0")
         )
         assert len(internal_handlers_list) == 1
         internal_handler = internal_handlers_list[0]
