@@ -251,8 +251,8 @@ class Transaction:
         counterparty_fee: int,
         quantities_by_good_id: Dict[str, int],
         nonce: int,
-        sender_signature: bytes,
-        counterparty_signature: bytes,
+        sender_signature: str,
+        counterparty_signature: str,
     ) -> None:
         """
         Instantiate transaction request.
@@ -322,12 +322,12 @@ class Transaction:
         return self._nonce
 
     @property
-    def sender_signature(self) -> bytes:
+    def sender_signature(self) -> str:
         """Get the sender signature."""
         return self._sender_signature
 
     @property
-    def counterparty_signature(self) -> bytes:
+    def counterparty_signature(self) -> str:
         """Get the counterparty signature."""
         return self._counterparty_signature
 
@@ -381,8 +381,8 @@ class Transaction:
             self.amount <= 0
             and all(quantity >= 0 for quantity in self.quantities_by_good_id.values())
         )
-        assert isinstance(self.sender_signature, bytes) and isinstance(
-            self.counterparty_signature, bytes
+        assert isinstance(self.sender_signature, str) and isinstance(
+            self.counterparty_signature, str
         )
         if self.amount >= 0:
             assert (

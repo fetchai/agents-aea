@@ -4,50 +4,54 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_data_provider:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_data_provider:0.1.0
+aea fetch fetchai/ml_data_provider:0.2.0
 cd ml_data_provider
 ```
 ``` bash
 aea install
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_train:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.1.0
+aea fetch fetchai/ml_model_trainer:0.2.0
 cd ml_model_trainer
 ```
 ``` bash
 aea install
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_data_provider:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/ml_train:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -73,7 +77,7 @@ aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id E
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id ethereum
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 cd ..

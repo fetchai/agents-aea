@@ -65,7 +65,8 @@ def test_preferences_init():
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
     tx_fee = 9
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         exchange_params_by_currency_id=exchange_params,
         utility_params_by_good_id=utility_params,
         tx_fee=tx_fee,
@@ -83,7 +84,8 @@ def test_logarithmic_utility():
     exchange_params = {"FET": 10.0}
     good_holdings = {"good_id": 2}
     tx_fee = 9
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -98,7 +100,8 @@ def test_linear_utility():
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
     tx_fee = 9
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -114,7 +117,8 @@ def test_utility():
     currency_holdings = {"FET": 100}
     good_holdings = {"good_id": 2}
     tx_fee = 9
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -136,14 +140,16 @@ def test_marginal_utility():
     exchange_params = {"FET": 10.0}
     good_holdings = {"good_id": 2}
     tx_fee = 9
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
     )
     delta_good_holdings = {"good_id": 1}
     delta_currency_holdings = {"FET": -5}
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings,
     )
     marginal_utility = preferences.marginal_utility(
@@ -161,10 +167,12 @@ def test_score_diff_from_transaction():
     utility_params = {"good_id": 20.0}
     exchange_params = {"FET": 10.0}
     tx_fee = 3
-    ownership_state = OwnershipState(
+    ownership_state = OwnershipState()
+    ownership_state._set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
     )
-    preferences = Preferences(
+    preferences = Preferences()
+    preferences._set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
