@@ -151,7 +151,9 @@ def ipfs_hashing(
     for result_dict in result_list:
         if configuration.directory.name == result_dict["Name"]:
             key = os.path.join(
-                configuration.author, package_type.to_plural(), configuration.name
+                configuration.author,
+                package_type.to_plural(),
+                configuration.directory.name,
             )
             return key, result_dict["Hash"]
 
@@ -310,7 +312,7 @@ if __name__ == "__main__":
                 key, package_hash = ipfs_hashing(
                     client, configuration_obj, package_type
                 )
-                if package_path.parent == Path("tests", "data"):
+                if package_path.parent == TEST_PATH:
                     test_package_hashes[key] = package_hash
                 else:
                     package_hashes[key] = package_hash
