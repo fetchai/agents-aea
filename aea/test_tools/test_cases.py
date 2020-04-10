@@ -29,7 +29,7 @@ from typing import Any, List
 import pytest
 
 from aea.cli import cli
-from aea.cli.common import DEFAULT_REGISTRY_PATH
+from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.config import AUTHOR, CLI_LOG_OPTION
 from aea.test_tools.exceptions import AEATestingException
