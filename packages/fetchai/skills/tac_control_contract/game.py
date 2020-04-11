@@ -64,9 +64,9 @@ class Phase(Enum):
     PRE_GAME = "pre_game"
     GAME_REGISTRATION = "game_registration"
     GAME_SETUP = "game_setup"
-    GAME_TOKEN_CREATION = "game_token_creation"
-    GAME_TOKENS_CREATED = "game_tokens_created"
-    GAME_TOKEN_MINTING = "game_token_minting"
+    GAME_TOKEN_CREATION = "game_token_creation"  # nosec
+    GAME_TOKENS_CREATED = "game_tokens_created"  # nosec
+    GAME_TOKEN_MINTING = "game_token_minting"  # nosec
     GAME = "game"
     POST_GAME = "post_game"
 

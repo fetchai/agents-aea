@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmRMJUitCefhsTmhshKziFfHvBbkg7RBFda2rn1aZsT3eD
-  game.py: QmdC1Hxawbn3Yn68FqgEzkejwhNnFP9EYWgCFskpkDtRag
-  handlers.py: QmS218R7tMQ5BbQg5G97VNtSu2JEdB2dDADsYHxB6QW9fJ
-  helpers.py: QmbzyW7ESVSg4NFCi1DVG2StzKdKEgc8g6w1t57GPF8bq9
-  parameters.py: QmR5dm2ceJ2wuqQwuhr3XvpYdoN73hFTr8Dv3g5DBLLSMn
+  behaviours.py: QmaFaNvpLXeCtQxi8mQuttuaNoAD6QYAw3xyVAdZfZjbmk
+  game.py: QmbzJUGxpUZQGvBLgEtm1caitNXitcEaZnEB3pTnSvxqJR
+  handlers.py: Qmdaeuq4PkhQ2ptxyqcXDrtXWYveGRTgbhrdANrNMjvcDN
+  helpers.py: QmR8DrtDH2XwtXMXc1W8YPiD3HuP4PfBytSTxH1ZMYwkMW
+  parameters.py: QmbeLfnHx9y2dk3k8CPstNSkqZ2hm8YaXYBawTvCVZtr1o
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.1.0
@@ -38,22 +38,22 @@ models:
     class_name: Game
   parameters:
     args:
-      ledger: ethereum
+      base_good_endowment: 4
+      competition_timeout: 360
       good_ids: []
+      inactivity_timeout: 60
+      item_setup_timeout: 120
+      ledger: ethereum
+      lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
       nb_goods: 10
-      tx_fee: 1
-      base_good_endowment: 4
-      lower_bound_factor: 1
-      upper_bound_factor: 1
-      start_time: 09 03 2020 15:15
       registration_timeout: 60
-      item_setup_timeout: 120
-      competition_timeout: 360
-      inactivity_timeout: 60
-      whitelist: []
+      start_time: 09 03 2020 15:15
+      tx_fee: 1
+      upper_bound_factor: 1
       version_id: v1
+      whitelist: []
     class_name: Parameters
 dependencies:
   numpy: {}
