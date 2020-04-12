@@ -7,18 +7,22 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
-  behaviours.py: QmaFaNvpLXeCtQxi8mQuttuaNoAD6QYAw3xyVAdZfZjbmk
-  game.py: QmbzJUGxpUZQGvBLgEtm1caitNXitcEaZnEB3pTnSvxqJR
-  handlers.py: Qmdaeuq4PkhQ2ptxyqcXDrtXWYveGRTgbhrdANrNMjvcDN
-  helpers.py: QmR8DrtDH2XwtXMXc1W8YPiD3HuP4PfBytSTxH1ZMYwkMW
-  parameters.py: QmbeLfnHx9y2dk3k8CPstNSkqZ2hm8YaXYBawTvCVZtr1o
+  behaviours.py: QmWmHhC2LZ8zqQswtL3aQhiNT5sCJFhucrfyAJKf4tS1b9
+  game.py: QmZrVFDGEmsDD1zRvp75pwcS6nKPYui8yfRotyteFVptrh
+  handlers.py: Qmd2Vcu3uV9n3Wd86stRae7guAkY1Bk4ZvAW9jQVPA8dxV
+  helpers.py: QmdT2RQsWcxzwTk7fEHxwnjTqpX9vWa4C8K38TVD2Wj9Jv
+  parameters.py: QmWYJpgNZGFEp5S5xApB1ehhfBc2MqAev9XSa2vZCzoZk3
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.1.0
+- fetchai/erc1155:0.2.0
 protocols:
 - fetchai/oef_search:0.1.0
 - fetchai/tac:0.1.0
 behaviours:
+  contract:
+    args:
+      tick_interval: 5
+    class_name: ContractBehaviour
   tac:
     args: {}
     class_name: TACBehaviour
@@ -40,6 +44,7 @@ models:
     args:
       base_good_endowment: 4
       competition_timeout: 360
+      currency_ids: []
       good_ids: []
       inactivity_timeout: 60
       item_setup_timeout: 120
@@ -47,7 +52,6 @@ models:
       lower_bound_factor: 1
       min_nb_agents: 2
       money_endowment: 2000000
-      nb_goods: 10
       registration_timeout: 60
       start_time: 09 03 2020 15:15
       tx_fee: 1

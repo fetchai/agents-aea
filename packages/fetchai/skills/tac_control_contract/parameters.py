@@ -27,7 +27,8 @@ from aea.skills.base import Model
 
 DEFAULT_MIN_NB_AGENTS = 5
 DEFAULT_MONEY_ENDOWMENT = 200
-DEFAULT_NB_GOODS = 5
+DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
+DEFAULT_NB_CURRENCIES = 1
 DEFAULT_TX_FEE = 1
 DEFAULT_BASE_GOOD_ENDOWMENT = 2
 DEFAULT_LOWER_BOUND_FACTOR = 1
@@ -51,14 +52,15 @@ class Parameters(Model):
             "contract_adress", None
         )  # type: Optional[str]
         self._good_ids = kwargs.pop("good_ids", [])  # type: List[int]
-        self._currency_id = kwargs.pop("currency_id", None)  # type: Optional[int]
+        self._currency_ids = kwargs.pop("currency_ids", [])  # type: List[int]
         self._min_nb_agents = kwargs.pop(
             "min_nb_agents", DEFAULT_MIN_NB_AGENTS
         )  # type: int
         self._money_endowment = kwargs.pop(
             "money_endowment", DEFAULT_MONEY_ENDOWMENT
         )  # type: int
-        self._nb_goods = kwargs.pop("nb_goods", DEFAULT_NB_GOODS)  # type: int
+        self._nb_goods = DEFAULT_NB_GOODS
+        self._nb_currencies = DEFAULT_NB_CURRENCIES
         self._tx_fee = kwargs.pop("tx_fee", DEFAULT_TX_FEE)
         self._base_good_endowment = kwargs.pop(
             "base_good_endowment", DEFAULT_BASE_GOOD_ENDOWMENT
@@ -91,10 +93,11 @@ class Parameters(Model):
         now = datetime.datetime.now()
         if now > self.registration_start_time:
             self.context.logger.warning(
-                "[{}]: TAC registration start time {} is in the past!".format(
+                "[{}]: TAC registration start time {} is in the past! Deregistering skill.".format(
                     self.context.agent_name, self.registration_start_time
                 )
             )
+            self.context.is_active = False
         else:
             self.context.logger.info(
                 "[{}]: TAC registation start time: {}, and registration end time: {}, and start time: {}, and end time: {}".format(
@@ -127,15 +130,15 @@ class Parameters(Model):
     def good_ids(self) -> List[int]:
         """The item ids of an already deployed smart-contract."""
         assert self.is_contract_deployed, "There is no deployed contract."
-        assert self._good_ids != [], "No good ids provided."
+        assert self._good_ids != [], "No good_ids provided."
         return self._good_ids
 
     @property
-    def currency_id(self) -> int:
-        """The currency id of an already deployed smart-contract."""
+    def currency_ids(self) -> List[int]:
+        """The currency ids of an already deployed smart-contract."""
         assert self.is_contract_deployed, "There is no deployed contract."
-        assert self._currency_id is not None, "No currency_id provided."
-        return self._currency_id
+        assert self._currency_ids != [], "No currency_ids provided."
+        return self._currency_ids
 
     @property
     def min_nb_agents(self) -> int:
@@ -151,6 +154,11 @@ class Parameters(Model):
     def nb_goods(self) -> int:
         """Good number for a TAC instance."""
         return self._nb_goods
+
+    @property
+    def nb_currencies(self) -> int:
+        """Currency number for a TAC instance."""
+        return self._nb_currencies
 
     @property
     def tx_fee(self) -> int:
@@ -214,8 +222,11 @@ class Parameters(Model):
     def _check_consistency(self) -> None:
         """Check the parameters are consistent."""
         if self._contract_address is not None and (
-            self._good_ids is None or self._currency_id is None
+            self._good_ids is []
+            or self._currency_ids is []
+            or len(self._good_ids) != self._nb_goods
+            or len(self._currency_ids) != self._nb_currencies
         ):
             raise ValueError(
-                "If the contract address is set, then good ids and currency id must be provided."
+                "If the contract address is set, then good ids and currency id must be provided and consistent."
             )

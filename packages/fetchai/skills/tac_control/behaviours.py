@@ -167,7 +167,7 @@ class TACBehaviour(Behaviour):
                 self.context.agent_name, game.equilibrium_summary
             )
         )
-        for agent_address in game.configuration.agent_addr_to_name.keys():
+        for agent_address in game.conf.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TacMessage(
                 performative=TacMessage.Performative.GAME_DATA,
@@ -175,11 +175,11 @@ class TACBehaviour(Behaviour):
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
                 utility_params_by_good_id=agent_state.utility_params_by_good_id,
-                tx_fee=game.configuration.tx_fee,
-                currency_id_to_name=game.configuration.currency_id_to_name,
-                agent_addr_to_name=game.configuration.agent_addr_to_name,
-                good_id_to_name=game.configuration.good_id_to_name,
-                version_id=game.configuration.version_id,
+                tx_fee=game.conf.tx_fee,
+                currency_id_to_name=game.conf.currency_id_to_name,
+                agent_addr_to_name=game.conf.agent_addr_to_name,
+                good_id_to_name=game.conf.good_id_to_name,
+                version_id=game.conf.version_id,
             )
             self.context.logger.debug(
                 "[{}]: sending game data to '{}': {}".format(

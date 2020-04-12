@@ -41,6 +41,8 @@ logger = logging.getLogger(__name__)
 ETHEREUM = "ethereum"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
+CONFIRMATION_RETRY_TIMEOUT = 1.0
+MAX_SEND_API_CALL_RETRIES = 60
 
 
 class EthereumCrypto(Crypto):
@@ -271,14 +273,16 @@ class EthereumApi(LedgerApi):
         tx_digest = hex_value.hex()
         logger.debug("TX digest: {}".format(tx_digest))
         if is_waiting_for_confirmation:
-            while True:
-                try:
-                    self._api.eth.getTransactionReceipt(hex_value)
-                    logger.debug("Transaction validated - exiting")
-                    break
-                except web3.exceptions.TransactionNotFound:  # pragma: no cover
+            retry = 0
+            while retry < MAX_SEND_API_CALL_RETRIES:
+                tx_receipt = self._try_get_transaction_receipt(tx_digest)
+                if tx_receipt is None:
                     logger.debug("Transaction not found - sleeping for 3.0 seconds")
-                    time.sleep(3.0)
+                    time.sleep(CONFIRMATION_RETRY_TIMEOUT)
+                    retry += 1
+                else:
+                    logger.debug("Transaction validated - exiting")
+                    retry = MAX_SEND_API_CALL_RETRIES
         return tx_digest
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
@@ -288,21 +292,35 @@ class EthereumApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
-        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
         is_successful = False
-        if tx_status is not None:
-            is_successful = True
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        if tx_receipt is not None:
+            is_successful = tx_receipt.status == 1
         return is_successful
 
-    def get_transaction_status(self, tx_digest: str) -> Any:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction status for a transaction digest.
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the tx status, if present
+        :return: the tx receipt, if present
         """
-        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
-        return tx_status
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        return tx_receipt
+
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+        """
+        Try get the transaction receipt with retries.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx receipt, if present
+        """
+        try:
+            tx_receipt = self._api.eth.getTransactionReceipt(tx_digest)
+        except web3.exceptions.TransactionNotFound as e:
+            logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
+            tx_receipt = None
+        return tx_receipt
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -329,20 +347,34 @@ class EthereumApi(LedgerApi):
         """
         Check whether a transaction is valid or not.
 
+        :param tx_digest: the transaction digest.
         :param seller: the address of the seller.
         :param client: the address of the client.
         :param tx_nonce: the transaction nonce.
         :param amount: the amount we expect to get from the transaction.
-        :param tx_digest: the transaction digest.
-
         :return: True if the random_message is equals to tx['input']
         """
-
-        tx = self._api.eth.getTransaction(tx_digest)
-        is_valid = (
-            tx.get("input") == tx_nonce
-            and tx.get("value") == amount
-            and tx.get("from") == client
-            and tx.get("to") == seller
-        )
+        is_valid = False
+        tx = self._try_get_transaction(tx_digest)
+        if tx is not None:
+            is_valid = (
+                tx.get("input") == tx_nonce
+                and tx.get("value") == amount
+                and tx.get("from") == client
+                and tx.get("to") == seller
+            )
         return is_valid
+
+    def _try_get_transaction(self, tx_digest: str) -> Optional[Any]:
+        """
+        Get the transaction with retries.
+
+        :param tx_digest: the transaction digest.
+        :return: the tx, if found
+        """
+        try:
+            tx = self._api.eth.getTransaction(tx_digest)
+        except Exception as e:
+            logger.debug("Error when attempting getting tx: {}".format(str(e)))
+            tx = None
+        return tx

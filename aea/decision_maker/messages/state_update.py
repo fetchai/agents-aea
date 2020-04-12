@@ -19,10 +19,13 @@
 
 """The state update message module."""
 
+import logging
 from enum import Enum
 from typing import Dict, cast
 
 from aea.decision_maker.messages.base import InternalMessage
+
+logger = logging.getLogger(__name__)
 
 TransactionId = str
 
@@ -61,7 +64,6 @@ class StateUpdateMessage(InternalMessage):
             quantities_by_good_id=quantities_by_good_id,
             **kwargs
         )
-        assert self._is_consistent(), "StateUpdateMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -139,6 +141,8 @@ class StateUpdateMessage(InternalMessage):
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
-        except (AssertionError, KeyError):
+        except (AssertionError, ValueError, KeyError) as e:
+            logger.error(str(e))
             return False
+
         return True

@@ -124,7 +124,8 @@ aea run --connections fetchai/oef:0.2.0
 You can fetch the finished agents:
 ``` bash
 aea fetch fetchai/tac_controller:0.1.0
-aea fetch fetchai/tac_participant:0.1.0
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
 ```
 
 The CLI tool supports the launch of several agents
@@ -136,7 +137,7 @@ can launch the TAC agents as follows:
 - set the default connection `fetchai/oef:0.2.0` for every
 agent;
 - run:
-```bash
+``` bash
 aea launch tac_controller tac_participant_one tac_participant_two
 ```
 
@@ -152,6 +153,7 @@ cd tac_controller_contract
 ```
 
 ### Add the tac control skill
+
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control_contract:0.1.0
@@ -182,8 +184,8 @@ You must set the start time to a point in the future `start_time: 01 01 2020  00
 Alternatively, use the command line to get and set the start time:
 
 ``` bash
-aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 
 ### Fund the controller AEA
@@ -211,11 +213,25 @@ aea get-wealth ethereum
   <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
 </div>
 
-### Run the TAC controller AEA
+
+### Create TAC participant AEAs
+
 ``` bash
-aea run --connections fetchai/oef:0.2.0
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
 ```
-	
+
+Then, cd into each project and set the usage to contract:
+``` bash
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+```
+
+### Run all AEAs
+
+``` bash
+aea launch tac_controller_contract tac_participant_one tac_participant_two
+```
+
 ## Communication
 
 There are two types of interactions:

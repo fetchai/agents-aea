@@ -373,6 +373,7 @@ class Behaviour(SkillComponent, ABC):
                     name=behaviour_id,
                     configuration=behaviour_config,
                     skill_context=skill_context,
+                    **dict(behaviour_config.args),
                 )
                 behaviours[behaviour_id] = behaviour
 
@@ -449,6 +450,7 @@ class Handler(SkillComponent, ABC):
                     name=handler_id,
                     configuration=handler_config,
                     skill_context=skill_context,
+                    **dict(handler_config.args),
                 )
                 handlers[handler_id] = handler
 
@@ -546,7 +548,7 @@ class Model(SkillComponent, ABC):
                     name=model_id,
                     skill_context=skill_context,
                     configuration=model_config,
-                    **dict(model_config.args)
+                    **dict(model_config.args),
                 )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)

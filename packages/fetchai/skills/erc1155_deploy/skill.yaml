@@ -13,7 +13,7 @@ fingerprint:
   strategy.py: QmPUs2LGKJeCrMqeZsv9X1WBuoKDUkbMhAWoxsD6LtfyiG
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.1.0
+- fetchai/erc1155:0.2.0
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0

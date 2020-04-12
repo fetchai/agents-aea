@@ -21,7 +21,7 @@
 
 import os
 from distutils.dir_util import copy_tree
-from typing import cast
+from typing import Optional, cast
 
 import click
 
@@ -33,48 +33,61 @@ from aea.cli.common import (
     try_to_load_agent_config,
 )
 from aea.cli.registry.fetch import fetch_agent
-from aea.configurations.base import PublicId
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
 
 @click.command(name="fetch")
 @click.option("--local", is_flag=True, help="For fetching agent from local folder.")
+@click.option(
+    "--alias", type=str, required=False, help="Provide a local alias for the agent.",
+)
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, local):
+def fetch(click_context, public_id, alias, local):
     """Fetch Agent from Registry."""
     ctx = cast(Context, click_context.obj)
     if local:
         ctx.set_config("is_local", True)
-        _fetch_agent_locally(ctx, public_id, click_context)
+        _fetch_agent_locally(ctx, public_id, click_context, alias)
     else:
-        fetch_agent(ctx, public_id, click_context)
+        fetch_agent(ctx, public_id, click_context, alias)
 
 
-def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> None:
+def _fetch_agent_locally(
+    ctx: Context, public_id: PublicId, click_context, alias: Optional[str]
+) -> None:
     """
     Fetch Agent from local packages.
 
     :param ctx: Context
     :param public_id: public ID of agent to be fetched.
-
+    :param click_context: the click context.
+    :param alias: an optional alias.
     :return: None
     """
     packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
     source_path = _try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
-    target_path = os.path.join(ctx.cwd, public_id.name)
+    folder_name = public_id.name if alias is None else alias
+    target_path = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
     copy_tree(source_path, target_path)
 
-    # add dependencies
     ctx.cwd = target_path
     try_to_load_agent_config(ctx)
 
+    if alias is not None:
+        ctx.agent_config.agent_name = alias
+        ctx.agent_loader.dump(
+            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        )
+
+    # add dependencies
     for item_type in ("skill", "connection", "contract", "protocol"):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)

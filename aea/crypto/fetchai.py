@@ -211,10 +211,10 @@ class FetchAIApi(LedgerApi):
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""
-        tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
+        tx_status = cast(TxStatus, self._get_transaction_receipt(tx_digest))
         is_successful = False
-        if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
-            is_successful = True
+        if tx_status is not None:
+            is_successful = tx_status.status in SUCCESSFUL_TERMINAL_STATES
         return is_successful
 
     def send_signed_transaction(
@@ -228,14 +228,33 @@ class FetchAIApi(LedgerApi):
         """
         raise NotImplementedError
 
-    def get_transaction_status(self, tx_digest: str) -> Any:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction status for a transaction digest.
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the tx status, if present
+        :return: the tx receipt, if present
         """
-        raise NotImplementedError
+        tx_receipt = self._get_transaction_receipt(tx_digest)
+        return tx_receipt
+
+    def _get_transaction_receipt(
+        self, tx_digest: str, max_retries: int = 3
+    ) -> Optional[Any]:
+        """Get the transaction receipt with retries."""
+        retry = 0
+        while retry < max_retries:
+            try:
+                tx_receipt = self._api.tx.status(tx_digest)
+                retry = max_retries
+            except Exception as e:
+                logger.debug(
+                    "Error when attempting getting tx receipt: {}".format(str(e))
+                )
+                retry += 1
+                time.sleep(0.01)
+                tx_receipt = None
+        return tx_receipt
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """

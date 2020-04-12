@@ -66,7 +66,7 @@ The framework supports different types of behaviours:
 There is another category of behaviours, called `CompositeBehaviour`. 
 - `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
   one after the other.
-- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+- `FSMBehaviour`: a state machine of `State` behaviours. 
     A state is in charge of scheduling the next state.
 
 

@@ -19,25 +19,17 @@
 
 """This package contains the handlers."""
 
-from typing import Optional, cast
+from typing import cast
 
-from aea.configurations.base import ProtocolId
 from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
-from packages.fetchai.skills.tac_control_contract.game import Configuration, Game, Phase
-from packages.fetchai.skills.tac_control_contract.helpers import (
-    generate_currency_id,
-    generate_currency_id_to_name,
-    generate_good_id_to_name,
-    generate_good_ids,
-)
+from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 
@@ -64,22 +56,20 @@ class TACHandler(Handler):
         :return: None
         """
         tac_message = cast(TacMessage, message)
-        tac_type = tac_message.performative
-
         game = cast(Game, self.context.game)
 
         self.context.logger.debug(
             "[{}]: Handling TAC message. type={}".format(
-                self.context.agent_name, tac_type
+                self.context.agent_name, tac_message.performative
             )
         )
         if (
-            tac_type == TacMessage.Performative.REGISTER
+            tac_message.performative == TacMessage.Performative.REGISTER
             and game.phase == Phase.GAME_REGISTRATION
         ):
             self._on_register(tac_message)
         elif (
-            tac_type == TacMessage.Performative.UNREGISTER
+            tac_message.performative == TacMessage.Performative.UNREGISTER
             and game.phase == Phase.GAME_REGISTRATION
         ):
             self._on_unregister(tac_message)
@@ -154,7 +144,6 @@ class TACHandler(Handler):
                 protocol_id=TacMessage.protocol_id,
                 message=TacSerializer().encode(tac_msg),
             )
-        self.context.shared_state["agents_participants_counter"] += 1
         game.registration.register_agent(message.counterparty, agent_name)
         self.context.logger.info(
             "[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name)
@@ -225,14 +214,13 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         oef_message = cast(OefSearchMessage, message)
-        oef_type = oef_message.performative
 
         self.context.logger.debug(
             "[{}]: Handling OEF message. type={}".format(
-                self.context.agent_name, oef_type
+                self.context.agent_name, oef_message.performative
             )
         )
-        if oef_type == OefSearchMessage.Performative.OEF_ERROR:
+        if oef_message.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_message)
         else:
             self.context.logger.warning(
@@ -267,16 +255,11 @@ class OEFRegistrationHandler(Handler):
 class TransactionHandler(Handler):
     """Implement the transaction handler."""
 
-    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def __init__(self, **kwargs):
-        """Instantiate the handler."""
-        super().__init__(**kwargs)
-        self.counter = 0
+    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        self.context.shared_state["agents_participants_counter"] = 0
+        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -286,94 +269,48 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         ledger_api = cast(
             EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
         )
         if tx_msg_response.tx_id == "contract_deploy":
-            self.context.logger.info("Sending deployment transaction to the ledger!")
+            game.phase = Phase.CONTRACT_DEPLOYING
+            self.context.logger.info(
+                "[{}]: Sending deployment transaction to the ledger...".format(
+                    self.context.agent_name
+                )
+            )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                is_waiting_for_confirmation=False, tx_signed=tx_signed
             )
-            transaction = ledger_api.get_transaction_status(  # type: ignore
-                tx_digest=tx_digest
-            )
-            if transaction.status != 1:
-                self.context.is_active = False
-                self.context.info(
-                    "The contract did not deployed successfully. Transaction hash: {}. Aborting!".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
-            else:
-                self.context.logger.info(
-                    "The contract was successfully deployed. Contract address: {} and transaction hash: {}".format(
-                        transaction.contractAddress, transaction.transactionHash.hex()
-                    )
-                )
-                contract.set_address(ledger_api, transaction.contractAddress)
-                configuration = Configuration(  # type: ignore
-                    parameters.version_id, parameters.tx_fee,
-                )
-                good_ids = generate_good_ids(parameters.nb_goods, contract)
-                configuration.good_id_to_name = generate_good_id_to_name(good_ids)
-                currency_id = generate_currency_id(contract)
-                configuration.currency_id_to_name = generate_currency_id_to_name(
-                    currency_id
-                )
-                game.conf = configuration
+            game.contract_manager.deploy_tx_digest = tx_digest
         elif tx_msg_response.tx_id == "contract_create_batch":
-            self.context.logger.info("Sending creation transaction to the ledger!")
+            game.phase = Phase.TOKENS_CREATING
+            self.context.logger.info(
+                "[{}]: Sending creation transaction to the ledger...".format(
+                    self.context.agent_name
+                )
+            )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                is_waiting_for_confirmation=False, tx_signed=tx_signed
             )
-            transaction = ledger_api.get_transaction_status(  # type: ignore
-                tx_digest=tx_digest
-            )
-            if transaction.status != 1:
-                self.context.is_active = False
-                self.context.warning(
-                    "The token creation wasn't successful. Transaction hash: {}. Aborting!".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
-            else:
-                self.context.logger.info(
-                    "Successfully created the tokens. Transaction hash: {}".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
-                game.phase = Phase.GAME_TOKENS_CREATED
+            game.contract_manager.create_tokens_tx_digest = tx_digest
         elif tx_msg_response.tx_id == "contract_mint_batch":
-            self.context.logger.info("Sending minting transaction to the ledger!")
+            game.phase = Phase.TOKENS_MINTING
+            self.context.logger.info(
+                "[{}]: Sending minting transaction to the ledger...".format(
+                    self.context.agent_name
+                )
+            )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
+            agent_addr = tx_msg_response.tx_counterparty_addr
             tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                is_waiting_for_confirmation=False, tx_signed=tx_signed
             )
-            transaction = ledger_api.get_transaction_status(  # type: ignore
-                tx_digest=tx_digest
-            )
-            if transaction.status != 1:
-                self.context.is_active = False
-                self.context.logger.warning(
-                    "The token mint wasn't successful. Transaction hash: {}. Aborting!".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
-            else:
-                game.successful_mint_count += 1
-                self.context.logger.info(
-                    "Successfully minted the tokens. Transaction hash: {}".format(
-                        transaction.transactionHash.hex()
-                    )
-                )
-                if game.successful_mint_count == len(game.initial_agent_states):
-                    self.context.logger.info("Can start the game.!")
-                    game.phase = Phase.GAME
+            game.contract_manager.set_mint_tokens_tx_digest(agent_addr, tx_digest)
 
     def teardown(self) -> None:
         """

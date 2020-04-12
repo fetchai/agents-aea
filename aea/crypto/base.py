@@ -193,12 +193,12 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def get_transaction_status(self, tx_digest: str) -> Any:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction status for a transaction digest.
+        Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the tx status, if present
+        :return: the tx receipt, if present
         """
 
     @abstractmethod
