@@ -204,10 +204,10 @@ class Agent(ABC):
 
     def _start_setup(self) -> None:
         """
-        setup Agent on start:
-        - up multiplexer
+        Setup Agent on start:
+        - connect Multiplexer
         - call agent.setup
-        - set started
+        - set liveness to started
 
         :return: None
         """
