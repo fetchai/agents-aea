@@ -244,7 +244,7 @@ class AEABuilder:
             "fetchai"  # set by the user, or instantiate a default one.
         )
         self._default_connection = PublicId("fetchai", "stub", "0.1.0")
-        self.context_namespace = {}  # type: Dict[str, Any]
+        self._context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -395,6 +395,10 @@ class AEABuilder:
         configuration._directory = directory
 
         return self
+
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+        """Set the context namespace."""
+        self._context_namespace = context_namespace
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -599,7 +603,7 @@ class AEABuilder:
             timeout=0.0,
             is_debug=False,
             max_reactions=20,
-            **self.context_namespace
+            **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
         return aea
