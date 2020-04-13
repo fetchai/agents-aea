@@ -25,9 +25,10 @@ import time
 
 import pytest
 
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.generic import (
-    create_default_message,
-    create_envelope,
     read_envelope_from_file,
     write_envelope_to_file,
 )
@@ -45,6 +46,7 @@ class TestEchoSkill(AEATestCase):
         self.initialize_aea()
         agent_name = "my_first_agent"
         self.create_agents(agent_name)
+        file = "my_file"
 
         agent_dir_path = os.path.join(self.t, agent_name)
         os.chdir(agent_dir_path)
@@ -55,8 +57,15 @@ class TestEchoSkill(AEATestCase):
         time.sleep(2.0)
 
         # add sending and receiving envelope from input/output files
-        message = create_default_message(b"hello")
-        expected_envelope = create_envelope(agent_name, message)
+        message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content=b"hello",
+        )
+        expected_envelope = Envelope(
+            to=agent_name,
+            sender=file,
+            protocol_id=message.protocol_id,
+            message=DefaultSerializer().encode(message),
+        )
 
         write_envelope_to_file(expected_envelope)
 

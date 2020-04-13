@@ -23,100 +23,49 @@ from pathlib import Path
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
-from aea.test_tools.config import DEFAULT_INPUT_FILE_NAME, DEFAULT_OUTPUT_FILE_NAME
 
 
-def create_default_message(
-    content, dialogue_reference=("", ""), message_id=1, target=0,
-):
-    """
-    Create a default message.
-
-    :param content: bytes str message content.
-
-    :return: DefaultMessage
-    """
-    return DefaultMessage(
-        dialogue_reference=dialogue_reference,
-        message_id=message_id,
-        target=target,
-        performative=DefaultMessage.Performative.BYTES,
-        content=content,
-    )
-
-
-def create_envelope(
-    agent_name, message, sender="sender", protocol_id=DefaultMessage.protocol_id,
-):
-    """
-    Create an envelope.
-
-    :param agent_name: str agent name.
-    :param message: str or DefaultMessage object message.
-
-    :return: Envelope
-    """
-    if type(message) == DefaultMessage:
-        message = DefaultSerializer().encode(message)
-
-    return Envelope(
-        to=agent_name, sender=sender, protocol_id=protocol_id, message=message
-    )
-
-
-def encode_envelope(envelope: Envelope) -> bytes:
-    """
-    Encode an envelope.
-
-    :param envelope: Envelope.
-
-    :return: str encoded envelope.
-    """
-    encoded_envelope = "{},{},{},{},".format(
-        envelope.to,
-        envelope.sender,
-        envelope.protocol_id,
-        envelope.message.decode("utf-8"),
-    )
-    return encoded_envelope.encode("utf-8")
-
-
-def write_envelope_to_file(envelope: Envelope) -> None:
+def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
     """
     Write an envelope to input_file.
     Run from agent's directory.
 
     :param envelope: Envelope.
+    :param file_path: the file path
 
     :return: None
     """
-    encoded_envelope = encode_envelope(envelope)
-    with open(Path(DEFAULT_INPUT_FILE_NAME), "ab+") as f:
+    encoded_envelope_str = "{},{},{},{},".format(
+        envelope.to,
+        envelope.sender,
+        envelope.protocol_id,
+        envelope.message.decode("utf-8"),
+    )
+    encoded_envelope = encoded_envelope_str.encode("utf-8")
+    with open(Path(file_path), "ab+") as f:
         f.write(encoded_envelope)
         f.flush()
 
 
-def read_envelope_from_file():
+def read_envelope_from_file(file_path: str):
     """
     Readlines the output_file.
     Run from agent's directory.
 
-    :return: list lines content of output_file.
+    :param file_path the file path.
+
+    :return: envelope
     """
     lines = []
-    with open(Path(DEFAULT_OUTPUT_FILE_NAME), "rb+") as f:
+    with open(Path(file_path), "rb+") as f:
         lines.extend(f.readlines())
 
     assert len(lines) == 2
     line = lines[0] + lines[1]
-    to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
-    to = to.decode("utf-8")
-    sender = sender.decode("utf-8")
-    protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
+    to_b, sender_b, protocol_id_b, message, end = line.strip().split(b",", maxsplit=4)
+    to = to_b.decode("utf-8")
+    sender = sender_b.decode("utf-8")
+    protocol_id = PublicId.from_str(protocol_id_b.decode("utf-8"))
     assert end in [b"", b"\n"]
 
-    return create_envelope(
-        agent_name=to, message=message, sender=sender, protocol_id=protocol_id
-    )
+    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)

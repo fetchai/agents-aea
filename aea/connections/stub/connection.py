@@ -34,6 +34,8 @@ from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_INPUT_FILE_NAME = "input_file"
+DEFAULT_OUTPUT_FILE_NAME = "output_file"
 SEPARATOR = b","
 
 
@@ -235,9 +237,11 @@ class StubConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = configuration.config.get("input_file", "./input_file")  # type: str
+        input_file = configuration.config.get(
+            DEFAULT_INPUT_FILE_NAME, "./" + DEFAULT_INPUT_FILE_NAME
+        )  # type: str
         output_file = configuration.config.get(
-            "output_file", "./output_file"
+            DEFAULT_OUTPUT_FILE_NAME, "./" + DEFAULT_OUTPUT_FILE_NAME
         )  # type: str
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
