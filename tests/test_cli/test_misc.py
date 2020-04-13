@@ -74,7 +74,7 @@ Commands:
   gui              Run the CLI GUI.
   init             Initialize your AEA configurations.
   install          Install the dependencies.
-  launch           Launch many agents.
+  launch           Launch many agents at the same time.
   list             List the installed resources.
   login            Login to Registry account.
   logout           Logout from Registry account.

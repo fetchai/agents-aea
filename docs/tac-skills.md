@@ -232,6 +232,10 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea launch tac_controller_contract tac_participant_one tac_participant_two
 ```
 
+You may want to try `--multithreaded`
+option in order to run the agents
+in the same process.
+	
 ## Communication
 
 There are two types of interactions:

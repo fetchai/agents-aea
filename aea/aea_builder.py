@@ -35,11 +35,11 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageType,
     ProtocolConfig,
     PublicId,
     SkillConfig,
@@ -649,7 +649,7 @@ class AEABuilder:
         try:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
-                loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+                loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)
         except FileNotFoundError:
@@ -694,7 +694,7 @@ class AEABuilder:
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
 
-        loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
         # set name and other configurations
