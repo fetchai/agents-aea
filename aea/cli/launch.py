@@ -25,10 +25,13 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 from subprocess import Popen  # nosec
+from threading import Thread
 from typing import List, cast
 
 import click
 
+from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
 
@@ -42,6 +45,7 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
     """
     Launch many agents using subprocesses.
 
+    :param agents: the click context.
     :param agents: list of paths to agent projects.
     :return: None
     """
@@ -81,10 +85,43 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
     sys.exit(failed)
 
 
+def _launch_threads(click_context: click.Context, agents: List[Path]):
+    """
+    Launch many agents, multithreaded.
+
+    :param agents: the click context.
+    :param agents: list of paths to agent projects.
+    :return: None
+    """
+    aeas = []  # type: List[AEA]
+    for agent_directory in agents:
+        aeas.append(AEABuilder.from_aea_project(agent_directory).build())
+
+    threads = [Thread(target=agent.start) for agent in aeas]
+    for t in threads:
+        t.start()
+
+    try:
+        for t in threads:
+            t.join()
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt detected.")
+    finally:
+        for idx, agent in enumerate(aeas):
+            if not agent.liveness.is_stopped:
+                agent.stop()
+            threads[idx].join()
+            logger.info("Agent {} has been stopped.".format(agent.name))
+
+
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
+@click.option("--multithreaded", is_flag=True)
 @click.pass_context
-def launch(click_context, agents: List[str]):
-    """Launch many agents."""
+def launch(click_context, agents: List[str], multithreaded: bool):
+    """Launch many agents at the same time."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    _launch_subprocesses(click_context, agents_directories)
+    if not multithreaded:
+        _launch_subprocesses(click_context, agents_directories)
+    else:
+        _launch_threads(click_context, agents_directories)

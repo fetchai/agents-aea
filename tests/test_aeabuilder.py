@@ -29,8 +29,8 @@ from .conftest import CUR_PATH
 
 def test_default_timeout_for_agent():
     """
-        Tests agents loop sleep timeout
-        set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT
+    Tests agents loop sleep timeout
+    set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT
     """
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")

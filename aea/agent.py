@@ -204,7 +204,12 @@ class Agent(ABC):
 
     def _start_setup(self) -> None:
         """
-            setup Agent on start
+        Setup Agent on start:
+        - connect Multiplexer
+        - call agent.setup
+        - set liveness to started
+
+        :return: None
         """
         if not self.is_debug:
             self.multiplexer.connect()

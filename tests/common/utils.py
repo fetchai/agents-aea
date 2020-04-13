@@ -35,14 +35,14 @@ class TimeItResult:
 @contextmanager
 def timeit_context():
     """
-        context manager to measure execution time of code in context
+    context manager to measure execution time of code in context
 
-        :return TimeItResult
+    :return TimeItResult
 
-        example:
-        with timeit_context() as result:
-            do_long_code()
-        print("Long code takes ", result.time_passed)
+    example:
+    with timeit_context() as result:
+        do_long_code()
+    print("Long code takes ", result.time_passed)
     """
 
     result = TimeItResult()
