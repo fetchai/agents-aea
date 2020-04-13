@@ -25,6 +25,10 @@ import time
 
 import pytest
 
+from aea.connections.stub.connection import (
+    DEFAULT_INPUT_FILE_NAME,
+    DEFAULT_OUTPUT_FILE_NAME,
+)
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -46,7 +50,6 @@ class TestEchoSkill(AEATestCase):
         self.initialize_aea()
         agent_name = "my_first_agent"
         self.create_agents(agent_name)
-        file = "my_file"
 
         agent_dir_path = os.path.join(self.t, agent_name)
         os.chdir(agent_dir_path)
@@ -60,22 +63,22 @@ class TestEchoSkill(AEATestCase):
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES, content=b"hello",
         )
-        expected_envelope = Envelope(
+        sent_envelope = Envelope(
             to=agent_name,
-            sender=file,
+            sender="sender",
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
 
-        write_envelope_to_file(expected_envelope)
+        write_envelope_to_file(sent_envelope, DEFAULT_INPUT_FILE_NAME)
 
         time.sleep(2.0)
-        actual_envelope = read_envelope_from_file()
-        assert expected_envelope.to == actual_envelope.sender
-        assert expected_envelope.sender == actual_envelope.to
-        assert expected_envelope.protocol_id == actual_envelope.protocol_id
-        assert expected_envelope.message == actual_envelope.message
-        time.sleep(2.0)
+        received_envelope = read_envelope_from_file(DEFAULT_OUTPUT_FILE_NAME)
+
+        assert sent_envelope.to == received_envelope.sender
+        assert sent_envelope.sender == received_envelope.to
+        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert sent_envelope.message == received_envelope.message
 
         process.send_signal(signal.SIGINT)
         process.wait(timeout=20)

@@ -27,8 +27,7 @@ from aea.mail.base import Envelope
 
 def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
     """
-    Write an envelope to input_file.
-    Run from agent's directory.
+    Write an envelope to a file.
 
     :param envelope: Envelope.
     :param file_path: the file path
@@ -49,8 +48,7 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
 
 def read_envelope_from_file(file_path: str):
     """
-    Readlines the output_file.
-    Run from agent's directory.
+    Read an envelope from a file.
 
     :param file_path the file path.
 

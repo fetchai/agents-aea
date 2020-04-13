@@ -34,8 +34,10 @@ from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_INPUT_FILE_NAME = "input_file"
-DEFAULT_OUTPUT_FILE_NAME = "output_file"
+INPUT_FILE_KEY = "input_file"
+OUTPUT_FILE_KEY = "output_file"
+DEFAULT_INPUT_FILE_NAME = "./input_file"
+DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
 
@@ -104,7 +106,7 @@ class StubConnection(Connection):
 
     or:
 
-        #>>> fp = open("input_file", "ab+")
+        #>>> fp = open(DEFAULT_INPUT_FILE_NAME, "ab+")
         #>>> fp.write(b"...\n")
 
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
@@ -238,10 +240,10 @@ class StubConnection(Connection):
         :return: the connection object
         """
         input_file = configuration.config.get(
-            DEFAULT_INPUT_FILE_NAME, "./" + DEFAULT_INPUT_FILE_NAME
+            INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
         )  # type: str
         output_file = configuration.config.get(
-            DEFAULT_OUTPUT_FILE_NAME, "./" + DEFAULT_OUTPUT_FILE_NAME
+            OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )  # type: str
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
