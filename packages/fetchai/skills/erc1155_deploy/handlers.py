@@ -19,6 +19,7 @@
 
 """This package contains the handlers of the erc1155 deploy skill AEA."""
 
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -237,8 +238,11 @@ class TransactionHandler(Handler):
         if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -262,8 +266,11 @@ class TransactionHandler(Handler):
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -284,8 +291,11 @@ class TransactionHandler(Handler):
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -316,8 +326,11 @@ class TransactionHandler(Handler):
         ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )

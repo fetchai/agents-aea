@@ -55,7 +55,7 @@ def fetch(click_context, public_id, alias, local):
 
 
 def _fetch_agent_locally(
-    ctx: Context, public_id: PublicId, click_context, alias: Optional[str]
+    ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
 ) -> None:
     """
     Fetch Agent from local packages.

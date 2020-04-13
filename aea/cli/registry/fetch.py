@@ -31,7 +31,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 def fetch_agent(
-    ctx: Context, public_id: PublicId, click_context, alias: Optional[str]
+    ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
 ) -> None:
     """
     Fetch Agent from Registry.

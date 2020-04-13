@@ -282,10 +282,16 @@ class TransactionHandler(Handler):
                 )
             )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=False, tx_signed=tx_signed
-            )
-            game.contract_manager.deploy_tx_digest = tx_digest
+            tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
+            if tx_digest is None:
+                self.context.logger.warning(
+                    "[{}]: Sending transaction failed. Aborting!".format(
+                        self.context.agent_name
+                    )
+                )
+                self.context.is_active = False
+            else:
+                game.contract_manager.deploy_tx_digest = tx_digest
         elif tx_msg_response.tx_id == "contract_create_batch":
             game.phase = Phase.TOKENS_CREATING
             self.context.logger.info(
@@ -294,10 +300,16 @@ class TransactionHandler(Handler):
                 )
             )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=False, tx_signed=tx_signed
-            )
-            game.contract_manager.create_tokens_tx_digest = tx_digest
+            tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
+            if tx_digest is None:
+                self.context.logger.warning(
+                    "[{}]: Sending transaction failed. Aborting!".format(
+                        self.context.agent_name
+                    )
+                )
+                self.context.is_active = False
+            else:
+                game.contract_manager.create_tokens_tx_digest = tx_digest
         elif tx_msg_response.tx_id == "contract_mint_batch":
             game.phase = Phase.TOKENS_MINTING
             self.context.logger.info(
@@ -307,10 +319,16 @@ class TransactionHandler(Handler):
             )
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             agent_addr = tx_msg_response.tx_counterparty_addr
-            tx_digest = ledger_api.send_signed_transaction(
-                is_waiting_for_confirmation=False, tx_signed=tx_signed
-            )
-            game.contract_manager.set_mint_tokens_tx_digest(agent_addr, tx_digest)
+            tx_digest = ledger_api.send_signed_transaction(tx_signed=tx_signed)
+            if tx_digest is None:
+                self.context.logger.warning(
+                    "[{}]: Sending transaction failed. Aborting!".format(
+                        self.context.agent_name
+                    )
+                )
+                self.context.is_active = False
+            else:
+                game.contract_manager.set_mint_tokens_tx_digest(agent_addr, tx_digest)
 
     def teardown(self) -> None:
         """

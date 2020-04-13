@@ -84,14 +84,12 @@ class TestLedgerApis:
         with mock.patch.object(api.api.eth, "getBalance", return_value=10):
             balance = ledger_apis.token_balance(ETHEREUM, eth_address)
             assert balance == 10
-            assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
 
         with mock.patch.object(
-            api.api.eth, "getBalance", return_value=0, side_effect=Exception
+            api.api.eth, "getBalance", return_value=-1, side_effect=Exception
         ):
             balance = ledger_apis.token_balance(ETHEREUM, fet_address)
-            assert balance == 0, "This must be 0 since the address is wrong"
-            assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"
+            assert balance == -1, "This must be -1 since the address is wrong"
 
     def test_unknown_token_balance(self):
         """Test the token_balance for the unknown tokens."""
@@ -114,14 +112,12 @@ class TestLedgerApis:
         with mock.patch.object(api.api.tokens, "balance", return_value=10):
             balance = ledger_apis.token_balance(FETCHAI, fet_address)
             assert balance == 10
-            assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
 
         with mock.patch.object(
-            api.api.tokens, "balance", return_value=0, side_effect=Exception
+            api.api.tokens, "balance", return_value=-1, side_effect=Exception
         ):
             balance = ledger_apis.token_balance(FETCHAI, eth_address)
-            assert balance == 0, "This must be 0 since the address is wrong"
-            assert ledger_apis.last_tx_statuses[FETCHAI] == "ERROR"
+            assert balance == -1, "This must be -1 since the address is wrong"
 
     def test_transfer_fetchai(self):
         """Test the transfer function for fetchai token."""
@@ -146,7 +142,6 @@ class TestLedgerApis:
                     tx_nonce="transaction nonce",
                 )
                 assert tx_digest is not None
-                assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
 
     def test_failed_transfer_fetchai(self):
         """Test the transfer function for fetchai token fails."""
@@ -173,7 +168,6 @@ class TestLedgerApis:
                     tx_nonce="transaction nonce",
                 )
                 assert tx_digest is None
-                assert ledger_apis.last_tx_statuses[FETCHAI] == "ERROR"
 
     # def test_transfer_ethereum(self):
     #     """Test the transfer function for ethereum token."""
@@ -219,7 +213,6 @@ class TestLedgerApis:
     #                             tx_nonce="transaction nonce",
     #                         )
     #                         assert tx_digest is not None
-    #                         assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
 
     def test_failed_transfer_ethereum(self):
         """Test the transfer function for ethereum token fails."""
@@ -243,7 +236,6 @@ class TestLedgerApis:
                 tx_nonce="transaction nonce",
             )
             assert tx_digest is None
-            assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"
 
     def test_is_tx_settled_fetchai(self):
         """Test if the transaction is settled for fetchai."""
@@ -252,30 +244,17 @@ class TestLedgerApis:
             FETCHAI,
         )
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
-        with pytest.raises(AssertionError):
-            ledger_apis._is_tx_settled("Unknown", tx_digest=tx_digest)
-
-        tx_status = TxStatus(
-            digest=tx_digest.encode(),
-            status="Executed",
-            exit_code=0,
-            charge=2,
-            charge_rate=1,
-            fee=10,
-        )
         with mock.patch.object(
-            ledger_apis.apis[FETCHAI].api.tx, "status", return_value=tx_status
+            ledger_apis.apis[FETCHAI], "is_transaction_settled", return_value=True
         ):
-            is_successful = ledger_apis._is_tx_settled(FETCHAI, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(FETCHAI, tx_digest=tx_digest)
             assert is_successful
-            assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
 
         with mock.patch.object(
-            ledger_apis.apis[FETCHAI].api.tx, "status", side_effect=Exception
+            ledger_apis.apis[FETCHAI], "is_transaction_settled", return_value=False
         ):
-            is_successful = ledger_apis._is_tx_settled(FETCHAI, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(FETCHAI, tx_digest=tx_digest)
             assert not is_successful
-            assert ledger_apis.last_tx_statuses[FETCHAI] == "ERROR"
 
     def test_is_tx_settled_ethereum(self):
         """Test if the transaction is settled for eth."""
@@ -284,26 +263,21 @@ class TestLedgerApis:
             FETCHAI,
         )
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
-        result = HexBytes(
-            "0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a"
-        )
         with mock.patch.object(
-            ledger_apis.apis[ETHEREUM].api.eth,
-            "getTransactionReceipt",
-            return_value=result,
+            ledger_apis.apis[ETHEREUM],
+            "is_transaction_settled",
+            return_value=True,
         ):
-            is_successful = ledger_apis._is_tx_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(ETHEREUM, tx_digest=tx_digest)
             assert is_successful
-            assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
 
         with mock.patch.object(
-            ledger_apis.apis[ETHEREUM].api.eth,
-            "getTransactionReceipt",
-            side_effect=Exception,
+            ledger_apis.apis[ETHEREUM],
+            "is_transaction_settled",
+            return_value=False,
         ):
-            is_successful = ledger_apis._is_tx_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(ETHEREUM, tx_digest=tx_digest)
             assert not is_successful
-            assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"
 
     @mock.patch("time.time", mock.MagicMock(return_value=1579533928))
     def test_validate_ethereum_transaction(self):
@@ -419,28 +393,27 @@ class TestLedgerApis:
                 )
                 assert result
 
-    @mock.patch("aea.crypto.ledger_apis.FetchAIApi.generate_tx_nonce", _raise_exception)
-    def test_generate_tx_nonce_negative(self, *mocks):
-        """Test generate_tx_nonce init negative result."""
+    def test_generate_tx_nonce_positive(self, *mocks):
+        """Test generate_tx_nonce positive result."""
         ledger_apis = LedgerApis(
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
         result = ledger_apis.generate_tx_nonce(FETCHAI, "seller", "client")
-        assert result == ""
+        assert result != ""
 
-    @mock.patch(
-        "aea.crypto.ledger_apis.FetchAIApi.validate_transaction", _raise_exception
-    )
     def test_is_tx_valid_negative(self, *mocks):
         """Test is_tx_valid init negative result."""
         ledger_apis = LedgerApis(
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        result = ledger_apis.is_tx_valid(
-            FETCHAI, "tx_digest", "seller", "client", "tx_nonce", 1
-        )
+        with mock.patch.object(
+            ledger_apis.apis.get(FETCHAI), "is_transaction_valid", return_value=False
+        ):
+            result = ledger_apis.is_tx_valid(
+                FETCHAI, "tx_digest", "seller", "client", "tx_nonce", 1
+            )
         assert not result
 
     def test_has_default_ledger_positive(self):

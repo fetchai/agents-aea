@@ -226,6 +226,7 @@ class SkillComponent(ABC):
         name: Optional[str] = None,
         configuration: Optional[SkillComponentConfiguration] = None,
         skill_context: Optional[SkillContext] = None,
+        **kwargs,
     ):
         """
         Initialize a skill component.
@@ -241,6 +242,10 @@ class SkillComponent(ABC):
         self._configuration = configuration
         self._name = name
         self._context = skill_context
+        if len(kwargs) != 0:
+            logger.warning(
+                "The kwargs={} passed to {} have not been set!".format(kwargs, name)
+            )
 
     @property
     def name(self) -> str:
@@ -459,16 +464,6 @@ class Handler(SkillComponent, ABC):
 
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
-
-    def __init__(self, **kwargs):
-        """
-        Initialize a model.
-
-        :param kwargs: keyword arguments.
-        """
-        super().__init__(
-            kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context")
-        )
 
     def setup(self) -> None:
         """Set the class up."""

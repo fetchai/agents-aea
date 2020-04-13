@@ -22,7 +22,7 @@
 import logging
 import sys
 import time
-from typing import Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
@@ -32,15 +32,14 @@ from aea.mail.base import Address
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
 SUPPORTED_CURRENCIES = {ETHEREUM: "ETH", FETCHAI: "FET"}
+IDENTIFIER_FOR_UNAVAILABLE_BALANCE = -1
 
 logger = logging.getLogger(__name__)
 
 MAX_CONNECTION_RETRY = 3
 GAS_PRICE = "50"
 GAS_ID = "gwei"
-UNKNOWN = "UNKNOWN"
-OK = "OK"
-ERROR = "ERROR"
+LEDGER_STATUS_UNKNOWN = "UNKNOWN"
 
 
 class LedgerApis:
@@ -59,9 +58,7 @@ class LedgerApis:
         """
         apis = {}  # type: Dict[str, LedgerApi]
         configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
-        self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
-            self._last_tx_statuses[identifier] = UNKNOWN
             retry = 0
             is_connected = False
             if identifier == FETCHAI:
@@ -155,8 +152,9 @@ class LedgerApis:
 
     @property
     def last_tx_statuses(self) -> Dict[str, str]:
-        """Get the statuses for the last transaction."""
-        return self._last_tx_statuses
+        """Get last tx statuses."""
+        logger.warning("This API is deprecated, please no longer use this API.")
+        return {identifier: LEDGER_STATUS_UNKNOWN for identifier in self.apis.keys()}
 
     @property
     def default_ledger_id(self) -> str:
@@ -173,17 +171,12 @@ class LedgerApis:
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[identifier]
-        try:
-            balance = api.get_balance(address)
-            self._last_tx_statuses[identifier] = OK
-        except Exception:
-            logger.warning(
-                "An error occurred while attempting to get the current balance."
-            )
-            self._last_tx_statuses[identifier] = ERROR
-            # TODO raise exception instead of returning zero.
-            balance = 0
-        return balance
+        balance = api.get_balance(address)
+        if balance is None:
+            _balance = IDENTIFIER_FOR_UNAVAILABLE_BALANCE
+        else:
+            _balance = balance
+        return _balance
 
     def transfer(
         self,
@@ -209,20 +202,24 @@ class LedgerApis:
             crypto_object.identifier in self.apis.keys()
         ), "Unsupported ledger identifier."
         api = self.apis[crypto_object.identifier]
-        logger.info("Waiting for the validation of the transaction ...")
-        try:
-            tx_digest = api.send_transaction(
-                crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs,
-            )
-            logger.info("transaction validated. TX digest: {}".format(tx_digest))
-            self._last_tx_statuses[crypto_object.identifier] = OK
-        except Exception:
-            logger.warning("An error occurred while attempting the transfer.")
-            tx_digest = None
-            self._last_tx_statuses[crypto_object.identifier] = ERROR
+        tx_digest = api.transfer(
+            crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs,
+        )
         return tx_digest
 
-    def _is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
+    def send_signed_transaction(self, identifier: str, tx_signed: Any) -> Optional[str]:
+        """
+        Send a signed transaction and wait for confirmation.
+
+        :param tx_signed: the signed transaction
+        :return: the tx_digest, if present
+        """
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
+        api = self.apis[identifier]
+        tx_digest = api.send_signed_transaction(tx_signed)
+        return tx_digest
+
+    def is_transaction_settled(self, identifier: str, tx_digest: str) -> bool:
         """
         Check whether the transaction is settled and correct.
 
@@ -232,18 +229,25 @@ class LedgerApis:
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[identifier]
-        try:
-            is_successful = api.is_transaction_settled(tx_digest)
-            self._last_tx_statuses[identifier] = OK
-        except Exception:
-            logger.warning(
-                "An error occured while attempting to check the transaction!"
-            )
-            is_successful = False
-            self._last_tx_statuses[identifier] = ERROR
-        return is_successful
+        is_settled = api.is_transaction_settled(tx_digest)
+        return is_settled
 
     def is_tx_valid(
+        self,
+        identifier: str,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """Kept for backwards compatibility!"""
+        logger.warning("This is a deprecated api, use 'is_transaction_valid' instead")
+        return self.is_transaction_valid(
+            identifier, tx_digest, seller, client, tx_nonce, amount
+        )
+
+    def is_transaction_valid(
         self,
         identifier: str,
         tx_digest: str,
@@ -263,19 +267,9 @@ class LedgerApis:
         :param amount: the amount we expect to get from the transaction.
         :return: True if is valid , False otherwise
         """
-        assert identifier in self.apis.keys()
-        is_settled = self._is_tx_settled(identifier=identifier, tx_digest=tx_digest)
+        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
         api = self.apis[identifier]
-        try:
-            tx_valid = api.validate_transaction(
-                tx_digest, seller, client, tx_nonce, amount
-            )
-        except Exception:
-            logger.warning(
-                "An error occurred while attempting to validate the transaction."
-            )
-            tx_valid = False
-        is_valid = is_settled and tx_valid
+        is_valid = api.is_transaction_valid(tx_digest, seller, client, tx_nonce, amount)
         return is_valid
 
     def generate_tx_nonce(
@@ -289,16 +283,7 @@ class LedgerApis:
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        if identifier in self.apis.keys():
-            try:
-                api = self.apis[identifier]
-                tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
-            except Exception:
-                logger.warning(
-                    "An error occurred while attempting to generate the tx_nonce."
-                )
-                tx_nonce = ""
-        else:
-            logger.warning("You didn't specify a ledger so the tx_nonce will be Empty.")
-            tx_nonce = ""
+        assert identifier in self.apis.keys(), "Not a registered ledger api identifier."
+        api = self.apis[identifier]
+        tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
         return tx_nonce

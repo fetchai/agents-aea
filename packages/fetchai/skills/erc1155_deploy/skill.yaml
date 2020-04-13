@@ -1,6 +1,6 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
 license: Apache-2.0
