@@ -226,6 +226,7 @@ class SkillComponent(ABC):
         name: Optional[str] = None,
         configuration: Optional[SkillComponentConfiguration] = None,
         skill_context: Optional[SkillContext] = None,
+        **kwargs,
     ):
         """
         Initialize a skill component.
@@ -241,6 +242,10 @@ class SkillComponent(ABC):
         self._configuration = configuration
         self._name = name
         self._context = skill_context
+        if len(kwargs) != 0:
+            logger.warning(
+                "The kwargs={} passed to {} have not been set!".format(kwargs, name)
+            )
 
     @property
     def name(self) -> str:
@@ -373,6 +378,7 @@ class Behaviour(SkillComponent, ABC):
                     name=behaviour_id,
                     configuration=behaviour_config,
                     skill_context=skill_context,
+                    **dict(behaviour_config.args),
                 )
                 behaviours[behaviour_id] = behaviour
 
@@ -449,6 +455,7 @@ class Handler(SkillComponent, ABC):
                     name=handler_id,
                     configuration=handler_config,
                     skill_context=skill_context,
+                    **dict(handler_config.args),
                 )
                 handlers[handler_id] = handler
 
@@ -457,16 +464,6 @@ class Handler(SkillComponent, ABC):
 
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""
-
-    def __init__(self, **kwargs):
-        """
-        Initialize a model.
-
-        :param kwargs: keyword arguments.
-        """
-        super().__init__(
-            kwargs.get("name"), kwargs.get("configuration"), kwargs.get("skill_context")
-        )
 
     def setup(self) -> None:
         """Set the class up."""
@@ -546,7 +543,7 @@ class Model(SkillComponent, ABC):
                     name=model_id,
                     skill_context=skill_context,
                     configuration=model_config,
-                    **dict(model_config.args)
+                    **dict(model_config.args),
                 )
                 instances[model_id] = model_instance
                 setattr(skill_context, model_id, model_instance)

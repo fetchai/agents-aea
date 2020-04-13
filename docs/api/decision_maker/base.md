@@ -75,16 +75,14 @@ Represent the ownership state of an agent.
 #### `__`init`__`
 
 ```python
- | __init__(amount_by_currency_id: Optional[CurrencyHoldings] = None, quantities_by_good_id: Optional[GoodHoldings] = None, agent_name: str = "")
+ | __init__()
 ```
 
 Instantiate an ownership state object.
 
 **Arguments**:
 
-- `amount_by_currency_id`: the currency endowment of the agent in this state.
-- `quantities_by_good_id`: the good endowment of the agent in this state.
-- `agent_name`: the agent name
+- `decision_maker`: the decision maker
 
 <a name=".aea.decision_maker.base.OwnershipState.is_initialized"></a>
 #### is`_`initialized
@@ -148,26 +146,6 @@ Apply a list of transactions to (a copy of) the current state.
 **Arguments**:
 
 - `transactions`: the sequence of transaction messages.
-
-**Returns**:
-
-the final state.
-
-<a name=".aea.decision_maker.base.OwnershipState.apply_state_update"></a>
-#### apply`_`state`_`update
-
-```python
- | apply_state_update(amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int]) -> "OwnershipState"
-```
-
-Apply a state update to (a copy of) the current state.
-
-This method is used to apply a raw state update without a transaction.
-
-**Arguments**:
-
-- `amount_by_currency_id`: the delta in the currency amounts
-- `quantities_by_good_id`: the delta in the quantities by good
 
 **Returns**:
 
@@ -250,16 +228,10 @@ Class to represent the preferences.
 #### `__`init`__`
 
 ```python
- | __init__(exchange_params_by_currency_id: Optional[ExchangeParams] = None, utility_params_by_good_id: Optional[UtilityParams] = None, tx_fee: int = 1)
+ | __init__()
 ```
 
 Instantiate an agent preference object.
-
-**Arguments**:
-
-- `exchange_params_by_currency_id`: the exchange params.
-- `utility_params_by_good_id`: the utility params for every asset.
-- `tx_fee`: the acceptable transaction fee.
 
 <a name=".aea.decision_maker.base.Preferences.is_initialized"></a>
 #### is`_`initialized
@@ -405,24 +377,14 @@ A wrapper of a queue to protect which object can read from it.
 #### `__`init`__`
 
 ```python
- | __init__(permitted_caller)
+ | __init__(access_code: str)
 ```
 
 Initialize the protected queue.
 
 **Arguments**:
 
-- `permitted_caller`: the permitted caller to the get method
-
-<a name=".aea.decision_maker.base.ProtectedQueue.permitted_caller"></a>
-#### permitted`_`caller
-
-```python
- | @property
- | permitted_caller() -> "DecisionMaker"
-```
-
-Get the permitted caller.
+- `access_code`: the access code to read from the queue
 
 <a name=".aea.decision_maker.base.ProtectedQueue.put"></a>
 #### put
@@ -504,14 +466,14 @@ None
 #### protected`_`get
 
 ```python
- | protected_get(caller: "DecisionMaker", block=True, timeout=None) -> Optional[InternalMessage]
+ | protected_get(access_code: str, block=True, timeout=None) -> Optional[InternalMessage]
 ```
 
 Access protected get method.
 
 **Arguments**:
 
-- `caller`: the permitted caller
+- `access_code`: the access code
 - `block`: If optional args block is true and timeout is None (the default), block if necessary until an item is available.
 - `timeout`: If timeout is a positive number, it blocks at most timeout seconds and raises the Empty exception if no item was available within that time.
 :raises: ValueError, if caller is not permitted

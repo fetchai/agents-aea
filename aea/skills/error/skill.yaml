@@ -14,8 +14,7 @@ protocols:
 behaviours: {}
 handlers:
   error_handler:
-    args:
-      foo: bar
+    args: {}
     class_name: ErrorHandler
 models: {}
 dependencies: {}

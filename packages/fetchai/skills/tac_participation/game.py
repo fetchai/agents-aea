@@ -159,7 +159,7 @@ class Game(Model):
         )  # type: Optional[str]
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
-        self._configuration = None  # type: Optional[Configuration]
+        self._conf = None  # type: Optional[Configuration]
         self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
 
     @property
@@ -185,12 +185,11 @@ class Game(Model):
         ), "Expected controller address not assigned!"
         return self._expected_controller_addr
 
-    # TODO the name of this property conflicts with the Model.configuration property.
     @property
-    def configuration(self) -> Configuration:  # type: ignore
+    def conf(self) -> Configuration:
         """Get the game configuration."""
-        assert self._configuration is not None, "Game configuration not assigned!"
-        return self._configuration
+        assert self._conf is not None, "Game configuration not assigned!"
+        return self._conf
 
     def init(self, tac_message: TacMessage, controller_addr: Address) -> None:
         """
@@ -210,7 +209,7 @@ class Game(Model):
         assert (
             tac_message.version_id == self.expected_version_id
         ), "TacMessage for unexpected game."
-        self._configuration = Configuration(
+        self._conf = Configuration(
             tac_message.version_id,
             tac_message.tx_fee,
             tac_message.agent_addr_to_name,
