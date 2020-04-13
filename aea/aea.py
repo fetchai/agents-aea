@@ -169,8 +169,12 @@ class AEA(Agent):
             counter += 1
             self._react_one()
 
-    def _react_one(self):
-        """ get and process one envelop from inbox """
+    def _react_one(self) -> None:
+        """
+        Get and process one envelop from inbox
+
+        :return: None
+        """
         envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
         if envelope is not None:
             self._handle(envelope)

@@ -29,8 +29,8 @@ from .conftest import CUR_PATH
 
 def test_default_timeout_for_agent():
     """
-    Tests agents loop sleep timeout
-    set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT
+        Tests agents loop sleep timeout
+        set by AEABuilder.DEFAULT_AGENT_LOOP_TIMEOUT
     """
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
@@ -40,11 +40,11 @@ def test_default_timeout_for_agent():
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
 
     """ Default timeout == 0.05 """
-    agent = builder.build()
-    assert agent._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    aea = builder.build()
+    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
     with timeit_context() as time_result:
-        agent._spin_main_loop()
+        aea._spin_main_loop()
 
     assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
     time_0_05 = time_result.time_passed
@@ -55,11 +55,11 @@ def test_default_timeout_for_agent():
     builder.add_private_key(FETCHAI, private_key_path)
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.001
 
-    agent = builder.build()
-    assert agent._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    aea = builder.build()
+    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
     with timeit_context() as time_result:
-        agent._spin_main_loop()
+        aea._spin_main_loop()
 
     assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
     time_0_001 = time_result.time_passed
@@ -70,11 +70,11 @@ def test_default_timeout_for_agent():
     builder.add_private_key(FETCHAI, private_key_path)
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.0
 
-    agent = builder.build()
-    assert agent._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
+    aea = builder.build()
+    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
     with timeit_context() as time_result:
-        agent._spin_main_loop()
+        aea._spin_main_loop()
 
     assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
     time_0 = time_result.time_passed

@@ -43,7 +43,7 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
-from .common.utils import AgentTool
+from .common.utils import AeaTool
 from .conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
@@ -87,7 +87,7 @@ def test_act():
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
-    AgentTool(agent).spin()
+    AeaTool(agent).spin_main_loop()
 
     behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
     assert behaviour.nb_act_called > 0, "Act() wasn't called"
@@ -129,11 +129,11 @@ def test_react():
         )
 
         try:
-            tool = AgentTool(agent).setup()
+            tool = AeaTool(agent).setup()
 
             agent.outbox.put(envelope)
 
-            tool.wait_inbox().spin()
+            tool.wait_inbox().spin_main_loop()
 
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
@@ -164,17 +164,17 @@ async def test_handle():
         )
         builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        list(agent._connections)[0]._local_node = node
+        list(aea._connections)[0]._local_node = node
 
-        tool = AgentTool(agent)
+        tool = AeaTool(aea)
 
         try:
-            tool.setup().spin()
+            tool.setup().spin_main_loop()
 
-            dummy_skill = agent.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
+            dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.handlers["dummy"]
 
             msg = DefaultMessage(
@@ -187,13 +187,13 @@ async def test_handle():
             message_bytes = DefaultSerializer().encode(msg)
 
             envelope = Envelope(
-                to=agent.identity.address,
-                sender=agent.identity.address,
+                to=aea.identity.address,
+                sender=aea.identity.address,
                 protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
                 message=message_bytes,
             )
             # send envelope via localnode back to agent
-            agent.outbox.put(envelope)
+            aea.outbox.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
             tool.wait_inbox().react_one()
             tool.wait_inbox().react_one()
@@ -201,13 +201,13 @@ async def test_handle():
 
             #   DECODING ERROR
             envelope = Envelope(
-                to=agent.identity.address,
-                sender=agent.identity.address,
+                to=aea.identity.address,
+                sender=aea.identity.address,
                 protocol_id=DefaultMessage.protocol_id,
                 message=b"",
             )
             # send envelope via localnode back to agent
-            agent.outbox.put(envelope)
+            aea.outbox.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
             tool.wait_inbox().react_one()
             tool.wait_inbox().react_one()
@@ -223,20 +223,20 @@ async def test_handle():
                 )
             )
             envelope = Envelope(
-                to=agent.identity.address,
-                sender=agent.identity.address,
+                to=aea.identity.address,
+                sender=aea.identity.address,
                 protocol_id=FipaMessage.protocol_id,
                 message=msg,
             )
             # send envelope via localnode back to agent
-            agent.outbox.put(envelope)
+            aea.outbox.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
             tool.wait_inbox().react_one()
             tool.wait_inbox().react_one()
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
-            agent.stop()
+            aea.stop()
 
 
 class TestInitializeAEAProgrammaticallyFromResourcesDir:
@@ -278,7 +278,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         )
         cls.aea._start_setup()
         cls.aea.outbox.put(envelope)
-        AgentTool(cls.aea).wait_inbox().spin()
+        AeaTool(cls.aea).wait_inbox().spin_main_loop()
 
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
@@ -366,7 +366,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         )
         cls.expected_message.counterparty = cls.agent_name
 
-        tool = AgentTool(cls.aea).setup()
+        tool = AeaTool(cls.aea).setup()
 
         cls.aea.outbox.put(
             Envelope(
@@ -377,7 +377,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
             )
         )
 
-        tool.wait_inbox().spin()
+        tool.wait_inbox().spin_main_loop()
 
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
@@ -441,7 +441,7 @@ class TestAddBehaviourDynamically:
         for skill in resources.get_all_skills():
             skill.skill_context.set_agent_context(cls.agent.context)
 
-        AgentTool(cls.agent).setup().spin()
+        AeaTool(cls.agent).setup().spin_main_loop()
 
     def test_add_behaviour_dynamically(self):
         """Test the dynamic registration of a behaviour."""
@@ -461,7 +461,7 @@ class TestAddBehaviourDynamically:
         first spin adds new behaviour to skill using update(internal messages)
         second runs act for new behaviour
         """
-        AgentTool(self.agent).spin().spin()
+        AeaTool(self.agent).spin_main_loop().spin_main_loop()
 
         assert new_behaviour.nb_act_called > 0
         assert len(self.agent.resources.get_behaviours(dummy_skill_id)) == 2

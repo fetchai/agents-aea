@@ -21,6 +21,8 @@
 import time
 from contextlib import contextmanager
 
+from aea.aea import AEA
+
 DEFAULT_SLEEP = 0.0001
 DEFAULT_TIMEOUT = 3
 
@@ -35,14 +37,14 @@ class TimeItResult:
 @contextmanager
 def timeit_context():
     """
-    context manager to measure execution time of code in context
+        context manager to measure execution time of code in context
 
-    :return TimeItResult
+        :return TimeItResult
 
-    example:
-    with timeit_context() as result:
-        do_long_code()
-    print("Long code takes ", result.time_passed)
+        example:
+        with timeit_context() as result:
+            do_long_code()
+        print("Long code takes ", result.time_passed)
     """
 
     result = TimeItResult()
@@ -53,40 +55,60 @@ def timeit_context():
         result.time_passed = time.time() - started_time
 
 
-class AgentTool:
-    def __init__(self, agent):
-        self.agent = agent
+class AeaTool:
+    def __init__(self, aea: AEA):
+        self.aea = aea
 
-    def setup(self) -> "AgentTool":
-        self.agent._start_setup()
+    def setup(self) -> "AeaTool":
+        self.aea._start_setup()
         return self
 
-    def spin(self) -> "AgentTool":
-        old_timeout, self.agent._timeout = self.agent._timeout, 0
-        self.agent._spin_main_loop()
-        self.agent._timeout = old_timeout
+    def spin_main_loop(self) -> "AeaTool":
+        """
+        Run one cycle of agent's main loop
+
+        :return: AeaTool
+        """
+        old_timeout, self.aea._timeout = self.aea._timeout, 0
+        self.aea._spin_main_loop()
+        self.aea._timeout = old_timeout
         return self
 
     def wait_outbox_empty(
-        self, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT
-    ) -> "AgentTool":
-        """ wait till agent's outbox consumed completely """
+        self, sleep: float = DEFAULT_SLEEP, timeout: float = DEFAULT_TIMEOUT
+    ) -> "AeaTool":
+        """
+        Wait till agent's outbox consumed completely
+
+        :return: AeaTool
+        """
         start_time = time.time()
-        while not self.agent.outbox.empty():
+        while not self.aea.outbox.empty():
             time.sleep(sleep)
             if time.time() - start_time > timeout:
                 raise Exception("timeout")
         return self
 
-    def wait_inbox(self, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT) -> "AgentTool":
-        """ wait till something appears on agents inbox and spin loop """
+    def wait_inbox(
+        self, sleep: float = DEFAULT_SLEEP, timeout: float = DEFAULT_TIMEOUT
+    ) -> "AeaTool":
+        """
+        Wait till something appears on agents inbox and spin loop
+
+        :return: AeaTool
+        """
         start_time = time.time()
-        while self.agent.inbox.empty():
+        while self.aea.inbox.empty():
             time.sleep(sleep)
             if time.time() - start_time > timeout:
                 raise Exception("timeout")
         return self
 
-    def react_one(self) -> "AgentTool":
-        self.agent._react_one()
+    def react_one(self) -> "AeaTool":
+        """
+        Run agent.react once to process inbox messages
+
+        :return: AeaTool
+        """
+        self.aea._react_one()
         return self
