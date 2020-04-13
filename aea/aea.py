@@ -55,6 +55,7 @@ class AEA(Agent):
         timeout: float = 0.0,
         is_debug: bool = False,
         max_reactions: int = 20,
+        **kwargs
     ) -> None:
         """
         Instantiate the agent.
@@ -68,6 +69,7 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
         """
@@ -92,6 +94,7 @@ class AEA(Agent):
             self.decision_maker.preferences,
             self.decision_maker.goal_pursuit_readiness,
             self.task_manager,
+            **kwargs
         )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)

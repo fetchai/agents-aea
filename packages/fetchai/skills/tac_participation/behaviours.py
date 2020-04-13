@@ -21,7 +21,7 @@
 
 from typing import cast
 
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
@@ -29,7 +29,7 @@ from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
 
-class TACBehaviour(Behaviour):
+class TACBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def setup(self) -> None:
@@ -47,8 +47,7 @@ class TACBehaviour(Behaviour):
         :return: None
         """
         game = cast(Game, self.context.game)
-        search = cast(Search, self.context.search)
-        if game.phase.value == Phase.PRE_GAME.value and search.is_time_to_search():
+        if game.phase.value == Phase.PRE_GAME.value:
             self._search_for_tac()
 
     def teardown(self) -> None:

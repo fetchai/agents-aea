@@ -19,8 +19,6 @@
 
 """This module contains tests for transaction."""
 
-import pytest
-
 from aea.configurations.base import PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 
@@ -44,32 +42,32 @@ class TestTransaction:
             info={"some_string": [1, 2]},
             tx_digest="some_string",
         )
-        with pytest.raises(AssertionError):
-            TransactionMessage(
-                performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
-                tx_id="transaction0",
-                tx_sender_addr="pk1",
-                tx_counterparty_addr="pk2",
-                tx_amount_by_currency_id={"FET": -2},
-                tx_sender_fee=0,
-                tx_counterparty_fee=0,
-                tx_quantities_by_good_id={"GOOD_ID": 10},
-                ledger_id="ethereum",
-                info={"some_string": [1, 2]},
-                tx_digest="some_string",
-            )
-        with pytest.raises(AssertionError):
-            TransactionMessage(
-                performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
-                tx_id="transaction0",
-                tx_sender_addr="pk",
-                tx_counterparty_addr="pk",
-                tx_amount_by_currency_id={"Unknown": 2},
-                tx_sender_fee=0,
-                tx_counterparty_fee=0,
-                tx_quantities_by_good_id={"Unknown": 10},
-                ledger_id="fetchai",
-                info={"info": "info_value"},
-            )
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
+            tx_id="transaction0",
+            tx_sender_addr="pk1",
+            tx_counterparty_addr="pk2",
+            tx_amount_by_currency_id={"FET": -2},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"GOOD_ID": 10},
+            ledger_id="ethereum",
+            info={"some_string": [1, 2]},
+            tx_digest="some_string",
+        )
+        assert not tx_msg._is_consistent()
+        tx_msg = TransactionMessage(
+            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
+            tx_id="transaction0",
+            tx_sender_addr="pk",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"Unknown": 2},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"Unknown": 10},
+            ledger_id="fetchai",
+            info={"info": "info_value"},
+        )
+        assert not tx_msg._is_consistent()

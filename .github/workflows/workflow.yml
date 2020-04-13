@@ -50,7 +50,7 @@ jobs:
 
         # install IPFS
         brew install wget
-        wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_darwin-amd64.tar.gz 
+        wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_darwin-amd64.tar.gz
         tar xvfz go-ipfs.tar.gz
         sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
         ipfs init

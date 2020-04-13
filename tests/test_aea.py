@@ -429,8 +429,6 @@ class TestAddBehaviourDynamically:
         resources = Resources()
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
-        cls.input_file = tempfile.mkstemp()[1]
-        cls.output_file = tempfile.mkstemp()[1]
         cls.agent = AEA(
             identity,
             [_make_local_connection(identity.address, LocalNode())],
@@ -470,5 +468,41 @@ class TestAddBehaviourDynamically:
     def teardown_class(cls):
         """Tear the class down."""
         cls.agent.stop()
-        Path(cls.input_file).unlink()
-        Path(cls.output_file).unlink()
+
+
+class TestContextNamespace:
+    """
+    Test that the keyword arguments to AEA constructor
+    can be accessible from the skill context.
+    """
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        agent_name = "my_agent"
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
+        resources = Resources()
+        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        cls.context_namespace = {"key1": 1, "key2": 2}
+        cls.agent = AEA(
+            identity,
+            [_make_local_connection(identity.address, LocalNode())],
+            wallet,
+            ledger_apis,
+            resources,
+            **cls.context_namespace
+        )
+        for skill in resources.get_all_skills():
+            skill.skill_context.set_agent_context(cls.agent.context)
+
+    def test_access_context_namespace(self):
+        """Test that we can access the context namespace."""
+        assert self.agent.context.namespace.key1 == 1
+        assert self.agent.context.namespace.key2 == 2
+
+        for skill in self.agent.resources.get_all_skills():
+            assert skill.skill_context.namespace.key1 == 1
+            assert skill.skill_context.namespace.key2 == 2

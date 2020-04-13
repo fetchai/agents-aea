@@ -19,6 +19,7 @@
 
 """The transaction message module."""
 
+import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Sequence, cast
 
@@ -26,6 +27,8 @@ from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
 from aea.mail.base import Address
+
+logger = logging.getLogger(__name__)
 
 TransactionId = str
 LedgerId = str
@@ -91,7 +94,6 @@ class TransactionMessage(InternalMessage):
             info=info,
             **kwargs
         )
-        assert self._is_consistent(), "Transaction message initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -232,9 +234,6 @@ class TransactionMessage(InternalMessage):
             assert isinstance(
                 self.tx_counterparty_addr, Address
             ), "Tx_counterparty_addr must be of type Address."
-            assert (
-                self.tx_sender_addr != self.tx_counterparty_addr
-            ), "Tx_sender_addr must be different of tx_counterparty_addr."
             assert isinstance(self.tx_amount_by_currency_id, dict) and all(
                 (isinstance(key, str) and isinstance(value, int))
                 for key, value in self.tx_amount_by_currency_id.items()
@@ -304,8 +303,10 @@ class TransactionMessage(InternalMessage):
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
-        except (AssertionError, KeyError):
+        except (AssertionError, ValueError, KeyError) as e:
+            logger.error(str(e))
             return False
+
         return True
 
     @classmethod

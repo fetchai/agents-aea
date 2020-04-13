@@ -205,19 +205,19 @@ Get the underlying API object.
 #### get`_`balance
 
 ```python
- | get_balance(address: AddressLike) -> int
+ | get_balance(address: Address) -> Optional[int]
 ```
 
 Get the balance of a given account.
 
-<a name=".aea.crypto.ethereum.EthereumApi.send_transaction"></a>
-#### send`_`transaction
+<a name=".aea.crypto.ethereum.EthereumApi.transfer"></a>
+#### transfer
 
 ```python
- | send_transaction(crypto: Crypto, destination_address: AddressLike, amount: int, tx_fee: int, tx_nonce: str, is_waiting_for_confirmation: bool = True, chain_id: int = 1, **kwargs) -> Optional[str]
+ | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: int = 1, **kwargs, ,) -> Optional[str]
 ```
 
-Submit a transaction to the ledger.
+Submit a transfer transaction to the ledger.
 
 **Arguments**:
 
@@ -226,18 +226,17 @@ Submit a transaction to the ledger.
 - `amount`: the amount of wealth to be transferred.
 - `tx_fee`: the transaction fee.
 - `tx_nonce`: verifies the authenticity of the tx
-- `is_waiting_for_confirmation`: whether or not to wait for confirmation
 - `chain_id`: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
 
 **Returns**:
 
-tx digest if successful, otherwise None
+tx digest if present, otherwise None
 
 <a name=".aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
- | send_signed_transaction(is_waiting_for_confirmation: bool, tx_signed: Any) -> str
+ | send_signed_transaction(tx_signed: Any) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -245,7 +244,10 @@ Send a signed transaction and wait for confirmation.
 **Arguments**:
 
 - `tx_signed`: the signed transaction
-- `is_waiting_for_confirmation`: whether or not to wait for confirmation
+
+**Returns**:
+
+tx_digest, if present
 
 <a name=".aea.crypto.ethereum.EthereumApi.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
@@ -264,14 +266,14 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_transaction_status"></a>
-#### get`_`transaction`_`status
+<a name=".aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
+#### get`_`transaction`_`receipt
 
 ```python
- | get_transaction_status(tx_digest: str) -> Any
+ | get_transaction_receipt(tx_digest: str) -> Optional[Any]
 ```
 
-Get the transaction status for a transaction digest.
+Get the transaction receipt for a transaction digest (non-blocking).
 
 **Arguments**:
 
@@ -279,7 +281,7 @@ Get the transaction status for a transaction digest.
 
 **Returns**:
 
-the tx status, if present
+the tx receipt, if present
 
 <a name=".aea.crypto.ethereum.EthereumApi.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
@@ -299,22 +301,22 @@ Generate a unique hash to distinguish txs with the same terms.
 
 return the hash in hex.
 
-<a name=".aea.crypto.ethereum.EthereumApi.validate_transaction"></a>
-#### validate`_`transaction
+<a name=".aea.crypto.ethereum.EthereumApi.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
 
 ```python
- | validate_transaction(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
-Check whether a transaction is valid or not.
+Check whether a transaction is valid or not (non-blocking).
 
 **Arguments**:
 
+- `tx_digest`: the transaction digest.
 - `seller`: the address of the seller.
 - `client`: the address of the client.
 - `tx_nonce`: the transaction nonce.
 - `amount`: the amount we expect to get from the transaction.
-- `tx_digest`: the transaction digest.
 
 **Returns**:
 

@@ -257,7 +257,7 @@ This class defines an abstract interface for skill component classes.
 #### `__`init`__`
 
 ```python
- | __init__(name: Optional[str] = None, configuration: Optional[SkillComponentConfiguration] = None, skill_context: Optional[SkillContext] = None)
+ | __init__(name: Optional[str] = None, configuration: Optional[SkillComponentConfiguration] = None, skill_context: Optional[SkillContext] = None, **kwargs, ,)
 ```
 
 Initialize a skill component.
@@ -473,19 +473,6 @@ class Model(SkillComponent,  ABC)
 ```
 
 This class implements an abstract model.
-
-<a name=".aea.skills.base.Model.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(**kwargs)
-```
-
-Initialize a model.
-
-**Arguments**:
-
-- `kwargs`: keyword arguments.
 
 <a name=".aea.skills.base.Model.setup"></a>
 #### setup
