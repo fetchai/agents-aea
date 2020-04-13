@@ -213,6 +213,11 @@ class SkillContext:
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.contracts)
 
+    @property
+    def namespace(self) -> SimpleNamespace:
+        """Get the agent context namespace."""
+        return self._get_agent_context().namespace
+
     def __getattr__(self, item) -> Any:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
