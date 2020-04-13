@@ -20,9 +20,7 @@
 
 import os
 import tempfile
-import time
 from pathlib import Path
-from threading import Thread
 
 import pytest
 
@@ -45,6 +43,7 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
+from .common.utils import AeaTool
 from .conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
@@ -87,16 +86,11 @@ def test_act():
     builder.add_private_key(FETCHAI, private_key_path)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
-    t = Thread(target=agent.start)
-    try:
-        t.start()
-        time.sleep(1.0)
 
-        behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
-        assert behaviour.nb_act_called > 0, "Act() wasn't called"
-    finally:
-        agent.stop()
-        t.join()
+    AeaTool(agent).spin_main_loop()
+
+    behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+    assert behaviour.nb_act_called > 0, "Act() wasn't called"
 
 
 def test_react():
@@ -134,12 +128,13 @@ def test_react():
             message=message_bytes,
         )
 
-        t = Thread(target=agent.start)
         try:
-            t.start()
-            time.sleep(1.0)
+            tool = AeaTool(agent).setup()
+
             agent.outbox.put(envelope)
-            time.sleep(2.0)
+
+            tool.wait_inbox().spin_main_loop()
+
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
             handler = agent.resources.get_handler(
@@ -153,7 +148,6 @@ def test_react():
             raise
         finally:
             agent.stop()
-            t.join()
 
 
 @pytest.mark.asyncio
@@ -174,11 +168,12 @@ async def test_handle():
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
         list(aea._connections)[0]._local_node = node
-        t = Thread(target=aea.start)
+
+        tool = AeaTool(aea)
 
         try:
-            t.start()
-            time.sleep(2.0)
+            tool.setup().spin_main_loop()
+
             dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.handlers["dummy"]
 
@@ -199,7 +194,9 @@ async def test_handle():
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            time.sleep(2.0)
+            """ inbox twice cause first message is invalid. generates error message and it accepted """
+            tool.wait_inbox().react_one()
+            tool.wait_inbox().react_one()
             assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
@@ -211,7 +208,9 @@ async def test_handle():
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            time.sleep(2.0)
+            """ inbox twice cause first message is invalid. generates error message and it accepted """
+            tool.wait_inbox().react_one()
+            tool.wait_inbox().react_one()
             assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
@@ -231,12 +230,13 @@ async def test_handle():
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            time.sleep(2.0)
+            """ inbox twice cause first message is invalid. generates error message and it accepted """
+            tool.wait_inbox().react_one()
+            tool.wait_inbox().react_one()
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
             aea.stop()
-            t.join()
 
 
 class TestInitializeAEAProgrammaticallyFromResourcesDir:
@@ -276,13 +276,9 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(cls.expected_message),
         )
-
-        cls.t = Thread(target=cls.aea.start)
-        cls.t.start()
-
-        time.sleep(0.5)
+        cls.aea._start_setup()
         cls.aea.outbox.put(envelope)
-        time.sleep(0.5)
+        AeaTool(cls.aea).wait_inbox().spin_main_loop()
 
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
@@ -317,7 +313,6 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
     def teardown_class(cls):
         """Tear the test down."""
         cls.aea.stop()
-        cls.t.join()
         cls.node.stop()
 
 
@@ -371,9 +366,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         )
         cls.expected_message.counterparty = cls.agent_name
 
-        cls.t = Thread(target=cls.aea.start)
-        cls.t.start()
-        time.sleep(0.5)
+        tool = AeaTool(cls.aea).setup()
 
         cls.aea.outbox.put(
             Envelope(
@@ -384,9 +377,10 @@ class TestInitializeAEAProgrammaticallyBuildResources:
             )
         )
 
+        tool.wait_inbox().spin_main_loop()
+
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
-        time.sleep(0.5)
 
         dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
         dummy_behaviour_name = "dummy"
@@ -418,7 +412,6 @@ class TestInitializeAEAProgrammaticallyBuildResources:
     def teardown_class(cls):
         """Tear the test down."""
         cls.aea.stop()
-        cls.t.join()
         cls.node.stop()
         Path(cls.temp).rmdir()
 
@@ -446,9 +439,7 @@ class TestAddBehaviourDynamically:
         for skill in resources.get_all_skills():
             skill.skill_context.set_agent_context(cls.agent.context)
 
-        cls.t = Thread(target=cls.agent.start)
-        cls.t.start()
-        time.sleep(1.0)
+        AeaTool(cls.agent).setup().spin_main_loop()
 
     def test_add_behaviour_dynamically(self):
         """Test the dynamic registration of a behaviour."""
@@ -459,7 +450,17 @@ class TestAddBehaviourDynamically:
             name="dummy2", skill_context=dummy_skill.skill_context
         )
         dummy_skill.skill_context.new_behaviours.put(new_behaviour)
-        time.sleep(1.0)
+
+        """
+        doule loop spin!!!
+        cause new behaviour added using internal message
+        internal message processed after act.
+
+        first spin adds new behaviour to skill using update(internal messages)
+        second runs act for new behaviour
+        """
+        AeaTool(self.agent).spin_main_loop().spin_main_loop()
+
         assert new_behaviour.nb_act_called > 0
         assert len(self.agent.resources.get_behaviours(dummy_skill_id)) == 2
 
@@ -467,7 +468,6 @@ class TestAddBehaviourDynamically:
     def teardown_class(cls):
         """Tear the class down."""
         cls.agent.stop()
-        cls.t.join()
 
 
 class TestContextNamespace:
