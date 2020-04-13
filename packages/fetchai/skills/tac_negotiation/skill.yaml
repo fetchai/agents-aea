@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: QmRrHMEja2Q41RKeWULNcanqE2mGZzy9ZMaH2jg4JQZ6uw
+  behaviours.py: QmQYAVUUaPUoqNiJDdjfDejTmiHbSf8754woG1zWvAQGwG
   dialogues.py: QmceDUEb1tmtTQZw2WxjQyTNKn6Zni7ZCUuDdznNN7nRzh
   handlers.py: QmbdUZw3nWFdtQUcbb4ELTFX99Ed3vXyp8Gy9CsapTNoqL
   helpers.py: QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu
@@ -27,8 +27,7 @@ behaviours:
       tick_interval: 5.0
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
-    args:
-      services_interval: 5
+    args: {}
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
   fipa:

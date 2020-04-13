@@ -34,9 +34,9 @@ from yaml import SafeLoader
 
 from aea.configurations.base import (
     AgentConfig,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
+    PackageType,
     ProtocolConfig,
     ProtocolSpecification,
     SkillConfig,
@@ -80,7 +80,7 @@ class ConfigLoader(Generic[T]):
 
     @property
     def configuration_class(self) -> Type[T]:
-        """Get the configuration type of the loader."""
+        """Get the configuration class of the loader."""
         return self._configuration_class
 
     def load_protocol_specification(self, file_pointer: TextIO) -> T:
@@ -143,34 +143,34 @@ class ConfigLoader(Generic[T]):
 
     @classmethod
     def from_configuration_type(
-        cls, configuration_type: Union[ConfigurationType, str]
+        cls, configuration_type: Union[PackageType, str]
     ) -> "ConfigLoader":
         """Get the configuration loader from the type."""
-        configuration_type = ConfigurationType(configuration_type)
-        return ConfigLoaders.from_configuration_type(configuration_type)
+        configuration_type = PackageType(configuration_type)
+        return ConfigLoaders.from_package_type(configuration_type)
 
 
 class ConfigLoaders:
 
     _from_configuration_type_to_loaders = {
-        ConfigurationType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
-        ConfigurationType.PROTOCOL: ConfigLoader(
+        PackageType.AGENT: ConfigLoader("aea-config_schema.json", AgentConfig),
+        PackageType.PROTOCOL: ConfigLoader(
             "protocol-config_schema.json", ProtocolConfig
         ),
-        ConfigurationType.CONNECTION: ConfigLoader(
+        PackageType.CONNECTION: ConfigLoader(
             "connection-config_schema.json", ConnectionConfig
         ),
-        ConfigurationType.SKILL: ConfigLoader("skill-config_schema.json", SkillConfig),
-        ConfigurationType.CONTRACT: ConfigLoader(
+        PackageType.SKILL: ConfigLoader("skill-config_schema.json", SkillConfig),
+        PackageType.CONTRACT: ConfigLoader(
             "contract-config_schema.json", ContractConfig
         ),
-    }  # type: Dict[ConfigurationType, ConfigLoader]
+    }  # type: Dict[PackageType, ConfigLoader]
 
     @classmethod
-    def from_configuration_type(
-        cls, configuration_type: Union[ConfigurationType, str]
+    def from_package_type(
+        cls, configuration_type: Union[PackageType, str]
     ) -> "ConfigLoader":
-        configuration_type = ConfigurationType(configuration_type)
+        configuration_type = PackageType(configuration_type)
         return cls._from_configuration_type_to_loaders[configuration_type]
 
 

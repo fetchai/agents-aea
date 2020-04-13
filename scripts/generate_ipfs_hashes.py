@@ -24,7 +24,7 @@ This script generates the IPFS hashes for all packages.
 This script requires that you have IPFS installed:
 - https://docs.ipfs.io/guides/guides/install/
 """
-
+import argparse
 import collections
 import csv
 import operator
@@ -35,8 +35,9 @@ import signal
 import subprocess  # nosec
 import sys
 import time
+import traceback
 from pathlib import Path
-from typing import Dict, List, Tuple, Type, cast
+from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
 
@@ -44,16 +45,15 @@ import yaml
 
 from aea.configurations.base import (
     AgentConfig,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     PackageConfiguration,
+    PackageType,
     ProtocolConfig,
     SkillConfig,
     _compute_fingerprint,
 )
 from aea.helpers.base import yaml_dump
-from aea.helpers.ipfs.base import IPFSHashOnly
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
@@ -62,15 +62,15 @@ PACKAGE_HASHES_PATH = "packages/hashes.csv"
 TEST_PACKAGE_HASHES_PATH = "tests/data/hashes.csv"
 
 type_to_class_config = {
-    ConfigurationType.AGENT: AgentConfig,
-    ConfigurationType.PROTOCOL: ProtocolConfig,
-    ConfigurationType.CONNECTION: ConnectionConfig,
-    ConfigurationType.SKILL: SkillConfig,
-    ConfigurationType.CONTRACT: ContractConfig,
-}  # type: Dict[ConfigurationType, Type[PackageConfiguration]]
+    PackageType.AGENT: AgentConfig,
+    PackageType.PROTOCOL: ProtocolConfig,
+    PackageType.CONNECTION: ConnectionConfig,
+    PackageType.SKILL: SkillConfig,
+    PackageType.CONTRACT: ContractConfig,
+}  # type: Dict[PackageType, Type[PackageConfiguration]]
 
 
-def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
+def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     """
     Get all the hashable package of the repository.
 
@@ -82,11 +82,11 @@ def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
     :return: pairs of (package-type, path-to-the-package)
     """
 
-    def package_type_and_path(package_path: Path) -> Tuple[ConfigurationType, Path]:
-        """Extract the configuration type from the path."""
+    def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
+        """Extract the package type from the path."""
         item_type_plural = package_path.parent.name
         item_type_singular = item_type_plural[:-1]
-        return ConfigurationType(item_type_singular), package_path
+        return PackageType(item_type_singular), package_path
 
     CORE_PACKAGES = list(
         map(
@@ -111,11 +111,11 @@ def _get_all_packages() -> List[Tuple[ConfigurationType, Path]]:
     )
 
     TEST_PACKAGES = [
-        (ConfigurationType.AGENT, TEST_PATH / "dummy_aea"),
-        (ConfigurationType.CONNECTION, TEST_PATH / "dummy_connection"),
-        (ConfigurationType.SKILL, TEST_PATH / "dependencies_skill"),
-        (ConfigurationType.SKILL, TEST_PATH / "exception_skill"),
-        (ConfigurationType.SKILL, TEST_PATH / "dummy_skill"),
+        (PackageType.AGENT, TEST_PATH / "dummy_aea"),
+        (PackageType.CONNECTION, TEST_PATH / "dummy_connection"),
+        (PackageType.SKILL, TEST_PATH / "dependencies_skill"),
+        (PackageType.SKILL, TEST_PATH / "exception_skill"),
+        (PackageType.SKILL, TEST_PATH / "dummy_skill"),
     ]
 
     ALL_PACKAGES = CORE_PACKAGES + PACKAGES + TEST_PACKAGES
@@ -133,7 +133,7 @@ def sort_configuration_file(config: PackageConfiguration):
 def ipfs_hashing(
     client: ipfshttpclient.Client,
     configuration: PackageConfiguration,
-    package_type: ConfigurationType,
+    package_type: PackageType,
 ) -> Tuple[str, str]:
     """
     Hashes a package and its components.
@@ -141,7 +141,8 @@ def ipfs_hashing(
     :param client: a connected IPFS client.
     :param configuration: the package configuration.
     :param package_type: the package type.
-    :return: the identifier of the hash (e.g. 'fetchai/protocols/default') and the hash of the whole package.
+    :return: the identifier of the hash (e.g. 'fetchai/protocols/default')
+           | and the hash of the whole package.
     """
     # hash again to get outer hash (this time all files):
     # TODO we still need to ignore some files
@@ -169,6 +170,18 @@ def to_csv(package_hashes: Dict[str, str], path: str):
         print("I/O error")
 
 
+def from_csv(path: str) -> Dict[str, str]:
+    """Load a CSV into a dictionary."""
+    result = collections.OrderedDict({})  # type: Dict[str, str]
+    with open(path, "r") as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            assert len(row) == 2
+            key, value = row
+            result[key] = value
+    return result
+
+
 class IPFSDaemon:
     """
     Set up the IPFS daemon.
@@ -176,8 +189,9 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self):
+    def __init__(self, timeout: float = 10.0):
         # check we have ipfs
+        self.timeout = timeout
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
@@ -187,8 +201,8 @@ class IPFSDaemon:
         self.process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
-        print("Waiting for the IPFS daemon to be up.")
-        time.sleep(10.0)
+        print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
+        time.sleep(self.timeout)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # terminate the ipfs daemon
@@ -201,7 +215,7 @@ class IPFSDaemon:
 
 
 def load_configuration(
-    package_type: ConfigurationType, package_path: Path
+    package_type: PackageType, package_path: Path
 ) -> PackageConfiguration:
     """
     Load a configuration, knowing the type and the path to the package root.
@@ -253,7 +267,7 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
 
     :param text: the content of a configuration file.
     :param fingerprint_dict: the fingerprint dictionary.
-    :return:
+    :return: the updated content of the configuration file.
     """
 
     def to_row(x):
@@ -263,6 +277,27 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
         "\n  ".join(map(to_row, sorted(fingerprint_dict.items())))
     )
     return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
+
+
+def compute_fingerprint(
+    package_path: Path,
+    fingerprint_ignore_patterns: Optional[Collection[str]],
+    client: ipfshttpclient.Client,
+) -> Dict[str, str]:
+    """
+    Compute the fingerprint of a package.
+
+    :param package_path: path to the package.
+    :param fingerprint_ignore_patterns: filename patterns whose matches will be ignored.
+    :param client: the IPFS Client. It is used to compare our implementation
+                |  with the true implementation of IPFS hashing.
+    :return: the fingerprint
+    """
+    fingerprint = _compute_fingerprint(
+        package_path, ignore_patterns=fingerprint_ignore_patterns,
+    )
+    assert_hash_consistency(fingerprint, package_path, client)
+    return fingerprint
 
 
 def update_fingerprint(
@@ -280,12 +315,9 @@ def update_fingerprint(
     if isinstance(configuration, AgentConfig):
         return
     assert configuration.directory is not None
-    fingerprint = _compute_fingerprint(
-        configuration.directory,
-        ignore_patterns=configuration.fingerprint_ignore_patterns,
+    fingerprint = compute_fingerprint(
+        configuration.directory, configuration.fingerprint_ignore_patterns, client
     )
-    assert_hash_consistency(fingerprint, configuration.directory, client)
-
     config_filepath = (
         configuration.directory / configuration.default_configuration_filename
     )
@@ -294,18 +326,73 @@ def update_fingerprint(
     config_filepath.write_text(new_content)
 
 
-if __name__ == "__main__":
+def check_fingerprint(
+    configuration: PackageConfiguration, client: ipfshttpclient.Client
+) -> bool:
+    """
+    Check the fingerprint of a package, given the loaded configuration file.
+
+    :param configuration: the configuration object.
+    :param client: the IPFS Client. It is used to compare our implementation
+                |  with the true implementation of IPFS hashing.
+    :return: True if the fingerprint match, False otherwise.
+    """
+    # we don't process agent configurations
+    if isinstance(configuration, AgentConfig):
+        return True
+    assert configuration.directory is not None
+    expected_fingerprint = compute_fingerprint(
+        configuration.directory, configuration.fingerprint_ignore_patterns, client
+    )
+    actual_fingerprint = configuration.fingerprint
+    result = expected_fingerprint == actual_fingerprint
+    if not result:
+        print(
+            "Fingerprints do not match for {} in {}".format(
+                configuration.name, configuration.directory
+            )
+        )
+    return result
+
+
+def parse_arguments() -> argparse.Namespace:
+    script_name = Path(__file__).name
+    parser = argparse.ArgumentParser(
+        script_name, description="Generate/check hashes of packages."
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        default=False,
+        help="Only check if the hashes are up-to-date.",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=10.0,
+        help="Time to wait before IPFS daemon is up and running.",
+    )
+
+    arguments = parser.parse_args()
+    return arguments
+
+
+def update_hashes(arguments: argparse.Namespace) -> int:
+    """
+    Process all AEA packages, update fingerprint, and update hashes.csv files.
+
+    :return exit code. 0 for success, 1 if an exception occurred.
+    """
     return_code = 0
     package_hashes = {}  # type: Dict[str, str]
     test_package_hashes = {}  # type: Dict[str, str]
     # run the ipfs daemon
-    with IPFSDaemon():
+    with IPFSDaemon(arguments.timeout):
         try:
             # connect ipfs client
             client = ipfshttpclient.connect(
                 "/ip4/127.0.0.1/tcp/5001/http"
             )  # type: ipfshttpclient.Client
-            ipfs_hash_only = IPFSHashOnly()
 
             # ipfs hash the packages
             for package_type, package_path in _get_all_packages():
@@ -331,7 +418,79 @@ if __name__ == "__main__":
 
             print("Done!")
         except Exception:
+            traceback.print_exc()
             return_code = 1
-            raise
+
+    return return_code
+
+
+def check_same_ipfs_hash(client, configuration, package_type, all_expected_hashes):
+    """
+    Compute actual package hash and compare with expected hash.
+
+    :param client: the IPFS client.
+    :param configuration: the configuration object of the package.
+    :param package_type: the type of package.
+    :param all_expected_hashes: the dictionary of all the expected hashes.
+    :return: True if the IPFS hash match, False otherwise.
+    """
+    key, actual_hash = ipfs_hashing(client, configuration, package_type)
+    expected_hash = all_expected_hashes[key]
+    result = actual_hash == expected_hash
+    if not result:
+        print(
+            "IPFS Hashes do not match for {} in {}".format(
+                configuration.name, configuration.directory
+            )
+        )
+    return result
+
+
+def check_hashes(arguments: argparse.Namespace) -> int:
+    """
+    Check fingerprints and outer hash of all AEA packages.
+
+    :return: exit code. 1 if some fingerprint/hash don't match or if an exception occurs,
+           | 0 in case of success.
+    """
+    return_code = 0
+    failed = False
+    expected_package_hashes = from_csv(PACKAGE_HASHES_PATH)  # type: Dict[str, str]
+    expected_test_package_hashes = from_csv(
+        TEST_PACKAGE_HASHES_PATH
+    )  # type: Dict[str, str]
+    all_expected_hashes = {**expected_package_hashes, **expected_test_package_hashes}
+    with IPFSDaemon(timeout=arguments.timeout):
+        try:
+            # connect ipfs client
+            client = ipfshttpclient.connect(
+                "/ip4/127.0.0.1/tcp/5001/http"
+            )  # type: ipfshttpclient.Client
+
+            for package_type, package_path in _get_all_packages():
+                configuration_obj = load_configuration(package_type, package_path)
+                # TODO: check the configuration file is sorted.
+                failed = failed or not check_fingerprint(configuration_obj, client)
+                failed = failed or not check_same_ipfs_hash(
+                    client, configuration_obj, package_type, all_expected_hashes
+                )
+        except Exception:
+            traceback.print_exc()
+            failed = True
+
+    if failed:
+        return_code = 1
+    else:
+        print("OK!")
+
+    return return_code
+
+
+if __name__ == "__main__":
+    arguments = parse_arguments()
+    if arguments.check:
+        return_code = check_hashes(arguments)
+    else:
+        return_code = update_hashes(arguments)
 
     sys.exit(return_code)

@@ -16,34 +16,35 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains some utils for testing purposes"""
 
-"""This package contains a class representing the search state."""
-
-from typing import Set
-
-from aea.skills.base import Model
+import time
+from contextlib import contextmanager
 
 
-class Search(Model):
-    """This class deals with the search state."""
+class TimeItResult:
+    """ class to store execution time for timeit_context """
 
-    def __init__(self, **kwargs):
-        """Instantiate the search class."""
-        super().__init__(**kwargs)
-        self._id = 0
-        self.ids_for_tac = set()  # type: Set[int]
+    def __init__(self):
+        self.time_passed = -1
 
-    @property
-    def id(self) -> int:
-        """Get the search id."""
-        return self._id
 
-    def get_next_id(self) -> int:
-        """
-        Generate the next search id and stores it.
+@contextmanager
+def timeit_context():
+    """
+    context manager to measure execution time of code in context
 
-        :return: a search id
-        """
-        self._id += 1
-        self.ids_for_tac.add(self._id)
-        return self._id
+    :return TimeItResult
+
+    example:
+    with timeit_context() as result:
+        do_long_code()
+    print("Long code takes ", result.time_passed)
+    """
+
+    result = TimeItResult()
+    started_time = time.time()
+    try:
+        yield result
+    finally:
+        result.time_passed = time.time() - started_time

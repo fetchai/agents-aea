@@ -184,7 +184,7 @@ class TACHandler(Handler):
             self.context.logger.debug(
                 "[{}]: Agent unregistered: '{}'".format(
                     self.context.agent_name,
-                    game.configuration.agent_addr_to_name[message.counterparty],
+                    game.conf.agent_addr_to_name[message.counterparty],
                 )
             )
             game.registration.unregister_agent(message.counterparty)

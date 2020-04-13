@@ -382,6 +382,20 @@ Set the protocol-specific message.
 
 Get the envelope context.
 
+<a name=".aea.mail.base.Envelope.skill_id"></a>
+#### skill`_`id
+
+```python
+ | @property
+ | skill_id() -> Optional[SkillId]
+```
+
+Get the skill id from an envelope context, if set.
+
+**Returns**:
+
+skill id
+
 <a name=".aea.mail.base.Envelope.__eq__"></a>
 #### `__`eq`__`
 
