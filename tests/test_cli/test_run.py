@@ -41,8 +41,8 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 

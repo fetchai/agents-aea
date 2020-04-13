@@ -29,8 +29,8 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,

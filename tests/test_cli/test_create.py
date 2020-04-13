@@ -46,8 +46,8 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
