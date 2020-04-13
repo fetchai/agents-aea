@@ -31,10 +31,10 @@ from threading import Thread
 import pytest
 
 from aea.cli import cli
+from aea.test_tools.click_testing import CliRunner
 
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...common.click_testing import CliRunner
 from ...conftest import (
     CLI_LOG_OPTION,
     CUR_PATH,

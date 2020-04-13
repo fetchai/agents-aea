@@ -35,8 +35,8 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 logger = logging.getLogger(__name__)
