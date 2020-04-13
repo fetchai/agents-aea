@@ -26,7 +26,7 @@ from unittest import mock
 
 from eth_account.datastructures import AttributeDict
 
-from fetchai.ledger.api.tx import TxContents, TxStatus
+from fetchai.ledger.api.tx import TxContents
 
 from hexbytes import HexBytes
 
@@ -247,13 +247,17 @@ class TestLedgerApis:
         with mock.patch.object(
             ledger_apis.apis[FETCHAI], "is_transaction_settled", return_value=True
         ):
-            is_successful = ledger_apis.is_transaction_settled(FETCHAI, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(
+                FETCHAI, tx_digest=tx_digest
+            )
             assert is_successful
 
         with mock.patch.object(
             ledger_apis.apis[FETCHAI], "is_transaction_settled", return_value=False
         ):
-            is_successful = ledger_apis.is_transaction_settled(FETCHAI, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(
+                FETCHAI, tx_digest=tx_digest
+            )
             assert not is_successful
 
     def test_is_tx_settled_ethereum(self):
@@ -264,19 +268,19 @@ class TestLedgerApis:
         )
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
         with mock.patch.object(
-            ledger_apis.apis[ETHEREUM],
-            "is_transaction_settled",
-            return_value=True,
+            ledger_apis.apis[ETHEREUM], "is_transaction_settled", return_value=True,
         ):
-            is_successful = ledger_apis.is_transaction_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(
+                ETHEREUM, tx_digest=tx_digest
+            )
             assert is_successful
 
         with mock.patch.object(
-            ledger_apis.apis[ETHEREUM],
-            "is_transaction_settled",
-            return_value=False,
+            ledger_apis.apis[ETHEREUM], "is_transaction_settled", return_value=False,
         ):
-            is_successful = ledger_apis.is_transaction_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis.is_transaction_settled(
+                ETHEREUM, tx_digest=tx_digest
+            )
             assert not is_successful
 
     @mock.patch("time.time", mock.MagicMock(return_value=1579533928))

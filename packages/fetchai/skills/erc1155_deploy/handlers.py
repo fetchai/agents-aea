@@ -241,7 +241,10 @@ class TransactionHandler(Handler):
                 tx_signed=tx_signed
             )
             # TODO; handle case when no tx_digest returned and remove loop
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
                 time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
@@ -269,7 +272,10 @@ class TransactionHandler(Handler):
                 tx_signed=tx_signed
             )
             # TODO; handle case when no tx_digest returned and remove loop
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
                 time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
@@ -294,7 +300,10 @@ class TransactionHandler(Handler):
                 tx_signed=tx_signed
             )
             # TODO; handle case when no tx_digest returned and remove loop
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
                 time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
@@ -329,7 +338,10 @@ class TransactionHandler(Handler):
                 tx_signed=tx_signed
             )
             # TODO; handle case when no tx_digest returned and remove loop
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(tx_digest):
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
                 time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
