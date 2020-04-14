@@ -317,13 +317,7 @@ class AEAWithOefTestCase(AEATestCase):
         """
         self.start_thread(target=self._read_error, process=process)
 
-    def run_agent_with_oef(self) -> subprocess.Popen:
-        """
-        Run agent with OEF connection as subprocess.
-        Run from agent's directory.
-
-        :param *args: CLI args
-
-        :return: subprocess object.
-        """
-        return self.run_agent("--connections", "fetchai/oef:0.1.0")
+    def add_scripts_folder(self):
+        scripts_src = os.path.join(self.cwd, "scripts")
+        scripts_dst = os.path.join(self.t, "scripts")
+        shutil.copytree(scripts_src, scripts_dst)

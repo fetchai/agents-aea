@@ -126,10 +126,10 @@ class TestCarPark(AEAWithOefTestCase):
 
         # Fire the sub-processes and the threads.
         os.chdir(agent_one_dir_path)
-        process_one = self.run_agent_with_oef()
+        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         os.chdir(agent_two_dir_path)
-        process_two = self.run_agent_with_oef()
+        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.start_tty_read_thread(process_one)
         self.start_error_read_thread(process_one)

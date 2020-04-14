@@ -71,14 +71,14 @@ class TestTacSkills(AEAWithOefTestCase):
 
         # run tac controller
         os.chdir(tac_controller_dir_path)
-        tac_controller_process = self.run_agent_with_oef()
+        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         # run two agents (participants)
         os.chdir(agent_one_dir_path)
-        agent_one_process = self.run_agent_with_oef()
+        agent_one_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         os.chdir(agent_two_dir_path)
-        agent_two_process = self.run_agent_with_oef()
+        agent_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)
         agent_one_process.send_signal(signal.SIGINT)
