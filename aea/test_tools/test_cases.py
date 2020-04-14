@@ -31,6 +31,7 @@ from typing import Any, Callable, List
 import pytest
 
 from aea.cli import cli
+from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.config import (
@@ -40,6 +41,8 @@ from aea.test_tools.config import (
     FETCHAI_NAME,
 )
 from aea.test_tools.exceptions import AEATestingException
+
+CLI_LOG_OPTION = ["-v", "OFF"]
 
 
 class AEATestCase:

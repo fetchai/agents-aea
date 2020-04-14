@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -33,7 +33,7 @@ from eth_keys import keys
 import web3
 from web3 import HTTPProvider, Web3
 
-from aea.crypto.base import AddressLike, Crypto, LedgerApi
+from aea.crypto.base import Crypto, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,8 @@ logger = logging.getLogger(__name__)
 ETHEREUM = "ethereum"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
+CONFIRMATION_RETRY_TIMEOUT = 1.0
+MAX_SEND_API_CALL_RETRIES = 60
 
 
 class EthereumCrypto(Crypto):
@@ -201,36 +203,44 @@ class EthereumApi(LedgerApi):
         """Get the underlying API object."""
         return self._api
 
-    def get_balance(self, address: AddressLike) -> int:
+    def get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
-        return self._api.eth.getBalance(address)
+        return self._try_get_balance(address)
 
-    def send_transaction(
+    def _try_get_balance(self, address: Address) -> Optional[int]:
+        """Get the balance of a given account."""
+        try:
+            balance = self._api.eth.getBalance(address)
+        except Exception as e:
+            logger.warning("Unable to retrieve balance: {}".format(str(e)))
+            balance = None
+        return balance
+
+    def transfer(
         self,
         crypto: Crypto,
-        destination_address: AddressLike,
+        destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        is_waiting_for_confirmation: bool = True,
         chain_id: int = 1,
-        **kwargs
+        **kwargs,
     ) -> Optional[str]:
         """
-        Submit a transaction to the ledger.
+        Submit a transfer transaction to the ledger.
 
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
-        :return: tx digest if successful, otherwise None
+        :return: tx digest if present, otherwise None
         """
-        nonce = self._api.eth.getTransactionCount(
-            self._api.toChecksumAddress(crypto.address)
-        )
+        tx_digest = None
+        nonce = self._try_get_transaction_count(crypto.address)
+        if nonce is None:
+            return tx_digest
 
         # TODO : handle misconfiguration
         transaction = {
@@ -242,43 +252,64 @@ class EthereumApi(LedgerApi):
             "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
             "data": tx_nonce,
         }
-        gas_estimation = self._api.eth.estimateGas(transaction=transaction)
-        assert (
-            tx_fee >= gas_estimation
-        ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
-            gas_estimation
-        )
+
+        gas_estimate = self._try_get_gas_estimate(transaction)
+        if gas_estimate is None or tx_fee >= gas_estimate:
+            logger.warning(
+                "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
+                    gas_estimate
+                )
+            )
+            return tx_digest
+
         signed_transaction = crypto.sign_transaction(transaction)
 
-        tx_digest = self.send_signed_transaction(
-            is_waiting_for_confirmation=is_waiting_for_confirmation,
-            tx_signed=signed_transaction,
-        )
+        tx_digest = self.send_signed_transaction(tx_signed=signed_transaction,)
 
         return tx_digest
 
-    def send_signed_transaction(
-        self, is_waiting_for_confirmation: bool, tx_signed: Any
-    ) -> str:
+    def _try_get_transaction_count(self, address: Address) -> Optional[int]:
+        """Try get the transaction count."""
+        try:
+            nonce = self._api.eth.getTransactionCount(
+                self._api.toChecksumAddress(address)
+            )
+        except Exception as e:
+            logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
+            nonce = None
+        return nonce
+
+    def _try_get_gas_estimate(self, transaction: Dict[str, str]) -> Optional[int]:
+        """Try get the gas estimate."""
+        try:
+            gas_estimate = self._api.eth.estimateGas(transaction=transaction)
+        except Exception as e:
+            logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
+            gas_estimate = None
+        return gas_estimate
+
+    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         :param tx_signed: the signed transaction
-        :param is_waiting_for_confirmation: whether or not to wait for confirmation
+        :return: tx_digest, if present
         """
-        tx_signed = cast(AttributeDict, tx_signed)
-        hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
-        tx_digest = hex_value.hex()
-        logger.debug("TX digest: {}".format(tx_digest))
-        if is_waiting_for_confirmation:
-            while True:
-                try:
-                    self._api.eth.getTransactionReceipt(hex_value)
-                    logger.debug("Transaction validated - exiting")
-                    break
-                except web3.exceptions.TransactionNotFound:  # pragma: no cover
-                    logger.debug("Transaction not found - sleeping for 3.0 seconds")
-                    time.sleep(3.0)
+        tx_digest = self._try_send_signed_transaction(tx_signed)
+        return tx_digest
+
+    def _try_send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+        """Try send a signed transaction."""
+        try:
+            tx_signed = cast(AttributeDict, tx_signed)
+            hex_value = self._api.eth.sendRawTransaction(tx_signed.rawTransaction)
+            tx_digest = hex_value.hex()
+            logger.debug(
+                "Successfully sent transaction with digest: {}".format(tx_digest)
+            )
+        except Exception as e:
+            logger.warning("Unable to send transaction: {}".format(str(e)))
+            tx_digest = None
         return tx_digest
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
@@ -288,21 +319,35 @@ class EthereumApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
-        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
         is_successful = False
-        if tx_status is not None:
-            is_successful = True
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        if tx_receipt is not None:
+            is_successful = tx_receipt.status == 1
         return is_successful
 
-    def get_transaction_status(self, tx_digest: str) -> Any:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction status for a transaction digest.
+        Get the transaction receipt for a transaction digest (non-blocking).
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the tx status, if present
+        :return: the tx receipt, if present
         """
-        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
-        return tx_status
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        return tx_receipt
+
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+        """
+        Try get the transaction receipt (non-blocking).
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx receipt, if present
+        """
+        try:
+            tx_receipt = self._api.eth.getTransactionReceipt(tx_digest)
+        except web3.exceptions.TransactionNotFound as e:
+            logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
+            tx_receipt = None
+        return tx_receipt
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -318,7 +363,7 @@ class EthereumApi(LedgerApi):
         )
         return aggregate_hash.hex()
 
-    def validate_transaction(
+    def is_transaction_valid(
         self,
         tx_digest: str,
         seller: Address,
@@ -327,22 +372,36 @@ class EthereumApi(LedgerApi):
         amount: int,
     ) -> bool:
         """
-        Check whether a transaction is valid or not.
+        Check whether a transaction is valid or not (non-blocking).
 
+        :param tx_digest: the transaction digest.
         :param seller: the address of the seller.
         :param client: the address of the client.
         :param tx_nonce: the transaction nonce.
         :param amount: the amount we expect to get from the transaction.
-        :param tx_digest: the transaction digest.
-
         :return: True if the random_message is equals to tx['input']
         """
-
-        tx = self._api.eth.getTransaction(tx_digest)
-        is_valid = (
-            tx.get("input") == tx_nonce
-            and tx.get("value") == amount
-            and tx.get("from") == client
-            and tx.get("to") == seller
-        )
+        is_valid = False
+        tx = self._try_get_transaction(tx_digest)
+        if tx is not None:
+            is_valid = (
+                tx.get("input") == tx_nonce
+                and tx.get("value") == amount
+                and tx.get("from") == client
+                and tx.get("to") == seller
+            )
         return is_valid
+
+    def _try_get_transaction(self, tx_digest: str) -> Optional[Any]:
+        """
+        Get the transaction (non-blocking).
+
+        :param tx_digest: the transaction digest.
+        :return: the tx, if found
+        """
+        try:
+            tx = self._api.eth.getTransaction(tx_digest)
+        except Exception as e:
+            logger.debug("Error when attempting getting tx: {}".format(str(e)))
+            tx = None
+        return tx

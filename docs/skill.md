@@ -16,6 +16,8 @@ This means it is possible to, at any point, grab the `context` and have access t
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
+Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
+
 ``` python
 self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
 ``` 
@@ -66,7 +68,7 @@ The framework supports different types of behaviours:
 There is another category of behaviours, called `CompositeBehaviour`. 
 - `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
   one after the other.
-- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+- `FSMBehaviour`: a state machine of `State` behaviours. 
     A state is in charge of scheduling the next state.
 
 

@@ -39,7 +39,7 @@ cd tac_controller
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control:0.1.0
-aea add contract fetchai/erc1155:0.1.0
+aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -61,7 +61,7 @@ aea config set agent.default_ledger ethereum
 ### Update the game parameters
 You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
-You must set the start time to a point in the future `start_time: 12 11 2019  15:01`.
+You must set the start time to a point in the future `start_time: 01 01 2020  00:01`.
 
 Alternatively, use the command line to get and set the start time:
 
@@ -88,7 +88,7 @@ cd tac_participant_one
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
-aea add contract fetchai/erc1155:0.1.0
+aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -104,7 +104,7 @@ cd tac_participant_two
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
-aea add contract fetchai/erc1155:0.1.0
+aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -124,7 +124,8 @@ aea run --connections fetchai/oef:0.2.0
 You can fetch the finished agents:
 ``` bash
 aea fetch fetchai/tac_controller:0.1.0
-aea fetch fetchai/tac_participant:0.1.0
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
 ```
 
 The CLI tool supports the launch of several agents
@@ -136,10 +137,104 @@ can launch the TAC agents as follows:
 - set the default connection `fetchai/oef:0.2.0` for every
 agent;
 - run:
-```bash
+``` bash
 aea launch tac_controller tac_participant_one tac_participant_two
 ```
 
+## Demo instructions 2: ledger transactions
+
+This demo uses another AEA - a controller AEA - to take the role of running the competition. Transactions are validated on an ERC1155 smart contract.
+
+### Create the TAC controller AEA
+In the root directory, create the tac controller AEA and enter the project.
+``` bash
+aea create tac_controller_contract
+cd tac_controller_contract
+```
+
+### Add the tac control skill
+
+``` bash
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/tac_control_contract:0.1.0
+aea add contract fetchai/erc1155:0.2.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
+```
+
+Add the following configs to the aea config:
+``` yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 20
+```
+
+Set the default ledger to ethereum:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
+### Update the game parameters
+You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
+
+You must set the start time to a point in the future `start_time: 01 01 2020  00:01`.
+
+Alternatively, use the command line to get and set the start time:
+
+``` bash
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
+```
+
+### Fund the controller AEA
+
+We first generate a private key.
+``` bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+
+To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:
+
+``` bash
+aea generate-wealth ethereum
+```
+
+To check the wealth use (after some time for the wealth creation to be mined on Ropsten):
+
+``` bash
+aea get-wealth ethereum
+```
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
+</div>
+
+
+### Create TAC participant AEAs
+
+``` bash
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
+```
+
+Then, cd into each project and set the usage to contract:
+``` bash
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+```
+
+### Run all AEAs
+
+``` bash
+aea launch tac_controller_contract tac_participant_one tac_participant_two
+```
+
+You may want to try `--multithreaded`
+option in order to run the agents
+in the same process.
 	
 ## Communication
 

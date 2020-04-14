@@ -24,7 +24,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -35,11 +35,11 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageType,
     ProtocolConfig,
     PublicId,
     SkillConfig,
@@ -229,6 +229,8 @@ class AEABuilder:
     returns the instance of the builder itself.
     """
 
+    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+
     def __init__(self, with_default_packages: bool = True):
         """
         Initialize the builder.
@@ -244,6 +246,7 @@ class AEABuilder:
             "fetchai"  # set by the user, or instantiate a default one.
         )
         self._default_connection = PublicId("fetchai", "stub", "0.1.0")
+        self._context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -394,6 +397,10 @@ class AEABuilder:
         configuration._directory = directory
 
         return self
+
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+        """Set the context namespace."""
+        self._context_namespace = context_namespace
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -595,12 +602,16 @@ class AEABuilder:
             LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
-            timeout=0.0,
+            timeout=self._get_agent_loop_timeout(),
             is_debug=False,
             max_reactions=20,
+            **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _get_agent_loop_timeout(self) -> float:
+        return self.DEFAULT_AGENT_LOOP_TIMEOUT
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
@@ -649,7 +660,7 @@ class AEABuilder:
         try:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
-                loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+                loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)
         except FileNotFoundError:
@@ -694,7 +705,7 @@ class AEABuilder:
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
 
-        loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
         # set name and other configurations

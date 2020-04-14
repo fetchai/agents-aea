@@ -319,14 +319,27 @@ class TACHandler(Handler):
 
         if game.is_using_contract:
             contract = self.context.contracts.erc1155
-            contract.set_deployed_instance(
-                self.context.ledger_apis.apis.get("ethereum"),
-                tac_message.get("contract_address"),
-            )
-
-            self.context.logger.info(
-                "We received a contract address: {}".format(contract.instance.address)
-            )
+            if (
+                tac_message.info is not None
+                and tac_message.info.get("contract_address") is not None
+            ):
+                contract_address = tac_message.info.get("contract_address")
+                contract.set_deployed_instance(
+                    self.context.ledger_apis.apis.get("ethereum"), contract_address,
+                )
+                self.context.logger.info(
+                    "[{}]: Received a contract address: {}".format(
+                        self.context.agent_name, contract_address
+                    )
+                )
+                # TODO; verify on-chain matches off-chain wealth
+            else:
+                self.context.is_active = False
+                self.context.logger.warning(
+                    "[{}]: Did not receive a contract address. Deregistering skill!".format(
+                        self.context.agent_name
+                    )
+                )
 
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
@@ -480,7 +493,7 @@ class TransactionHandler(Handler):
                     tx_nonce=tx_message.info.get("tx_nonce"),
                 )
                 self.context.outbox.put_message(
-                    to=game.configuration.controller_addr,
+                    to=game.conf.controller_addr,
                     sender=self.context.agent_address,
                     protocol_id=TacMessage.protocol_id,
                     message=TacSerializer().encode(msg),

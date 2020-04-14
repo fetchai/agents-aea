@@ -260,7 +260,7 @@ class TransactionCleanUpBehaviour(TickerBehaviour):
 
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)  # type: ignore
+        transactions = cast(Transactions, self.context.transactions)
         transactions.cleanup_pending_transactions()
 
     def teardown(self) -> None:
