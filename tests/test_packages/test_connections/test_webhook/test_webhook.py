@@ -21,22 +21,22 @@
 
 import asyncio
 import logging
+import subprocess
+import time
 from unittest import mock
 from unittest.mock import Mock
 
+from aiohttp import web
+
+from multidict import CIMultiDict, CIMultiDictProxy
+
 import pytest
 
-import requests
+from yarl import URL
 
-from aea.mail.base import Envelope
-
-# from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.connections.webhook.connection import WebhookConnection
-from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
     get_host,
     get_unused_tcp_port,
 )
@@ -73,6 +73,7 @@ class TestWebhookConnect:
         await self.webhook_connection.connect()
         assert self.webhook_connection.connection_status.is_connected is True
 
+
 @pytest.mark.asyncio
 class TestWebhookDisconnection:
     """Tests the webhook connection's 'disconnect' functionality."""
@@ -105,54 +106,58 @@ class TestWebhookDisconnection:
 @pytest.mark.asyncio
 async def test_webhook_receive():
     """Test the receive functionality of the webhook connection."""
-    address = "127.0.0.1"
-    port = 8050
+    # admin_address = "127.0.0.1"
+    # admin_port = 8020
+
+    webhook_address = "127.0.0.1"
+    webhook_port = 8050
+
     agent_address = "some agent address"
 
     webhook_connection = WebhookConnection(
         address=agent_address,
-        webhook_address=address,
-        webhook_port=port,
+        webhook_address=webhook_address,
+        webhook_port=webhook_port,
         webhook_url_path="/webhooks/topic/{topic}/",
     )
     webhook_connection.loop = asyncio.get_event_loop()
+    await webhook_connection.connect()
 
-    # create a dummy server to send webhook notifications
-    request_http_message = HttpMessage(
-        dialogue_reference=("", ""),
-        target=0,
-        message_id=1,
-        performative=HttpMessage.Performative.REQUEST,
-        method="",
-        url="",
-        headers="",
-        version="",
-        bodyy=b"",
+    # # Start an aries agent process
+    # process = start_aca(admin_address, admin_port)
+
+    webhook_request_mock = Mock()
+    webhook_request_mock.method = "POST"
+    webhook_request_mock.url = URL(val="some url")
+    webhook_request_mock.version = (1, 1)
+    webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
+    webhook_request_mock.body = b"some body"
+
+    with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
+        received_webhook_envelop = await webhook_connection.receive()
+        logger.info(received_webhook_envelop)
+
+    # process.terminate()
+
+
+def start_aca(admin_address: str, admin_port: int):
+    process = subprocess.Popen(  # nosec
+        [
+            "aca-py",
+            "start",
+            "--admin",
+            admin_address,
+            str(admin_port),
+            "--admin-insecure-mode",
+            "--inbound-transport",
+            "http",
+            "0.0.0.0",
+            "8000",
+            "--outbound-transport",
+            "http",
+            "--webhook-url",
+            "http://127.0.0.1:8050/webhooks",
+        ]
     )
-    request_envelope = Envelope(
-        to="receiver",
-        sender="sender",
-        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=HttpSerializer().encode(request_http_message),
-    )
-
-    connection_response_mock = Mock()
-    connection_response_mock.status_code = 200
-
-    with mock.patch.object(requests, "request", return_value=connection_response_mock):
-        await http_client_connection.connect()
-        assert http_client_connection.connection_status.is_connected is True
-
-    send_response_mock = Mock()
-    send_response_mock.status_code = 200
-    send_response_mock.headers = {"headers": "some header"}
-    send_response_mock.reason = "OK"
-    send_response_mock.content = b"Some content"
-
-    with mock.patch.object(requests, "request", return_value=send_response_mock):
-        await http_client_connection.send(envelope=request_envelope)
-        # TODO: Consider returning the response from the server in order to be able to assert that the message send!
-        assert True
-
-    await http_client_connection.disconnect()
-    assert http_client_connection.connection_status.is_connected is False
+    time.sleep(4.0)
+    return process

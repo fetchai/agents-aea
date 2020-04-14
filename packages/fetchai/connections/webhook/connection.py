@@ -133,7 +133,9 @@ class WebhookChannel:
     def send(self, request_envelope: Envelope) -> None:
         pass
 
-    async def to_envelope(self, connection_id: PublicId, request: web.Request,) -> Envelope:
+    async def to_envelope(
+        self, connection_id: PublicId, request: web.Request,
+    ) -> Envelope:
         """
         Convert a webhook request object into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
@@ -142,13 +144,14 @@ class WebhookChannel:
         """
 
         payload_bytes = await request.read()
+        version = str(request.version[0]) + "." + str(request.version[1])
 
         context = EnvelopeContext(connection_id=connection_id)
         http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
-            url=request.url,
-            version=request.version,
+            url=str(request.url),
+            version=version,
             headers=json.dumps(dict(request.headers)),
             bodyy=payload_bytes if payload_bytes is not None else b"",
         )
@@ -166,7 +169,7 @@ class WebhookConnection(Connection):
     """Proxy to the functionality of a webhook."""
 
     def __init__(
-        self, webhook_address: str, webhook_port: int, webhook_url_path:str, **kwargs,
+        self, webhook_address: str, webhook_port: int, webhook_url_path: str, **kwargs,
     ):
         """
         Initialize a connection.
