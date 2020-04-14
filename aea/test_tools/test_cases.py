@@ -31,15 +31,15 @@ from typing import Any, Callable, List
 import pytest
 
 from aea.cli import cli
+from aea.cli_gui import DEFAULT_AUTHOR as AUTHOR
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.test_tools.click_testing import CliRunner
-from aea.test_tools.config import (
-    AUTHOR,
-    CLI_LOG_OPTION,
-    DEFAULT_PRIVATE_KEY_FILE_NAME,
-    FETCHAI_NAME,
-)
 from aea.test_tools.exceptions import AEATestingException
+
+
+CLI_LOG_OPTION = ["-v", "OFF"]
 
 
 class AEATestCase:
@@ -268,7 +268,7 @@ class AEATestCase:
 
         :return: None
         """
-        self.run_cli_command("add-key", FETCHAI_NAME, DEFAULT_PRIVATE_KEY_FILE_NAME)
+        self.run_cli_command("add-key", FETCHAI_NAME, FETCHAI_PRIVATE_KEY_FILE)
 
     def generate_wealth(self) -> None:
         """

@@ -46,7 +46,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
         agent_one_dir_path = os.path.join(self.t, agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
         self.disable_ledger_tx("fetchai", "skill", "weather_station")
         self.run_install()
@@ -55,7 +55,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
         agent_two_dir_path = os.path.join(self.t, agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
         self.disable_ledger_tx("fetchai", "skill", "weather_client")
         self.run_install()

@@ -45,7 +45,7 @@ class TestCarPark(AEAWithOefTestCase):
         # Setup agent one
         agent_one_dir_path = os.path.join(self.t, agent_name_one)
         os.chdir(agent_one_dir_path)
-        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
         self.run_install()
 
@@ -86,7 +86,7 @@ class TestCarPark(AEAWithOefTestCase):
         agent_two_dir_path = os.path.join(self.t, agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        self.add_item("connection", "fetchai/oef:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
         self.run_install()
 
