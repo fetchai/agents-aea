@@ -62,10 +62,10 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         # run agents
         os.chdir(agent_one_dir_path)
-        process_one = self.run_oef()
+        process_one = self.run_agent_with_oef()
 
         os.chdir(agent_two_dir_path)
-        process_two = self.run_oef()
+        process_two = self.run_agent_with_oef()
 
         # TODO increase timeout so we are sure they work until the end of negotiation.
         time.sleep(5.0)
