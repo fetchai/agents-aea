@@ -21,7 +21,7 @@
 
 import asyncio
 import logging
-import subprocess
+import subprocess  # nosec
 import time
 from unittest import mock
 from unittest.mock import Mock
