@@ -75,4 +75,4 @@ class TestWeatherSkills(AEAWithOefTestCase):
         process_two.wait(timeout=10)
 
         assert process_one.returncode == 0
-        assert process_two.returncode == 0q
+        assert process_two.returncode == 0
