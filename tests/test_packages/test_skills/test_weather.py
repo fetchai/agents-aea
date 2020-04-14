@@ -23,19 +23,16 @@ import os
 import signal
 import time
 
-import pytest
-
+from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
 class TestWeatherSkills(AEAWithOefTestCase):
     """Test that weather skills work."""
 
+    @skip_test_ci
     def test_weather(self, pytestconfig):
         """Run the weather skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         agent_name_one = "my_weather_station"
         agent_name_two = "my_weather_client"
 

@@ -23,19 +23,16 @@ import os
 import signal
 import time
 
-import pytest
-
+from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
 class TestTacSkills(AEAWithOefTestCase):
     """Test that tac skills work."""
 
+    @skip_test_ci
     def test_tac(self, pytestconfig):
         """Run the tac skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         agent_name_one = "tac_participant_one"
         agent_name_two = "tac_participant_two"
         tac_controller_name = "tac_controller"
