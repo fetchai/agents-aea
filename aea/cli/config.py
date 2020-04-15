@@ -21,7 +21,7 @@
 
 import sys
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, Tuple, cast
 
 import click
 
@@ -51,7 +51,7 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
 FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 
-def handle_dotted_path(value):
+def handle_dotted_path(value: str) -> Tuple:
     """Separate the path between path to resource and json path to attribute.
 
     Allowed values:
@@ -64,7 +64,7 @@ def handle_dotted_path(value):
 
     :param value: dotted path.
 
-    :return: (list of settings dict keys, filepath, config loader).
+    :return: Tuple[list of settings dict keys, filepath, config loader].
     """
     parts = value.split(".")
 
@@ -90,7 +90,7 @@ def handle_dotted_path(value):
     # if the root is 'agent', stop.
     if root == "agent":
         resource_type_plural = "agents"
-        path_to_resource_configuration = DEFAULT_AEA_CONFIG_FILE
+        path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
         json_path = parts[1:]
     elif root == "vendor":
         resource_author = parts[1]
