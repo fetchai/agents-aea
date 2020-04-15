@@ -48,7 +48,6 @@ class TestCarPark(AEAWithOefTestCase):
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
         self.run_install()
 
-        # Load the skill yaml file and manually insert the things we need
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
         self.set_config(setting_path, False)
 
