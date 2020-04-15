@@ -45,7 +45,6 @@ class OEFSearchHandler(Handler):
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
         super().__init__(**kwargs)
-        # self._rejoin = False
 
     def setup(self) -> None:
         """
@@ -154,10 +153,6 @@ class OEFSearchHandler(Handler):
                     self.context.agent_name
                 )
             )
-        # elif self._rejoin:
-        #     self.context.logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
-        #     controller_addr = agent_addresses[0]
-        #     self._rejoin_tac(controller_addr)
         else:
             self.context.logger.info(
                 "[{}]: Found the TAC controller. Registering...".format(
@@ -189,21 +184,6 @@ class OEFSearchHandler(Handler):
             protocol_id=TacMessage.protocol_id,
             message=tac_bytes,
         )
-
-    # def _rejoin_tac(self, controller_addr: Address) -> None:
-    #     """
-    #     Rejoin the TAC run by a Controller.
-
-    #     :param controller_addr: the address of the controller.
-
-    #     :return: None
-    #     """
-    #     game = cast(Game, self.context.game)
-    #     game.update_expected_controller_addr(controller_addr)
-    #     game.update_game_phase(Phase.GAME_SETUP)
-    #     tac_msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
-    #     tac_bytes = TacSerializer().encode(tac_msg)
-    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TacMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
@@ -258,8 +238,6 @@ class TACHandler(Handler):
                     self._on_transaction_confirmed(tac_msg)
                 elif tac_msg.performative == TacMessage.Performative.CANCELLED:
                     self._on_cancelled()
-                # elif tac_msg.performative == TacMessage.Performative.STATE_UPDATE:
-                #     self._on_state_update(tac_msg, sender)
             elif game.phase.value == Phase.POST_GAME.value:
                 raise ValueError(
                     "We do not expect a controller agent message in the post game phase."
@@ -340,14 +318,24 @@ class TACHandler(Handler):
                     )
                 )
                 # TODO; verify on-chain matches off-chain wealth
+                self._update_ownership_and_preferences(tac_message)
             else:
-                self.context.is_active = False
                 self.context.logger.warning(
-                    "[{}]: Did not receive a contract address. Deregistering skill!".format(
+                    "[{}]: Did not receive a contract address!".format(
                         self.context.agent_name
                     )
                 )
+        else:
+            self._update_ownership_and_preferences(tac_message)
 
+    def _update_ownership_and_preferences(self, tac_message: TacMessage) -> None:
+        """
+        Update ownership and preferences.
+
+        :param tac_message: the game data
+
+        :return: None
+        """
         state_update_msg = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.INITIALIZE,
             amount_by_currency_id=tac_message.amount_by_currency_id,
@@ -397,50 +385,6 @@ class TACHandler(Handler):
             self.context.shared_state["confirmed_tx_ids"] = []
         self.context.shared_state["confirmed_tx_ids"].append(message.tx_id)
 
-    # def _on_state_update(self, tac_message: TacMessage, controller_addr: Address) -> None:
-    #     """
-    #     Update the game instance with a State Update from the controller.
-
-    #     :param tac_message: the state update
-    #     :param controller_addr: the address of the controller
-
-    #     :return: None
-    #     """
-    #     game = cast(Game, self.context.game)
-    #     game.init(tac_message, controller_addr)
-    #     game.update_game_phase(Phase.GAME)
-    #     # for tx in message.get("transactions"):
-    #     #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
-    #     self.context.state_update_queue =
-    #     self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
-    #     self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
-    #     # if self.strategy.is_world_modeling:
-    #     #     opponent_addrs = self.game_configuration.agent_addresses
-    #     #     opponent_addrs.remove(agent_addr)
-    #     #     self._world_state = WorldState(opponent_addrs, self.game_configuration.good_addrs, self.initial_agent_state)
-
-    # def _on_dialogue_error(self, tac_message: TacMessage) -> None:
-    #     """
-    #     Handle dialogue error event emitted by the controller.
-
-    #     :param tac_message: the dialogue error message
-    #     :return: None
-    #     """
-    #     self.context.logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
-    #                                                                                       tac_message.details,
-    #                                                                                       tac_message.counterparty))
-
-    # def _request_state_update(self) -> None:
-    #     """
-    #     Request current agent state from TAC Controller.
-
-    #     :return: None
-    #     """
-    #     tac_msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
-    #     tac_bytes = TacSerializer().encode(tac_msg)
-    #     game = cast(Game, self.context.game)
-    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_address, protocol_id=TacMessage.protocol_id, message=tac_bytes)
-
 
 class TransactionHandler(Handler):
     """This class implements the transaction handler."""
@@ -468,7 +412,7 @@ class TransactionHandler(Handler):
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
         ):
 
-            # TODO: // Need to modify here and add the contract option in case we are using one.
+            # TODO: Need to modify here and add the contract option in case we are using one.
 
             self.context.logger.info(
                 "[{}]: transaction confirmed by decision maker, sending to controller.".format(

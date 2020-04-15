@@ -164,79 +164,105 @@ def _sample_good_instances(
     return nb_instances
 
 
-def generate_money_endowments(
-    agent_addresses: List[str], money_endowment: int
-) -> Dict[str, int]:
+def generate_currency_endowments(
+    agent_addresses: List[str], currency_ids: List[str], money_endowment: int
+) -> Dict[str, Dict[str, int]]:
     """
     Compute the initial money amounts for each agent.
 
     :param agent_addresses: addresses of the agents.
+    :param currency_ids: the currency ids.
     :param money_endowment: money endowment per agent.
-    :return: the list of initial money amounts.
+    :return: the nested dict of currency endowments
     """
-    return {agent_addr: money_endowment for agent_addr in agent_addresses}
+    currency_endowment = {currency_id: money_endowment for currency_id in currency_ids}
+    return {agent_addr: currency_endowment for agent_addr in agent_addresses}
+
+
+def generate_exchange_params(
+    agent_addresses: List[str], currency_ids: List[str],
+) -> Dict[str, Dict[str, float]]:
+    """
+    Compute the exchange parameters for each agent.
+
+    :param agent_addresses: addresses of the agents.
+    :param currency_ids: the currency ids.
+    :return: the nested dict of currency endowments
+    """
+    exchange_params = {currency_id: 1.0 for currency_id in currency_ids}
+    return {agent_addr: exchange_params for agent_addr in agent_addresses}
 
 
 def generate_equilibrium_prices_and_holdings(
-    endowments: Dict[str, Dict[str, int]],
-    utility_function_params: Dict[str, Dict[str, float]],
-    money_endowment: Dict[str, int],
+    agent_addr_to_good_endowments: Dict[str, Dict[str, int]],
+    agent_addr_to_utility_params: Dict[str, Dict[str, float]],
+    agent_addr_to_currency_endowments: Dict[str, Dict[str, int]],
+    agent_addr_to_exchange_params: Dict[str, Dict[str, float]],
     scaling_factor: float,
     quantity_shift: int = QUANTITY_SHIFT,
 ) -> Tuple[Dict[str, float], Dict[str, Dict[str, float]], Dict[str, float]]:
     """
     Compute the competitive equilibrium prices and allocation.
 
-    :param endowments: endowments of the agents
-    :param utility_function_params: utility function params of the agents (already scaled)
-    :param money_endowment: money endowment per agent.
+    :param agent_addr_to_good_endowments: endowments of the agents
+    :param agent_addr_to_utility_params: utility function params of the agents (already scaled)
+    :param agent_addr_to_currency_endowments: money endowment per agent.
+    :param agent_addr_to_exchange_params: exchange params per agent.
     :param scaling_factor: a scaling factor for all the utility params generated.
     :param quantity_shift: a factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
     :return: the lists of equilibrium prices, equilibrium good holdings and equilibrium money holdings
     """
     # create ordered lists
-    agent_addresses = []
-    good_ids = []
-    good_ids_to_idx = {}
-    endowments_l = []
-    utility_function_params_l = []
-    money_endowment_l = []
+    agent_addresses = []  # type: List[str]
+    good_ids = []  # type: List[str]
+    good_ids_to_idx = {}  # type: Dict[str, int]
+    good_endowments_l = []  # type: List[List[int]]
+    utility_params_l = []  # type: List[List[float]]
+    currency_endowment_l = []  # type: List[int]
+    # exchange_params_l = []  # type: List[float]
     count = 0
-    for agent_addr, endowment in endowments.items():
+    for agent_addr, good_endowment in agent_addr_to_good_endowments.items():
         agent_addresses.append(agent_addr)
-        money_endowment_l.append(money_endowment[agent_addr])
-        temp_e = [0] * len(endowment.keys())
-        temp_u = [0.0] * len(endowment.keys())
+        assert (
+            len(agent_addr_to_currency_endowments[agent_addr].values()) == 1
+        ), "Cannot have more than one currency."
+        currency_endowment_l.append(
+            list(agent_addr_to_currency_endowments[agent_addr].values())[0]
+        )
+        assert len(good_endowment.keys()) == len(
+            agent_addr_to_utility_params[agent_addr].keys()
+        ), "Good endowments and utility params inconsistent."
+        temp_g_e = [0] * len(good_endowment.keys())
+        temp_u_p = [0.0] * len(agent_addr_to_utility_params[agent_addr].keys())
         idx = 0
-        for good_id, quantity in endowment.items():
+        for good_id, quantity in good_endowment.items():
             if count == 0:
                 good_ids.append(good_id)
                 good_ids_to_idx[good_id] = idx
                 idx += 1
-            temp_e[good_ids_to_idx[good_id]] = quantity
-            temp_u[good_ids_to_idx[good_id]] = utility_function_params[agent_addr][
-                good_id
-            ]
+            temp_g_e[good_ids_to_idx[good_id]] = quantity
+            temp_u_p[good_ids_to_idx[good_id]] = agent_addr_to_utility_params[
+                agent_addr
+            ][good_id]
         count += 1
-        endowments_l.append(temp_e)
-        utility_function_params_l.append(temp_u)
+        good_endowments_l.append(temp_g_e)
+        utility_params_l.append(temp_u_p)
 
     # maths
-    endowments_a = np.array(endowments_l, dtype=np.int)
-    scaled_utility_function_params_a = np.array(
-        utility_function_params_l, dtype=np.float
+    endowments_a = np.array(good_endowments_l, dtype=np.int)
+    scaled_utility_params_a = np.array(
+        utility_params_l, dtype=np.float
     )  # note, they are already scaled
     endowments_by_good = np.sum(endowments_a, axis=0)
-    scaled_params_by_good = np.sum(scaled_utility_function_params_a, axis=0)
+    scaled_params_by_good = np.sum(scaled_utility_params_a, axis=0)
     eq_prices = np.divide(
-        scaled_params_by_good, quantity_shift * len(endowments) + endowments_by_good
+        scaled_params_by_good,
+        quantity_shift * len(agent_addresses) + endowments_by_good,
     )
-    eq_good_holdings = (
-        np.divide(scaled_utility_function_params_a, eq_prices) - quantity_shift
-    )
-    eq_money_holdings = (
+    eq_good_holdings = np.divide(scaled_utility_params_a, eq_prices) - quantity_shift
+    eq_currency_holdings = (
         np.transpose(np.dot(eq_prices, np.transpose(endowments_a + quantity_shift)))
-        + money_endowment_l
+        + currency_endowment_l
         - scaling_factor
     )
 
@@ -249,13 +275,13 @@ def generate_equilibrium_prices_and_holdings(
         agent_addr: {good_id: cast(float, v) for good_id, v in zip(good_ids, egh)}
         for agent_addr, egh in zip(agent_addresses, eq_good_holdings.tolist())
     }
-    eq_money_holdings_dict = {
-        agent_addr: cast(float, eq_money_holding)
-        for agent_addr, eq_money_holding in zip(
-            agent_addresses, eq_money_holdings.tolist()
+    eq_currency_holdings_dict = {
+        agent_addr: cast(float, eq_currency_holding)
+        for agent_addr, eq_currency_holding in zip(
+            agent_addresses, eq_currency_holdings.tolist()
         )
     }
-    return eq_prices_dict, eq_good_holdings_dict, eq_money_holdings_dict
+    return eq_prices_dict, eq_good_holdings_dict, eq_currency_holdings_dict
 
 
 def _get_hash(
