@@ -24,15 +24,20 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
-from typing import Any, List
+from io import TextIOWrapper
+from threading import Thread
+from typing import Any, Callable, List
 
 import pytest
 
 from aea.cli import cli
-from aea.cli_gui import DEFAULT_AUTHOR
+from aea.cli_gui import DEFAULT_AUTHOR as AUTHOR
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.exceptions import AEATestingException
+
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
@@ -45,6 +50,7 @@ class AEATestCase:
     runner: CliRunner  # CLI runner
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
+    threads: List  # list of started threads
 
     @classmethod
     def setup_class(cls, packages_dir_path=DEFAULT_REGISTRY_PATH):
@@ -59,7 +65,9 @@ class AEATestCase:
         shutil.copytree(packages_src, packages_dst)
 
         cls.subprocesses = []
-        cls.author = DEFAULT_AUTHOR
+        cls.threads = []
+
+        cls.author = AUTHOR
 
         os.chdir(cls.t)
 
@@ -67,6 +75,7 @@ class AEATestCase:
     def teardown_class(cls):
         """Teardown the test."""
         cls._terminate_subprocesses()
+        cls._join_threads()
 
         os.chdir(cls.cwd)
         try:
@@ -84,6 +93,12 @@ class AEATestCase:
                     process.terminate()
                     process.wait(2)
 
+    @classmethod
+    def _join_threads(cls):
+        """Join all started threads."""
+        for thread in cls.threads:
+            thread.join()
+
     def set_config(self, dotted_path: str, value: Any) -> None:
         """
         Set a config.
@@ -95,22 +110,6 @@ class AEATestCase:
         :return: None
         """
         self.run_cli_command("config", "set", dotted_path, str(value))
-
-    def disable_ledger_tx(self, author: str, item_type: str, item_name: str) -> None:
-        """
-        Disable ledger tx by modifying item yaml settings.
-        Run from agent's directory and only for item with present strategy is_ledger_tx setting.
-
-        :param author: str author name (equals to a vendor folder name).
-        :param item_type: str item type.
-        :param item_name: str item name.
-
-        :return: None
-        """
-        dotted_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
-            author, item_type, item_name
-        )
-        self.set_config(dotted_path, False)
 
     def disable_aea_logging(self):
         """
@@ -159,6 +158,19 @@ class AEATestCase:
         )
         self.subprocesses.append(process)
         return process
+
+    def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
+        """
+        Start python Thread.
+
+        :param target: target method.
+        :param process: subprocess passed to thread args.
+
+        :return: None.
+        """
+        thread = Thread(target=target, args=(process,))
+        thread.start()
+        self.threads.append(thread)
 
     def run_agent(self, *args: str) -> subprocess.Popen:
         """
@@ -224,19 +236,83 @@ class AEATestCase:
         """
         self.run_cli_command("install")
 
+    def generate_private_key(self, ledger_api_id: str = FETCHAI_NAME) -> None:
+        """
+        Generate AEA private key with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+
+        :return: None
+        """
+        self.run_cli_command("generate-key", ledger_api_id)
+
+    def add_private_key(
+        self,
+        ledger_api_id: str = FETCHAI_NAME,
+        private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE,
+    ) -> None:
+        """
+        Add private key with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+        :param private_key_filepath: private key filepath.
+
+        :return: None
+        """
+        self.run_cli_command("add-key", ledger_api_id, private_key_filepath)
+
+    def generate_wealth(self, ledger_api_id: str = FETCHAI_NAME) -> None:
+        """
+        Generate wealth with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+
+        :return: None
+        """
+        self.run_cli_command("generate-wealth", ledger_api_id)
+
 
 class AEAWithOefTestCase(AEATestCase):
+    """Test case for AEA end-to-end tests with OEF node."""
+
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
         """Start an oef node."""
 
-    def run_agent_with_oef(self) -> subprocess.Popen:
-        """
-        Run agent with OEF connection as subprocess.
-        Run from agent's directory.
+    @staticmethod
+    def _read_tty(pid: subprocess.Popen):
+        for line in TextIOWrapper(pid.stdout, encoding="utf-8"):
+            print("stdout: " + line.replace("\n", ""))
 
-        :param *args: CLI args
+    @staticmethod
+    def _read_error(pid: subprocess.Popen):
+        for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
+            print("stderr: " + line.replace("\n", ""))
 
-        :return: subprocess object.
+    def start_tty_read_thread(self, process: subprocess.Popen) -> None:
         """
-        return self.run_agent("--connections", "fetchai/oef:0.1.0")
+        Start a tty reading thread.
+
+        :param process: target process passed to a thread args.
+
+        :return: None.
+        """
+        self.start_thread(target=self._read_tty, process=process)
+
+    def start_error_read_thread(self, process: subprocess.Popen) -> None:
+        """
+        Start an error reading thread.
+
+        :param process: target process passed to a thread args.
+
+        :return: None.
+        """
+        self.start_thread(target=self._read_error, process=process)
+
+    def add_scripts_folder(self):
+        scripts_src = os.path.join(self.cwd, "scripts")
+        scripts_dst = os.path.join(self.t, "scripts")
+        shutil.copytree(scripts_src, scripts_dst)

@@ -23,26 +23,23 @@ import os
 import signal
 import time
 
-import pytest
-
+from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
 class TestTacSkills(AEAWithOefTestCase):
     """Test that tac skills work."""
 
+    @skip_test_ci
     def test_tac(self, pytestconfig):
         """Run the tac skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
-        agent_name_one = "tac_participant_one"
-        agent_name_two = "tac_participant_two"
+        tac_aea_one = "tac_participant_one"
+        tac_aea_two = "tac_participant_two"
         tac_controller_name = "tac_controller"
 
         # create tac controller, agent one and agent two
         self.create_agents(
-            agent_name_one, agent_name_two, tac_controller_name,
+            tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
         # prepare tac controller for test
@@ -55,10 +52,10 @@ class TestTacSkills(AEAWithOefTestCase):
         self.run_install()
 
         # prepare agents for test
-        agent_one_dir_path = os.path.join(self.t, agent_name_one)
-        agent_two_dir_path = os.path.join(self.t, agent_name_two)
+        tac_aea_one_dir_path = os.path.join(self.t, tac_aea_one)
+        tac_aea_two_dir_path = os.path.join(self.t, tac_aea_two)
 
-        for agent_path in (agent_one_dir_path, agent_two_dir_path):
+        for agent_path in (tac_aea_one_dir_path, tac_aea_two_dir_path):
             os.chdir(agent_path)
 
             self.add_item("connection", "fetchai/oef:0.2.0")
@@ -71,25 +68,25 @@ class TestTacSkills(AEAWithOefTestCase):
 
         # run tac controller
         os.chdir(tac_controller_dir_path)
-        tac_controller_process = self.run_agent_with_oef()
+        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         # run two agents (participants)
-        os.chdir(agent_one_dir_path)
-        agent_one_process = self.run_agent_with_oef()
+        os.chdir(tac_aea_one_dir_path)
+        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(agent_two_dir_path)
-        agent_two_process = self.run_agent_with_oef()
+        os.chdir(tac_aea_two_dir_path)
+        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)
-        agent_one_process.send_signal(signal.SIGINT)
-        agent_one_process.wait(timeout=10)
+        tac_aea_one_process.send_signal(signal.SIGINT)
+        tac_aea_one_process.wait(timeout=10)
 
-        agent_two_process.send_signal(signal.SIGINT)
-        agent_two_process.wait(timeout=10)
+        tac_aea_two_process.send_signal(signal.SIGINT)
+        tac_aea_two_process.wait(timeout=10)
 
         tac_controller_process.send_signal(signal.SIGINT)
         tac_controller_process.wait(timeout=10)
 
-        assert agent_one_process.returncode == 0
-        assert agent_two_process.returncode == 0
+        assert tac_aea_one_process.returncode == 0
+        assert tac_aea_two_process.returncode == 0
         assert tac_controller_process.returncode == 0
