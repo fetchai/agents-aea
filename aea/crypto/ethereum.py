@@ -39,6 +39,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
+ETHEREUM_CURRENCY = "ETH"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
 CONFIRMATION_RETRY_TIMEOUT = 1.0
