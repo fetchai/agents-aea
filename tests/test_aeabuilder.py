@@ -96,10 +96,7 @@ def test_add_package_already_existing():
     """
     builder = AEABuilder()
     fipa_package_path = Path(ROOT_DIR) / "packages" / "fetchai" / "protocols" / "fipa"
-    builder.add_component(
-        ComponentType.PROTOCOL,
-        fipa_package_path
-    )
+    builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
         "Component 'fetchai/fipa:0.1.0' of type 'protocol' already added."
