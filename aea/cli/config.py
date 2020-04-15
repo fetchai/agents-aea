@@ -156,7 +156,7 @@ class AEAJsonPathType(click.ParamType):
                 config_loader,
             ) = handle_dotted_path(value)
         except Exception as e:
-            self.fail(e)
+            self.fail(str(e))
         else:
             ctx.obj.set_config(
                 "configuration_file_path", path_to_resource_configuration
