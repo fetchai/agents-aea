@@ -25,7 +25,9 @@ import time
 from pathlib import Path
 
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.generic import force_set_config
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
@@ -44,30 +46,6 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         self.initialize_aea()
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
-        # add fetchai ledger in both configuration files
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        weather_station_aea_config = Path(
-            weather_station_aea_name, DEFAULT_AEA_CONFIG_FILE
-        )
-        weather_station_aea_config_content = weather_station_aea_config.read_text()
-        weather_station_aea_config_content = weather_station_aea_config_content.replace(
-            find_text, replace_text
-        )
-        weather_station_aea_config.write_text(weather_station_aea_config_content)
-
-        weather_client_aea_config = Path(
-            weather_client_aea_name, DEFAULT_AEA_CONFIG_FILE
-        )
-        weather_client_aea_config_content = weather_client_aea_config.read_text()
-        weather_client_aea_config_content = weather_client_aea_config_content.replace(
-            find_text, replace_text
-        )
-        weather_client_aea_config.write_text(weather_client_aea_config_content)
-
         # add packages for agent one and run it
         weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
         os.chdir(weather_station_aea_dir_path)
@@ -76,6 +54,10 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         self.add_item("skill", "fetchai/weather_station:0.1.0")
         self.run_install()
 
+        setting_path = "agent.ledger_apis"
+        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
+        force_set_config(setting_path, ledger_apis)
+
         # add packages for agent two and run it
         weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
         os.chdir(weather_client_aea_dir_path)
@@ -83,6 +65,8 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
         self.run_install()
+
+        force_set_config(setting_path, ledger_apis)
 
         self.generate_private_key()
         self.add_private_key()

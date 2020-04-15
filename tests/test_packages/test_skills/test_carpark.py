@@ -53,7 +53,6 @@ class TestCarPark(AEAWithOefTestCase):
 
         setting_path = "agent.ledger_apis"
         ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
-
         force_set_config(setting_path, ledger_apis)
 
         # Setup Agent two
