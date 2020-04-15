@@ -22,9 +22,7 @@
 import os
 import signal
 import time
-from pathlib import Path
 
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import force_set_config
