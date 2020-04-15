@@ -17,7 +17,8 @@ fingerprint:
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
   transactions.py: QmY83PRH3ncMuqvjWsC3HuxJRS51dFq4RytMzEYjBA9KDx
 fingerprint_ignore_patterns: []
-contracts: []
+contracts:
+- fetchai/erc1155:0.2.0
 protocols:
 - fetchai/fipa:0.1.0
 - fetchai/oef_search:0.1.0
@@ -58,6 +59,7 @@ models:
     class_name: Strategy
   transactions:
     args:
+      is_using_contract: false
       pending_transaction_timeout: 30
     class_name: Transactions
 dependencies: {}

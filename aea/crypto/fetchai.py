@@ -36,6 +36,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
+FETCHAI_CURRENCY = "FET"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 

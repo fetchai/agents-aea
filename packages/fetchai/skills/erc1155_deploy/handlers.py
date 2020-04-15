@@ -191,7 +191,7 @@ class FIPAHandler(Handler):
                 )
             )
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            tx = contract.get_atomic_swap_single_transaction_proposal(
+            tx = contract.get_atomic_swap_single_transaction_msg(
                 from_address=self.context.agent_address,
                 to_address=msg.counterparty,
                 token_id=int(dialogue.proposal.values["token_id"]),
@@ -322,7 +322,7 @@ class TransactionHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-                result = contract.get_balance_of_batch(
+                result = contract.get_balances(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )
@@ -359,7 +359,7 @@ class TransactionHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-                result = contract.get_balance_of_batch(
+                result = contract.get_balances(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )

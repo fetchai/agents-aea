@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmUH8aTndA3gLK999bviGNg2Ky8dHxZosbA8PRPg9LgtjF
-  custom_types.py: Qmd1VjZP5LZUzRFeTWK7HairNhYD7yaJUEKkckwQd4ysKH
+  custom_types.py: QmXQATfnvuCpt4FicF4QcqCcLj9PQNsSHjCBvVQknWpyaN
   message.py: QmV68VWmJ7x2YczX9bSQxQhyWgbDNzKFLBE2MSWfjpGMtt
   serialization.py: QmRwii5vMjEKuus3D1TkK7XFuZqV2x88TVB8cRhmv5qNPW
   tac.proto: QmedPvKHu387gAsdxTDLWgGcCucYXEfCaTiLJbTJPRqDkR
