@@ -23,7 +23,6 @@ import logging.config
 import os
 import re
 import shutil
-import sys
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
@@ -191,20 +190,18 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if is_exit_on_except:
-            logger.error(
+            raise click.ClickException(
                 "Agent configuration file '{}' not found in the current directory.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-            sys.exit(1)
     except jsonschema.exceptions.ValidationError:
         if is_exit_on_except:
-            logger.error(
+            raise click.ClickException(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-            sys.exit(1)
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:
@@ -230,12 +227,11 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         try:
             _try_validate_fet_private_key_path(fetchai_private_key_path)
         except FileNotFoundError:  # pragma: no cover
-            logger.error(
+            raise click.ClickException(
                 "File {} for private key {} not found.".format(
                     repr(fetchai_private_key_path), FETCHAI,
                 )
             )
-            sys.exit(1)
 
     ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_path is None:
@@ -245,12 +241,11 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         try:
             _try_validate_ethereum_private_key_path(ethereum_private_key_path)
         except FileNotFoundError:  # pragma: no cover
-            logger.error(
+            raise click.ClickException(
                 "File {} for private key {} not found.".format(
                     repr(ethereum_private_key_path), ETHEREUM,
                 )
             )
-            sys.exit(1)
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
@@ -383,7 +378,6 @@ class AgentDirectory(click.Path):
             # everything ok - return the parameter to the command
             return value
         except Exception:
-            logger.error("The name provided is not a path to an AEA project.")
             self.fail(value, param, ctx)
         finally:
             os.chdir(cwd)
@@ -494,8 +488,7 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
     try:
         shutil.copytree(src, dest)
     except Exception as e:
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
     Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
 
@@ -521,8 +514,9 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-        sys.exit(1)
+        raise click.ClickException(
+            "Cannot find {}: '{}'.".format(item_type, item_public_id)
+        )
 
     # try to load the item configuration file
     try:
@@ -533,19 +527,17 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
             item_configuration_filepath.open()
         )
     except ValidationError as e:
-        logger.error(
+        raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
         )
-        sys.exit(1)
 
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
     if item_public_id.author != author or item_public_id.version != version:
-        logger.error(
+        raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
-        sys.exit(1)
 
     return package_path
 
@@ -569,8 +561,9 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-        sys.exit(1)
+        raise click.ClickException(
+            "Cannot find {}: '{}'.".format(item_type, item_public_id)
+        )
 
     # try to load the item configuration file
     try:
@@ -581,19 +574,17 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
             item_configuration_filepath.open()
         )
     except ValidationError as e:
-        logger.error(
+        raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
         )
-        sys.exit(1)
 
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
     if item_public_id.author != author or item_public_id.version != version:
-        logger.error(
+        raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
-        sys.exit(1)
 
     return package_path
 
@@ -674,8 +665,7 @@ def check_aea_project(f):
             if not skip_consistency_check:
                 _validate_config_consistency(ctx)
         except Exception as e:
-            logger.error(str(e))
-            sys.exit(1)
+            raise click.ClickException(str(e))
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)

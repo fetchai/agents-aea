@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea list' subcommand."""
 
-import sys
 from pathlib import Path
 from typing import Dict, List, cast
 
@@ -31,7 +30,6 @@ from aea.cli.common import (
     Context,
     check_aea_project,
     from_string_to_type,
-    logger,
     pass_ctx,
 )
 from aea.configurations.base import (
@@ -191,15 +189,14 @@ def get(ctx: Context, json_path: List[str]):
     try:
         parent_object = _get_parent_object(configuration_object, parent_object_path)
     except ValueError as e:
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
     if attribute_name not in parent_object:
-        logger.error("Attribute '{}' not found.".format(attribute_name))
-        sys.exit(1)
+        raise click.ClickException("Attribute '{}' not found.".format(attribute_name))
     if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
-        logger.error("Attribute '{}' is not of primitive type.".format(attribute_name))
-        sys.exit(1)
+        raise click.ClickException(
+            "Attribute '{}' is not of primitive type.".format(attribute_name)
+        )
 
     attribute_value = parent_object.get(attribute_name)
     print(attribute_value)
@@ -229,15 +226,14 @@ def set(ctx: Context, json_path: List[str], value, type):
     try:
         parent_object = _get_parent_object(configuration_dict, parent_object_path)
     except ValueError as e:
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
     if attribute_name not in parent_object:
-        logger.error("Attribute '{}' not found.".format(attribute_name))
-        sys.exit(1)
+        raise click.ClickException("Attribute '{}' not found.".format(attribute_name))
     if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
-        logger.error("Attribute '{}' is not of primitive type.".format(attribute_name))
-        sys.exit(1)
+        raise click.ClickException(
+            "Attribute '{}' is not of primitive type.".format(attribute_name)
+        )
 
     try:
         if type_ != bool:
@@ -245,7 +241,7 @@ def set(ctx: Context, json_path: List[str], value, type):
         else:
             parent_object[attribute_name] = value not in FALSE_EQUIVALENTS
     except ValueError:  # pragma: no cover
-        logger.error("Cannot convert {} to type {}".format(value, type_))
+        raise click.ClickException("Cannot convert {} to type {}".format(value, type_))
 
     try:
         configuration_obj = config_loader.configuration_class.from_json(
@@ -254,5 +250,4 @@ def set(ctx: Context, json_path: List[str], value, type):
         config_loader.validator.validate(instance=configuration_obj.json)
         config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
-        logger.error("Attribute or value not valid.")
-        sys.exit(1)
+        raise click.ClickException("Attribute or value not valid.")

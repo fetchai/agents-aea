@@ -51,12 +51,11 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             return_code = _try_install(command)
         assert return_code == 0
     except Exception as e:
-        logger.error(
+        raise click.ClickException(
             "An error occurred while installing {}, {}: {}".format(
                 dependency_name, dependency, str(e)
             )
         )
-        sys.exit(1)
 
 
 def _try_install(install_command: List[str]) -> int:
@@ -85,12 +84,11 @@ def _install_from_requirement(file: str):
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception:
-        logger.error(
+        raise click.ClickException(
             "An error occurred while installing requirement file {}. Stopping...".format(
                 file
             )
         )
-        sys.exit(1)
     finally:
         poll = subp.poll()
         if poll is None:  # pragma: no cover

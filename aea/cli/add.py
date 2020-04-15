@@ -20,7 +20,6 @@
 """Implementation of the 'aea add' subcommand."""
 
 import os
-import sys
 from pathlib import Path
 from typing import Collection, cast
 
@@ -121,12 +120,11 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         )
     )
     if _is_item_present(item_type, item_public_id, ctx):
-        logger.error(
+        raise click.ClickException(
             "A {} with id '{}/{}' already exists. Aborting...".format(
                 item_type, item_public_id.author, item_public_id.name
             )
         )
-        sys.exit(1)
 
     # find and add protocol
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:

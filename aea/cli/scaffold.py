@@ -21,7 +21,6 @@
 
 import os
 import shutil
-import sys
 from pathlib import Path
 
 import click
@@ -89,12 +88,11 @@ def _scaffold_item(ctx: Context, item_type, item_name):
     existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
     # check if we already have an item with the same public id
     if (author_name, item_name) in existing_ids_only_author_and_name:
-        logger.error(
+        raise click.ClickException(
             "A {} with name '{}' already exists. Aborting...".format(
                 item_type, item_name
             )
         )
-        sys.exit(1)
 
     try:
         agent_name = ctx.agent_config.agent_name
@@ -132,19 +130,16 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:
-        logger.error(
+        raise click.ClickException(
             "A {} with this name already exists. Please choose a different name and try again.".format(
                 item_type
             )
         )
-        sys.exit(1)
     except ValidationError:
-        logger.error(
+        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        raise click.ClickException(
             "Error when validating the {} configuration file.".format(item_type)
         )
-        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
-        sys.exit(1)
     except Exception as e:
-        logger.exception(e)
         shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
-        sys.exit(1)
+        raise click.ClickException(str(e))
