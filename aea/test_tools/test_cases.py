@@ -111,22 +111,6 @@ class AEATestCase:
         """
         self.run_cli_command("config", "set", dotted_path, str(value))
 
-    def disable_ledger_tx(self, author: str, item_type: str, item_name: str) -> None:
-        """
-        Disable ledger tx by modifying item yaml settings.
-        Run from agent's directory and only for item with present strategy is_ledger_tx setting.
-
-        :param author: str author name (equals to a vendor folder name).
-        :param item_type: str item type.
-        :param item_name: str item name.
-
-        :return: None
-        """
-        dotted_path = "vendor.{}.{}s.{}.models.strategy.args.is_ledger_tx".format(
-            author, item_type, item_name
-        )
-        self.set_config(dotted_path, False)
-
     def disable_aea_logging(self):
         """
         Disable AEA logging of specific agent.

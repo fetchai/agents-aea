@@ -23,6 +23,7 @@ import os
 import signal
 import time
 
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
@@ -45,7 +46,11 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
-        self.disable_ledger_tx("fetchai", "skill", "weather_station")
+
+        dotted_path = "vendor.{}.skills.weather_station.models.strategy.args.is_ledger_tx".format(
+            FETCHAI_NAME
+        )
+        self.set_config(dotted_path, False)
         self.run_install()
 
         # prepare agent two (weather client)
@@ -54,7 +59,11 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
-        self.disable_ledger_tx("fetchai", "skill", "weather_client")
+
+        dotted_path = "vendor.{}.skills.weather_client.models.strategy.args.is_ledger_tx".format(
+            FETCHAI_NAME
+        )
+        self.set_config(dotted_path, False)
         self.run_install()
 
         # run agents
