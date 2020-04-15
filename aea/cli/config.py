@@ -51,7 +51,7 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
 FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 
-def dotted_path_to_dict(value):
+def handle_dotted_path(value):
     """Separate the path between path to resource and json path to attribute.
 
     Allowed values:
@@ -63,7 +63,7 @@ def dotted_path_to_dict(value):
 
     :param value: dotted path.
 
-    :return: json path.
+    :return: (list of settings dict keys, filepath, config loader).
     """
     parts = value.split(".")
 
@@ -154,7 +154,7 @@ class AEAJsonPathType(click.ParamType):
                 json_path,
                 path_to_resource_configuration,
                 config_loader,
-            ) = dotted_path_to_dict(value)
+            ) = handle_dotted_path(value)
         except Exception as e:
             self.fail(e)
         else:

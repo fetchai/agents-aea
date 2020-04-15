@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 import yaml
 
-from aea.cli.config import dotted_path_to_dict
+from aea.cli.config import handle_dotted_path
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
@@ -105,7 +105,7 @@ def force_set_config(dotted_path: str, value: Any) -> None:
 
     :return: None.
     """
-    settings_keys, file_path, _ = dotted_path_to_dict(dotted_path)
+    settings_keys, file_path, _ = handle_dotted_path(dotted_path)
 
     settings = {}
     with open(file_path, "r") as f:
