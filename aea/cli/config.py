@@ -58,6 +58,7 @@ def handle_dotted_path(value):
         'agent.an_attribute_name'
         'protocols.my_protocol.an_attribute_name'
         'connections.my_connection.an_attribute_name'
+        'contracts.my_contract.an_attribute_name'
         'skills.my_skill.an_attribute_name'
         'vendor.author.[protocols|connections|skills].package_name.attribute_name
 
@@ -146,6 +147,7 @@ class AEAJsonPathType(click.ParamType):
             'agent.an_attribute_name'
             'protocols.my_protocol.an_attribute_name'
             'connections.my_connection.an_attribute_name'
+            'contracts.my_contract.an_attribute_name'
             'skills.my_skill.an_attribute_name'
             'vendor.author.[protocols|connections|skills].package_name.attribute_name
         """
