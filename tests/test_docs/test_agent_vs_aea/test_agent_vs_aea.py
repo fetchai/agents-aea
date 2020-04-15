@@ -65,7 +65,6 @@ class TestAgentVsAEA:
 
         run()
         assert os.path.exists(Path(self.t, "input.txt"))
-        assert os.path.exists(Path(self.t, "input.txt"))
 
         message_text = (
             "other_agent,my_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"

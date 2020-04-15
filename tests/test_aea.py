@@ -101,6 +101,9 @@ def test_react():
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
@@ -159,6 +162,9 @@ async def test_handle():
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
@@ -252,6 +258,9 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )

@@ -22,6 +22,7 @@ import inspect
 import itertools
 import logging
 import os
+import pprint
 import re
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
@@ -61,6 +62,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.exceptions import AEAException
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -190,19 +192,6 @@ class _DependenciesManager:
         for dependency in component.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
 
-    def check_package_dependencies(
-        self, component_configuration: ComponentConfiguration
-    ) -> bool:
-        """
-        Check that we have all the dependencies needed to the package.
-
-        return: True if all the dependencies are covered, False otherwise.
-        """
-        not_supported_packages = component_configuration.package_dependencies.difference(
-            self.all_dependencies
-        )
-        return len(not_supported_packages) == 0
-
     @property
     def pypi_dependencies(self) -> Dependencies:
         """Get all the PyPI dependencies."""
@@ -283,7 +272,6 @@ class AEABuilder:
 
         :param configuration: the configuration of the component.
         :return: None
-        :raises ValueError: if the component is not present.
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
@@ -384,7 +372,8 @@ class AEABuilder:
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises ValueError: if a component is already registered with the same component id.
+        :raises AEAException: if a component is already registered with the same component id.
+                            | or if there's a missing dependency.
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -618,14 +607,33 @@ class AEABuilder:
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
         ):
-            raise ValueError(
-                "Component {} of type {} already added.".format(
+            raise AEAException(
+                "Component '{}' of type '{}' already added.".format(
                     configuration.public_id, configuration.component_type
                 )
             )
 
-    def _check_package_dependencies(self, configuration):
-        self._package_dependency_manager.check_package_dependencies(configuration)
+    def _check_package_dependencies(
+        self, configuration: ComponentConfiguration
+    ) -> None:
+        """
+        Check that we have all the dependencies needed to the package.
+
+        :return: None
+        :raises AEAException: if there's a missing dependency.
+        """
+        not_supported_packages = configuration.package_dependencies.difference(
+            self._package_dependency_manager.all_dependencies
+        )  # type: Set[ComponentId]
+        has_all_dependencies = len(not_supported_packages) == 0
+        if not has_all_dependencies:
+            raise AEAException(
+                "Package '{}' of type '{}' cannot be added. Missing dependencies: {}".format(
+                    configuration.public_id,
+                    configuration.component_type.value,
+                    pprint.pformat(sorted(map(str, not_supported_packages))),
+                )
+            )
 
     @staticmethod
     def _find_component_directory_from_component_id(
