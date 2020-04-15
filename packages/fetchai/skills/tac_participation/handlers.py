@@ -22,12 +22,14 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
+from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
@@ -89,9 +91,9 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEFSearch error: answer_id={}, oef_error_operation={}".format(
+            "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 self.context.agent_name,
-                oef_error.message_id,
+                oef_error.dialogue_reference,
                 oef_error.oef_error_operation,
             )
         )
@@ -105,10 +107,10 @@ class OEFSearchHandler(Handler):
         :return: None
         """
         search = cast(Search, self.context.search)
-        search_id = search_result.message_id
+        search_id = int(search_result.dialogue_reference[0])
         agents = search_result.agents
         self.context.logger.debug(
-            "[{}]: on search result: {} {}".format(
+            "[{}]: on search result: search_id={} agents={}".format(
                 self.context.agent_name, search_id, agents
             )
         )
@@ -318,14 +320,19 @@ class TACHandler(Handler):
         game.update_game_phase(Phase.GAME)
 
         if game.is_using_contract:
-            contract = self.context.contracts.erc1155
-            if (
-                tac_message.info is not None
-                and tac_message.info.get("contract_address") is not None
-            ):
-                contract_address = tac_message.info.get("contract_address")
+            contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            contract_address = (
+                None
+                if tac_message.info is None
+                else tac_message.info.get("contract_address")
+            )
+
+            if contract_address is not None:
+                ethereum_api = cast(
+                    EthereumApi, self.context.ledger_apis.apis[ETHEREUM]
+                )
                 contract.set_deployed_instance(
-                    self.context.ledger_apis.apis.get("ethereum"), contract_address,
+                    ethereum_api, contract_address,
                 )
                 self.context.logger.info(
                     "[{}]: Received a contract address: {}".format(

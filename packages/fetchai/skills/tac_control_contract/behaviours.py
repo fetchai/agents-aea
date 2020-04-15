@@ -296,10 +296,13 @@ class TACBehaviour(SimpleBehaviour):
                 version_id=game.conf.version_id,
                 info={"contract_address": game.conf.contract_address},
             )
-            self.context.logger.info(
-                "[{}]: sending game data to '{}': {}".format(
-                    self.context.agent_name, agent_address, str(tac_msg)
+            self.context.logger.debug(
+                "[{}]: sending game data to '{}'.".format(
+                    self.context.agent_name, agent_address
                 )
+            )
+            self.context.logger.debug(
+                "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
             )
             self.context.outbox.put_message(
                 to=agent_address,

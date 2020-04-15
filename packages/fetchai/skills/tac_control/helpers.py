@@ -32,7 +32,7 @@ from web3 import Web3
 from aea.mail.base import Address
 
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
-DEFAULT_CURRENCY_ID_TO_NAME = {"FET": "FET Native Token"}
+DEFAULT_CURRENCY_ID_TO_NAME = {"0": "FET"}
 
 
 def generate_currency_id_to_name() -> Dict[str, str]:
@@ -53,10 +53,7 @@ def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
     string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
-    return {
-        string_format.format(i) + "_id": string_format.format(i)
-        for i in range(nb_goods)
-    }
+    return {str(i + 1): string_format.format(i + 1) for i in range(nb_goods)}
 
 
 def determine_scaling_factor(money_endowment: int) -> float:
@@ -261,17 +258,6 @@ def generate_equilibrium_prices_and_holdings(
     return eq_prices_dict, eq_good_holdings_dict, eq_money_holdings_dict
 
 
-def _recover_uid(good_id) -> int:
-    """
-    Get the uid part of the good id.
-
-    :param int good_id: the good id
-    :return: the uid
-    """
-    uid = int(good_id.split("_")[-2])
-    return uid
-
-
 def _get_hash(
     tx_sender_addr: Address,
     tx_counterparty_addr: Address,
@@ -337,11 +323,10 @@ def tx_hash_from_values(
     :param tx_message: the transaction message
     :return: the hash
     """
-    converted = {
-        _recover_uid(good_id): quantity
-        for good_id, quantity in tx_quantities_by_good_id.items()
-    }
-    ordered = collections.OrderedDict(sorted(converted.items()))
+    _tx_quantities_by_good_id = {
+        int(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()
+    }  # type: Dict[int, int]
+    ordered = collections.OrderedDict(sorted(_tx_quantities_by_good_id.items()))
     good_uids = []  # type: List[int]
     sender_supplied_quantities = []  # type: List[int]
     counterparty_supplied_quantities = []  # type: List[int]

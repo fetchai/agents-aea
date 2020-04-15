@@ -20,6 +20,7 @@
 """This class contains the helpers for FIPA negotiation."""
 
 import collections
+import copy
 from typing import Dict, List, Union, cast
 
 from web3 import Web3
@@ -38,6 +39,7 @@ from aea.mail.base import Address
 
 SUPPLY_DATAMODEL_NAME = "supply"
 DEMAND_DATAMODEL_NAME = "demand"
+PREFIX = "pre_"
 
 
 def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
@@ -45,7 +47,6 @@ def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
     Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
     :param good_ids: a list of ids (i.e. identifiers) of the relevant goods.
-    :param currency: the currency used for trading.
     :param is_supply: Boolean indicating whether it is a supply or demand data model
 
     :return: the data model.
@@ -87,7 +88,10 @@ def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
 
 
 def build_goods_description(
-    good_id_to_quantities: Dict[str, int], currency_id: str, is_supply: bool
+    good_id_to_quantities: Dict[str, int],
+    currency_id: str,
+    is_supply: bool,
+    is_search_description: bool,
 ) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
@@ -95,20 +99,31 @@ def build_goods_description(
     :param good_id_to_quantities: a dictionary mapping the ids of the goods to the quantities.
     :param currency_id: the currency used for pricing and transacting.
     :param is_supply: True if the description is indicating supply, False if it's indicating demand.
+    :param is_search_description: Whether or not the description is used for search
 
     :return: the description to advertise on the Service Directory.
     """
+    _good_id_to_quantities = copy.copy(good_id_to_quantities)
+    if is_search_description:
+        # the OEF does not accept attribute names consisting of integers only
+        _good_id_to_quantities = {
+            PREFIX + good_id: quantity
+            for good_id, quantity in _good_id_to_quantities.items()
+        }
     data_model = _build_goods_datamodel(
-        good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply
+        good_ids=list(_good_id_to_quantities.keys()), is_supply=is_supply
     )
-    values = cast(Dict[str, Union[int, str]], good_id_to_quantities)
+    values = cast(Dict[str, Union[int, str]], _good_id_to_quantities)
     values.update({"currency_id": currency_id})
     desc = Description(values, data_model=data_model)
     return desc
 
 
 def build_goods_query(
-    good_ids: List[str], currency_id: str, is_searching_for_sellers: bool
+    good_ids: List[str],
+    currency_id: str,
+    is_searching_for_sellers: bool,
+    is_search_query: bool,
 ) -> Query:
     """
     Build buyer or seller search query.
@@ -127,9 +142,14 @@ def build_goods_query(
     :param good_ids: the list of good ids to put in the query
     :param currency_id: the currency used for pricing and transacting.
     :param is_searching_for_sellers: Boolean indicating whether the query is for sellers (supply) or buyers (demand).
+    :param is_search_query: whether or not the query is used for search on OEF
 
     :return: the query
     """
+    if is_search_query:
+        # the OEF does not accept attribute names consisting of integers only
+        good_ids = [PREFIX + good_id for good_id in good_ids]
+
     data_model = _build_goods_datamodel(
         good_ids=good_ids, is_supply=is_searching_for_sellers
     )
@@ -196,17 +216,6 @@ def _get_hash(
     return Web3.keccak(b"".join(m_list))
 
 
-def _recover_uid(good_id) -> int:
-    """
-    Get the uid part of the good id.
-
-    :param int good_id: the good id
-    :return: the uid
-    """
-    uid = int(good_id.split("_")[-2])
-    return uid
-
-
 def tx_hash_from_values(
     tx_sender_addr: str,
     tx_counterparty_addr: str,
@@ -220,11 +229,10 @@ def tx_hash_from_values(
     :param tx_message: the transaction message
     :return: the hash
     """
-    converted = {
-        _recover_uid(good_id): quantity
-        for good_id, quantity in tx_quantities_by_good_id.items()
-    }
-    ordered = collections.OrderedDict(sorted(converted.items()))
+    _tx_quantities_by_good_id = {
+        int(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()
+    }  # type: Dict[int, int]
+    ordered = collections.OrderedDict(sorted(_tx_quantities_by_good_id.items()))
     good_uids = []  # type: List[int]
     sender_supplied_quantities = []  # type: List[int]
     counterparty_supplied_quantities = []  # type: List[int]
