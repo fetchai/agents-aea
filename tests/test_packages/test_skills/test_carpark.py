@@ -23,7 +23,9 @@ import os
 import signal
 import time
 
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.generic import force_set_config
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
@@ -35,13 +37,13 @@ class TestCarPark(AEAWithOefTestCase):
         """Run the weather skills sequence."""
         self.initialize_aea()
 
-        agent_name_one = "my_carpark_aea"
-        agent_name_two = "my_carpark_client_aea"
-        self.create_agents(agent_name_one, agent_name_two)
+        capark_aea_name = "my_carpark_aea"
+        capark_client_aea_name = "my_carpark_client_aea"
+        self.create_agents(capark_aea_name, capark_client_aea_name)
 
         # Setup agent one
-        agent_one_dir_path = os.path.join(self.t, agent_name_one)
-        os.chdir(agent_one_dir_path)
+        capark_aea_dir_path = os.path.join(self.t, capark_aea_name)
+        os.chdir(capark_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
         self.run_install()
@@ -50,69 +52,20 @@ class TestCarPark(AEAWithOefTestCase):
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
         self.set_config(setting_path, False)
 
-        # Load the agent yaml file and manually insert the things we need (ledger APIs)
+        setting_path = "agent.ledger_apis"
+        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
 
-        # TODO: remove this block and replace with next two commented lines
-        # when "aea config set" will be able to handle dictionaties and non-existing keys
-
-        # setting_path = "agent.ledger_apis.fetchai.network"
-        # self.set_config(setting_path, "testnet")
-
-        # agent config update block start
-        file = open("aea-config.yaml", mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        # add in the ledger address
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        whole_file = whole_file.replace(find_text, replace_text)
-
-        # close the file
-        file.close()
-
-        with open("aea-config.yaml", "w") as f:
-            f.write(whole_file)
-        # agent config update block end
+        force_set_config(setting_path, ledger_apis)
 
         # Setup Agent two
-        agent_two_dir_path = os.path.join(self.t, agent_name_two)
-        os.chdir(agent_two_dir_path)
+        carpark_client_aea_dir_path = os.path.join(self.t, capark_client_aea_name)
+        os.chdir(carpark_client_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
         self.run_install()
 
-        # TODO: same as above. Remove this block and replace with next two commented lines
-        # when "aea config set" will be able to handle dictionaties and non-existing keys
-
-        # setting_path = "agent.ledger_apis.fetchai.network"
-        # self.set_config(setting_path, "testnet")
-
-        # agent config update block start
-        file = open("aea-config.yaml", mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        # add in the ledger address
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        whole_file = whole_file.replace(find_text, replace_text)
-
-        # close the file
-        file.close()
-
-        with open("aea-config.yaml", "w") as f:
-            f.write(whole_file)
-        # agent config update block end
+        force_set_config(setting_path, ledger_apis)
 
         # Generate and add private keys
         self.generate_private_key()
@@ -122,10 +75,10 @@ class TestCarPark(AEAWithOefTestCase):
         self.generate_wealth()
 
         # Fire the sub-processes and the threads.
-        os.chdir(agent_one_dir_path)
+        os.chdir(capark_aea_dir_path)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(agent_two_dir_path)
+        os.chdir(carpark_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.start_tty_read_thread(process_one)

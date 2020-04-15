@@ -33,15 +33,15 @@ class TestWeatherSkills(AEAWithOefTestCase):
     @skip_test_ci
     def test_weather(self, pytestconfig):
         """Run the weather skills sequence."""
-        agent_name_one = "my_weather_station"
-        agent_name_two = "my_weather_client"
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
 
         self.initialize_aea()
-        self.create_agents(agent_name_one, agent_name_two)
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         # prepare agent one (weather station)
-        agent_one_dir_path = os.path.join(self.t, agent_name_one)
-        os.chdir(agent_one_dir_path)
+        weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
+        os.chdir(weather_station_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
@@ -49,8 +49,8 @@ class TestWeatherSkills(AEAWithOefTestCase):
         self.run_install()
 
         # prepare agent two (weather client)
-        agent_two_dir_path = os.path.join(self.t, agent_name_two)
-        os.chdir(agent_two_dir_path)
+        weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
+        os.chdir(weather_client_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
@@ -58,10 +58,10 @@ class TestWeatherSkills(AEAWithOefTestCase):
         self.run_install()
 
         # run agents
-        os.chdir(agent_one_dir_path)
+        os.chdir(weather_station_aea_dir_path)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(agent_two_dir_path)
+        os.chdir(weather_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         # TODO increase timeout so we are sure they work until the end of negotiation.

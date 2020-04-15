@@ -36,13 +36,13 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
     def test_weather(self, pytestconfig):
         """Run the weather skills sequence."""
 
-        agent_name_one = "my_weather_station"
-        agent_name_two = "my_weather_client"
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
 
         self.add_scripts_folder()
 
         self.initialize_aea()
-        self.create_agents(agent_name_one, agent_name_two)
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         # add fetchai ledger in both configuration files
         find_text = "ledger_apis: {}"
@@ -50,31 +50,35 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         fetchai:
             network: testnet"""
 
-        agent_one_config = Path(agent_name_one, DEFAULT_AEA_CONFIG_FILE)
-        agent_one_config_content = agent_one_config.read_text()
-        agent_one_config_content = agent_one_config_content.replace(
+        weather_station_aea_config = Path(
+            weather_station_aea_name, DEFAULT_AEA_CONFIG_FILE
+        )
+        weather_station_aea_config_content = weather_station_aea_config.read_text()
+        weather_station_aea_config_content = weather_station_aea_config_content.replace(
             find_text, replace_text
         )
-        agent_one_config.write_text(agent_one_config_content)
+        weather_station_aea_config.write_text(weather_station_aea_config_content)
 
-        agent_two_config = Path(agent_name_two, DEFAULT_AEA_CONFIG_FILE)
-        agent_two_config_content = agent_two_config.read_text()
-        agent_two_config_content = agent_two_config_content.replace(
+        weather_client_aea_config = Path(
+            weather_client_aea_name, DEFAULT_AEA_CONFIG_FILE
+        )
+        weather_client_aea_config_content = weather_client_aea_config.read_text()
+        weather_client_aea_config_content = weather_client_aea_config_content.replace(
             find_text, replace_text
         )
-        agent_two_config.write_text(agent_two_config_content)
+        weather_client_aea_config.write_text(weather_client_aea_config_content)
 
         # add packages for agent one and run it
-        agent_one_dir_path = os.path.join(self.t, agent_name_one)
-        os.chdir(agent_one_dir_path)
+        weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
+        os.chdir(weather_station_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
         self.run_install()
 
         # add packages for agent two and run it
-        agent_two_dir_path = os.path.join(self.t, agent_name_two)
-        os.chdir(agent_two_dir_path)
+        weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
+        os.chdir(weather_client_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
@@ -84,10 +88,10 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         self.add_private_key()
         self.generate_wealth()
 
-        os.chdir(agent_one_dir_path)
+        os.chdir(weather_station_aea_dir_path)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(agent_two_dir_path)
+        os.chdir(weather_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.start_tty_read_thread(process_one)

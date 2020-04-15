@@ -252,32 +252,43 @@ class AEATestCase:
         """
         self.run_cli_command("install")
 
-    def generate_private_key(self) -> None:
+    def generate_private_key(self, ledger_api_id: str = FETCHAI_NAME) -> None:
         """
         Generate AEA private key with CLI command.
         Run from agent's directory.
 
+        :param ledger_api_id: ledger API ID.
+
         :return: None
         """
-        self.run_cli_command("generate-key", FETCHAI_NAME)
+        self.run_cli_command("generate-key", ledger_api_id)
 
-    def add_private_key(self) -> None:
+    def add_private_key(
+        self,
+        ledger_api_id: str = FETCHAI_NAME,
+        private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE,
+    ) -> None:
         """
         Add private key with CLI command.
         Run from agent's directory.
 
+        :param ledger_api_id: ledger API ID.
+        :param private_key_filepath: private key filepath.
+
         :return: None
         """
-        self.run_cli_command("add-key", FETCHAI_NAME, FETCHAI_PRIVATE_KEY_FILE)
+        self.run_cli_command("add-key", ledger_api_id, private_key_filepath)
 
-    def generate_wealth(self) -> None:
+    def generate_wealth(self, ledger_api_id: str = FETCHAI_NAME) -> None:
         """
         Generate wealth with CLI command.
         Run from agent's directory.
 
+        :param ledger_api_id: ledger API ID.
+
         :return: None
         """
-        self.run_cli_command("generate-wealth", FETCHAI_NAME)
+        self.run_cli_command("generate-wealth", ledger_api_id)
 
 
 class AEAWithOefTestCase(AEATestCase):
