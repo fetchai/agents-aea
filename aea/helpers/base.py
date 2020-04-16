@@ -201,21 +201,41 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     return module
 
 
-def import_module(dotted_path: str, module_obj) -> None:
+def import_aea_module(dotted_path: str, module_obj) -> None:
     """
-    Add module to sys.modules.
+    Add an AEA module to sys.modules.
+
+    The parameter dotted_path has the form:
+
+        packages.<author_name>.<package_type>.<package_name>
+
+    If the closed-prefix packages are not present, add them to sys.modules.
+    This is done in order to emulate the behaviour of the true Python import system,
+    which in fact imports the packages recursively, for every prefix.
+
+    E.g. see https://docs.python.org/3/library/importlib.html#approximating-importlib-import-module
+    for an explanation on how the 'import' built-in function works.
 
     :param dotted_path: the dotted path to be used in the imports.
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
     """
-    # if path is nested, and the root package is not present, add it to sys.modules
-    split = dotted_path.split(".")
-    if len(split) > 1 and split[0] not in sys.modules:
-        root = split[0]
-        sys.modules[root] = types.ModuleType(root)
 
-    # add the module at the specified path.
+    def add_namespace_to_sys_modules_if_not_present(dotted_path: str):
+        if dotted_path not in sys.modules:
+            sys.modules[dotted_path] = types.ModuleType(dotted_path)
+
+    # add all prefixes as 'namespaces', since they are not actual packages.
+    split = dotted_path.split(".")
+    assert len(split) > 3
+    root = split[0]
+    till_author = root + "." + split[1]
+    till_item_type = till_author + "." + split[2]
+    add_namespace_to_sys_modules_if_not_present(root)
+    add_namespace_to_sys_modules_if_not_present(till_author)
+    add_namespace_to_sys_modules_if_not_present(till_item_type)
+
+    # finally, add the module at the specified path.
     sys.modules[dotted_path] = module_obj
 
 
@@ -247,7 +267,7 @@ def add_modules_to_sys_modules(
     :return: None
     """
     for import_path, module_obj in modules_by_import_path.items():
-        import_module(import_path, module_obj)
+        import_aea_module(import_path, module_obj)
 
 
 def load_env_file(env_file: str):
