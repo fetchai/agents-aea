@@ -179,8 +179,8 @@ class TestStubConnectionSending:
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
 
-        assert len(lines) == 2
-        line = lines[0] + lines[1]
+        assert len(lines) == 1
+        line = lines[0]
         to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")

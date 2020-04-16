@@ -60,7 +60,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     # TOFIX(LR) properly handle bytes encoding with \n escaping
     #  - parse based on ',' separators, not \n
     #  - use size-data format --> need to write an echo script
-    result += str(e.message)[2:-1].encode("latin-1")
+    result += e.message.decode("utf-8").encode("unicode-escape")
     result += separator
     result += b"\n"
 
