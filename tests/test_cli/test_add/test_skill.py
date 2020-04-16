@@ -490,7 +490,10 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
 
 class TestAddSkillWithContractsDeps(AEATestCase):
+    """Test add skill with contract dependencies."""
+
     def test_add_skill_with_contracts_positive(self):
+        """Test add skill with contract dependencies positive result."""
         self.initialize_aea()
         agent_name = "my_first_agent"
         self.create_agents(agent_name)
