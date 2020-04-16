@@ -38,7 +38,9 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.test_cases import AEATestCase
 
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
 
@@ -485,3 +487,20 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestAddSkillWithContractsDeps(AEATestCase):
+    def test_add_skill_with_contracts_positive(self):
+        self.initialize_aea()
+        agent_name = "my_first_agent"
+        self.create_agents(agent_name)
+
+        agent_dir_path = os.path.join(self.t, agent_name)
+        os.chdir(agent_dir_path)
+
+        skill_name = "erc1155_client"
+        self.add_item("skill", "fetchai/{}:0.1.0".format(skill_name))
+
+        skills_path = os.path.join(agent_dir_path, "vendor", FETCHAI_NAME, "skills")
+        skills_folders = os.listdir(skills_path)
+        assert skill_name in skills_folders

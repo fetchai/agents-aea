@@ -141,7 +141,9 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         )
     else:
         package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
+
     if item_type in {"connection", "skill"}:
+        # TODO: find a better way to handle dependencies
         configuration_file_name = _get_default_configuration_file_name_from_type(
             item_type
         )
@@ -151,6 +153,10 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         )
         item_configuration = configuration_loader.load(configuration_path.open())
         _add_protocols(click_context, item_configuration.protocols)
+
+    if item_type == "skill":
+        for contract_public_id in item_configuration.contracts:
+            _add_item(click_context, "contract", contract_public_id)
 
     # add the item to the configurations.
     logger.debug(
