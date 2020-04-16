@@ -24,5 +24,9 @@ import os
 
 from aea.__version__ import __title__, __description__, __url__, __version__
 from aea.__version__ import __author__, __license__, __copyright__
+from aea.helpers._import_wrapper import ImportWrapper
 
 AEA_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+
+# enable the import wrapper
+ImportWrapper.wrap()

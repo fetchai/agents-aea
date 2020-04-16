@@ -220,6 +220,7 @@ def import_aea_module(dotted_path: str, module_obj) -> None:
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
     """
+
     def add_namespace_to_sys_modules_if_not_present(dotted_path: str):
         if dotted_path not in sys.modules:
             sys.modules[dotted_path] = types.ModuleType(dotted_path)
