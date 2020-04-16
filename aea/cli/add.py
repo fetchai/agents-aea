@@ -143,7 +143,6 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
 
     if item_type in {"connection", "skill"}:
-        # TODO: find a better way to handle dependencies
         configuration_file_name = _get_default_configuration_file_name_from_type(
             item_type
         )
