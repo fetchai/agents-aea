@@ -32,7 +32,6 @@ from jsonschema import Draft4Validator, ValidationError
 import yaml
 
 import aea.cli.common
-import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.test_tools.click_testing import CliRunner

@@ -305,6 +305,7 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
         s = "Error when validating the protocol configuration file."
+        assert self.result.exception.message == s
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.
