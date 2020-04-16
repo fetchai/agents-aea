@@ -61,8 +61,6 @@ class TestGenerateProtocol:
             Path(cls.t, "sample_specification.yaml"),
         )
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
@@ -137,8 +135,6 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
             Path(cls.t, "sample_specification.yaml"),
         )
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # create an agent
         os.chdir(cls.t)
@@ -183,7 +179,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         s = "A directory with name '{}' already exists. Aborting...".format(
             self.protocol_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -216,8 +212,6 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
             Path(cls.t, "sample_specification.yaml"),
         )
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # create an agent
         os.chdir(cls.t)
@@ -272,7 +266,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
         s = "A protocol with name 't_protocol' already exists. Aborting..."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -305,8 +299,6 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
             Path(cls.t, "sample_specification.yaml"),
         )
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # create an agent
         os.chdir(cls.t)
@@ -356,9 +348,8 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "There was an error while generating the protocol. The protocol is NOT generated."
-        )
+        s = "There was an error while generating the protocol. The protocol is NOT generated."
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
