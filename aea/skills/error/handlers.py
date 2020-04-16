@@ -64,9 +64,12 @@ class ErrorHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "Unsupported protocol: {}".format(envelope.protocol_id)
+            "Unsupported protocol: {}. You might want to add a handler for this protocol.".format(
+                envelope.protocol_id
+            )
         )
         encoded_protocol_id = base64.b85encode(str.encode(str(envelope.protocol_id)))
+        encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -74,7 +77,10 @@ class ErrorHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
             error_msg="Unsupported protocol.",
-            error_data={"protocol_id": encoded_protocol_id},
+            error_data={
+                "protocol_id": encoded_protocol_id,
+                "envelope": encoded_envelope,
+            },
         )
         self.context.outbox.put_message(
             to=envelope.sender,
@@ -90,7 +96,11 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        self.context.logger.warning("Decoding error: {}.".format(envelope))
+        self.context.logger.warning(
+            "Decoding error for envelope: {}. Protocol_id='{}' and message='{!r}' are inconsistent.".format(
+                envelope, envelope.protocol_id, envelope.message
+            )
+        )
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
@@ -108,33 +118,6 @@ class ErrorHandler(Handler):
             message=DefaultSerializer().encode(reply),
         )
 
-    def send_invalid_message(self, envelope: Envelope) -> None:
-        """
-        Handle an message that is invalid wrt a protocol.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        self.context.logger.warning(
-            "Invalid message wrt protocol: {}.".format(envelope.protocol_id)
-        )
-        encoded_envelope = base64.b85encode(envelope.encode())
-        reply = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.ERROR,
-            error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
-            error_msg="Invalid message.",
-            error_data={"envelope": encoded_envelope},
-        )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
-        )
-
     def send_unsupported_skill(self, envelope: Envelope) -> None:
         """
         Handle the received envelope in case the skill is not supported.
@@ -142,11 +125,18 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        self.context.logger.warning(
-            "Cannot handle envelope: no handler registered for the protocol '{}'.".format(
-                envelope.protocol_id
+        if envelope.skill_id is None:
+            self.context.logger.warning(
+                "Cannot handle envelope: no active handler registered for the protocol_id='{}'.".format(
+                    envelope.protocol_id
+                )
             )
-        )
+        else:
+            self.context.logger.warning(
+                "Cannot handle envelope: no active handler registered for the protocol_id='{}' and skill_id='{}'.".format(
+                    envelope.protocol_id, envelope.skill_id
+                )
+            )
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),

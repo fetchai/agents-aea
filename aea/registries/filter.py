@@ -31,7 +31,6 @@ from aea.configurations.base import (
 )
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, Model
@@ -75,23 +74,15 @@ class Filter:
         return self._decision_maker_out_queue
 
     def get_active_handlers(
-        self, protocol_id: PublicId, envelope_context: Optional[EnvelopeContext]
+        self, protocol_id: PublicId, skill_id: Optional[SkillId]
     ) -> List[Handler]:
         """
-        Get active handlers.
+        Get active handlers based on protocol id and optional skill id.
 
         :param protocol_id: the protocol id
-        :param envelope context: the envelope context
+        :param skill_id: the skill id
         :return: the list of handlers currently active
         """
-        skill_id = None  # Optional[PublicId]
-        if envelope_context is not None and envelope_context.uri is not None:
-            uri_path = envelope_context.uri.path
-            try:
-                skill_id = PublicId.from_uri_path(uri_path)
-            except ValueError:
-                logger.warning("URI - {} - not a valid skill id.".format(uri_path))
-
         if skill_id is not None:
             handler = self.resources.get_handler(protocol_id, skill_id)
             active_handlers = (

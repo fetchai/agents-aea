@@ -148,7 +148,7 @@ class StubConnection(Connection):
         :param output_file_path: the output file for the outgoing messages.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
+            kwargs["connection_id"] = PublicId.from_str("fetchai/stub:0.2.0")
         super().__init__(**kwargs)
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)

@@ -65,14 +65,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
-AUTHOR = "author"
+AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.2.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.1.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.1.0")
-DEFAULT_LEDGER = FETCHAI
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
 NOT_PERMITTED_AUTHORS = [
     "skills",
     "connections",
