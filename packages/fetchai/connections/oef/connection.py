@@ -46,7 +46,7 @@ from oef.query import (
     Or as OEFOr,
     Query as OEFQuery,
     Range,
-)
+    Distance as OEFDistance)
 from oef.schema import (
     AttributeSchema as OEFAttribute,
     DataModel as OEFDataModel,
@@ -64,10 +64,10 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    Distance,
     Not,
     Or,
-    Query,
-)
+    Query)
 from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -172,6 +172,8 @@ class OEFObjectTranslator:
             return In(value)
         elif constraint_type.type == ConstraintTypes.NOT_IN:
             return NotIn(value)
+        elif constraint_type.type == ConstraintTypes.DISTANCE:
+            return OEFDistance(center=value[0], distance=value[1])
         else:
             raise ValueError("Constraint type not recognized.")
 
@@ -269,6 +271,8 @@ class OEFObjectTranslator:
             return ConstraintType(ConstraintTypes.IN, constraint_type.values)
         elif isinstance(constraint_type, NotIn):
             return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
+        elif isinstance(constraint_type, Distance):
+            return Distance(constraint_type.center, constraint_type.distance)
         else:
             raise ValueError("Constraint type not recognized.")
 
