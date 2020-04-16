@@ -1,0 +1,48 @@
+---
+name: rail_stomp
+author: aris
+version: 0.1.0
+license: Apache-2.0
+aea_version: 0.3.0
+description: 'A protocol for Train updates using stomp connections.'
+speech_acts:
+  rail_updates:
+    event_type: ct:EventType
+    variation_status: ct:VariationStatus
+    planned_event_type: pt:str
+    status: pt:str
+    planned_datetime: pt:str
+    actual_datetime: pt:str
+    planned_timetable_datetime: pt:str
+    location: pt:str
+    location_stanox: pt:int
+    is_correction: pt:bool
+    train_terminated: pt:bool
+    operating_company: pt:str
+    division_code: pt:str
+    train_service_code: pt:str
+    train_id: pt:str
+    is_off_route: pt:bool
+    current_train_id: pt:str
+    original_location: pt:str
+    original_location_planned_departure_datetime: pt:str
+    minutes_late: pt:int
+    early_late_description: pt:str
+...
+---
+ct:EventType: |
+  enum EventTypeEnum {
+    ARRIVAL = 0;
+    DEPARTURE = 1;
+    DESTINATION = 2;
+  }
+  EventTypeEnum event_type = 1;
+ct:VariationStatus: |
+  enum VariationStatusEnum {
+    ON_TIME = 0;
+    EARLY = 1;
+    LATE = 2;
+    OFF_ROUTE = 3;
+  }
+  VariationStatusEnum variation_status = 1;
+...
