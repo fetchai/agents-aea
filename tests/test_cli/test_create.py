@@ -24,7 +24,6 @@ import json
 import os
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 from typing import Dict
 from unittest.mock import patch
