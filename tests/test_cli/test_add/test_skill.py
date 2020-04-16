@@ -57,8 +57,6 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -97,7 +95,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         s = "A skill with id '{}' already exists. Aborting...".format(
             self.skill_author + "/" + self.skill_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_skill_from_registry_positive(self, fetch_package_mock):
@@ -140,8 +138,6 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -200,7 +196,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         s = "A skill with id '{}' already exists. Aborting...".format(
             self.skill_author + "/" + self.skill_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     # @unittest.mock.patch("aea.cli.add.fetch_package")
     # def test_add_skill_from_registry_positive(self, fetch_package_mock):
@@ -239,8 +235,6 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "author/unknown_skill:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -274,7 +268,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
         s = "Cannot find skill: '{}'.".format(self.skill_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -298,8 +292,6 @@ class TestAddSkillFailsWhenDifferentPublicId:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "different_author/error:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -330,7 +322,7 @@ class TestAddSkillFailsWhenDifferentPublicId:
     def test_error_message_skill_wrong_public_id(self):
         """Test that the log error message is fixed."""
         s = "Cannot find skill: '{}'.".format(self.skill_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -354,8 +346,6 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -402,9 +392,8 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Skill configuration file not valid: test error message"
-        )
+        s = "Skill configuration file not valid: test error message"
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -429,8 +418,6 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -475,7 +462,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(
             self.skill_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
