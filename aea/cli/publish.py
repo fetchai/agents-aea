@@ -65,7 +65,7 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
 
     :return: None.
     """
-    if private_key_paths.read_all():
+    if private_key_paths.read_all() != []:
         raise click.ClickException(
             "You are not allowed to publish agents with non-empty private_key_paths."
         )
