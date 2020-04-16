@@ -501,9 +501,9 @@ class TestAddSkillWithContractsDeps(AEATestCase):
         agent_dir_path = os.path.join(self.t, agent_name)
         os.chdir(agent_dir_path)
 
-        skill_name = "erc1155_client"
-        self.add_item("skill", "fetchai/{}:0.1.0".format(skill_name))
+        self.add_item("skill", "fetchai/erc1155_client:0.1.0")
 
-        skills_path = os.path.join(agent_dir_path, "vendor", FETCHAI_NAME, "skills")
-        skills_folders = os.listdir(skills_path)
-        assert skill_name in skills_folders
+        contracts_path = os.path.join(agent_dir_path, "vendor", FETCHAI_NAME, "contracts")
+        contracts_folders = os.listdir(contracts_path)
+        contract_dependency_name = "erc1155"
+        assert contract_dependency_name in contracts_folders
