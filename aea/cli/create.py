@@ -159,8 +159,8 @@ def create(click_context, agent_name, author, local):
     except OSError:
         raise click.ClickException("Directory already exist. Aborting...")
     except ValidationError as e:
+        shutil.rmtree(agent_name, ignore_errors=True)
         raise click.ClickException(str(e))
-        shutil.rmtree(agent_name, ignore_errors=True)
     except Exception as e:
-        logger.exception(e)
         shutil.rmtree(agent_name, ignore_errors=True)
+        raise click.ClickException(str(e))

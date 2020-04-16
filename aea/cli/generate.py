@@ -132,15 +132,15 @@ def _generate_item(click_context, item_type, specification_path):
             )
         )
     except ProtocolSpecificationParseError as e:
+        shutil.rmtree(
+            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
+        )
         raise click.ClickException(
             "The following error happened while parsing the protocol specification: "
             + str(e)
         )
-        shutil.rmtree(
-            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
-        )
     except Exception as e:
-        logger.debug("Exception thrown: " + str(e))
+        print("Exception thrown: " + str(e))
         shutil.rmtree(
             os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
         )
