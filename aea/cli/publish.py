@@ -48,11 +48,19 @@ from aea.configurations.constants import (
 def publish(click_context, local):
     """Publish Agent to Registry."""
     ctx = cast(Context, click_context.obj)
+    _validate_pkp(ctx.agent_config.private_key_paths)
     if local:
         _save_agent_locally(ctx)
     else:
         # TODO: check agent dependencies are available in local packages dir.
         publish_agent(ctx)
+
+
+def _validate_pkp(private_key_paths):
+    if private_key_paths.read_all():
+        raise click.ClickException(
+            "You are not allowed to publish agents with non-empty private_key_paths."
+        )
 
 
 def _check_is_item_in_local_registry(public_id, item_type_plural, registry_path):
