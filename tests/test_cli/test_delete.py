@@ -25,7 +25,6 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-import aea
 from aea.cli import cli
 from aea.test_tools.click_testing import CliRunner
 
