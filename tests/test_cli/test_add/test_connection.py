@@ -124,7 +124,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         s = "A connection with id '{}/{}' already exists. Aborting...".format(
             self.connection_author, self.connection_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -219,7 +219,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         s = "A connection with id '{}' already exists. Aborting...".format(
             self.connection_author + "/" + self.connection_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -279,7 +279,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
         s = "Cannot find connection: '{}'.".format(self.connection_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -336,7 +336,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
     def test_error_message_connection_wrong_public_id(self):
         """Test that the log error message is fixed."""
         s = "Cannot find connection: '{}'.".format(self.connection_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -404,9 +404,8 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Connection configuration file not valid: '{connection_name}''
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Connection configuration file not valid: test error message"
-        )
+        s = "Connection configuration file not valid: test error message"
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -478,7 +477,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(
             self.connection_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
