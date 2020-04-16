@@ -40,8 +40,10 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    Distance,
+    Location,
     Query,
-    Location, Distance)
+)
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -189,7 +191,7 @@ class TestOEF:
             assert search_result.dialogue_reference[0] == str(request_id)
             assert search_result.agents == ()
 
-        def test_search_services_with_distance_query_with_model(self):
+        def test_search_services_with_distance_query(self):
             """Test that a search services request can be sent correctly.
 
             In this test, the query has a simple data model.
@@ -205,8 +207,6 @@ class TestOEF:
                 dialogue_reference=(str(request_id), ""),
                 query=search_query,
             )
-
-            import pdb; pdb.set_trace()
 
             self.multiplexer.put(
                 Envelope(

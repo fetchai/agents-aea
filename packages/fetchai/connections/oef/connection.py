@@ -34,10 +34,12 @@ from oef.query import (
     Constraint as OEFConstraint,
     ConstraintExpr as OEFConstraintExpr,
     ConstraintType as OEFConstraintType,
+    Distance as OEFDistance,
     Eq,
     Gt,
     GtEq,
     In,
+    Location as OEFLocation,
     Lt,
     LtEq,
     Not as OEFNot,
@@ -46,7 +48,7 @@ from oef.query import (
     Or as OEFOr,
     Query as OEFQuery,
     Range,
-    Distance as OEFDistance)
+)
 from oef.schema import (
     AttributeSchema as OEFAttribute,
     DataModel as OEFDataModel,
@@ -65,9 +67,11 @@ from aea.helpers.search.models import (
     DataModel,
     Description,
     Distance,
+    Location,
     Not,
     Or,
-    Query)
+    Query,
+)
 from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -124,6 +128,11 @@ class OEFObjectTranslator:
         )
         constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
         return OEFQuery(constraints, oef_data_model)
+
+    @classmethod
+    def to_oef_location(cls, location: Location) -> OEFLocation:
+        """From our location to OEF location."""
+        return OEFLocation(location.latitude, location.longitude)
 
     @classmethod
     def to_oef_constraint_expr(
@@ -216,6 +225,11 @@ class OEFObjectTranslator:
         )
         constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
         return Query(constraints, data_model)
+
+    @classmethod
+    def from_oef_location(cls, oef_location: OEFLocation) -> Location:
+        """From oef location to our location."""
+        return Location(oef_location.latitude, oef_location.longitude)
 
     @classmethod
     def from_oef_constraint_expr(

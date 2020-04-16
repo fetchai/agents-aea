@@ -23,13 +23,18 @@ import pickle  # nosec
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
-from math import radians, sin, asin, sqrt, cos
+from math import asin, cos, radians, sin, sqrt
 from typing import Any, Dict, List, Optional, Type, Union
+from oef.Wrappers import Location as OefLocation
 
-from oef.Wrappers import Location
-
-ATTRIBUTE_TYPES = Union[float, str, bool, int, Location]
-SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool, "location": Location}
+ATTRIBUTE_TYPES = Union[float, str, bool, int, OefLocation]
+SUPPORTED_TYPES = {
+    "str": str,
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "location": OefLocation,
+}
 
 
 class Attribute:
@@ -519,6 +524,7 @@ class Query:
 
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
+
     def __init__(self, latitude: float, longitude: float):
         """
         Initialize a location.
@@ -558,6 +564,7 @@ class Distance(ConstraintType):
         >>> close_to_tour_eiffel.check(colosseum)
         False
     """
+
     def __init__(self, center: Location, distance: float) -> None:
         """
         Instantiate the ``Distance`` constraint.
