@@ -42,6 +42,8 @@ requests = ">=2.22.0"
 safety = "==1.8.5"
 tox = "==3.14.5"
 vyper = "==0.1.0b12"
+psutil = "==5.7.0"
+memory-profiler = "==0.57.0"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
