@@ -63,7 +63,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += e.message
     result += separator
-    
+
     return result
 
 
