@@ -31,10 +31,10 @@ from click.exceptions import BadParameter
 import aea.cli.common
 from aea.cli import cli
 from aea.cli.config import AEAJsonPathType
+from aea.test_tools.click_testing import CliRunner
 
 from tests.test_cli.tools_for_testing import ContextMock
 
-from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 

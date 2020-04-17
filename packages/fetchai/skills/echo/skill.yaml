@@ -19,8 +19,7 @@ behaviours:
     class_name: EchoBehaviour
 handlers:
   echo:
-    args:
-      foo: bar
+    args: {}
     class_name: EchoHandler
 models: {}
 dependencies: {}

@@ -40,9 +40,9 @@ from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
-    ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageType,
     PublicId,
     _check_aea_version,
     _compare_fingerprints,
@@ -95,27 +95,27 @@ class Context:
     @property
     def agent_loader(self) -> ConfigLoader:
         """Get the agent loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        return ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     @property
     def protocol_loader(self) -> ConfigLoader:
         """Get the protocol loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.PROTOCOL)
+        return ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
 
     @property
     def connection_loader(self) -> ConfigLoader:
         """Get the connection loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.CONNECTION)
+        return ConfigLoader.from_configuration_type(PackageType.CONNECTION)
 
     @property
     def skill_loader(self) -> ConfigLoader:
         """Get the skill loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.SKILL)
+        return ConfigLoader.from_configuration_type(PackageType.SKILL)
 
     @property
     def contract_loader(self) -> ConfigLoader:
         """Get the contract loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.CONTRACT)
+        return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
 
     def set_config(self, key, value) -> None:
         """
@@ -527,7 +527,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         item_configuration = item_configuration_loader.load(
             item_configuration_filepath.open()
@@ -575,7 +575,7 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         item_configuration = item_configuration_loader.load(
             item_configuration_filepath.open()
@@ -609,15 +609,12 @@ def _validate_config_consistency(ctx: Context):
 
     packages_public_ids_to_types = dict(
         [
-            *map(lambda x: (x, ConfigurationType.PROTOCOL), ctx.agent_config.protocols),
-            *map(
-                lambda x: (x, ConfigurationType.CONNECTION),
-                ctx.agent_config.connections,
-            ),
-            *map(lambda x: (x, ConfigurationType.SKILL), ctx.agent_config.skills),
-            *map(lambda x: (x, ConfigurationType.CONTRACT), ctx.agent_config.contracts),
+            *map(lambda x: (x, PackageType.PROTOCOL), ctx.agent_config.protocols),
+            *map(lambda x: (x, PackageType.CONNECTION), ctx.agent_config.connections,),
+            *map(lambda x: (x, PackageType.SKILL), ctx.agent_config.skills),
+            *map(lambda x: (x, PackageType.CONTRACT), ctx.agent_config.contracts),
         ]
-    )  # type: Dict[PublicId, ConfigurationType]
+    )  # type: Dict[PublicId, PackageType]
 
     for public_id, item_type in packages_public_ids_to_types.items():
 
@@ -635,7 +632,7 @@ def _validate_config_consistency(ctx: Context):
             # we fail if none of the two alternative works.
             assert package_directory.exists()
 
-            loader = ConfigLoaders.from_configuration_type(item_type)
+            loader = ConfigLoaders.from_package_type(item_type)
             config_file_name = _get_default_configuration_file_name_from_type(item_type)
             configuration_file_path = package_directory / config_file_name
             assert configuration_file_path.exists()

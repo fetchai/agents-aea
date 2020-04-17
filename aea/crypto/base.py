@@ -20,11 +20,9 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Optional, Union
+from typing import Any, BinaryIO, Optional
 
 from aea.mail.base import Address
-
-AddressLike = Union[str, bytes]
 
 
 class Crypto(ABC):
@@ -134,7 +132,7 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def get_balance(self, address: AddressLike) -> int:
+    def get_balance(self, address: Address) -> Optional[int]:
         """
         Get the balance of a given account.
 
@@ -145,14 +143,13 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def send_transaction(
+    def transfer(
         self,
         crypto: Crypto,
-        destination_address: AddressLike,
+        destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        is_waiting_for_confirmation: bool = True,
         **kwargs
     ) -> Optional[str]:
         """
@@ -166,20 +163,16 @@ class LedgerApi(ABC):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :return: tx digest if successful, otherwise None
         """
 
     @abstractmethod
-    def send_signed_transaction(
-        self, is_waiting_for_confirmation: bool, tx_signed: Any
-    ) -> str:
+    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         Use keyword arguments for the specifying the signed transaction payload.
 
-        :param is_waiting_for_confirmation: whether or not to wait for confirmation
         :param tx_signed: the signed transaction
         """
 
@@ -193,12 +186,12 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def get_transaction_status(self, tx_digest: str) -> Any:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
-        Get the transaction status for a transaction digest.
+        Get the transaction receipt for a transaction digest (non-blocking).
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the tx status, if present
+        :return: the tx receipt, if present
         """
 
     @abstractmethod
@@ -212,7 +205,7 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def validate_transaction(
+    def is_transaction_valid(
         self,
         tx_digest: str,
         seller: Address,
@@ -221,7 +214,7 @@ class LedgerApi(ABC):
         amount: int,
     ) -> bool:
         """
-        Check whether a transaction is valid or not.
+        Check whether a transaction is valid or not (non-blocking).
 
         :param seller: the address of the seller.
         :param client: the address of the client.

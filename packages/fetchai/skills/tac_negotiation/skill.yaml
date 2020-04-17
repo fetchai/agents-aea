@@ -7,17 +7,18 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
-  behaviours.py: QmRrHMEja2Q41RKeWULNcanqE2mGZzy9ZMaH2jg4JQZ6uw
+  behaviours.py: QmezjkFXso21vV7SDSxKDTFyNKN1Sek3xi5y8uCzJrj6S1
   dialogues.py: QmceDUEb1tmtTQZw2WxjQyTNKn6Zni7ZCUuDdznNN7nRzh
-  handlers.py: QmbdUZw3nWFdtQUcbb4ELTFX99Ed3vXyp8Gy9CsapTNoqL
-  helpers.py: QmcWKPeUVHqKov4eWifY5zietsSdWW4XxyVc1AgQbVUGeu
+  handlers.py: QmYitq7PLwU3gd5rR6WjuR6ai5kw6vQijZU6FetRGz1DkF
+  helpers.py: QmXYbZYtLdJLrc7pCmmkHfEzBUeqm1sYQGEY2UNKsFKb8A
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmT2y3gPWasEBtksj6jEWniP7mT6FbmZ1DjHSNE85vLLjb
+  strategy.py: QmNevTD49acUMHMLqCvLLbkqtqqiPfNukZGakQWcKHEBPF
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
   transactions.py: QmY83PRH3ncMuqvjWsC3HuxJRS51dFq4RytMzEYjBA9KDx
 fingerprint_ignore_patterns: []
-contracts: []
+contracts:
+- fetchai/erc1155:0.2.0
 protocols:
 - fetchai/fipa:0.1.0
 - fetchai/oef_search:0.1.0
@@ -27,8 +28,7 @@ behaviours:
       tick_interval: 5.0
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
-    args:
-      services_interval: 5
+    args: {}
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
   fipa:
@@ -59,6 +59,7 @@ models:
     class_name: Strategy
   transactions:
     args:
+      is_using_contract: false
       pending_transaction_timeout: 30
     class_name: Transactions
 dependencies: {}

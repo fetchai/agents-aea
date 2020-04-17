@@ -45,7 +45,6 @@ class TacMessage(Message):
 
         CANCELLED = "cancelled"
         GAME_DATA = "game_data"
-        GET_STATE_UPDATE = "get_state_update"
         REGISTER = "register"
         TAC_ERROR = "tac_error"
         TRANSACTION = "transaction"
@@ -82,7 +81,6 @@ class TacMessage(Message):
         self._performatives = {
             "cancelled",
             "game_data",
-            "get_state_update",
             "register",
             "tac_error",
             "transaction",
@@ -387,8 +385,6 @@ class TacMessage(Message):
                 ), "Invalid type for content 'tx_counterparty_signature'. Expected 'str'. Found '{}'.".format(
                     type(self.tx_counterparty_signature)
                 )
-            elif self.performative == TacMessage.Performative.GET_STATE_UPDATE:
-                expected_nb_of_contents = 0
             elif self.performative == TacMessage.Performative.CANCELLED:
                 expected_nb_of_contents = 0
             elif self.performative == TacMessage.Performative.GAME_DATA:

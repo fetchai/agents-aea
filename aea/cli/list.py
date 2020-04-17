@@ -33,7 +33,7 @@ from aea.cli.common import (
     pass_ctx,
 )
 from aea.configurations.base import (
-    ConfigurationType,
+    PackageType,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
@@ -69,7 +69,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
                 ctx.cwd, item_type_plural, public_id.name, default_file_name
             )
         configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         details = _retrieve_details(
             public_id.name, configuration_loader, str(configuration_filepath)

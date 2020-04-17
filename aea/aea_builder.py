@@ -22,9 +22,10 @@ import inspect
 import itertools
 import logging
 import os
+import pprint
 import re
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -35,11 +36,11 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageType,
     ProtocolConfig,
     PublicId,
     SkillConfig,
@@ -66,6 +67,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.exceptions import AEAException
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -195,19 +197,6 @@ class _DependenciesManager:
         for dependency in component.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
 
-    def check_package_dependencies(
-        self, component_configuration: ComponentConfiguration
-    ) -> bool:
-        """
-        Check that we have all the dependencies needed to the package.
-
-        return: True if all the dependencies are covered, False otherwise.
-        """
-        not_supported_packages = component_configuration.package_dependencies.difference(
-            self.all_dependencies
-        )
-        return len(not_supported_packages) == 0
-
     @property
     def pypi_dependencies(self) -> Dependencies:
         """Get all the PyPI dependencies."""
@@ -234,6 +223,8 @@ class AEABuilder:
     returns the instance of the builder itself.
     """
 
+    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+
     def __init__(self, with_default_packages: bool = True):
         """
         Initialize the builder.
@@ -249,6 +240,7 @@ class AEABuilder:
             "fetchai"  # set by the user, or instantiate a default one.
         )
         self._default_connection = DEFAULT_CONNECTION
+        self._context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -285,7 +277,6 @@ class AEABuilder:
 
         :param configuration: the configuration of the component.
         :return: None
-        :raises ValueError: if the component is not present.
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
@@ -386,7 +377,8 @@ class AEABuilder:
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises ValueError: if a component is already registered with the same component id.
+        :raises AEAException: if a component is already registered with the same component id.
+                            | or if there's a missing dependency.
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -399,6 +391,10 @@ class AEABuilder:
         configuration._directory = directory
 
         return self
+
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+        """Set the context namespace."""
+        self._context_namespace = context_namespace
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -600,26 +596,49 @@ class AEABuilder:
             LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
-            timeout=0.0,
+            timeout=self._get_agent_loop_timeout(),
             is_debug=False,
             max_reactions=20,
+            **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _get_agent_loop_timeout(self) -> float:
+        return self.DEFAULT_AGENT_LOOP_TIMEOUT
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
         ):
-            raise ValueError(
-                "Component {} of type {} already added.".format(
+            raise AEAException(
+                "Component '{}' of type '{}' already added.".format(
                     configuration.public_id, configuration.component_type
                 )
             )
 
-    def _check_package_dependencies(self, configuration):
-        self._package_dependency_manager.check_package_dependencies(configuration)
+    def _check_package_dependencies(
+        self, configuration: ComponentConfiguration
+    ) -> None:
+        """
+        Check that we have all the dependencies needed to the package.
+
+        :return: None
+        :raises AEAException: if there's a missing dependency.
+        """
+        not_supported_packages = configuration.package_dependencies.difference(
+            self._package_dependency_manager.all_dependencies
+        )  # type: Set[ComponentId]
+        has_all_dependencies = len(not_supported_packages) == 0
+        if not has_all_dependencies:
+            raise AEAException(
+                "Package '{}' of type '{}' cannot be added. Missing dependencies: {}".format(
+                    configuration.public_id,
+                    configuration.component_type.value,
+                    pprint.pformat(sorted(map(str, not_supported_packages))),
+                )
+            )
 
     @staticmethod
     def _find_component_directory_from_component_id(
@@ -654,7 +673,7 @@ class AEABuilder:
         try:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
-                loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+                loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)
         except FileNotFoundError:
@@ -699,7 +718,7 @@ class AEABuilder:
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
 
-        loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
         # set name and other configurations
