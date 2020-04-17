@@ -175,6 +175,12 @@ def test_real_search():
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
+    assert data[i]["id"] == "fetchai/p2p_stub:0.2.0"
+    assert (
+        data[i]["description"]
+        == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
+    )
+    i += 1
     assert data[i]["id"] == "fetchai/stub:0.2.0"
     assert (
         data[i]["description"]
