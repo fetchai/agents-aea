@@ -116,8 +116,11 @@ class OEFObjectTranslator:
     @classmethod
     def to_oef_attribute(cls, attribute: Attribute) -> OEFAttribute:
         """From our attribute to OEF attribute."""
+
+        # in case the attribute type is Location, replace with the `oef` class.
+        attribute_type = OEFLocation if attribute.type == Location else attribute.type
         return OEFAttribute(
-            attribute.name, attribute.type, attribute.is_required, attribute.description
+            attribute.name, attribute_type, attribute.is_required, attribute.description
         )
 
     @classmethod
@@ -209,9 +212,10 @@ class OEFObjectTranslator:
     @classmethod
     def from_oef_attribute(cls, oef_attribute: OEFAttribute) -> Attribute:
         """From an OEF attribute to our attribute."""
+        oef_attribute_type = Location if oef_attribute.type == OEFLocation else oef_attribute.type
         return Attribute(
             oef_attribute.name,
-            oef_attribute.type,
+            oef_attribute_type,
             oef_attribute.required,
             oef_attribute.description,
         )
