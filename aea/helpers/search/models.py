@@ -24,16 +24,20 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Optional, Type, Union
-from oef.Wrappers import Location as OefLocation
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
-ATTRIBUTE_TYPES = Union[float, str, bool, int, OefLocation]
+
+class Location:
+    pass
+
+
+ATTRIBUTE_TYPES = Union[float, str, bool, int, Location]
 SUPPORTED_TYPES = {
     "str": str,
     "int": int,
     "float": float,
     "bool": bool,
-    "location": OefLocation,
+    "location": Location,
 }
 
 
@@ -239,7 +243,7 @@ class ConstraintType:
                     _type = type(next(iter(self.value)))
                     assert all(isinstance(obj, _type) for obj in self.value)
             elif self.type == ConstraintTypes.DISTANCE:
-                assert isinstance(self.value, list)
+                assert isinstance(self.value, (list, tuple))
                 assert len(self.value) == 2
             else:
                 raise ValueError("Type not recognized.")
@@ -278,6 +282,14 @@ class ConstraintType:
             return value in self.value
         elif self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
+        elif self.type == ConstraintTypes.DISTANCE:
+            point = cast(Location, value)
+            center = self.value[0]  # type: Location
+            max_distance = self.value[1]  # type: float
+            actual_distance = haversine(
+                center.latitude, center.longitude, point.latitude, point.longitude
+            )
+            return actual_distance <= max_distance
         else:
             raise ValueError("Constraint type not recognized.")
 
