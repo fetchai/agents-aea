@@ -192,9 +192,7 @@ class StubConnection(Connection):
 
         message = b""
         parts = 0
-        logger.debug("file content: {!r}".format(content))
         for split in splits:
-            logger.debug("reading split: {!r}".format(split))
             parts += 1
             if parts == 5:
                 logger.debug("processing: {!r}".format(message))
@@ -207,7 +205,6 @@ class StubConnection(Connection):
             message += split + separator
             if parts == 1:
                 message = message.decode("utf-8").strip().encode("utf-8")
-            logger.debug("constructed{}: {!r}".format(parts, message))
 
         if 5 > parts > 0:
             logger.debug("processing: {!r}".format(message))
