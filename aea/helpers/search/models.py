@@ -287,7 +287,7 @@ class ConstraintType:
             center = self.value[0]  # type: Location
             max_distance = self.value[1]  # type: float
             actual_distance = haversine(
-                center.latitude, center.longitude, point.latitude, point.longitude
+                center.latitude, center.longitude, point.latitude, point.longitude  # type: ignore
             )
             return actual_distance <= max_distance
         else:

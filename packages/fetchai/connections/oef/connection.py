@@ -126,13 +126,14 @@ class OEFObjectTranslator:
         oef_data_model = (
             cls.to_oef_data_model(query.model) if query.model is not None else None
         )
+        # import pdb; pdb.set_trace()
         constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
         return OEFQuery(constraints, oef_data_model)
 
     @classmethod
     def to_oef_location(cls, location: Location) -> OEFLocation:
         """From our location to OEF location."""
-        return OEFLocation(location.latitude, location.longitude)
+        return OEFLocation(location.latitude, location.longitude)  # type: ignore
 
     @classmethod
     def to_oef_constraint_expr(
@@ -182,7 +183,8 @@ class OEFObjectTranslator:
         elif constraint_type.type == ConstraintTypes.NOT_IN:
             return NotIn(value)
         elif constraint_type.type == ConstraintTypes.DISTANCE:
-            return OEFDistance(center=value[0], distance=value[1])
+            location = cls.to_oef_location(location=value[0])
+            return OEFDistance(center=location, distance=value[1])
         else:
             raise ValueError("Constraint type not recognized.")
 
@@ -286,7 +288,8 @@ class OEFObjectTranslator:
         elif isinstance(constraint_type, NotIn):
             return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
         elif isinstance(constraint_type, Distance):
-            return Distance(constraint_type.center, constraint_type.distance)
+            location = cls.from_oef_location(constraint_type.center)
+            return Distance(location, constraint_type.distance)
         else:
             raise ValueError("Constraint type not recognized.")
 

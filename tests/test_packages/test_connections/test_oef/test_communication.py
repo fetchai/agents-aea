@@ -40,7 +40,6 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
-    Distance,
     Location,
     Query,
 )
@@ -200,7 +199,8 @@ class TestOEF:
             request_id = 1
             data_model = DataModel("geolocation", [Attribute("latlon", Location, True)])
             search_query = Query(
-                [Constraint("dinstance", Distance(tour_eiffel, 1.0))], model=data_model
+                [Constraint("latlon", ConstraintType("distance", (tour_eiffel, 1.0)))],
+                model=data_model,
             )
             search_request = OefSearchMessage(
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
