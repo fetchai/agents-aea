@@ -180,7 +180,7 @@ class TestStubConnectionSending:
             lines = f.readlines()
 
         assert len(lines) == 2
-        line = lines[0]
+        line = lines[0] + lines[1]
         to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
