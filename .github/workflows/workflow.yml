@@ -57,7 +57,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
 
     timeout-minutes: 30
@@ -84,6 +84,13 @@ jobs:
         pip install pipenv
         pip install tox
         brew install protobuf
+    - if: matrix.os == 'windows-latest'
+      name: Install dependencies (windows-latest)
+      run: |
+        pip install pipenv
+        pip install tox
+        echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+    # TODO install protocol buffers on Windows
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
