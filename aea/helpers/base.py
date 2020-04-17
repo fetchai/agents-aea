@@ -227,7 +227,9 @@ def import_aea_module(dotted_path: str, module_obj) -> None:
 
     # add all prefixes as 'namespaces', since they are not actual packages.
     split = dotted_path.split(".")
-    assert len(split) > 3
+    assert (
+        len(split) > 3
+    ), "Import path has not the form 'packages.<author_name>.<package_type>.<package_name>'"
     root = split[0]
     till_author = root + "." + split[1]
     till_item_type = till_author + "." + split[2]
