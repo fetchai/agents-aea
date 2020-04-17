@@ -90,7 +90,7 @@ jobs:
         pip install pipenv
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-    # TODO install protocol buffers on Windows
+        choco install protoc
     - name: Unit tests and coverage
       run: |
         tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
