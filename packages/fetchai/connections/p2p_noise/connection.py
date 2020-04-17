@@ -26,6 +26,7 @@ import subprocess
 import errno
 import struct
 import posix
+import time
 from pathlib import Path
 from typing import Optional, List, Union, IO, AnyStr
 
@@ -97,21 +98,26 @@ class NoiseNode:
         self.source = source
         self.clargs = clargs
 
-        # async loop
-        # TOFIX(LR) new_loop or get_loop?
-        self._loop = loop if loop is not None else asyncio.get_event_loop()
-
         # named pipes (fifos)
         self.NOISE_TO_AEA_PATH = "/tmp/{}-noise_to_aea".format(self.identity)
         self.AEA_TO_NOISE_PATH = "/tmp/{}-aea_to_noise".format(self.identity)
         self._noise_to_aea = None
         self._aea_to_noise = None
         self._connection_attempts = 3
+        
+        # async loop
+        self._loop = loop 
 
         #
         self.proc = None
 
     async def start(self) -> None:
+        # async loop
+        # TOFIX(LR) new_loop or get_loop?
+        if self._loop is None: 
+            # TOFIX(LR) new_loop or get_loop?
+            self._loop = asyncio.get_event_loop()
+
         # get source deps
         proc = _golang_get_deps(self.source)
         proc.wait()
@@ -153,7 +159,7 @@ class NoiseNode:
         self._noise_to_aea = posix.open(
             self.NOISE_TO_AEA_PATH, posix.O_RDONLY | os.O_NONBLOCK
         )
-        # self._noise_to_aea = posix.open(self.NOISE_TO_AEA_PATH, posix.O_RDONLY)
+        self._noise_to_aea = posix.open(self.NOISE_TO_AEA_PATH, posix.O_RDONLY)
         print(self._noise_to_aea)
         try:
             self._aea_to_noise = posix.open(
@@ -173,9 +179,19 @@ class NoiseNode:
         )
         #
         self._in_queue = asyncio.Queue()
+
+        # setup reader 
+        self._stream_reader = asyncio.StreamReader(loop=self._loop)
+        self._reader_protocol = asyncio.StreamReaderProtocol(self._stream_reader, loop=self._loop)
+        self._fileobj = os.fdopen(self._noise_to_aea, "r")
+        asyncio.ensure_future(self._read_messages(), loop=self._loop)
+        await self._loop.connect_read_pipe(lambda : self._reader_protocol, self._fileobj)
+#await self._read_messages()
         # starting receiving msgs
-        self._read_messages()
-        self._loop.add_reader(self._noise_to_aea, self._read_messages, self)
+        asyncio.ensure_future(self._read_messages(), loop=self._loop)
+        #self._read_messages()
+        #self._loop.add_reader(self._noise_to_aea, self._read_messages, self)
+
 
     async def send(self, data: bytes) -> None:
         size = struct.pack("!I", len(data))
@@ -186,9 +202,12 @@ class NoiseNode:
         # TOFIX(LR) hack
         #  could use asyncio add_writer
 
-    def _read_messages(self) -> None:
+    def _read_messages_(self) -> None:
         # TOFIX(LR) still need to check if all expected bytes are available
         print("[py] looking for messages ...")
+        #asyncio.sleep(10000)
+        #return
+        #time.sleep(2)
         try:
             while True:
                 size = os.read(self._noise_to_aea, 4)
@@ -196,6 +215,7 @@ class NoiseNode:
                 print("[py] recved size: {}".format(size))
                 data = os.read(self._noise_to_aea, size)
                 print("[py] recved data: {}".format(data))
+                # TOFIX(LR) needs to check if there is more messages
                 # asyncio.run_coroutine_threadsafe(
                 self._in_queue.put_nowait(data), self._loop
                 # ).result() # TOFIX(LR) check race conditions
@@ -205,6 +225,32 @@ class NoiseNode:
                 return
             else:
                 raise e
+    
+    async def _read_messages(self) -> None:
+      #print("[py] connecting read pipe...")
+      #await self._loop.connect_read_pipe(lambda : self._reader_protocol, self._fileobj)
+      while True:
+        try:
+          print("[py] waiting for messages...")
+          size = await self._stream_reader.readexactly(4)
+          if not size:
+            print("[py] EOF reached")
+            break;
+            # TOFIX(LR) disconnect Connection from Multiplexer
+          size = struct.unpack("!I", size)[0]
+          print("[py] recved size: {}".format(size))
+          data = await self._stream_reader.readexactly(size)
+          print("[py] recved data: {}".format(data))
+          if not data:
+            print("[py] EOF reached")
+            break;
+            # TOFIX(LR) disconnect Connection from Multiplexer
+          self._in_queue.put_nowait(data), self._loop
+        except asyncio.streams.IncompleteReadError as e:
+          print("[py] EOF reached - read {}/{}".format(len(e.partial), e.expected))
+          break;
+      print("[py] stop receiving")
+ 
 
     async def receive(self) -> Optional[bytes]:
         # data = self._read_messages()
@@ -245,7 +291,29 @@ def GET_NOISE_NODE_CLARGS() -> List[str]:
 class P2PNoiseConnection(Connection):
     r"""A noise p2p library connection.
 
-    This connection deploys a noise p2p node as a subprocess and exchange envelopes with it through named pipes.
+    This connection uses two files to communicate: one for the incoming messages and
+    the other for the outgoing messages. Each line contains an encoded envelope.
+
+    The format of each line is the following:
+
+        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+
+    e.g.:
+
+        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+
+    The connection detects new messages by watchdogging the input file looking for new lines.
+
+    To post a message on the input file, you can use e.g.
+
+        echo "..." >> input_file
+
+    or:
+
+        #>>> fp = open("input_file", "ab+")
+        #>>> fp.write(b"...\n")
+
+    It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
     # TOFIX(LR) add local node ip address and port number
     def __init__(
