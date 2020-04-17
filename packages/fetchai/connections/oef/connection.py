@@ -126,7 +126,6 @@ class OEFObjectTranslator:
         oef_data_model = (
             cls.to_oef_data_model(query.model) if query.model is not None else None
         )
-        # import pdb; pdb.set_trace()
         constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
         return OEFQuery(constraints, oef_data_model)
 
