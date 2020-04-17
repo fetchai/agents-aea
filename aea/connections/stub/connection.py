@@ -57,13 +57,9 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    # TOFIX(LR) properly handle bytes encoding with \n escaping
-    #  - parse based on ',' separators, not \n
-    #  - use size-data format --> need to write an echo script
-    result += e.message.decode("utf-8").encode("unicode-escape")
+    result += e.message
     result += separator
-    result += b"\n"
-
+    
     return result
 
 
@@ -80,7 +76,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    message = split[3].decode("unicode_escape").encode("utf-8")
+    message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
@@ -181,9 +177,37 @@ class StubConnection(Connection):
         ok = _unlock_file(self.input_file)
         # TOFIX(LR) how to handle locking errors
 
-        for line in lines:
-            logger.debug("read line: {!r}".format(line))
-            self._process_line(line)
+        #
+        if len(lines) == 0:
+            return
+
+        # split lines based on separator
+        content = b"".join(lines)
+        separator = SEPARATOR
+        splits = content.split(separator)
+
+        message = b""
+        parts = 0
+        logger.debug("file content: {!r}".format(content))
+        for split in splits:
+            logger.debug("reading split: {!r}".format(split))
+            parts += 1
+            if parts == 5:
+                logger.debug("processing: {!r}".format(message))
+                self._process_line(message)
+                parts = 1
+                message = b""
+                if split == b"\n" or split == b"":
+                    parts = 0
+                    continue
+            message += split + separator
+            if parts == 1:
+                message = message.decode("utf-8").strip().encode("utf-8")
+            logger.debug("constructed{}: {!r}".format(parts, message))
+
+        if 5 > parts > 0:
+            logger.debug("processing: {!r}".format(message))
+            self._process_line(message)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
