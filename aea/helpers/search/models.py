@@ -24,21 +24,46 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Optional, Type, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Type, Union, cast
 
 
 class Location:
-    pass
+    """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
+
+    def __init__(self, latitude: float, longitude: float):
+        """
+        Initialize a location.
+        :param latitude: the latitude of the location.
+        :param longitude: the longitude of the location.
+        """
+        self.latitude = latitude
+        self.longitude = longitude
+
+    def distance(self, other) -> float:
+        return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
+
+    def __eq__(self, other):
+        if type(other) != Location:
+            return False
+        else:
+            return self.latitude == other.latitude and self.longitude == other.longitude
 
 
+"""
+The allowable types that an Attribute can have
+"""
 ATTRIBUTE_TYPES = Union[float, str, bool, int, Location]
-SUPPORTED_TYPES = {
-    "str": str,
-    "int": int,
-    "float": float,
-    "bool": bool,
-    "location": Location,
-}
+ALLOWED_ATTRIBUTE_TYPES = [float, str, bool, int, Location]
+
+
+class AttributeInconsistencyException(Exception):
+    """
+    Raised when the attributes in a Description are inconsistent.
+    Inconsistency is defined when values do not meet their respective schema, or if the values
+    are not of an allowed type.
+    """
+
+    pass
 
 
 class Attribute:
@@ -59,10 +84,10 @@ class Attribute:
         :param is_required: whether the attribute is required by the data model.
         :param description: an (optional) human-readable description for the attribute.
         """
-        self.name: str = name
-        self.type: Type[ATTRIBUTE_TYPES] = type
-        self.is_required: bool = is_required
-        self.description: str = description
+        self.name = name
+        self.type = type
+        self.is_required = is_required
+        self.description = description
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -86,8 +111,19 @@ class DataModel:
         """
         self.name: str = name
         self.attributes: List[Attribute] = sorted(attributes, key=lambda x: x.name)
+        self._check_validity()
         self.attributes_by_name = {a.name: a for a in attributes}
         self.description = description
+
+    def _check_validity(self):
+        # check if there are duplicated attribute names
+        attribute_names = [attribute.name for attribute in self.attributes]
+        if len(attribute_names) != len(set(attribute_names)):
+            raise ValueError(
+                "Invalid input value for type '{}': duplicated attribute name.".format(
+                    type(self).__name__
+                )
+            )
 
     def __eq__(self, other) -> bool:
         """Compare with another object."""
@@ -98,18 +134,53 @@ class DataModel:
         )
 
 
+def generate_data_model(
+    model_name: str, attribute_values: Mapping[str, ATTRIBUTE_TYPES]
+) -> DataModel:
+    """
+    Generate a data model that matches the values stored in this description.
+
+    That is, for each attribute (name, value), generate an Attribute.
+    It is assumed that each attribute is required.
+
+    :param model_name: the name of the model.
+    :param attribute_values: the values of each attribute
+    :return: the schema compliant with the values specified.
+    """
+    return DataModel(
+        model_name,
+        [Attribute(key, type(value), True) for key, value in attribute_values.items()],
+    )
+
+
 class Description:
     """Implements an OEF description."""
 
-    def __init__(self, values: Dict, data_model: Optional[DataModel] = None):
+    def __init__(
+        self,
+        values: Mapping[str, ATTRIBUTE_TYPES],
+        data_model: Optional[DataModel] = None,
+        data_model_name: str = "",
+    ):
         """
         Initialize the description object.
 
         :param values: the values in the description.
+        :param data_model: the data model (optional)
+        :pram data_model_name: the data model name if a datamodel is created on the fly.
         """
         _values = deepcopy(values)
-        self.values = _values
-        self.data_model = data_model
+        self._values = _values
+        if data_model is not None:
+            self.data_model = data_model
+        else:
+            self.data_model = generate_data_model(data_model_name, values)
+        self._check_consistency()
+
+    @property
+    def values(self) -> Dict:
+        """Get the values."""
+        return cast(Dict, self._values)
 
     def __eq__(self, other) -> bool:
         """Compare with another object."""
@@ -122,6 +193,52 @@ class Description:
     def __iter__(self):
         """Create an iterator."""
         return iter(self.values)
+
+    def _check_consistency(self):
+        """
+        Checks the consistency of the values of this description.
+        If an attribute has been provided, values are checked against that. If no attribute
+        schema has been provided then minimal checking is performed based on the values in the
+        provided attribute_value dictionary.
+        :raises AttributeInconsistencyException: if values do not meet the schema, or if no schema is present
+                                               | if they have disallowed types.
+        """
+        # check that all required attributes in the schema are contained in the description
+        required_attributes = [
+            attribute.name
+            for attribute in self.data_model.attributes
+            if attribute.is_required
+        ]
+        if not all(
+            attribute_name in self.values for attribute_name in required_attributes
+        ):
+            raise AttributeInconsistencyException("Missing required attribute.")
+
+        # check that all values are defined in the data model
+        all_attributes = [attribute.name for attribute in self.data_model.attributes]
+        if not all(key in all_attributes for key in self.values):
+            raise AttributeInconsistencyException(
+                "Have extra attribute not in data model."
+            )
+
+        # check that each of the values are consistent with that specified in the data model
+        for attribute in self.data_model.attributes:
+            if type(self.values[attribute.name]) != attribute.type:
+                # values does not match type in data model
+                raise AttributeInconsistencyException(
+                    "Attribute {} has incorrect type: {}".format(
+                        attribute.name, attribute.type
+                    )
+                )
+            elif not type(self.values[attribute.name]) in ALLOWED_ATTRIBUTE_TYPES:
+                # value type matches data model, but it is not an allowed type
+                raise AttributeInconsistencyException(
+                    "Attribute {} has unallowed type: {}. Allowed types: {}".format(
+                        attribute.name,
+                        type(self.values[attribute.name]),
+                        ALLOWED_ATTRIBUTE_TYPES,
+                    )
+                )
 
     @classmethod
     def encode(
@@ -245,12 +362,44 @@ class ConstraintType:
             elif self.type == ConstraintTypes.DISTANCE:
                 assert isinstance(self.value, (list, tuple))
                 assert len(self.value) == 2
+                assert isinstance(self.value[0], Location)
+                assert isinstance(self.value[1], float)
             else:
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):
             return False
 
         return True
+
+    def is_valid(self, attribute: Attribute) -> bool:
+        """
+        Check if the constraint type is valid wrt a given attribute.
+
+        :param attribute: the data model used to check the validity of the constraint type.
+        :return: ``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
+        """
+        if self.type == ConstraintTypes.EQUAL:
+            return True
+        elif self.type == ConstraintTypes.NOT_EQUAL:
+            return True
+        elif self.type == ConstraintTypes.LESS_THAN:
+            return True
+        elif self.type == ConstraintTypes.LESS_THAN_EQ:
+            return True
+        elif self.type == ConstraintTypes.GREATER_THAN:
+            return True
+        elif self.type == ConstraintTypes.GREATER_THAN_EQ:
+            return True
+        elif self.type == ConstraintTypes.WITHIN:
+            return True
+        elif self.type == ConstraintTypes.IN:
+            return True
+        elif self.type == ConstraintTypes.NOT_IN:
+            return True
+        elif self.type == ConstraintTypes.DISTANCE:
+            return attribute.type == Location
+        else:
+            raise ValueError("Constraint type not recognized.")
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
@@ -283,13 +432,10 @@ class ConstraintType:
         elif self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
         elif self.type == ConstraintTypes.DISTANCE:
-            point = cast(Location, value)
-            center = self.value[0]  # type: Location
-            max_distance = self.value[1]  # type: float
-            actual_distance = haversine(
-                center.latitude, center.longitude, point.latitude, point.longitude  # type: ignore
-            )
-            return actual_distance <= max_distance
+            assert isinstance(value, Location), "Value must be of type Location."
+            location = cast(Location, self.value[0])
+            distance = self.value[1]
+            return location.distance(value) <= distance
         else:
             raise ValueError("Constraint type not recognized.")
 
@@ -314,6 +460,27 @@ class ConstraintExpr(ABC):
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
 
+    @abstractmethod
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Check whether a constraint expression is valid wrt a data model
+
+         Specifically, check the following conditions:
+        - If all the attributes referenced by the constraints are correctly associated with the Data Model attributes.
+
+        :param data_model: the data model used to check the validity of the constraint expression.
+        :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+        """
+
+    def _check_validity(self) -> None:
+        """
+        Check whether a Constraint Expression satisfies some basic requirements.
+
+        :return ``None``
+        :raises ValueError: if the object does not satisfy some requirements.
+        """
+        return None
+
 
 class And(ConstraintExpr):
     """Implementation of the 'And' constraint expression."""
@@ -334,6 +501,30 @@ class And(ConstraintExpr):
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
         return all(expr.check(description) for expr in self.constraints)
+
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Check whether the constraint expression is valid wrt a data model
+
+        :param data_model: the data model used to check the validity of the constraint expression.
+        :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+        """
+        return all(constraint.is_valid(data_model) for constraint in self.constraints)
+
+    def _check_validity(self):
+        """
+        Check whether the Constraint Expression satisfies some basic requirements.
+
+        :return ``None``
+        :raises ValueError: if the object does not satisfy some requirements.
+        """
+        if len(self.constraints) < 2:
+            raise ValueError(
+                "Invalid input value for type '{}': number of "
+                "subexpression must be at least 2.".format(type(self).__name__)
+            )
+        for constraint in self.constraints:
+            constraint._check_validity()
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -360,6 +551,30 @@ class Or(ConstraintExpr):
         """
         return any(expr.check(description) for expr in self.constraints)
 
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Check whether the constraint expression is valid wrt a data model
+
+        :param data_model: the data model used to check the validity of the constraint expression.
+        :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+        """
+        return all(constraint.is_valid(data_model) for constraint in self.constraints)
+
+    def _check_validity(self):
+        """
+        Check whether the Constraint Expression satisfies some basic requirements.
+
+        :return ``None``
+        :raises ValueError: if the object does not satisfy some requirements.
+        """
+        if len(self.constraints) < 2:
+            raise ValueError(
+                "Invalid input value for type '{}': number of "
+                "subexpression must be at least 2.".format(type(self).__name__)
+            )
+        for constraint in self.constraints:
+            constraint._check_validity()
+
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
@@ -384,6 +599,15 @@ class Not(ConstraintExpr):
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
         return not self.constraint.check(description)
+
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Check whether the constraint expression is valid wrt a data model
+
+        :param data_model: the data model used to check the validity of the constraint expression.
+        :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+        """
+        return self.constraint.is_valid(data_model)
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -457,11 +681,29 @@ class Constraint(ConstraintExpr):
             value, type(next(iter(self.constraint_type.value)))
         ):
             return False
-        if not isinstance(value, type(self.constraint_type.value)):
+        if type(self.constraint_type.value) not in {
+            list,
+            tuple,
+            set,
+        } and not isinstance(value, type(self.constraint_type.value)):
             return False
 
         # dispatch the check to the right implementation for the concrete constraint type.
         return self.constraint_type.check(value)
+
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Check whether the constraint expression is valid wrt a data model
+
+        :param data_model: the data model used to check the validity of the constraint expression.
+        :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+        """
+        # if the attribute name of the constraint is not present in the data model, the constraint is not valid.
+        if self.attribute_name not in data_model.attributes_by_name:
+            return False
+
+        attribute = data_model.attributes_by_name[self.attribute_name]
+        return self.constraint_type.is_valid(attribute)
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -486,6 +728,7 @@ class Query:
         """
         self.constraints = constraints
         self.model = model
+        self._check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -497,6 +740,34 @@ class Query:
         :return: True if the description satisfies all the constraints, False otherwise.
         """
         return all(c.check(description) for c in self.constraints)
+
+    def is_valid(self, data_model: DataModel) -> bool:
+        """
+        Given a data model, check whether the query is valid for that data model.
+        :return: ``True`` if the query is compliant with the data model, ``False`` otherwise.
+        """
+        if data_model is None:
+            return True
+
+        return all(c.is_valid(data_model) for c in self.constraints)
+
+    def _check_validity(self):
+        """
+        Check whether the` object is valid.
+
+        :return ``None``
+        :raises ValueError: if the query does not satisfy some sanity requirements.
+        """
+        if len(self.constraints) < 1:
+            raise ValueError(
+                "Invalid input value for type '{}': empty list of constraints. The number of "
+                "constraints must be at least 1.".format(type(self).__name__)
+            )
+        if not self.is_valid(self.model):
+            raise ValueError(
+                "Invalid input value for type '{}': the query is not valid "
+                "for the given data model.".format(type(self).__name__)
+            )
 
     def __eq__(self, other):
         """Compare with another object."""
@@ -532,71 +803,6 @@ class Query:
         """
         query = pickle.loads(query_protobuf_object.query_bytes)  # nosec
         return query
-
-
-class Location:
-    """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
-
-    def __init__(self, latitude: float, longitude: float):
-        """
-        Initialize a location.
-        :param latitude: the latitude of the location.
-        :param longitude: the longitude of the location.
-        """
-        self.latitude = latitude
-        self.longitude = longitude
-
-    def distance(self, other) -> float:
-        return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
-
-    def __eq__(self, other):
-        if type(other) != Location:
-            return False
-        else:
-            return self.latitude == other.latitude and self.longitude == other.longitude
-
-
-class Distance(ConstraintType):
-    """
-    Class that implements the 'distance' constraint type.
-    That is, the locations we are looking for
-    must be within a given distance from a given location.
-    The distance is interpreted as a radius from a center.
-    Examples:
-        Define a location of interest, e.g. the Tour Eiffel
-        >>> tour_eiffel = Location(48.8581064, 2.29447)
-        Find all the locations close to the Tour Eiffel within 1 km
-        >>> close_to_tour_eiffel = Distance(tour_eiffel, 1.0)
-        Le Jules Verne, a famous restaurant close to the Tour Eiffel, satisfies the constraint.
-        >>> le_jules_verne_restaurant = Location(48.8579675, 2.2951849)
-        >>> close_to_tour_eiffel.check(le_jules_verne_restaurant)
-        True
-        The Colosseum does not satisfy the constraint (farther than 1 km from the Tour Eiffel).
-        >>> colosseum = Location(41.8902102, 12.4922309)
-        >>> close_to_tour_eiffel.check(colosseum)
-        False
-    """
-
-    def __init__(self, center: Location, distance: float) -> None:
-        """
-        Instantiate the ``Distance`` constraint.
-        :param center: the center from where compute the distance.
-        :param distance: the maximum distance from the center, in km.
-        """
-        self.center = center
-        self.distance = distance
-        super().__init__(ConstraintTypes.DISTANCE, [center, distance])
-
-    def check(self, value: Location) -> bool:
-        return self.center.distance(value) <= self.distance
-
-    def _get_type(self) -> Optional[Type[ATTRIBUTE_TYPES]]:
-        return Location
-
-    def __eq__(self, other):
-        if type(other) != Distance:
-            return False
-        return self.center == other.center and self.distance == other.distance
 
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
