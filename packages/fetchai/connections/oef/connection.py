@@ -34,10 +34,12 @@ from oef.query import (
     Constraint as OEFConstraint,
     ConstraintExpr as OEFConstraintExpr,
     ConstraintType as OEFConstraintType,
+    Distance,
     Eq,
     Gt,
     GtEq,
     In,
+    Location as OEFLocation,
     Lt,
     LtEq,
     Not as OEFNot,
@@ -64,6 +66,7 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    Location,
     Not,
     Or,
     Query,
@@ -112,8 +115,11 @@ class OEFObjectTranslator:
     @classmethod
     def to_oef_attribute(cls, attribute: Attribute) -> OEFAttribute:
         """From our attribute to OEF attribute."""
+
+        # in case the attribute type is Location, replace with the `oef` class.
+        attribute_type = OEFLocation if attribute.type == Location else attribute.type
         return OEFAttribute(
-            attribute.name, attribute.type, attribute.is_required, attribute.description
+            attribute.name, attribute_type, attribute.is_required, attribute.description
         )
 
     @classmethod
@@ -124,6 +130,11 @@ class OEFObjectTranslator:
         )
         constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
         return OEFQuery(constraints, oef_data_model)
+
+    @classmethod
+    def to_oef_location(cls, location: Location) -> OEFLocation:
+        """From our location to OEF location."""
+        return OEFLocation(location.latitude, location.longitude)  # type: ignore
 
     @classmethod
     def to_oef_constraint_expr(
@@ -172,6 +183,9 @@ class OEFObjectTranslator:
             return In(value)
         elif constraint_type.type == ConstraintTypes.NOT_IN:
             return NotIn(value)
+        elif constraint_type.type == ConstraintTypes.DISTANCE:
+            location = cls.to_oef_location(location=value[0])
+            return Distance(center=location, distance=value[1])
         else:
             raise ValueError("Constraint type not recognized.")
 
@@ -197,9 +211,12 @@ class OEFObjectTranslator:
     @classmethod
     def from_oef_attribute(cls, oef_attribute: OEFAttribute) -> Attribute:
         """From an OEF attribute to our attribute."""
+        oef_attribute_type = (
+            Location if oef_attribute.type == OEFLocation else oef_attribute.type
+        )
         return Attribute(
             oef_attribute.name,
-            oef_attribute.type,
+            oef_attribute_type,
             oef_attribute.required,
             oef_attribute.description,
         )
@@ -214,6 +231,11 @@ class OEFObjectTranslator:
         )
         constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
         return Query(constraints, data_model)
+
+    @classmethod
+    def from_oef_location(cls, oef_location: OEFLocation) -> Location:
+        """From oef location to our location."""
+        return Location(oef_location.latitude, oef_location.longitude)
 
     @classmethod
     def from_oef_constraint_expr(
@@ -269,6 +291,11 @@ class OEFObjectTranslator:
             return ConstraintType(ConstraintTypes.IN, constraint_type.values)
         elif isinstance(constraint_type, NotIn):
             return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
+        elif isinstance(constraint_type, Distance):
+            location = cls.from_oef_location(constraint_type.center)
+            return ConstraintType(
+                ConstraintTypes.DISTANCE, (location, constraint_type.distance)
+            )
         else:
             raise ValueError("Constraint type not recognized.")
 

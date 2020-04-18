@@ -61,6 +61,9 @@ nav:
         - File structure: 'package-imports.md'
         - GUI: 'cli-gui.md'
         - Generating wealth: 'wealth.md'
+      - Search & Discovery:
+        - Defining Data Models: 'defining-data-models.md'
+        - The Query Language: 'query-language.md'
       - Developer guides:
         - Version: 'version.md'
         - Skill: 'skill.md'
