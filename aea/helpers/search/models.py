@@ -19,12 +19,15 @@
 
 """Useful classes for the OEF search."""
 
+import logging
 import pickle  # nosec
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
 from typing import Any, Dict, List, Mapping, Optional, Type, Union, cast
+
+logger = logging.getLogger(__name__)
 
 
 class Location:
@@ -759,7 +762,8 @@ class Query:
         :raises ValueError: if the query does not satisfy some sanity requirements.
         """
         if len(self.constraints) < 1:
-            raise ValueError(
+            logger.warning(
+                "DEPRECATION WARNING: "
                 "Invalid input value for type '{}': empty list of constraints. The number of "
                 "constraints must be at least 1.".format(type(self).__name__)
             )
