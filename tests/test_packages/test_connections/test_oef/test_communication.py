@@ -40,6 +40,7 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    Location,
     Query,
 )
 from aea.mail.base import Envelope, Multiplexer
@@ -180,6 +181,41 @@ class TestOEF:
                 )
             )
 
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
+            search_result = OefSearchSerializer().decode(envelope.message)
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.dialogue_reference[0] == str(request_id)
+            assert search_result.agents == ()
+
+        def test_search_services_with_distance_query(self):
+            """Test that a search services request can be sent correctly.
+
+            In this test, the query has a simple data model.
+            """
+            tour_eiffel = Location(48.8581064, 2.29447)
+            request_id = 1
+            data_model = DataModel("geolocation", [Attribute("latlon", Location, True)])
+            search_query = Query(
+                [Constraint("latlon", ConstraintType("distance", (tour_eiffel, 1.0)))],
+                model=data_model,
+            )
+            search_request = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                dialogue_reference=(str(request_id), ""),
+                query=search_query,
+            )
+
+            self.multiplexer.put(
+                Envelope(
+                    to=DEFAULT_OEF,
+                    sender=self.crypto1.address,
+                    protocol_id=OefSearchMessage.protocol_id,
+                    message=OefSearchSerializer().encode(search_request),
+                )
+            )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
             assert (

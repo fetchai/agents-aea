@@ -23,10 +23,22 @@ import pickle  # nosec
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
+from math import asin, cos, radians, sin, sqrt
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
-ATTRIBUTE_TYPES = Union[float, str, bool, int]
-SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
+
+class Location:
+    pass
+
+
+ATTRIBUTE_TYPES = Union[float, str, bool, int, Location]
+SUPPORTED_TYPES = {
+    "str": str,
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "location": Location,
+}
 
 
 class Attribute:
@@ -155,6 +167,7 @@ class ConstraintTypes(Enum):
     WITHIN = "within"
     IN = "in"
     NOT_IN = "not_in"
+    DISTANCE = "distance"
 
     def __str__(self):
         """Get the string representation."""
@@ -178,7 +191,6 @@ class ConstraintType:
         >>> within_range = ConstraintType("within", (-10.0, 10.0))
         >>> in_a_set = ConstraintType("in", [1, 2, 3])
         >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
-
     """
 
     def __init__(self, type: Union[ConstraintTypes, str], value: Any):
@@ -230,6 +242,9 @@ class ConstraintType:
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
                     assert all(isinstance(obj, _type) for obj in self.value)
+            elif self.type == ConstraintTypes.DISTANCE:
+                assert isinstance(self.value, (list, tuple))
+                assert len(self.value) == 2
             else:
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):
@@ -267,6 +282,14 @@ class ConstraintType:
             return value in self.value
         elif self.type == ConstraintTypes.NOT_IN:
             return value not in self.value
+        elif self.type == ConstraintTypes.DISTANCE:
+            point = cast(Location, value)
+            center = self.value[0]  # type: Location
+            max_distance = self.value[1]  # type: float
+            actual_distance = haversine(
+                center.latitude, center.longitude, point.latitude, point.longitude  # type: ignore
+            )
+            return actual_distance <= max_distance
         else:
             raise ValueError("Constraint type not recognized.")
 
@@ -509,3 +532,89 @@ class Query:
         """
         query = pickle.loads(query_protobuf_object.query_bytes)  # nosec
         return query
+
+
+class Location:
+    """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
+
+    def __init__(self, latitude: float, longitude: float):
+        """
+        Initialize a location.
+        :param latitude: the latitude of the location.
+        :param longitude: the longitude of the location.
+        """
+        self.latitude = latitude
+        self.longitude = longitude
+
+    def distance(self, other) -> float:
+        return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
+
+    def __eq__(self, other):
+        if type(other) != Location:
+            return False
+        else:
+            return self.latitude == other.latitude and self.longitude == other.longitude
+
+
+class Distance(ConstraintType):
+    """
+    Class that implements the 'distance' constraint type.
+    That is, the locations we are looking for
+    must be within a given distance from a given location.
+    The distance is interpreted as a radius from a center.
+    Examples:
+        Define a location of interest, e.g. the Tour Eiffel
+        >>> tour_eiffel = Location(48.8581064, 2.29447)
+        Find all the locations close to the Tour Eiffel within 1 km
+        >>> close_to_tour_eiffel = Distance(tour_eiffel, 1.0)
+        Le Jules Verne, a famous restaurant close to the Tour Eiffel, satisfies the constraint.
+        >>> le_jules_verne_restaurant = Location(48.8579675, 2.2951849)
+        >>> close_to_tour_eiffel.check(le_jules_verne_restaurant)
+        True
+        The Colosseum does not satisfy the constraint (farther than 1 km from the Tour Eiffel).
+        >>> colosseum = Location(41.8902102, 12.4922309)
+        >>> close_to_tour_eiffel.check(colosseum)
+        False
+    """
+
+    def __init__(self, center: Location, distance: float) -> None:
+        """
+        Instantiate the ``Distance`` constraint.
+        :param center: the center from where compute the distance.
+        :param distance: the maximum distance from the center, in km.
+        """
+        self.center = center
+        self.distance = distance
+        super().__init__(ConstraintTypes.DISTANCE, [center, distance])
+
+    def check(self, value: Location) -> bool:
+        return self.center.distance(value) <= self.distance
+
+    def _get_type(self) -> Optional[Type[ATTRIBUTE_TYPES]]:
+        return Location
+
+    def __eq__(self, other):
+        if type(other) != Distance:
+            return False
+        return self.center == other.center and self.distance == other.distance
+
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    Compute the Haversine distance between two locations (i.e. two pairs of latitude and longitude).
+    :param lat1: the latitude of the first location.
+    :param lon1: the longitude of the first location.
+    :param lat2: the latitude of the second location.
+    :param lon2: the longitude of the second location.
+    :return: the Haversine distance.
+    """
+    lat1, lon1, lat2, lon2, = map(radians, [lat1, lon1, lat2, lon2])
+    # average earth radius
+    R = 6372.8
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    sin_lat_squared = sin(dlat * 0.5) * sin(dlat * 0.5)
+    sin_lon_squared = sin(dlon * 0.5) * sin(dlon * 0.5)
+    computation = asin(sqrt(sin_lat_squared + sin_lon_squared * cos(lat1) * cos(lat2)))
+    d = 2 * R * computation
+    return d
