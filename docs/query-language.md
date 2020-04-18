@@ -110,7 +110,7 @@ from aea.helpers.search.models import Constraint, ConstraintType
 Constraint("title", ConstraintType("within", ("A", "B")))
 
 # all the books that have been published between 1960 and 1970
-Constraint("genre", ConstraintType("within", (1960, 1970))
+Constraint("genre", ConstraintType("within", (1960, 1970)))
 ```
 
 ### Distance
@@ -158,7 +158,7 @@ The `Not` is a constraint expression that allows you to specify a negation of a 
 from aea.helpers.search.models import Constraint, ConstraintType, Not
 
 # all the books whose year of publication is not between 1990 and 2000
-Not(Constraint("year", ConstraintType("within", (1990, 2000)))
+Not(Constraint("year", ConstraintType("within", (1990, 2000))))
 ```
 
 ### And
