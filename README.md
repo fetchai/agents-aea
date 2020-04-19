@@ -22,7 +22,9 @@ A framework for autonomous economic agent (AEA) development
 
        pip install aea[all]
 
-    (`pip install "aea[all]"` if you use `zsh` rather than `bash`)
+    or is you use `zsh` rather than `bash`:
+
+       pip install "aea[all]"
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
@@ -54,7 +56,9 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[all]
 
-    (`pip install ".[all]"` if you use `zsh` rather than `bash`)
+    or is you use `zsh` rather than `bash`:
+
+      pip install ".[all]"
 
 - Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
