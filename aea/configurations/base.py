@@ -90,7 +90,6 @@ We cannot have two items with the same package name since the keys of a YAML obj
 """
 
 
-# TODO rename this to "PackageType"
 PackageVersion = Type[semver.VersionInfo]
 PackageVersionLike = Union[str, semver.VersionInfo]
 
