@@ -68,7 +68,6 @@ cd tac_controller_contract
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control_contract:0.1.0
-aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
