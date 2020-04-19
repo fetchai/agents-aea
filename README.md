@@ -48,9 +48,9 @@ This repository contains submodules. Clone with recursive strategy:
 
 ### Dependencies
 
-All python specific dependencies are specified in the Pipfile (and installed via the commands specified in 'Preliminaries').
+All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in 'Preliminaries').
 
-Or, you can have more control on the installed dependencies by leveraging the setuptools' extras mechanism (more details later). 
+You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism. 
 
 ### Preliminaries
 
@@ -80,13 +80,15 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       pipenv install --dev --skip-lock
 
-- Install package in development mode (this step replaces `pip install aea[all]` above):
+- Install the package from source in development mode:
 
       pip install -e .[all]
 
-    (`pip install -e ".[all]"` if you use `zsh` rather than `bash`.)
+    or if you use `zsh` rather than `bash`:
 
-- To run tests (ensure no oef docker containers are running):
+      pip install -e ".[all]"
+
+- To run tests:
 
       tox -e py3.7
 
