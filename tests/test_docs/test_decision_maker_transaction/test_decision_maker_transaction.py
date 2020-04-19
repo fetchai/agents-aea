@@ -35,9 +35,7 @@ from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import CUR_PATH, ROOT_DIR
 
 MD_FILE = "docs/decision-maker-transaction.md"
-PY_FILE = (
-    "test_docs/test_decision_maker_transaction/decision_maker_transaction.py"
-)
+PY_FILE = "test_docs/test_decision_maker_transaction/decision_maker_transaction.py"
 
 test_logger = logging.getLogger(__name__)
 
