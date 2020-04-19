@@ -23,7 +23,7 @@ This script will update the symlinks of the project, cross-platform compatible.
 """
 import inspect
 import os
-import subprocess
+import subprocess  # nosec
 import sys
 import traceback
 from functools import reduce
