@@ -637,9 +637,7 @@ def _validate_config_consistency(ctx: Context):
             configuration_file_path = package_directory / config_file_name
             assert configuration_file_path.exists()
         except Exception:
-            raise ValueError(
-                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
-            )
+            raise ValueError("Cannot find {}: '{}'".format(item_type.value, public_id))
 
         # load the configuration file.
         try:

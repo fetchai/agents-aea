@@ -62,7 +62,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -787,6 +787,8 @@ class AEABuilder:
             configuration = cast(ProtocolConfig, configuration)
             try:
                 protocol = Protocol.from_config(configuration)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
                 _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(protocol)
@@ -796,6 +798,8 @@ class AEABuilder:
             configuration = cast(ContractConfig, configuration)
             try:
                 contract = Contract.from_config(configuration)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
                 _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(contract)
@@ -811,6 +815,8 @@ class AEABuilder:
             configuration = cast(SkillConfig, configuration)
             try:
                 skill = Skill.from_config(configuration, skill_context=skill_context)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
                 _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(skill)
@@ -906,9 +912,12 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
         return connection_class.from_config(
             address=address, configuration=configuration
         )
+    except ModuleNotFoundError as e:
+        _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:
         _handle_error_while_loading_component_generic_error(configuration, e)
-    assert False  # this is to make MyPy stop complaining of "Missin return statement".
+    # this is to make MyPy stop complaining of "Missing return statement".
+    assert False  # noqa
 
 
 def _handle_error_while_loading_component_module_not_found(
@@ -917,8 +926,63 @@ def _handle_error_while_loading_component_module_not_found(
     """
     Handle ModuleNotFoundError for AEA packages.
 
-    :raises ModuleNotFoundError: the same exception, but prepending an informative message.
+    It will rewrite the error message only if the import path starts with 'packages'.
+    To do that, it will extract the wrong import path from the error message.
+
+    :raises ModuleNotFoundError: if it is not
+    :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
+
+    error_message = str(e)
+    extract_import_path_regex = re.compile(r"No module named '([\w.]+)';")
+    match = extract_import_path_regex.match(error_message)
+    if match is None:
+        # if for some reason we cannot extract the import path, just re-raise the error
+        raise e from e
+
+    import_path = match.group(1)
+    parts = import_path.split(".")
+    nb_parts = len(parts)
+    if parts[0] != "packages":
+        # if the first part of the import path is not 'packages',
+        # the error is due for other reasons - just re-raise the error
+        raise e from e
+
+    if nb_parts == 2:
+        author = parts[1]
+        new_message = "No AEA package found with author name '{}'".format(author)
+    elif nb_parts == 3:
+        author = parts[1]
+        pkg_type = parts[2]
+        new_message = "No AEA package found with author name '{}' and type '{}'".format(
+            author, pkg_type,
+        )
+    elif nb_parts == 4:
+        author = parts[1]
+        pkg_type = parts[2]
+        pkg_name = parts[3]
+        new_message = "No AEA package found with author name '{}', type '{}', and name '{}'".format(
+            author, pkg_type, pkg_name
+        )
+    elif nb_parts >= 5:
+        author = parts[1]
+        pkg_type = parts[2]
+        pkg_name = parts[3]
+        the_rest = ".".join(parts[4:])
+        new_message = "The package '{}/{}' of type '{}' exists, but cannot find module '{}'".format(
+            author, pkg_name, pkg_type, the_rest
+        )
+    else:
+        raise e from e
+
+    raise AEAPackageLoadingError(
+        "An error occurred while loading {} {}: No module named {}; {}".format(
+            str(configuration.component_type),
+            configuration.public_id,
+            import_path,
+            new_message,
+        )
+    ) from e
 
 
 def _handle_error_while_loading_component_generic_error(

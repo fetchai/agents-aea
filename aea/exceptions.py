@@ -20,3 +20,7 @@
 
 class AEAException(Exception):
     """User-defined exception for the AEA framework."""
+
+
+class AEAPackageLoadingError(AEAException):
+    """Class for exceptions that are raised for loading errors of AEA packages."""
