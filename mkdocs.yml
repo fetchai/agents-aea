@@ -23,7 +23,6 @@ nav:
       - Identity: 'identity.md'
       - Trust issues: 'trust.md'
     - Demos:
-      - Aries Cloud Agent: 'aries-cloud-agent.md'
       - Car park skills: 'car-park-skills.md'
       - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
@@ -47,10 +46,11 @@ nav:
         - Thermometer skills step-by-step: 'thermometer-skills-step-by-step.md'
       - Use case components:
         - Generic skills: 'generic-skills.md'
-        - ORM integration: 'orm-integration-to-generic.md'
+        - ORM integration: 'orm-integration.md'
         - Frontend intergration: 'connect-a-frontend.md'
         - ERC1155 deploy and interact: 'erc1155-skills.md'
         - HTTP Connection: 'http-connection-and-skill.md'
+        - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
       - Architecture:
         - Design principles: 'design-principles.md'
         - Architectural diagram: 'diagram.md'
@@ -70,7 +70,7 @@ nav:
         - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
         - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
-        - Using public ledgers: 'integration.md'
+        - Using public ledgers: 'ledger-integration.md'
         - Use multiplexer stand-alone: 'multiplexer-standalone.md'
         - Create stand-alone transaction: 'standalone-transaction.md'
         - Create decision-maker transaction: 'decision-maker-transaction.md'

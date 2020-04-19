@@ -2,6 +2,6 @@ The current version of the Autonomous Economic Agent framework is `0.3.0`. The f
 
 To check which version you have installed locally, run
 
-```bash
+``` bash
 aea --version
 ```

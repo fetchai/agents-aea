@@ -206,7 +206,6 @@ response.status_code
 # >>> 200
 response.content
 # >>> b''
-
 ```
 
 

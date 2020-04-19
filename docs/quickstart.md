@@ -246,7 +246,7 @@ cd my_first_aea
 <b>Add the echo skill</b> 		
 <br>    
 Second, add the echo skill to the project.		
-```bash
+``` bash
 aea add skill fetchai/echo:0.1.0		
 ```		
 This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		

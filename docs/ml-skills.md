@@ -129,13 +129,13 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 Additionally, create the private key for the model trainer AEA based on the network you want to transact.
 
 To generate and add a key for Fetch.ai use:
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
 To generate and add a key for Ethereum use:
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -153,7 +153,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe

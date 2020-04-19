@@ -1,0 +1,65 @@
+name: tac_control_contract
+author: fetchai
+version: 0.1.0
+description: The tac control skill implements the logic for an AEA to control an instance
+  of the TAC.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmW9WBy1sNYVKpymGnpJY2pW5MEqGgVga2kBFUT9S34Yt5
+  behaviours.py: QmWNaPq3wXFbkQsNDkaSmTx7YqdNxQ3wPK4s6ZyqGDAHuZ
+  game.py: QmPAqXAw7kpyEFQGFe8jTixT9zzLH1uhj2FugJEUstkBhW
+  handlers.py: QmSsnWpa6cwvySZwwGpVukYaodPhTstVxqAvb2MnjS8Wuj
+  helpers.py: QmdT2RQsWcxzwTk7fEHxwnjTqpX9vWa4C8K38TVD2Wj9Jv
+  parameters.py: QmWYJpgNZGFEp5S5xApB1ehhfBc2MqAev9XSa2vZCzoZk3
+fingerprint_ignore_patterns: []
+contracts:
+- fetchai/erc1155:0.2.0
+protocols:
+- fetchai/oef_search:0.1.0
+- fetchai/tac:0.1.0
+behaviours:
+  contract:
+    args:
+      tick_interval: 5
+    class_name: ContractBehaviour
+  tac:
+    args: {}
+    class_name: TACBehaviour
+handlers:
+  oef:
+    args: {}
+    class_name: OEFRegistrationHandler
+  tac:
+    args: {}
+    class_name: TACHandler
+  transaction:
+    args: {}
+    class_name: TransactionHandler
+models:
+  game:
+    args: {}
+    class_name: Game
+  parameters:
+    args:
+      base_good_endowment: 4
+      competition_timeout: 360
+      currency_ids: []
+      good_ids: []
+      inactivity_timeout: 60
+      item_setup_timeout: 120
+      ledger: ethereum
+      lower_bound_factor: 1
+      min_nb_agents: 2
+      money_endowment: 2000000
+      registration_timeout: 60
+      start_time: 15 04 2020  14:44
+      tx_fee: 1
+      upper_bound_factor: 1
+      version_id: v1
+      whitelist: []
+    class_name: Parameters
+dependencies:
+  numpy: {}
+  vyper:
+    version: ==0.1.0b12
