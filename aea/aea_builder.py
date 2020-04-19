@@ -788,11 +788,7 @@ class AEABuilder:
             try:
                 protocol = Protocol.from_config(configuration)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading protocol {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
@@ -801,11 +797,7 @@ class AEABuilder:
             try:
                 contract = Contract.from_config(configuration)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading contract {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
@@ -820,11 +812,7 @@ class AEABuilder:
             try:
                 skill = Skill.from_config(configuration, skill_context=skill_context)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading skill {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(skill)
 
 
@@ -919,8 +907,30 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
             address=address, configuration=configuration
         )
     except Exception as e:
-        raise Exception(
-            "An error occurred while loading connection {}: {}".format(
-                configuration.public_id, str(e)
-            )
+        _handle_error_while_loading_component_generic_error(configuration, e)
+    assert False  # this is to make MyPy stop complaining of "Missin return statement".
+
+
+def _handle_error_while_loading_component_module_not_found(
+    configuration: ComponentConfiguration, e: ModuleNotFoundError
+):
+    """
+    Handle ModuleNotFoundError for AEA packages.
+
+    :raises ModuleNotFoundError: the same exception, but prepending an informative message.
+    """
+
+
+def _handle_error_while_loading_component_generic_error(
+    configuration: ComponentConfiguration, e: Exception
+):
+    """
+    Handle Exception for AEA packages.
+
+    :raises Exception: the same exception, but prepending an informative message.
+    """
+    raise Exception(
+        "An error occurred while loading {} {}: {}".format(
+            str(configuration.component_type), configuration.public_id, str(e)
         )
+    )
