@@ -21,14 +21,15 @@
 """
 This script will update the symlinks of the project, cross-platform compatible.
 """
+import inspect
+import os
 import subprocess
 from functools import reduce
 from pathlib import Path
 from typing import List, Tuple
 
-from aea import AEA_DIR
-
-ROOT_PATH = Path(AEA_DIR).parent
+SCRIPTS_PATH = Path(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
+ROOT_PATH = SCRIPTS_PATH.parent
 TEST_DATA = ROOT_PATH / "tests" / "data"
 TEST_DUMMY_AEA_DIR = TEST_DATA / "dummy_aea"
 FETCHAI_PACKAGES = ROOT_PATH / "packages" / "fetchai"
@@ -60,8 +61,34 @@ SYMLINKS = [
 
 
 def do_symlink(link_path: Path, target_path: Path):
-    """Change directory and call the cross-platform script."""
-    # the working directory must be the parent of the symbolic link name
+    """
+    Change directory and call the cross-platform script.
+
+    The working directory must be the parent of the symbolic link name
+    when executing 'create_symlink_crossplatform.sh'. Hence, we
+    need to translate target_path into the relatve path from the
+    symbolic link directory to the target directory.
+
+    So:
+    1) from link_path, extract the number of jumps to the parent directory
+      in order to reach the repository root directory, and chain many "../" paths.
+    2) from target_path, compute the relative path to the root
+    3) relative_target_path is just the concatenation of the results from step (1) and (2).
+
+
+    For instance, given
+    - link_path: './directory_1//symbolic_link
+    - target_path: './directory_2/target_path
+
+    we want to compute:
+    - link_path: 'symbolic_link' (just the last bit)
+    - relative_target_path: '../../directory_1/target_path'
+
+    The resulting command on UNIX systems will be:
+
+        cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
+
+    """
     working_directory = link_path.parent
     target_relative_to_root = target_path.relative_to(ROOT_PATH)
     cwd_relative_to_root = working_directory.relative_to(ROOT_PATH)
