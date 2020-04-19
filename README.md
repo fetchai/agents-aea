@@ -13,7 +13,7 @@
 A framework for autonomous economic agent (AEA) development
 
 <p align="center">
-  <img src="/data/aea.png?raw=true" alt="AEA" width="70%"/>
+  <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
 </p>
 
 ## Get started
@@ -32,7 +32,11 @@ A framework for autonomous economic agent (AEA) development
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
-[![Watch the AEA video](/data/video-aea.png?raw=true)](https://www.youtube.com/embed/xpJA4IT5X88)
+<p align="center">
+  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
+    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
+  </a>
+</p>
 
 ## Alternatively: Install from Source
 
@@ -70,7 +74,7 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
-The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
+The following steps are **only relevant if you intend to contribute** to the repository. They are not required for agent development.
 
 - Install development dependencies (optionally skipping Lockfile creation):
 
