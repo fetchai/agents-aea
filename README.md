@@ -13,7 +13,7 @@
 A framework for autonomous economic agent (AEA) development
 
 <p align="center">
-  <img src="https://github.com/fetchai/agents-aea/blob/develop/data/aea.png?raw=true" alt="AEA" width="70%"/>
+  <img src="/data/aea.png?raw=true" alt="AEA" width="70%"/>
 </p>
 
 ## Get started
@@ -32,9 +32,7 @@ A framework for autonomous economic agent (AEA) development
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
-<p align="center">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
+[![Watch the AEA video](/data/video-aea.png?raw=true)](https://www.youtube.com/embed/xpJA4IT5X88)
 
 ## Alternatively: Install from Source
 
