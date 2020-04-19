@@ -16,11 +16,11 @@ A framework for autonomous economic agent (AEA) development
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-        pipenv --python 3.7 && pipenv shell
+      pipenv --python 3.7 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-        pip install aea[all]
+      pip install aea[all]
 
     (`pip install "aea[all]"` if you use `zsh` rather than `bash`)
 
@@ -48,11 +48,11 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
 - Create and launch a virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-        pipenv --python 3.7 && pipenv shell
+      pipenv --python 3.7 && pipenv shell
 
 - Install the package from source:
 
-        pip install .[all]
+      pip install .[all]
 
     (`pip install ".[all]"` if you use `zsh` rather than `bash`)
 
@@ -68,44 +68,44 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - Install development dependencies (optionally skipping Lockfile creation):
 
-        pipenv install --dev --skip-lock
+      pipenv install --dev --skip-lock
 
 - Install package in development mode (this step replaces `pip install aea[all]` above):
 
-        pip install -e .[all]
+      pip install -e .[all]
 
     (`pip install -e ".[all]"` if you use `zsh` rather than `bash`.)
 
 - To run tests (ensure no oef docker containers are running):
 
-        tox -e py3.7
+      tox -e py3.7
 
 - To run linters (code style checks):
 
-        tox -e flake8
+      tox -e flake8
 
 - To run static type checks:
 
-        tox -e mypy
+      tox -e mypy
 
 - To run black code formatter:
 
-        tox -e black
+      tox -e black
 
 - To run bandit security checks:
 
-        tox -e bandit-main
-        tox -e bandit-tests
+      tox -e bandit-main
+      tox -e bandit-tests
 
 - To start a live-reloading docs server on localhost
 	
-        mkdocs serve
+      mkdocs serve
 
 - To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
 - Fetch submodules:
 
-        git submodule sync --recursive && git submodule update --init --recursive
+      git submodule sync --recursive && git submodule update --init --recursive
 
 ## Cite
 
