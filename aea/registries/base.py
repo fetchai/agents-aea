@@ -341,7 +341,19 @@ class ComponentRegistry(
         :return: None
         """
         for item in self.fetch_all():
-            item.setup()
+            if item.context.is_active:
+                logger.debug(
+                    "Calling setup() of component {} of skill {}".format(
+                        item.name, item.skill_id
+                    )
+                )
+                item.setup()
+            else:
+                logger.debug(
+                    "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
+                        item.name, item.skill_id
+                    )
+                )
 
     def teardown(self) -> None:
         """
