@@ -26,7 +26,7 @@ A framework for autonomous economic agent (AEA) development
 
        pip install aea[all]
 
-    or is you use `zsh` rather than `bash`:
+    Or, if you use `zsh` rather than `bash`:
 
        pip install "aea[all]"
 
@@ -40,6 +40,8 @@ A framework for autonomous economic agent (AEA) development
 
 ## Alternatively: Install from Source
 
+This approach is not recommended!
+
 ### Cloning
 
 This repository contains submodules. Clone with recursive strategy:
@@ -48,7 +50,7 @@ This repository contains submodules. Clone with recursive strategy:
 
 ### Dependencies
 
-All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in 'Preliminaries').
+All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in [Preliminaries](#preliminaries)).
 
 You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism. 
 
@@ -62,7 +64,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 
       pip install .[all]
 
-    or is you use `zsh` rather than `bash`:
+    Or, if you use `zsh` rather than `bash`:
 
       pip install ".[all]"
 
@@ -74,17 +76,17 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
-The following steps are **only relevant if you intend to contribute** to the repository. They are not required for agent development.
+The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-- Install development dependencies (optionally skipping Lockfile creation):
+- To install development dependencies (here optionally skipping `Pipfile.lock` creation):
 
       pipenv install --dev --skip-lock
 
-- Install the package from source in development mode:
+- To install the package from source in development mode:
 
       pip install -e .[all]
 
-    or if you use `zsh` rather than `bash`:
+    Of, if you use `zsh` rather than `bash`:
 
       pip install -e ".[all]"
 
@@ -115,7 +117,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
-- Fetch submodules:
+- To fetch/update submodules:
 
       git submodule sync --recursive && git submodule update --init --recursive
 
