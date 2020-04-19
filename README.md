@@ -12,6 +12,10 @@
 
 A framework for autonomous economic agent (AEA) development
 
+<p align="center">
+  <img src="https://github.com/fetchai/agents-aea/blob/develop/data/aea.png?raw=true" alt="AEA" width="70%"/>
+</p>
+
 ## Get started
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
@@ -29,7 +33,7 @@ A framework for autonomous economic agent (AEA) development
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
 <p align="center">
-  <img src="https://github.com/fetchai/agents-aea/blob/develop/data/aea.png?raw=true" alt="AEA" width="70%"/>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 ## Alternatively: Install from Source
