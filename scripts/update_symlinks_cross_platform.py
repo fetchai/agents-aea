@@ -24,12 +24,14 @@ This script will update the symlinks of the project, cross-platform compatible.
 import inspect
 import os
 import subprocess
+import sys
+import traceback
 from functools import reduce
 from pathlib import Path
 from typing import List, Tuple
 
 SCRIPTS_PATH = Path(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
-ROOT_PATH = SCRIPTS_PATH.parent
+ROOT_PATH = SCRIPTS_PATH.parent.absolute()
 TEST_DATA = ROOT_PATH / "tests" / "data"
 TEST_DUMMY_AEA_DIR = TEST_DATA / "dummy_aea"
 FETCHAI_PACKAGES = ROOT_PATH / "packages" / "fetchai"
@@ -106,14 +108,24 @@ def do_symlink(link_path: Path, target_path: Path):
         str(target),
     ]
     print("Calling '{}'".format(" ".join(args)))
-    subprocess.call(args, cwd=str(working_directory.absolute()))
+    return subprocess.call(args, cwd=str(working_directory.absolute()))
 
 
 if __name__ == "__main__":
+    failed = False
     for link_name, target in SYMLINKS:
         print("Linking {} to {}".format(link_name, target))
         try:
             link_name.unlink()
         except FileNotFoundError:
             pass
-        do_symlink(link_name, target)
+        try:
+            return_code = do_symlink(link_name, target)
+        except Exception as e:
+            return_code = 1
+            traceback.print_exc()
+        if return_code != 0:
+            print("Last command failed with return code {}".format(return_code))
+            failed = True
+
+    sys.exit(1 if failed else 0)
