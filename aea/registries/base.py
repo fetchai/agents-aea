@@ -33,7 +33,6 @@ from aea.configurations.base import (
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
-from aea.skills.tasks import Task
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ DECISION_MAKER = "decision_maker"
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
 ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
+SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 
 
 class Registry(Generic[ItemId, Item], ABC):
