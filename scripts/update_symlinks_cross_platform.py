@@ -100,6 +100,7 @@ def do_symlink(link_path: Path, target_path: Path):
     link_name = link_path.name
     target = root_relative_to_cwd / target_relative_to_root
     args = [
+        "bash",
         str(ROOT_PATH / "scripts" / "create_symlink_crossplatform.sh"),
         str(link_name),
         str(target),
