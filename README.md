@@ -16,11 +16,11 @@ A framework for autonomous economic agent (AEA) development
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-      pipenv --python 3.7 && pipenv shell
+       pipenv --python 3.7 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-      pip install aea[all]
+       pip install aea[all]
 
     (`pip install "aea[all]"` if you use `zsh` rather than `bash`)
 
