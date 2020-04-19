@@ -108,7 +108,7 @@ def do_symlink(link_path: Path, target_path: Path):
         str(target),
     ]
     print("Calling '{}'".format(" ".join(args)))
-    return subprocess.call(args, cwd=str(working_directory.absolute()))
+    return subprocess.call(args, cwd=str(working_directory.absolute()))  # nosec
 
 
 if __name__ == "__main__":
