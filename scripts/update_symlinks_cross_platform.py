@@ -122,10 +122,15 @@ if __name__ == "__main__":
         try:
             return_code = do_symlink(link_name, target)
         except Exception as e:
+            exception = e
             return_code = 1
             traceback.print_exc()
         if return_code != 0:
-            print("Last command failed with return code {}".format(return_code))
+            print(
+                "Last command failed with return code {} and exception {}".format(
+                    return_code, exception
+                )
+            )
             failed = True
 
     sys.exit(1 if failed else 0)
