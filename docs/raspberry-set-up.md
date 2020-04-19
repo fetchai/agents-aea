@@ -19,11 +19,11 @@ When you first boot your Raspberry Pi, you will be prompted to enter a password 
 I recommend having these instructions easily accessible on your Raspberry Pi so you can copy and paste lines into the terminal. You will also be restarting your Raspberry Pi a few times during this process. 
 
 Even if your Raspberry Pi updated itself, I recommend making sure it is completely up to date using the terminal. Open a Terminal window and type:
-   ```bash
-    sudo apt update -y 
-    sudo apt-get update
-    sudo apt-get dist-upgrade 
-   ```
+``` bash
+sudo apt update -y 
+sudo apt-get update
+sudo apt-get dist-upgrade 
+```
 
 ## Install a virtual environment
 You will need to install pipenv. This is a virtual environment for python. Open a terminal and write the following command:
@@ -31,7 +31,7 @@ You will need to install pipenv. This is a virtual environment for python. Open 
 sudo apt-get install pipenv
 
 ## Create and launch a virtual environment
-```bash
+``` bash
 pipenv --python 3.7 && pipenv shell
 ```
 

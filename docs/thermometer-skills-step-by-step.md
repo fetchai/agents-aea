@@ -1733,7 +1733,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Create the private key for the weather client AEA.
 
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
