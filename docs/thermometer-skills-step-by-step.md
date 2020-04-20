@@ -1733,7 +1733,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Create the private key for the weather client AEA.
 
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
@@ -1757,9 +1757,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea install
-aea run --connections fetchai/oef:0.1.0
+aea config set agent.default_connection fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.2.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
@@ -1814,9 +1815,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea install
-aea run --connections fetchai/oef:0.1.0
+aea config set agent.default_connection fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Ethereum testnet.

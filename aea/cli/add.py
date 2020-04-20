@@ -28,9 +28,6 @@ import click
 
 from aea.cli.common import (
     Context,
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     PublicIdParameter,
     _copy_package_directory,
     _find_item_in_distribution,
@@ -40,8 +37,8 @@ from aea.cli.common import (
 )
 from aea.cli.registry.utils import fetch_package
 from aea.configurations.base import (
-    ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
+    PackageType,
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
@@ -49,6 +46,11 @@ from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+)
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
 )
 from aea.configurations.loader import ConfigLoader
 
@@ -139,16 +141,21 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         )
     else:
         package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
+
     if item_type in {"connection", "skill"}:
         configuration_file_name = _get_default_configuration_file_name_from_type(
             item_type
         )
         configuration_path = package_path / configuration_file_name
         configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         item_configuration = configuration_loader.load(configuration_path.open())
         _add_protocols(click_context, item_configuration.protocols)
+
+    if item_type == "skill":
+        for contract_public_id in item_configuration.contracts:
+            _add_item(click_context, "contract", contract_public_id)
 
     # add the item to the configurations.
     logger.debug(

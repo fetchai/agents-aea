@@ -33,8 +33,9 @@ aea fingerprint skill fetchai/my_search:0.1.0
 aea add protocol fetchai/oef_search:0.1.0
 ```
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -80,5 +81,5 @@ models:
 dependencies: {}
 ```
 ```bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```

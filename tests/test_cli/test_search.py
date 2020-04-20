@@ -31,10 +31,10 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
+from aea.test_tools.click_testing import CliRunner
 
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
-from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
@@ -351,11 +351,11 @@ class TestSearchWithRegistryInSubfolderLocal:
             "Version: 0.1.0\n"
             "------------------------------\n"
             "------------------------------\n"
-            "Public ID: fetchai/error:0.1.0\n"
+            "Public ID: fetchai/error:0.2.0\n"
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
 
@@ -425,11 +425,11 @@ class TestSearchInAgentDirectoryLocal:
             "Version: 0.1.0\n"
             "------------------------------\n"
             "------------------------------\n"
-            "Public ID: fetchai/error:0.1.0\n"
+            "Public ID: fetchai/error:0.2.0\n"
             "Name: error\n"
             "Description: The error skill implements basic error handling required by all AEAs.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
 

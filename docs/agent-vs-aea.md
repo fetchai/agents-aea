@@ -38,8 +38,8 @@ Such a lightweight agent can be used to implement simple logic.
 
 We define our `Agent` which simply receives envelopes, prints the sender address and protocol_id and returns it unopened.
 ``` python
-INPUT_FILE = "input.txt"
-OUTPUT_FILE = "output.txt"
+INPUT_FILE = "input_file"
+OUTPUT_FILE = "output_file"
 
 
 class MyAgent(Agent):
@@ -158,8 +158,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
-INPUT_FILE = "input.txt"
-OUTPUT_FILE = "output.txt"
+INPUT_FILE = "input_file"
+OUTPUT_FILE = "output_file"
 
 
 class MyAgent(Agent):

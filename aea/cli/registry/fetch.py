@@ -20,21 +20,26 @@
 
 import os
 from shutil import rmtree
+from typing import Optional
 
 import click
 
 from aea.cli.add import _add_item
 from aea.cli.common import Context, try_to_load_agent_config
 from aea.cli.registry.utils import download_file, extract, request_api
-from aea.configurations.base import PublicId
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
-def fetch_agent(ctx: Context, public_id: PublicId, click_context) -> None:
+def fetch_agent(
+    ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
+) -> None:
     """
     Fetch Agent from Registry.
 
+    :param ctx: Context
     :param public_id: str public ID of desirable Agent.
-
+    :param click_context: the click context.
+    :param alias: an optional alias.
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
@@ -45,9 +50,20 @@ def fetch_agent(ctx: Context, public_id: PublicId, click_context) -> None:
     filepath = download_file(file_url, ctx.cwd)
     extract(filepath, ctx.cwd)
 
-    target_folder = os.path.join(ctx.cwd, name)
+    if alias is not None:
+        os.rename(name, alias)
+
+    folder_name = name if alias is None else alias
+
+    target_folder = os.path.join(ctx.cwd, folder_name)
     ctx.cwd = target_folder
     try_to_load_agent_config(ctx)
+
+    if alias is not None:
+        ctx.agent_config.agent_name = alias
+        ctx.agent_loader.dump(
+            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        )
 
     click.echo("Fetching dependencies...")
     for item_type in ("connection", "contract", "skill", "protocol"):

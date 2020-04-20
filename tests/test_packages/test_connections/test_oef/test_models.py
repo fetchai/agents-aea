@@ -31,6 +31,7 @@ from aea.helpers.search.models import (
     ConstraintType,
     DataModel,
     Description,
+    Location,
     Not,
     Or,
     Query,
@@ -211,6 +212,14 @@ class TestCheckValidity:
         m_constraint = ConstraintType("not_in", {"C", "Java", "Python"})
         assert m_constraint.check("C++")
         assert str(m_constraint.type) == "not_in"
+
+        tour_eiffel = Location(48.8581064, 2.29447)
+        colosseum = Location(41.8902102, 12.4922309)
+        le_jules_verne_restaurant = Location(48.8579675, 2.2951849)
+        m_constraint = ConstraintType("distance", (tour_eiffel, 1.0))
+        assert m_constraint.check(tour_eiffel)
+        assert m_constraint.check(le_jules_verne_restaurant)
+        assert not m_constraint.check(colosseum)
 
         m_constraint.type = "unknown"
         with pytest.raises(ValueError):

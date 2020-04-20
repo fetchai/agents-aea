@@ -19,10 +19,13 @@
 
 """This module contains the base message and serialization definition."""
 
+import logging
 from copy import copy
 from typing import Any, Dict, Optional
 
 from aea.configurations.base import PublicId
+
+logger = logging.getLogger(__name__)
 
 
 class InternalMessage:
@@ -39,6 +42,10 @@ class InternalMessage:
         """
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
+        try:
+            self._is_consistent()
+        except Exception as e:
+            logger.error(e)
 
     @property
     def body(self) -> Dict:

@@ -32,14 +32,15 @@ First, create the car detector AEA:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/carpark_detection:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Alternatively to the previous two steps, simply run:
 ``` bash
-aea fetch fetchai/car_detector:0.1.0
+aea fetch fetchai/car_detector:0.2.0
 cd car_detector
 aea install
 ```
@@ -50,14 +51,15 @@ Then, create the car data client AEA:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/carpark_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Alternatively to the previous two steps, simply run:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.1.0
+aea fetch fetchai/car_data_buyer:0.2.0
 cd car_data_buyer
 aea install
 ```
@@ -65,13 +67,13 @@ aea install
 Additionally, create the private key for the car data buyer AEA based on the network you want to transact.
 
 To generate and add a private-public key pair for Fetch.ai use:
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
 To generate and add a private-public key pair for Ethereum use:
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -174,7 +176,7 @@ aea config set vendor.fetchai.skills.carpark_client.models.strategy.args.ledger_
 
 Finally, run both AEAs from their respective directories:
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 You can see that the AEAs find each other, negotiate and eventually trade.

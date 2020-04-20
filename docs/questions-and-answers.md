@@ -23,7 +23,7 @@ You can read more about the Search and Discovery <a href="/oef-ledger/">here</a>
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
 two different networks natively: the `Fetch.ai` network and the `Ethereum` network. 
 <br><br>
-You can read more about the intergration of ledger <a href="/integration/">here</a>
+You can read more about the intergration of ledger <a href="/ledger-integration/">here</a>
 
 </details>
 
@@ -37,7 +37,7 @@ You have two options to connect to a database:
 - Creating a wrapper that communicates with the database and imports a Model. You can find an example implementation in the `weather_station` package
 - Using an ORM (object-relational mapping) library, and implementing the logic inside a class that inherits from the Model abstract class.
 <br><br>
-For a detailed example of how to use an ORM follow the <a href='/orm-integration-to-generic/'>ORM use case</a>  
+For a detailed example of how to use an ORM follow the <a href='/orm-integration/'>ORM use case</a>  
 </details>
 
 <details><summary>How does one connect to a live-stream of data?</summary>

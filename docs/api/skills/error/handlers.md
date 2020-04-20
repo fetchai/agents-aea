@@ -85,23 +85,6 @@ Handle a decoding error.
 
 None
 
-<a name=".aea.skills.error.handlers.ErrorHandler.send_invalid_message"></a>
-#### send`_`invalid`_`message
-
-```python
- | send_invalid_message(envelope: Envelope) -> None
-```
-
-Handle an message that is invalid wrt a protocol.
-
-**Arguments**:
-
-- `envelope`: the envelope
-
-**Returns**:
-
-None
-
 <a name=".aea.skills.error.handlers.ErrorHandler.send_unsupported_skill"></a>
 #### send`_`unsupported`_`skill
 

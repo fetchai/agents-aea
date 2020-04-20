@@ -39,9 +39,9 @@ import pytest
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_VERSION
+from aea.test_tools.click_testing import CliRunner
 
 from ..helper import extract_code_blocks
-from ...common.click_testing import CliRunner
 from ...conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -97,7 +97,7 @@ class TestBuildSkill:
                 *CLI_LOG_OPTION,
                 "fetch",
                 "--local",
-                "fetchai/simple_service_registration:0.1.0",
+                "fetchai/simple_service_registration:0.2.0",
             ],
             standalone_mode=False,
         )
@@ -117,7 +117,18 @@ class TestBuildSkill:
             # add oef connection
             cls.result = cls.runner.invoke(
                 cli,
-                [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+                [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
+                standalone_mode=False,
+            )
+            cls.result = cls.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "config",
+                    "set",
+                    "agent.default_connection",
+                    "fetchai/oef:0.2.0",
+                ],
                 standalone_mode=False,
             )
 
@@ -188,7 +199,7 @@ class TestBuildSkill:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
@@ -203,7 +214,7 @@ class TestBuildSkill:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),

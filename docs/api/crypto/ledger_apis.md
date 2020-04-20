@@ -104,7 +104,7 @@ Check if it has the default ledger API.
  | last_tx_statuses() -> Dict[str, str]
 ```
 
-Get the statuses for the last transaction.
+Get last tx statuses.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.default_ledger_id"></a>
 #### default`_`ledger`_`id
@@ -155,11 +155,55 @@ Transfer from self to destination.
 
 tx digest if successful, otherwise None
 
+<a name=".aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
+#### send`_`signed`_`transaction
+
+```python
+ | send_signed_transaction(identifier: str, tx_signed: Any) -> Optional[str]
+```
+
+Send a signed transaction and wait for confirmation.
+
+**Arguments**:
+
+- `tx_signed`: the signed transaction
+
+**Returns**:
+
+the tx_digest, if present
+
+<a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
+#### is`_`transaction`_`settled
+
+```python
+ | is_transaction_settled(identifier: str, tx_digest: str) -> bool
+```
+
+Check whether the transaction is settled and correct.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger
+- `tx_digest`: the transaction digest
+
+**Returns**:
+
+True if correctly settled, False otherwise
+
 <a name=".aea.crypto.ledger_apis.LedgerApis.is_tx_valid"></a>
 #### is`_`tx`_`valid
 
 ```python
  | is_tx_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Kept for backwards compatibility!
+
+<a name=".aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | is_transaction_valid(identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether the transaction is valid

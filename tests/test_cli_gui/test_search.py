@@ -163,7 +163,7 @@ def test_real_search():
         == "The local connection provides a stub for an OEF node."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/oef:0.1.0"
+    assert data[i]["id"] == "fetchai/oef:0.2.0"
     assert (
         data[i]["description"]
         == "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."

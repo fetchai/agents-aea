@@ -29,7 +29,7 @@ from threading import Lock, Thread
 from typing import Dict, List, Optional, Sequence, Tuple, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId, PublicId, SkillId
 from aea.connections.base import Connection, ConnectionStatus
 from aea.mail import base_pb2
 
@@ -329,6 +329,22 @@ class Envelope:
     def context(self) -> EnvelopeContext:
         """Get the envelope context."""
         return self._context
+
+    @property
+    def skill_id(self) -> Optional[SkillId]:
+        """
+        Get the skill id from an envelope context, if set.
+
+        :return: skill id
+        """
+        skill_id = None  # Optional[PublicId]
+        if self.context is not None and self.context.uri is not None:
+            uri_path = self.context.uri.path
+            try:
+                skill_id = PublicId.from_uri_path(uri_path)
+            except ValueError:
+                logger.debug("URI - {} - not a valid skill id.".format(uri_path))
+        return skill_id
 
     def __eq__(self, other):
         """Compare with another object."""

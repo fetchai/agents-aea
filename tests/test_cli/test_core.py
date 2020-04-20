@@ -30,8 +30,8 @@ from aea.cli.core import (
     _wait_funds_release,
 )
 from aea.crypto.fetchai import FETCHAI
+from aea.test_tools.click_testing import CliRunner
 
-from tests.common.click_testing import CliRunner
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock
 

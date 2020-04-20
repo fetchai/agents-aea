@@ -28,15 +28,17 @@ import click
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     _try_get_item_source_path,
     _try_get_item_target_path,
     check_aea_project,
 )
 from aea.cli.registry.publish import publish_agent
-from aea.configurations.base import PublicId
+from aea.configurations.base import CRUDCollection, PublicId
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 
 
 @click.command(name="publish")
@@ -46,11 +48,27 @@ from aea.configurations.base import PublicId
 def publish(click_context, local):
     """Publish Agent to Registry."""
     ctx = cast(Context, click_context.obj)
+    _validate_pkp(ctx.agent_config.private_key_paths)
     if local:
         _save_agent_locally(ctx)
     else:
         # TODO: check agent dependencies are available in local packages dir.
         publish_agent(ctx)
+
+
+def _validate_pkp(private_key_paths: CRUDCollection) -> None:
+    """
+    Prevent to publish agents with non-empty private_key_paths.
+
+    :param private_key_paths: private_key_paths from agent config.
+    :raises: ClickException if private_key_paths is not empty.
+
+    :return: None.
+    """
+    if private_key_paths.read_all() != []:
+        raise click.ClickException(
+            "You are not allowed to publish agents with non-empty private_key_paths."
+        )
 
 
 def _check_is_item_in_local_registry(public_id, item_type_plural, registry_path):

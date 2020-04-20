@@ -24,7 +24,11 @@ from click import ClickException
 from click.testing import CliRunner
 
 from aea.cli import cli
-from aea.cli.publish import _check_is_item_in_local_registry, _save_agent_locally
+from aea.cli.publish import (
+    _check_is_item_in_local_registry,
+    _save_agent_locally,
+    _validate_pkp,
+)
 
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import (
@@ -86,6 +90,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
 @mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
+@mock.patch("aea.cli.publish._validate_pkp")
 class PublishCommandTestCase(TestCase):
     """Test case for CLI publish command."""
 
@@ -101,3 +106,22 @@ class PublishCommandTestCase(TestCase):
         self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )
+
+
+class ValidatePkpTestCase(TestCase):
+    """Test case for _validate_pkp method."""
+
+    def test__validate_pkp_positive(self):
+        """Test _validate_pkp for positive result."""
+        private_key_paths = mock.Mock()
+        private_key_paths.read_all = mock.Mock(return_value=[])
+        _validate_pkp(private_key_paths)
+        private_key_paths.read_all.assert_called_once()
+
+    def test__validate_pkp_negative(self):
+        """Test _validate_pkp for negative result."""
+        private_key_paths = mock.Mock()
+        private_key_paths.read_all = mock.Mock(return_value=[1, 2])
+        with self.assertRaises(ClickException):
+            _validate_pkp(private_key_paths)
+        private_key_paths.read_all.assert_called_once()

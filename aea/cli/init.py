@@ -24,7 +24,7 @@ import click
 from aea import __version__
 from aea.cli.common import (
     AEA_LOGO,
-    AUTHOR,
+    AUTHOR_KEY,
     Context,
     _get_or_create_cli_config,
     _update_cli_config,
@@ -76,12 +76,12 @@ def do_init(author: str, reset: bool, registry: bool) -> None:
     :return: None.
     """
     config = _get_or_create_cli_config()
-    if reset or config.get(AUTHOR, None) is None:
+    if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
         if registry:
             _registry_init(username=author)
 
-        _update_cli_config({AUTHOR: author})
+        _update_cli_config({AUTHOR_KEY: author})
         config = _get_or_create_cli_config()
         config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)

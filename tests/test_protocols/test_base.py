@@ -25,6 +25,7 @@ import tempfile
 from pathlib import Path
 
 from aea import AEA_DIR
+from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.mail.base import Envelope
 from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol
 
@@ -110,8 +111,8 @@ class TestProtocolFromDir:
     def test_protocol_load_positive(self):
         """Test protocol loaded correctly."""
         default_protocol = Protocol.from_dir(Path(AEA_DIR, "protocols", "default"))
-        assert (
-            str(default_protocol.public_id) == "fetchai/default:0.1.0"
+        assert str(default_protocol.public_id) == str(
+            DEFAULT_PROTOCOL
         ), "Protocol not loaded correctly."
 
     @classmethod

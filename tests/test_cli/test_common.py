@@ -27,7 +27,6 @@ from click import ClickException
 from yaml import YAMLError
 
 from aea.cli.common import (
-    AUTHOR,
     # AEAConfigException,
     PublicIdParameter,
     _format_items,
@@ -37,6 +36,8 @@ from aea.cli.common import (
     _try_get_item_target_path,
     _update_cli_config,
 )
+
+AUTHOR = "author"
 
 
 class FormatItemsTestCase(TestCase):

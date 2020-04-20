@@ -32,8 +32,8 @@ import pytest
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.test_tools.click_testing import CliRunner
 
-from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION
 
 
@@ -113,7 +113,20 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/oef:0.2.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -133,7 +146,7 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.2.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -149,7 +162,20 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/oef:0.2.0",
+            ],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -169,7 +195,7 @@ class TestGenericSkills:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.1.0"],
+            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.2.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -188,7 +214,7 @@ class TestGenericSkills:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),
@@ -202,7 +228,7 @@ class TestGenericSkills:
                     "aea.cli",
                     "run",
                     "--connections",
-                    "fetchai/oef:0.1.0",
+                    "fetchai/oef:0.2.0",
                 ],
                 stdout=subprocess.PIPE,
                 env=os.environ.copy(),

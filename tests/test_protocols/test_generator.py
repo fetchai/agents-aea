@@ -53,6 +53,7 @@ from aea.protocols.generator import (
     _union_sub_type_to_protobuf_variable_name,
 )
 from aea.skills.base import Handler, SkillContext
+from aea.test_tools.click_testing import CliRunner
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
@@ -61,7 +62,6 @@ from tests.data.generator.t_protocol.serialization import (  # type: ignore
     TProtocolSerializer,
 )
 
-from ..common.click_testing import CliRunner
 from ..conftest import ROOT_DIR
 
 logger = logging.getLogger("aea")
@@ -261,6 +261,13 @@ class TestEndToEndGenerator:
         builder_1.set_name("my_aea_1")
         builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_1.set_default_ledger(FETCHAI)
+        builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
+        builder_1.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
+        )
+        builder_1.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        )
         builder_1.add_component(
             ComponentType.PROTOCOL,
             Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
@@ -274,6 +281,13 @@ class TestEndToEndGenerator:
         builder_2.set_name("my_aea_2")
         builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         builder_2.set_default_ledger(FETCHAI)
+        builder_2.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
+        )
+        builder_2.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
+        )
+        builder_2.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_2.add_component(
             ComponentType.PROTOCOL,
             Path(ROOT_DIR, "tests", "data", "generator", "t_protocol"),
@@ -284,8 +298,8 @@ class TestEndToEndGenerator:
         )
 
         # create AEAs
-        aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
-        aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.1.0")])
+        aea_1 = builder_1.build(connection_ids=[PublicId.from_str("fetchai/oef:0.2.0")])
+        aea_2 = builder_2.build(connection_ids=[PublicId.from_str("fetchai/oef:0.2.0")])
 
         # message 1
         message = TProtocolMessage(

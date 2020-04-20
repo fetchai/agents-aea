@@ -184,7 +184,7 @@ class TACHandler(Handler):
             self.context.logger.debug(
                 "[{}]: Agent unregistered: '{}'".format(
                     self.context.agent_name,
-                    game.configuration.agent_addr_to_name[message.counterparty],
+                    game.conf.agent_addr_to_name[message.counterparty],
                 )
             )
             game.registration.unregister_agent(message.counterparty)
@@ -343,9 +343,9 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
+            "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 self.context.agent_name,
-                oef_error.message_id,
+                oef_error.dialogue_reference,
                 oef_error.oef_error_operation,
             )
         )

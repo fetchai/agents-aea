@@ -16,7 +16,7 @@ You can think the concrete implementations of the base class `LedgerApi` as wrap
 ## Abstract class LedgerApi
 
 Each `LedgerApi` must implement all the methods based on the abstract class.
-```python
+``` python
 class LedgerApi(ABC):
     """Interface for ledger APIs."""
 
@@ -27,15 +27,17 @@ class LedgerApi(ABC):
     def api(self) -> Any:
         """
         Get the underlying API object.
+
+        This can be used for low-level operations with the concrete ledger APIs.
         If there is no such object, return None.
         """
 ```
 The api property can be used for low-level operation with the concrete ledger APIs.
 
-```python
+``` python
 
     @abstractmethod
-    def get_balance(self, address: AddressLike) -> int:
+    def get_balance(self, address: Address) -> Optional[int]:
         """
         Get the balance of a given account.
 
@@ -46,13 +48,13 @@ The api property can be used for low-level operation with the concrete ledger AP
         """
 ```
 The `get_balance` method returns the amount of tokens we hold for a specific address.
-```python
+``` python
 
     @abstractmethod
-    def send_transaction(
+    def transfer(
         self,
         crypto: Crypto,
-        destination_address: AddressLike,
+        destination_address: Address,
         amount: int,
         tx_fee: int,
         tx_nonce: str,
@@ -64,17 +66,17 @@ The `get_balance` method returns the amount of tokens we hold for a specific add
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
-        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
+        :param tx_nonce: verifies the authenticity of the tx
         :return: tx digest if successful, otherwise None
         """
 ```
-The `send_transaction` is where we must implement the logic for sending a transaction to the ledger. 
+The `transfer` is where we must implement the logic for sending a transaction to the ledger. 
 
-```python
+``` python
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """
@@ -85,7 +87,7 @@ The `send_transaction` is where we must implement the logic for sending a transa
         """
 
     @abstractmethod
-    def validate_transaction(
+    def is_transaction_valid(
         self,
         tx_digest: str,
         seller: Address,
@@ -94,7 +96,7 @@ The `send_transaction` is where we must implement the logic for sending a transa
         amount: int,
     ) -> bool:
         """
-        Check whether a transaction is valid or not.
+        Check whether a transaction is valid or not (non-blocking).
 
         :param seller: the address of the seller.
         :param client: the address of the client.
@@ -105,8 +107,8 @@ The `send_transaction` is where we must implement the logic for sending a transa
         :return: True if the transaction referenced by the tx_digest matches the terms.
         """
 ```
-The `is_transaction_settled` and `validate_transaction` are two functions that helps us to verify a transaction digest.
-```python
+The `is_transaction_settled` and `is_transaction_valid` are two functions that helps us to verify a transaction digest.
+``` python
     @abstractmethod
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -123,22 +125,22 @@ as extra data for the transaction to be considered valid.
 Next, we are going to discuss the different implementation of `send_transaction` and `validate_transacaction` for the two natively supported ledgers of the framework.
 
 ## Fetch.ai Ledger
-```python
- def send_transaction(
-         self,
-         crypto: Crypto,
-         destination_address: AddressLike,
-         amount: int,
-         tx_fee: int,
-         tx_nonce: str,
-         **kwargs
-     ) -> Optional[str]:
-         """Submit a transaction to the ledger."""
-         tx_digest = self._api.tokens.transfer(
-             crypto.entity, destination_address, amount, tx_fee
-         )
-         self._api.sync(tx_digest)
-         return tx_digest
+``` python
+def transfer(
+    self,
+    crypto: Crypto,
+    destination_address: Address,
+    amount: int,
+    tx_fee: int,
+    tx_nonce: str,
+    is_waiting_for_confirmation: bool = True,
+    **kwargs,
+) -> Optional[str]:
+    """Submit a transaction to the ledger."""
+    tx_digest = self._try_transfer_tokens(
+        crypto, destination_address, amount, tx_fee
+    )
+    return tx_digest
 ```
 As you can see, the implementation for sending a transcation to the Fetch.ai ledger is relatively trivial.
 
@@ -147,45 +149,45 @@ As you can see, the implementation for sending a transcation to the Fetch.ai led
   <p>We cannot use the tx_nonce yet in the Fetch.ai ledger.</p>
 </div>
 
-```python
-    def is_transaction_settled(self, tx_digest: str) -> bool:
-         """Check whether a transaction is settled or not."""
-         tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
-         is_successful = False
-         if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
-             is_successful = True
-         return is_successful
+``` python
+def is_transaction_settled(self, tx_digest: str) -> bool:
+    """Check whether a transaction is settled or not."""
+    tx_status = cast(TxStatus, self._try_get_transaction_receipt(tx_digest))
+    is_successful = False
+    if tx_status is not None:
+        is_successful = tx_status.status in SUCCESSFUL_TERMINAL_STATES
+    return is_successful
 ```
-```python
-    def validate_transaction(
-         self,
-         tx_digest: str,
-         seller: Address,
-         client: Address,
-         tx_nonce: str,
-         amount: int,
-    ) -> bool:
-         """
-         Check whether a transaction is valid or not.
+``` python
+def is_transaction_valid(
+    self,
+    tx_digest: str,
+    seller: Address,
+    client: Address,
+    tx_nonce: str,
+    amount: int,
+) -> bool:
+    """
+    Check whether a transaction is valid or not (non-blocking).
 
-         :param seller: the address of the seller.
-         :param client: the address of the client.
-         :param tx_nonce: the transaction nonce.
-         :param amount: the amount we expect to get from the transaction.
-         :param tx_digest: the transaction digest.
+    :param seller: the address of the seller.
+    :param client: the address of the client.
+    :param tx_nonce: the transaction nonce.
+    :param amount: the amount we expect to get from the transaction.
+    :param tx_digest: the transaction digest.
 
-         :return: True if the random_message is equals to tx['input']
-         """
-         tx_contents = cast(TxContents, self._api.tx.contents(tx_digest))
-         transfers = tx_contents.transfers
-         seller_address = Address(seller)
-         is_valid = (
-             str(tx_contents.from_address) == client
-             and amount == transfers[seller_address]
-         )
-         is_settled = self.is_transaction_settled(tx_digest=tx_digest)
-         result = is_valid and is_settled
-         return result
+    :return: True if the random_message is equals to tx['input']
+    """
+    is_valid = False
+    tx_contents = self._try_get_transaction(tx_digest)
+    if tx_contents is not None:
+        seller_address = FetchaiAddress(seller)
+        is_valid = (
+            str(tx_contents.from_address) == client
+            and amount == tx_contents.transfers[seller_address]
+            and self.is_transaction_settled(tx_digest=tx_digest)
+        )
+    return is_valid
 ```
 Inside the `validate_transcation` we request the contents of the transaction based on the tx_digest we received. We are checking that the address
 of the client is the same as the one that is inside the `from` field of the transaction. Lastly, we are checking that the transaction is settled.
@@ -193,61 +195,58 @@ If both of these checks return True we consider the transaction as valid.
 
 ## Ethereum Ledger
 
-```python
-     def send_transaction(
-         self,
-         crypto: Crypto,
-         destination_address: AddressLike,
-         amount: int,
-         tx_fee: int,
-         tx_nonce: str,
-         chain_id: int = 3,
-         **kwargs
-     ) -> Optional[str]:
-         """
-         Submit a transaction to the ledger.
+``` python
+def transfer(
+    self,
+    crypto: Crypto,
+    destination_address: Address,
+    amount: int,
+    tx_fee: int,
+    tx_nonce: str,
+    chain_id: int = 1,
+    **kwargs,
+) -> Optional[str]:
+    """
+    Submit a transfer transaction to the ledger.
 
-         :param tx_nonce: verifies the authenticity of the tx
-         :param crypto: the crypto object associated to the payer.
-         :param destination_address: the destination address of the payee.
-         :param amount: the amount of wealth to be transferred.
-         :param tx_fee: the transaction fee.
-         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
-         :return: the transaction digest, or None if not available.
-         """
-         nonce = self._api.eth.getTransactionCount(
-             self._api.toChecksumAddress(crypto.address)
-         )
-         transaction = {
-             "nonce": nonce,
-             "chainId": chain_id,
-             "to": destination_address,
-             "value": amount,
-             "gas": tx_fee,
-             "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
-             "data": tx_nonce,
-         }
-         gas_estimation = self._api.eth.estimateGas(transaction=transaction)
-         assert (
-             tx_fee >= gas_estimation
-         ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
-             gas_estimation
-         )
-         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+    :param crypto: the crypto object associated to the payer.
+    :param destination_address: the destination address of the payee.
+    :param amount: the amount of wealth to be transferred.
+    :param tx_fee: the transaction fee.
+    :param tx_nonce: verifies the authenticity of the tx
+    :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+    :return: tx digest if present, otherwise None
+    """
+    tx_digest = None
+    nonce = self._try_get_transaction_count(crypto.address)
+    if nonce is None:
+        return tx_digest
 
-         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+    # TODO : handle misconfiguration
+    transaction = {
+        "nonce": nonce,
+        "chainId": chain_id,
+        "to": destination_address,
+        "value": amount,
+        "gas": tx_fee,
+        "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
+        "data": tx_nonce,
+    }
 
-         logger.info("TX Hash: {}".format(str(hex_value.hex())))
-         while True:
-             try:
-                 self._api.eth.getTransactionReceipt(hex_value)
-                 logger.info("transaction validated - exiting")
-                 tx_digest = hex_value.hex()
-                 break
-             except web3.exceptions.TransactionNotFound:  # pragma: no cover
-                 logger.info("transaction not found - sleeping for 3.0 seconds")
-                 time.sleep(3.0)
-         return tx_digest
+    gas_estimate = self._try_get_gas_estimate(transaction)
+    if gas_estimate is None or tx_fee >= gas_estimate:
+        logger.warning(
+            "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
+                gas_estimate
+            )
+        )
+        return tx_digest
+
+    signed_transaction = crypto.sign_transaction(transaction)
+
+    tx_digest = self.send_signed_transaction(tx_signed=signed_transaction,)
+
+    return tx_digest
 ```
 On contrary to the Fetch.ai implementation of the `send_transaction` function, the Ethereum implementation is more complicated. This happens because we must create 
 the transaction dictionary and send a raw transaction.
@@ -263,44 +262,49 @@ the transaction dictionary and send a raw transaction.
 Once we filled the transaction dictionary. We are checking that the transaction fee is more than the estimated gas for the transaction otherwise we will not be able to complete the transfer. Then we are signing and we are sending the transaction. Once we get the transaction receipt we consider the transaction completed and
 we return the transaction digest. 
 
-```python
- def is_transaction_settled(self, tx_digest: str) -> bool:
-         """Check whether a transaction is settled or not."""
-         tx_status = self._api.eth.getTransactionReceipt(tx_digest)
-         is_successful = False
-         if tx_status is not None:
-             is_successful = True
-         return is_successful
+``` python
+def is_transaction_settled(self, tx_digest: str) -> bool:
+    """
+    Check whether a transaction is settled or not.
+
+    :param tx_digest: the digest associated to the transaction.
+    :return: True if the transaction has been settled, False o/w.
+    """
+    is_successful = False
+    tx_receipt = self._try_get_transaction_receipt(tx_digest)
+    if tx_receipt is not None:
+        is_successful = tx_receipt.status == 1
+    return is_successful
 ```
-```python
-def validate_transaction(
-         self,
-         tx_digest: str,
-         seller: Address,
-         client: Address,
-         tx_nonce: str,
-         amount: int,
-     ) -> bool:
-         """
-         Check whether a transaction is valid or not.
+``` python
+def is_transaction_valid(
+     self,
+     tx_digest: str,
+     seller: Address,
+     client: Address,
+     tx_nonce: str,
+     amount: int,
+ ) -> bool:
+     """
+     Check whether a transaction is valid or not.
 
-         :param seller: the address of the seller.
-         :param client: the address of the client.
-         :param tx_nonce: the transaction nonce.
-         :param amount: the amount we expect to get from the transaction.
-         :param tx_digest: the transaction digest.
+     :param seller: the address of the seller.
+     :param client: the address of the client.
+     :param tx_nonce: the transaction nonce.
+     :param amount: the amount we expect to get from the transaction.
+     :param tx_digest: the transaction digest.
 
-         :return: True if the random_message is equals to tx['input']
-         """
+     :return: True if the random_message is equals to tx['input']
+     """
 
-         tx = self._api.eth.getTransaction(tx_digest)
-         is_valid = (
-             tx.get("input") == tx_nonce
-             and tx.get("value") == amount
-             and tx.get("from") == client
-             and tx.get("to") == seller
-         )
-         return is_valid
+     tx = self._api.eth.getTransaction(tx_digest)
+     is_valid = (
+         tx.get("input") == tx_nonce
+         and tx.get("value") == amount
+         and tx.get("from") == client
+         and tx.get("to") == seller
+     )
+     return is_valid
 ```
 The `validate_transaction` and `is_transaction_settled` functions help us to check if a transaction digest is valid and is settled. 
 In the Ethereum API, we can pass the `tx_nonce`, so we can check that it's the same. If it is different, we consider that transaction as no valid. The same happens if any of `amount`, `client` address
@@ -310,7 +314,7 @@ Lastly, the `generate_tx_nonce` function is the same for both `LedgerApi` implem
 Both use the timestamp as a random factor alongside the seller and client addresses.
 
 #### Fetch.ai implementation 
-```python
+``` python
 def generate_tx_nonce(self, seller: Address, client: Address) -> str:
     """
     Generate a random str message.
@@ -319,30 +323,26 @@ def generate_tx_nonce(self, seller: Address, client: Address) -> str:
     :param client: the address of the client.
     :return: return the hash in hex.
     """
-
     time_stamp = int(time.time())
-    seller = cast(str, seller)
-    client = cast(str, client)
     aggregate_hash = sha256_hash(
         b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
     )
-
     return aggregate_hash.hex()
 
 ```
 #### Ethereum implementation
-```python
+``` python
 def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-         """
-         Generate a unique hash to distinguish txs with the same terms.
+    """
+    Generate a unique hash to distinguish txs with the same terms.
 
-         :param seller: the address of the seller.
-         :param client: the address of the client.
-         :return: return the hash in hex.
-         """
-         time_stamp = int(time.time())
-         aggregate_hash = Web3.keccak(
-             b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
-         )
-         return aggregate_hash.hex()
+    :param seller: the address of the seller.
+    :param client: the address of the client.
+    :return: return the hash in hex.
+    """
+    time_stamp = int(time.time())
+    aggregate_hash = Web3.keccak(
+        b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+    )
+    return aggregate_hash.hex()
 ```

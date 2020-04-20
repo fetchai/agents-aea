@@ -6,19 +6,21 @@ aea create tac_controller
 cd tac_controller
 ```
 ``` bash
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control:0.1.0
+aea add contract fetchai/erc1155:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea config get skills.tac_control.models.parameters.args.start_time
-aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
+aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
 aea create tac_participant_one
@@ -26,29 +28,81 @@ aea create tac_participant_two
 ```
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
+```
+``` bash
+aea fetch fetchai/tac_controller:0.1.0
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
 ```
 ```bash
 aea launch tac_controller tac_participant_one tac_participant_two
+```
+``` bash
+aea create tac_controller_contract
+cd tac_controller_contract
+```
+``` bash
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/tac_control_contract:0.1.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
+```
+``` bash
+aea config set agent.default_ledger ethereum
+```
+``` bash
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
+```
+``` bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+``` bash
+aea generate-wealth ethereum
+```
+``` bash
+aea get-wealth ethereum
+```
+``` bash
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
+```
+``` bash
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
+```
+``` bash
+aea launch tac_controller_contract tac_participant_one tac_participant_two
+```
+
+``` yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 20
 ```
 ``` yaml
 ledger_apis:
@@ -69,7 +123,7 @@ behaviours:
       args:
         services_interval: 5
   clean_up:
-    class_name: TransactionCleanUpTask
+    class_name: TransactionCleanUpBehaviour
     args:
       tick_interval: 5.0
 handlers:
