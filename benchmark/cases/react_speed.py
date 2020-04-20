@@ -17,11 +17,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """Example performance test using benchmark framework. test react speed on amount of incoming messages."""
+
 from benchmark.cases.helpers.dummy_handler import DummyHandler
-from benchmark.framework.agency import Agency
+from benchmark.framework.aea_test_wrapper import AEATestWrapper
+from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
@@ -31,17 +31,18 @@ DUMMMY_AGENT_CONF = {
 }
 
 
-def react_speed(control, amount=1000):
+def react_speed(benchmark: BenchmarkControl, amount: int = 1000):
     """Test react only. Does not run full agent's loop."""
-    agency = Agency(**DUMMMY_AGENT_CONF)
-    agency.setup()
-    for _ in range(amount):
-        agency.put_inbox(agency.dummy_envelope())
+    aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
+    aea_test_wrapper.setup()
 
-    control.put("Go!")
-    while not agency.is_inbox_empty():
-        agency.react()
-    agency.close()
+    for _ in range(amount):
+        aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
+
+    benchmark.start()
+    while not aea_test_wrapper.is_inbox_empty():
+        aea_test_wrapper.react()
+    aea_test_wrapper.stop()
 
 
 if __name__ == "__main__":

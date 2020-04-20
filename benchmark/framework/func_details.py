@@ -16,32 +16,32 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Helper module for details about function being tested."""
 import inspect
 from inspect import Parameter
 from typing import Any, Callable, List
 
 
-class FuncDetails:
-    """Class to introspect some callable details."""
+class BaseFuncDetails:
+    """Class to introspect some callable details: name, docstring, arguments."""
 
     def __init__(self, func: Callable):
-        """Create an instance."""
+        """
+        Create an instance.
+
+        :param func: Function or another callable to get details.
+        """
         self.func = func
-
-    def check(self) -> None:
-        """Check for docstring and arguments have default values set."""
-        if not self.doc:
-            raise ValueError("Function docstring is missing")
-
-        if self._arguments[0].name != "control":
-            raise ValueError("first function argument must be named `control`!")
 
     @property
     def doc(self) -> str:
         """Return docstring for function."""
         return self.func.__doc__ or ""
+
+    @property
+    def name(self) -> str:
+        """Return function definition name."""
+        return self.func.__name__ or ""
 
     @property
     def _arguments(self) -> List[Parameter]:
@@ -52,17 +52,13 @@ class FuncDetails:
     @property
     def argument_names(self) -> List[str]:
         """Get list of argument names in function."""
-        return [i.name for i in self._arguments[1:]]
+        return [i.name for i in self._arguments]
 
     @property
     def default_argument_values(self) -> List[Any]:
         """Get list of argument default values."""
         default_args = []
-        for arg in self._arguments[1:]:
-            if arg.default == inspect._empty:  # type: ignore
-                raise ValueError(
-                    "function should have default values for every param except control"
-                )
+        for arg in self._arguments:
             default_args.append(arg.default)
         return default_args
 
@@ -70,3 +66,36 @@ class FuncDetails:
     def default_argument_values_as_string(self) -> str:
         """Get list of argument default values as a string."""
         return ",".join(map(repr, self.default_argument_values))
+
+
+class BenchmarkFuncDetails(BaseFuncDetails):
+    """
+    Special benchmarked function details.
+
+    With check of function definition.
+
+    :param CONTROL_ARG_NAME: Name of the special argument name, placed first.
+    """
+
+    CONTROL_ARG_NAME: str = "benchmark"
+
+    def check(self) -> None:
+        """Check for docstring and arguments have default values set."""
+        if not self.doc:
+            raise ValueError("Function docstring is missing")
+
+        if super()._arguments[0].name != self.CONTROL_ARG_NAME:
+            raise ValueError(
+                f"first function argument must be named `{self.CONTROL_ARG_NAME}`!"
+            )
+
+        for arg in self._arguments:
+            if arg.default == inspect._empty:  # type: ignore
+                raise ValueError(
+                    "function should have default values for every param except first one"
+                )
+
+    @property
+    def _arguments(self) -> List[Parameter]:
+        """Skip first argument, cause it special."""
+        return super()._arguments[1:]

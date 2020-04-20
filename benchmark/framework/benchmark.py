@@ -16,5 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Helper fot benchmark run control."""
+from multiprocessing import Queue
+from typing import Any
 
-"""Simple cases for performance tests."""
+
+class BenchmarkControl:
+    """Class to sync executor and function in test."""
+
+    START_MSG = "start"
+
+    def __init__(self):
+        """Init."""
+        self._queue = Queue(2)
+
+    def start(self) -> None:
+        """Notify executor to start measure resources."""
+        self._queue.put(self.START_MSG)
+
+    def wait_msg(self) -> Any:
+        """Wait a message from function being tested."""
+        return self._queue.get()

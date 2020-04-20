@@ -17,12 +17,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Example performance test using benchmark framework. Test react speed on amount of incoming messages using normal agent operating."""
 import time
 
 from benchmark.cases.helpers.dummy_handler import DummyHandler
-from benchmark.framework.agency import Agency
+from benchmark.framework.aea_test_wrapper import AEATestWrapper
+from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
@@ -32,16 +32,19 @@ DUMMMY_AGENT_CONF = {
 }
 
 
-def react_speed_in_loop(control, inbox_amount=1000):
+def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000):
     """Test inbox message processing in a loop."""
-    agency = Agency(**DUMMMY_AGENT_CONF)
-    for _ in range(inbox_amount):
-        agency.put_inbox(agency.dummy_envelope())
+    aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
 
-    agency.set_loop_timeout(0.0)
-    control.put("Go!")
-    with agency:
-        while not agency.is_inbox_empty():
+    for _ in range(inbox_amount):
+        aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
+
+    aea_test_wrapper.set_loop_timeout(0.0)
+
+    benchmark.start()
+
+    with aea_test_wrapper:
+        while not aea_test_wrapper.is_inbox_empty():
             time.sleep(0.1)
 
 

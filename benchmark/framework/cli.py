@@ -16,17 +16,16 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Cli implementation for performance tests suits."""
 import ast
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
 from click.core import Argument, Command, Context, Option, Parameter
 
 from .executor import Executor
-from .func_details import FuncDetails
+from .func_details import BenchmarkFuncDetails
 from .report_printer import PerformanceReportPrinter
 
 
@@ -54,13 +53,33 @@ class TestCli:
         executor_class=Executor,
         report_printer_class=PerformanceReportPrinter,
     ):
-        """
+        r"""
         Make performance client.
 
-        func - should be function with first parameter multithreading.Queue.
+        :param func: function to be tested.
+        :param executor_class: executor to be used for testing
+        :param report_printer_class: report printer to print results
+
+
+        func - should be function with first parameter multithreading.Queue
         func  - should have docstring, and default values for every extra argument.
+
+        Exmple of usage:
+
+        def test_fn(benchmark: BenchmarkControl, list_size: int = 1000000):
+            # test list iteration
+            # prepare some data:
+            big_list = list(range(list_size))
+
+            # ready for test
+            benchmark.start()
+
+            for i in range(big_list):
+                i ** 2  # actually do nothing
+
+        TestCli(test_fn).run()
         """
-        self.func_details = FuncDetails(func)
+        self.func_details = BenchmarkFuncDetails(func)
         self.func_details.check()
         self.func = func
         self.executor_class = Executor
@@ -81,7 +100,7 @@ class TestCli:
 
     def _make_help(self) -> str:
         """Make help for command."""
-        return inspect.cleandoc(
+        doc_str = inspect.cleandoc(
             f"""
         {self.func_details.doc}
 
@@ -90,10 +109,11 @@ class TestCli:
         default ARGS is `{self.func_details.default_argument_values_as_string}`
         """
         )
+        return doc_str
 
     def executor_params(self) -> Dict[str, Parameter]:
         """Get parameters used by Executor."""
-        return {
+        parameters = {
             "timeout": Option(
                 ["--timeout"],
                 default=10,
@@ -107,12 +127,14 @@ class TestCli:
                 help="Period for measurement",
             ),
         }
+        return parameters  # type: ignore # for some reason mypy does not follow superclass
 
     def _function_args(self) -> Parameter:
         """Get arguments requireed by test function."""
-        return DefaultArgumentsMultiple(
+        argument = DefaultArgumentsMultiple(
             ["args"], default=[self.func_details.default_argument_values_as_string],
         )
+        return argument
 
     def run(self) -> None:
         """Run performance test."""
@@ -126,6 +148,8 @@ class TestCli:
         executor = self.executor_class(**exec_params)
         exec_reports = []
 
+        self.report_printer_class(self.func_details, exec_params, []).print_header()
+
         for args in args_list:
             exec_report = executor.run(self.func, self._parse_arg_str(args))
             exec_reports.append(exec_report)
@@ -134,7 +158,7 @@ class TestCli:
             )
             report_printer.print_()
 
-    def _parse_arg_str(self, args: str) -> tuple:
+    def _parse_arg_str(self, args: str) -> Tuple[str]:
         """Parse arguments string to tuple."""
         parsed = ast.literal_eval(args)
 

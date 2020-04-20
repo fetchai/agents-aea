@@ -16,16 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Executor to run and measure resources consumed by python code."""
 import datetime
 import inspect
+import multiprocessing
 import time
 from collections import namedtuple
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 from operator import attrgetter
 from statistics import mean
-from typing import Any, Callable, List, Tuple
+from typing import Callable, List, Tuple
+
+from benchmark.framework.benchmark import BenchmarkControl
 
 import memory_profiler  # type: ignore
 
@@ -45,36 +47,48 @@ class ExecReport:
         args: tuple,
         time_passed: float,
         stats: List[ResourceStats],
-        killed: bool,
+        is_killed: bool,
         period: float,
     ):
-        """Make an instance."""
+        """Make an instance.
+
+        :param args: tuple of arguments passed to function tested.
+        :param time_passed: time test function was executed.
+        :param stats: list of ResourceStats: cpu, mem.
+        :param is_killed: was process terminated by timeout.
+        :param period: what is measurement period length.
+        """
         self.args = args
         self.report_created = datetime.datetime.now()
         self.time_passed = time_passed
         self.stats = stats
-        self.killed = killed
+        self.is_killed = is_killed
         self.period = period
 
-    def __getattr__(self, attr: str) -> Any:
-        """Get list of stats kinds."""
-        if self.stats and attr in self.stats[0]._fields:
-            return list(map(attrgetter(attr), self.stats))
-        return super().__getattr__(attr)  # type: ignore
+    @property
+    def cpu(self) -> List[float]:
+        """Return list of cpu usage records."""
+        return list(map(attrgetter("cpu"), self.stats))
+
+    @property
+    def mem(self) -> List[float]:
+        """Return list of memory usage records."""
+        return list(map(attrgetter("mem"), self.stats))
 
     def __str__(self) -> str:
         """Render report to string."""
         return inspect.cleandoc(
             f"""
         == Report created {self.report_created} ==
-        == Arguments are `{self.args}` ==
-        Time passed {self.time_passed}. Killed: {self.killed} Period: {self.period}
-        Cpu mean: {mean(self.cpu)}
-        Cpu min: {min(self.cpu)}
-        Cpu max: {max(self.cpu)}
-        Mem mean: {mean(self.mem)}
-        Mem min: {min(self.mem)}
-        Mem max: {max(self.mem)}
+        Arguments are `{self.args}`
+        Time passed {self.time_passed}
+        Terminated by timeout: {self.is_killed}
+        Cpu(%) mean: {mean(self.cpu)}
+        Cpu(%) min: {min(self.cpu)}
+        Cpu(%) max: {max(self.cpu)}
+        Mem(kb) mean: {mean(self.mem)}
+        Mem(kb) min: {min(self.mem)}
+        Mem(kb) max: {max(self.mem)}
         """
         )
 
@@ -83,26 +97,48 @@ class Executor:
     """Process execution and resources measurement."""
 
     def __init__(self, period: float = 0.1, timeout: float = 30):
-        """Set exeutor with parameters."""
+        """
+        Set executor with parameters.
+
+        :param period: period to take resource measurement.
+        :param timeout: time limit to perform test, test process will be killed after timeout.
+        """
         self.period = period
         self.timeout = timeout
 
     def run(self, func: Callable, args: tuple) -> ExecReport:
-        """Run function to be tested for performance."""
+        """
+        Run function to be tested for performance.
+
+        :param func: function or callable to be tested for performance.
+        :param args: tuple of argument to pass to function tested.
+        """
         process = self._prepare(func, args)
         time_usage, stats, killed = self._measure(process)
         return self._report(args, time_usage, stats, killed)
 
     def _prepare(self, func: Callable, args: tuple) -> Process:
-        """Start process and wait process ready to be measured."""
-        control: Queue = Queue(2)
+        """
+        Start process and wait process ready to be measured.
+
+        :param func: function or callable to be tested for performance.
+        :param args: tuple of argument to pass to function tested.
+        """
+        control: BenchmarkControl = BenchmarkControl()
         process = Process(target=func, args=(control, *args))
         process.start()
-        control.get()
+        msg = control.wait_msg()
+        assert msg == control.START_MSG
         return process
 
-    def _measure(self, process: Process) -> Tuple[float, List[ResourceStats], bool]:
-        """Measure resources consumed by the process."""
+    def _measure(
+        self, process: multiprocessing.Process
+    ) -> Tuple[float, List[ResourceStats], bool]:
+        """
+        Measure resources consumed by the process.
+
+        :param process: process to measure resource consumption
+        """
         started_time = time.time()
         killed = False
         proc_info = psutil.Process(process.pid)
@@ -124,7 +160,11 @@ class Executor:
         return time_usage, stats, killed
 
     def _get_stats_record(self, proc_info: psutil.Process) -> ResourceStats:
-        """Read resources usage and create record."""
+        """
+        Read resources usage and create record.
+
+        :param proc_info: process information to get cpu usage and memory usage from.
+        """
         return ResourceStats(
             time.time(),
             proc_info.cpu_percent(),
@@ -132,7 +172,18 @@ class Executor:
         )
 
     def _report(
-        self, args: tuple, time_usage: float, stats: List[ResourceStats], killed: bool
+        self,
+        args: tuple,
+        time_passed: float,
+        stats: List[ResourceStats],
+        is_killed: bool,
     ) -> ExecReport:
-        """Create execution report."""
-        return ExecReport(args, time_usage, stats, killed, self.period,)
+        """
+        Create execution report.
+
+        :param args: tuple of argument to pass to function tested.
+        :param time_passed: time test function was executed.
+        :param stats: list of ResourceStats: cpu, mem.
+        :param is_killed: was process terminated by timeout.
+        """
+        return ExecReport(args, time_passed, stats, is_killed, self.period)

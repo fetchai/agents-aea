@@ -16,10 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains AEA/AEABuilder wrapper to make performance tests easy."""
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
+
+from benchmark.framework.fake_connection import FakeConnection
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -33,21 +34,19 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler, Skill, SkillContext
 
 
-class Agency:
+class AEATestWrapper:
     """A testing wrapper to run and control an agent."""
 
-    def __init__(self, name: str = "my_eae", skills: List[dict] = None):
+    def __init__(self, name: str = "my_aea", skills: List[dict] = None):
         """Make an agency with optional name and skills."""
         self.skills = skills or []
         self.name = name
 
-        self.agent = self.make_agent(
+        self.aea = self.make_aea(
             self.name, [self.make_skill(**skill) for skill in self.skills]
         )
 
-    def make_agent(
-        self, name: str = "my_eae", components: List[Component] = None
-    ) -> AEA:
+    def make_aea(self, name: str = "my_eae", components: List[Component] = None) -> AEA:
         """
         Create AEA from name and already loaded components.
 
@@ -56,7 +55,7 @@ class Agency:
         components = components or []
         builder = AEABuilder()
 
-        builder.set_name("my_aea")
+        builder.set_name(self.name)
         builder.add_private_key(FETCHAI, "")
 
         for component in components:
@@ -80,23 +79,24 @@ class Agency:
         context = context or SkillContext()
         config = config or SkillConfig()
 
-        handlers_instsances = {
+        handlers_instances = {
             name: cls(name=name, skill_context=context)
             for name, cls in handlers.items()
         }
 
         skill = Skill(
-            configuration=config, skill_context=context, handlers=handlers_instsances
+            configuration=config, skill_context=context, handlers=handlers_instances
         )
 
         return skill
 
-    def dummy_message(
-        self,
+    @classmethod
+    def dummy_default_message(
+        cls,
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        performative=DefaultMessage.Performative.BYTES,
+        performative: DefaultMessage.Performative = DefaultMessage.Performative.BYTES,
         content: Union[str, bytes] = "hello world!",
     ) -> Message:
         """
@@ -115,8 +115,9 @@ class Agency:
             content=content,
         )
 
+    @classmethod
     def dummy_envelope(
-        self,
+        cls,
         to: str = "test",
         sender: str = "test",
         protocol_id: ProtocolId = DefaultMessage.protocol_id,
@@ -127,7 +128,7 @@ class Agency:
 
         :return: Envelope
         """
-        message = message or self.dummy_message()
+        message = message or cls.dummy_default_message()
         return Envelope(
             to=to,
             sender=sender,
@@ -137,49 +138,49 @@ class Agency:
 
     def set_loop_timeout(self, timeout: float) -> None:
         """Set agent's loop timeout."""
-        self.agent._timeout = timeout
+        self.aea._timeout = timeout
 
     def setup(self) -> None:
         """Set up agent: start multiplexer etc."""
-        self.agent._start_setup()
+        self.aea._start_setup()
 
-    def close(self) -> None:
+    def stop(self) -> None:
         """Stop the agent."""
-        self.agent.stop()
+        self.aea.stop()
 
     def put_inbox(self, envelope: Envelope) -> None:
         """Add an envelope to agent's inbox."""
-        self.agent._multiplexer.in_queue.put(envelope)
+        self.aea._multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
         """Check there is no messages in inbox."""
-        return self.agent._multiplexer.in_queue.empty()
+        return self.aea._multiplexer.in_queue.empty()
 
     def react(self) -> None:
         """One time process of react for incoming message."""
-        self.agent.react()
+        self.aea.react()
 
     def spin_main_loop(self) -> None:
         """One time process agent's main loop."""
-        self.agent._spin_main_loop()
+        self.aea._spin_main_loop()
 
     def __enter__(self) -> None:
         """Contenxt manager enter."""
-        self._start_loop()
+        self.start_loop()
 
     def __exit__(self, exc_type=None, exc=None, traceback=None) -> None:
         """Context manager exit, stop agent."""
-        self._stop_loop()
+        self.stop_loop()
         return None
 
-    def _start_loop(self) -> None:
+    def start_loop(self) -> None:
         """Start agents loop in dedicated thread."""
-        self._thread = Thread(target=self.agent.start)
+        self._thread = Thread(target=self.aea.start)
         self._thread.start()
 
-    def _stop_loop(self) -> None:
+    def stop_loop(self) -> None:
         """Stop agents loop in dedicated thread, close thread."""
-        self.agent.stop()
+        self.aea.stop()
         self._thread.join()
 
     def is_running(self) -> bool:
@@ -188,4 +189,21 @@ class Agency:
 
         :return: bool
         """
-        return not self.agent.liveness.is_stopped
+        return not self.aea.liveness.is_stopped
+
+    def set_fake_connection(self, inbox_num: int, envelope: Optional[Envelope] = None):
+        """
+        Replace first conenction with fake one.
+
+        :param inbox_num: number of messages to generate by connection.
+        :param envelope: envelope to generate. dummy one created by default.
+        """
+        envelope = envelope or self.dummy_envelope()
+        self.aea._connections.clear()
+        self.aea._connections.append(
+            FakeConnection(envelope, inbox_num, connection_id="12")
+        )
+
+    def is_messages_in_fake_connection(self):
+        """Check fake connection has messages left."""
+        return self.aea._connections[0].num != 0

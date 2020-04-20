@@ -17,20 +17,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Example performance test using benchmark framework. Just test CPU usage with empty while loop."""
 import time
 
+from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
-def cpu_burn(control, run_time=10, sleep=0.0001):
-    """Do nothin, just burn cpu to check cpu load changed on sleep."""
-    control.put("go")
-    a = 0
+def cpu_burn(benchmark: BenchmarkControl, run_time=10, sleep=0.0001):
+    """Do nothing, just burn cpu to check cpu load changed on sleep."""
+    benchmark.start()
     start_time = time.time()
+
     while True:
-        a += 1
         for i in range(10000):
             i ** 2
         time.sleep(sleep)
