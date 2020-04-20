@@ -18,7 +18,9 @@
 # ------------------------------------------------------------------------------
 """Python code execution time limit tools."""
 import asyncio
+import concurrent
 import ctypes
+import logging
 import signal
 import threading
 from abc import ABC, abstractmethod
@@ -26,6 +28,9 @@ from asyncio import Future
 from asyncio.events import AbstractEventLoop
 from types import TracebackType
 from typing import Optional, Type
+
+
+logger = logging.getLogger(__file__)
 
 
 class TimeoutResult:
@@ -73,7 +78,7 @@ class BaseExecTimeout(ABC):
         """
         Init.
 
-         :param timeout: number of seconds to execute code before interruption
+        :param timeout: number of seconds to execute code before interruption
         """
         self.timeout = timeout
         self.result = TimeoutResult()
@@ -134,7 +139,7 @@ class BaseExecTimeout(ABC):
 
 class ExecTimeoutSigAlarm(BaseExecTimeout):
     """
-    ExecTimeout context manager implementation usin signals and SIGALARM.
+    ExecTimeout context manager implementation using signals and SIGALARM.
 
     Does not support threads, have to be used only in main thread.
     """
@@ -168,15 +173,31 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
 
     _supervisor_thread: Optional[threading.Thread] = None
     _loop: Optional[AbstractEventLoop] = None
-    _stopped_future: Optional[asyncio.Future] = None
+    _stopped_future: Optional[Future] = None
+    _start_count: int = 0
+
+    def __init__(self, timeout: float = 0.0):
+        """
+        Init ExecTimeoutThreadGuard variables.
+
+        :param timeout: number of seconds to execute code before interruption
+        """
+        super().__init__(timeout=timeout)
+
+        self._future_guard_task: Optional[concurrent.futures._base.Future[None]] = None
+        self._thread_id: Optional[int] = None
 
     @classmethod
     def start(cls) -> None:
         """
         Start supervisor thread to check timeouts.
 
+        Supervisor starts once but number of start counted.
+
         :return: None
         """
+        cls._start_count += 1
+
         if cls._supervisor_thread:
             return
 
@@ -186,22 +207,31 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         cls._supervisor_thread.start()
 
     @classmethod
-    def stop(cls) -> None:
+    def stop(cls, force: bool = False) -> None:
         """
         Stop supervisor thread.
 
+        Actual stop performed on force == True or if  number of stops == number of starts
+
+        :param force: force stop regardless number of start.
         :return: None
         """
-        cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
-        cls._supervisor_thread.join()  # type: ignore
-        cls._supervisor_thread = None  # type: ignore
+        if not cls._supervisor_thread:
+            return
+
+        cls._start_count -= 1
+
+        if cls._start_count <= 0 or force:
+            cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
+            cls._supervisor_thread.join()
+            cls._supervisor_thread = None
 
     @classmethod
     def _supervisor_event_loop(cls) -> None:
         """Start supervisor thread to execute asyncio task controlling execution time."""
         # pydocstyle: noqa # cause black reformats with pydocstyle confilct
-        async def wait_stopped():
-            await cls._stopped_future
+        async def wait_stopped() -> None:
+            await cls._stopped_future  # type: ignore
 
         cls._loop.run_until_complete(wait_stopped())  # type: ignore
 
@@ -212,10 +242,10 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         :return: None
         """
         await asyncio.sleep(self.timeout)
-        self._set_thread_exception(self._thread_id, self.exception_class)
+        self._set_thread_exception(self._thread_id, self.exception_class)  # type: ignore
 
     @staticmethod
-    def _set_thread_exception(thread_id, exception_class) -> None:
+    def _set_thread_exception(thread_id: int, exception_class: Type[Exception]) -> None:
         """
         Terminate code execution in specific thread by setting exception.
 
@@ -230,9 +260,16 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         Start control over execution time.
 
         Set task checking code execution time.
+        ExecTimeoutThreadGuard.start is required at least once in project before usage!
 
         :return: None
         """
+        if not self._supervisor_thread:
+            logger.warning(
+                "ExecTimeoutThreadGuard is used but not started! No timeout wil be applied!"
+            )
+            return
+
         self._thread_id = threading.current_thread().ident
         self._future_guard_task = asyncio.run_coroutine_threadsafe(
             self._guard_task(), self._loop  # type: ignore
@@ -248,3 +285,4 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         """
         if self._future_guard_task and not self._future_guard_task.done():
             self._future_guard_task.cancel()
+            self._future_guard_task = None

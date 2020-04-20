@@ -91,7 +91,8 @@ class BaseTestExecTimeout(TestCase):
             and timeit_result.time_passed >= slow_function_time
         )
 
-    def slow_function(self, sleep):
+    @classmethod
+    def slow_function(cls, sleep):
         """Sleep some time to test timeout applied."""
         time.sleep(sleep)
 
@@ -113,9 +114,10 @@ class TestThreadGuard(BaseTestExecTimeout):
 
     def tearDown(self):
         """Tear down."""
-        self.EXEC_TIMEOUT_CLASS.stop()
+        self.EXEC_TIMEOUT_CLASS.stop(force=True)
 
-    def slow_function(self, sleep):
+    @classmethod
+    def slow_function(cls, sleep):
         """Sleep in cycle to be perfect interrupted."""
         fractions = 10
         for _ in range(fractions):
@@ -153,11 +155,16 @@ class TestThreadGuard(BaseTestExecTimeout):
         assert t2_timeout <= time_t2.time_passed <= t2_sleep
         assert t1_timeout <= time_t1.time_passed < t1_sleep
 
-    def test_avoid_double_start(self):
-        """Test that double start handled properly."""
-        assert ExecTimeoutThreadGuard._supervisor_thread  # started by setup
-        thread = ExecTimeoutThreadGuard._supervisor_thread
 
-        ExecTimeoutThreadGuard.start()
+def test_supervisor_not_started():
+    """Test that TestThreadGuard supervisor thread not started."""
+    timeout = 0.1
+    sleep_time = 0.5
 
-        assert ExecTimeoutThreadGuard._supervisor_thread == thread
+    exec_limiter = ExecTimeoutThreadGuard(timeout)
+
+    with exec_limiter as exec_limit:
+        assert not exec_limiter._future_guard_task
+        TestThreadGuard.slow_function(sleep_time)
+
+    assert not exec_limit.is_cancelled_by_timeout()
