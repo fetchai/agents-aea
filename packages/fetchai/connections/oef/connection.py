@@ -102,7 +102,36 @@ class OEFObjectTranslator:
             if desc.data_model is not None
             else None
         )
-        return OEFDescription(desc.values, oef_data_model)
+
+        new_values = {}
+        location_keys = set()
+        loggers_by_key = {}
+        for key, value in desc.values.items():
+            if isinstance(value, Location):
+                oef_location = OEFLocation(value.latitude, value.longitude)
+                location_keys.add(key)
+                new_values[key] = oef_location
+            else:
+                new_values[key] = value
+
+        # this is a workaround to make OEFLocation objects deep-copyable.
+        # Indeed, there is a problem in deep-copying such objects
+        # because of the logger object they have attached.
+        # Steps:
+        # 1) we remove the loggers attached to each Location obj,
+        # 2) then we instantiate the description (it runs deepcopy on the values),
+        # 3) and then we reattach the loggers.
+        for key in location_keys:
+            loggers_by_key[key] = new_values[key].log
+            # in this way we remove the logger
+            new_values[key].log = None
+
+        description = OEFDescription(new_values, oef_data_model)
+
+        for key in location_keys:
+            new_values[key].log = loggers_by_key[key]
+
+        return description
 
     @classmethod
     def to_oef_data_model(cls, data_model: DataModel) -> OEFDataModel:
@@ -197,7 +226,15 @@ class OEFObjectTranslator:
             if oef_desc.data_model is not None
             else None
         )
-        return Description(oef_desc.values, data_model=data_model)
+
+        new_values = {}
+        for key, value in oef_desc.values.items():
+            if isinstance(value, OEFLocation):
+                new_values[key] = Location(value.latitude, value.longitude)
+            else:
+                new_values[key] = value
+
+        return Description(new_values, data_model=data_model)
 
     @classmethod
     def from_oef_data_model(cls, oef_data_model: OEFDataModel) -> DataModel:
