@@ -1,0 +1,34 @@
+name: rail_receiver
+author: aris
+version: 0.1.0
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
+  behaviours.py: Qmcrn7wefL7A2epwSEYq8aZa9gW1Nq6nwvwDwNwNyRoUmG
+  handlers.py: QmamFPovQv2Yga4y6YMjpMkF11t6et5LPdWEGrqQpQVkVg
+  parameters.py: QmQ14w3V7HG7pZToQJeGeZAcXvWDyCgvYZJvYVdJVA7LJ9
+  rail_data_model.py: QmSW86q9i4D8A3RHFdfNrnrPaKXziMdvxVyiGm2kPe9LWd
+fingerprint_ignore_patterns: []
+contracts: []
+protocols: []
+behaviours:
+  service_registration:
+    args:
+      services_interval: 30
+    class_name: ServiceRegistrationBehaviour
+handlers:
+  scaffold:
+    args:
+      foo: bar
+    class_name: MyScaffoldHandler
+models:
+  parameters:
+    args:
+      ledger_id: fetchai
+      service_data:
+        city: Cambridge
+        country: UK
+    class_name: Parameters
+dependencies: {}

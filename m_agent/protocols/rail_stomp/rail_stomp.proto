@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package fetch.aea.RailStomp;
+
+message RailStompMessage{
+
+    // Custom Types
+    message EventType{
+        enum EventTypeEnum {
+          ARRIVAL = 0;
+          DEPARTURE = 1;
+          DESTINATION = 2;
+        }
+        EventTypeEnum event_type = 1;
+    }
+
+    message VariationStatus{
+        enum VariationStatusEnum {
+          ON_TIME = 0;
+          EARLY = 1;
+          LATE = 2;
+          OFF_ROUTE = 3;
+        }
+        VariationStatusEnum variation_status = 1;
+    }
+
+
+    // Performatives and contents
+    message Rail_Updates_Performative{
+        EventType event_type = 1;
+        VariationStatus variation_status = 2;
+        string planned_event_type = 3;
+        string status = 4;
+        string planned_datetime = 5;
+        string actual_datetime = 6;
+        string planned_timetable_datetime = 7;
+        string location = 8;
+        int32 location_stanox = 9;
+        bool is_correction = 10;
+        bool train_terminated = 11;
+        string operating_company = 12;
+        string division_code = 13;
+        string train_service_code = 14;
+        string train_id = 15;
+        bool is_off_route = 16;
+        string current_train_id = 17;
+        string original_location = 18;
+        string original_location_planned_departure_datetime = 19;
+        int32 minutes_late = 20;
+        string early_late_description = 21;
+    }
+
+
+    // Standard RailStompMessage fields
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+    oneof performative{
+        Rail_Updates_Performative rail_updates = 5;
+    }
+}
