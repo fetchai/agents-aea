@@ -23,6 +23,7 @@ import asyncio
 import fcntl
 import logging
 import os
+from contextlib import contextmanager
 from pathlib import Path
 from typing import AnyStr, IO, Optional, Union
 
@@ -85,26 +86,17 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
 
-def _lock_file(fd: IO[AnyStr]) -> bool:
+@contextmanager
+def lock_file(file_descriptor: IO[AnyStr]):
     try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
+        fcntl.flock(file_descriptor, fcntl.LOCK_EX)
     except OSError as e:
         logger.error("Couldn't acquire lock for file {}: {}".format(fd.name, e))
-        return False
-    else:
-        logger.debug("Lock successfully acquired for file {}".format(fd.name))
-        return True
-
-
-def _unlock_file(fd: IO[AnyStr]) -> bool:
-    try:
+        raise e
+    try
+        yield
+    finally:
         fcntl.flock(fd, fcntl.LOCK_UN)
-    except OSError as e:
-        logger.error("Couldn't free lock for file {}: {}".format(fd.name, e))
-        return False
-    else:
-        logger.debug("Lock successfully freed for file {}".format(fd.name))
-        return True
 
 
 class StubConnection(Connection):
@@ -168,19 +160,12 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        ok = _lock_file(self.input_file)
-        if not ok:
-            # TOFIX(LR) how to handle locking errors
-            return
-
-        lines = self.input_file.readlines()
-        if len(lines) > 0:
-            self.input_file.truncate(0)
-            self.input_file.seek(0)
-
-        ok = _unlock_file(self.input_file)
-        # TOFIX(LR) how to handle locking errors
-
+        with lock_file(self.input_file):
+            lines = self.input_file.readlines()
+            if len(lines) > 0:
+                self.input_file.truncate(0)
+                self.input_file.seek(0)
+        
         #
         if len(lines) == 0:
             return
@@ -281,14 +266,10 @@ class StubConnection(Connection):
 
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
-        ok = _lock_file(self.output_file)
-        self.output_file.write(encoded_envelope)
-        self.output_file.flush()
-        ok = _unlock_file(self.output_file)
-        # TOFIX(LR) handle (un)locking errors.
-        #  should exception be propagated?
-        if not ok:
-            logger.error("while locking/unlocking file")
+        with lock_file(self.output_file):
+            self.output_file.write(encoded_envelope)
+            self.output_file.flush()
+
 
     @classmethod
     def from_config(
