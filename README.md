@@ -13,8 +13,7 @@
 A framework for autonomous economic agent (AEA) development
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/fetchai/agents-aea/master/data/aea.png>" 
-   alt="AEA Description" width="70%"/>
+  <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
 </p>
 
 ## Get started
@@ -35,7 +34,7 @@ A framework for autonomous economic agent (AEA) development
 
 <p align="center">
   <a href="https://www.youtube.com/embed/xpJA4IT5X88">
-    <img src=" https://raw.githubusercontent.com/fetchai/agents-aea/master/data/aea-video.png" alt="AEA Video" width="70%"/>
+    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
   </a>
 </p>
 

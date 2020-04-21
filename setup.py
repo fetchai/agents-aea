@@ -116,6 +116,13 @@ def parse_readme():
     with open("README.md", "r") as f:
         readme = f.read()
 
+    # replace relative links of images
+    raw_url_root = "https://raw.githubusercontent.com/fetchai/agents-aea/master"
+    replacement = '<img src="{}"'
+    readme = re.sub('(?<=<img src=")(/.*?)(?=")',
+                    replacement.format(raw_url_root + "\g<1>"),
+                    readme)
+
     header = re.search("# AEA Framework.*?(?=## )", readme, re.DOTALL).group(0)
     get_started = re.search("## Get started.*?(?=## )", readme, re.DOTALL).group(0)
     cite = re.search("## Cite.*$", readme, re.DOTALL).group(0)
