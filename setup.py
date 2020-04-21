@@ -20,9 +20,9 @@
 import importlib
 import os
 import re
-from typing import List, Dict
+from typing import Dict, List
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 PACKAGE_NAME = "aea"
 
@@ -111,8 +111,15 @@ about = {}
 with open(os.path.join(here, PACKAGE_NAME, "__version__.py"), "r") as f:
     exec(f.read(), about)
 
-with open("README.md", "r") as f:
-    readme = f.read()
+
+def parse_readme():
+    with open("README.md", "r") as f:
+        readme = f.read()
+
+    header = re.search("# AEA Framework.*?(?=## )", readme, re.DOTALL).group(0)
+    get_started = re.search("## Get started.*?(?=## )", readme, re.DOTALL).group(0)
+    cite = re.search("## Cite.*$", readme, re.DOTALL).group(0)
+    return "\n".join([header, get_started, cite])
 
 
 setup(
@@ -121,7 +128,7 @@ setup(
     version=about["__version__"],
     author=about["__author__"],
     url=about["__url__"],
-    long_description=readme,
+    long_description=parse_readme(),
     long_description_content_type="text/markdown",
     packages=find_packages(include=["aea*"]),
     classifiers=[
@@ -146,7 +153,7 @@ setup(
     install_requires=base_deps,
     tests_require=["tox"],
     extras_require=all_extras,
-    entry_points={"console_scripts": ["aea=aea.cli:cli"],},
+    entry_points={"console_scripts": ["aea=aea.cli:cli"], },
     zip_safe=False,
     include_package_data=True,
     license=about["__license__"],
