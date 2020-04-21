@@ -39,7 +39,6 @@ from aea.skills.error.handlers import ErrorHandler
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 from ..conftest import CUR_PATH, _make_dummy_connection
 
@@ -67,7 +66,6 @@ class TestSkillError:
             cls.ledger_apis,
             timeout=2.0,
             resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))),
-            is_programmatic=False,
         )
         cls.skill_context = SkillContext(cls.my_aea._context)
         logger_name = "aea.{}.skills.{}.{}".format(
@@ -137,29 +135,6 @@ class TestSkillError:
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.DECODING_ERROR
-
-    def test_error_invalid_message(self):
-        """Test the invalid message."""
-        msg = FipaMessage(
-            message_id=1,
-            dialogue_reference=(str(0), ""),
-            target=0,
-            performative=FipaMessage.Performative.ACCEPT,
-        )
-        msg_bytes = FipaSerializer().encode(msg)
-        envelope = Envelope(
-            to=self.address,
-            sender=self.address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
-        )
-
-        self.my_error_handler.send_invalid_message(envelope)
-
-        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
-        msg = DefaultSerializer().decode(envelope.message)
-        assert msg.performative == DefaultMessage.Performative.ERROR
-        assert msg.error_code == DefaultMessage.ErrorCode.INVALID_MESSAGE
 
     def test_error_unsupported_skill(self):
         """Test the unsupported skill."""

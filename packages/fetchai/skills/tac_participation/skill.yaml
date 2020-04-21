@@ -7,19 +7,20 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
-  behaviours.py: QmTBRm5rneqkYirRZcdgaWaptgPLgk4kTPd1Eb9dM9iK3W
-  game.py: QmZG7qnNqfewMBGSFEiuH8J6xaysGXBj3ZLkb2w6gD6BQo
-  handlers.py: QmbEc3J2FqD8M3gb3oJb2JD95A6TgY9huxmEpKb6HFzi55
-  search.py: Qmbsk7SszDKLScVQzn6G9aaCKVtxkWDv8hM7aWHpmjkYC7
+  behaviours.py: QmTi5FPgKu1NfFBDbacesUP9sxJq3YhVFp3i4JT8n8PdJp
+  game.py: QmYcWiECZ4MTXJiH9yrHa4ipJHYVVfERNLw39KCcxR7MfE
+  handlers.py: QmQR4vZ1gaRGiJGZDHY8tr9UxVRha8DSBT21oo1XZoJgRu
+  search.py: QmYsFDh6BY8ENi3dPiZs1DSvkrCw2wgjBQjNfJXxRQf9us
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/erc1155:0.1.0
+- fetchai/erc1155:0.2.0
 protocols:
 - fetchai/oef_search:0.1.0
 - fetchai/tac:0.1.0
 behaviours:
   tac:
-    args: {}
+    args:
+      tick_interval: 5
     class_name: TACBehaviour
 handlers:
   oef:
@@ -38,7 +39,6 @@ models:
       is_using_contract: false
     class_name: Game
   search:
-    args:
-      search_interval: 5
+    args: {}
     class_name: Search
 dependencies: {}

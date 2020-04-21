@@ -8,14 +8,14 @@ fingerprint: ''
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/oef:0.2.0
-- fetchai/stub:0.1.0
+- fetchai/stub:0.2.0
 contracts: []
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
 - fetchai/oef_search:0.1.0
 skills:
-- fetchai/error:0.1.0
+- fetchai/error:0.2.0
 - fetchai/simple_service_registration:0.1.0
 default_connection: fetchai/oef:0.2.0
 default_ledger: fetchai

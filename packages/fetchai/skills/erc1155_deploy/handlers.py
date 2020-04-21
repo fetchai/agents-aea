@@ -19,6 +19,7 @@
 
 """This package contains the handlers of the erc1155 deploy skill AEA."""
 
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -190,7 +191,7 @@ class FIPAHandler(Handler):
                 )
             )
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-            tx = contract.get_atomic_swap_single_transaction_proposal(
+            tx = contract.get_atomic_swap_single_transaction_msg(
                 from_address=self.context.agent_address,
                 to_address=msg.counterparty,
                 token_id=int(dialogue.proposal.values["token_id"]),
@@ -237,8 +238,14 @@ class TransactionHandler(Handler):
         if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -262,8 +269,14 @@ class TransactionHandler(Handler):
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -284,8 +297,14 @@ class TransactionHandler(Handler):
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -303,7 +322,7 @@ class TransactionHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-                result = contract.get_balance_of_batch(
+                result = contract.get_balances(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )
@@ -316,8 +335,14 @@ class TransactionHandler(Handler):
         ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
             tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                is_waiting_for_confirmation=True, tx_signed=tx_signed
+                tx_signed=tx_signed
             )
+            # TODO; handle case when no tx_digest returned and remove loop
+            assert tx_digest is not None, "Error when submitting tx."
+            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+                tx_digest
+            ):
+                time.sleep(3.0)
             transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
                 tx_digest=tx_digest
             )
@@ -334,7 +359,7 @@ class TransactionHandler(Handler):
                         self.context.agent_name, tx_digest
                     )
                 )
-                result = contract.get_balance_of_batch(
+                result = contract.get_balances(
                     address=self.context.agent_address,
                     token_ids=self.context.behaviours.service_registration.token_ids,
                 )

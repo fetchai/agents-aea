@@ -1,0 +1,19 @@
+name: p2p_stub
+author: fetchai
+version: 0.1.0
+description: The stub p2p connection implements a local p2p connection allowing agents
+  to communicate with each other through files created in the namespace directory.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
+  connection.py: QmSDFuRN3ehV2dVz2nNSR33gNrG8wRYXdTroHsux1uQNcU
+fingerprint_ignore_patterns: []
+protocols: []
+class_name: P2PStubConnection
+config:
+  namespace_dir: /tmp/
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  watchdog: {}
