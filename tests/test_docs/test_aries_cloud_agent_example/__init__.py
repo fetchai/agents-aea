@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,10 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-
-class AEAException(Exception):
-    """User-defined exception for the AEA framework."""
-
-
-class AEAPackageLoadingError(AEAException):
-    """Class for exceptions that are raised for loading errors of AEA packages."""
+"""This module contains the tests for the code-blocks in the aries-cloud-agent-example.md file."""

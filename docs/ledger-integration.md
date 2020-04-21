@@ -16,7 +16,7 @@ You can think the concrete implementations of the base class `LedgerApi` as wrap
 ## Abstract class LedgerApi
 
 Each `LedgerApi` must implement all the methods based on the abstract class.
-```python
+``` python
 class LedgerApi(ABC):
     """Interface for ledger APIs."""
 
@@ -34,7 +34,7 @@ class LedgerApi(ABC):
 ```
 The api property can be used for low-level operation with the concrete ledger APIs.
 
-```python
+``` python
 
     @abstractmethod
     def get_balance(self, address: Address) -> Optional[int]:
@@ -48,7 +48,7 @@ The api property can be used for low-level operation with the concrete ledger AP
         """
 ```
 The `get_balance` method returns the amount of tokens we hold for a specific address.
-```python
+``` python
 
     @abstractmethod
     def transfer(
@@ -76,7 +76,7 @@ The `get_balance` method returns the amount of tokens we hold for a specific add
 ```
 The `transfer` is where we must implement the logic for sending a transaction to the ledger. 
 
-```python
+``` python
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """
@@ -108,7 +108,7 @@ The `transfer` is where we must implement the logic for sending a transaction to
         """
 ```
 The `is_transaction_settled` and `is_transaction_valid` are two functions that helps us to verify a transaction digest.
-```python
+``` python
     @abstractmethod
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -125,7 +125,7 @@ as extra data for the transaction to be considered valid.
 Next, we are going to discuss the different implementation of `send_transaction` and `validate_transacaction` for the two natively supported ledgers of the framework.
 
 ## Fetch.ai Ledger
-```python
+``` python
 def transfer(
     self,
     crypto: Crypto,
@@ -149,7 +149,7 @@ As you can see, the implementation for sending a transcation to the Fetch.ai led
   <p>We cannot use the tx_nonce yet in the Fetch.ai ledger.</p>
 </div>
 
-```python
+``` python
 def is_transaction_settled(self, tx_digest: str) -> bool:
     """Check whether a transaction is settled or not."""
     tx_status = cast(TxStatus, self._try_get_transaction_receipt(tx_digest))
@@ -158,7 +158,7 @@ def is_transaction_settled(self, tx_digest: str) -> bool:
         is_successful = tx_status.status in SUCCESSFUL_TERMINAL_STATES
     return is_successful
 ```
-```python
+``` python
 def is_transaction_valid(
     self,
     tx_digest: str,
@@ -195,7 +195,7 @@ If both of these checks return True we consider the transaction as valid.
 
 ## Ethereum Ledger
 
-```python
+``` python
 def transfer(
     self,
     crypto: Crypto,
@@ -262,7 +262,7 @@ the transaction dictionary and send a raw transaction.
 Once we filled the transaction dictionary. We are checking that the transaction fee is more than the estimated gas for the transaction otherwise we will not be able to complete the transfer. Then we are signing and we are sending the transaction. Once we get the transaction receipt we consider the transaction completed and
 we return the transaction digest. 
 
-```python
+``` python
 def is_transaction_settled(self, tx_digest: str) -> bool:
     """
     Check whether a transaction is settled or not.
@@ -276,7 +276,7 @@ def is_transaction_settled(self, tx_digest: str) -> bool:
         is_successful = tx_receipt.status == 1
     return is_successful
 ```
-```python
+``` python
 def is_transaction_valid(
      self,
      tx_digest: str,
@@ -314,7 +314,7 @@ Lastly, the `generate_tx_nonce` function is the same for both `LedgerApi` implem
 Both use the timestamp as a random factor alongside the seller and client addresses.
 
 #### Fetch.ai implementation 
-```python
+``` python
 def generate_tx_nonce(self, seller: Address, client: Address) -> str:
     """
     Generate a random str message.
@@ -331,7 +331,7 @@ def generate_tx_nonce(self, seller: Address, client: Address) -> str:
 
 ```
 #### Ethereum implementation
-```python
+``` python
 def generate_tx_nonce(self, seller: Address, client: Address) -> str:
     """
     Generate a unique hash to distinguish txs with the same terms.

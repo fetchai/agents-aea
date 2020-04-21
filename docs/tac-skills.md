@@ -88,7 +88,6 @@ cd tac_participant_one
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
-aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -104,7 +103,6 @@ cd tac_participant_two
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
-aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -157,7 +155,6 @@ cd tac_controller_contract
 ``` bash
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/tac_control_contract:0.1.0
-aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
