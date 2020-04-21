@@ -20,7 +20,7 @@
 """Implementation of the 'aea list' subcommand."""
 
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, Tuple, cast
 
 import click
 
@@ -49,6 +49,90 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
 FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 
+def handle_dotted_path(value: str) -> Tuple:
+    """Separate the path between path to resource and json path to attribute.
+
+    Allowed values:
+        'agent.an_attribute_name'
+        'protocols.my_protocol.an_attribute_name'
+        'connections.my_connection.an_attribute_name'
+        'contracts.my_contract.an_attribute_name'
+        'skills.my_skill.an_attribute_name'
+        'vendor.author.[protocols|connections|skills].package_name.attribute_name
+
+    :param value: dotted path.
+
+    :return: Tuple[list of settings dict keys, filepath, config loader].
+    """
+    parts = value.split(".")
+
+    root = parts[0]
+    if root not in ALLOWED_PATH_ROOTS:
+        raise Exception(
+            "The root of the dotted path must be one of: {}".format(ALLOWED_PATH_ROOTS)
+        )
+
+    if (
+        len(parts) < 1
+        or parts[0] == "agent"
+        and len(parts) < 2
+        or parts[0] == "vendor"
+        and len(parts) < 5
+        or parts[0] != "agent"
+        and len(parts) < 3
+    ):
+        raise Exception(
+            "The path is too short. Please specify a path up to an attribute name."
+        )
+
+    # if the root is 'agent', stop.
+    if root == "agent":
+        resource_type_plural = "agents"
+        path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
+        json_path = parts[1:]
+    elif root == "vendor":
+        resource_author = parts[1]
+        resource_type_plural = parts[2]
+        resource_name = parts[3]
+        path_to_resource_directory = (
+            Path(".")
+            / "vendor"
+            / resource_author
+            / resource_type_plural
+            / resource_name
+        )
+        path_to_resource_configuration = (
+            path_to_resource_directory
+            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+        )
+        json_path = parts[4:]
+        if not path_to_resource_directory.exists():
+            raise Exception(
+                "Resource vendor/{}/{}/{} does not exist.".format(
+                    resource_author, resource_type_plural, resource_name
+                )
+            )
+    else:
+        # navigate the resources of the agent to reach the target configuration file.
+        resource_type_plural = root
+        resource_name = parts[1]
+        path_to_resource_directory = Path(".") / resource_type_plural / resource_name
+        path_to_resource_configuration = (
+            path_to_resource_directory
+            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+        )
+        json_path = parts[2:]
+        if not path_to_resource_directory.exists():
+            raise Exception(
+                "Resource {}/{} does not exist.".format(
+                    resource_type_plural, resource_name
+                )
+            )
+
+    config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
+    return json_path, path_to_resource_configuration, config_loader
+
+
 class AEAJsonPathType(click.ParamType):
     """This class implements the JSON-path parameter type for the AEA CLI tool."""
 
@@ -61,82 +145,24 @@ class AEAJsonPathType(click.ParamType):
             'agent.an_attribute_name'
             'protocols.my_protocol.an_attribute_name'
             'connections.my_connection.an_attribute_name'
+            'contracts.my_contract.an_attribute_name'
             'skills.my_skill.an_attribute_name'
             'vendor.author.[protocols|connections|skills].package_name.attribute_name
         """
-        parts = value.split(".")
-
-        root = parts[0]
-        if root not in ALLOWED_PATH_ROOTS:
-            self.fail(
-                "The root of the dotted path must be one of: {}".format(
-                    ALLOWED_PATH_ROOTS
-                )
-            )
-
-        if (
-            len(parts) < 1
-            or parts[0] == "agent"
-            and len(parts) < 2
-            or parts[0] == "vendor"
-            and len(parts) < 5
-            or parts[0] != "agent"
-            and len(parts) < 3
-        ):
-            self.fail(
-                "The path is too short. Please specify a path up to an attribute name."
-            )
-
-        # if the root is 'agent', stop.
-        if root == "agent":
-            resource_type_plural = "agents"
-            path_to_resource_configuration = DEFAULT_AEA_CONFIG_FILE
-            json_path = parts[1:]
-        elif root == "vendor":
-            resource_author = parts[1]
-            resource_type_plural = parts[2]
-            resource_name = parts[3]
-            path_to_resource_directory = (
-                Path(".")
-                / "vendor"
-                / resource_author
-                / resource_type_plural
-                / resource_name
-            )
-            path_to_resource_configuration = (
-                path_to_resource_directory
-                / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
-            )
-            json_path = parts[4:]
-            if not path_to_resource_directory.exists():
-                self.fail(
-                    "Resource vendor/{}/{}/{} does not exist.".format(
-                        resource_author, resource_type_plural, resource_name
-                    )
-                )
+        try:
+            (
+                json_path,
+                path_to_resource_configuration,
+                config_loader,
+            ) = handle_dotted_path(value)
+        except Exception as e:
+            self.fail(str(e))
         else:
-            # navigate the resources of the agent to reach the target configuration file.
-            resource_type_plural = root
-            resource_name = parts[1]
-            path_to_resource_directory = (
-                Path(".") / resource_type_plural / resource_name
+            ctx.obj.set_config(
+                "configuration_file_path", path_to_resource_configuration
             )
-            path_to_resource_configuration = (
-                path_to_resource_directory
-                / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
-            )
-            json_path = parts[2:]
-            if not path_to_resource_directory.exists():
-                self.fail(
-                    "Resource {}/{} does not exist.".format(
-                        resource_type_plural, resource_name
-                    )
-                )
-
-        config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
-        ctx.obj.set_config("configuration_file_path", path_to_resource_configuration)
-        ctx.obj.set_config("configuration_loader", config_loader)
-        return json_path
+            ctx.obj.set_config("configuration_loader", config_loader)
+            return json_path
 
 
 def _get_parent_object(obj: dict, dotted_path: List[str]):

@@ -51,7 +51,6 @@ class ErrorCode(Enum):
     COMPETITION_NOT_RUNNING = 8
     DIALOGUE_INCONSISTENT = 9
 
-    @property
     @staticmethod
     def to_msg(error_code: int) -> str:
         """Get the error code."""

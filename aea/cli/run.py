@@ -34,6 +34,7 @@ from aea.cli.common import (
 )
 from aea.cli.install import install
 from aea.configurations.base import PublicId
+from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
 
 AEA_DIR = str(Path("."))
@@ -64,6 +65,10 @@ def _build_aea(
         )
         aea = builder.build(connection_ids=connection_ids)
         return aea
+    except AEAPackageLoadingError as e:
+        logger.exception(e)
+        # TODO convert to raise ClickException
+        sys.exit(1)
     except Exception as e:
         # TODO use an ad-hoc exception class for predictable errors
         #      all the other exceptions should be logged with logger.exception

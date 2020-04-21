@@ -131,7 +131,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 )
             )
             goods_supplied_description = strategy.get_own_service_description(
-                is_supply=True
+                is_supply=True, is_search_description=False,
             )
             registration.registered_goods_supplied_description = (
                 goods_supplied_description
@@ -155,7 +155,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 )
             )
             goods_demanded_description = strategy.get_own_service_description(
-                is_supply=False
+                is_supply=False, is_search_description=False,
             )
             registration.registered_goods_demanded_description = (
                 goods_demanded_description
@@ -187,7 +187,9 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         search = cast(Search, self.context.search)
 
         if strategy.is_searching_for_sellers:
-            query = strategy.get_own_services_query(is_searching_for_sellers=True)
+            query = strategy.get_own_services_query(
+                is_searching_for_sellers=True, is_search_query=True
+            )
             if query is None:
                 self.context.logger.warning(
                     "[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(
@@ -215,7 +217,9 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 )
 
         if strategy.is_searching_for_buyers:
-            query = strategy.get_own_services_query(is_searching_for_sellers=False)
+            query = strategy.get_own_services_query(
+                is_searching_for_sellers=False, is_search_query=True
+            )
             if query is None:
                 self.context.logger.warning(
                     "[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(

@@ -164,9 +164,9 @@ def test_run_with_default_connection(pytestconfig):
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
-        ["fetchai/local:0.1.0,fetchai/stub:0.1.0"],
-        ["'fetchai/local:0.1.0, fetchai/stub:0.1.0'"],
-        ["fetchai/local:0.1.0,,fetchai/stub:0.1.0,"],
+        ["fetchai/local:0.1.0,{}".format(str(DEFAULT_CONNECTION))],
+        ["'fetchai/local:0.1.0, {}'".format(str(DEFAULT_CONNECTION))],
+        ["fetchai/local:0.1.0,,{},".format(str(DEFAULT_CONNECTION))],
     ],
 )
 def test_run_multiple_connections(pytestconfig, connection_ids):

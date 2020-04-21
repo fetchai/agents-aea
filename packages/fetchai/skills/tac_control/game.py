@@ -41,11 +41,12 @@ from aea.skills.base import Model
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.helpers import (
     determine_scaling_factor,
+    generate_currency_endowments,
     generate_currency_id_to_name,
     generate_equilibrium_prices_and_holdings,
+    generate_exchange_params,
     generate_good_endowments,
     generate_good_id_to_name,
-    generate_money_endowments,
     generate_utility_params,
     tx_hash_from_values,
 )
@@ -53,17 +54,16 @@ from packages.fetchai.skills.tac_control.parameters import Parameters
 
 GoodId = str
 CurrencyId = str
-Amount = int
 Quantity = int
 EquilibriumQuantity = float
 Parameter = float
 TransactionId = str
-Endowment = Dict[GoodId, Quantity]
+CurrencyEndowment = Dict[CurrencyId, Quantity]
+ExchangeParams = Dict[CurrencyId, Parameter]
+GoodEndowment = Dict[GoodId, Quantity]
 UtilityParams = Dict[GoodId, Parameter]
-EquilibriumHoldings = Dict[GoodId, EquilibriumQuantity]
-
-DEFAULT_CURRENCY = "FET"
-DEFAULT_CURRENCY_EXCHANGE_RATE = 1.0
+EquilibriumCurrencyHoldings = Dict[CurrencyId, EquilibriumQuantity]
+EquilibriumGoodHoldings = Dict[GoodId, EquilibriumQuantity]
 
 
 class Phase(Enum):
@@ -99,7 +99,6 @@ class Configuration:
         self._agent_addr_to_name = agent_addr_to_name
         self._currency_id_to_name = generate_currency_id_to_name()
         self._good_id_to_name = generate_good_id_to_name(nb_goods)
-
         self._check_consistency()
 
     @property
@@ -136,8 +135,9 @@ class Configuration:
         """
         assert self.version_id is not None, "A version id must be set."
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
-        assert len(self.agent_addr_to_name) > 1, "Must have at least two agents."
-        assert len(self.agent_addr_to_name) > 1, "Must have at least two goods."
+        assert len(self.agent_addr_to_name) >= 2, "Must have at least two agents."
+        assert len(self.good_id_to_name) >= 2, "Must have at least two goods."
+        assert len(self.currency_id_to_name) == 1, "Must have exactly one currency."
 
 
 class Initialization:
@@ -145,51 +145,54 @@ class Initialization:
 
     def __init__(
         self,
-        agent_addr_to_initial_money_amounts: Dict[Address, Amount],
-        agent_addr_to_endowments: Dict[Address, Endowment],
+        agent_addr_to_currency_endowments: Dict[Address, CurrencyEndowment],
+        agent_addr_to_exchange_params: Dict[Address, ExchangeParams],
+        agent_addr_to_good_endowments: Dict[Address, GoodEndowment],
         agent_addr_to_utility_params: Dict[Address, UtilityParams],
         good_id_to_eq_prices: Dict[GoodId, float],
-        agent_addr_to_eq_good_holdings: Dict[Address, EquilibriumHoldings],
-        agent_addr_to_eq_money_holdings: Dict[Address, float],
+        agent_addr_to_eq_good_holdings: Dict[Address, EquilibriumGoodHoldings],
+        agent_addr_to_eq_currency_holdings: Dict[Address, EquilibriumCurrencyHoldings],
     ):
         """
         Instantiate a game initialization.
 
-        :param agent_addr_to_initial_money_amounts: the initial amount of money of every agent.
-        :param agent_addr_to_endowments: the endowments of the agents. A matrix where the first index is the agent id
-                            and the second index is the good id. A generic element e_ij at row i and column j is
-                            an integer that denotes the endowment of good j for agent i.
-        :param agent_addr_to_utility_params: the utility params representing the preferences of the agents. A matrix where the first
-                            index is the agent id and the second index is the good id. A generic element e_ij
-                            at row i and column j is an integer that denotes the utility of good j for agent i.
+        :param agent_addr_to_currency_endowments: the currency endowments of the agents. A nested dict where the outer key is the agent id
+                            and the inner key is the currency id.
+        :param agent_addr_to_exchange_params: the exchange params representing the exchange rate the agetns use between currencies.
+        :param agent_addr_to_good_endowments: the good endowments of the agents. A nested dict where the outer key is the agent id
+                            and the inner key is the good id.
+        :param agent_addr_to_utility_params: the utility params representing the preferences of the agents.
         :param good_id_to_eq_prices: the competitive equilibrium prices of the goods. A list.
-        :param agent_addr_to_eq_good_holdings: the competitive equilibrium good holdings of the agents. A matrix where the first index is the agent id
-                            and the second index is the good id. A generic element g_ij at row i and column j is
-                            a float that denotes the (divisible) amount of good j for agent i.
-        :param agent_addr_to_eq_money_holdings: the competitive equilibrium money holdings of the agents. A list.
+        :param agent_addr_to_eq_good_holdings: the competitive equilibrium good holdings of the agents.
+        :param agent_addr_to_eq_currency_holdings: the competitive equilibrium money holdings of the agents.
         """
-        self._agent_addr_to_initial_money_amounts = agent_addr_to_initial_money_amounts
-        self._agent_addr_to_endowments = agent_addr_to_endowments
+        self._agent_addr_to_currency_endowments = agent_addr_to_currency_endowments
+        self._agent_addr_to_exchange_params = agent_addr_to_exchange_params
+        self._agent_addr_to_good_endowments = agent_addr_to_good_endowments
         self._agent_addr_to_utility_params = agent_addr_to_utility_params
         self._good_id_to_eq_prices = good_id_to_eq_prices
         self._agent_addr_to_eq_good_holdings = agent_addr_to_eq_good_holdings
-        self._agent_addr_to_eq_money_holdings = agent_addr_to_eq_money_holdings
-
+        self._agent_addr_to_eq_currency_holdings = agent_addr_to_eq_currency_holdings
         self._check_consistency()
 
     @property
-    def agent_addr_to_initial_money_amounts(self) -> Dict[Address, Amount]:
-        """Get list of the initial amount of money of every agent."""
-        return self._agent_addr_to_initial_money_amounts
+    def agent_addr_to_currency_endowments(self) -> Dict[Address, CurrencyEndowment]:
+        """Get currency endowments of agents."""
+        return self._agent_addr_to_currency_endowments
 
     @property
-    def agent_addr_to_endowments(self) -> Dict[Address, Endowment]:
-        """Get endowments of the agents."""
-        return self._agent_addr_to_endowments
+    def agent_addr_to_exchange_params(self) -> Dict[Address, ExchangeParams]:
+        """Get exchange params of agents."""
+        return self._agent_addr_to_exchange_params
+
+    @property
+    def agent_addr_to_good_endowments(self) -> Dict[Address, GoodEndowment]:
+        """Get good endowments of the agents."""
+        return self._agent_addr_to_good_endowments
 
     @property
     def agent_addr_to_utility_params(self) -> Dict[Address, UtilityParams]:
-        """Get utility parameter list of the agents."""
+        """Get utility parameters of agents."""
         return self._agent_addr_to_utility_params
 
     @property
@@ -198,14 +201,16 @@ class Initialization:
         return self._good_id_to_eq_prices
 
     @property
-    def agent_addr_to_eq_good_holdings(self) -> Dict[Address, EquilibriumHoldings]:
+    def agent_addr_to_eq_good_holdings(self) -> Dict[Address, EquilibriumGoodHoldings]:
         """Get theoretical equilibrium good holdings (a benchmark)."""
         return self._agent_addr_to_eq_good_holdings
 
     @property
-    def agent_addr_to_eq_money_holdings(self) -> Dict[Address, float]:
-        """Get theoretical equilibrium money holdings (a benchmark)."""
-        return self._agent_addr_to_eq_money_holdings
+    def agent_addr_to_eq_currency_holdings(
+        self,
+    ) -> Dict[Address, EquilibriumCurrencyHoldings]:
+        """Get theoretical equilibrium currency holdings (a benchmark)."""
+        return self._agent_addr_to_eq_currency_holdings
 
     def _check_consistency(self):
         """
@@ -215,39 +220,46 @@ class Initialization:
         :raises: AssertionError: if some constraint is not satisfied.
         """
         assert all(
-            initial_money_amount >= 0
-            for initial_money_amount in self.agent_addr_to_initial_money_amounts.values()
-        ), "Initial money amount must be non-negative."
+            c_e >= 0
+            for currency_endowments in self.agent_addr_to_currency_endowments.values()
+            for c_e in currency_endowments.values()
+        ), "Currency endowments must be non-negative."
         assert all(
-            e > 0
-            for endowments in self.agent_addr_to_endowments.values()
-            for e in endowments.values()
-        ), "Endowments must be strictly positive."
+            p > 0
+            for params in self.agent_addr_to_exchange_params.values()
+            for p in params.values()
+        ), "ExchangeParams must be strictly positive."
+        assert all(
+            g_e > 0
+            for good_endowments in self.agent_addr_to_good_endowments.values()
+            for g_e in good_endowments.values()
+        ), "Good endowments must be strictly positive."
         assert all(
             p > 0
             for params in self.agent_addr_to_utility_params.values()
             for p in params.values()
         ), "UtilityParams must be strictly positive."
-
-        assert len(self.agent_addr_to_endowments.values()) == len(
-            self.agent_addr_to_initial_money_amounts.values()
-        ), "Length of endowments and initial_money_amounts must be the same."
-        assert len(self.agent_addr_to_endowments.values()) == len(
-            self.agent_addr_to_utility_params.values()
-        ), "Length of endowments and utility_params must be the same."
-
+        assert len(self.agent_addr_to_good_endowments.keys()) == len(
+            self.agent_addr_to_currency_endowments.keys()
+        ), "Length of endowments must be the same."
+        assert len(self.agent_addr_to_exchange_params.keys()) == len(
+            self.agent_addr_to_utility_params.keys()
+        ), "Length of params must be the same."
         assert all(
             len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings)
             for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()
         ), "Length of eq_prices and an element of eq_good_holdings must be the same."
         assert len(self.agent_addr_to_eq_good_holdings.values()) == len(
-            self.agent_addr_to_eq_money_holdings.values()
-        ), "Length of eq_good_holdings and eq_money_holdings must be the same."
-
+            self.agent_addr_to_eq_currency_holdings.values()
+        ), "Length of eq_good_holdings and eq_currency_holdings must be the same."
+        assert all(
+            len(self.agent_addr_to_exchange_params[agent_addr]) == len(endowments)
+            for agent_addr, endowments in self.agent_addr_to_currency_endowments.items()
+        ), "Dimensions for exchange_params and currency_endowments rows must be the same."
         assert all(
             len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments)
-            for agent_addr, endowments in self.agent_addr_to_endowments.items()
-        ), "Dimensions for utility_params and endowments rows must be the same."
+            for agent_addr, endowments in self.agent_addr_to_good_endowments.items()
+        ), "Dimensions for utility_params and good_endowments rows must be the same."
 
 
 class Transaction:
@@ -309,7 +321,7 @@ class Transaction:
         return self._counterparty_addr
 
     @property
-    def amount_by_currency_id(self) -> Dict[CurrencyId, Amount]:
+    def amount_by_currency_id(self) -> Dict[CurrencyId, Quantity]:
         """Get the amount for each currency."""
         return copy.copy(self._amount_by_currency_id)
 
@@ -503,7 +515,7 @@ class AgentState:
     def __init__(
         self,
         agent_address: Address,
-        amount_by_currency_id: Dict[CurrencyId, Amount],
+        amount_by_currency_id: Dict[CurrencyId, Quantity],
         exchange_params_by_currency_id: Dict[CurrencyId, Parameter],
         quantities_by_good_id: Dict[GoodId, Quantity],
         utility_params_by_good_id: Dict[GoodId, Parameter],
@@ -535,7 +547,7 @@ class AgentState:
         return self._agent_address
 
     @property
-    def amount_by_currency_id(self) -> Dict[CurrencyId, Amount]:
+    def amount_by_currency_id(self) -> Dict[CurrencyId, Quantity]:
         """Get the amount for each currency."""
         return copy.copy(self._amount_by_currency_id)
 
@@ -570,18 +582,6 @@ class AgentState:
         )
         score = goods_score + money_score
         return score
-
-    # def get_score_diff_from_transaction(self, tx: Transaction) -> float:
-    #     """
-    #     Simulate a transaction and get the resulting score (taking into account the fee).
-
-    #     :param tx: a transaction object.
-    #     :return: the score.
-    #     """
-    #     current_score = self.get_score()
-    #     new_state = self.apply([tx])
-    #     new_score = new_state.get_score()
-    #     return new_score - current_score
 
     def is_consistent_transaction(self, tx: Transaction) -> bool:
         """
@@ -867,9 +867,18 @@ class Game(Model):
         )
 
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
-        agent_addr_to_money_endowments = generate_money_endowments(
-            list(self.conf.agent_addr_to_name.keys()), parameters.money_endowment,
+
+        agent_addr_to_currency_endowments = generate_currency_endowments(
+            list(self.conf.agent_addr_to_name.keys()),
+            list(self.conf.currency_id_to_name.keys()),
+            parameters.money_endowment,
         )
+
+        agent_addr_to_exchange_params = generate_exchange_params(
+            list(self.conf.agent_addr_to_name.keys()),
+            list(self.conf.currency_id_to_name.keys()),
+        )
+
         agent_addr_to_good_endowments = generate_good_endowments(
             list(self.conf.agent_addr_to_name.keys()),
             list(self.conf.good_id_to_name.keys()),
@@ -877,28 +886,33 @@ class Game(Model):
             parameters.lower_bound_factor,
             parameters.upper_bound_factor,
         )
+
         agent_addr_to_utility_params = generate_utility_params(
             list(self.conf.agent_addr_to_name.keys()),
             list(self.conf.good_id_to_name.keys()),
             scaling_factor,
         )
+
         (
             good_id_to_eq_prices,
             agent_addr_to_eq_good_holdings,
-            agent_addr_to_eq_money_holdings,
+            agent_addr_to_eq_currency_holdings,
         ) = generate_equilibrium_prices_and_holdings(
             agent_addr_to_good_endowments,
             agent_addr_to_utility_params,
-            agent_addr_to_money_endowments,
+            agent_addr_to_currency_endowments,
+            agent_addr_to_exchange_params,
             scaling_factor,
         )
+
         self._initialization = Initialization(
-            agent_addr_to_money_endowments,
+            agent_addr_to_currency_endowments,
+            agent_addr_to_exchange_params,
             agent_addr_to_good_endowments,
             agent_addr_to_utility_params,
             good_id_to_eq_prices,
             agent_addr_to_eq_good_holdings,
-            agent_addr_to_eq_money_holdings,
+            agent_addr_to_eq_currency_holdings,
         )
 
         self._initial_agent_states = dict(
@@ -906,13 +920,9 @@ class Game(Model):
                 agent_addr,
                 AgentState(
                     agent_addr,
-                    {
-                        DEFAULT_CURRENCY: self.initialization.agent_addr_to_initial_money_amounts[
-                            agent_addr
-                        ]
-                    },
-                    {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
-                    self.initialization.agent_addr_to_endowments[agent_addr],
+                    self.initialization.agent_addr_to_currency_endowments[agent_addr],
+                    self.initialization.agent_addr_to_exchange_params[agent_addr],
+                    self.initialization.agent_addr_to_good_endowments[agent_addr],
                     self.initialization.agent_addr_to_utility_params[agent_addr],
                 ),
             )
@@ -924,13 +934,9 @@ class Game(Model):
                 agent_addr,
                 AgentState(
                     agent_addr,
-                    {
-                        DEFAULT_CURRENCY: self.initialization.agent_addr_to_initial_money_amounts[
-                            agent_addr
-                        ]
-                    },
-                    {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
-                    self.initialization.agent_addr_to_endowments[agent_addr],
+                    self.initialization.agent_addr_to_currency_endowments[agent_addr],
+                    self.initialization.agent_addr_to_exchange_params[agent_addr],
+                    self.initialization.agent_addr_to_good_endowments[agent_addr],
                     self.initialization.agent_addr_to_utility_params[agent_addr],
                 ),
             )
@@ -946,9 +952,21 @@ class Game(Model):
                 result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":" + "\n"
             )
             for good_id, quantity in agent_state.quantities_by_good_id.items():
-                result += "    " + good_id + ": " + str(quantity) + "\n"
+                result += (
+                    "    "
+                    + self.conf.good_id_to_name[good_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
             for currency_id, amount in agent_state.amount_by_currency_id.items():
-                result += "    " + currency_id + ": " + str(amount) + "\n"
+                result += (
+                    "    "
+                    + self.conf.currency_id_to_name[currency_id]
+                    + ": "
+                    + str(amount)
+                    + "\n"
+                )
             result += "    score: " + str(round(agent_state.get_score(), 2)) + "\n"
         result = result + "\n"
         return result
@@ -958,7 +976,9 @@ class Game(Model):
         """Get equilibrium summary."""
         result = "\n" + "Equilibrium prices: \n"
         for good_id, eq_price in self.initialization.good_id_to_eq_prices.items():
-            result = result + good_id + " " + str(eq_price) + "\n"
+            result = (
+                result + self.conf.good_id_to_name[good_id] + " " + str(eq_price) + "\n"
+            )
         result = result + "\n"
         result = result + "Equilibrium good allocation: \n"
         for (
@@ -967,13 +987,20 @@ class Game(Model):
         ) in self.initialization.agent_addr_to_eq_good_holdings.items():
             result = result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":\n"
             for good_id, quantity in eq_allocations.items():
-                result = result + "    " + good_id + ": " + str(quantity) + "\n"
+                result = (
+                    result
+                    + "    "
+                    + self.conf.good_id_to_name[good_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
         result = result + "\n"
         result = result + "Equilibrium money allocation: \n"
         for (
             agent_addr,
             eq_allocation,
-        ) in self.initialization.agent_addr_to_eq_money_holdings.items():
+        ) in self.initialization.agent_addr_to_eq_currency_holdings.items():
             result = (
                 result
                 + self.conf.agent_addr_to_name[agent_addr]

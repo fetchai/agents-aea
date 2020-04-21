@@ -20,251 +20,65 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import shutil
 import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
 
-import pytest
-
-from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
-
-from ...conftest import AUTHOR, CLI_LOG_OPTION
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
-class TestWeatherSkills:
+class TestWeatherSkills(AEAWithOefTestCase):
     """Test that weather skills work."""
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name_one = "my_weather_station"
-        cls.agent_name_two = "my_weather_client"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
+    @skip_test_ci
     def test_weather(self, pytestconfig):
         """Run the weather skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
+        self.initialize_aea()
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
+
+        # prepare agent one (weather station)
+        weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
+        os.chdir(weather_station_aea_dir_path)
+
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/weather_station:0.1.0")
+
+        dotted_path = "vendor.{}.skills.weather_station.models.strategy.args.is_ledger_tx".format(
+            FETCHAI_NAME
         )
-        assert result.exit_code == 0
+        self.set_config(dotted_path, False)
+        self.run_install()
 
-        # create agent one and agent two
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
-            standalone_mode=False,
+        # prepare agent two (weather client)
+        weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
+        os.chdir(weather_client_aea_dir_path)
+
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/weather_client:0.1.0")
+
+        dotted_path = "vendor.{}.skills.weather_client.models.strategy.args.is_ledger_tx".format(
+            FETCHAI_NAME
         )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        self.set_config(dotted_path, False)
+        self.run_install()
 
-        # add packages for agent one and run it
-        agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
-        os.chdir(agent_one_dir_path)
+        # run agents
+        os.chdir(weather_station_aea_dir_path)
+        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        os.chdir(weather_client_aea_dir_path)
+        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        # TODO increase timeout so we are sure they work until the end of negotiation.
+        time.sleep(5.0)
+        process_one.send_signal(signal.SIGINT)
+        process_one.wait(timeout=10)
+        process_two.send_signal(signal.SIGINT)
+        process_two.wait(timeout=10)
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/weather_station:0.1.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Load the agent yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "weather_station", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.t)
-
-        # add packages for agent two and run it
-        agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
-        os.chdir(agent_two_dir_path)
-
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/weather_client:0.1.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Load the agent yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "weather_client", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("is_ledger_tx: true", "is_ledger_tx: false")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        try:
-            os.chdir(agent_one_dir_path)
-            process_one = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-            os.chdir(agent_two_dir_path)
-            process_two = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            # TODO increase timeout so we are sure they work until the end of negotiation.
-            time.sleep(5.0)
-            process_one.send_signal(signal.SIGINT)
-            process_one.wait(timeout=10)
-            process_two.send_signal(signal.SIGINT)
-            process_two.wait(timeout=10)
-
-            assert process_one.returncode == 0
-            assert process_two.returncode == 0
-        finally:
-            poll_one = process_one.poll()
-            if poll_one is None:
-                process_one.terminate()
-                process_one.wait(2)
-
-            poll_two = process_two.poll()
-            if poll_two is None:
-                process_two.terminate()
-                process_two.wait(2)
-
-        os.chdir(self.t)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        assert process_one.returncode == 0
+        assert process_two.returncode == 0

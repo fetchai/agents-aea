@@ -145,7 +145,7 @@ recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 
 ## Run the AEA
 
-Run the AEA with the default `stub` connection.
+Run the AEA with the default `fetchai/stub:0.2.0` connection.
 
 ``` bash
 aea run
@@ -154,7 +154,7 @@ aea run
 or 
 
 ``` bash
-aea run --connections fetchai/stub:0.1.0
+aea run --connections fetchai/stub:0.2.0
 ```
 
 You will see the echo skill running in the terminal window.
@@ -246,7 +246,7 @@ cd my_first_aea
 <b>Add the echo skill</b> 		
 <br>    
 Second, add the echo skill to the project.		
-```bash
+``` bash
 aea add skill fetchai/echo:0.1.0		
 ```		
 This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		

@@ -56,9 +56,6 @@ UtilityParams = Dict[GoodId, Parameter]
 EquilibriumCurrencyHoldings = Dict[CurrencyId, EquilibriumQuantity]
 EquilibriumGoodHoldings = Dict[GoodId, EquilibriumQuantity]
 
-DEFAULT_CURRENCY = "FET"
-DEFAULT_CURRENCY_EXCHANGE_RATE = 1.0
-
 
 class Phase(Enum):
     """This class defines the phases of the game."""
@@ -1007,9 +1004,21 @@ class Game(Model):
                 result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":" + "\n"
             )
             for good_id, quantity in agent_state.quantities_by_good_id.items():
-                result += "    " + good_id + ": " + str(quantity) + "\n"
+                result += (
+                    "    "
+                    + self.conf.good_id_to_name[good_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
             for currency_id, amount in agent_state.amount_by_currency_id.items():
-                result += "    " + currency_id + ": " + str(amount) + "\n"
+                result += (
+                    "    "
+                    + self.conf.currency_id_to_name[currency_id]
+                    + ": "
+                    + str(amount)
+                    + "\n"
+                )
             result += "    score: " + str(round(agent_state.get_score(), 2)) + "\n"
         result = result + "\n"
         return result
@@ -1019,7 +1028,9 @@ class Game(Model):
         """Get equilibrium summary."""
         result = "\n" + "Equilibrium prices: \n"
         for good_id, eq_price in self.initialization.good_id_to_eq_prices.items():
-            result = result + good_id + " " + str(eq_price) + "\n"
+            result = (
+                result + self.conf.good_id_to_name[good_id] + " " + str(eq_price) + "\n"
+            )
         result = result + "\n"
         result = result + "Equilibrium good allocation: \n"
         for (
@@ -1028,7 +1039,14 @@ class Game(Model):
         ) in self.initialization.agent_addr_to_eq_good_holdings.items():
             result = result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":\n"
             for good_id, quantity in eq_allocations.items():
-                result = result + "    " + good_id + ": " + str(quantity) + "\n"
+                result = (
+                    result
+                    + "    "
+                    + self.conf.good_id_to_name[good_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
         result = result + "\n"
         result = result + "Equilibrium money allocation: \n"
         for (
