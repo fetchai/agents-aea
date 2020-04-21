@@ -378,6 +378,21 @@ class ConstraintType:
         """
         Check if the constraint type is valid wrt a given attribute.
 
+        A constraint type is valid wrt an attribute if the
+        type of its operand(s) is the same of the attribute type.
+
+        >>> attribute = Attribute("year", int, True)
+        >>> valid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, 2000)
+        >>> valid_constraint_type.is_valid(attribute)
+        True
+
+        The following constraint is invalid: the year is in a string variable,
+        whereas the attribute is defined over integers.
+
+        >>> invalid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, "2000")
+        >>> invalid_constraint_type.is_valid(attribute)
+        False
+
         :param attribute: the data model used to check the validity of the constraint type.
         :return: ``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
         """
