@@ -75,7 +75,7 @@ The `fetchai/oef_search:0.1.0` protocol is used by AEAs to interact with an [OEF
 
 The `fetchai/oef_search:0.1.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
-```python
+``` python
 class Performative(Enum):
 
     """Performatives for the oef_search protocol."""
@@ -97,7 +97,7 @@ We show some example messages below:
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
 and a description of the service we would like to register, for instance
-```python
+``` python
 my_service_data = {"country": "UK", "city": "Cambridge"}
 my_service_description = Description(
     my_service_data,
@@ -183,7 +183,7 @@ oef_msg = OefSearchMessage(
 * The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.1.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
-```python
+``` python
 class OefErrorOperation(Enum):
 
     """This class represents an instance of OefErrorOperation."""
@@ -199,7 +199,7 @@ class OefErrorOperation(Enum):
 
 The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the following performatives:
 
-```python
+``` python
 class Performative(Enum):
     """Performatives for the fipa protocol."""
 
@@ -219,7 +219,7 @@ class Performative(Enum):
 
 `FipaMessages` are constructed with a `performative`, `dialogue_reference`, `message_id`, and `target` as well as the `kwargs` specific to each message performative.
 
-```python
+``` python
 def __init__(
     self,
     performative: Performative,

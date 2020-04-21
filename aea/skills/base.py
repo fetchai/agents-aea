@@ -643,12 +643,19 @@ class Skill(Component):
         assert (
             configuration.directory is not None
         ), "Configuration must be associated with a directory."
+
+        # we put the initialization here because some skill components
+        # might need some info from the skill
+        # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
+        skill_context = SkillContext() if skill_context is None else skill_context
+        skill = Skill(configuration, skill_context)
+        skill_context._skill = skill
+
         directory = configuration.directory
         package_modules = load_all_modules(
             directory, glob="__init__.py", prefix=configuration.prefix_import_path
         )
         add_modules_to_sys_modules(package_modules)
-        skill_context = SkillContext() if skill_context is None else skill_context
         handlers_by_id = dict(configuration.handlers.read_all())
         handlers = Handler.parse_module(
             str(directory / "handlers.py"), handlers_by_id, skill_context
@@ -664,10 +671,10 @@ class Skill(Component):
             str(directory), models_by_id, skill_context
         )
 
-        skill = Skill(
-            configuration, skill_context, handlers, behaviours, model_instances
-        )
-        skill_context._skill = skill
+        skill.handlers.update(handlers)
+        skill.behaviours.update(behaviours)
+        skill.models.update(model_instances)
+
         return skill
 
 

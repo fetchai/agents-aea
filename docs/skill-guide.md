@@ -455,7 +455,7 @@ dependencies: {}
 
 We can then launch our AEA.
 
-```bash
+``` bash
 aea run --connections fetchai/oef:0.2.0
 ```
 

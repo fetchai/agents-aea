@@ -61,13 +61,13 @@ aea add skill fetchai/generic_buyer:0.1.0
 Additionally, create the private key for the buyer AEA based on the network you want to transact.
 
 To generate and add a key for Fetch.ai use:
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
 To generate and add a key for Ethereum use:
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -153,7 +153,7 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |----------------------------------------------------------------------| 
 ```
 After changing the skill config files you should run the following command for both agents to install each dependency:
-```bash
+``` bash
 aea install
 ```
 
@@ -162,11 +162,11 @@ aea install
 Open the `strategy.py` with your IDE and modify the following.
 
 Import the newly installed library to your strategy.
-```python
+``` python
 import sqlalchemy as db
 ```
 Then modify your strategy's \_\_init__ function to match the following code:
-```python
+``` python
   def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
@@ -202,7 +202,7 @@ Then modify your strategy's \_\_init__ function to match the following code:
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 
-```python
+``` python
     def collect_from_data_source(self) -> Dict[str, Any]:
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
@@ -211,7 +211,7 @@ At the end of the file modify the `collect_from_data_source` function :
 ```
 Also, create two new functions, one that will create a connection with the database, and another one will populate the database with some fake data:
 
-```python
+``` python
     def create_database_and_table(self):
         """Creates a database and a table to store the data if not exists."""
         metadata = db.MetaData()
@@ -252,14 +252,14 @@ You can change the endpoint's address and port by modifying the connection's yam
 
 Under config locate :
 
-```bash
+``` bash
 addr: ${OEF_ADDR: 127.0.0.1}
 ```
  and replace it with your ip (The ip of the machine that runs the oef image.)
 
 Run both AEAs from their respective terminals
 
-```bash 
+``` bash 
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 aea run --connections fetchai/oef:0.2.0
@@ -268,7 +268,7 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 
 ## Delete the AEAs
 When you're done, go up a level and delete the AEAs.
-```bash 
+``` bash 
 cd ..
 aea delete my_seller_aea
 aea delete my_buyer_aea

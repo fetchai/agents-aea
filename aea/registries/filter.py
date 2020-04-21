@@ -103,7 +103,7 @@ class Filter:
         """
         behaviours = self.resources.get_all_behaviours()
         active_behaviour = list(
-            filter(lambda b: b.context.is_active and not b.is_done(), behaviours,)
+            filter(lambda b: b.context.is_active and not b.is_done(), behaviours)
         )
         return active_behaviour
 

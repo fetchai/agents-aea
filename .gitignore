@@ -112,6 +112,7 @@ pip-wheel-metadata/
 
 data/*
 !data/aea.png
+!data/video-aea.png
 temp_private_key.pem
 .idea/
 
