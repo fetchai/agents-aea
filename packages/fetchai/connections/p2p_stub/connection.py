@@ -30,8 +30,7 @@ from aea.connections.base import Connection
 from aea.connections.stub.connection import (
     StubConnection,
     _encode,
-    _lock_file,
-    _unlock_file,
+    lock_file,
 )
 from aea.mail.base import Address, Envelope
 
@@ -82,15 +81,9 @@ class P2PStubConnection(StubConnection):
         logger.debug("write to {}: {}".format(target_file, encoded_envelope))
 
         with open(target_file, "ab") as file:
-            ok = _lock_file(file)
-            file.write(encoded_envelope)
-            file.flush()
-            ok = _unlock_file(file)
-            # TOFIX(LR) handle (un)locking errors.
-            #  Functions return boolean to indicate
-            #  the success of the operation.
-            if not ok:
-                logger.error("while locking/unlocking file")
+            with lock_file(file):
+                file.write(encoded_envelope)
+                file.flush()
 
     async def disconnect(self) -> None:
         super().disconnect()
