@@ -386,6 +386,10 @@ class ConstraintType:
         >>> valid_constraint_type.is_valid(attribute)
         True
 
+        >>> valid_constraint_type = ConstraintType(ConstraintTypes.WITHIN, (2000, 2001))
+        >>> valid_constraint_type.is_valid(attribute)
+        True
+
         The following constraint is invalid: the year is in a string variable,
         whereas the attribute is defined over integers.
 
@@ -398,7 +402,7 @@ class ConstraintType:
         """
         return self.get_data_type() == attribute.type
 
-    def get_data_type(self) -> ATTRIBUTE_TYPES:
+    def get_data_type(self) -> Type[ATTRIBUTE_TYPES]:
         """
         Get the type of the data used to define the constraint type.
 
@@ -409,9 +413,11 @@ class ConstraintType:
 
         """
         if isinstance(self.value, (list, tuple, set)):
-            return type(self.value[0])
+            value = next(iter(self.value))
         else:
-            return type(self.value)
+            value = self.value
+        value = cast(ATTRIBUTE_TYPES, value)
+        return type(value)
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
