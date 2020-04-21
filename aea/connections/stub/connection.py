@@ -23,6 +23,7 @@ import asyncio
 import fcntl
 import logging
 import os
+import re
 from contextlib import contextmanager
 from pathlib import Path
 from typing import AnyStr, IO, Optional, Union
@@ -161,7 +162,7 @@ class StubConnection(Connection):
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
         with lock_file(self.input_file):
-            lines = self.input_file.readlines()
+            lines = self.input_file.read()
             if len(lines) > 0:
                 self.input_file.truncate(0)
                 self.input_file.seek(0)
@@ -170,30 +171,13 @@ class StubConnection(Connection):
         if len(lines) == 0:
             return
 
-        # split lines based on separator
-        content = b"".join(lines)
-        separator = SEPARATOR
-        splits = content.split(separator)
-
-        message = b""
-        parts = 0
-        for split in splits:
-            parts += 1
-            if parts == 5:
-                logger.debug("processing: {!r}".format(message))
-                self._process_line(message)
-                parts = 1
-                message = b""
-                if split == b"\n" or split == b"":
-                    parts = 0
-                    continue
-            message += split + separator
-            if parts == 1:
-                message = message.decode("utf-8").strip().encode("utf-8")
-
-        if 5 > parts > 0:
-            logger.debug("processing: {!r}".format(message))
-            self._process_line(message)
+        # get messages
+        # match with b"[^,]*,[^,]*,[^,]*,[^,]*,[\n]?"
+        regex = re.compile((b"[^" + SEPARATOR + b"]*" + SEPARATOR)*4 + b"[\n]?", re.DOTALL)
+        messages = [m.group(0) for m in regex.finditer(lines)]
+        for msg in messages:
+            logger.debug("processing: {!r}".format(msg))
+            self._process_line(msg)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
