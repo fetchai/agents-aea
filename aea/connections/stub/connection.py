@@ -92,12 +92,14 @@ def lock_file(file_descriptor: IO[AnyStr]):
     try:
         fcntl.flock(file_descriptor, fcntl.LOCK_EX)
     except OSError as e:
-        logger.error("Couldn't acquire lock for file {}: {}".format(fd.name, e))
+        logger.error(
+            "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
+        )
         raise e
-    try
+    try:
         yield
     finally:
-        fcntl.flock(fd, fcntl.LOCK_UN)
+        fcntl.flock(file_descriptor, fcntl.LOCK_UN)
 
 
 class StubConnection(Connection):
@@ -166,14 +168,16 @@ class StubConnection(Connection):
             if len(lines) > 0:
                 self.input_file.truncate(0)
                 self.input_file.seek(0)
-        
+
         #
         if len(lines) == 0:
             return
 
         # get messages
         # match with b"[^,]*,[^,]*,[^,]*,[^,]*,[\n]?"
-        regex = re.compile((b"[^" + SEPARATOR + b"]*" + SEPARATOR)*4 + b"[\n]?", re.DOTALL)
+        regex = re.compile(
+            (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 4 + b"[\n]?", re.DOTALL
+        )
         messages = [m.group(0) for m in regex.finditer(lines)]
         for msg in messages:
             logger.debug("processing: {!r}".format(msg))
@@ -253,7 +257,6 @@ class StubConnection(Connection):
         with lock_file(self.output_file):
             self.output_file.write(encoded_envelope)
             self.output_file.flush()
-
 
     @classmethod
     def from_config(
