@@ -151,14 +151,14 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
     # find and add protocol
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
-        package_path = _find_item_in_distribution(ctx, item_type, item_public_id)
+        source_path = _find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = _copy_package_directory(
-            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+            ctx, source_path, item_type, item_public_id.name, item_public_id.author
         )
     elif is_local:
-        package_path = _find_item_locally(ctx, item_type, item_public_id)
+        source_path = _find_item_locally(ctx, item_type, item_public_id)
         package_path = _copy_package_directory(
-            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+            ctx, source_path, item_type, item_public_id.name, item_public_id.author
         )
     else:
         package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
