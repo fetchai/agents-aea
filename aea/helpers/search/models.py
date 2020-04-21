@@ -381,28 +381,22 @@ class ConstraintType:
         :param attribute: the data model used to check the validity of the constraint type.
         :return: ``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
         """
-        if self.type == ConstraintTypes.EQUAL:
-            return True
-        elif self.type == ConstraintTypes.NOT_EQUAL:
-            return True
-        elif self.type == ConstraintTypes.LESS_THAN:
-            return True
-        elif self.type == ConstraintTypes.LESS_THAN_EQ:
-            return True
-        elif self.type == ConstraintTypes.GREATER_THAN:
-            return True
-        elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-            return True
-        elif self.type == ConstraintTypes.WITHIN:
-            return True
-        elif self.type == ConstraintTypes.IN:
-            return True
-        elif self.type == ConstraintTypes.NOT_IN:
-            return True
-        elif self.type == ConstraintTypes.DISTANCE:
-            return attribute.type == Location
+        return self.get_data_type() == attribute.type
+
+    def get_data_type(self) -> ATTRIBUTE_TYPES:
+        """
+        Get the type of the data used to define the constraint type.
+
+        For instance:
+        >>> c = ConstraintType(ConstraintTypes.EQUAL, 1)
+        >>> c.get_data_type()
+        <class 'int'>
+
+        """
+        if isinstance(self.value, (list, tuple, set)):
+            return type(self.value[0])
         else:
-            raise ValueError("Constraint type not recognized.")
+            return type(self.value)
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
