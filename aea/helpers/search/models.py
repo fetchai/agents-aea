@@ -113,7 +113,9 @@ class DataModel:
         :param attributes:  the attributes of the data model.
         """
         self.name: str = name
-        self.attributes: List[Attribute] = sorted(attributes, key=lambda x: x.name)
+        self.attributes = sorted(
+            attributes, key=lambda x: x.name
+        )  # type: List[Attribute]
         self._check_validity()
         self.attributes_by_name = {a.name: a for a in attributes}
         self.description = description

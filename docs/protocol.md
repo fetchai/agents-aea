@@ -27,6 +27,8 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 The `fetchai/default:0.1.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
+from enum import Enum
+
 class Performative(Enum):
     """Performatives for the default protocol."""
 
@@ -40,6 +42,8 @@ class Performative(Enum):
 
 * The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
 ``` python
+from aea.protocols.default.message import DefaultMessage
+
 msg = DefaultMessage(
     performative=DefaultMessage.Performative.BYTES,
     content=b"This is a bytes payload",
@@ -97,7 +101,9 @@ We show some example messages below:
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
 and a description of the service we would like to register, for instance
-``` python
+```python
+from aea.helpers.search.models import Description
+
 my_service_data = {"country": "UK", "city": "Cambridge"}
 my_service_description = Description(
     my_service_data,
@@ -105,7 +111,7 @@ my_service_description = Description(
 )
 ```
 where we use, for instance
-``` python
+```python
 from aea.helpers.search.generic import GenericDataModel
 
 data_model_name = "location"
@@ -113,12 +119,12 @@ data_model = {
     "attribute_one": {
         "name": "country",
         "type": "str",
-        "is_required": "True",
+        "is_required": True,
     },
     "attribute_two": {
         "name": "city",
         "type": "str",
-        "is_required": "True",
+        "is_required": True,
     },
 }
 my_data_model = GenericDataModel(data_model_name, data_model)

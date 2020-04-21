@@ -25,7 +25,8 @@ import mistune
 from aea.skills.behaviours import OneShotBehaviour
 from aea.skills.tasks import Task
 
-from ...conftest import ROOT_DIR
+from ..conftest import ROOT_DIR
+from ..test_docs.helper import compile_and_exec
 
 
 class TestSkillDocs:
@@ -54,7 +55,8 @@ class TestSkillDocs:
     def test_hello_world_behaviour(self):
         """Test the code in the 'behaviours.py' section."""
         # here, we test the definition of a custom class
-        block = self.code_blocks[1]
+        offset = 1
+        block = self.code_blocks[offset]
         text = block["text"]
 
         # check that the code can be executed
@@ -68,11 +70,11 @@ class TestSkillDocs:
 
         # here, we test the code example for adding the new custom behaviour to the list
         # of new behaviours
-        block = self.code_blocks[2]
+        block = self.code_blocks[offset + 1]
         text = block["text"]
         assert text.strip() == "self.context.new_behaviours.put(HelloWorldBehaviour())"
 
-        block = self.code_blocks[3]
+        block = self.code_blocks[offset + 2]
         assert (
             block["text"] == "def hello():\n"
             '    print("Hello, World!")\n'
@@ -82,13 +84,10 @@ class TestSkillDocs:
 
     def test_task(self):
         """Test the code blocks of the 'tasks.py' section."""
-
         # test code of task definition
-        block = self.code_blocks[4]
-        # check that the code can be executed
-        code_obj = compile(block["text"], "fakemodule", "exec")
-        locals_dict = {}
-        exec(code_obj, globals(), locals_dict)  # nosec
+        offset = 4
+        block = self.code_blocks[offset]
+        locals_dict = compile_and_exec(block["text"])
 
         nth_prime_number = locals_dict["nth_prime_number"]
         assert nth_prime_number(1) == 2
