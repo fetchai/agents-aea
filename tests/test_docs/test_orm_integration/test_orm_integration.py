@@ -23,7 +23,7 @@ import os
 import re
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time

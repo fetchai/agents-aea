@@ -169,7 +169,7 @@ class Strategy(Model):
         connection = self._db_engine.connect()
         self.context.logger.info("Populating the database...")
         for _ in range(10):
-            query = db.insert(self._tbl).values(
+            query = db.insert(self._tbl).values(  # nosec
                 timestamp=time.time(), temprature=str(random.randrange(10, 25))
             )
             connection.execute(query)
