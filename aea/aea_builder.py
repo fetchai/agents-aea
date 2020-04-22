@@ -46,6 +46,11 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.components import Component
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
@@ -234,7 +239,7 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = PublicId("fetchai", "stub", "0.1.0")
+        self._default_connection = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
@@ -245,11 +250,11 @@ class AEABuilder:
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
-        self.add_protocol(Path(AEA_DIR, "protocols", "default"))
+        self.add_protocol(Path(AEA_DIR, "protocols", DEFAULT_PROTOCOL.name))
         # add stub connection
-        self.add_connection(Path(AEA_DIR, "connections", "stub"))
+        self.add_connection(Path(AEA_DIR, "connections", DEFAULT_CONNECTION.name))
         # add error skill
-        self.add_skill(Path(AEA_DIR, "skills", "error"))
+        self.add_skill(Path(AEA_DIR, "skills", DEFAULT_SKILL.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """

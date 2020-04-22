@@ -17,16 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Module to declare constants."""
-
-from pathlib import Path
-
-from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FETCHAI
-
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.2.0")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.1.0")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.2.0")
-DEFAULT_LEDGER = FETCHAI
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
+"""Implementation of the P2P stub connection."""
