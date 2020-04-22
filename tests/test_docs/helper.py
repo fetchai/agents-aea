@@ -73,17 +73,17 @@ def compile_and_exec(code: str, locals_dict: Dict = None) -> Dict:
     :param locals_dict: the dictionary of local variables.
     :return: the dictionary of locals.
     """
+    locals_dict = {} if locals_dict is None else locals_dict
     try:
         code_obj = compile(code, "fakemodule", "exec")
-        locals_dict = {} if locals_dict is None else locals_dict
-        exec(code_obj, locals_dict)
-        return locals_dict
+        exec(code_obj, locals_dict)  # nosec
     except Exception:
         pytest.fail(
             "The execution of the following code:\n{}\nfailed with error:\n{}".format(
                 code, traceback.format_exc()
             )
         )
+    return locals_dict
 
 
 def compare_enum_classes(expected_enum_class, actual_enum_class):
