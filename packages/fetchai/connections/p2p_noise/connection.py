@@ -28,7 +28,8 @@ import struct
 import posix
 import time
 from pathlib import Path
-from typing import Optional, List, Union, IO, AnyStr
+from typing import Optional, List, Union, IO, AnyStr, Sequence
+from publickey import PubKey, PrivKey
 
 from asyncio import AbstractEventLoop, CancelledError
 
@@ -38,8 +39,23 @@ from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
-# TOFIX(LR) make it async, if still relevent
-# TOFIX(LR) add return type
+
+NOISE_NODE_SOURCE = os.path.join(os.path.abspath(os.path.dirname(__file__)), "noise_node.go")
+NOISE_NODE_CLARGS = list()
+
+# TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
+async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
+    cmd = ["go", "get", "-v", "-d", "."]
+
+    try:
+        logger.debug(cmd, loop)
+        proc = await asyncio.create_subprocess_exec(*cmd, cwd=os.path.dirname(src), loop=loop)
+    except Exception as e:
+        logger.error("While executing go get : {}".format(str(e)))
+        raise e
+
+    return proc
+
 def _golang_get_deps(src: str):
     cmd = ["go", "get", "-v", "-d", "."]
 
@@ -52,81 +68,112 @@ def _golang_get_deps(src: str):
 
     return proc
 
-
-# TOFIX(LR) add types
+# TOFIX(LR) add typing
 def _golang_run(src: str, args=[], env={}):
     cmd = ["go", "run", src]
 
     cmd.extend(args)
 
     try:
-        print(cmd)
+        logger.debug(cmd)
         proc = subprocess.Popen(cmd, env=env)
     except Exception as e:
-        print("While executing go run {} {} : {}".format(src, args, str(e)))
-        raise
+        logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
+        raise e
 
     return proc
+
+
+class Uri:
+    def __init__(
+        self, uri: Optional[str] = None, addr: Optional[str] = None, port: Optional[int] = None
+    ):
+        if uri is not None:
+            split = uri.split(":", 1)
+            self._addr = split[0]
+            self._port = split[1]
+        elif addr is not None and port is not None:
+            self._addr = addr
+            self._port = port
+        else:
+            raise ValueError("Either 'uri' or both 'addr' and 'port' must be set")
+
+    def __str__(self):
+        return "{}:{}".format(self._addr, self._port)
+
+    def __repr__(self):
+        return self.__str__()
+
+    @property
+    def addr(self) -> str:
+        return self._addr
+
+    @property
+    def port(self) -> int:
+        return self._port
 
 
 # TOFIX(LR) NOT thread safe
 class NoiseNode:
     r"""Noise p2p node as a subprocess with named pipes interface
-  """
+    """
 
     def __init__(
         self,
-        identity: Address,
-        entry_addr: str,
-        entry_port: int,
-        # TOFIX(LR) entry peer should be optional, for genesis peer
-        source: Path,  # TOFIX(LR) unionize with str?
+        key: PrivKey,
+        uri: Optional[Uri],
+        entry_peers: Sequence[Uri],
+        source: Union[Path,str], 
         clargs: Optional[List[str]] = [],
-        loop: Optional[AbstractEventLoop] = None,
     ):
         """
-    """
-        # node id in the p2p network
-        self.identity = identity
+        Initialize a p2p noise node.
 
-        # entry peer
-        # TOFIX(LR) make it a list
-        self.entry_addr = entry_addr
-        self.entry_port = entry_port
+        :param key: ec25519 curve private key.
+        :param uri: noise node ip address and port number in format ipaddress:port.
+        :param entry_peers: noise entry peers ip address and port numbers.
+        """
+
+        # node id in the p2p network
+        self.key = str(key)
+        self.pub = str(key.pub())
+
+        # node uri
+        self.uri = uri
+
+        # entry p
+        self.entry_peers = entry_peers
 
         # node startup
         self.source = source
         self.clargs = clargs
 
         # named pipes (fifos)
-        self.NOISE_TO_AEA_PATH = "/tmp/{}-noise_to_aea".format(self.identity)
-        self.AEA_TO_NOISE_PATH = "/tmp/{}-aea_to_noise".format(self.identity)
+        self.noise_to_aea_path = "/tmp/{}-noise_to_aea".format(self.pub[:5])
+        self.aea_to_noise_path = "/tmp/{}-aea_to_noise".format(self.pub[:5])
         self._noise_to_aea = None
         self._aea_to_noise = None
-        self._connection_attempts = 3
-        
-        # async loop
-        self._loop = loop 
+        self._connection_attempts = 10
 
         #
+        self._loop = None
         self.proc = None
 
     async def start(self) -> None:
-        # async loop
-        # TOFIX(LR) new_loop or get_loop?
-        if self._loop is None: 
-            # TOFIX(LR) new_loop or get_loop?
+        if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
         # get source deps
+        # TOFIX(LR) async version
+        #proc = await _async_golang_get_deps(self.source, loop=self._loop)
+        #await proc.wait()
         proc = _golang_get_deps(self.source)
         proc.wait()
-        # TOFIX(LR) make it async
 
         # setup fifos
-        in_path = self.NOISE_TO_AEA_PATH
-        out_path = self.AEA_TO_NOISE_PATH
-        print("[py] creating pipes ({}, {})...".format(in_path, out_path))
+        in_path = self.noise_to_aea_path
+        out_path = self.aea_to_noise_path
+        logger.debug("Creating pipes ({}, {})...".format(in_path, out_path))
         if os.path.exists(in_path):
             os.remove(in_path)
         if os.path.exists(out_path):
@@ -134,8 +181,11 @@ class NoiseNode:
         os.mkfifo(in_path)
         os.mkfifo(out_path)
 
+        # setup config
         env = os.environ
-        env["ID"] = self.identity
+        env["ID"] = self.key + self.pub
+        env["URI"] = str(self.uri)
+        env["ENTRY_URI"] = ",".join([str(uri) for uri in self.entry_peers if str(uri) != str(self.uri)])
         env["NOISE_TO_AEA"] = in_path
         env["AEA_TO_NOISE"] = out_path
 
@@ -151,110 +201,66 @@ class NoiseNode:
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
 
-        print(
-            "[py] attempt opening pipes {}, {}...".format(
-                self.NOISE_TO_AEA_PATH, self.AEA_TO_NOISE_PATH
+        logger.debug(
+            "Attempt opening pipes {}, {}...".format(
+                self.noise_to_aea_path, self.aea_to_noise_path
             )
         )
+
         self._noise_to_aea = posix.open(
-            self.NOISE_TO_AEA_PATH, posix.O_RDONLY | os.O_NONBLOCK
+            self.noise_to_aea_path, posix.O_RDONLY | os.O_NONBLOCK
         )
-        self._noise_to_aea = posix.open(self.NOISE_TO_AEA_PATH, posix.O_RDONLY)
-        print(self._noise_to_aea)
+
         try:
             self._aea_to_noise = posix.open(
-                self.AEA_TO_NOISE_PATH, posix.O_WRONLY | os.O_NONBLOCK
+                self.aea_to_noise_path, posix.O_WRONLY | os.O_NONBLOCK
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.8)
                 await self._connect()
                 return
             else:
                 raise e
-        print(
-            "[py] connected to pipes {}, {}...".format(
-                self.NOISE_TO_AEA_PATH, self.AEA_TO_NOISE_PATH
-            )
-        )
-        #
-        self._in_queue = asyncio.Queue()
-
-        # setup reader 
+        
+        # setup reader
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
-        self._reader_protocol = asyncio.StreamReaderProtocol(self._stream_reader, loop=self._loop)
+        self._reader_protocol = asyncio.StreamReaderProtocol(
+            self._stream_reader, loop=self._loop
+        )
         self._fileobj = os.fdopen(self._noise_to_aea, "r")
-        asyncio.ensure_future(self._read_messages(), loop=self._loop)
-        await self._loop.connect_read_pipe(lambda : self._reader_protocol, self._fileobj)
-#await self._read_messages()
-        # starting receiving msgs
-        asyncio.ensure_future(self._read_messages(), loop=self._loop)
-        #self._read_messages()
-        #self._loop.add_reader(self._noise_to_aea, self._read_messages, self)
+        await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
+        
+        logger.info("Connected to noise node")
 
-
-    async def send(self, data: bytes) -> None:
+        
+    @asyncio.coroutine
+    def write(self, data: bytes) -> None:
         size = struct.pack("!I", len(data))
         posix.write(self._aea_to_noise, size)
         posix.write(self._aea_to_noise, data)
+        # TOFIX(LR) can use asyncio.connect_write_pipe
 
-        await asyncio.sleep(0)
-        # TOFIX(LR) hack
-        #  could use asyncio add_writer
 
-    def _read_messages_(self) -> None:
-        # TOFIX(LR) still need to check if all expected bytes are available
-        print("[py] looking for messages ...")
-        #asyncio.sleep(10000)
-        #return
-        #time.sleep(2)
+    async def read(self) -> Optional[bytes]:
         try:
-            while True:
-                size = os.read(self._noise_to_aea, 4)
-                size = struct.unpack("!I", size)[0]
-                print("[py] recved size: {}".format(size))
-                data = os.read(self._noise_to_aea, size)
-                print("[py] recved data: {}".format(data))
-                # TOFIX(LR) needs to check if there is more messages
-                # asyncio.run_coroutine_threadsafe(
-                self._in_queue.put_nowait(data), self._loop
-                # ).result() # TOFIX(LR) check race conditions
-        except OSError as e:
-            if e.errno == errno.EAGAIN:
-                print("[py] looking for messages ...done")
-                return
-            else:
-                raise e
-    
-    async def _read_messages(self) -> None:
-      #print("[py] connecting read pipe...")
-      #await self._loop.connect_read_pipe(lambda : self._reader_protocol, self._fileobj)
-      while True:
-        try:
-          print("[py] waiting for messages...")
-          size = await self._stream_reader.readexactly(4)
-          if not size:
-            print("[py] EOF reached")
-            break;
-            # TOFIX(LR) disconnect Connection from Multiplexer
-          size = struct.unpack("!I", size)[0]
-          print("[py] recved size: {}".format(size))
-          data = await self._stream_reader.readexactly(size)
-          print("[py] recved data: {}".format(data))
-          if not data:
-            print("[py] EOF reached")
-            break;
-            # TOFIX(LR) disconnect Connection from Multiplexer
-          self._in_queue.put_nowait(data), self._loop
+            logger.debug("Waiting for messages...")
+            size = await self._stream_reader.readexactly(4)
+            if not size:
+                return None
+            size = struct.unpack("!I", size)[0]
+            data = await self._stream_reader.readexactly(size)
+            if not data:
+                return None
+            return data
         except asyncio.streams.IncompleteReadError as e:
-          print("[py] EOF reached - read {}/{}".format(len(e.partial), e.expected))
-          break;
-      print("[py] stop receiving")
- 
+            logger.info(
+                "Node disconnected while reading {}/{}".format(len(e.partial), e.expected)
+            )
+            return None
+    
 
     async def receive(self) -> Optional[bytes]:
-        # data = self._read_messages()
-        # return data
         try:
             assert self._in_queue is not None
             data = await self._in_queue.get()
@@ -270,95 +276,70 @@ class NoiseNode:
             logger.exception(e)
             return None
 
+
     def stop(self) -> None:
-        # TOFIX(LR) should I send a special message?
-        #  or just rely on the node catching SIGTERM?
-        proc.terminate()
-        proc.wait()
-        assert self.in_queue is not None, "Input queue not initialized."
-        self.in_queue.put_nowait(None)
+        # TOFIX(LR) wait is blocking and proc can ignore terminate
+        self.proc.terminate()
+        self.proc.wait()
 
-
-def GET_NOISE_NODE_SOURCE() -> Path:
-    src = os.path.join(os.path.abspath(os.path.dirname(__file__)), "pipe_from_env.go")
-    return src
-
-
-def GET_NOISE_NODE_CLARGS() -> List[str]:
-    return []
 
 
 class P2PNoiseConnection(Connection):
-    r"""A noise p2p library connection.
-
-    This connection uses two files to communicate: one for the incoming messages and
-    the other for the outgoing messages. Each line contains an encoded envelope.
-
-    The format of each line is the following:
-
-        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
-
-    e.g.:
-
-        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
-
-    The connection detects new messages by watchdogging the input file looking for new lines.
-
-    To post a message on the input file, you can use e.g.
-
-        echo "..." >> input_file
-
-    or:
-
-        #>>> fp = open("input_file", "ab+")
-        #>>> fp.write(b"...\n")
-
-    It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
+    r"""A noise p2p node connection.
     """
-    # TOFIX(LR) add local node ip address and port number
     def __init__(
         self,
-        address: Address,
-        noise_addr: str,
-        noise_port: int,
-        # TOFIX(LR): make it a list of entry peers, and attempt joining the p2p network in a random ordering
+        key: PrivKey,
+        uri: Optional[Uri],
+        entry_peers: Sequence[Uri],
         **kwargs
     ):
         """
         Initialize a p2p noise connection.
 
-        :param address: agent address, will be used as an identity in noise.
-        :param noise_addr: noise entry peer ip address.
-        :param noise_port: noise entry peer port number.
+        :param key: ec25519 curve private key.
+        :param uri: noise node ip address and port number in format ipaddress:port.
+        :param entry_peers: noise entry peers ip address and port numbers.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
         super().__init__(**kwargs)
 
+        if uri is None and len(entry_peers) == 0:
+            raise ValueError("uri parameter must be set for genesis connection")
+
         # noise local node
-        # TOFIX(LR) noise_node startup config will depends on how code will be shipped
         self.node = NoiseNode(
-            address,
-            noise_addr,
-            noise_port,
-            GET_NOISE_NODE_SOURCE(),
-            GET_NOISE_NODE_CLARGS(),
-            self._loop,
+            key,
+            uri,
+            entry_peers,
+            NOISE_NODE_SOURCE,
+            NOISE_NODE_CLARGS,
         )
 
     async def connect(self) -> None:
         """Set up the connection."""
         if self.connection_status.is_connected:
             return
+        
+        # start noise node
         await self.node.start()
         self.connection_status.is_connected = True
+
+        # starting receiving msgs
+        self._in_queue = asyncio.Queue()
+        asyncio.ensure_future(self._receive_from_node(), loop=self._loop)
 
     async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
         """
-        await self.node.stop()
+        self.connection_status.is_connected = False
+        await asyncio.coroutine(self.node.stop)()
+        assert self._in_queue is not None, "Input queue not initialized."
+        self._in_queue.put_nowait(None)
+        
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -366,11 +347,24 @@ class P2PNoiseConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        data = await self.node.receive()
-        if data is not None:
+        try:
+            assert self._in_queue is not None
+            data = await self._in_queue.get()
+            if data is None:
+                logger.debug("Received None.")
+                self.node.stop()
+                self.connection_status.is_connected = False
+                return None
+                # TOFIX(LR) attempt restarting the node?
+            logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
-        else:
+        except CancelledError:
+            logger.debug("Receive cancelled.")
             return None
+        except Exception as e:
+            logger.exception(e)
+            return None
+
 
     async def send(self, envelope: Envelope):
         """
@@ -378,7 +372,16 @@ class P2PNoiseConnection(Connection):
 
         :return: None
         """
-        await self.node.send(envelope.encode())
+        await self.node.write(envelope.encode())
+
+
+    async def _receive_from_node(self) -> None:
+        while True:
+            data = await self.node.read()
+            if data is None:
+                break
+            self._in_queue.put_nowait(data)
+
 
     @classmethod
     def from_config(
@@ -391,17 +394,25 @@ class P2PNoiseConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        noise_addr = str(configuration.config.get("noise_addr"))
+        key_file = str(configuration.config.get("key_file"))
+        noise_host = str(configuration.config.get("noise_host"))
         noise_port = int(configuration.config.get("noise_port"))
+        entry_peers = list(configuration.config.get("entry_peers"))
+        
+        with open(key_file, "r") as f:
+            key = PrivKey(f.read().strip)
+        
+        entry_peers_uris = [Uri(uri) for uri in entry_peers]
+
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
         }
         excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
-        # TOFIX(LR) add local node ip address and port number
+        
         return P2PNoiseConnection(
-            address,
-            noise_addr,
-            noise_port,
+            key,
+            Uri(noise_host, noise_port),
+            entry_peers_uris,
             connection_id=configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
