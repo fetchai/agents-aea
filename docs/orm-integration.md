@@ -170,10 +170,10 @@ Then modify your strategy's \_\_init__ function to match the following code:
     def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
-    
+
         :param register_as: determines whether the agent registers as seller, buyer or both
         :param search_for: determines whether the agent searches for sellers, buyers or both
-    
+
         :return: None
         """
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
@@ -182,21 +182,21 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
-    
-        self._db_engine = db.create_engine('sqlite:///genericdb.db')
+
+        self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
         self.insert_data()
-    
+
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
         else:
             self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-    
+
         super().__init__(**kwargs)
         self._oef_msg_id = 0
-    
+
         self._scheme = kwargs.pop("search_data")
         self._datamodel = kwargs.pop("search_schema")
 
