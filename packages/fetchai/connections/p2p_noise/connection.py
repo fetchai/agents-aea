@@ -26,10 +26,9 @@ import subprocess
 import errno
 import struct
 import posix
-import time
 from pathlib import Path
-from typing import Optional, List, Union, IO, AnyStr, Sequence
-from publickey import PubKey, PrivKey
+from publickey import PrivKey
+from typing import List, Optional, Sequence, Union
 
 from asyncio import AbstractEventLoop, CancelledError
 
@@ -40,8 +39,11 @@ from aea.mail.base import Address, Envelope
 logger = logging.getLogger(__name__)
 
 
-NOISE_NODE_SOURCE = os.path.join(os.path.abspath(os.path.dirname(__file__)), "noise_node.go")
+NOISE_NODE_SOURCE = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)), "noise_node.go"
+)
 NOISE_NODE_CLARGS = list()
+
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
 async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
@@ -49,12 +51,15 @@ async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
 
     try:
         logger.debug(cmd, loop)
-        proc = await asyncio.create_subprocess_exec(*cmd, cwd=os.path.dirname(src), loop=loop)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, cwd=os.path.dirname(src), loop=loop
+        )
     except Exception as e:
         logger.error("While executing go get : {}".format(str(e)))
         raise e
 
     return proc
+
 
 def _golang_get_deps(src: str):
     cmd = ["go", "get", "-v", "-d", "."]
@@ -67,6 +72,7 @@ def _golang_get_deps(src: str):
         raise e
 
     return proc
+
 
 # TOFIX(LR) add typing
 def _golang_run(src: str, args=[], env={}):
@@ -86,7 +92,10 @@ def _golang_run(src: str, args=[], env={}):
 
 class Uri:
     def __init__(
-        self, uri: Optional[str] = None, addr: Optional[str] = None, port: Optional[int] = None
+        self,
+        uri: Optional[str] = None,
+        addr: Optional[str] = None,
+        port: Optional[int] = None,
     ):
         if uri is not None:
             split = uri.split(":", 1)
@@ -123,7 +132,7 @@ class NoiseNode:
         key: PrivKey,
         uri: Optional[Uri],
         entry_peers: Sequence[Uri],
-        source: Union[Path,str], 
+        source: Union[Path, str],
         clargs: Optional[List[str]] = [],
     ):
         """
@@ -165,8 +174,8 @@ class NoiseNode:
 
         # get source deps
         # TOFIX(LR) async version
-        #proc = await _async_golang_get_deps(self.source, loop=self._loop)
-        #await proc.wait()
+        # proc = await _async_golang_get_deps(self.source, loop=self._loop)
+        # await proc.wait()
         proc = _golang_get_deps(self.source)
         proc.wait()
 
@@ -185,7 +194,9 @@ class NoiseNode:
         env = os.environ
         env["ID"] = self.key + self.pub
         env["URI"] = str(self.uri)
-        env["ENTRY_URI"] = ",".join([str(uri) for uri in self.entry_peers if str(uri) != str(self.uri)])
+        env["ENTRY_URI"] = ",".join(
+            [str(uri) for uri in self.entry_peers if str(uri) != str(self.uri)]
+        )
         env["NOISE_TO_AEA"] = in_path
         env["AEA_TO_NOISE"] = out_path
 
@@ -222,7 +233,7 @@ class NoiseNode:
                 return
             else:
                 raise e
-        
+
         # setup reader
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
         self._reader_protocol = asyncio.StreamReaderProtocol(
@@ -230,17 +241,15 @@ class NoiseNode:
         )
         self._fileobj = os.fdopen(self._noise_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
-        
+
         logger.info("Connected to noise node")
 
-        
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
         size = struct.pack("!I", len(data))
         posix.write(self._aea_to_noise, size)
         posix.write(self._aea_to_noise, data)
         # TOFIX(LR) can use asyncio.connect_write_pipe
-
 
     async def read(self) -> Optional[bytes]:
         try:
@@ -255,10 +264,11 @@ class NoiseNode:
             return data
         except asyncio.streams.IncompleteReadError as e:
             logger.info(
-                "Node disconnected while reading {}/{}".format(len(e.partial), e.expected)
+                "Node disconnected while reading {}/{}".format(
+                    len(e.partial), e.expected
+                )
             )
             return None
-    
 
     async def receive(self) -> Optional[bytes]:
         try:
@@ -276,23 +286,18 @@ class NoiseNode:
             logger.exception(e)
             return None
 
-
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         self.proc.terminate()
         self.proc.wait()
 
 
-
 class P2PNoiseConnection(Connection):
     r"""A noise p2p node connection.
     """
+
     def __init__(
-        self,
-        key: PrivKey,
-        uri: Optional[Uri],
-        entry_peers: Sequence[Uri],
-        **kwargs
+        self, key: PrivKey, uri: Optional[Uri], entry_peers: Sequence[Uri], **kwargs
     ):
         """
         Initialize a p2p noise connection.
@@ -310,18 +315,14 @@ class P2PNoiseConnection(Connection):
 
         # noise local node
         self.node = NoiseNode(
-            key,
-            uri,
-            entry_peers,
-            NOISE_NODE_SOURCE,
-            NOISE_NODE_CLARGS,
+            key, uri, entry_peers, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS,
         )
 
     async def connect(self) -> None:
         """Set up the connection."""
         if self.connection_status.is_connected:
             return
-        
+
         # start noise node
         await self.node.start()
         self.connection_status.is_connected = True
@@ -339,7 +340,6 @@ class P2PNoiseConnection(Connection):
         await asyncio.coroutine(self.node.stop)()
         assert self._in_queue is not None, "Input queue not initialized."
         self._in_queue.put_nowait(None)
-        
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -365,7 +365,6 @@ class P2PNoiseConnection(Connection):
             logger.exception(e)
             return None
 
-
     async def send(self, envelope: Envelope):
         """
         Send messages.
@@ -374,14 +373,12 @@ class P2PNoiseConnection(Connection):
         """
         await self.node.write(envelope.encode())
 
-
     async def _receive_from_node(self) -> None:
         while True:
             data = await self.node.read()
             if data is None:
                 break
             self._in_queue.put_nowait(data)
-
 
     @classmethod
     def from_config(
@@ -398,17 +395,17 @@ class P2PNoiseConnection(Connection):
         noise_host = str(configuration.config.get("noise_host"))
         noise_port = int(configuration.config.get("noise_port"))
         entry_peers = list(configuration.config.get("entry_peers"))
-        
+
         with open(key_file, "r") as f:
             key = PrivKey(f.read().strip)
-        
+
         entry_peers_uris = [Uri(uri) for uri in entry_peers]
 
         restricted_to_protocols_names = {
             p.name for p in configuration.restricted_to_protocols
         }
         excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
-        
+
         return P2PNoiseConnection(
             key,
             Uri(noise_host, noise_port),
