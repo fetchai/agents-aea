@@ -18,11 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains helper function to extract code from the .md files."""
-import os
 import re
-import subprocess
 import traceback
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 

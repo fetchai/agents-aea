@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the orm-integration.md guide."""
-import json
 import logging
 import os
 import re
@@ -30,14 +29,18 @@ import tempfile
 import time
 from pathlib import Path
 
-import mistune
-import pytest
-import yaml
 from click.testing import CliRunner
+
+import mistune
+
+import pytest
+
+import yaml
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
-from ...conftest import ROOT_DIR, CLI_LOG_OPTION
+
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -47,45 +50,45 @@ ledger_config_replacement = """ledger_apis:
     network: testnet"""
 
 
-seller_strategy_replacement = """models:                        
-  strategy:                    
-    class_name: Strategy      
-    args:                      
-      total_price: 10          
-      seller_tx_fee: 0         
-      currency_id: 'FET'       
-      ledger_id: 'fetchai'     
-      is_ledger_tx: True       
-      has_data_source: True    
-      data_for_sale: {}        
-      search_schema:           
-        attribute_one:         
-          name: country        
-          type: str            
-          is_required: True    
-        attribute_two:         
-          name: city           
-          type: str            
-          is_required: True    
-      search_data:             
-        country: UK            
-        city: Cambridge        
-dependencies:                   
+seller_strategy_replacement = """models:
+  strategy:
+    class_name: Strategy
+    args:
+      total_price: 10
+      seller_tx_fee: 0
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      has_data_source: True
+      data_for_sale: {}
+      search_schema:
+        attribute_one:
+          name: country
+          type: str
+          is_required: True
+        attribute_two:
+          name: city
+          type: str
+          is_required: True
+      search_data:
+        country: UK
+        city: Cambridge
+dependencies:
   SQLAlchemy: {}"""
 
-buyer_strategy_replacement = """models:                          
-  strategy:                      
-    class_name: Strategy        
-    args:                        
-      max_price: 40              
-      max_buyer_tx_fee: 100      
-      currency_id: 'FET'         
-      ledger_id: 'fetchai'       
-      is_ledger_tx: True         
-      search_query:              
-        search_term: country     
-        search_value: UK         
-        constraint_type: '=='    
+buyer_strategy_replacement = """models:
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 40
+      max_buyer_tx_fee: 100
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
 ledgers: ['fetchai']"""
 
 
