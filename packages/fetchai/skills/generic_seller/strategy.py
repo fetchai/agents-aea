@@ -34,8 +34,8 @@ DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": "True"},
-    "attribute_two": {"name": "city", "type": "str", "is_required": "True"},
+    "attribute_one": {"name": "country", "type": "str", "is_required": True},
+    "attribute_two": {"name": "city", "type": "str", "is_required": True},
 }  # type: Optional[Dict[str, Any]]
 DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 

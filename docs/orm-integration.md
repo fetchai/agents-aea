@@ -176,16 +176,13 @@ Then modify your strategy's \_\_init__ function to match the following code:
 
         :return: None
         """
+        super().__init__(**kwargs)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
-
-        self._db_engine = db.create_engine("sqlite:///genericdb.db")
-        self._tbl = self.create_database_and_table()
-        self.insert_data()
 
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
@@ -194,7 +191,6 @@ Then modify your strategy's \_\_init__ function to match the following code:
         else:
             self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
 
-        super().__init__(**kwargs)
         self._oef_msg_id = 0
 
         self._scheme = kwargs.pop("search_data")
@@ -203,6 +199,10 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+
+        self._db_engine = db.create_engine("sqlite:///genericdb.db")
+        self._tbl = self.create_database_and_table()
+        self.insert_data()
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 

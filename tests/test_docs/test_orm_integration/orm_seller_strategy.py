@@ -20,6 +20,7 @@
 """This module contains the strategy class."""
 import random
 import time
+import json
 from typing import Any, Dict, List, Optional, Tuple
 
 # This is to allow sqlalchemy to be not installed until the test runs.
@@ -42,8 +43,8 @@ DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": "True"},
-    "attribute_two": {"name": "city", "type": "str", "is_required": "True"},
+    "attribute_one": {"name": "country", "type": "str", "is_required": True},
+    "attribute_two": {"name": "city", "type": "str", "is_required": True},
 }  # type: Optional[Dict[str, Any]]
 DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 
@@ -60,12 +61,22 @@ class Strategy(Model):
 
         :return: None
         """
+        super().__init__(**kwargs)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
+
+        self._oef_msg_id = 0
+
+        self._scheme = kwargs.pop("search_data")
+        self._datamodel = kwargs.pop("search_schema")
+
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
 
         self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
@@ -77,16 +88,6 @@ class Strategy(Model):
             self._data_for_sale = self.collect_from_data_source()
         else:
             self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
-
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -153,7 +154,8 @@ class Strategy(Model):
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
         result_proxy = connection.execute(query)
-        return {"data": result_proxy.fetchall()}
+        data_points = result_proxy.fetchall()
+        return {"data": json.dumps(list(map(tuple, data_points)))}
 
     def create_database_and_table(self):
         """Creates a database and a table to store the data if not exists."""

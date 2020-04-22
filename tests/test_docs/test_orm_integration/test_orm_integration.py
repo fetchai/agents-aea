@@ -37,20 +37,21 @@ import pytest
 
 import yaml
 
-from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import  DEFAULT_SKILL_CONFIG_FILE
+from aea.crypto.fetchai import FETCHAI
+from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.generic import force_set_config
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
-from ...conftest import CLI_LOG_OPTION, ROOT_DIR
+from ...conftest import ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
 
-ledger_config_replacement = """ledger_apis:
-  fetchai:
-    network: testnet"""
-
-
 seller_strategy_replacement = """models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
     class_name: Strategy
     args:
@@ -77,6 +78,9 @@ dependencies:
   SQLAlchemy: {}"""
 
 buyer_strategy_replacement = """models:
+  dialogues:
+    args: {}
+    class_name: Dialogues
   strategy:
     class_name: Strategy
     args:
@@ -97,145 +101,49 @@ ORM_SELLER_STRATEGY_PATH = Path(
 )
 
 
-class TestOrmIntegrationDocs:
+class TestOrmIntegrationDocs(AEAWithOefTestCase):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
+    @skip_test_ci
+    def test_orm_integration_docs_example(self, pytestconfig):
+        """Run the weather skills sequence."""
+        self.initialize_aea()
 
-    @classmethod
-    def setup_class(cls):
-        """Set the tests up."""
-        cls.tmpdir = tempfile.mkdtemp()
-        cls.oldcwd = os.getcwd()
-        os.chdir(cls.tmpdir)
-        cls.runner = CliRunner()
+        seller_aea_name = "my_seller_aea"
+        buyer_aea_name = "my_buyer_aea"
+        self.create_agents(seller_aea_name, buyer_aea_name)
 
-        cls.aea_seller_name = "my_seller_aea"
-        cls.aea_buyer_name = "my_buyer_aea"
-        cls.aea_seller_dir = Path(cls.tmpdir, cls.aea_seller_name)
-        cls.aea_buyer_dir = Path(cls.tmpdir, cls.aea_buyer_name)
+        ledger_apis = {FETCHAI: {"network": "testnet"}}
 
-        # copy 'packages/' into temporary test directory
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.tmpdir, "packages"))
+        # Setup seller
+        seller_aea_dir_path = Path(self.t, seller_aea_name)
+        os.chdir(seller_aea_dir_path)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/generic_seller:0.1.0")
+        self.run_install()
+        force_set_config("agent.ledger_apis", ledger_apis)
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
 
-        markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
+        # Setup Buyer
+        buyer_aea_dir_path = Path(self.t, buyer_aea_name)
+        os.chdir(buyer_aea_dir_path)
 
-        skill_doc_file = Path(ROOT_DIR, "docs", "orm-integration.md")
-        doc = markdown_parser(skill_doc_file.read_text())
-        # get only code blocks
-        code_blocks = list(filter(lambda x: x["type"] == "block_code" == "python", doc))
-        cls.python_code_blocks = list(
-            filter(lambda x: x["info"].strip() == "python" == "python", code_blocks)
-        )
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.1.0")
+        self.run_install()
+        force_set_config("agent.ledger_apis", ledger_apis)
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
 
-    def test_strategy_consistency(self):
-        """
-        Test that the seller strategy specified in the documentation
-        is the same we use in the tests.
-        """
-        strategy_file_content = ORM_SELLER_STRATEGY_PATH.read_text()
-        for python_code_block in self.python_code_blocks:
-            if not python_code_block["text"] in strategy_file_content:
-                pytest.fail(
-                    "Code block not present in strategy file:\n{}".format(
-                        python_code_block["text"]
-                    )
-                )
+        # Generate and add private keys
+        self.generate_private_key()
+        self.add_private_key()
 
-    def test_example(self):
-        """Test the example."""
-        # # init the CLI tool locally
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", "fakeauthor"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Create the seller AEA (ledger version)
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", self.aea_seller_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.aea_seller_dir)
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/generic_seller:0.1.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.tmpdir)
-
-        # Create the buyer client
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", self.aea_buyer_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.aea_buyer_dir)
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/generic_buyer:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Update the AEA configs
-        aea_config_seller = self.aea_seller_dir / DEFAULT_AEA_CONFIG_FILE
-        aea_config_buyer = self.aea_buyer_dir / DEFAULT_AEA_CONFIG_FILE
-        new_content_seller = re.sub(
-            "ledger_apis:.*", ledger_config_replacement, aea_config_seller.read_text()
-        )
-        new_content_buyer = re.sub(
-            "ledger_apis:.*", ledger_config_replacement, aea_config_buyer.read_text()
-        )
-        aea_config_seller.write_text(new_content_seller)
-        aea_config_buyer.write_text(new_content_buyer)
+        # Add some funds to the buyer
+        self.generate_wealth()
 
         # Update the seller AEA skill configs.
         seller_skill_config_path = Path(
-            self.aea_seller_dir,
+            seller_aea_dir_path,
             "vendor",
             "fetchai",
             "skills",
@@ -248,7 +156,7 @@ class TestOrmIntegrationDocs:
 
         # Update the buyer AEA skill configs.
         buyer_skill_config_path = Path(
-            self.aea_buyer_dir,
+            buyer_aea_dir_path,
             "vendor",
             "fetchai",
             "skills",
@@ -259,49 +167,9 @@ class TestOrmIntegrationDocs:
         updated_skill_config.update(yaml.safe_load(buyer_strategy_replacement))
         yaml.safe_dump(updated_skill_config, buyer_skill_config_path.open("w"))
 
-        # Run aea install in both agents
-        os.chdir(self.aea_seller_dir)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        os.chdir(self.aea_buyer_dir)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Set default connection in both agents
-        os.chdir(self.aea_seller_dir)
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        os.chdir(self.aea_buyer_dir)
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
         # Replace the seller strategy
         seller_stategy_path = Path(
-            self.aea_seller_dir,
+            seller_aea_dir_path,
             "vendor",
             "fetchai",
             "skills",
@@ -309,74 +177,52 @@ class TestOrmIntegrationDocs:
             "strategy.py",
         )
         seller_stategy_path.write_text(ORM_SELLER_STRATEGY_PATH.read_text())
+        os.chdir(seller_aea_dir_path / "vendor" / "fetchai")
+        self.run_cli_command("fingerprint", "skill", "fetchai/generic_seller:0.1.0")
 
-        try:
-            os.chdir(self.aea_seller_dir)
-            process_one = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
+        # Fire the sub-processes and the threads.
+        os.chdir(seller_aea_dir_path)
+        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        os.chdir(buyer_aea_dir_path)
+        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        self.start_tty_read_thread(process_one)
+        self.start_error_read_thread(process_one)
+        self.start_tty_read_thread(process_two)
+        self.start_error_read_thread(process_two)
+
+        time.sleep(20)
+        process_one.send_signal(signal.SIGINT)
+        process_two.send_signal(signal.SIGINT)
+
+        process_one.wait(timeout=10)
+        process_two.wait(timeout=10)
+
+        assert process_one.returncode == 0
+        assert process_two.returncode == 0
+
+
+def test_strategy_consistency():
+    """
+    Test that the seller strategy specified in the documentation
+    is the same we use in the tests.
+    """
+    markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())
+
+    skill_doc_file = Path(ROOT_DIR, "docs", "orm-integration.md")
+    doc = markdown_parser(skill_doc_file.read_text())
+    # get only code blocks
+    code_blocks = list(filter(lambda x: x["type"] == "block_code" == "python", doc))
+    python_code_blocks = list(
+        filter(lambda x: x["info"].strip() == "python" == "python", code_blocks)
+    )
+
+    strategy_file_content = ORM_SELLER_STRATEGY_PATH.read_text()
+    for python_code_block in python_code_blocks:
+        if not python_code_block["text"] in strategy_file_content:
+            pytest.fail(
+                "Code block not present in strategy file:\n{}".format(
+                    python_code_block["text"]
+                )
             )
-
-            os.chdir(self.aea_buyer_dir)
-            process_two = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            time.sleep(10.0)
-        finally:
-            process_one.send_signal(signal.SIGINT)
-            process_one.wait(timeout=10)
-            process_two.send_signal(signal.SIGINT)
-            process_two.wait(timeout=10)
-
-            if not process_one.returncode == 0:
-                poll_one = process_one.poll()
-                if poll_one is None:
-                    process_one.terminate()
-                    process_one.wait(2)
-
-            if not process_two.returncode == 0:
-                poll_two = process_two.poll()
-                if poll_two is None:
-                    process_two.terminate()
-                    process_two.wait(2)
-
-            os.chdir(self.tmpdir)
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "delete", self.aea_seller_name],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "delete", self.aea_buyer_name],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the class down."""
-        os.chdir(cls.oldcwd)
-        try:
-            shutil.rmtree(cls.tmpdir)
-        except (OSError, IOError):
-            pass

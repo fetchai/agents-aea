@@ -289,8 +289,9 @@ class AEAWithOefTestCase(AEATestCase):
 
     @staticmethod
     def _read_error(pid: subprocess.Popen):
-        for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
-            print("stderr: " + line.replace("\n", ""))
+        if pid.stderr is not None:
+            for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
+                print("stderr: " + line.replace("\n", ""))
 
     def start_tty_read_thread(self, process: subprocess.Popen) -> None:
         """

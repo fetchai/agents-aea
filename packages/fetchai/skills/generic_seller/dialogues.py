@@ -46,7 +46,7 @@ class Dialogue(FipaDialogue):
         :return: None
         """
         FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
-        self.data_for_sale = None  # type: Optional[Dict[str, Any]]
+        self.data_for_sale = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
 
 
