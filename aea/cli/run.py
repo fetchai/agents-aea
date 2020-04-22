@@ -74,7 +74,6 @@ def _build_aea(
     except Exception as e:
         # TODO use an ad-hoc exception class for predictable errors
         #      all the other exceptions should be logged with logger.exception
-        logger.exception(e)
         logger.error(str(e))
         sys.exit(1)
 

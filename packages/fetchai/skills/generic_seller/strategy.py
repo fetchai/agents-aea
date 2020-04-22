@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
@@ -106,7 +106,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, str]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
