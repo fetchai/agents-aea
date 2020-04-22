@@ -101,7 +101,10 @@ In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_f
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
 |    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
@@ -126,7 +129,7 @@ In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_f
 |        city: Cambridge            |        city: Cambridge           |
 |dependencies:                      |dependencies:                     |
 |  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
 The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
@@ -136,7 +139,10 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |  
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
 |    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
@@ -184,13 +190,6 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
 
-        # Read the data from the sensor if the bool is set to True.
-        # Enables us to let the user implement his data collection logic without major changes.
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()
-        else:
-            self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
         self._oef_msg_id = 0
 
         self._scheme = kwargs.pop("search_data")
@@ -203,6 +202,13 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
         self.insert_data()
+
+        # Read the data from the sensor if the bool is set to True.
+        # Enables us to let the user implement his data collection logic without major changes.
+        if self._has_data_source:
+            self._data_for_sale = self.collect_from_data_source()
+        else:
+            self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 
@@ -212,7 +218,8 @@ At the end of the file modify the `collect_from_data_source` function :
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
         result_proxy = connection.execute(query)
-        return {"data": result_proxy.fetchall()}
+        data_points = result_proxy.fetchall()
+        return {"data": json.dumps(list(map(tuple, data_points)))}
 ```
 Also, create two new functions, one that will create a connection with the database, and another one will populate the database with some fake data:
 
@@ -221,10 +228,12 @@ Also, create two new functions, one that will create a connection with the datab
         """Creates a database and a table to store the data if not exists."""
         metadata = db.MetaData()
 
-        tbl = db.Table('data', metadata,
-                       db.Column('timestamp', db.Integer()),
-                       db.Column('temprature', db.String(255), nullable=False),
-              )
+        tbl = db.Table(
+            "data",
+            metadata,
+            db.Column("timestamp", db.Integer()),
+            db.Column("temprature", db.String(255), nullable=False),
+        )
         metadata.create_all(self._db_engine)
         return tbl
 
@@ -233,7 +242,9 @@ Also, create two new functions, one that will create a connection with the datab
         connection = self._db_engine.connect()
         self.context.logger.info("Populating the database...")
         for _ in range(10):
-            query = db.insert(self._tbl).values(timestamp=time.time(), temprature=str(random.randrange(10, 25)))
+            query = db.insert(self._tbl).values(  # nosec
+                timestamp=time.time(), temprature=str(random.randrange(10, 25))
+            )
             connection.execute(query)
 ```
 

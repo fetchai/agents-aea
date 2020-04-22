@@ -206,9 +206,12 @@ def test_strategy_consistency():
     skill_doc_file = Path(ROOT_DIR, "docs", "orm-integration.md")
     doc = markdown_parser(skill_doc_file.read_text())
     # get only code blocks
-    code_blocks = list(filter(lambda x: x["type"] == "block_code" == "python", doc))
+    code_blocks = list(filter(lambda x: x["type"] == "block_code", doc))
     python_code_blocks = list(
-        filter(lambda x: x["info"].strip() == "python" == "python", code_blocks)
+        filter(
+            lambda x: x["info"] is not None and x["info"].strip() == "python",
+            code_blocks,
+        )
     )
 
     strategy_file_content = ORM_SELLER_STRATEGY_PATH.read_text()

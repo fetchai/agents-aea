@@ -106,7 +106,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, List[Dict[str, str]]]]:
         """
         Generate a proposal matching the query.
 

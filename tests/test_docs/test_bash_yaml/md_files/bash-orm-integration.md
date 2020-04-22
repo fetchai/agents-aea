@@ -55,11 +55,14 @@ ledger_apis:
     chain_id: 3
     gas_price: 50
 ```
-``` yaml
+``` yaml           
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
 |    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
@@ -84,13 +87,16 @@ ledger_apis:
 |        city: Cambridge            |        city: Cambridge           |
 |dependencies:                      |dependencies:                     |
 |  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
 ``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |  
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
 |    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
