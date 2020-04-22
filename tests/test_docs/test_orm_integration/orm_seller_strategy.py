@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+import json
 import random
 import time
-import json
 from typing import Any, Dict, List, Optional, Tuple
 
 # This is to allow sqlalchemy to be not installed until the test runs.

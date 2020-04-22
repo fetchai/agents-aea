@@ -24,7 +24,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description

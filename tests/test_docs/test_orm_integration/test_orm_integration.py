@@ -20,16 +20,9 @@
 """This module contains the tests for the orm-integration.md guide."""
 import logging
 import os
-import re
-import shutil
 import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
 from pathlib import Path
-
-from click.testing import CliRunner
 
 import mistune
 
@@ -37,7 +30,7 @@ import pytest
 
 import yaml
 
-from aea.configurations.base import  DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import force_set_config
