@@ -19,25 +19,14 @@
 
 """This test module contains the integration test for the thermometer skills."""
 
-import io
 import os
-import shutil
 import signal
-import subprocess  # nosec
-import sys
-import tempfile
-import threading
 import time
 
-import pytest
-
-from aea.cli import cli
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
-from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.generic import force_set_config
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION
 
 class TestThermometerSkill(AEAWithOefTestCase):
     """Test that thermometer skills work."""
@@ -62,16 +51,17 @@ class TestThermometerSkill(AEAWithOefTestCase):
 
         setting_path = "agent.ledger_apis"
         force_set_config(setting_path, ledger_apis)
-        setting_path = (
-            "vendor.{}.skills.thermometer.models.strategy.args.has_sensor"
-            .format(FETCHAI_NAME)
+        setting_path = "vendor.{}.skills.thermometer.models.strategy.args.has_sensor".format(
+            FETCHAI_NAME
         )
         force_set_config(setting_path, False)
 
         self.run_install()
 
         # add packages for agent two and run it
-        thermometer_client_aea_dir_path = os.path.join(self.t, thermometer_client_aea_name)
+        thermometer_client_aea_dir_path = os.path.join(
+            self.t, thermometer_client_aea_name
+        )
         os.chdir(thermometer_client_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -90,7 +80,9 @@ class TestThermometerSkill(AEAWithOefTestCase):
         thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         os.chdir(thermometer_client_aea_dir_path)
-        thermometer_client_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        thermometer_client_aea_process = self.run_agent(
+            "--connections", "fetchai/oef:0.2.0"
+        )
 
         self.start_tty_read_thread(thermometer_aea_process)
         self.start_error_read_thread(thermometer_aea_process)
