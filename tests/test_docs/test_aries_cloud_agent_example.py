@@ -24,16 +24,14 @@ import mistune
 
 import pytest
 
-from ...conftest import ROOT_DIR
+from tests.conftest import ROOT_DIR
 
 
 def test_code_blocks_all_present():
     """
-    Test that all the code blocks in the docs
-    are present in the Aries test module.
-
-    Please have a look at the file 'aries_cloud_agent_example.py`,
-    which is a symlink to test_http_client_connection_to_aries_cloud_agent.py.
+    Test that all the code blocks in the docs (aries-cloud-agent-example.md)
+    are present in the Aries test module
+    (tests/test_examples/test_http_client_connection_to_aries_cloud_agent.py).
     """
 
     markdown_parser = mistune.create_markdown(renderer=mistune.AstRenderer())

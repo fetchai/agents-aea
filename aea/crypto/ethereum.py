@@ -217,6 +217,7 @@ class EthereumApi(LedgerApi):
             balance = None
         return balance
 
+    # TODO : handle transaction misconfiguration
     def transfer(
         self,
         crypto: Crypto,
@@ -243,7 +244,6 @@ class EthereumApi(LedgerApi):
         if nonce is None:
             return tx_digest
 
-        # TODO : handle misconfiguration
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
