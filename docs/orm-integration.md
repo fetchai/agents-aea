@@ -138,7 +138,7 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |-----------------------------------|----------------------------------|
 |models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
+|    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
 |      max_price: 40                |      max_price: 40               |
 |      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
