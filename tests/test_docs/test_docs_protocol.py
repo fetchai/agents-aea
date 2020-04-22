@@ -18,16 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the code-blocks in the protocol.md file."""
+from enum import Enum
 from pathlib import Path
 
 import mistune
-import pytest
 
-from packages.fetchai.protocols.oef_search.custom_types import (
-    OefErrorOperation as ExpectedOefErrorOperation,
-)
+from aea.protocols.default.message import DefaultMessage
+
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from .helper import compile_and_exec, compare_enum_classes
+
+from .helper import compare_enum_classes, compile_and_exec
 from ..conftest import ROOT_DIR
 
 
@@ -50,23 +52,16 @@ class TestProtocolDocs:
         offset = 0
         locals_dict = {}
         compile_and_exec(self.code_blocks[offset]["text"], locals_dict=locals_dict)
-        Performative = locals_dict["Performative"]
-
-        # test that we can allocate a performative
-        Performative("bytes")
-        Performative("error")
-
-        # test the values of this enum
-        assert hasattr(Performative, "BYTES")
-        assert hasattr(Performative, "ERROR")
+        ActualPerformative = locals_dict["Performative"]
+        compare_enum_classes(ActualPerformative, DefaultMessage.Performative)
 
         # load the example of default message of type BYTES
         compile_and_exec(self.code_blocks[offset + 1]["text"], locals_dict=locals_dict)
 
         # load the definition of the ErrorCode enumeration
         compile_and_exec(self.code_blocks[offset + 2]["text"], locals_dict=locals_dict)
-        ErrorCode = locals_dict["ErrorCode"]
-        ErrorCode(0)
+        ExpectedErrorCode = locals_dict["ErrorCode"]
+        compare_enum_classes(ExpectedErrorCode, DefaultMessage.ErrorCode)
 
         # load the example of default message of type ERROR
         _ = compile_and_exec(
@@ -79,8 +74,6 @@ class TestProtocolDocs:
         offset = 4
 
         # define a data model and a description
-        from enum import Enum
-
         locals_dict = {"Enum": Enum}
         compile_and_exec(self.code_blocks[offset]["text"], locals_dict=locals_dict)
         ActualPerformative = locals_dict["Performative"]
@@ -91,7 +84,7 @@ class TestProtocolDocs:
         compile_and_exec(self.code_blocks[offset + 3]["text"], locals_dict=locals_dict)
         compile_and_exec(self.code_blocks[offset + 2]["text"], locals_dict=locals_dict)
 
-        # test the construction of OEF Search Messages
+        # test the construction of OEF Search Messages does not contain trivial errors.
         locals_dict["OefSearchMessage"] = OefSearchMessage
         compile_and_exec(self.code_blocks[offset + 4]["text"], locals_dict=locals_dict)
         compile_and_exec(self.code_blocks[offset + 5]["text"], locals_dict=locals_dict)
@@ -99,7 +92,7 @@ class TestProtocolDocs:
         compile_and_exec(self.code_blocks[offset + 7]["text"], locals_dict=locals_dict)
         compile_and_exec(self.code_blocks[offset + 8]["text"], locals_dict=locals_dict)
         compile_and_exec(self.code_blocks[offset + 9]["text"], locals_dict=locals_dict)
-
+        # this is just to test that something has actually run
         assert locals_dict["query_data"] == {
             "search_term": "country",
             "search_value": "UK",
@@ -109,4 +102,14 @@ class TestProtocolDocs:
         # test the definition of OefErrorOperation
         compile_and_exec(self.code_blocks[offset + 10]["text"], locals_dict=locals_dict)
         ActualOefErrorOperation = locals_dict["OefErrorOperation"]
+        ExpectedOefErrorOperation = OefErrorOperation
         compare_enum_classes(ExpectedOefErrorOperation, ActualOefErrorOperation)
+
+    def test_fipa_protocol(self):
+        """Test the fetchai/fipa:0.1.0 documentation."""
+        offset = 15
+        locals_dict = {"Enum": Enum}
+        compile_and_exec(self.code_blocks[offset]["text"], locals_dict=locals_dict)
+        ActualFipaPerformative = locals_dict["Performative"]
+        ExpectedFipaPerformative = FipaMessage.Performative
+        compare_enum_classes(ExpectedFipaPerformative, ActualFipaPerformative)

@@ -219,7 +219,7 @@ class Performative(Enum):
     PROPOSE = "propose"
 
     def __str__(self):
-    	"""Get string representation."""
+        """Get string representation."""
         return self.value
 ```
 

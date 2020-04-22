@@ -78,7 +78,7 @@ def compile_and_exec(code: str, locals_dict: Dict = None) -> Dict:
         locals_dict = {} if locals_dict is None else locals_dict
         exec(code_obj, locals_dict)
         return locals_dict
-    except BaseException as e:
+    except Exception:
         pytest.fail(
             "The execution of the following code:\n{}\nfailed with error:\n{}".format(
                 code, traceback.format_exc()
