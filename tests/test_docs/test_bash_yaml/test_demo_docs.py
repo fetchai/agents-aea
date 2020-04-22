@@ -37,19 +37,20 @@ class TestDemoDocs:
         path = Path(ROOT_DIR, "tests", "test_docs", "test_bash_yaml", "md_files")
         logger.info(os.listdir(path))
         for file in os.listdir(path):
-            if file.endswith(".md"):
-                bash_file = read_md_file(filepath=Path(path, file))
-                md_path = os.path.join(ROOT_DIR, "docs", file.replace("bash-", ""))
-                bash_code_blocks = extract_code_blocks(filepath=md_path, filter="bash")
-                for blocks in bash_code_blocks:
-                    assert (
-                        blocks in bash_file
-                    ), "[{}]: FAILED. Code must be identical".format(file)
-                logger.info("[{}]: PASSED".format(file))
+            if not file.endswith(".md"):
+                continue
+            bash_file = read_md_file(filepath=Path(path, file))
+            md_path = os.path.join(ROOT_DIR, "docs", file.replace("bash-", ""))
+            bash_code_blocks = extract_code_blocks(filepath=md_path, filter="bash")
+            for blocks in bash_code_blocks:
+                assert (
+                    blocks in bash_file
+                ), "[{}]: FAILED. Code must be identical".format(file)
+            logger.info("[{}]: PASSED".format(file))
 
-                yaml_code_blocks = extract_code_blocks(filepath=md_path, filter="yaml")
-                for blocks in yaml_code_blocks:
-                    assert (
-                        blocks in bash_file
-                    ), "[{}]: FAILED. Code must be identical".format(file)
-                logger.info("[{}]: PASSED".format(file))
+            yaml_code_blocks = extract_code_blocks(filepath=md_path, filter="yaml")
+            for blocks in yaml_code_blocks:
+                assert (
+                    blocks in bash_file
+                ), "[{}]: FAILED. Code must be identical".format(file)
+            logger.info("[{}]: PASSED".format(file))

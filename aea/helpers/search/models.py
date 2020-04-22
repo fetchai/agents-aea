@@ -113,7 +113,9 @@ class DataModel:
         :param attributes:  the attributes of the data model.
         """
         self.name: str = name
-        self.attributes: List[Attribute] = sorted(attributes, key=lambda x: x.name)
+        self.attributes = sorted(
+            attributes, key=lambda x: x.name
+        )  # type: List[Attribute]
         self._check_validity()
         self.attributes_by_name = {a.name: a for a in attributes}
         self.description = description
@@ -378,31 +380,46 @@ class ConstraintType:
         """
         Check if the constraint type is valid wrt a given attribute.
 
+        A constraint type is valid wrt an attribute if the
+        type of its operand(s) is the same of the attribute type.
+
+        >>> attribute = Attribute("year", int, True)
+        >>> valid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, 2000)
+        >>> valid_constraint_type.is_valid(attribute)
+        True
+
+        >>> valid_constraint_type = ConstraintType(ConstraintTypes.WITHIN, (2000, 2001))
+        >>> valid_constraint_type.is_valid(attribute)
+        True
+
+        The following constraint is invalid: the year is in a string variable,
+        whereas the attribute is defined over integers.
+
+        >>> invalid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, "2000")
+        >>> invalid_constraint_type.is_valid(attribute)
+        False
+
         :param attribute: the data model used to check the validity of the constraint type.
         :return: ``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
         """
-        if self.type == ConstraintTypes.EQUAL:
-            return True
-        elif self.type == ConstraintTypes.NOT_EQUAL:
-            return True
-        elif self.type == ConstraintTypes.LESS_THAN:
-            return True
-        elif self.type == ConstraintTypes.LESS_THAN_EQ:
-            return True
-        elif self.type == ConstraintTypes.GREATER_THAN:
-            return True
-        elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-            return True
-        elif self.type == ConstraintTypes.WITHIN:
-            return True
-        elif self.type == ConstraintTypes.IN:
-            return True
-        elif self.type == ConstraintTypes.NOT_IN:
-            return True
-        elif self.type == ConstraintTypes.DISTANCE:
-            return attribute.type == Location
+        return self.get_data_type() == attribute.type
+
+    def get_data_type(self) -> Type[ATTRIBUTE_TYPES]:
+        """
+        Get the type of the data used to define the constraint type.
+
+        For instance:
+        >>> c = ConstraintType(ConstraintTypes.EQUAL, 1)
+        >>> c.get_data_type()
+        <class 'int'>
+
+        """
+        if isinstance(self.value, (list, tuple, set)):
+            value = next(iter(self.value))
         else:
-            raise ValueError("Constraint type not recognized.")
+            value = self.value
+        value = cast(ATTRIBUTE_TYPES, value)
+        return type(value)
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
