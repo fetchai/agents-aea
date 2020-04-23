@@ -23,16 +23,16 @@ import asyncio
 import logging
 import subprocess  # nosec
 import time
-from unittest import mock
-from unittest.mock import Mock
-
-from aiohttp import web
-
-from multidict import CIMultiDict, CIMultiDictProxy
+# from unittest import mock
+# from unittest.mock import Mock
+#
+# from aiohttp import web  # type: ignore
+#
+# from multidict import CIMultiDict, CIMultiDictProxy  # type: ignore
 
 import pytest
 
-from yarl import URL
+# from yarl import URL  # type: ignore
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 
@@ -102,42 +102,41 @@ class TestWebhookDisconnection:
         await self.webhook_connection.disconnect()
         assert self.webhook_connection.connection_status.is_connected is False
 
-
-@pytest.mark.asyncio
-async def test_webhook_receive():
-    """Test the receive functionality of the webhook connection."""
-    # admin_address = "127.0.0.1"
-    # admin_port = 8020
-
-    webhook_address = "127.0.0.1"
-    webhook_port = 8050
-
-    agent_address = "some agent address"
-
-    webhook_connection = WebhookConnection(
-        address=agent_address,
-        webhook_address=webhook_address,
-        webhook_port=webhook_port,
-        webhook_url_path="/webhooks/topic/{topic}/",
-    )
-    webhook_connection.loop = asyncio.get_event_loop()
-    await webhook_connection.connect()
-
-    # # Start an aries agent process
-    # process = start_aca(admin_address, admin_port)
-
-    webhook_request_mock = Mock()
-    webhook_request_mock.method = "POST"
-    webhook_request_mock.url = URL(val="some url")
-    webhook_request_mock.version = (1, 1)
-    webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
-    webhook_request_mock.body = b"some body"
-
-    with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
-        received_webhook_envelop = await webhook_connection.receive()
-        logger.info(received_webhook_envelop)
-
-    # process.terminate()
+# ToDo: testing webhooks received
+# @pytest.mark.asyncio
+# async def test_webhook_receive():
+#     """Test the receive functionality of the webhook connection."""
+#     webhook_address = "127.0.0.1"
+#     webhook_port = 8050
+#
+#     agent_address = "some agent address"
+#
+#     webhook_connection = WebhookConnection(
+#         address=agent_address,
+#         webhook_address=webhook_address,
+#         webhook_port=webhook_port,
+#         webhook_url_path="/webhooks/topic/{topic}/",
+#     )
+#     webhook_connection.loop = asyncio.get_event_loop()
+#     await webhook_connection.connect()
+#
+#
+#
+#     # # Start an aries agent process
+#     # process = start_aca(admin_address, admin_port)
+#
+#     webhook_request_mock = Mock()
+#     webhook_request_mock.method = "POST"
+#     webhook_request_mock.url = URL(val="some url")
+#     webhook_request_mock.version = (1, 1)
+#     webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
+#     webhook_request_mock.body = b"some body"
+#
+#     with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
+#         received_webhook_envelop = await webhook_connection.receive()
+#         logger.info(received_webhook_envelop)
+#
+#     # process.terminate()
 
 
 def start_aca(admin_address: str, admin_port: int):

@@ -9,6 +9,7 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
+aiohttp = "==3.6.2"
 bandit = "==1.6.2"
 black = "==19.10b0"
 bs4 = "==0.0.1"
@@ -42,6 +43,7 @@ requests = ">=2.22.0"
 safety = "==1.8.5"
 tox = "==3.14.5"
 vyper = "==0.1.0b12"
+mistune = "==2.0.0a4"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
