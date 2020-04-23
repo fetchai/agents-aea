@@ -26,7 +26,6 @@ import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.generic import force_set_config
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
