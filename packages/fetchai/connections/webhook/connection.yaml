@@ -12,9 +12,9 @@ protocols:
 - fetchai/http:0.1.0
 class_name: WebhookConnection
 config:
-  webhook_address: ${WEBHOOK_ADDRESS:127.0.0.1}
-  webhook_port: ${WEBHOOK_PORT:8000}
-  webhook_url_path: ${WEBHOOK_URL_PATH:/some/url/path}
+  webhook_address: 127.0.0.1
+  webhook_port: 8000
+  webhook_url_path: /some/url/path
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/http:0.1.0
