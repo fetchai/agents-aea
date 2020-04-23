@@ -18,7 +18,16 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-from typing import Any, Dict, Optional, Tuple
+import json
+import random
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+# This is to allow sqlalchemy to be not installed until the test runs.
+try:
+    import sqlalchemy as db
+except ModuleNotFoundError:
+    pass
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
@@ -59,19 +68,27 @@ class Strategy(Model):
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
 
+        self._oef_msg_id = 0
+
+        self._scheme = kwargs.pop("search_data")
+        self._datamodel = kwargs.pop("search_schema")
+
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+
+        super().__init__(**kwargs)
+
+        self._db_engine = db.create_engine("sqlite:///genericdb.db")
+        self._tbl = self.create_database_and_table()
+        self.insert_data()
+
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
         else:
             self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -106,7 +123,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, str]]:
+    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
 
@@ -133,6 +150,33 @@ class Strategy(Model):
         )
         return proposal, self._data_for_sale
 
-    def collect_from_data_source(self):
-        """Implement the logic to communicate with the sensor."""
-        raise NotImplementedError
+    def collect_from_data_source(self) -> Dict[str, Any]:
+        """Implement the logic to collect data."""
+        connection = self._db_engine.connect()
+        query = db.select([self._tbl])
+        result_proxy = connection.execute(query)
+        data_points = result_proxy.fetchall()
+        return {"data": json.dumps(list(map(tuple, data_points)))}
+
+    def create_database_and_table(self):
+        """Creates a database and a table to store the data if not exists."""
+        metadata = db.MetaData()
+
+        tbl = db.Table(
+            "data",
+            metadata,
+            db.Column("timestamp", db.Integer()),
+            db.Column("temprature", db.String(255), nullable=False),
+        )
+        metadata.create_all(self._db_engine)
+        return tbl
+
+    def insert_data(self):
+        """Insert data in the database."""
+        connection = self._db_engine.connect()
+        self.context.logger.info("Populating the database...")
+        for _ in range(10):
+            query = db.insert(self._tbl).values(  # nosec
+                timestamp=time.time(), temprature=str(random.randrange(10, 25))
+            )
+            connection.execute(query)
