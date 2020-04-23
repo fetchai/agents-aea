@@ -6,11 +6,11 @@ import (
 	"os"
 	"os/signal"
 	//"strings"
-	"time"
+	aea "./aea"
 	"errors"
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"
-  	aea "./aea"
+	"time"
 )
 
 // check panics if err is not nil.
@@ -20,24 +20,23 @@ func check(err error) {
 	}
 }
 
-
 // An initial noise p2p node for AEA's fetchai/p2p-noise/0.1.0 connection
 func main() {
-	
+
 	// Create connection to aea
 	agent := aea.AeaApi{}
 	check(agent.Init())
 
 	// Create a new configured node.
-  	host, port := agent.Uri()
+	host, port := agent.Uri()
 	key, err := noise.LoadKeysFromHex(agent.PrivateKey())
-	check(err)  
-	
-  	node, err := noise.NewNode(
+	check(err)
+
+	node, err := noise.NewNode(
 		noise.WithNodeBindHost(host),
 		noise.WithNodeBindPort(port),
 		noise.WithNodeAddress(""),
-    	noise.WithNodePrivateKey(key),
+		noise.WithNodePrivateKey(key),
 	)
 	check(err)
 
@@ -48,9 +47,9 @@ func main() {
 	node.RegisterMessage(aea.Envelope{}, aea.UnmarshalEnvelope)
 
 	// Register a message handler to the node.
-	node.Handle(func (ctx noise.HandlerContext) error {
-    	return handle(ctx, agent)
- 	 })
+	node.Handle(func(ctx noise.HandlerContext) error {
+		return handle(ctx, agent)
+	})
 
 	// Instantiate Kademlia.
 	events := kademlia.Events{
@@ -82,19 +81,19 @@ func main() {
 	go func() {
 		for {
 			discover(overlay)
-			time.Sleep(2500*time.Millisecond)
+			time.Sleep(2500 * time.Millisecond)
 		}
 	}()
 
 	// Once overlay setup, connect to agent
 	check(agent.Connect())
 
-	// Receive envelopes from agent
-  	go func() {
-    	for envel :=  range(agent.Queue()) {
+	// Receive envelopes from agent and forward to peer
+	go func() {
+		for envel := range agent.Queue() {
 			go send(*envel, node, overlay)
-    	}
-  	}()
+		}
+	}()
 
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
@@ -104,22 +103,22 @@ func main() {
 	println("[noise-p2p][info] node stopped")
 }
 
-// Deliver an envelope 
-func  send(envel aea.Envelope, node *noise.Node, overlay *kademlia.Protocol) error {
-    //fmt.Printf("[noise-p2p][debug] Looking for %s...\n", envel.To)
-    ids := overlay.Table().Peers()
-    var dest *noise.ID = nil
-    for _, id := range(ids) {
-      if id.ID.String() == envel.To {
-        dest = &id
-        break
-      }
-    }
-    
-    if dest == nil {
-	    fmt.Printf("[noise-p2p][error] Couldn't locate peer with id %s\n", envel.To)
-      	return errors.New("Couldn't locate peer")
-    }
+// Deliver an envelope from agent to receiver peer
+func send(envel aea.Envelope, node *noise.Node, overlay *kademlia.Protocol) error {
+	//fmt.Printf("[noise-p2p][debug] Looking for %s...\n", envel.To)
+	ids := overlay.Table().Peers()
+	var dest *noise.ID = nil
+	for _, id := range ids {
+		if id.ID.String() == envel.To {
+			dest = &id
+			break
+		}
+	}
+
+	if dest == nil {
+		fmt.Printf("[noise-p2p][error] Couldn't locate peer with id %s\n", envel.To)
+		return errors.New("Couldn't locate peer")
+	}
 
 	fmt.Printf("[noise-p2p][debug] Sending to %s:%s...\n", dest.Address, envel)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -137,7 +136,7 @@ func  send(envel aea.Envelope, node *noise.Node, overlay *kademlia.Protocol) err
 	return nil
 }
 
-// Handle envelope from other peers
+// Handle envelope from other peers for agent
 func handle(ctx noise.HandlerContext, agent aea.AeaApi) error {
 	if ctx.IsRequest() {
 		return nil
@@ -155,7 +154,7 @@ func handle(ctx noise.HandlerContext, agent aea.AeaApi) error {
 
 	// Deliver envelope to agent
 	fmt.Printf("[noise-p2p][debug] Received envelope %s(%s) - %s\n", ctx.ID().Address, ctx.ID().ID.String(), envel)
-  	agent.Put(&envel)
+	agent.Put(&envel)
 
 	return nil
 }

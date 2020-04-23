@@ -29,7 +29,8 @@ import nacl.signing
 import struct
 import posix
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from random import randint
+from typing import List, IO, Mapping, Optional, Sequence, Union
 
 from asyncio import AbstractEventLoop, CancelledError
 
@@ -49,7 +50,11 @@ NOISE_NODE_LOG_FILE = "noise_node.log"
 
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
-async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
+async def _async_golang_get_deps(
+    src: str, loop: AbstractEventLoop
+) -> asyncio.subprocess.Process:
+    """ Downloads libraries that go 'src' file depends on
+    """
     cmd = ["go", "get", "-v", "-d", "."]
 
     try:
@@ -64,7 +69,9 @@ async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
     return proc
 
 
-def _golang_get_deps(src: str, log_file_desc):
+def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
+    """ Downloads libraries that go 'src' file depends on
+    """
     cmd = ["go", "get", "-v", "-d", "."]
 
     try:
@@ -79,8 +86,11 @@ def _golang_get_deps(src: str, log_file_desc):
     return proc
 
 
-# TOFIX(LR) add typing
-def _golang_run(src: str, args, env, log_file_desc):
+def _golang_run(
+    src: str, args: Sequence[str], env: Mapping[str, str], log_file_desc: IO[str]
+) -> subprocess.Popen:
+    """ Runs the go 'src' as a subprocess
+    """
     cmd = ["go", "run", src]
 
     cmd.extend(args)
@@ -98,6 +108,9 @@ def _golang_run(src: str, args, env, log_file_desc):
 
 
 class Curve25519PubKey:
+    """ Elliptic curve Curve25519 public key - Required by noise
+    """
+
     def __init__(
         self,
         *,
@@ -120,6 +133,9 @@ class Curve25519PubKey:
 
 
 class Curve25519PrivKey:
+    """ Elliptic curve Curve25519 private key - Required by noise
+    """
+
     def __init__(self, key: Optional[str] = None):
         if key is None:
             self._ed25519 = nacl.signing.SigningKey.generate()
@@ -139,6 +155,9 @@ class Curve25519PrivKey:
 
 
 class Uri:
+    """ Holds a node address in format "host:port"
+    """
+
     def __init__(
         self,
         uri: Optional[str] = None,
@@ -153,7 +172,9 @@ class Uri:
             self._host = host
             self._port = port
         else:
-            raise ValueError("Either 'uri' or both 'addr' and 'port' must be set")
+            self._host = "127.0.0.1"
+            self._port = randint(5000, 10000)
+            # raise ValueError("Either 'uri' or both 'addr' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
@@ -170,9 +191,8 @@ class Uri:
         return self._port
 
 
-# TOFIX(LR) NOT thread safe
 class NoiseNode:
-    r"""Noise p2p node as a subprocess with named pipes interface
+    """Noise p2p node as a subprocess with named pipes interface
     """
 
     def __init__(
@@ -197,7 +217,7 @@ class NoiseNode:
         self.pub = str(key.pub())
 
         # node uri
-        self.uri = uri
+        self.uri = uri if uri is not None else Uri()
 
         # entry p
         self.entry_peers = entry_peers
@@ -216,7 +236,6 @@ class NoiseNode:
         self._aea_to_noise = None
         self._connection_attempts = 10
 
-        #
         self._loop = None
         self.proc = None
 
@@ -247,9 +266,9 @@ class NoiseNode:
 
         # setup config
         env = os.environ
-        env["ID"] = self.key + self.pub
-        env["URI"] = str(self.uri)
-        env["ENTRY_URI"] = ",".join(
+        env["AEA_P2P_ID"] = self.key + self.pub
+        env["AEA_P2P_URI"] = str(self.uri)
+        env["AEA_P2P_ENTRY_URIS"] = ",".join(
             [str(uri) for uri in self.entry_peers if str(uri) != str(self.uri)]
         )
         env["NOISE_TO_AEA"] = in_path
@@ -262,7 +281,6 @@ class NoiseNode:
 
     async def _connect(self) -> None:
         if self._connection_attempts == 1:
-            logger.error("couldn't connect to noise p2p process")
             raise Exception("couldn't connect to noise p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
@@ -332,7 +350,7 @@ class NoiseNode:
 
 
 class P2PNoiseConnection(Connection):
-    r"""A noise p2p node connection.
+    """A noise p2p node connection.
     """
 
     def __init__(
