@@ -69,7 +69,7 @@ class TestGymSkill(AEAWithOefTestCase):
         setting_path = "vendor.{}.skills.gym.handlers.gym.args.nb_steps".format(
             FETCHAI_NAME
         )
-        force_set_config(setting_path, 20)
+        self.set_config(setting_path, 20)
 
         gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.1.0")
         time.sleep(10.0)
