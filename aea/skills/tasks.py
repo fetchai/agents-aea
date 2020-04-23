@@ -106,12 +106,14 @@ class Task:
         """
 
 
-def init_worker():
+def init_worker() -> None:
     """
     Initialize a worker.
 
     Disable the SIGINT handler.
     Related to a well-known bug: https://bugs.python.org/issue8296
+
+    :return: None
     """
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -119,13 +121,15 @@ def init_worker():
 class TaskManager:
     """A Task manager."""
 
-    def __init__(self, nb_workers: int = 5):
+    def __init__(self, nb_workers: int = 5, is_lazy_pool_start: bool = True):
         """
         Initialize the task manager.
 
         :param nb_workers: the number of worker processes.
+        :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
         """
         self._nb_workers = nb_workers
+        self._is_lazy_pool_start = is_lazy_pool_start
         self._pool = None  # type: Optional[Pool]
         self._stopped = True
         self._lock = threading.Lock()
@@ -134,8 +138,21 @@ class TaskManager:
         self._results_by_task_id = {}  # type: Dict[int, Any]
 
     @property
+    def is_started(self) -> bool:
+        """
+        Get started status of TaskManager.
+
+        :return: bool
+        """
+        return not self._stopped
+
+    @property
     def nb_workers(self) -> int:
-        """Get the number of workers."""
+        """
+        Get the number of workers.
+
+        :return: int
+        """
         return self._nb_workers
 
     def enqueue_task(
@@ -153,6 +170,10 @@ class TaskManager:
         with self._lock:
             if self._stopped:
                 raise ValueError("Task manager not running.")
+
+            if not self._pool and self._is_lazy_pool_start:
+                self._start_pool()
+
             self._pool = cast(Pool, self._pool)
             task_id = self._task_enqueued_counter
             self._task_enqueued_counter += 1
@@ -163,7 +184,11 @@ class TaskManager:
             return task_id
 
     def get_task_result(self, task_id: int) -> AsyncResult:
-        """Get the result from a task."""
+        """
+        Get the result from a task.
+
+        :return: async result for task_id
+        """
         task_result = self._results_by_task_id.get(
             task_id, None
         )  # type: Optional[AsyncResult]
@@ -173,24 +198,58 @@ class TaskManager:
         return task_result
 
     def start(self) -> None:
-        """Start the task manager."""
+        """
+        Start the task manager.
+
+        :return: None
+        """
         with self._lock:
             if self._stopped is False:
                 logger.debug("Task manager already running.")
             else:
                 logger.debug("Start the task manager.")
                 self._stopped = False
-                self._pool = Pool(self._nb_workers, initializer=init_worker)
+                if not self._is_lazy_pool_start:
+                    self._start_pool()
 
     def stop(self) -> None:
-        """Stop the task manager."""
+        """
+        Stop the task manager.
+
+        :return: None
+        """
         with self._lock:
             if self._stopped is True:
                 logger.debug("Task manager already stopped.")
             else:
                 logger.debug("Stop the task manager.")
                 self._stopped = True
-                self._pool = cast(Pool, self._pool)
-                self._pool.terminate()
-                self._pool.join()
-                self._pool = None
+                self._stop_pool()
+
+    def _start_pool(self) -> None:
+        """
+        Start internal task pool.
+
+        Only one pool will be created.
+
+        :return: None
+        """
+        if self._pool:
+            logger.debug("Pool was already started!.")
+            return
+        self._pool = Pool(self._nb_workers, initializer=init_worker)
+
+    def _stop_pool(self) -> None:
+        """
+        Stop internal task pool.
+
+        :return: None
+        """
+        if not self._pool:
+            logger.debug("Pool is not started!.")
+            return
+
+        self._pool = cast(Pool, self._pool)
+        self._pool.terminate()
+        self._pool.join()
+        self._pool = None
