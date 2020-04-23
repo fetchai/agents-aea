@@ -25,6 +25,7 @@ import subprocess  # nosec
 import sys
 import tempfile
 from io import TextIOWrapper
+from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, List
 
@@ -99,17 +100,18 @@ class AEATestCase:
         for thread in cls.threads:
             thread.join()
 
-    def set_config(self, dotted_path: str, value: Any) -> None:
+    def set_config(self, dotted_path: str, value: Any, type: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
+        :param type: the type
 
         :return: None
         """
-        self.run_cli_command("config", "set", dotted_path, str(value))
+        self.run_cli_command("config", "set", dotted_path, str(value), "--type", type)
 
     def disable_aea_logging(self):
         """
@@ -274,6 +276,16 @@ class AEATestCase:
         """
         self.run_cli_command("generate-wealth", ledger_api_id)
 
+    def replace_file_content(self, src: Path, dest: Path) -> None:
+        """
+        Replace the content of the source file to the dest file.
+        :param src: the source file.
+        :param dest: the destination file.
+        :return: None
+        """
+        assert src.is_file() and dest.is_file()
+        src.write_text(dest.read_text())
+
 
 class AEAWithOefTestCase(AEATestCase):
     """Test case for AEA end-to-end tests with OEF node."""
@@ -289,8 +301,9 @@ class AEAWithOefTestCase(AEATestCase):
 
     @staticmethod
     def _read_error(pid: subprocess.Popen):
-        for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
-            print("stderr: " + line.replace("\n", ""))
+        if pid.stderr is not None:
+            for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
+                print("stderr: " + line.replace("\n", ""))
 
     def start_tty_read_thread(self, process: subprocess.Popen) -> None:
         """
