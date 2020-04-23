@@ -30,7 +30,6 @@ import pytest
 
 import yaml
 
-from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import force_set_config
@@ -135,30 +134,20 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         self.generate_wealth()
 
         # Update the seller AEA skill configs.
-        seller_skill_config_path = Path(
-            seller_aea_dir_path,
-            "vendor",
-            "fetchai",
-            "skills",
-            "generic_seller",
-            DEFAULT_SKILL_CONFIG_FILE,
+        os.chdir(seller_aea_dir_path)
+        seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
+        force_set_config(
+            "vendor.fetchai.skills.generic_seller.models",
+            seller_skill_config_replacement["models"],
         )
-        seller_skill_config = yaml.safe_load(seller_skill_config_path.open())
-        seller_skill_config.update(yaml.safe_load(seller_strategy_replacement))
-        yaml.safe_dump(seller_skill_config, seller_skill_config_path.open("w"))
 
         # Update the buyer AEA skill configs.
-        buyer_skill_config_path = Path(
-            buyer_aea_dir_path,
-            "vendor",
-            "fetchai",
-            "skills",
-            "generic_buyer",
-            DEFAULT_SKILL_CONFIG_FILE,
+        os.chdir(buyer_aea_dir_path)
+        buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
+        force_set_config(
+            "vendor.fetchai.skills.generic_buyer.models",
+            buyer_skill_config_replacement["models"],
         )
-        updated_skill_config = yaml.safe_load(buyer_skill_config_path.open())
-        updated_skill_config.update(yaml.safe_load(buyer_strategy_replacement))
-        yaml.safe_dump(updated_skill_config, buyer_skill_config_path.open("w"))
 
         # Replace the seller strategy
         seller_stategy_path = Path(
@@ -169,7 +158,7 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
             "generic_seller",
             "strategy.py",
         )
-        seller_stategy_path.write_text(ORM_SELLER_STRATEGY_PATH.read_text())
+        self.replace_file_content(seller_stategy_path, ORM_SELLER_STRATEGY_PATH)
         os.chdir(seller_aea_dir_path / "vendor" / "fetchai")
         self.run_cli_command("fingerprint", "skill", "fetchai/generic_seller:0.1.0")
 

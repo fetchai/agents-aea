@@ -25,6 +25,7 @@ import subprocess  # nosec
 import sys
 import tempfile
 from io import TextIOWrapper
+from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, List
 
@@ -273,6 +274,16 @@ class AEATestCase:
         :return: None
         """
         self.run_cli_command("generate-wealth", ledger_api_id)
+
+    def replace_file_content(self, src: Path, dest: Path) -> None:
+        """
+        Replace the content of the source file to the dest file.
+        :param src: the source file.
+        :param dest: the destination file.
+        :return: None
+        """
+        assert src.is_file() and dest.is_file()
+        src.write_text(dest.read_text())
 
 
 class AEAWithOefTestCase(AEATestCase):
