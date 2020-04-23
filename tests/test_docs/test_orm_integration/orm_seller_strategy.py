@@ -23,11 +23,7 @@ import random
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-# This is to allow sqlalchemy to be not installed until the test runs.
-try:
-    import sqlalchemy as db
-except ModuleNotFoundError:
-    pass
+import sqlalchemy as db
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query

@@ -111,7 +111,7 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         seller_aea_dir_path = Path(self.t, seller_aea_name)
         os.chdir(seller_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.1.0")
+        self.add_item("skill", "fetchai/generic_seller:0.2.0")
         self.run_install()
         force_set_config("agent.ledger_apis", ledger_apis)
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -121,7 +121,7 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         os.chdir(buyer_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.1.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.2.0")
         self.run_install()
         force_set_config("agent.ledger_apis", ledger_apis)
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -175,7 +175,7 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         self.start_tty_read_thread(process_two)
         self.start_error_read_thread(process_two)
 
-        time.sleep(20)
+        time.sleep(30)
         process_one.send_signal(signal.SIGINT)
         process_two.send_signal(signal.SIGINT)
 

@@ -175,7 +175,8 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
     if item_type == "skill":
         for contract_public_id in item_configuration.contracts:
-            _add_item(click_context, "contract", contract_public_id)
+            if contract_public_id not in ctx.agent_config.contracts:
+                _add_item(click_context, "contract", contract_public_id)
 
     # add the item to the configurations.
     logger.debug(

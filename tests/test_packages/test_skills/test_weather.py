@@ -23,7 +23,6 @@ import os
 import signal
 import time
 
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEAWithOefTestCase
 
@@ -46,11 +45,11 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
-
-        dotted_path = "vendor.{}.skills.weather_station.models.strategy.args.is_ledger_tx".format(
-            FETCHAI_NAME
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        dotted_path = (
+            "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
-        self.set_config(dotted_path, False)
+        self.set_config(dotted_path, False, "bool")
         self.run_install()
 
         # prepare agent two (weather client)
@@ -59,11 +58,11 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
-
-        dotted_path = "vendor.{}.skills.weather_client.models.strategy.args.is_ledger_tx".format(
-            FETCHAI_NAME
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        dotted_path = (
+            "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
-        self.set_config(dotted_path, False)
+        self.set_config(dotted_path, False, "bool")
         self.run_install()
 
         # run agents
@@ -73,8 +72,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
         os.chdir(weather_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        # TODO increase timeout so we are sure they work until the end of negotiation.
-        time.sleep(5.0)
+        time.sleep(10.0)
         process_one.send_signal(signal.SIGINT)
         process_one.wait(timeout=10)
         process_two.send_signal(signal.SIGINT)
