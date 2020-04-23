@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Dummy handler to use in test skills."""
 from random import randint
 

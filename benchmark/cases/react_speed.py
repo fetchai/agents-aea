@@ -31,8 +31,14 @@ DUMMMY_AGENT_CONF = {
 }
 
 
-def react_speed(benchmark: BenchmarkControl, amount: int = 1000):
-    """Test react only. Does not run full agent's loop."""
+def react_speed(benchmark: BenchmarkControl, amount: int = 1000) -> None:
+    """
+    Test react only. Does not run full agent's loop.
+
+    :param benchmark: benchmark special parameter to communicate with executor
+
+    :return: None
+    """
     aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
     aea_test_wrapper.setup()
 

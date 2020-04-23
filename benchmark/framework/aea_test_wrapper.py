@@ -24,7 +24,7 @@ from benchmark.framework.fake_connection import FakeConnection
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ProtocolId, SkillConfig
+from aea.configurations.base import SkillConfig
 from aea.configurations.components import Component
 from aea.crypto.fetchai import FETCHAI
 from aea.mail.base import Envelope
@@ -37,18 +37,26 @@ from aea.skills.base import Handler, Skill, SkillContext
 class AEATestWrapper:
     """A testing wrapper to run and control an agent."""
 
-    def __init__(self, name: str = "my_aea", skills: List[dict] = None):
-        """Make an agency with optional name and skills."""
+    def __init__(self, name: str = "my_aea", skills: List[Dict[str, Skill]] = None):
+        """
+        Make an agency with optional name and skills.
+
+        :param name: name of the agent
+        :param skills: dict of skills to add to agent
+        """
         self.skills = skills or []
         self.name = name
 
         self.aea = self.make_aea(
-            self.name, [self.make_skill(**skill) for skill in self.skills]
+            self.name, [self.make_skill(**skill) for skill in self.skills]  # type: ignore
         )
 
     def make_aea(self, name: str = "my_eae", components: List[Component] = None) -> AEA:
         """
         Create AEA from name and already loaded components.
+
+        :param name: name of the agent
+        :param components: list of components to add to agent
 
         :return: AEA
         """
@@ -72,6 +80,10 @@ class AEATestWrapper:
     ) -> Skill:
         """
         Make a skill from optional config, context, handlers dict.
+
+        :param config: SkillConfig
+        :param context: SkillContext
+        :param handlers: dict of handler types to add to skill
 
         :return: Skill
         """
@@ -102,6 +114,12 @@ class AEATestWrapper:
         """
         Construct simple message, all arguments are optional.
 
+        :param dialogue_reference: the dialogue reference.
+        :param message_id: the message id.
+        :param target: the message target.
+        :param performative: the message performative.
+        :param content: string or bytes payload.
+
         :return: Message
         """
         if isinstance(content, str):
@@ -117,14 +135,15 @@ class AEATestWrapper:
 
     @classmethod
     def dummy_envelope(
-        cls,
-        to: str = "test",
-        sender: str = "test",
-        protocol_id: ProtocolId = DefaultMessage.protocol_id,
-        message: Message = None,
+        cls, to: str = "test", sender: str = "test", message: Message = None,
     ) -> Envelope:
         """
         Create envelope, if message is not passed use .dummy_message method.
+
+        :param to: the address of the receiver.
+        :param sender: the address of the sender.
+        :param protocol_id: the protocol id.
+        :param message: the protocol-specific message.
 
         :return: Envelope
         """
@@ -132,36 +151,68 @@ class AEATestWrapper:
         return Envelope(
             to=to,
             sender=sender,
-            protocol_id=protocol_id,
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
         )
 
     def set_loop_timeout(self, timeout: float) -> None:
-        """Set agent's loop timeout."""
+        """
+        Set agent's loop timeout.
+
+        :param timeout: idle sleep timeout for agent's loop
+
+        :return: None
+        """
         self.aea._timeout = timeout
 
     def setup(self) -> None:
-        """Set up agent: start multiplexer etc."""
+        """
+        Set up agent: start multiplexer etc.
+
+        :return: None
+        """
         self.aea._start_setup()
 
     def stop(self) -> None:
-        """Stop the agent."""
+        """
+        Stop the agent.
+
+        :return: None
+        """
         self.aea.stop()
 
     def put_inbox(self, envelope: Envelope) -> None:
-        """Add an envelope to agent's inbox."""
-        self.aea._multiplexer.in_queue.put(envelope)
+        """
+        Add an envelope to agent's inbox.
+
+        :params envelope: envelope to process by agent
+
+        :return: None
+        """
+        self.aea.multiplexer.in_queue.put(envelope)
 
     def is_inbox_empty(self) -> bool:
-        """Check there is no messages in inbox."""
-        return self.aea._multiplexer.in_queue.empty()
+        """
+        Check there is no messages in inbox.
+
+        :return: None
+        """
+        return self.aea.multiplexer.in_queue.empty()
 
     def react(self) -> None:
-        """One time process of react for incoming message."""
+        """
+        One time process of react for incoming message.
+
+        :return: None
+        """
         self.aea.react()
 
     def spin_main_loop(self) -> None:
-        """One time process agent's main loop."""
+        """
+        One time process agent's main loop.
+
+        :return: None
+        """
         self.aea._spin_main_loop()
 
     def __enter__(self) -> None:
@@ -169,12 +220,20 @@ class AEATestWrapper:
         self.start_loop()
 
     def __exit__(self, exc_type=None, exc=None, traceback=None) -> None:
-        """Context manager exit, stop agent."""
+        """
+        Context manager exit, stop agent.
+
+        :return: None
+        """
         self.stop_loop()
         return None
 
     def start_loop(self) -> None:
-        """Start agents loop in dedicated thread."""
+        """
+        Start agents loop in dedicated thread.
+
+        :return: None
+        """
         self._thread = Thread(target=self.aea.start)
         self._thread.start()
 
@@ -191,12 +250,16 @@ class AEATestWrapper:
         """
         return not self.aea.liveness.is_stopped
 
-    def set_fake_connection(self, inbox_num: int, envelope: Optional[Envelope] = None):
+    def set_fake_connection(
+        self, inbox_num: int, envelope: Optional[Envelope] = None
+    ) -> None:
         """
         Replace first conenction with fake one.
 
         :param inbox_num: number of messages to generate by connection.
         :param envelope: envelope to generate. dummy one created by default.
+
+        :return: None
         """
         envelope = envelope or self.dummy_envelope()
         self.aea._connections.clear()
@@ -204,6 +267,10 @@ class AEATestWrapper:
             FakeConnection(envelope, inbox_num, connection_id="12")
         )
 
-    def is_messages_in_fake_connection(self):
-        """Check fake connection has messages left."""
-        return self.aea._connections[0].num != 0
+    def is_messages_in_fake_connection(self) -> bool:
+        """
+        Check fake connection has messages left.
+
+        :return: bool
+        """
+        return self.aea._connections[0].num != 0  # type: ignore # cause fake connection is used.

@@ -32,8 +32,15 @@ DUMMMY_AGENT_CONF = {
 }
 
 
-def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000):
-    """Test inbox message processing in a loop."""
+def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
+    """
+    Test inbox message processing in a loop.
+
+    :param benchmark: benchmark special parameter to communicate with executor
+    :param inbox_amount: num of inbox messages for every agent
+
+    :return: None
+    """
     aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
 
     for _ in range(inbox_amount):

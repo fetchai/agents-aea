@@ -67,16 +67,28 @@ class ExecReport:
 
     @property
     def cpu(self) -> List[float]:
-        """Return list of cpu usage records."""
+        """
+        Return list of cpu usage records.
+
+        :return: list of cpu usage values
+        """
         return list(map(attrgetter("cpu"), self.stats))
 
     @property
     def mem(self) -> List[float]:
-        """Return list of memory usage records."""
+        """
+        Return list of memory usage records.
+
+        :return: list of memory usage values
+        """
         return list(map(attrgetter("mem"), self.stats))
 
     def __str__(self) -> str:
-        """Render report to string."""
+        """
+        Render report to string.
+
+        :return: string representation of report.
+        """
         return inspect.cleandoc(
             f"""
         == Report created {self.report_created} ==
@@ -112,6 +124,8 @@ class Executor:
 
         :param func: function or callable to be tested for performance.
         :param args: tuple of argument to pass to function tested.
+
+        :return: execution report for single test run
         """
         process = self._prepare(func, args)
         time_usage, stats, killed = self._measure(process)
@@ -123,6 +137,8 @@ class Executor:
 
         :param func: function or callable to be tested for performance.
         :param args: tuple of argument to pass to function tested.
+
+        :return: process with tested code
         """
         control: BenchmarkControl = BenchmarkControl()
         process = Process(target=func, args=(control, *args))
@@ -138,32 +154,38 @@ class Executor:
         Measure resources consumed by the process.
 
         :param process: process to measure resource consumption
+
+        :return: time used, list of resource stats, was killed
         """
         started_time = time.time()
-        killed = False
+        is_killed = False
         proc_info = psutil.Process(process.pid)
         stats = []
 
         with timeit_context() as timeit:
             while process.is_alive():
                 if time.time() - started_time > self.timeout:
-                    process.kill()
-                    killed = True
-
+                    is_killed = True
+                    break
                 stats.append(self._get_stats_record(proc_info))
 
                 time.sleep(self.period)
 
+        if is_killed:
+            process.terminate()
+
         process.join()
         time_usage = timeit.time_passed
 
-        return time_usage, stats, killed
+        return time_usage, stats, is_killed
 
     def _get_stats_record(self, proc_info: psutil.Process) -> ResourceStats:
         """
         Read resources usage and create record.
 
         :param proc_info: process information to get cpu usage and memory usage from.
+
+        :return: one time resource stats record
         """
         return ResourceStats(
             time.time(),
@@ -185,5 +207,7 @@ class Executor:
         :param time_passed: time test function was executed.
         :param stats: list of ResourceStats: cpu, mem.
         :param is_killed: was process terminated by timeout.
+
+        :return: test case one execution report
         """
         return ExecReport(args, time_passed, stats, is_killed, self.period)

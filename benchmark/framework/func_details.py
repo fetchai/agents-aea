@@ -35,28 +35,48 @@ class BaseFuncDetails:
 
     @property
     def doc(self) -> str:
-        """Return docstring for function."""
+        """
+        Return docstring for function.
+
+        :return: str. docstring for function
+        """
         return self.func.__doc__ or ""
 
     @property
     def name(self) -> str:
-        """Return function definition name."""
+        """
+        Return function definition name.
+
+        :return: str
+        """
         return self.func.__name__ or ""
 
     @property
     def _arguments(self) -> List[Parameter]:
-        """Get list of arguments defined in function."""
+        """
+        Get list of arguments defined in function.
+
+        :return: list of function parameters
+        """
         sig = inspect.signature(self.func)
         return list(sig.parameters.values())
 
     @property
     def argument_names(self) -> List[str]:
-        """Get list of argument names in function."""
+        """
+        Get list of argument names in function.
+
+        :return: list of function argument names
+        """
         return [i.name for i in self._arguments]
 
     @property
     def default_argument_values(self) -> List[Any]:
-        """Get list of argument default values."""
+        """
+        Get list of argument default values.
+
+        :return: list of default values for funcion arguments
+        """
         default_args = []
         for arg in self._arguments:
             default_args.append(arg.default)
@@ -64,7 +84,11 @@ class BaseFuncDetails:
 
     @property
     def default_argument_values_as_string(self) -> str:
-        """Get list of argument default values as a string."""
+        """
+        Get list of argument default values as a string.
+
+        :return: str
+        """
         return ",".join(map(repr, self.default_argument_values))
 
 
@@ -80,7 +104,13 @@ class BenchmarkFuncDetails(BaseFuncDetails):
     CONTROL_ARG_NAME: str = "benchmark"
 
     def check(self) -> None:
-        """Check for docstring and arguments have default values set."""
+        """
+        Check for docstring and arguments have default values set.
+
+        Raises exception if function definition does not contain docstring or default values.
+
+        :return: None
+        """
         if not self.doc:
             raise ValueError("Function docstring is missing")
 
@@ -97,5 +127,9 @@ class BenchmarkFuncDetails(BaseFuncDetails):
 
     @property
     def _arguments(self) -> List[Parameter]:
-        """Skip first argument, cause it special."""
+        """
+        Skip first argument, cause it special.
+
+        :return: list of function arguments except the first one named `benchmark`
+        """
         return super()._arguments[1:]

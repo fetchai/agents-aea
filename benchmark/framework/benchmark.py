@@ -16,9 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Helper fot benchmark run control."""
+"""Helper for benchmark run control."""
 from multiprocessing import Queue
-from typing import Any
 
 
 class BenchmarkControl:
@@ -31,9 +30,17 @@ class BenchmarkControl:
         self._queue = Queue(2)
 
     def start(self) -> None:
-        """Notify executor to start measure resources."""
+        """
+        Notify executor to start measure resources.
+
+        :return: None
+        """
         self._queue.put(self.START_MSG)
 
-    def wait_msg(self) -> Any:
-        """Wait a message from function being tested."""
+    def wait_msg(self) -> str:
+        """
+        Wait a message from function being tested.
+
+        :return: messsage from tested function.
+        """
         return self._queue.get()

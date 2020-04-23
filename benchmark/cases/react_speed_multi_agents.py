@@ -28,8 +28,15 @@ from benchmark.framework.cli import TestCli
 from aea.configurations.base import SkillConfig
 
 
-def make_agency_conf(name: str = "dummy_agent", skills_num: int = 1) -> dict:
-    """Construct simple config for agency."""
+def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
+    """
+    Construct config for test wrapper.
+
+    :param name: agent's name
+    :param skills_num: number of skills to add to agent
+
+    :return: dict to be used in AEATestWrapper(**result)
+    """
     return {
         "name": "dummy_a",
         "skills": [
@@ -48,12 +55,24 @@ def react_speed_in_loop(
     skills_num: int = 1,
     inbox_num: int = 1000,
     agent_loop_timeout: float = 0.01,
-):
-    """Test inbox message processing in a loop."""
+) -> None:
+    """
+    Test inbox message processing in a loop.
+
+    :param benchmark: benchmark special parameter to communicate with executor
+    :param agents_num: number of agents to start
+    :param skills_num: number of skills to add to each agent
+    :param inbox_num: num of inbox messages for every agent
+    :param agent_loop_timeout: idle sleep time for agent's loop
+
+    :return: None
+    """
     aea_test_wrappers = []
 
     for i in range(agents_num):
-        aea_test_wrapper = AEATestWrapper(**make_agency_conf(f"agent{i}", skills_num))
+        aea_test_wrapper = AEATestWrapper(
+            **_make_custom_config(f"agent{i}", skills_num)
+        )
         aea_test_wrapper.set_loop_timeout(agent_loop_timeout)
         aea_test_wrappers.append(aea_test_wrapper)
 

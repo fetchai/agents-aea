@@ -24,8 +24,16 @@ from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
-def cpu_burn(benchmark: BenchmarkControl, run_time=10, sleep=0.0001):
-    """Do nothing, just burn cpu to check cpu load changed on sleep."""
+def cpu_burn(benchmark: BenchmarkControl, run_time=10, sleep=0.0001) -> None:
+    """
+    Do nothing, just burn cpu to check cpu load changed on sleep.
+
+    :param benchmark: benchmark special parameter to communicate with executor
+    :param run_time: time limit to run this function
+    :param sleep: time to sleep in loop
+
+    :return: None
+    """
     benchmark.start()
     start_time = time.time()
 
