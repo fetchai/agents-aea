@@ -246,7 +246,7 @@ class WebhookConnection(Connection):
 
     @classmethod
     def from_config(
-            cls, address: Address, configuration: ConnectionConfig
+        cls, address: Address, configuration: ConnectionConfig
     ) -> "Connection":
         """
         Get the HTTP connection from a connection configuration.
