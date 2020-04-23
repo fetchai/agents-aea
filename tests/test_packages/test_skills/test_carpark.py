@@ -46,10 +46,11 @@ class TestCarPark(AEAWithOefTestCase):
         os.chdir(capark_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.run_install()
 
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
-        self.set_config(setting_path, False)
+        self.set_config(setting_path, False, "bool")
 
         setting_path = "agent.ledger_apis"
         ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
@@ -61,6 +62,7 @@ class TestCarPark(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.run_install()
 
         force_set_config(setting_path, ledger_apis)

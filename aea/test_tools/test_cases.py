@@ -100,17 +100,18 @@ class AEATestCase:
         for thread in cls.threads:
             thread.join()
 
-    def set_config(self, dotted_path: str, value: Any) -> None:
+    def set_config(self, dotted_path: str, value: Any, type: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
+        :param type: the type
 
         :return: None
         """
-        self.run_cli_command("config", "set", dotted_path, str(value))
+        self.run_cli_command("config", "set", dotted_path, str(value), "--type", type)
 
     def disable_aea_logging(self):
         """

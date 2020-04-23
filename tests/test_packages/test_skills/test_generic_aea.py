@@ -51,7 +51,7 @@ class TestGenericSkills(AEAWithOefTestCase):
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.1.0")
+        self.add_item("skill", "fetchai/generic_seller:0.2.0")
         self.run_install()
 
         # prepare buyer agent
@@ -61,7 +61,7 @@ class TestGenericSkills(AEAWithOefTestCase):
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.1.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.2.0")
         self.run_install()
 
         # run AEAs
