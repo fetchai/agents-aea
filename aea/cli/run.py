@@ -66,9 +66,7 @@ def _build_aea(
         aea = builder.build(connection_ids=connection_ids)
         return aea
     except AEAPackageLoadingError as e:
-        logger.exception(e)
-        # TODO convert to raise ClickException
-        sys.exit(1)
+        raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
         # TODO use an ad-hoc exception class for predictable errors
         #      all the other exceptions should be logged with logger.exception
