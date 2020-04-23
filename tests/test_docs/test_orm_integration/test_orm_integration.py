@@ -164,6 +164,7 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
 
         # Fire the sub-processes and the threads.
         os.chdir(seller_aea_dir_path)
+        self.run_install()
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         os.chdir(buyer_aea_dir_path)
