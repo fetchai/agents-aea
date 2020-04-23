@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains helper function to extract code from the .md files."""
-
 import re
 import traceback
 from typing import Dict
