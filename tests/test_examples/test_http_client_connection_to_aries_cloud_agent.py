@@ -196,7 +196,7 @@ class TestAEAToACA:
                 )
             )
         )
-        http_protocol = Protocol(http_protocol_configuration, HttpSerializer(),)
+        http_protocol = Protocol(http_protocol_configuration, HttpSerializer())
         resources.add_protocol(http_protocol)
 
         # Request message & envelope

@@ -96,7 +96,7 @@ ledger_apis:
 
 ### Update the seller AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
+In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
