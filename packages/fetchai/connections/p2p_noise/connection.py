@@ -22,12 +22,13 @@
 import asyncio
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 import errno
 import nacl.encoding
 import nacl.signing
 import struct
 import posix
+import tempfile
 from pathlib import Path
 from random import randint
 from typing import List, IO, Mapping, Optional, Sequence, Union
@@ -61,7 +62,7 @@ async def _async_golang_get_deps(
         logger.debug(cmd, loop)
         proc = await asyncio.create_subprocess_exec(
             *cmd, cwd=os.path.dirname(src), loop=loop
-        )
+        )  # nosec
     except Exception as e:
         logger.error("While executing go get : {}".format(str(e)))
         raise e
@@ -76,8 +77,12 @@ def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
 
     try:
         logger.debug(cmd)
-        proc = subprocess.Popen(
-            cmd, cwd=os.path.dirname(src), stdout=log_file_desc, stderr=log_file_desc
+        proc = subprocess.Popen(  # nosec
+            cmd,
+            cwd=os.path.dirname(src),
+            stdout=log_file_desc,
+            stderr=log_file_desc,
+            shell=False,
         )
     except Exception as e:
         logger.error("While executing go get : {}".format(str(e)))
@@ -97,8 +102,8 @@ def _golang_run(
 
     try:
         logger.debug(cmd)
-        proc = subprocess.Popen(
-            cmd, env=env, stdout=log_file_desc, stderr=log_file_desc
+        proc = subprocess.Popen(  # nosec
+            cmd, env=env, stdout=log_file_desc, stderr=log_file_desc, shell=False
         )
     except Exception as e:
         logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
@@ -173,8 +178,8 @@ class Uri:
             self._port = port
         else:
             self._host = "127.0.0.1"
-            self._port = randint(5000, 10000)
-            # raise ValueError("Either 'uri' or both 'addr' and 'port' must be set")
+            self._port = randint(5000, 10000)  # nosec
+            # raise ValueError("Either 'uri' or both 'host' and 'port' must be set")
 
     def __str__(self):
         return "{}:{}".format(self._host, self._port)
@@ -230,8 +235,9 @@ class NoiseNode:
         self.log_file = log_file if log_file is not None else NOISE_NODE_LOG_FILE
 
         # named pipes (fifos)
-        self.noise_to_aea_path = "/tmp/{}-noise_to_aea".format(self.pub[:5])
-        self.aea_to_noise_path = "/tmp/{}-aea_to_noise".format(self.pub[:5])
+        tmp_dir = tempfile.mkdtemp()
+        self.noise_to_aea_path = "{}/{}-noise_to_aea".format(tmp_dir, self.pub[:5])
+        self.aea_to_noise_path = "{}/{}-aea_to_noise".format(tmp_dir, self.pub[:5])
         self._noise_to_aea = None
         self._aea_to_noise = None
         self._connection_attempts = 10
