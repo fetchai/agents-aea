@@ -27,13 +27,11 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest import mock
 
 import pytest
 
 import yaml
 
-import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
