@@ -9,14 +9,12 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
   aea/api.go: QmdatRSHu3Nuz18NDMk9PGSPi34o1ATggYRX962nP6jSXm
-  connection.py: QmPi2M1uaexKUGjZxpSuoDTZ6J6wVYYCpEREp9TZYY3jwu
-  noise_node.go: QmP92aiWBd2LNgEbH1gSjr3H575c4XUPkZ2uZVTq3QgUWJ
-  publickey.py: QmPyfGWQJAhHV1SQoNiCkS5uDhFXSJfPrPe7igQ1uxcPsa
+  connection.py: Qmam2q4KvP58eZegTxtgo95Arpf36CshFbLqNoHADmBoY9
+  noise_node.go: QmQctBoA3uQFwPxdJ94CfnAQaecoGwzFQ9Dky7SjEjJtxC
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PNoiseConnection
 config:
-  key_file: secret.txt
   noise_entry_peers: []
   noise_host: 127.0.0.1
   noise_log_file: noise_node.log

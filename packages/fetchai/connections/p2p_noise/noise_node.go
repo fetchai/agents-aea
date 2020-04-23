@@ -30,7 +30,8 @@ func main() {
 
 	// Create a new configured node.
   	host, port := agent.Uri()
-  	key, err := noise.LoadKeysFromHex(agent.PrivateKey())
+	key, err := noise.LoadKeysFromHex(agent.PrivateKey())
+	check(err)  
 	
   	node, err := noise.NewNode(
 		noise.WithNodeBindHost(host),

@@ -24,10 +24,11 @@ import logging
 import os
 import subprocess
 import errno
+import nacl.encoding
+import nacl.signing
 import struct
 import posix
 from pathlib import Path
-from publickey import PrivKey
 from typing import List, Optional, Sequence, Union
 
 from asyncio import AbstractEventLoop, CancelledError
@@ -93,6 +94,47 @@ def _golang_run(src: str, args, env, log_file):
     return proc
 
 
+class Curve25519PubKey:
+    def __init__(
+        self,
+        *,
+        strkey: Optional[str] = None,
+        naclkey: Optional[nacl.signing.VerifyKey] = None
+    ):
+        if naclkey is not None:
+            self._ed25519_pub = naclkey
+        elif strkey is not None:
+            self._ed25519_pub = nacl.signing.VerifyKey(
+                strkey, encoder=nacl.encoding.HexEncoder
+            )
+        else:
+            raise ValueError("Either 'strkey' or 'naclkey' must be set")
+
+    def __str__(self):
+        return self._ed25519_pub.encode(encoder=nacl.encoding.HexEncoder).decode(
+            "ascii"
+        )
+
+
+class Curve25519PrivKey:
+    def __init__(self, key: Optional[str] = None):
+        if key is None:
+            self._ed25519 = nacl.signing.SigningKey.generate()
+        else:
+            self._ed25519 = nacl.signing.SigningKey(
+                key, encoder=nacl.encoding.HexEncoder
+            )
+
+    def __str__(self):
+        return self._ed25519.encode(encoder=nacl.encoding.HexEncoder).decode("ascii")
+
+    def hex(self):
+        return self._ed25519.encode(encoder=nacl.encoding.HexEncoder).decode("ascii")
+
+    def pub(self) -> Curve25519PubKey:
+        return Curve25519PubKey(naclkey=self._ed25519.verify_key)
+
+
 class Uri:
     def __init__(
         self,
@@ -132,7 +174,7 @@ class NoiseNode:
 
     def __init__(
         self,
-        key: PrivKey,
+        key: Curve25519PrivKey,
         uri: Optional[Uri],
         entry_peers: Sequence[Uri],
         source: Union[Path, str],
@@ -305,7 +347,7 @@ class P2PNoiseConnection(Connection):
 
     def __init__(
         self,
-        key: PrivKey,
+        key: Curve25519PrivKey,
         uri: Optional[Uri] = None,
         entry_peers: Sequence[Uri] = [],
         log_file: Optional[str] = None,
@@ -404,14 +446,17 @@ class P2PNoiseConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        key_file = str(configuration.config.get("key_file"))
+        noise_key_file = configuration.config.get("noise_key_file")  # Optional[str]
         noise_host = str(configuration.config.get("noise_host"))
         noise_port = int(configuration.config.get("noise_port"))
         entry_peers = list(configuration.config.get("entry_peers"))
-        log_file = configuration.config.get("log_file")  # optinal, can be None
+        log_file = configuration.config.get("log_file")  # Optional[str]
 
-        with open(key_file, "r") as f:
-            key = PrivKey(f.read().strip)
+        if noise_key_file is None:
+            key = Curve25519PrivKey()
+        else:
+            with open(noise_key_file, "r") as f:
+                key = Curve25519PrivKey(f.read().strip)
 
         entry_peers_uris = [Uri(uri) for uri in entry_peers]
 
