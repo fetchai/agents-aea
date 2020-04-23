@@ -24,18 +24,27 @@ from typing import Dict, Optional
 
 from aea.configurations.base import ProtocolId
 from aea.configurations.base import PublicId
+from aea.mail.base import Address, Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
+DEFAULT_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "default", "0.1.0")
+
+OEF_CONNECTION_PUBLIC_ID = PublicId("fetchai", "oef", "0.1.0")
+ALICE_AEA_ADDRESS = "FRxXBaKvt9XwzdiQnMS8f6rXfUzi6ZCDb2UR1x4sr7WMo2SpH"
+
 ADMIN_HOST = "127.0.0.1"
 ADMIN_PORT = 8020
 SUPPORT_REVOCATION = False
 
-class AriesDemoHandler(Handler):
+
+class AriesDemoHTTPHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
@@ -120,6 +129,22 @@ class AriesDemoHandler(Handler):
             "/credential-definitions", credential_definition_body
         )
 
+    def send_message(self, content: Dict):
+        # message & envelope
+        message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES,
+            content=json.dumps(content).encode("utf-8"),
+        )
+        context = EnvelopeContext(connection_id=OEF_CONNECTION_PUBLIC_ID)
+        envelope = Envelope(
+            to=ALICE_AEA_ADDRESS,
+            sender=self.context.agent_address,
+            protocol_id=DEFAULT_PROTOCOL_PUBLIC_ID,
+            context=context,
+            message=DefaultSerializer().encode(message),
+        )
+        self.context.outbox.put(envelope)
+
     def setup(self) -> None:
         """
         Implement the setup.
@@ -138,7 +163,6 @@ class AriesDemoHandler(Handler):
         # self.context.behaviours.aries_demo_behaviour.put(message)
 
         self.handled_message = message
-        # import pdb;pdb.set_trace()
         if message.performative == HttpMessage.Performative.RESPONSE and message.status_code == 200:
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
@@ -157,8 +181,14 @@ class AriesDemoHandler(Handler):
             #     credential_definition_id = content["credential_definition_id"]
                 self._admin_post("/connections/create-invitation")
             elif "connection_id" in content:
+                connection = content
                 connection_id = content["connection_id"]
+                invitation = connection["invitation"]
+                self.context.logger.info("connection: " + str(connection))
+                self.context.logger.info("connection id: " + connection_id)
+                self.context.logger.info("invitation: " + str(invitation))
                 self.context.logger.info("Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection...")
+                self.send_message(invitation)
 
     def teardown(self) -> None:
         """

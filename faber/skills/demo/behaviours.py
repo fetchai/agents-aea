@@ -35,7 +35,7 @@ DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8020
 
 
-class AriesDemoBehaviour(OneShotBehaviour):
+class AriesDemoFaberBehaviour(OneShotBehaviour):
     """This class scaffolds a behaviour."""
 
     def __init__(self, admin_host: str = None, admin_port: int = None, **kwargs):

@@ -1,4 +1,4 @@
-agent_name: faber
+agent_name: alice
 author: ali
 version: 0.1.0
 description: ''
@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.1.0
 - fetchai/oef:0.1.0
-- fetchai/stub:0.1.0
+- fetchai/stub:0.2.0
 - fetchai/webhook:0.1.0
 contracts: []
 protocols:
@@ -18,9 +18,9 @@ protocols:
 - fetchai/http:0.1.0
 - fetchai/oef_search:0.1.0
 skills:
-- ali/demo:0.1.0
+- ali/demo_alice:0.1.0
 - fetchai/error:0.2.0
-default_connection: fetchai/http_client:0.1.0
+default_connection: fetchai/oef:0.1.0
 default_ledger: fetchai
 ledger_apis: {}
 logging_config:

@@ -1,0 +1,15 @@
+name: http
+author: fetchai
+version: 0.1.0
+description: A protocol for HTTP requests and responses.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: QmRdY1QzpEXg7bX78QTpCTmMKRRR1DcyfpyvkL8xHnoY5C
+  http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS
+  http_pb2.py: QmbwRzuZuSj9c9fb1fv5mPVMbRgJ6Zz5TUKmZmjoKs5dwi
+  message.py: QmcfB66axSpSJr436nqrJsWvxMxJxXPA371sRJtfQ5oXCz
+  serialization.py: Qma1qPZdxKAF1TZsVQoZKxUKSdx5pkP99gSpBpC8dz7PXX
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}
