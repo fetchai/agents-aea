@@ -94,8 +94,8 @@ info: Echo Behaviour: teardown method called.
 aea delete my_first_aea
 ```
 ``` bash
-aea create my_first_aea		
-cd my_first_aea		
+aea create my_first_aea
+cd my_first_aea
 ```
 ``` bash
 aea add skill fetchai/echo:0.1.0		
