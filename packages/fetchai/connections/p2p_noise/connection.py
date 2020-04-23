@@ -304,9 +304,12 @@ class P2PNoiseConnection(Connection):
     """
 
     def __init__(
-        self, key: PrivKey, uri: Optional[Uri] = None, entry_peers: Sequence[Uri] = [], 
+        self,
+        key: PrivKey,
+        uri: Optional[Uri] = None,
+        entry_peers: Sequence[Uri] = [],
         log_file: Optional[str] = None,
-         **kwargs
+        **kwargs
     ):
         """
         Initialize a p2p noise connection.
@@ -405,7 +408,7 @@ class P2PNoiseConnection(Connection):
         noise_host = str(configuration.config.get("noise_host"))
         noise_port = int(configuration.config.get("noise_port"))
         entry_peers = list(configuration.config.get("entry_peers"))
-        log_file = configuration.config.get("log_file") # optinal, can be None
+        log_file = configuration.config.get("log_file")  # optinal, can be None
 
         with open(key_file, "r") as f:
             key = PrivKey(f.read().strip)

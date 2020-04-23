@@ -8,20 +8,20 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
-  aea/api.go: QmYYRrMemRA1x9UsSg2VrofprHyH5oZv9S3FrF6G9jzCC1
-  connection.py: QmaayZzvz5WY6D5SD8MDwqRoscxrxB8fQfUDy3S8JG84Eu
-  noise_node.go: QmUf63vTTndzgqDeogsQ3fEERtYJ5hQotgiWgb7rtqMSzZ
+  aea/api.go: QmdatRSHu3Nuz18NDMk9PGSPi34o1ATggYRX962nP6jSXm
+  connection.py: QmPi2M1uaexKUGjZxpSuoDTZ6J6wVYYCpEREp9TZYY3jwu
+  noise_node.go: QmP92aiWBd2LNgEbH1gSjr3H575c4XUPkZ2uZVTq3QgUWJ
   publickey.py: QmPyfGWQJAhHV1SQoNiCkS5uDhFXSJfPrPe7igQ1uxcPsa
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PNoiseConnection
 config:
-  entry_peers:
-  - 127.0.0.1:10000
   key_file: secret.txt
+  noise_entry_peers:
+  - 127.0.0.1:10000
   noise_host: 127.0.0.1
-  noise_port: 9999
   noise_log_file: noise_node.log
+  noise_port: 9999
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
