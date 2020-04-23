@@ -82,3 +82,5 @@ class TestMLSkills(AEAWithOefTestCase):
         model_trainer_aea_process.send_signal(signal.SIGINT)
         data_provider_aea_process.wait(timeout=60)
         model_trainer_aea_process.wait(timeout=60)
+        assert data_provider_aea_process.returncode == 0
+        assert model_trainer_aea_process.returncode == 0
