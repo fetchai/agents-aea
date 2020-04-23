@@ -64,12 +64,14 @@ async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
     return proc
 
 
-def _golang_get_deps(src: str):
+def _golang_get_deps(src: str, log_file_desc):
     cmd = ["go", "get", "-v", "-d", "."]
 
     try:
         logger.debug(cmd)
-        proc = subprocess.Popen(cmd, cwd=os.path.dirname(src))
+        proc = subprocess.Popen(
+            cmd, cwd=os.path.dirname(src), stdout=log_file_desc, stderr=log_file_desc
+        )
     except Exception as e:
         logger.error("While executing go get : {}".format(str(e)))
         raise e
@@ -78,15 +80,16 @@ def _golang_get_deps(src: str):
 
 
 # TOFIX(LR) add typing
-def _golang_run(src: str, args, env, log_file):
+def _golang_run(src: str, args, env, log_file_desc):
     cmd = ["go", "run", src]
 
     cmd.extend(args)
 
     try:
         logger.debug(cmd)
-        golang_out = open(log_file, "a", 1)
-        proc = subprocess.Popen(cmd, env=env, stdout=golang_out, stderr=golang_out)
+        proc = subprocess.Popen(
+            cmd, env=env, stdout=log_file_desc, stderr=log_file_desc
+        )
     except Exception as e:
         logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
         raise e
@@ -139,28 +142,28 @@ class Uri:
     def __init__(
         self,
         uri: Optional[str] = None,
-        addr: Optional[str] = None,
+        host: Optional[str] = None,
         port: Optional[int] = None,
     ):
         if uri is not None:
             split = uri.split(":", 1)
-            self._addr = split[0]
+            self._host = split[0]
             self._port = split[1]
-        elif addr is not None and port is not None:
-            self._addr = addr
+        elif host is not None and port is not None:
+            self._host = host
             self._port = port
         else:
             raise ValueError("Either 'uri' or both 'addr' and 'port' must be set")
 
     def __str__(self):
-        return "{}:{}".format(self._addr, self._port)
+        return "{}:{}".format(self._host, self._port)
 
     def __repr__(self):
         return self.__str__()
 
     @property
-    def addr(self) -> str:
-        return self._addr
+    def host(self) -> str:
+        return self._host
 
     @property
     def port(self) -> int:
@@ -175,10 +178,10 @@ class NoiseNode:
     def __init__(
         self,
         key: Curve25519PrivKey,
-        uri: Optional[Uri],
-        entry_peers: Sequence[Uri],
         source: Union[Path, str],
         clargs: Optional[List[str]] = [],
+        uri: Optional[Uri] = None,
+        entry_peers: Sequence[Uri] = [],
         log_file: Optional[str] = None,
     ):
         """
@@ -221,11 +224,14 @@ class NoiseNode:
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
+        # open log file
+        self._log_file_desc = open(self.log_file, "a", 1)
+
         # get source deps
         # TOFIX(LR) async version
         # proc = await _async_golang_get_deps(self.source, loop=self._loop)
         # await proc.wait()
-        proc = _golang_get_deps(self.source)
+        proc = _golang_get_deps(self.source, self._log_file_desc)
         proc.wait()
 
         # setup fifos
@@ -250,7 +256,7 @@ class NoiseNode:
         env["AEA_TO_NOISE"] = out_path
 
         # run node
-        self.proc = _golang_run(self.source, self.clargs, env, self.log_file)
+        self.proc = _golang_run(self.source, self.clargs, env, self._log_file_desc)
 
         await self._connect()
 
@@ -319,22 +325,6 @@ class NoiseNode:
             )
             return None
 
-    async def receive(self) -> Optional[bytes]:
-        try:
-            assert self._in_queue is not None
-            data = await self._in_queue.get()
-            if data is None:
-                logger.debug("Received None.")
-                return None
-            logger.debug("Received data: {}".format(data))
-            return data
-        except CancelledError:
-            logger.debug("Receive cancelled.")
-            return None
-        except Exception as e:
-            logger.exception(e)
-            return None
-
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         self.proc.terminate()
@@ -370,7 +360,7 @@ class P2PNoiseConnection(Connection):
 
         # noise local node
         self.node = NoiseNode(
-            key, uri, entry_peers, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, log_file
+            key, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, uri, entry_peers, log_file
         )
 
     async def connect(self) -> None:
@@ -447,9 +437,9 @@ class P2PNoiseConnection(Connection):
         :return: the connection object
         """
         noise_key_file = configuration.config.get("noise_key_file")  # Optional[str]
-        noise_host = str(configuration.config.get("noise_host"))
-        noise_port = int(configuration.config.get("noise_port"))
-        entry_peers = list(configuration.config.get("entry_peers"))
+        noise_host = configuration.config.get("noise_host")  # Optional[str]
+        noise_port = configuration.config.get("noise_port")  # Optional[int]
+        entry_peers = list(configuration.config.get("noise_entry_peers"))
         log_file = configuration.config.get("log_file")  # Optional[str]
 
         if noise_key_file is None:
@@ -457,6 +447,13 @@ class P2PNoiseConnection(Connection):
         else:
             with open(noise_key_file, "r") as f:
                 key = Curve25519PrivKey(f.read().strip)
+
+        uri = None
+        if noise_port is not None:
+            if noise_host is not None:
+                uri = Uri(host=noise_host, port=noise_port)
+            else:
+                uri = Uri(host="127.0.0.1", port=noise_port)
 
         entry_peers_uris = [Uri(uri) for uri in entry_peers]
 
@@ -467,7 +464,7 @@ class P2PNoiseConnection(Connection):
 
         return P2PNoiseConnection(
             key,
-            Uri(noise_host, noise_port),
+            uri,
             entry_peers_uris,
             log_file,
             connection_id=configuration.public_id,

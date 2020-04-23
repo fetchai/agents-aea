@@ -101,8 +101,7 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	<-c
 
-	// Empty println.
-	println()
+	println("[noise-p2p][info] node stopped")
 }
 
 // Deliver an envelope 
