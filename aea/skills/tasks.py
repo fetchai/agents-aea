@@ -121,7 +121,7 @@ def init_worker() -> None:
 class TaskManager:
     """A Task manager."""
 
-    def __init__(self, nb_workers: int = 5, is_lazy_pool_start: bool = True):
+    def __init__(self, nb_workers: int = 1, is_lazy_pool_start: bool = True):
         """
         Initialize the task manager.
 
