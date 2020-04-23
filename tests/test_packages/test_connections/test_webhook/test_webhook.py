@@ -106,9 +106,10 @@ class TestWebhookDisconnection:
 # @pytest.mark.asyncio
 # async def test_webhook_receive():
 #     """Test the receive functionality of the webhook connection."""
+#     admin_address = "127.0.0.1"
+#     admin_port = 8051
 #     webhook_address = "127.0.0.1"
-#     webhook_port = 8050
-#
+#     webhook_port = 8052
 #     agent_address = "some agent address"
 #
 #     webhook_connection = WebhookConnection(
@@ -125,6 +126,9 @@ class TestWebhookDisconnection:
 #     # # Start an aries agent process
 #     # process = start_aca(admin_address, admin_port)
 #
+#     received_webhook_envelop = await webhook_connection.receive()
+#     logger.info(received_webhook_envelop)
+
 #     webhook_request_mock = Mock()
 #     webhook_request_mock.method = "POST"
 #     webhook_request_mock.url = URL(val="some url")
@@ -155,7 +159,7 @@ def start_aca(admin_address: str, admin_port: int):
             "--outbound-transport",
             "http",
             "--webhook-url",
-            "http://127.0.0.1:8050/webhooks",
+            "http://127.0.0.1:8052/webhooks",
         ]
     )
     time.sleep(4.0)
