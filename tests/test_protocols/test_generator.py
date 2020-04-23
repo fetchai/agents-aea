@@ -40,6 +40,7 @@ from aea.configurations.base import (
     ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
+    SkillConfig,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
@@ -52,7 +53,7 @@ from aea.protocols.generator import (
     _specification_type_to_python_type,
     _union_sub_type_to_protobuf_variable_name,
 )
-from aea.skills.base import Handler, SkillContext
+from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.click_testing import CliRunner
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
@@ -335,9 +336,13 @@ class TestEndToEndGenerator:
         )
         encoded_message_2_in_bytes = TProtocolSerializer().encode(message_2)
 
-        # add handlers to AEA resources
+        # add handlers to AEA resources]
+        skill_context_1 = SkillContext(aea_1.context)
+        skill_1 = Skill(SkillConfig("fake_skill", "fetchai", "0.1.0"), skill_context_1)
+        skill_context_1._skill = skill_1
+
         agent_1_handler = Agent1Handler(
-            skill_context=SkillContext(aea_1.context), name="fake_skill"
+            skill_context=skill_context_1, name="fake_handler_1"
         )
         aea_1.resources._handler_registry.register(
             (
@@ -346,11 +351,14 @@ class TestEndToEndGenerator:
             ),
             agent_1_handler,
         )
+        skill_context_2 = SkillContext(aea_2.context)
+        skill_2 = Skill(SkillConfig("fake_skill", "fetchai", "0.1.0"), skill_context_2)
+        skill_context_2._skill = skill_2
 
         agent_2_handler = Agent2Handler(
             encoded_messsage=encoded_message_2_in_bytes,
-            skill_context=SkillContext(aea_2.context),
-            name="fake_skill",
+            skill_context=skill_context_2,
+            name="fake_handler_2",
         )
         aea_2.resources._handler_registry.register(
             (

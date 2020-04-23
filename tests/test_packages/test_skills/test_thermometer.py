@@ -51,10 +51,10 @@ class TestThermometerSkill(AEAWithOefTestCase):
 
         setting_path = "agent.ledger_apis"
         force_set_config(setting_path, ledger_apis)
-        setting_path = "vendor.{}.skills.thermometer.models.strategy.args.has_sensor".format(
-            FETCHAI_NAME
+        setting_path = (
+            "vendor.fetchai.skills.thermometer.models.strategy.args.has_sensor"
         )
-        force_set_config(setting_path, False)
+        self.set_config(setting_path, False, "bool")
 
         self.run_install()
 
