@@ -20,20 +20,19 @@
 """This module contains the p2p noise connection."""
 
 import asyncio
+import errno
 import logging
 import os
+import posix
+import struct
 import subprocess  # nosec
-import errno
+import tempfile
+from asyncio import AbstractEventLoop, CancelledError
+from random import randint
+from typing import IO, List, Mapping, Optional, Sequence, cast
+
 import nacl.encoding
 import nacl.signing
-import struct
-import posix
-import tempfile
-from pathlib import Path
-from random import randint
-from typing import List, IO, Mapping, Optional, Sequence, Union
-
-from asyncio import AbstractEventLoop, CancelledError
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
@@ -42,10 +41,10 @@ from aea.mail.base import Address, Envelope
 logger = logging.getLogger(__name__)
 
 
-NOISE_NODE_SOURCE = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), "noise_node.go"
+NOISE_NODE_SOURCE = str(
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), "noise_node.go")
 )
-NOISE_NODE_CLARGS = list()
+NOISE_NODE_CLARGS = list()  # type: List[str]
 
 NOISE_NODE_LOG_FILE = "noise_node.log"
 
@@ -54,7 +53,8 @@ NOISE_NODE_LOG_FILE = "noise_node.log"
 async def _async_golang_get_deps(
     src: str, loop: AbstractEventLoop
 ) -> asyncio.subprocess.Process:
-    """ Downloads libraries that go 'src' file depends on
+    """
+    Downloads libraries that go 'src' file depends on
     """
     cmd = ["go", "get", "-v", "-d", "."]
 
@@ -71,7 +71,8 @@ async def _async_golang_get_deps(
 
 
 def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
-    """ Downloads libraries that go 'src' file depends on
+    """
+    Downloads libraries that go 'src' file depends on
     """
     cmd = ["go", "get", "-v", "-d", "."]
 
@@ -94,7 +95,8 @@ def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
 def _golang_run(
     src: str, args: Sequence[str], env: Mapping[str, str], log_file_desc: IO[str]
 ) -> subprocess.Popen:
-    """ Runs the go 'src' as a subprocess
+    """
+    Runs the go 'src' as a subprocess
     """
     cmd = ["go", "run", src]
 
@@ -113,7 +115,8 @@ def _golang_run(
 
 
 class Curve25519PubKey:
-    """ Elliptic curve Curve25519 public key - Required by noise
+    """
+    Elliptic curve Curve25519 public key - Required by noise
     """
 
     def __init__(
@@ -138,7 +141,8 @@ class Curve25519PubKey:
 
 
 class Curve25519PrivKey:
-    """ Elliptic curve Curve25519 private key - Required by noise
+    """
+    Elliptic curve Curve25519 private key - Required by noise
     """
 
     def __init__(self, key: Optional[str] = None):
@@ -160,7 +164,8 @@ class Curve25519PrivKey:
 
 
 class Uri:
-    """ Holds a node address in format "host:port"
+    """
+    Holds a node address in format "host:port"
     """
 
     def __init__(
@@ -172,7 +177,7 @@ class Uri:
         if uri is not None:
             split = uri.split(":", 1)
             self._host = split[0]
-            self._port = split[1]
+            self._port = int(split[1])
         elif host is not None and port is not None:
             self._host = host
             self._port = port
@@ -197,24 +202,28 @@ class Uri:
 
 
 class NoiseNode:
-    """Noise p2p node as a subprocess with named pipes interface
+    """
+    Noise p2p node as a subprocess with named pipes interface
     """
 
     def __init__(
         self,
         key: Curve25519PrivKey,
-        source: Union[Path, str],
-        clargs: Optional[List[str]] = [],
+        source: str,
+        clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
-        entry_peers: Sequence[Uri] = [],
+        entry_peers: Optional[Sequence[Uri]] = None,
         log_file: Optional[str] = None,
     ):
         """
         Initialize a p2p noise node.
 
         :param key: ec25519 curve private key.
+        :param source: the source path
+        :param clargs: the command line arguments for the noise node
         :param uri: noise node ip address and port number in format ipaddress:port.
         :param entry_peers: noise entry peers ip address and port numbers.
+        :param log_file: the logfile path for the noise node
         """
 
         # node id in the p2p network
@@ -225,11 +234,11 @@ class NoiseNode:
         self.uri = uri if uri is not None else Uri()
 
         # entry p
-        self.entry_peers = entry_peers
+        self.entry_peers = entry_peers if entry_peers is not None else []
 
         # node startup
         self.source = source
-        self.clargs = clargs
+        self.clargs = clargs if clargs is not None else []
 
         # log file
         self.log_file = log_file if log_file is not None else NOISE_NODE_LOG_FILE
@@ -238,12 +247,13 @@ class NoiseNode:
         tmp_dir = tempfile.mkdtemp()
         self.noise_to_aea_path = "{}/{}-noise_to_aea".format(tmp_dir, self.pub[:5])
         self.aea_to_noise_path = "{}/{}-aea_to_noise".format(tmp_dir, self.pub[:5])
-        self._noise_to_aea = None
+        self._noise_to_aea = None  # type: Optional[int]
         self._aea_to_noise = None
         self._connection_attempts = 10
 
-        self._loop = None
-        self.proc = None
+        self._loop = None  # type: Optional[AbstractEventLoop]
+        self.proc = None  # type: Optional[subprocess.Popen]
+        self._stream_reader = None  # type: Optional[asyncio.StreamReader]
 
     async def start(self) -> None:
         if self._loop is None:
@@ -314,6 +324,7 @@ class NoiseNode:
                 raise e
 
         # setup reader
+        assert self._noise_to_aea is not None and self._aea_to_noise is not None
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
         self._reader_protocol = asyncio.StreamReaderProtocol(
             self._stream_reader, loop=self._loop
@@ -331,6 +342,9 @@ class NoiseNode:
         # TOFIX(LR) can use asyncio.connect_write_pipe
 
     async def read(self) -> Optional[bytes]:
+        assert (
+            self._stream_reader is not None
+        ), "StreamReader not set, call connect first!"
         try:
             logger.debug("Waiting for messages...")
             size = await self._stream_reader.readexactly(4)
@@ -351,6 +365,7 @@ class NoiseNode:
 
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
+        assert self.proc is not None, "Process not set, call connect first!"
         self.proc.terminate()
         self.proc.wait()
 
@@ -363,7 +378,7 @@ class P2PNoiseConnection(Connection):
         self,
         key: Curve25519PrivKey,
         uri: Optional[Uri] = None,
-        entry_peers: Sequence[Uri] = [],
+        entry_peers: Sequence[Uri] = None,
         log_file: Optional[str] = None,
         **kwargs
     ):
@@ -379,16 +394,21 @@ class P2PNoiseConnection(Connection):
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
         super().__init__(**kwargs)
 
-        if uri is None and len(entry_peers) == 0:
-            raise ValueError("uri parameter must be set for genesis connection")
+        if uri is None and (entry_peers is None or len(entry_peers) == 0):
+            raise ValueError("Uri parameter must be set for genesis connection")
 
         # noise local node
         self.node = NoiseNode(
             key, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, uri, entry_peers, log_file
         )
+        self._in_queue = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
-        """Set up the connection."""
+        """
+        Set up the connection.
+
+        :return: None
+        """
         if self.connection_status.is_connected:
             return
 
@@ -404,9 +424,10 @@ class P2PNoiseConnection(Connection):
         """
         Disconnect from the channel.
 
+        :reutrn: None
         """
         self.connection_status.is_connected = False
-        await asyncio.coroutine(self.node.stop)()
+        self.node.stop()
         assert self._in_queue is not None, "Input queue not initialized."
         self._in_queue.put_nowait(None)
 
@@ -443,10 +464,16 @@ class P2PNoiseConnection(Connection):
         await self.node.write(envelope.encode())
 
     async def _receive_from_node(self) -> None:
+        """
+        Receive data from node.
+
+        :return: None
+        """
         while True:
             data = await self.node.read()
             if data is None:
                 break
+            assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
 
     @classmethod
@@ -463,14 +490,14 @@ class P2PNoiseConnection(Connection):
         noise_key_file = configuration.config.get("noise_key_file")  # Optional[str]
         noise_host = configuration.config.get("noise_host")  # Optional[str]
         noise_port = configuration.config.get("noise_port")  # Optional[int]
-        entry_peers = list(configuration.config.get("noise_entry_peers"))
+        entry_peers = list(cast(List, configuration.config.get("noise_entry_peers")))
         log_file = configuration.config.get("log_file")  # Optional[str]
 
         if noise_key_file is None:
             key = Curve25519PrivKey()
         else:
             with open(noise_key_file, "r") as f:
-                key = Curve25519PrivKey(f.read().strip)
+                key = Curve25519PrivKey(f.read().strip())
 
         uri = None
         if noise_port is not None:
