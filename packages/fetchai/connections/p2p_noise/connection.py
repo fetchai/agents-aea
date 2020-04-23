@@ -44,6 +44,8 @@ NOISE_NODE_SOURCE = os.path.join(
 )
 NOISE_NODE_CLARGS = list()
 
+NOISE_NODE_LOG_FILE = "noise_node.log"
+
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
 async def _async_golang_get_deps(src: str, loop: AbstractEventLoop):
@@ -75,14 +77,15 @@ def _golang_get_deps(src: str):
 
 
 # TOFIX(LR) add typing
-def _golang_run(src: str, args=[], env={}):
+def _golang_run(src: str, args, env, log_file):
     cmd = ["go", "run", src]
 
     cmd.extend(args)
 
     try:
         logger.debug(cmd)
-        proc = subprocess.Popen(cmd, env=env)
+        golang_out = open(log_file, "a", 1)
+        proc = subprocess.Popen(cmd, env=env, stdout=golang_out, stderr=golang_out)
     except Exception as e:
         logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
         raise e
@@ -134,6 +137,7 @@ class NoiseNode:
         entry_peers: Sequence[Uri],
         source: Union[Path, str],
         clargs: Optional[List[str]] = [],
+        log_file: Optional[str] = None,
     ):
         """
         Initialize a p2p noise node.
@@ -156,6 +160,9 @@ class NoiseNode:
         # node startup
         self.source = source
         self.clargs = clargs
+
+        # log file
+        self.log_file = log_file if log_file is not None else NOISE_NODE_LOG_FILE
 
         # named pipes (fifos)
         self.noise_to_aea_path = "/tmp/{}-noise_to_aea".format(self.pub[:5])
@@ -201,7 +208,7 @@ class NoiseNode:
         env["AEA_TO_NOISE"] = out_path
 
         # run node
-        self.proc = _golang_run(self.source, self.clargs, env)
+        self.proc = _golang_run(self.source, self.clargs, env, self.log_file)
 
         await self._connect()
 
@@ -297,7 +304,9 @@ class P2PNoiseConnection(Connection):
     """
 
     def __init__(
-        self, key: PrivKey, uri: Optional[Uri], entry_peers: Sequence[Uri], **kwargs
+        self, key: PrivKey, uri: Optional[Uri] = None, entry_peers: Sequence[Uri] = [], 
+        log_file: Optional[str] = None,
+         **kwargs
     ):
         """
         Initialize a p2p noise connection.
@@ -305,6 +314,7 @@ class P2PNoiseConnection(Connection):
         :param key: ec25519 curve private key.
         :param uri: noise node ip address and port number in format ipaddress:port.
         :param entry_peers: noise entry peers ip address and port numbers.
+        :param log_file: noise node log file
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
@@ -315,7 +325,7 @@ class P2PNoiseConnection(Connection):
 
         # noise local node
         self.node = NoiseNode(
-            key, uri, entry_peers, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS,
+            key, uri, entry_peers, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, log_file
         )
 
     async def connect(self) -> None:
@@ -395,6 +405,7 @@ class P2PNoiseConnection(Connection):
         noise_host = str(configuration.config.get("noise_host"))
         noise_port = int(configuration.config.get("noise_port"))
         entry_peers = list(configuration.config.get("entry_peers"))
+        log_file = configuration.config.get("log_file") # optinal, can be None
 
         with open(key_file, "r") as f:
             key = PrivKey(f.read().strip)
@@ -410,6 +421,7 @@ class P2PNoiseConnection(Connection):
             key,
             Uri(noise_host, noise_port),
             entry_peers_uris,
+            log_file,
             connection_id=configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,

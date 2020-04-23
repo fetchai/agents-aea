@@ -78,14 +78,14 @@ func (aea *AeaApi) Init() error {
   uri := os.Getenv("URI")
 
   if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
-    fmt.Println("[aea-api][error] couldn't get configuration")
+    fmt.Println("[aea-api  ][error] couldn't get configuration")
     return errors.New("Couldn't get AEA configuration.")
   }
 
   // parse uri
   parts  := strings.SplitN(uri, ":", -1)
   if len(parts) < 2 {
-    fmt.Println("[aea-api][error] malformed Uri:", uri)
+    fmt.Println("[aea-api  ][error] malformed Uri:", uri)
     return errors.New("Malformed Uri.")
   }
 	aea.host = net.ParseIP(parts[0])
@@ -107,7 +107,7 @@ func (aea *AeaApi) Connect() error {
   aea.msgin,  erri = os.OpenFile(aea.msgin_path, os.O_RDONLY, os.ModeNamedPipe)
 
   if erri != nil || erro != nil {
-    fmt.Println("[aea-api][error] while opening pipes", erri, erro)
+    fmt.Println("[aea-api  ][error] while opening pipes", erri, erro)
     if erri != nil {
       return erri
     }
@@ -118,14 +118,14 @@ func (aea *AeaApi) Connect() error {
   //TOFIX(LR) trade-offs between bufferd vs unbuffered channel
   aea.out_queue = make(chan *Envelope, 10) 
   go aea.listen_for_envelopes()
-  //fmt.Println("[aea-api][info] connected to agent")
+  fmt.Println("[aea-api  ][info] connected to agent")
 
   return nil
 }
 
 func (aea *AeaApi) WithSandbox() *AeaApi {
   var err error
-  fmt.Println("[aea-api][warning] running in sandbox mode")
+  fmt.Println("[aea-api  ][warning] running in sandbox mode")
   aea.msgin_path, aea.msgout_path, aea.id, aea.host, aea.port, err = setup_aea_sandbox()
   if err != nil {
     return nil
@@ -145,8 +145,8 @@ func (aea *AeaApi) listen_for_envelopes() {
   for {
     envel, err := read_envelope(aea.msgin)
     if err != nil {
-      fmt.Println("[aea-api][error] while receiving envelope:", err)
-      fmt.Println("[aea-api][info] disconnecting")
+      fmt.Println("[aea-api  ][error] while receiving envelope:", err)
+      fmt.Println("[aea-api  ][info] disconnecting")
       // TOFIX(LR) see above
       if !aea.closing {
         aea.stop()
@@ -187,7 +187,7 @@ func read(pipe *os.File) ([]byte, error) {
   buf := make([]byte, 4)
   _, err := pipe.Read(buf)
   if err != nil {
-    fmt.Println("[aea-api][error] while receiving size:", err)
+    fmt.Println("[aea-api  ][error] while receiving size:", err)
     return buf, err
   }
   size := binary.BigEndian.Uint32(buf)
@@ -200,7 +200,7 @@ func read(pipe *os.File) ([]byte, error) {
 func write_envelope(pipe *os.File, envelope *Envelope) error {
   data, err := proto.Marshal(envelope)
   if err != nil {
-    fmt.Println("[aea-api][error] while serializing envelope:", envelope, ":", err)
+    fmt.Println("[aea-api  ][error] while serializing envelope:", envelope, ":", err)
     return err
   }
   return write(pipe, data)
@@ -210,7 +210,7 @@ func read_envelope(pipe *os.File) (*Envelope, error) {
   envelope := &Envelope{}
   data, err := read(pipe)
   if err != nil {
-    fmt.Println("[aea-api][error] while receiving data:", err)
+    fmt.Println("[aea-api  ][error] while receiving data:", err)
     return envelope, err
   }
   err = proto.Unmarshal(data, envelope)
@@ -243,7 +243,7 @@ func setup_aea_sandbox() (string, string, string, net.IP, uint16, error) {
   erri := syscall.Mkfifo(msgin_path, 0666)
   erro := syscall.Mkfifo(msgout_path, 0666)
   if erri != nil || erro != nil {
-    fmt.Println("[aea-api][error][sandbox] setting up pipes:", erri, erro)
+    fmt.Println("[aea-api  ][error][sandbox] setting up pipes:", erri, erro)
     if erri != nil {
       return  "", "", "", nil, 0, erri
     }
@@ -259,7 +259,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
   msgout, erro := os.OpenFile(msgout_path, os.O_RDONLY, os.ModeNamedPipe)
   msgin,  erri := os.OpenFile(msgin_path, os.O_WRONLY, os.ModeNamedPipe)
   if erri != nil || erro != nil {
-    fmt.Println("[aea-api][error][sandbox] error while opening pipes:", erri, erro)
+    fmt.Println("[aea-api  ][error][sandbox] error while opening pipes:", erri, erro)
     if erri != nil {
       return erri
     } else {
@@ -272,10 +272,10 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
     for {
       envel, err := read_envelope(msgout)
       if err != nil {
-        fmt.Println("[aea-api][error][sandbox] stopped receiving envelopes:", err)
+        fmt.Println("[aea-api  ][error][sandbox] stopped receiving envelopes:", err)
         return
       }
-      fmt.Println("[aea-api][error][sandbox] consumed envelope", envel)
+      fmt.Println("[aea-api  ][error][sandbox] consumed envelope", envel)
     }
   }()
 
@@ -287,7 +287,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
       envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.1.0", []byte("\x08\x01*\x07\n\x05Message from sandbox "+strconv.Itoa(i)), ""}
       err := write_envelope(msgin, envel)
       if err != nil {
-        fmt.Println("[aea-api][error][sandbox] stopped producing envelopes:", err)
+        fmt.Println("[aea-api  ][error][sandbox] stopped producing envelopes:", err)
         return
       }
       i += 1

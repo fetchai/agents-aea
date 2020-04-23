@@ -21,6 +21,7 @@ config:
   key_file: secret.txt
   noise_host: 127.0.0.1
   noise_port: 9999
+  noise_log_file: noise_node.log
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:

@@ -70,7 +70,7 @@ func main() {
 	check(node.Listen())
 
 	//
-	//fmt.Printf("[noise-p2p][info] started node %s (%s).\n", node.ID().Address, node.ID().ID.String())
+	fmt.Printf("[noise-p2p][info] started node %s (%s).\n", node.ID().Address, node.ID().ID.String())
 
 	// Ping entry node to initially bootstrap, if non genesis
 	if len(agent.EntryUris()) > 0 {
@@ -78,7 +78,12 @@ func main() {
 	}
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
-	discover(overlay)
+	go func() {
+		for {
+			discover(overlay)
+			time.Sleep(2500*time.Millisecond)
+		}
+	}()
 
 	// Once overlay setup, connect to agent
 	check(agent.Connect())
@@ -102,7 +107,6 @@ func main() {
 // Deliver an envelope 
 func  send(envel aea.Envelope, node *noise.Node, overlay *kademlia.Protocol) error {
     //fmt.Printf("[noise-p2p][debug] Looking for %s...\n", envel.To)
-    discover(overlay)
     ids := overlay.Table().Peers()
     var dest *noise.ID = nil
     for _, id := range(ids) {
@@ -117,7 +121,7 @@ func  send(envel aea.Envelope, node *noise.Node, overlay *kademlia.Protocol) err
       	return errors.New("Couldn't locate peer")
     }
 
-	//fmt.Printf("[noise-p2p][debug] Sending to %s:%s...\n", dest.Address, envel)
+	fmt.Printf("[noise-p2p][debug] Sending to %s:%s...\n", dest.Address, envel)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	err := node.SendMessage(ctx, dest.Address, envel)
 	cancel()
@@ -150,7 +154,7 @@ func handle(ctx noise.HandlerContext, agent aea.AeaApi) error {
 	}
 
 	// Deliver envelope to agent
-	//fmt.Printf("[noise-p2p][debug] Received envelope %s(%s) - %s\n", ctx.ID().Address, ctx.ID().ID.String(), envel)
+	fmt.Printf("[noise-p2p][debug] Received envelope %s(%s) - %s\n", ctx.ID().Address, ctx.ID().ID.String(), envel)
   	agent.Put(&envel)
 
 	return nil
@@ -180,6 +184,7 @@ func discover(overlay *kademlia.Protocol) {
 		str = append(str, fmt.Sprintf("%s(%s)", id.Address, id.ID.String()))
 	}
 
+	// TOFIX(LR) keeps printing already known peers
 	if len(ids) > 0 {
 		//fmt.Printf("[noise-p2p][debug] Discovered %d peer(s): [%v]\n", len(ids), strings.Join(str, ", "))
 	} else {
