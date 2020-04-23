@@ -17,12 +17,11 @@ protocols: []
 class_name: P2PNoiseConnection
 config:
   key_file: secret.txt
-  noise_entry_peers:
-  - 127.0.0.1:10000
+  noise_entry_peers: []
   noise_host: 127.0.0.1
   noise_log_file: noise_node.log
-  noise_port: 9999
+  noise_port: 9000
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
-  watchdog: {}
+  pynacl: {}
