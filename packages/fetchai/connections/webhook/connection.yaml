@@ -17,4 +17,6 @@ config:
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/http:0.1.0
-dependencies: {}
+dependencies:
+  aiohttp:
+    version: ==3.6.2
