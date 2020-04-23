@@ -22,8 +22,7 @@
 import json
 from typing import Dict, Optional
 
-from aea.configurations.base import ProtocolId
-from aea.configurations.base import PublicId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.mail.base import Address, Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -56,6 +55,8 @@ class AriesDemoHTTPHandler(Handler):
         self.admin_post = admin_port if not None else ADMIN_PORT
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_post)
+        self.connection_id = ""
+        self.is_connected_to_Alice = False
 
         self.kwargs = kwargs
         self.handled_message = None
@@ -163,7 +164,7 @@ class AriesDemoHTTPHandler(Handler):
         # self.context.behaviours.aries_demo_behaviour.put(message)
 
         self.handled_message = message
-        if message.performative == HttpMessage.Performative.RESPONSE and message.status_code == 200:
+        if message.performative == HttpMessage.Performative.RESPONSE and message.status_code == 200:  # response to http request
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
@@ -182,13 +183,22 @@ class AriesDemoHTTPHandler(Handler):
                 self._admin_post("/connections/create-invitation")
             elif "connection_id" in content:
                 connection = content
-                connection_id = content["connection_id"]
+                self.connection_id = content["connection_id"]
                 invitation = connection["invitation"]
                 self.context.logger.info("connection: " + str(connection))
-                self.context.logger.info("connection id: " + connection_id)
+                self.context.logger.info("connection id: " + self.connection_id)
                 self.context.logger.info("invitation: " + str(invitation))
                 self.context.logger.info("Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection...")
                 self.send_message(invitation)
+        elif message.performative == HttpMessage.Performative.REQUEST:  # webhook request
+            content_bytes = message.bodyy
+            content = json.loads(content_bytes)
+            self.context.logger.info("Received webhook message content:" + str(content))
+            if "connection_id" in content:
+                if content["connection_id"] == self.connection_id:
+                    if content["state"] == "active" and not self.is_connected_to_Faber:
+                        self.context.logger.info("Connected to Alice")
+                        self.is_connected_to_Alice = True
 
     def teardown(self) -> None:
         """

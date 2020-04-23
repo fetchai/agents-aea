@@ -14,6 +14,7 @@ class_name: WebhookConnection
 config:
   host: ${addr:127.0.0.1}
   port: ${port:8000}
+  url_path: ${/webhooks/topic/{topic}/}
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/http:0.1.0

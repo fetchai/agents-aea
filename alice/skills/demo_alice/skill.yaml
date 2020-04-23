@@ -7,7 +7,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmQMquwDVrJsGCkSJojr45kfHttvBgawFNwBbTcUaJpJsF
-  handlers.py: QmaMZd8PfY3qYQvj9Rr9SLeu7EQ7ZpzZuTR5Z4U4fh9XWf
+  handlers.py: QmfGRmCxLT3cjyYDVRFPocwyCK6z5oErPuPfXDrNksxg1a
   my_model.py: QmPaZ6G37Juk63mJj88nParaEp71XyURts8AmmX1axs24V
 fingerprint_ignore_patterns: []
 contracts: []
