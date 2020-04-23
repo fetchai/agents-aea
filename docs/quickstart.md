@@ -228,7 +228,6 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` is a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
 ``` python
-import os
 import signal
 import time
 
@@ -239,7 +238,6 @@ from aea.connections.stub.connection import (
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
@@ -250,18 +248,8 @@ from aea.test_tools.test_cases import AEATestCase
 class TestEchoSkill(AEATestCase):
     """Test that echo skill works."""
 
-    @skip_test_ci
-    def test_echo(self, pytestconfig):
+    def test_echo(self):
         """Run the echo skill sequence."""
-        self.initialize_aea()
-        agent_name = "my_first_agent"
-        self.create_agents(agent_name)
-
-        agent_dir_path = os.path.join(self.t, agent_name)
-        os.chdir(agent_dir_path)
-
-        self.add_item("skill", "fetchai/echo:0.1.0")
-
         process = self.run_agent()
         time.sleep(2.0)
 
@@ -270,8 +258,8 @@ class TestEchoSkill(AEATestCase):
             performative=DefaultMessage.Performative.BYTES, content=b"hello",
         )
         sent_envelope = Envelope(
-            to=agent_name,
-            sender="sender",
+            to=self.agent_name,
+            sender="sender_aea",
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
@@ -289,6 +277,14 @@ class TestEchoSkill(AEATestCase):
         process.send_signal(signal.SIGINT)
         process.wait(timeout=20)
         assert process.returncode == 0
+```
+
+Place the above code into a file `test.py` in your AEA project directory (the same level as the `aea-config.yaml` file).
+
+To run, execute the following:
+
+``` python
+pytest test.py
 ```
 
 </details>
