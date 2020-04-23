@@ -56,7 +56,7 @@ You can install the `svn` command with (`brew install subversion` or `sudo apt-g
 
 ## Installation
 
-The following installs the entire AEA package which also includes a command-line interface (CLI).
+The following installs the entire AEA package which also includes a [command-line interface (CLI)](../cli-commands).
 
 ``` bash
 pip install aea[all]
@@ -109,10 +109,14 @@ v0.3.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>If you would rather not create an account on the registry at this point, then run `aea init --local` instead.</p>
+</div>
+
 ## Echo skill demo
 
-The echo skill is a simple demo that introduces you to the main business logic components of an AEA. 
-The fastest way to create your first AEA is to fetch it! 
+The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it! 
 
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
@@ -120,6 +124,8 @@ If you want to follow a step by step guide we show you how to do it at the end o
 aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
 ```
+
+To learn more about the folder structure of an AEA project read on [here](../package-imports).
 
 ## Usage of the stub connection	
 
@@ -239,8 +245,8 @@ For more demos, use cases or step by step guides, please check the following:
 <br>		
 First, create a new AEA project and enter it.		
 ``` bash		
-aea create my_first_aea		
-cd my_first_aea		
+aea create my_first_aea
+cd my_first_aea
 ```
 <br>  
 <b>Add the echo skill</b> 		
@@ -249,5 +255,5 @@ Second, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.1.0		
 ```		
-This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
+This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
 </details>
