@@ -32,7 +32,7 @@ from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 DEFAULT_ADMIN_HOST = "127.0.0.1"
-DEFAULT_ADMIN_PORT = 8020
+DEFAULT_ADMIN_PORT = 8021
 
 
 class AriesDemoFaberBehaviour(OneShotBehaviour):

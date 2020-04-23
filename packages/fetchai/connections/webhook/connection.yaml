@@ -6,15 +6,15 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmWUKSmXaBgGMvKgdmzKmMjCx43BnrfW6og2n3afNoAALq
-  connection.py: QmZKFwYYW3dLb8uY3V7Y8pc7B5t3Dcbxvh1pbqanGdnqB5
+  connection.py: QmY5LJAhSgJjwBqt8rBpaSTGPvaYNc7JeeP5qEBrpmNHvC
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/http:0.1.0
 class_name: WebhookConnection
 config:
-  host: ${addr:127.0.0.1}
-  port: ${port:8000}
-  url_path: ${webhook_url_path}
+  webhook_address: ${WEBHOOK_ADDRESS:127.0.0.1}
+  webhook_port: ${WEBHOOK_PORT:8000}
+  webhook_url_path: ${WEBHOOK_URL_PATH:/some/url/path}
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/http:0.1.0

@@ -23,11 +23,11 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
-from aiohttp import web
+from aiohttp import web  # type: ignore
 
-from aea.configurations.base import PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
@@ -182,15 +182,11 @@ class WebhookConnection(Connection):
 
         super().__init__(**kwargs)
 
-        self.webhook_address = webhook_address
-        self.webhook_port = webhook_port
-        self.webhook_url_path = webhook_url_path
-
         self.channel = WebhookChannel(
             agent_address=self.address,
-            webhook_address=self.webhook_address,
+            webhook_address=webhook_address,
+            webhook_port=webhook_port,
             webhook_url_path=webhook_url_path,
-            webhook_port=self.webhook_port,
             connection_id=self.connection_id,
         )
 
@@ -243,3 +239,25 @@ class WebhookConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
+
+    @classmethod
+    def from_config(
+        cls, address: Address, configuration: ConnectionConfig
+    ) -> "Connection":
+        """
+        Get the HTTP connection from a connection configuration.
+
+        :param address: the address of the agent.
+        :param configuration: the connection configuration object.
+        :return: the connection object
+        """
+        webhook_address = cast(str, configuration.config.get("webhook_address"))
+        webhook_port = cast(int, configuration.config.get("webhook_port"))
+        webhook_url_path = cast(str, configuration.config.get("webhook_url_path"))
+        return WebhookConnection(
+            webhook_address,
+            webhook_port,
+            webhook_url_path,
+            address=address,
+            configuration=configuration,
+        )

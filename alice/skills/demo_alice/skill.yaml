@@ -6,8 +6,8 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmQMquwDVrJsGCkSJojr45kfHttvBgawFNwBbTcUaJpJsF
-  handlers.py: QmfGRmCxLT3cjyYDVRFPocwyCK6z5oErPuPfXDrNksxg1a
+  behaviours.py: QmRqcKKbLXF7xMpR5pEwRG4aGQYynsDhhWrC6ybQvKiByW
+  handlers.py: QmQ2RVpzAtuDvhW6y6RFDwBy87kPeFfHGLzmwGMf1TAkPs
   my_model.py: QmPaZ6G37Juk63mJj88nParaEp71XyURts8AmmX1axs24V
 fingerprint_ignore_patterns: []
 contracts: []
@@ -20,9 +20,8 @@ handlers:
   aries_demo_default_handler:
     args: {}
     class_name: AriesDemoDefaultHandler
-models:
-  scaffold:
-    args:
-      foo: bar
-    class_name: MyModel
+  aries_demo_http_handler:
+    args: {}
+    class_name: AriesDemoHttpHandler
+models: {}
 dependencies: {}

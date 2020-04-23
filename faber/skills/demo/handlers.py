@@ -23,7 +23,7 @@ import json
 from typing import Dict, Optional
 
 from aea.configurations.base import ProtocolId, PublicId
-from aea.mail.base import Address, Envelope, EnvelopeContext
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 from aea.protocols.default.message import DefaultMessage
@@ -38,8 +38,8 @@ DEFAULT_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "default", "0.1.0")
 OEF_CONNECTION_PUBLIC_ID = PublicId("fetchai", "oef", "0.1.0")
 ALICE_AEA_ADDRESS = "FRxXBaKvt9XwzdiQnMS8f6rXfUzi6ZCDb2UR1x4sr7WMo2SpH"
 
-ADMIN_HOST = "127.0.0.1"
-ADMIN_PORT = 8020
+DEFAULT_ADMIN_HOST = "127.0.0.1"
+DEFAULT_ADMIN_PORT = 8021
 SUPPORT_REVOCATION = False
 
 
@@ -50,9 +50,10 @@ class AriesDemoHTTPHandler(Handler):
 
     def __init__(self, admin_host: str = None, admin_port: int = None, **kwargs):
         """Initialize the handler."""
+        self.admin_host = kwargs.pop(admin_host, DEFAULT_ADMIN_HOST)
+        self.admin_post = kwargs.pop(admin_port, DEFAULT_ADMIN_PORT)
+
         super().__init__(**kwargs)
-        self.admin_host = admin_host if not None else ADMIN_HOST
-        self.admin_post = admin_port if not None else ADMIN_PORT
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_post)
         self.connection_id = ""

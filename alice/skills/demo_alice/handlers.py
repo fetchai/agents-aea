@@ -25,6 +25,7 @@ import json
 from typing import Dict, Optional
 
 from aea.configurations.base import ProtocolId, PublicId
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -34,9 +35,11 @@ from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from urllib.parse import urlparse
 
+HTTP_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
+
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
-ADMIN_HOST = "127.0.0.1"
-ADMIN_PORT = 8030
+DEFAULT_ADMIN_HOST = "127.0.0.1"
+DEFAULT_ADMIN_PORT = 8031
 
 
 class AriesDemoDefaultHandler(Handler):
@@ -46,9 +49,10 @@ class AriesDemoDefaultHandler(Handler):
 
     def __init__(self, admin_host: str = None, admin_port: int = None, **kwargs):
         """Initialize the handler."""
+        self.admin_host = kwargs.pop(admin_host, DEFAULT_ADMIN_HOST)
+        self.admin_post = kwargs.pop(admin_port, DEFAULT_ADMIN_PORT)
+
         super().__init__(**kwargs)
-        self.admin_host = admin_host if not None else ADMIN_HOST
-        self.admin_post = admin_port if not None else ADMIN_PORT
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_post)
 
@@ -65,12 +69,15 @@ class AriesDemoDefaultHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        self.context.outbox.put_message(
+        context = EnvelopeContext(connection_id=HTTP_CONNECTION_PUBLIC_ID)
+        envelope = Envelope(
             to="Alice_ACA",
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
+            context=context,
             message=HttpSerializer().encode(request_http_message),
         )
+        self.context.outbox.put(envelope)
 
     def setup(self) -> None:
         """
@@ -92,7 +99,8 @@ class AriesDemoDefaultHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
-                self.handle_received_invite(content)
+                # self.handle_received_invite(content)
+                self._admin_post("/connections/receive-invitation", content)
 
     def teardown(self) -> None:
         """
@@ -103,6 +111,7 @@ class AriesDemoDefaultHandler(Handler):
         pass
 
     def handle_received_invite(self, invite_detail: Dict):
+        import pdb;pdb.set_trace()
         for details in invite_detail:
             try:
                 url = urlparse(details)
@@ -136,8 +145,6 @@ class AriesDemoDefaultHandler(Handler):
 
         self._admin_post("/connections/receive-invitation", details)
 
-        await agent.detect_connection()
-
 
 class AriesDemoHttpHandler(Handler):
     """This class scaffolds a handler."""
@@ -146,9 +153,10 @@ class AriesDemoHttpHandler(Handler):
 
     def __init__(self, admin_host: str = None, admin_port: int = None, **kwargs):
         """Initialize the handler."""
+        self.admin_host = kwargs.pop(admin_host, DEFAULT_ADMIN_HOST)
+        self.admin_post = kwargs.pop(admin_port, DEFAULT_ADMIN_PORT)
+
         super().__init__(**kwargs)
-        self.admin_host = admin_host if not None else ADMIN_HOST
-        self.admin_post = admin_port if not None else ADMIN_PORT
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_post)
         self.connection_id = ""
@@ -200,15 +208,18 @@ class AriesDemoHttpHandler(Handler):
                         self.is_connected_to_Faber = True
         elif message.performative == HttpMessage.Performative.RESPONSE:  # response to http_client request
             content_bytes = message.bodyy
-            content = json.loads(content_bytes)
-            self.context.logger.info("Received http response message content:" + str(content))
-            if "connection_id" in content:
-                connection = content
-                self.connection_id = content["connection_id"]
-                invitation = connection["invitation"]
-                self.context.logger.info("invitation response: " + str(connection))
-                self.context.logger.info("connection id: " + self.connection_id)
-                self.context.logger.info("invitation: " + str(invitation))
+            content = content_bytes.decode("utf-8")
+            if "Error" in content:
+                self.context.logger.error("Something went wrong after I sent the administrative command of 'invitation receive'")
+            else:
+                self.context.logger.info("Received http response message content:" + str(content))
+                if "connection_id" in content:
+                    connection = content
+                    self.connection_id = content["connection_id"]
+                    invitation = connection["invitation"]
+                    self.context.logger.info("invitation response: " + str(connection))
+                    self.context.logger.info("connection id: " + self.connection_id)
+                    self.context.logger.info("invitation: " + str(invitation))
 
     def teardown(self) -> None:
         """

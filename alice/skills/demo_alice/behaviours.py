@@ -19,7 +19,6 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from aea.skills.base import Behaviour
 from aea.skills.behaviours import OneShotBehaviour
 
 
