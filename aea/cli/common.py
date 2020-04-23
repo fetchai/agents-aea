@@ -471,7 +471,9 @@ def _try_get_item_target_path(
     return target_path
 
 
-def _copy_package_directory(ctx, package_path, item_type, item_name, author_name):
+def _copy_package_directory(
+    ctx: Context, package_path: Path, item_type: str, item_name: str, author_name: str
+) -> Path:
     """
      Copy a package directory to the agent vendor resources.
 
@@ -480,7 +482,8 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
     :param item_type: the type of the package.
     :param item_name: the name of the package.
     :param author_name: the author of the package.
-    :return: None
+
+    :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
@@ -494,6 +497,7 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
         raise click.ClickException(str(e))
 
     Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
+    return Path(dest)
 
 
 def _find_item_locally(ctx, item_type, item_public_id) -> Path:

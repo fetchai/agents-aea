@@ -38,6 +38,7 @@ from aea.cli.common import (
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
@@ -56,6 +57,14 @@ def scaffold(click_context):
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
     _scaffold_item(ctx, "connection", connection_name)
+
+
+@scaffold.command()
+@click.argument("contract_name", type=str, required=True)
+@pass_ctx
+def contract(ctx: Context, contract_name: str) -> None:
+    """Add a contract scaffolding to the configuration file and agent."""
+    _scaffold_item(ctx, "contract", contract_name)
 
 
 @scaffold.command()

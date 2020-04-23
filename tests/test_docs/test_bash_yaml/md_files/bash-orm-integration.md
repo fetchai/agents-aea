@@ -59,9 +59,12 @@ ledger_apis:
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
+|    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
 |      total_price: 10              |      total_price: 10             |
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
@@ -82,17 +85,20 @@ ledger_apis:
 |      search_data:                 |      search_data:                |
 |        country: UK                |        country: UK               |
 |        city: Cambridge            |        city: Cambridge           |
-|dependencies                       |dependencies:                     |
+|dependencies:                      |dependencies:                     |
 |  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
 ``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |  
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
+|    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
 |      max_price: 40                |      max_price: 40               |
 |      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |

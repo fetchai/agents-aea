@@ -21,6 +21,7 @@
 
 import os
 from pathlib import Path
+from shutil import rmtree
 from typing import Collection, cast
 
 import click
@@ -39,6 +40,7 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     PublicId,
+    _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.base import (  # noqa: F401
@@ -91,6 +93,25 @@ def _add_protocols(click_context, protocols: Collection[PublicId]):
             _add_item(click_context, "protocol", protocol_public_id)
 
 
+def _validate_fingerprint(package_path, item_config):
+    """
+    Validate fingerprint of item before adding.
+
+    :param package_path: path to a package folder.
+    :param item_config: item configuration.
+
+    :raises ClickException: if fingerprint is incorrect and removes package_path folder.
+
+    :return: None.
+    """
+    fingerprint = _compute_fingerprint(
+        package_path, ignore_patterns=item_config.fingerprint_ignore_patterns
+    )
+    if item_config.fingerprint != fingerprint:
+        rmtree(package_path)
+        raise click.ClickException("Failed to add an item with incorrect fingerprint.")
+
+
 def _add_item(click_context, item_type, item_public_id) -> None:
     """
     Add an item.
@@ -128,27 +149,26 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
     # find and add protocol
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
-        package_path = _find_item_in_distribution(ctx, item_type, item_public_id)
-        _copy_package_directory(
-            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+        source_path = _find_item_in_distribution(ctx, item_type, item_public_id)
+        package_path = _copy_package_directory(
+            ctx, source_path, item_type, item_public_id.name, item_public_id.author
         )
     elif is_local:
-        package_path = _find_item_locally(ctx, item_type, item_public_id)
-        _copy_package_directory(
-            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+        source_path = _find_item_locally(ctx, item_type, item_public_id)
+        package_path = _copy_package_directory(
+            ctx, source_path, item_type, item_public_id.name, item_public_id.author
         )
     else:
         package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
 
+    configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
+    configuration_path = package_path / configuration_file_name
+    configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
+    item_configuration = configuration_loader.load(configuration_path.open())
+
+    _validate_fingerprint(package_path, item_configuration)
+
     if item_type in {"connection", "skill"}:
-        configuration_file_name = _get_default_configuration_file_name_from_type(
-            item_type
-        )
-        configuration_path = package_path / configuration_file_name
-        configuration_loader = ConfigLoader.from_configuration_type(
-            PackageType(item_type)
-        )
-        item_configuration = configuration_loader.load(configuration_path.open())
         _add_protocols(click_context, item_configuration.protocols)
 
     if item_type == "skill":

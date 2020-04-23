@@ -95,6 +95,14 @@ def connection(click_context, connection_public_id: PublicId):
 
 
 @fingerprint.command()
+@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def contract(click_context, contract_public_id: PublicId):
+    """Fingerprint a contract and add the fingerprints to the configuration file."""
+    _fingerprint_item(click_context, "contract", contract_public_id)
+
+
+@fingerprint.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @click.pass_context
 def protocol(click_context, protocol_public_id):

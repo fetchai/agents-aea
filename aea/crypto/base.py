@@ -186,25 +186,6 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
-        """
-        Get the transaction receipt for a transaction digest (non-blocking).
-
-        :param tx_digest: the digest associated to the transaction.
-        :return: the tx receipt, if present
-        """
-
-    @abstractmethod
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-        """
-        Generate a random str message.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
-        """
-
-    @abstractmethod
     def is_transaction_valid(
         self,
         tx_digest: str,
@@ -223,4 +204,23 @@ class LedgerApi(ABC):
         :param tx_digest: the transaction digest.
 
         :return: True if the transaction referenced by the tx_digest matches the terms.
+        """
+
+    @abstractmethod
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+        """
+        Get the transaction receipt for a transaction digest (non-blocking).
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx receipt, if present
+        """
+
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """

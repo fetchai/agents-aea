@@ -292,6 +292,7 @@ class FetchAIApi(LedgerApi):
         )
         return aggregate_hash.hex()
 
+    # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
     def is_transaction_valid(
         self,
         tx_digest: str,
@@ -319,7 +320,6 @@ class FetchAIApi(LedgerApi):
                 str(tx_contents.from_address) == client
                 and amount == tx_contents.transfers[seller_address]
                 and self.is_transaction_settled(tx_digest=tx_digest)
-                # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
             )
         return is_valid
 

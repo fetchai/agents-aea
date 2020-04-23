@@ -148,6 +148,7 @@ from aea.skills.tasks import Task
 
 def nth_prime_number(n: int) -> int:
     """A naive algorithm to find the n_th prime number."""
+    assert n > 0
     primes = [2]
     num = 3
     while len(primes) < n:

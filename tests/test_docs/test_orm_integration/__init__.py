@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the aries-cloud-agent-example.md file."""
+"""This package contains the tests for the orm-integration.md guide."""
