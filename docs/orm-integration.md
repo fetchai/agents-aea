@@ -94,16 +94,19 @@ ledger_apis:
     gas_price: 50
 ```
 
-### Update the seller AEA skill configs
+### Update the seller and buyer AEA skill configs
 
 In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ``` yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
+|    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
 |      total_price: 10              |      total_price: 10             |
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
@@ -124,9 +127,9 @@ In `my_seller_aea/vendor/fetchai/generic_seller/skill.yaml`, replace the `data_f
 |      search_data:                 |      search_data:                |
 |        country: UK                |        country: UK               |
 |        city: Cambridge            |        city: Cambridge           |
-|dependencies                       |dependencies:                     |
+|dependencies:                      |dependencies:                     |
 |  SQLAlchemy: {}                   |  SQLAlchemy: {}                  |    
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
 The `search_schema` and the `search_data` are used to register the service in the [OEF search node](../oef-ledger) and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
@@ -136,9 +139,12 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
+|models:                            |models:                           |  
+|  dialogues:                       |  dialogues:                      |
+|    args: {}                       |    args: {}                      |
+|    class_name: Dialogues          |    class_name: Dialogues         |
 |  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
+|    class_name: Strategy           |    class_name: Strategy          |
 |    args:                          |    args:                         |
 |      max_price: 40                |      max_price: 40               |
 |      max_buyer_tx_fee: 100        |      max_buyer_tx_fee: 200000    |
@@ -167,7 +173,7 @@ import sqlalchemy as db
 ```
 Then modify your strategy's \_\_init__ function to match the following code:
 ``` python
-  def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -183,7 +189,18 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
 
-        self._db_engine = db.create_engine('sqlite:///genericdb.db')
+        self._oef_msg_id = 0
+
+        self._scheme = kwargs.pop("search_data")
+        self._datamodel = kwargs.pop("search_schema")
+
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+
+        super().__init__(**kwargs)
+
+        self._db_engine = db.create_engine("sqlite:///genericdb.db")
         self._tbl = self.create_database_and_table()
         self.insert_data()
 
@@ -193,21 +210,17 @@ Then modify your strategy's \_\_init__ function to match the following code:
             self._data_for_sale = self.collect_from_data_source()
         else:
             self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
 ``` 
 
 At the end of the file modify the `collect_from_data_source` function : 
 ``` python
     def collect_from_data_source(self) -> Dict[str, Any]:
+        """Implement the logic to collect data."""
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
         result_proxy = connection.execute(query)
-        return {"data": result_proxy.fetchall()}
+        data_points = result_proxy.fetchall()
+        return {"data": json.dumps(list(map(tuple, data_points)))}
 ```
 Also, create two new functions, one that will create a connection with the database, and another one will populate the database with some fake data:
 
@@ -216,19 +229,23 @@ Also, create two new functions, one that will create a connection with the datab
         """Creates a database and a table to store the data if not exists."""
         metadata = db.MetaData()
 
-        tbl = db.Table('data', metadata,
-                       db.Column('timestamp', db.Integer()),
-                       db.Column('temprature', db.String(255), nullable=False),
-              )
+        tbl = db.Table(
+            "data",
+            metadata,
+            db.Column("timestamp", db.Integer()),
+            db.Column("temprature", db.String(255), nullable=False),
+        )
         metadata.create_all(self._db_engine)
         return tbl
 
     def insert_data(self):
         """Insert data in the database."""
         connection = self._db_engine.connect()
-        logger.info("Populating the database....")
-        for counter in range(10):
-            query = db.insert(self._tbl).values(timestamp=time.time(), temprature=str(random.randrange(10, 25)))
+        self.context.logger.info("Populating the database...")
+        for _ in range(10):
+            query = db.insert(self._tbl).values(  # nosec
+                timestamp=time.time(), temprature=str(random.randrange(10, 25))
+            )
             connection.execute(query)
 ```
 

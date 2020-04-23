@@ -1015,4 +1015,4 @@ def _handle_error_while_loading_component_generic_error(
         "An error occurred while loading {} {}: {}".format(
             str(configuration.component_type), configuration.public_id, str(e)
         )
-    )
+    ) from e
