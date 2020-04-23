@@ -23,6 +23,7 @@ import asyncio
 import logging
 import subprocess  # nosec
 import time
+
 # from unittest import mock
 # from unittest.mock import Mock
 #
@@ -101,6 +102,7 @@ class TestWebhookDisconnection:
 
         await self.webhook_connection.disconnect()
         assert self.webhook_connection.connection_status.is_connected is False
+
 
 # ToDo: testing webhooks received
 # @pytest.mark.asyncio
