@@ -25,7 +25,7 @@ import logging
 from asyncio import CancelledError
 from typing import Optional, Union
 
-from aiohttp import web
+from aiohttp import web  # type: ignore
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection

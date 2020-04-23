@@ -26,13 +26,13 @@ import time
 from unittest import mock
 from unittest.mock import Mock
 
-from aiohttp import web
+from aiohttp import web  # type: ignore
 
-from multidict import CIMultiDict, CIMultiDictProxy
+from multidict import CIMultiDict, CIMultiDictProxy  # type: ignore
 
 import pytest
 
-from yarl import URL
+from yarl import URL  # type: ignore
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 
@@ -120,6 +120,8 @@ async def test_webhook_receive():
     webhook_connection.loop = asyncio.get_event_loop()
     await webhook_connection.connect()
 
+    # ToDo complete the test
+
     # # Start an aries agent process
     # process = start_aca(admin_address, admin_port)
 
@@ -129,12 +131,10 @@ async def test_webhook_receive():
     webhook_request_mock.version = (1, 1)
     webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
     webhook_request_mock.body = b"some body"
-    #
+
     with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
         received_webhook_envelop = await webhook_connection.receive()
         logger.info(received_webhook_envelop)
-
-    # ToDo complete the test
 
     # process.terminate()
 
