@@ -378,7 +378,6 @@ class AgentDirectory(click.Path):
             # everything ok - return the parameter to the command
             return value
         except Exception:
-            # self.fail(value, param, ctx)
             raise click.ClickException(
                 "The name provided is not a path to an AEA project."
             )
