@@ -143,7 +143,10 @@ def test_real_search():
     i = 0
 
     assert data[i]["id"] == "fetchai/webhook:0.1.0"
-    assert data[i]["description"] == "The webhook connection that wraps a webhook functionality."
+    assert (
+        data[i]["description"]
+        == "The webhook connection that wraps a webhook functionality."
+    )
     i += 1
     assert data[i]["id"] == "fetchai/gym:0.1.0"
     assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
