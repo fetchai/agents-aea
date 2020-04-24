@@ -29,6 +29,7 @@ import subprocess  # nosec
 import sys
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from pathlib import Path
 from random import randint
 from typing import IO, List, Mapping, Optional, Sequence, cast
 
@@ -99,7 +100,10 @@ def _golang_get_deps_mod(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
     """
     Downloads dependencies of go 'src' file using go modules (go.mod)
     """
-    cmd = ["go", "build"]
+    cmd = ["go", "mod", "download"]
+
+    env = os.environ
+    env["GOPATH"] = "{}/go".format(Path.home())
 
     try:
         logger.debug(cmd)
@@ -123,11 +127,9 @@ def _golang_run(
     """
     Runs the go 'src' as a subprocess
     """
-    cmd = ["go", "run", "noise_aea"]
+    cmd = ["go", "run", src]
 
     cmd.extend(args)
-
-    env[""]
 
     try:
         logger.debug(cmd)
