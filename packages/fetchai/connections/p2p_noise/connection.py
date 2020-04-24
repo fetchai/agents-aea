@@ -60,7 +60,7 @@ async def _async_golang_get_deps(
     """
     Downloads libraries that go 'src' file depends on
     """
-    cmd = ["go", "get", "-v", "-d", "."]
+    cmd = ["go", "get", "-v", "."]
 
     try:
         logger.debug(cmd, loop)
@@ -323,7 +323,7 @@ class NoiseNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                await asyncio.sleep(0.8)
+                await asyncio.sleep(2)
                 await self._connect()
                 return
             else:
