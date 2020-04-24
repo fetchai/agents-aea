@@ -20,14 +20,14 @@
 """This package contains the handlers for the faber_alice skill."""
 
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
-from aea.skills.base import Handler
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
@@ -125,11 +125,9 @@ class AriesDemoHTTPHandler(Handler):
         # Create a cred def for the schema
         credential_definition_body = {
             "schema_id": schema_id,
-            "support_revocation": SUPPORT_REVOCATION
+            "support_revocation": SUPPORT_REVOCATION,
         }
-        self._admin_post(
-            "/credential-definitions", credential_definition_body
-        )
+        self._admin_post("/credential-definitions", credential_definition_body)
 
     def send_message(self, content: Dict):
         # message & envelope
@@ -163,10 +161,13 @@ class AriesDemoHTTPHandler(Handler):
         :return: None
         """
         # self.context.behaviours.aries_demo_behaviour.put(message)
-
+        message = cast(HttpMessage, message)
         self.handled_message = message
-        if message.performative == HttpMessage.Performative.RESPONSE and message.status_code == 200:  # response to http request
-            content_bytes = message.bodyy
+        if (
+            message.performative == HttpMessage.Performative.RESPONSE
+            and message.status_code == 200
+        ):  # response to http request
+            content_bytes = message.bodyy  # type: ignore
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
@@ -176,11 +177,11 @@ class AriesDemoHTTPHandler(Handler):
                 #     version="0.0.1",
                 #     schema_attrs=["name", "date", "degree", "age", "timestamp"],
                 # )
-            # elif "schema_id" in content:
-            #     schema_id = content["schema_id"]
-            #     self.register_creddef(schema_id)
-            # elif "credential_definition_id" in content:
-            #     credential_definition_id = content["credential_definition_id"]
+                # elif "schema_id" in content:
+                #     schema_id = content["schema_id"]
+                #     self.register_creddef(schema_id)
+                # elif "credential_definition_id" in content:
+                #     credential_definition_id = content["credential_definition_id"]
                 self._admin_post("/connections/create-invitation")
             elif "connection_id" in content:
                 connection = content
@@ -189,15 +190,19 @@ class AriesDemoHTTPHandler(Handler):
                 self.context.logger.info("connection: " + str(connection))
                 self.context.logger.info("connection id: " + self.connection_id)
                 self.context.logger.info("invitation: " + str(invitation))
-                self.context.logger.info("Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection...")
+                self.context.logger.info(
+                    "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
+                )
                 self.send_message(invitation)
-        elif message.performative == HttpMessage.Performative.REQUEST:  # webhook request
+        elif (
+            message.performative == HttpMessage.Performative.REQUEST
+        ):  # webhook request
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
             if "connection_id" in content:
                 if content["connection_id"] == self.connection_id:
-                    if content["state"] == "active" and not self.is_connected_to_Faber:
+                    if content["state"] == "active" and not self.is_connected_to_Alice:
                         self.context.logger.info("Connected to Alice")
                         self.is_connected_to_Alice = True
 

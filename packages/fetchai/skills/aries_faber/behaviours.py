@@ -22,9 +22,8 @@
 import json
 from typing import Dict
 
-from aea.skills.base import Behaviour
-from aea.skills.behaviours import OneShotBehaviour
 from aea.configurations.base import PublicId
+from aea.skills.behaviours import OneShotBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer

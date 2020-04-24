@@ -22,7 +22,8 @@
 import base64
 import binascii
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
+from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.mail.base import Envelope, EnvelopeContext
@@ -32,8 +33,6 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
-
-from urllib.parse import urlparse
 
 HTTP_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
 
@@ -94,6 +93,7 @@ class AriesDemoDefaultHandler(Handler):
         :param message: the message
         :return: None
         """
+        message = cast(DefaultMessage, message)
         if message.performative == DefaultMessage.Performative.BYTES:
             content_bytes = message.content
             content = json.loads(content_bytes)
@@ -111,7 +111,6 @@ class AriesDemoDefaultHandler(Handler):
         pass
 
     def handle_received_invite(self, invite_detail: Dict):
-        import pdb;pdb.set_trace()
         for details in invite_detail:
             try:
                 url = urlparse(details)
@@ -197,6 +196,7 @@ class AriesDemoHttpHandler(Handler):
         :param message: the message
         :return: None
         """
+        message = cast(HttpMessage, message)
         if message.performative == HttpMessage.Performative.REQUEST:  # webhook
             content_bytes = message.bodyy
             content = json.loads(content_bytes)
@@ -206,13 +206,19 @@ class AriesDemoHttpHandler(Handler):
                     if content["state"] == "active" and not self.is_connected_to_Faber:
                         self.context.logger.info("Connected to Faber")
                         self.is_connected_to_Faber = True
-        elif message.performative == HttpMessage.Performative.RESPONSE:  # response to http_client request
+        elif (
+            message.performative == HttpMessage.Performative.RESPONSE
+        ):  # response to http_client request
             content_bytes = message.bodyy
             content = content_bytes.decode("utf-8")
             if "Error" in content:
-                self.context.logger.error("Something went wrong after I sent the administrative command of 'invitation receive'")
+                self.context.logger.error(
+                    "Something went wrong after I sent the administrative command of 'invitation receive'"
+                )
             else:
-                self.context.logger.info("Received http response message content:" + str(content))
+                self.context.logger.info(
+                    "Received http response message content:" + str(content)
+                )
                 if "connection_id" in content:
                     connection = content
                     self.connection_id = content["connection_id"]
