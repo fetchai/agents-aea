@@ -53,18 +53,16 @@ def _generate_item(click_context, item_type, specification_path):
     ctx = cast(Context, click_context.obj)
     res = shutil.which("protoc")
     if res is None:
-        logger.error(
+        raise click.ClickException(
             "Please install protocol buffer first! See the following link: https://developers.google.com/protocol-buffers/"
         )
-        sys.exit(1)
 
     # check black code formatter is installed
     res = shutil.which("black")
     if res is None:
-        logger.error(
+        raise click.ClickException(
             "Please install black code formater first! See the following link: https://black.readthedocs.io/en/stable/installation_and_usage.html"
         )
-        sys.exit(1)
 
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
@@ -81,8 +79,7 @@ def _generate_item(click_context, item_type, specification_path):
             open(specification_path)
         )
     except Exception as e:
-        logger.exception(e)
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
     protocol_directory_path = os.path.join(
         ctx.cwd, item_type_plural, protocol_spec.name
@@ -95,20 +92,18 @@ def _generate_item(click_context, item_type, specification_path):
         )
     )
     if protocol_spec.name in existing_item_list:
-        logger.error(
+        raise click.ClickException(
             "A {} with name '{}' already exists. Aborting...".format(
                 item_type, protocol_spec.name
             )
         )
-        sys.exit(1)
     # Check if we already have a directory with the same name in the resource directory (e.g. protocols) of the agent's directory
     if os.path.exists(protocol_directory_path):
-        logger.error(
+        raise click.ClickException(
             "A directory with name '{}' already exists. Aborting...".format(
                 protocol_spec.name
             )
         )
-        sys.exit(1)
 
     try:
         agent_name = ctx.agent_config.agent_name
@@ -131,30 +126,26 @@ def _generate_item(click_context, item_type, specification_path):
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )
     except FileExistsError:
-        logger.error(
+        raise click.ClickException(
             "A {} with this name already exists. Please choose a different name and try again.".format(
                 item_type
             )
         )
-        sys.exit(1)
     except ProtocolSpecificationParseError as e:
-        logger.error(
+        shutil.rmtree(
+            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
+        )
+        raise click.ClickException(
             "The following error happened while parsing the protocol specification: "
             + str(e)
         )
-        shutil.rmtree(
-            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
-        )
-        sys.exit(1)
     except Exception as e:
-        logger.debug("Exception thrown: " + str(e))
-        logger.error(
-            "There was an error while generating the protocol. The protocol is NOT generated."
-        )
         shutil.rmtree(
             os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
         )
-        sys.exit(1)
+        raise click.ClickException(
+            "There was an error while generating the protocol. The protocol is NOT generated. Exception: " + str(e)
+        )
 
     # Run black code formatting
     try:

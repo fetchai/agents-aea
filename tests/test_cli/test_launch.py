@@ -213,9 +213,9 @@ class TestLaunchWithWrongArguments:
             standalone_mode=True,
         )
 
-    def test_exit_code_equal_to_two(self):
-        """Assert that the exit code is equal to two (i.e. bad parameters)."""
-        assert self.result.exit_code == 2
+    def test_exit_code_equal_to_one(self):
+        """Assert that the exit code is equal to 1."""
+        assert self.result.exit_code == 1
 
     @classmethod
     def teardown_class(cls):
