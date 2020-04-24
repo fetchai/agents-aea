@@ -24,11 +24,10 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import TestCase
 
 from click.exceptions import BadParameter
 
-import aea.cli.common
 from aea.cli import cli
 from aea.cli.config import AEAJsonPathType
 from aea.test_tools.click_testing import CliRunner
