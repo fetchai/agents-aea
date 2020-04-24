@@ -139,7 +139,7 @@ def test_real_search():
     )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
-    
+
     assert len(data) == 10
     i = 0
 
@@ -196,6 +196,6 @@ def test_real_search():
     i += 1
     assert data[i]["id"] == "fetchai/webhook:0.1.0"
     assert (
-            data[i]["description"]
-            == "The webhook connection that wraps a webhook functionality."
+        data[i]["description"]
+        == "The webhook connection that wraps a webhook functionality."
     )
