@@ -48,9 +48,6 @@ class TestConfigGet:
         cls.t = tempfile.mkdtemp()
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
         os.chdir(Path(cls.t, "dummy_aea"))
-
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
         cls.runner = CliRunner()
 
     def test_get_agent_name(self):
@@ -149,9 +146,8 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Attribute 'non_existing_attribute' not found."
-        )
+        s = "Attribute 'non_existing_attribute' not found."
+        assert result.exception.message == s
 
     def test_get_fails_when_getting_non_primitive_type(self):
         """Test that getting the 'dummy' skill behaviours fails because not a primitive type."""
@@ -161,9 +157,8 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Attribute 'behaviours' is not of primitive type."
-        )
+        s = "Attribute 'behaviours' is not of primitive type."
+        assert result.exception.message == s
 
     def test_get_fails_when_getting_nested_object(self):
         """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
@@ -178,9 +173,8 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Cannot get attribute 'non_existing_attribute'"
-        )
+        s = "Cannot get attribute 'non_existing_attribute'"
+        assert result.exception.message == s
 
     def test_get_fails_when_getting_non_dict_attribute(self):
         """Test that the get fails because the path point to a non-dict object."""
@@ -190,9 +184,8 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "The target object is not a dictionary."
-        )
+        s = "The target object is not a dictionary."
+        assert result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -214,9 +207,6 @@ class TestConfigSet:
         cls.t = tempfile.mkdtemp()
         shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
         os.chdir(Path(cls.t, "dummy_aea"))
-
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
         cls.runner = CliRunner()
 
     def test_set_agent_name(self):
@@ -378,9 +368,8 @@ class TestConfigSet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Attribute 'non_existing_attribute' not found."
-        )
+        s = "Attribute 'non_existing_attribute' not found."
+        assert result.exception.message == s
 
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
@@ -390,9 +379,8 @@ class TestConfigSet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Attribute 'behaviours' is not of primitive type."
-        )
+        s = "Attribute 'behaviours' is not of primitive type."
+        assert result.exception.message == s
 
     def test_get_fails_when_setting_nested_object(self):
         """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
@@ -408,9 +396,8 @@ class TestConfigSet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "Cannot get attribute 'non_existing_attribute'"
-        )
+        s = "Cannot get attribute 'non_existing_attribute'"
+        assert result.exception.message == s
 
     def test_get_fails_when_setting_non_dict_attribute(self):
         """Test that the set fails because the path point to a non-dict object."""
@@ -426,9 +413,8 @@ class TestConfigSet:
             standalone_mode=False,
         )
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with(
-            "The target object is not a dictionary."
-        )
+        s = "The target object is not a dictionary."
+        assert result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
