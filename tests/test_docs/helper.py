@@ -18,8 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains helper function to extract code from the .md files."""
-
 import re
+import traceback
+from typing import Dict
+
+import pytest
 
 
 def extract_code_blocks(filepath, filter=None):
@@ -59,3 +62,41 @@ def read_md_file(filepath):
     with open(filepath, "r") as md_file:
         md_file_str = md_file.read()
     return md_file_str
+
+
+def compile_and_exec(code: str, locals_dict: Dict = None) -> Dict:
+    """
+    Compile and exec the code.
+
+    :param code: the code to execute.
+    :param locals_dict: the dictionary of local variables.
+    :return: the dictionary of locals.
+    """
+    locals_dict = {} if locals_dict is None else locals_dict
+    try:
+        code_obj = compile(code, "fakemodule", "exec")
+        exec(code_obj, locals_dict)  # nosec
+    except Exception:
+        pytest.fail(
+            "The execution of the following code:\n{}\nfailed with error:\n{}".format(
+                code, traceback.format_exc()
+            )
+        )
+    return locals_dict
+
+
+def compare_enum_classes(expected_enum_class, actual_enum_class):
+    """Compare enum classes."""
+    try:
+        # do some pre-processing
+        expected_pairs = sorted(map(lambda x: (x.name, x.value), expected_enum_class))
+        actual_pairs = sorted(map(lambda x: (x.name, x.value), actual_enum_class))
+        assert expected_pairs == actual_pairs, "{} != {}".format(
+            expected_pairs, actual_pairs
+        )
+    except AssertionError:
+        pytest.fail(
+            "Actual enum {} is different from the actual one {}".format(
+                expected_enum_class, actual_enum_class
+            )
+        )

@@ -39,6 +39,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
+ETHEREUM_CURRENCY = "ETH"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
 CONFIRMATION_RETRY_TIMEOUT = 1.0
@@ -216,6 +217,7 @@ class EthereumApi(LedgerApi):
             balance = None
         return balance
 
+    # TODO : handle transaction misconfiguration
     def transfer(
         self,
         crypto: Crypto,
@@ -242,7 +244,6 @@ class EthereumApi(LedgerApi):
         if nonce is None:
             return tx_digest
 
-        # TODO : handle misconfiguration
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,

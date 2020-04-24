@@ -157,10 +157,10 @@ class Game(Model):
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
+        self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._conf = None  # type: Optional[Configuration]
-        self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
 
     @property
     def is_using_contract(self) -> bool:

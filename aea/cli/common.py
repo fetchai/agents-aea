@@ -474,7 +474,9 @@ def _try_get_item_target_path(
     return target_path
 
 
-def _copy_package_directory(ctx, package_path, item_type, item_name, author_name):
+def _copy_package_directory(
+    ctx: Context, package_path: Path, item_type: str, item_name: str, author_name: str
+) -> Path:
     """
      Copy a package directory to the agent vendor resources.
 
@@ -483,7 +485,8 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
     :param item_type: the type of the package.
     :param item_name: the name of the package.
     :param author_name: the author of the package.
-    :return: None
+
+    :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
@@ -498,6 +501,7 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
         sys.exit(1)
 
     Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
+    return Path(dest)
 
 
 def _find_item_locally(ctx, item_type, item_public_id) -> Path:
@@ -637,9 +641,7 @@ def _validate_config_consistency(ctx: Context):
             configuration_file_path = package_directory / config_file_name
             assert configuration_file_path.exists()
         except Exception:
-            raise ValueError(
-                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
-            )
+            raise ValueError("Cannot find {}: '{}'".format(item_type.value, public_id))
 
         # load the configuration file.
         try:

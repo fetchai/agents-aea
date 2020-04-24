@@ -22,8 +22,10 @@
 import os
 import shutil
 import tempfile
-import unittest.mock
 from pathlib import Path
+from unittest import TestCase, mock
+
+from click import ClickException
 
 from jsonschema import ValidationError
 
@@ -32,13 +34,16 @@ import yaml
 import aea
 import aea.cli.common
 from aea.cli import cli
+from aea.cli.add import _validate_fingerprint
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.test_cases import AEATestCase
 
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
 
@@ -57,7 +62,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -99,7 +104,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch("aea.cli.add.fetch_package")
+    @mock.patch("aea.cli.add.fetch_package")
     def test_add_skill_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
@@ -140,7 +145,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -202,7 +207,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    # @unittest.mock.patch("aea.cli.add.fetch_package")
+    # @mock.patch("aea.cli.add.fetch_package")
     # def test_add_skill_from_registry_positive(self, fetch_package_mock):
     #     """Test add from registry positive result."""
     #     public_id = aea.configurations.base.PublicId(AUTHOR, "name", "0.1.0")
@@ -239,7 +244,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "author/unknown_skill:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -298,7 +303,7 @@ class TestAddSkillFailsWhenDifferentPublicId:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "different_author/error:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -354,7 +359,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -380,7 +385,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         yaml.safe_dump(dict(config.json), open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = unittest.mock.patch.object(
+        cls.patch = mock.patch.object(
             aea.configurations.base.SkillConfig,
             "from_json",
             side_effect=ValidationError("test error message"),
@@ -429,7 +434,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
+        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -485,3 +490,51 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestAddSkillWithContractsDeps(AEATestCase):
+    """Test add skill with contract dependencies."""
+
+    def test_add_skill_with_contracts_positive(self):
+        """Test add skill with contract dependencies positive result."""
+        self.initialize_aea()
+        agent_name = "my_first_agent"
+        self.create_agents(agent_name)
+
+        agent_dir_path = os.path.join(self.t, agent_name)
+        os.chdir(agent_dir_path)
+
+        self.add_item("skill", "fetchai/erc1155_client:0.1.0")
+
+        contracts_path = os.path.join(
+            agent_dir_path, "vendor", FETCHAI_NAME, "contracts"
+        )
+        contracts_folders = os.listdir(contracts_path)
+        contract_dependency_name = "erc1155"
+        assert contract_dependency_name in contracts_folders
+
+
+@mock.patch("aea.cli.add._compute_fingerprint", return_value={"correct": "fingerprint"})
+class ValidateFingerprintTestCase(TestCase):
+    """Test case for adding skill with invalid fingerprint."""
+
+    def test__validate_fingerprint_positive(self, *mocks):
+        """Test _validate_fingerprint method for positive result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"correct": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        _validate_fingerprint("package_path", item_config)
+
+    @mock.patch("aea.cli.add.rmtree")
+    def test__validate_fingerprint_negative(
+        self, rmtree_mock, _compute_fingerprint_mock
+    ):
+        """Test _validate_fingerprint method for negative result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"incorrect": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        package_path = "package_dir"
+        with self.assertRaises(ClickException):
+            _validate_fingerprint(package_path, item_config)
+
+        rmtree_mock.assert_called_once_with(package_path)

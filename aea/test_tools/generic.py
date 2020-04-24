@@ -20,7 +20,11 @@
 """This module contains generic tools for AEA end-to-end testing."""
 
 from pathlib import Path
+from typing import Any, Dict, List
 
+import yaml
+
+from aea.cli.config import handle_dotted_path
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 
@@ -67,3 +71,48 @@ def read_envelope_from_file(file_path: str):
     assert end in [b"", b"\n"]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
+
+
+def _nested_set(dic: Dict, keys: List, value: Any) -> None:
+    """
+    Nested set a value to a dict.
+
+    :param dic: target dict
+    :param keys: list of keys.
+    :param value: a value to set.
+
+    :return: None.
+    """
+    for key in keys[:-1]:
+        dic = dic.setdefault(key, {})
+    dic[keys[-1]] = value
+
+
+def force_set_config(dotted_path: str, value: Any) -> None:
+    """
+    Set an AEA config without validation.
+    Run from agent's directory.
+
+    Allowed dotted_path:
+        'agent.an_attribute_name'
+        'protocols.my_protocol.an_attribute_name'
+        'connections.my_connection.an_attribute_name'
+        'contracts.my_contract.an_attribute_name'
+        'skills.my_skill.an_attribute_name'
+        'vendor.author.[protocols|connections|skills].package_name.attribute_name
+
+    :param dotted_path: dotted path to a setting.
+    :param value: a value to assign. Must be of yaml serializable type.
+
+    :return: None.
+    """
+    settings_keys, file_path, _ = handle_dotted_path(dotted_path)
+
+    settings = {}
+    with open(file_path, "r") as f:
+        settings = yaml.safe_load(f)
+
+    _nested_set(settings, settings_keys, value)
+
+    with open(file_path, "w") as f:
+        yaml.dump(settings, f, default_flow_style=False)

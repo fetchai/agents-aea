@@ -23,6 +23,7 @@ import time
 import pytest
 
 from aea.helpers.search.models import (
+    Attribute,
     Constraint,
     ConstraintType,
     DataModel,
@@ -114,7 +115,10 @@ class TestSimpleSearchResult:
 
         # register a service.
         request_id = 1
-        cls.data_model = DataModel("foobar", attributes=[])
+        cls.data_model = DataModel(
+            "foobar",
+            attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
+        )
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model
         )
@@ -190,7 +194,10 @@ class TestUnregister:
 
     def test_unregister_service_result(self):
         """Test that at the beginning, the search request returns an empty search result."""
-        data_model = DataModel("foobar", attributes=[])
+        data_model = DataModel(
+            "foobar",
+            attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
+        )
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
@@ -252,10 +259,6 @@ class TestUnregister:
         assert len(result.agents) == 1
 
         # unregister the service
-        data_model = DataModel("foobar", attributes=[])
-        service_description = Description(
-            {"foo": 1, "bar": "baz"}, data_model=data_model
-        )
         msg = OefSearchMessage(
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             dialogue_reference=(str(1), ""),
@@ -388,7 +391,10 @@ class TestFilteredSearchResult:
 
         # register 'multiplexer1' as a service 'foobar'.
         request_id = 1
-        cls.data_model_foobar = DataModel("foobar", attributes=[])
+        cls.data_model_foobar = DataModel(
+            "foobar",
+            attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
+        )
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar
         )
@@ -409,7 +415,10 @@ class TestFilteredSearchResult:
         time.sleep(1.0)
 
         # register 'multiplexer2' as a service 'barfoo'.
-        cls.data_model_barfoo = DataModel("barfoo", attributes=[])
+        cls.data_model_barfoo = DataModel(
+            "barfoo",
+            attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
+        )
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo
         )
@@ -428,7 +437,10 @@ class TestFilteredSearchResult:
         cls.multiplexer2.put(envelope)
 
         # unregister multiplexer1
-        data_model = DataModel("foobar", attributes=[])
+        data_model = DataModel(
+            "foobar",
+            attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
+        )
         service_description = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )

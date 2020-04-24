@@ -23,8 +23,6 @@ import os
 import signal
 import time
 
-import pytest
-
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
@@ -32,6 +30,7 @@ from aea.connections.stub.connection import (
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
@@ -42,11 +41,9 @@ from aea.test_tools.test_cases import AEATestCase
 class TestEchoSkill(AEATestCase):
     """Test that echo skill works."""
 
+    @skip_test_ci
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         self.initialize_aea()
         agent_name = "my_first_agent"
         self.create_agents(agent_name)

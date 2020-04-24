@@ -46,7 +46,6 @@ def test_tac_message_instantiation():
         tx_sender_signature="some_signature",
         tx_counterparty_signature="some_other_signature",
     )
-    assert TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
     assert TacMessage(performative=TacMessage.Performative.CANCELLED)
     assert TacMessage(
         performative=TacMessage.Performative.GAME_DATA,
@@ -103,12 +102,6 @@ def test_tac_serialization():
         tx_sender_signature="some_signature",
         tx_counterparty_signature="some_other_signature",
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
-    expected_msg = msg
-    assert expected_msg == actual_msg
-
-    msg = TacMessage(performative=TacMessage.Performative.GET_STATE_UPDATE)
     msg_bytes = TacSerializer().encode(msg)
     actual_msg = TacSerializer().decode(msg_bytes)
     expected_msg = msg

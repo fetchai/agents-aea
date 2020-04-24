@@ -343,9 +343,9 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         self.context.logger.error(
-            "[{}]: Received OEF error: answer_id={}, oef_error_operation={}".format(
+            "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 self.context.agent_name,
-                oef_error.message_id,
+                oef_error.dialogue_reference,
                 oef_error.oef_error_operation,
             )
         )

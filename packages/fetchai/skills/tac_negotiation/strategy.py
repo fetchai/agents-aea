@@ -108,11 +108,14 @@ class Strategy(Model):
             or self._search_for == Strategy.SearchFor.BOTH
         )
 
-    def get_own_service_description(self, is_supply: bool) -> Description:
+    def get_own_service_description(
+        self, is_supply: bool, is_search_description: bool
+    ) -> Description:
         """
         Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
 
         :param is_supply: Boolean indicating whether it is supply or demand.
+        :param is_search_description: whether or not the description is for search.
 
         :return: the description (to advertise on the Service Directory).
         """
@@ -130,6 +133,7 @@ class Strategy(Model):
             good_id_to_quantities=good_id_to_quantities,
             currency_id=currency_id,
             is_supply=is_supply,
+            is_search_description=is_search_description,
         )
         return desc
 
@@ -157,15 +161,18 @@ class Strategy(Model):
             demand[good_id] = 1
         return demand
 
-    def get_own_services_query(self, is_searching_for_sellers: bool) -> Query:
+    def get_own_services_query(
+        self, is_searching_for_sellers: bool, is_search_query: bool
+    ) -> Query:
         """
-        Build a query to search for services.
+        Build a query.
 
         In particular, build the query to look for agents
             - which supply the agent's demanded goods (i.e. sellers), or
             - which demand the agent's supplied goods (i.e. buyers).
 
         :param is_searching_for_sellers: Boolean indicating whether the search is for sellers or buyers.
+        :param is_search_query: whether or not the query is used for search on OEF
 
         :return: the Query, or None.
         """
@@ -183,6 +190,7 @@ class Strategy(Model):
             good_ids=list(good_id_to_quantities.keys()),
             currency_id=currency_id,
             is_searching_for_sellers=is_searching_for_sellers,
+            is_search_query=is_search_query,
         )
         return query
 
@@ -219,7 +227,9 @@ class Strategy(Model):
 
         :return: a description
         """
-        own_service_description = self.get_own_service_description(is_supply=is_seller)
+        own_service_description = self.get_own_service_description(
+            is_supply=is_seller, is_search_description=False
+        )
         if not query.check(own_service_description):
             self.context.logger.debug(
                 "[{}]: Current holdings do not satisfy CFP query.".format(
@@ -274,6 +284,7 @@ class Strategy(Model):
                 good_id_to_quantities=proposal_dict,
                 currency_id=currency_id,
                 is_supply=is_seller,
+                is_search_description=False,
             )
             if is_seller:
                 delta_quantities_by_good_id = {
