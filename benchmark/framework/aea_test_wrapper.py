@@ -51,7 +51,7 @@ class AEATestWrapper:
             self.name, [self.make_skill(**skill) for skill in self.skills]  # type: ignore
         )
 
-    def make_aea(self, name: str = "my_eae", components: List[Component] = None) -> AEA:
+    def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
         """
         Create AEA from name and already loaded components.
 
@@ -99,7 +99,7 @@ class AEATestWrapper:
         skill = Skill(
             configuration=config, skill_context=context, handlers=handlers_instances
         )
-
+        context._skill = skill  # TODO: investigate why
         return skill
 
     @classmethod
@@ -264,7 +264,7 @@ class AEATestWrapper:
         envelope = envelope or self.dummy_envelope()
         self.aea._connections.clear()
         self.aea._connections.append(
-            FakeConnection(envelope, inbox_num, connection_id="12")
+            FakeConnection(envelope, inbox_num, connection_id="fake_connection")
         )
 
     def is_messages_in_fake_connection(self) -> bool:

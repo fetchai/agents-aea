@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Fake connection to generate test messages."""
+import asyncio
 from typing import Optional
 
 from aea.connections.base import Connection
@@ -68,7 +69,9 @@ class FakeConnection(Connection):
 
         :return: incoming envelope
         """
-        if self.num > 0:
-            self.num -= 1
+        if self.num <= 0:
+            await asyncio.sleep(0.1)  # sleep to avoid multiplexer loop without idle.
+            return None
 
+        self.num -= 1
         return self.envelope
