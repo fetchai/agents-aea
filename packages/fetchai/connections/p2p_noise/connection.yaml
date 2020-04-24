@@ -12,7 +12,8 @@ fingerprint:
   connection.py: QmTSdShTK9uA1UQGHoFVkzBdT7qzCnHL3JHWyvwmFn62DF
   go.mod: QmUzpzaa5qnYbRnuH9kVXkoHLQugwfdZLNpq5ShFbcrk2V
   noise_node.go: QmWXkZ8qV2CE297om3tgsWJCA8xvvedC5f2ctaJRReGqZx
-fingerprint_ignore_patterns: []
+fingerprint_ignore_patterns:
+- go.sum
 protocols: []
 class_name: P2PNoiseConnection
 config:
