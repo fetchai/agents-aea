@@ -112,7 +112,6 @@ class TestWebhookDisconnection:
 #     admin_port = 8051
 #     webhook_address = "127.0.0.1"
 #     webhook_port = 8052
-#
 #     agent_address = "some agent address"
 #
 #     webhook_connection = WebhookConnection(
@@ -124,22 +123,24 @@ class TestWebhookDisconnection:
 #     webhook_connection.loop = asyncio.get_event_loop()
 #     await webhook_connection.connect()
 #
+#
+#
 #     # # Start an aries agent process
 #     # process = start_aca(admin_address, admin_port)
 #
 #     received_webhook_envelop = await webhook_connection.receive()
 #     logger.info(received_webhook_envelop)
+
+#     webhook_request_mock = Mock()
+#     webhook_request_mock.method = "POST"
+#     webhook_request_mock.url = URL(val="some url")
+#     webhook_request_mock.version = (1, 1)
+#     webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
+#     webhook_request_mock.body = b"some body"
 #
-#     # webhook_request_mock = Mock()
-#     # webhook_request_mock.method = "POST"
-#     # webhook_request_mock.url = URL(val="some url")
-#     # webhook_request_mock.version = (1, 1)
-#     # webhook_request_mock.headers = CIMultiDictProxy(CIMultiDict(a="Ali"))
-#     # webhook_request_mock.body = b"some body"
-#
-#     # with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
-#     #     received_webhook_envelop = await webhook_connection.receive()
-#     #     logger.info(received_webhook_envelop)
+#     with mock.patch.object(web.Request, "__init__", return_value=webhook_request_mock):
+#         received_webhook_envelop = await webhook_connection.receive()
+#         logger.info(received_webhook_envelop)
 #
 #     # process.terminate()
 

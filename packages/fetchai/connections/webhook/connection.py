@@ -29,7 +29,7 @@ from aiohttp import web  # type: ignore
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope, EnvelopeContext
+from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
@@ -61,6 +61,7 @@ class WebhookChannel:
         :param agent_address: the address of the agent
         :param webhook_address: webhook hostname / IP address
         :param webhook_port: webhook port number
+        :param webhook_url_path: the url path to receive webhooks from
         :param connection_id: the connection id
         """
         self.agent_address = agent_address
@@ -77,16 +78,14 @@ class WebhookChannel:
 
         self.connection_id = connection_id
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
-        self.loop = (
-            None
-        )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
         logger.info("Initialised a webhook channel")
 
-    async def connect(self):
+    async def connect(self) -> None:
         """
         Connect the webhook
 
         Connects the webhook via the webhook_address and webhook_port parameters
+        :return: None
         """
         if self.is_stopped:
             self.app = web.Application()
@@ -101,52 +100,57 @@ class WebhookChannel:
             await self.webhook_site.start()
             self.is_stopped = False
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """
         Disconnect.
 
         Shut-off and cleanup the webhook site, the runner and the web app, then stop the channel.
+
+        :return: None
         """
         assert (
             self.webhook_site is not None
+            and self.runner is not None
+            and self.app is not None
         ), "Application not connected, call connect first!"
 
         if not self.is_stopped:
-            logger.info("Webhook app is shutdown.")
             await self.webhook_site.stop()
             await self.runner.shutdown()
             await self.runner.cleanup()
             await self.app.shutdown()
             await self.app.cleanup()
+            logger.info("Webhook app is shutdown.")
             self.is_stopped = True
 
-    async def _receive_webhook(self, request: web.Request):
+    async def _receive_webhook(self, request: web.Request) -> web.Response:
         """
         Receive a webhook request
 
         Get webhook request, turn it to envelop and send it to the agent to be picked up.
+
+        :param request: the webhook request
+        :return: Http response with a 200 code
         """
-        webhook_envelop = await self.to_envelope(self.connection_id, request)
+        webhook_envelop = await self.to_envelope(request)
         self.in_queue.put_nowait(webhook_envelop)  # type: ignore
         return web.Response(status=200)
 
     def send(self, request_envelope: Envelope) -> None:
         pass
 
-    async def to_envelope(
-        self, connection_id: PublicId, request: web.Request,
-    ) -> Envelope:
+    async def to_envelope(self, request: web.Request) -> Envelope:
         """
         Convert a webhook request object into an Envelope containing an HttpMessage (from the 'http' Protocol).
 
-        :param connection_id: the connection id
         :param request: the webhook request
+        :return: The envelop representing the webhook request
         """
 
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
-        context = EnvelopeContext(connection_id=connection_id)
+        context = EnvelopeContext(uri=URI("aea/mail/base.py"))
         http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
@@ -176,6 +180,7 @@ class WebhookConnection(Connection):
 
         :param webhook_address: the webhook hostname / IP address
         :param webhook_port: the webhook port number
+        :param webhook_url_path: the url path to receive webhooks from
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "http_client", "0.1.0")
@@ -199,7 +204,6 @@ class WebhookConnection(Connection):
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
             self.channel.in_queue = asyncio.Queue()
-            self.channel.loop = self.loop
             await self.channel.connect()
 
     async def disconnect(self) -> None:
@@ -214,7 +218,7 @@ class WebhookConnection(Connection):
 
     async def send(self, envelope: "Envelope") -> None:
         """
-        Send an envelope.
+        The webhook connection does not support send. Webhooks only receive.
 
         :param envelope: the envelop
         :return: None

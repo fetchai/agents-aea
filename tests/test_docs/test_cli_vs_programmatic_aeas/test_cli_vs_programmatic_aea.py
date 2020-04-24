@@ -118,7 +118,7 @@ class TestCliVsProgrammaticAEA:
             env=os.environ.copy(),
         )
 
-        time.sleep(5.0)
+        time.sleep(10.0)
         process_one.send_signal(signal.SIGINT)
         process_one.wait(timeout=20)
 

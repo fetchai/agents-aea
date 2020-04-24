@@ -40,4 +40,9 @@ Command  | Description
   <p>You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.</p>
 </div>
 
+<div class="admonition tip">
+  <p class="admonition-title">Tip</p>
+  <p>You can skip the consistency checks on the AEA project by using the flag `--skip-consistency-check`. E.g. `aea --skip-consistency-check run` will bypass the fingerprint checks.</p>
+</div>
+
 <br />

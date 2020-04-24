@@ -33,7 +33,9 @@ import pytest
 
 from aea.cli import cli
 from aea.cli_gui import DEFAULT_AUTHOR as AUTHOR
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.test_tools.click_testing import CliRunner
@@ -41,29 +43,45 @@ from aea.test_tools.exceptions import AEATestingException
 
 
 CLI_LOG_OPTION = ["-v", "OFF"]
+PROJECT_ROOT_DIR = "."
 
 
 class AEATestCase:
     """Test case for AEA end-to-end tests."""
 
+    is_project_dir_test: bool  # whether or not the test is run in an aea directory
     author: str  # author name
     cwd: str  # current working directory path
     runner: CliRunner  # CLI runner
+    agent_configuration: AgentConfig  # AgentConfig
+    agent_name: str  # the agent name derived from the config
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
     threads: List  # list of started threads
 
     @classmethod
-    def setup_class(cls, packages_dir_path=DEFAULT_REGISTRY_PATH):
+    def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
         """Set up the test class."""
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
+        aea_config_file_path = Path(
+            os.path.join(PROJECT_ROOT_DIR, DEFAULT_AEA_CONFIG_FILE)
+        )
+        cls.is_project_dir_test = os.path.isfile(aea_config_file_path)
+        if not cls.is_project_dir_test:
+            cls.t = tempfile.mkdtemp()
 
-        # add packages folder
-        packages_src = os.path.join(cls.cwd, packages_dir_path)
-        packages_dst = os.path.join(cls.t, packages_dir_path)
-        shutil.copytree(packages_src, packages_dst)
+            # add packages folder
+            packages_src = os.path.join(cls.cwd, packages_dir_path)
+            packages_dst = os.path.join(cls.t, packages_dir_path)
+            shutil.copytree(packages_src, packages_dst)
+        else:
+            with aea_config_file_path.open(mode="r", encoding="utf-8") as fp:
+                loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+                agent_configuration = loader.load(fp)
+            cls.agent_configuration = agent_configuration
+            cls.agent_name = agent_configuration.agent_name
+            cls.t = PROJECT_ROOT_DIR
 
         cls.subprocesses = []
         cls.threads = []
@@ -79,10 +97,12 @@ class AEATestCase:
         cls._join_threads()
 
         os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+
+        if not cls.is_project_dir_test:
+            try:
+                shutil.rmtree(cls.t)
+            except (OSError, IOError):
+                pass
 
     @classmethod
     def _terminate_subprocesses(cls):
@@ -100,17 +120,18 @@ class AEATestCase:
         for thread in cls.threads:
             thread.join()
 
-    def set_config(self, dotted_path: str, value: Any) -> None:
+    def set_config(self, dotted_path: str, value: Any, type: str = "str") -> None:
         """
         Set a config.
         Run from agent's directory.
 
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
+        :param type: the type
 
         :return: None
         """
-        self.run_cli_command("config", "set", dotted_path, str(value))
+        self.run_cli_command("config", "set", dotted_path, str(value), "--type", type)
 
     def disable_aea_logging(self):
         """
