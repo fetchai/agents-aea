@@ -59,7 +59,7 @@ async def _async_golang_get_deps(
     """
     Downloads libraries that go 'src' file depends on
     """
-    cmd = ["go", "get", "-v", "."]
+    cmd = ["go", "get", "-d","-v", "./..."]
 
     try:
         logger.debug(cmd, loop)
