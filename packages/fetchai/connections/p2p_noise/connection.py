@@ -24,8 +24,10 @@ import errno
 import logging
 import os
 import posix
+import shutil
 import struct
 import subprocess  # nosec
+import sys
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from random import randint
@@ -47,6 +49,8 @@ NOISE_NODE_SOURCE = str(
 NOISE_NODE_CLARGS = list()  # type: List[str]
 
 NOISE_NODE_LOG_FILE = "noise_node.log"
+
+NOISE = "noise"
 
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
@@ -266,8 +270,10 @@ class NoiseNode:
         # TOFIX(LR) async version
         # proc = await _async_golang_get_deps(self.source, loop=self._loop)
         # await proc.wait()
+        logger.info("Downloading goland dependencies. This may take a while...")
         proc = _golang_get_deps(self.source, self._log_file_desc)
         proc.wait()
+        logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
         in_path = self.noise_to_aea_path
@@ -390,18 +396,31 @@ class P2PNoiseConnection(Connection):
         :param entry_peers: noise entry peers ip address and port numbers.
         :param log_file: noise node log file
         """
+        self._check_go_installed()
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
+        # noise local node
+        self.node = NoiseNode(
+            key, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, uri, entry_peers, log_file
+        )
+        # replace address in kwargs
+        kwargs["address"] = self.node.pub
         super().__init__(**kwargs)
 
         if uri is None and (entry_peers is None or len(entry_peers) == 0):
             raise ValueError("Uri parameter must be set for genesis connection")
 
-        # noise local node
-        self.node = NoiseNode(
-            key, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, uri, entry_peers, log_file
-        )
         self._in_queue = None  # type: Optional[asyncio.Queue]
+
+    @property
+    def noise_address(self) -> str:
+        """The address used by the node."""
+        return self.node.pub
+
+    @property
+    def noise_address_id(self) -> str:
+        """The identifier for the address."""
+        return NOISE
 
     async def connect(self) -> None:
         """
@@ -476,6 +495,16 @@ class P2PNoiseConnection(Connection):
             assert self._in_queue is not None, "Input queue not initialized."
             self._in_queue.put_nowait(data)
 
+    def _check_go_installed(self) -> None:
+        """Checks if go is installed. Sys.exits if not"""
+        res = shutil.which("go")
+        if res is None:
+            logger.error(
+                "Please install go before running the `fetchai/p2p_noise:0.1.0` connection. "
+                "Go is available for download here: https://golang.org/doc/install"
+            )
+            sys.exit(1)
+
     @classmethod
     def from_config(
         cls, address: Address, configuration: ConnectionConfig
@@ -508,17 +537,11 @@ class P2PNoiseConnection(Connection):
 
         entry_peers_uris = [Uri(uri) for uri in entry_peers]
 
-        restricted_to_protocols_names = {
-            p.name for p in configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
-
         return P2PNoiseConnection(
             key,
             uri,
             entry_peers_uris,
             log_file,
-            connection_id=configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            address=address,
+            configuration=configuration,
         )

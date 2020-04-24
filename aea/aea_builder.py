@@ -24,6 +24,7 @@ import logging
 import os
 import pprint
 import re
+import sys
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
@@ -589,6 +590,7 @@ class AEABuilder:
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
+        identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
             identity,
             connections,
@@ -603,6 +605,42 @@ class AEABuilder:
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
+    def _update_identity(
+        self, identity: Identity, wallet: Wallet, connections: List[Connection]
+    ) -> Identity:
+        """
+        TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection.
+        """
+        public_ids = []  # type: List[PublicId]
+        for connection in connections:
+            public_ids.append(connection.public_id)
+        if not PublicId("fetchai", "p2p_noise", "0.1.0") in public_ids:
+            return identity
+        if len(public_ids) == 1:
+            p2p_noise_connection = connections[0]
+            noise_addresses = {
+                p2p_noise_connection.noise_address_id: p2p_noise_connection.noise_address  # type: ignore
+            }
+            # update identity:
+            assert self._name is not None, "Name not set!"
+            if len(wallet.addresses) > 1:
+                identity = Identity(
+                    self._name,
+                    addresses={**wallet.addresses, **noise_addresses},
+                    default_address_key=p2p_noise_connection.noise_address_id,  # type: ignore
+                )
+            else:  # pragma: no cover
+                identity = Identity(self._name, address=p2p_noise_connection.noise_address)  # type: ignore
+            return identity
+        else:
+            logger.error(
+                "The p2p-noise connection can only be used as a single connection. "
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.1.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.1.0` to run it as a single connection."
+            )
+            sys.exit(1)
 
     def _get_agent_loop_timeout(self) -> float:
         return self.DEFAULT_AGENT_LOOP_TIMEOUT
