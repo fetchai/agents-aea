@@ -29,7 +29,7 @@ from aiohttp import web  # type: ignore
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope, EnvelopeContext
+from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
@@ -61,6 +61,7 @@ class WebhookChannel:
         :param agent_address: the address of the agent
         :param webhook_address: webhook hostname / IP address
         :param webhook_port: webhook port number
+        :param webhook_url_path: url path to receive webhooks from
         :param connection_id: the connection id
         """
         self.agent_address = agent_address
@@ -77,9 +78,6 @@ class WebhookChannel:
 
         self.connection_id = connection_id
         self.in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
-        self.loop = (
-            None
-        )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
         logger.info("Initialised a webhook channel")
 
     async def connect(self):
@@ -112,12 +110,12 @@ class WebhookChannel:
         ), "Application not connected, call connect first!"
 
         if not self.is_stopped:
-            logger.info("Webhook app is shutdown.")
             await self.webhook_site.stop()
             await self.runner.shutdown()
             await self.runner.cleanup()
             await self.app.shutdown()
             await self.app.cleanup()
+            logger.info("Webhook app is shutdown.")
             self.is_stopped = True
 
     async def _receive_webhook(self, request: web.Request):
@@ -146,7 +144,7 @@ class WebhookChannel:
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
-        context = EnvelopeContext(connection_id=connection_id)
+        context = EnvelopeContext(uri=URI("aea/mail/base.py"))
         http_message = HttpMessage(
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
