@@ -24,8 +24,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import click
 from click.core import Argument, Command, Context, Option, Parameter
 
-from matplotlib.axes._axes import Axes  # type: ignore
-
 from .executor import Executor
 from .func_details import BenchmarkFuncDetails
 from .report_printer import PerformanceReport, ReportPrinter
@@ -282,7 +280,7 @@ class TestCli:
 
     def _draw_resource(
         self,
-        plt: Axes,
+        plt: "matplotpib.axes.Axes",  # type: ignore  # noqa: F821
         xaxis: List[float],
         reports: List[PerformanceReport],
         resources_range: List[int],
