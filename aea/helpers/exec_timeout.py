@@ -57,7 +57,7 @@ class TimeoutResult:
         return self._cancelled_by_timeout
 
 
-class TimeoutException(Exception):
+class TimeoutException(BaseException):
     """
     TimeoutException raised by ExecTimeout context managers in thread with limited execution time.
 
@@ -72,7 +72,7 @@ class BaseExecTimeout(ABC):
     exception_class - is exception type to raise in code controlled in case of timeout.
     """
 
-    exception_class: Type[Exception] = TimeoutException
+    exception_class: Type[BaseException] = TimeoutException
 
     def __init__(self, timeout: float = 0.0):
         """
