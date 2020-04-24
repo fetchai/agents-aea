@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 	//"strings"
-	aea "./aea"
+	aea "noise_aea/aea"
 	"errors"
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"

@@ -39,7 +39,7 @@ from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.packages.fetchai.connections.p2p_noise")
 
 
 NOISE_NODE_SOURCE = str(
@@ -57,7 +57,7 @@ async def _async_golang_get_deps(
     src: str, loop: AbstractEventLoop
 ) -> asyncio.subprocess.Process:
     """
-    Downloads libraries that go 'src' file depends on
+    Downloads dependencies of go 'src' file - asynchronous
     """
     cmd = ["go", "get", "-d", "-v", "./..."]
 
@@ -75,9 +75,31 @@ async def _async_golang_get_deps(
 
 def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
     """
-    Downloads libraries that go 'src' file depends on
+    Downloads dependencies of go 'src' file
     """
     cmd = ["go", "get", "-v", "./..."]
+
+    try:
+        logger.debug(cmd)
+        proc = subprocess.Popen(  # nosec
+            cmd,
+            cwd=os.path.dirname(src),
+            stdout=log_file_desc,
+            stderr=log_file_desc,
+            shell=False,
+        )
+    except Exception as e:
+        logger.error("While executing go get : {}".format(str(e)))
+        raise e
+
+    return proc
+
+
+def _golang_get_deps_mod(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
+    """
+    Downloads dependencies of go 'src' file using go modules (go.mod)
+    """
+    cmd = ["go", "mod", "download"]
 
     try:
         logger.debug(cmd)
@@ -108,7 +130,12 @@ def _golang_run(
     try:
         logger.debug(cmd)
         proc = subprocess.Popen(  # nosec
-            cmd, env=env, stdout=log_file_desc, stderr=log_file_desc, shell=False
+            cmd,
+            cwd=os.path.dirname(src),
+            env=env,
+            stdout=log_file_desc,
+            stderr=log_file_desc,
+            shell=False,
         )
     except Exception as e:
         logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
@@ -270,7 +297,7 @@ class NoiseNode:
         # proc = await _async_golang_get_deps(self.source, loop=self._loop)
         # await proc.wait()
         logger.info("Downloading goland dependencies. This may take a while...")
-        proc = _golang_get_deps(self.source, self._log_file_desc)
+        proc = _golang_get_deps_mod(self.source, self._log_file_desc)
         proc.wait()
         logger.info("Finished downloading golang dependencies.")
 
@@ -296,6 +323,7 @@ class NoiseNode:
         env["AEA_TO_NOISE"] = out_path
 
         # run node
+        logger.info("Starting noise node...")
         self.proc = _golang_run(self.source, self.clargs, env, self._log_file_desc)
 
         await self._connect()
@@ -338,7 +366,7 @@ class NoiseNode:
         assert self._loop is not None
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
 
-        logger.info("Connected to noise node")
+        logger.info("Connected to noise node addr({})".format(self.pub))
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -363,7 +391,7 @@ class NoiseNode:
             return data
         except asyncio.streams.IncompleteReadError as e:
             logger.info(
-                "Node disconnected while reading {}/{}".format(
+                "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
