@@ -130,6 +130,8 @@ def _golang_run(
     cmd = ["go", "run", src]
 
     cmd.extend(args)
+    
+    env["GOPATH"] = "{}/go".format(Path.home())
 
     try:
         logger.debug(cmd)
