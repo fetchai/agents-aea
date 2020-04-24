@@ -1,0 +1,29 @@
+name: aries_faber
+author: fetchai
+version: 0.1.0
+description: The aries_faber skill implements the alice player in the aries cloud
+  agent demo
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
+  behaviours.py: Qmf6bRVkdkKzEE7NVmgyr4NPqxfL8uB3Vw47Mw3K6tzAwn
+  handlers.py: Qmasf3DSzbC3YcuahFDcacnYg5yz5sSJQydX7i1WCGpncg
+fingerprint_ignore_patterns: []
+contracts: []
+protocols: []
+behaviours:
+  aries_demo_faber_behaviour:
+    args:
+      admin_host: 127.0.0.1
+      admin_port: 8021
+    class_name: AriesDemoFaberBehaviour
+handlers:
+  aries_demo_http_handler:
+    args:
+      admin_host: 127.0.0.1
+      admin_port: 8021
+      alice_id: alice_identity_address
+    class_name: AriesDemoHTTPHandler
+models: {}
+dependencies: {}

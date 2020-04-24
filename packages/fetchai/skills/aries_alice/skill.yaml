@@ -1,0 +1,33 @@
+name: aries_alice
+author: fetchai
+version: 0.1.0
+description: The aries_alice skill implements the alice player in the aries cloud
+  agent demo
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: Qma8qSTU34ADKWskBwQKQLGNpe3xDKNgjNQ6Q4MxUnKa3Q
+  behaviours.py: QmYyuRYNhYyG2449Rra3vMRa2oLK9vC2nZXogykN7jvNGd
+  handlers.py: QmfSZDzNGD4fBFxosmrXUNxdKqPQKcUhVEaW9SRi7F7nRp
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/http:0.1.0
+behaviours:
+  aries_demo_alice_behaviour:
+    args: {}
+    class_name: AriesDemoAliceBehaviour
+handlers:
+  aries_demo_default_handler:
+    args:
+      admin_host: 127.0.0.1
+      admin_port: 8031
+    class_name: AriesDemoDefaultHandler
+  aries_demo_http_handler:
+    args:
+      admin_host: 127.0.0.1
+      admin_port: 8031
+    class_name: AriesDemoHttpHandler
+models: {}
+dependencies: {}
