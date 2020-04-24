@@ -59,7 +59,7 @@ async def _async_golang_get_deps(
     """
     Downloads libraries that go 'src' file depends on
     """
-    cmd = ["go", "get", "-d","-v", "./..."]
+    cmd = ["go", "get", "-d", "-v", "./..."]
 
     try:
         logger.debug(cmd, loop)
@@ -77,7 +77,7 @@ def _golang_get_deps(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
     """
     Downloads libraries that go 'src' file depends on
     """
-    cmd = ["go", "get", "-v", "-d", "."]
+    cmd = ["go", "get", "-v", "./..."]
 
     try:
         logger.debug(cmd)
