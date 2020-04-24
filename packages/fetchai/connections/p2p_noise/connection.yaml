@@ -11,7 +11,6 @@ fingerprint:
   aea/api.go: Qma5dr4Rhtx4grvYZiemFZ3btgCRQAWSnbSE2V1vVeuusE
   connection.py: QmTSdShTK9uA1UQGHoFVkzBdT7qzCnHL3JHWyvwmFn62DF
   go.mod: QmUzpzaa5qnYbRnuH9kVXkoHLQugwfdZLNpq5ShFbcrk2V
-  go.sum: QmVNfH3vLsEUko4QGtD5RaxPiS6pgDdHKshNfqmTN5Ao2N
   noise_node.go: QmWXkZ8qV2CE297om3tgsWJCA8xvvedC5f2ctaJRReGqZx
 fingerprint_ignore_patterns: []
 protocols: []
