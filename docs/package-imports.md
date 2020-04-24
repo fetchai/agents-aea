@@ -47,7 +47,7 @@ The `aea-config.yaml` is the top level configuration file of an AEA. It defines 
 For the AEA to use a package, the `public_id` for the package must be listed in the `aea-config.yaml` file, e.g.
 ``` yaml
 connections:
-- fetchai/stub:0.1.0
+- fetchai/stub:0.2.0
 ```
 
 The above shows a part of the `aea-config.yaml`. If you see the connections, you will see that we follow a pattern of `author/name_package:version` to identify each package, also referred to as `public_id`. Here the `author` is the author of the package.
@@ -66,6 +66,8 @@ The way we import modules from packages inside the agent is in the form of `pack
 
 The framework loads the modules from the local agent project and adds them to Python's `sys.modules` under the respective path.
 
+We use a custom package management approach for the AEAs rather than the default Python one as it provides us with more flexibility, especially when it comes to extension beyond the Python ecosystem.
+
 ## Python dependencies of packages
 
 Python dependencies of packages are specified in their respective configuration files under `dependencies`.
@@ -75,10 +77,14 @@ Python dependencies of packages are specified in their respective configuration 
 If you want to create a package, you can use the <a href="../scaffolding/">CLI command</a> `aea scaffold connection/contract/protocol/skill [name]` and this will create the package and put it inside the respective folder based on the command for example if we `scaffold` skill with the name `my_skill`
 it will be located inside the folder skills in the root directory of the agent (`my_aea/skills/my_skill`).
 
-## Use published packages
+## Use published packages from the registry
 
-On the other hand, if you use a package from the registry or the `packages` located in the AEA repository, you will be able to locate the package under the folder `vendor` after adding it using the CLI.
+If you want to use a finished package, you can use a package from the registry.
 
-## Difference of vendor and own packages
+There or two registries. The remote registry operated by Fetch.ai and a local registry stub. The local registry stub is a directory called `packages` which contains packages in a nested structure with authors on the top level, followed by the package type, then package name. An example of such a directory is the `packages` directory located in the AEA repository. The local registry is useful for development.
 
-The packages you have developed in the context of the given AEA project should be located in the root folders (`connections/`, `contracs/`, `protocols/` and `skills/`) and all the packages you have added from the registry should be located in the `vendor` folder, under the relevant author.
+You can use the CLI to interact with the registry. By default the CLI points to the remote registry. You can point it to the local registry via the flag `--local`.
+
+## Package versioning
+
+By default, the AEA can only handle one version per package. That is, a project should never use both `some_author/some_package_name:0.1.0` and `some_author/some_package_name:0.2.0`.

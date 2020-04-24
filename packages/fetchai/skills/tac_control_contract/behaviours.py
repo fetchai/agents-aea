@@ -107,7 +107,7 @@ class TACBehaviour(SimpleBehaviour):
             )
         )
         contract.set_instance(ledger_api)
-        transaction_message = contract.get_deploy_transaction(
+        transaction_message = contract.get_deploy_transaction_msg(
             deployer_address=self.context.agent_address,
             ledger_api=ledger_api,
             skill_callback_id=self.context.skill_id,
@@ -296,10 +296,13 @@ class TACBehaviour(SimpleBehaviour):
                 version_id=game.conf.version_id,
                 info={"contract_address": game.conf.contract_address},
             )
-            self.context.logger.info(
-                "[{}]: sending game data to '{}': {}".format(
-                    self.context.agent_name, agent_address, str(tac_msg)
+            self.context.logger.debug(
+                "[{}]: sending game data to '{}'.".format(
+                    self.context.agent_name, agent_address
                 )
+            )
+            self.context.logger.debug(
+                "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
             )
             self.context.outbox.put_message(
                 to=agent_address,
@@ -348,7 +351,7 @@ class TACBehaviour(SimpleBehaviour):
         ] + [
             int(currency_id) for currency_id in configuration.currency_id_to_name.keys()
         ]
-        tx_msg = contract.get_create_batch_transaction(
+        tx_msg = contract.get_create_batch_transaction_msg(
             deployer_address=self.context.agent_address,
             ledger_api=ledger_api,
             skill_callback_id=self.context.skill_id,
@@ -370,7 +373,7 @@ class TACBehaviour(SimpleBehaviour):
         for currency_id, amount in agent_state.amount_by_currency_id.items():
             token_ids.append(int(currency_id))
             mint_quantities.append(amount)
-        tx_msg = contract.get_mint_batch_transaction(
+        tx_msg = contract.get_mint_batch_transaction_msg(
             deployer_address=self.context.agent_address,
             recipient_address=agent_state.agent_address,
             mint_quantities=mint_quantities,
@@ -423,12 +426,12 @@ class ContractBehaviour(TickerBehaviour):
                 )
                 contract.set_address(ledger_api, tx_receipt.contractAddress)
                 configuration = Configuration(parameters.version_id, parameters.tx_fee,)
-                good_ids = generate_good_ids(parameters.nb_goods, contract)
-                configuration.good_id_to_name = generate_good_id_to_name(good_ids)
                 currency_ids = generate_currency_ids(parameters.nb_currencies, contract)
                 configuration.currency_id_to_name = generate_currency_id_to_name(
                     currency_ids
                 )
+                good_ids = generate_good_ids(parameters.nb_goods, contract)
+                configuration.good_id_to_name = generate_good_id_to_name(good_ids)
                 configuration.contract_address = tx_receipt.contractAddress
                 game.conf = configuration
                 game.phase = Phase.CONTRACT_DEPLOYED

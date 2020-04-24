@@ -563,7 +563,7 @@ class OEFSearchHandler(Handler):
 
         if oef_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
             agents = list(oef_msg.agents)
-            search_id = oef_msg.message_id
+            search_id = int(oef_msg.dialogue_reference[0])
             search = cast(Search, self.context.search)
             if self.context.agent_address in agents:
                 agents.remove(self.context.agent_address)
@@ -607,7 +607,9 @@ class OEFSearchHandler(Handler):
             )
             strategy = cast(Strategy, self.context.strategy)
             dialogues = cast(Dialogues, self.context.dialogues)
-            query = strategy.get_own_services_query(is_searching_for_sellers)
+            query = strategy.get_own_services_query(
+                is_searching_for_sellers, is_search_query=False
+            )
 
             for opponent_addr in agents:
                 dialogue = dialogues.create_self_initiated(

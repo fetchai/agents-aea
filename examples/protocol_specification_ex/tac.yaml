@@ -21,7 +21,6 @@ speech_acts:
     tx_nonce: pt:int
     tx_sender_signature: pt:str
     tx_counterparty_signature: pt:str
-  get_state_update: {}
   cancelled: {}
   game_data:
     amount_by_currency_id: pt:dict[pt:str, pt:int]

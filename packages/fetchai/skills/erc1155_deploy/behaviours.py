@@ -99,7 +99,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         if strategy.contract_address is None:
             self.context.logger.info("Preparing contract deployment transaction")
             contract.set_instance(self.context.ledger_apis.ethereum_api)
-            dm_message_for_deploy = contract.get_deploy_transaction(
+            dm_message_for_deploy = contract.get_deploy_transaction_msg(
                 deployer_address=self.context.agent_address,
                 ledger_api=self.context.ledger_apis.ethereum_api,
                 skill_callback_id=self.context.skill_id,
@@ -125,7 +125,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 token_type=strategy.ft, nb_tokens=strategy.nb_tokens
             )
             self.context.logger.info("Creating a batch of items")
-            creation_message = contract.get_create_batch_transaction(
+            creation_message = contract.get_create_batch_transaction_msg(
                 deployer_address=self.context.agent_address,
                 token_ids=self.token_ids,
                 ledger_api=self.context.ledger_apis.ethereum_api,
@@ -134,7 +134,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self.context.decision_maker_message_queue.put_nowait(creation_message)
         if contract.is_deployed and self.is_items_created and not self.is_items_minted:
             self.context.logger.info("Minting a batch of items")
-            mint_message = contract.get_mint_batch_transaction(
+            mint_message = contract.get_mint_batch_transaction_msg(
                 deployer_address=self.context.agent_address,
                 recipient_address=self.context.agent_address,
                 token_ids=self.token_ids,

@@ -79,9 +79,6 @@ class TacSerializer(Serializer):
             tx_counterparty_signature = msg.tx_counterparty_signature
             performative.tx_counterparty_signature = tx_counterparty_signature
             tac_msg.transaction.CopyFrom(performative)
-        elif performative_id == TacMessage.Performative.GET_STATE_UPDATE:
-            performative = tac_pb2.TacMessage.Get_State_Update_Performative()  # type: ignore
-            tac_msg.get_state_update.CopyFrom(performative)
         elif performative_id == TacMessage.Performative.CANCELLED:
             performative = tac_pb2.TacMessage.Cancelled_Performative()  # type: ignore
             tac_msg.cancelled.CopyFrom(performative)
@@ -185,8 +182,6 @@ class TacSerializer(Serializer):
             performative_content[
                 "tx_counterparty_signature"
             ] = tx_counterparty_signature
-        elif performative_id == TacMessage.Performative.GET_STATE_UPDATE:
-            pass
         elif performative_id == TacMessage.Performative.CANCELLED:
             pass
         elif performative_id == TacMessage.Performative.GAME_DATA:

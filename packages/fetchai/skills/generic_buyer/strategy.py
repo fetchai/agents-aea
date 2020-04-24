@@ -50,10 +50,10 @@ class Strategy(Model):
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+        self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
-        self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
 
     def get_next_search_id(self) -> int:
         """

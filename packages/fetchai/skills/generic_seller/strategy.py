@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from aea.helpers.search.generic import GenericDataModel
 from aea.helpers.search.models import Description, Query
@@ -34,8 +34,8 @@ DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
 DEFAULT_DATA_MODEL_NAME = "location"
 DEFAULT_DATA_MODEL = {
-    "attribute_one": {"name": "country", "type": "str", "is_required": "True"},
-    "attribute_two": {"name": "city", "type": "str", "is_required": "True"},
+    "attribute_one": {"name": "country", "type": "str", "is_required": True},
+    "attribute_two": {"name": "city", "type": "str", "is_required": True},
 }  # type: Optional[Dict[str, Any]]
 DEFAULT_SERVICE_DATA = {"country": "UK", "city": "Cambridge"}
 
@@ -58,20 +58,20 @@ class Strategy(Model):
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
+        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
+        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
 
+        super().__init__(**kwargs)
+
+        self._oef_msg_id = 0
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
         if self._has_data_source:
             self._data_for_sale = self.collect_from_data_source()
         else:
-            self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
-
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
-        self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
-        self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
-        self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+            self._data_for_sale = data_for_sale
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -106,7 +106,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 

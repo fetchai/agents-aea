@@ -153,7 +153,7 @@ class FIPAHandler(Handler):
                 ledger_api=self.context.ledger_apis.ethereum_api,
                 contract_address=data["contract_address"],
             )
-            tx_msg = contract.get_hash_single_transaction(
+            tx_msg = contract.get_hash_single_transaction_msg(
                 from_address=msg.counterparty,
                 to_address=self.context.agent_address,
                 token_id=int(data["token_id"]),
@@ -282,7 +282,7 @@ class TransactionHandler(Handler):
             == TransactionMessage.Performative.SUCCESSFUL_SIGNING
             and (
                 tx_msg_response.tx_id
-                == ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value
+                == ERC1155Contract.Performative.CONTRACT_SIGN_HASH_SINGLE.value
             )
         ):
             tx_signature = tx_msg_response.signed_payload.get("tx_signature")

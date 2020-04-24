@@ -189,6 +189,19 @@ class TestBuildSkill:
         )
         assert result.exit_code == 0, "Fingerprinting not successful"
 
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.default_connection",
+                "fetchai/oef:0.2.0",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0, "Config set not successful"
+
         os.chdir(Path(self.t, "simple_service_registration"))
         try:
             # run service agent

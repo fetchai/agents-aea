@@ -1,4 +1,4 @@
-# AEA Framework 
+# AEA Framework
 
 [![PyPI](https://img.shields.io/pypi/v/aea)](https://pypi.org/project/aea/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aea)
@@ -12,37 +12,47 @@
 
 A framework for autonomous economic agent (AEA) development
 
+<p align="center">
+  <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
+</p>
+
 ## Get started
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
-      pipenv --python 3.7 && pipenv shell
+       pipenv --python 3.7 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-      pip install aea[all]
+       pip install aea[all]
 
-(`pip install "aea[all]"` if you use `zsh` rather than `bash`.)
+    Or, if you use `zsh` rather than `bash`:
+
+       pip install "aea[all]"
 
 3. Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
 <p align="center">
-  <img src="https://github.com/fetchai/agents-aea/blob/develop/data/aea.png?raw=true" alt="AEA" width="70%"/>
+  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
+    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
+  </a>
 </p>
 
 ## Alternatively: Install from Source
+
+This approach is not recommended!
 
 ### Cloning
 
 This repository contains submodules. Clone with recursive strategy:
 
-      git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+    git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ### Dependencies
 
-All python specific dependencies are specified in the Pipfile (and installed via the commands specified in 'Preliminaries').
+All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in [Preliminaries](#preliminaries)).
 
-Or, you can have more control on the installed dependencies by leveraging the setuptools' extras mechanism (more details later). 
+You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism. 
 
 ### Preliminaries
 
@@ -54,57 +64,62 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[all]
 
-(`pip install ".[all]"` if you use `zsh` rather than `bash`.)
+    Or, if you use `zsh` rather than `bash`:
+
+      pip install ".[all]"
 
 - Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
 ## Contribute
 
 The following dependency is **only relevant if you intend to contribute** to the repository:
-- the project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
-The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
+- The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
-- Install development dependencies (optionally skipping Lockfile creation):
+The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-	  pipenv install --dev --skip-lock
+- To install development dependencies (here optionally skipping `Pipfile.lock` creation):
 
-- Install package in development mode (this step replaces `pip install aea[all]` above):
+      pipenv install --dev --skip-lock
 
-	  pip install -e .[all]
+- To install the package from source in development mode:
 
-(`pip install -e ".[all]"` if you use `zsh` rather than `bash`.)
+      pip install -e .[all]
 
-- To run tests (ensure no oef docker containers are running):
+    Of, if you use `zsh` rather than `bash`:
 
-	    tox -e py3.7
+      pip install -e ".[all]"
+
+- To run tests:
+
+      tox -e py3.7
 
 - To run linters (code style checks):
 
-	  tox -e flake8
+      tox -e flake8
 
 - To run static type checks:
 
-	  tox -e mypy
+      tox -e mypy
 
 - To run black code formatter:
 
-	  tox -e black
+      tox -e black
 
 - To run bandit security checks:
 
-	  tox -e bandit-main
-	  tox -e bandit-tests
+      tox -e bandit-main
+      tox -e bandit-tests
 
-- Docs:
+- To start a live-reloading docs server on localhost
+	
+      mkdocs serve
 
-	* `mkdocs serve` - Start the live-reloading docs server on localhost.
+- To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
-To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
+- To fetch/update submodules:
 
-- Fetch submodules:
-
-	  git submodule sync --recursive && git submodule update --init --recursive
+      git submodule sync --recursive && git submodule update --init --recursive
 
 ## Cite
 
@@ -117,5 +132,4 @@ consider to cite it with the following BibTex entry:
   Title = {Autonomous Economic Agent (AEA) Framework},
   Year = {2019},
 }
-
 ```
