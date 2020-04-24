@@ -81,7 +81,7 @@ class TestCli:
         executor_class=Executor,
         report_printer_class=ReportPrinter,
     ):
-        r"""
+        """
         Make performance client.
 
         :param func: function to be tested.
