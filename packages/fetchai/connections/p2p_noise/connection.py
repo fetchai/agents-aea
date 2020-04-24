@@ -99,7 +99,7 @@ def _golang_get_deps_mod(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
     """
     Downloads dependencies of go 'src' file using go modules (go.mod)
     """
-    cmd = ["go", "mod", "download"]
+    cmd = ["go", "build"]
 
     try:
         logger.debug(cmd)
@@ -123,9 +123,11 @@ def _golang_run(
     """
     Runs the go 'src' as a subprocess
     """
-    cmd = ["go", "run", src]
+    cmd = ["go", "run", "noise_aea"]
 
     cmd.extend(args)
+
+    env[""]
 
     try:
         logger.debug(cmd)

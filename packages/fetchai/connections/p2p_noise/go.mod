@@ -1,6 +1,6 @@
 module noise_aea
 
-go 1.13
+go 1.11
 
 require (
 	github.com/golang/protobuf v1.4.0

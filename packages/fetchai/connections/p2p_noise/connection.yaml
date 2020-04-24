@@ -9,8 +9,8 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
   aea/api.go: Qma5dr4Rhtx4grvYZiemFZ3btgCRQAWSnbSE2V1vVeuusE
-  connection.py: QmTSdShTK9uA1UQGHoFVkzBdT7qzCnHL3JHWyvwmFn62DF
-  go.mod: QmUzpzaa5qnYbRnuH9kVXkoHLQugwfdZLNpq5ShFbcrk2V
+  connection.py: QmVhBNkYNQXTeCgLimAEDjspNy4FRMTobwFrAdjup1KJdB
+  go.mod: QmRN9oTHJprsvYAqqWq2KgLopK4GVMPUuxUAukZqyQ3o5y
   noise_node.go: QmWXkZ8qV2CE297om3tgsWJCA8xvvedC5f2ctaJRReGqZx
 fingerprint_ignore_patterns:
 - go.sum
