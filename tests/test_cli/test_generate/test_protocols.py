@@ -264,7 +264,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
         s = "A protocol with name 't_protocol' already exists. Aborting..."
-        assert self.result.exception.message == s
+        assert self.generate_result_2.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
