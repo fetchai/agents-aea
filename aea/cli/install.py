@@ -28,6 +28,7 @@ import click
 
 from aea.cli.common import Context, check_aea_project, logger
 from aea.configurations.base import Dependency
+from aea.exceptions import AEAException
 
 
 def _install_dependency(dependency_name: str, dependency: Dependency):
@@ -51,7 +52,7 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             return_code = _try_install(command)
         assert return_code == 0
     except Exception as e:
-        raise click.ClickException(
+        raise AEAException(
             "An error occurred while installing {}, {}: {}".format(
                 dependency_name, dependency, str(e)
             )
@@ -84,7 +85,7 @@ def _install_from_requirement(file: str):
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception:
-        raise click.ClickException(
+        raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(
                 file
             )
@@ -111,11 +112,14 @@ def install(click_context, requirement: Optional[str]):
     """Install the dependencies."""
     ctx = cast(Context, click_context.obj)
 
-    if requirement:
-        logger.debug("Installing the dependencies in '{}'...".format(requirement))
-        _install_from_requirement(requirement)
-    else:
-        logger.debug("Installing all the dependencies...")
-        dependencies = ctx.get_dependencies()
-        for name, d in dependencies.items():
-            _install_dependency(name, d)
+    try:
+        if requirement:
+            logger.debug("Installing the dependencies in '{}'...".format(requirement))
+            _install_from_requirement(requirement)
+        else:
+            logger.debug("Installing all the dependencies...")
+            dependencies = ctx.get_dependencies()
+            for name, d in dependencies.items():
+                _install_dependency(name, d)
+    except AEAException as e:
+        raise click.ClickException(str(e))
