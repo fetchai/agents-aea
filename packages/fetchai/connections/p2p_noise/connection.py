@@ -23,7 +23,6 @@ import asyncio
 import errno
 import logging
 import os
-import posix
 import shutil
 import struct
 import subprocess  # nosec
@@ -251,8 +250,8 @@ class NoiseNode:
         tmp_dir = tempfile.mkdtemp()
         self.noise_to_aea_path = "{}/{}-noise_to_aea".format(tmp_dir, self.pub[:5])
         self.aea_to_noise_path = "{}/{}-aea_to_noise".format(tmp_dir, self.pub[:5])
-        self._noise_to_aea = None  # type: Optional[int]
-        self._aea_to_noise = None
+        self._noise_to_aea = -1
+        self._aea_to_noise = -1
         self._connection_attempts = 10
 
         self._loop = None  # type: Optional[AbstractEventLoop]
@@ -313,13 +312,13 @@ class NoiseNode:
             )
         )
 
-        self._noise_to_aea = posix.open(
-            self.noise_to_aea_path, posix.O_RDONLY | os.O_NONBLOCK
+        self._noise_to_aea = os.open(
+            self.noise_to_aea_path, os.O_RDONLY | os.O_NONBLOCK
         )
 
         try:
-            self._aea_to_noise = posix.open(
-                self.aea_to_noise_path, posix.O_WRONLY | os.O_NONBLOCK
+            self._aea_to_noise = os.open(
+                self.aea_to_noise_path, os.O_WRONLY | os.O_NONBLOCK
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
@@ -336,6 +335,7 @@ class NoiseNode:
             self._stream_reader, loop=self._loop
         )
         self._fileobj = os.fdopen(self._noise_to_aea, "r")
+        assert self._loop is not None
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
 
         logger.info("Connected to noise node")
@@ -343,8 +343,8 @@ class NoiseNode:
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
         size = struct.pack("!I", len(data))
-        posix.write(self._aea_to_noise, size)
-        posix.write(self._aea_to_noise, data)
+        os.write(self._aea_to_noise, size)
+        os.write(self._aea_to_noise, data)
         # TOFIX(LR) can use asyncio.connect_write_pipe
 
     async def read(self) -> Optional[bytes]:
@@ -353,10 +353,10 @@ class NoiseNode:
         ), "StreamReader not set, call connect first!"
         try:
             logger.debug("Waiting for messages...")
-            size = await self._stream_reader.readexactly(4)
-            if not size:
+            buf = await self._stream_reader.readexactly(4)
+            if not buf:
                 return None
-            size = struct.unpack("!I", size)[0]
+            size = struct.unpack("!I", buf)[0]
             data = await self._stream_reader.readexactly(size)
             if not data:
                 return None
