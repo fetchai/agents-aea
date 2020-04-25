@@ -132,8 +132,6 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -168,7 +166,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
         The expected message is: 'A connection with name '{connection_name}' already exists. Aborting...'
         """
         s = "A connection with this name already exists. Please choose a different name and try again."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -198,8 +196,6 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -240,7 +236,7 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
         s = "A connection with name '{}' already exists. Aborting...".format(
             self.resource_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -270,8 +266,6 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -308,9 +302,8 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Error when validating the connection configuration file."
-        )
+        s = "Error when validating the connection configuration file."
+        assert self.result.exception.message == s
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.

@@ -21,13 +21,14 @@
 
 import os
 import shutil
+import signal
 import subprocess  # nosec
 import sys
 import tempfile
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 import pytest
 
@@ -205,6 +206,38 @@ class AEATestCase:
         """
         return self._run_python_subprocess("-m", "aea.cli", "run", *args)
 
+    def terminate_agents(
+        self,
+        subprocesses: Optional[List[subprocess.Popen]] = None,
+        signal: signal.Signals = signal.SIGINT,
+        timeout: int = 10,
+    ) -> None:
+        """
+        Terminate agent subprocesses.
+        Run from agent's directory.
+
+        :param subprocesses: the subprocesses running the agents
+        :param signal: the signal for interuption
+        :timeout: the timeout for interuption
+        """
+        if subprocesses is None:
+            subprocesses = self.subprocesses
+        for process in subprocesses:
+            process.send_signal(signal.SIGINT)
+        for process in subprocesses:
+            process.wait(timeout=timeout)
+
+    def is_successfully_terminated(
+        self, subprocesses: Optional[List[subprocess.Popen]] = None
+    ):
+        """
+        Check if all subprocesses terminated successfully
+        """
+        if subprocesses is None:
+            subprocesses = self.subprocesses
+        all_terminated = [process.returncode == 0 for process in subprocesses]
+        return all_terminated
+
     def initialize_aea(self, author=None) -> None:
         """
         Initialize AEA locally with author name.
@@ -303,7 +336,7 @@ class AEATestCase:
         :param dest: the destination file.
         :return: None
         """
-        assert src.is_file() and dest.is_file()
+        assert src.is_file() and dest.is_file(), "Source or destination is not a file."
         src.write_text(dest.read_text())
 
 

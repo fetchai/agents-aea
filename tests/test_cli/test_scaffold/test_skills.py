@@ -141,8 +141,6 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -176,7 +174,7 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         The expected message is: 'A skill with name '{skill_name}' already exists. Aborting...'
         """
         s = "A skill with this name already exists. Please choose a different name and try again."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -206,8 +204,6 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -247,7 +243,7 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         s = "A skill with name '{}' already exists. Aborting...".format(
             self.resource_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -277,8 +273,6 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -314,9 +308,8 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find skill: '{skill_name}'
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Error when validating the skill configuration file."
-        )
+        s = "Error when validating the skill configuration file."
+        assert self.result.exception.message == s
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.

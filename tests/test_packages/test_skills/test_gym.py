@@ -21,7 +21,6 @@
 
 import os
 import shutil
-import signal
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
@@ -73,6 +72,6 @@ class TestGymSkill(AEAWithOefTestCase):
         gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.1.0")
         time.sleep(10.0)
 
-        gym_aea_process.send_signal(signal.SIGINT)
-        gym_aea_process.wait(timeout=20)
-        # TODO: check the run ends properly
+        self.terminate_agents([gym_aea_process])
+
+        assert self.is_successfully_terminated(), "Gym test not successful."

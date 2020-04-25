@@ -22,7 +22,6 @@
 
 import os
 import shutil
-import sys
 import time
 from pathlib import Path
 from typing import cast
@@ -106,10 +105,9 @@ def delete(click_context, agent_name):
     try:
         shutil.rmtree(agent_name, ignore_errors=False)
     except OSError:
-        logger.error(
+        raise click.ClickException(
             "An error occurred while deleting the agent directory. Aborting..."
         )
-        sys.exit(1)
 
 
 @cli.command()
@@ -168,8 +166,7 @@ def _try_add_key(ctx, type_, filepath):
     try:
         ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
     ctx.agent_loader.dump(
         ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )
@@ -207,8 +204,7 @@ def _try_get_address(ctx, type_):
         address = wallet.addresses[type_]
         return address
     except ValueError as e:  # pragma: no cover
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
 
 @cli.command()
@@ -237,8 +233,7 @@ def _try_get_balance(agent_config, wallet, type_):
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
 
 def _try_get_wealth(ctx, type_):
@@ -295,8 +290,7 @@ def _try_generate_wealth(ctx, type_, sync):
             _wait_funds_release(ctx.agent_config, wallet, type_)
 
     except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
 
 @cli.command()

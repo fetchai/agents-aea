@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea run' subcommand."""
 
-import sys
 from pathlib import Path
 from typing import List, Optional
 
@@ -32,7 +31,6 @@ from aea.cli.common import (
     AEA_LOGO,
     ConnectionsOption,
     check_aea_project,
-    logger,
 )
 from aea.cli.install import install
 from aea.configurations.base import PublicId
@@ -68,14 +66,11 @@ def _build_aea(
         aea = builder.build(connection_ids=connection_ids)
         return aea
     except AEAPackageLoadingError as e:
-        logger.exception(e)
-        # TODO convert to raise ClickException
-        sys.exit(1)
+        raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
         # TODO use an ad-hoc exception class for predictable errors
-        #      all the other exceptions should be logged with logger.exception
-        logger.error(str(e))
-        sys.exit(1)
+        #      all the other exceptions should be logged with ClickException
+        raise click.ClickException(str(e))
 
 
 def _run_aea(aea: AEA) -> None:
@@ -86,8 +81,7 @@ def _run_aea(aea: AEA) -> None:
     except KeyboardInterrupt:
         click.echo(" {} interrupted!".format(aea.name))  # pragma: no cover
     except Exception as e:
-        logger.exception(e)
-        sys.exit(1)
+        raise click.ClickException(str(e))
     finally:
         click.echo("{} stopping ...".format(aea.name))
         aea.stop()

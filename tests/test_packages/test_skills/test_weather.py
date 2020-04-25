@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import signal
 import time
 
 from aea.test_tools.decorators import skip_test_ci
@@ -73,10 +72,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)
-        process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=10)
-        process_two.send_signal(signal.SIGINT)
-        process_two.wait(timeout=10)
 
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+        self.terminate_agents([process_one, process_two])
+
+        assert self.is_successfully_terminated(), "Weather test not successful."

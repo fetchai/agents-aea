@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import signal
 import sys
 import time
 
@@ -34,7 +33,7 @@ class TestMLSkills(AEAWithOefTestCase):
     """Test that ml skills work."""
 
     @pytest.mark.skipif(
-        sys.version_info > (3, 7),
+        sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
     )
     @skip_test_ci
@@ -78,9 +77,6 @@ class TestMLSkills(AEAWithOefTestCase):
 
         time.sleep(60)
 
-        data_provider_aea_process.send_signal(signal.SIGINT)
-        model_trainer_aea_process.send_signal(signal.SIGINT)
-        data_provider_aea_process.wait(timeout=60)
-        model_trainer_aea_process.wait(timeout=60)
-        assert data_provider_aea_process.returncode == 0
-        assert model_trainer_aea_process.returncode == 0
+        self.terminate_agents(timeout=60)
+
+        assert self.is_successfully_terminated(), "ML test not successful."

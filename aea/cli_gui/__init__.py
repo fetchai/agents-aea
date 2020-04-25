@@ -142,7 +142,9 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         if line[:13] == "Description: ":
             item_descs.append(line[13:-1])
 
-    assert len(item_ids) == len(item_descs)
+    assert len(item_ids) == len(
+        item_descs
+    ), "Number of item ids and descriptions does not match!"
 
     for i in range(0, len(item_ids)):
         output.append({"id": item_ids[i], "description": item_descs[i]})
@@ -567,7 +569,7 @@ def _stop_agent(agent_id: str):
 
 def get_process_status(process_id: subprocess.Popen) -> ProcessState:
     """Return the state of the execution."""
-    assert process_id is not None
+    assert process_id is not None, "Process id cannot be None!"
 
     return_code = process_id.poll()
     if return_code is None:

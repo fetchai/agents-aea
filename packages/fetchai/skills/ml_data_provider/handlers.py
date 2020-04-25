@@ -35,10 +35,6 @@ class MLTradeHandler(Handler):
 
     SUPPORTED_PROTOCOL = MlTradeMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.debug("MLTrade handler: setup method called.")

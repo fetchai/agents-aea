@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import sys
@@ -24,6 +25,8 @@ import time
 import unittest.mock
 
 import pytest
+
+from tests.common.mocks import ctx_mock_Popen
 
 from .test_base import DummyPID, create_app
 
@@ -42,7 +45,7 @@ def test_create_and_run_oef(pytestconfig):
         assert "launch.py" in param_list[1]
         return pid
 
-    with unittest.mock.patch("subprocess.call", return_value=None):
+    with ctx_mock_Popen():
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
             response_start = app.post(
                 "api/oef", data=None, content_type="application/json",
@@ -88,7 +91,7 @@ def test_create_and_run_oef(pytestconfig):
     assert "FINISHED" in data["status"]
 
     # Stop the OEF Node
-    with unittest.mock.patch("subprocess.call", return_value=None):
+    with ctx_mock_Popen():
         response_stop = app.delete(
             "api/oef", data=None, content_type="application/json",
         )
@@ -117,7 +120,7 @@ def test_create_and_run_oef_fail(pytestconfig):
         assert "launch.py" in param_list[1]
         return None
 
-    with unittest.mock.patch("subprocess.call", return_value=None):
+    with ctx_mock_Popen():
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
             response_start = app.post(
                 "api/oef", data=None, content_type="application/json",

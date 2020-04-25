@@ -201,7 +201,7 @@ class StubConnection(Connection):
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
-            assert self.in_queue is not None
+            assert self.in_queue is not None, "Input queue not initialized."
             envelope = await self.in_queue.get()
             return envelope
         except Exception as e:

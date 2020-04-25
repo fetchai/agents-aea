@@ -999,7 +999,7 @@ def _handle_error_while_loading_component_module_not_found(
 
     def get_new_error_message_no_package_found() -> str:
         """Create a new error message in case the package is not found."""
-        assert nb_parts <= 4
+        assert nb_parts <= 4, "More than 4 parts!"
         author = parts[1]
         new_message = "No AEA package found with author name '{}'".format(author)
 
@@ -1019,7 +1019,7 @@ def _handle_error_while_loading_component_module_not_found(
 
     def get_new_error_message_with_package_found() -> str:
         """Create a new error message in case the package is found."""
-        assert nb_parts >= 5
+        assert nb_parts >= 5, "Less than 5 parts!"
         author, pkg_name, pkg_type = parts[:3]
         the_rest = ".".join(parts[4:])
         return "The package '{}/{}' of type '{}' exists, but cannot find module '{}'".format(

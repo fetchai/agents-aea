@@ -21,6 +21,8 @@
 
 from unittest import TestCase, mock
 
+from click import ClickException
+
 from aea.cli.generate import _generate_item
 
 from tests.test_cli.tools_for_testing import ContextMock
@@ -40,5 +42,5 @@ class GenerateItemTestCase(TestCase):
     def test__generate_item_file_exists(self, *mocks):
         """Test for fetch_agent_locally method positive result."""
         ctx_mock = ContextMock()
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(ClickException):
             _generate_item(ctx_mock, "protocol", "path")
