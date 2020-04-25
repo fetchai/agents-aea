@@ -86,7 +86,7 @@ jobs:
         brew install protobuf
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
+        tox -e py${{ matrix.python-version }}
     # optionally, use flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
