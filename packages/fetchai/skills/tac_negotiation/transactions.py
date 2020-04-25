@@ -151,9 +151,9 @@ class Transactions(Model):
             tx_nonce=proposal_description.values["tx_nonce"],
         )
         skill_callback_ids = (
-            [PublicId("fetchai", "tac_participation", "0.1.0")]
+            [PublicId.from_str("fetchai/tac_participation:0.1.0")]
             if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-            else [PublicId("fetchai", "tac_negotiation", "0.1.0")]
+            else [PublicId.from_str("fetchai/tac_negotiation:0.1.0")]
         )
         transaction_msg = TransactionMessage(
             performative=performative,

@@ -20,9 +20,10 @@
 """This module contains the handler for the 'ml_train' skill."""
 
 import pickle  # nosec
+import uuid
 from typing import Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
@@ -41,10 +42,6 @@ class TrainHandler(Handler):
     """Train handler."""
 
     SUPPORTED_PROTOCOL = MlTradeMessage.protocol_id
-
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
 
     def setup(self) -> None:
         """
@@ -96,7 +93,7 @@ class TrainHandler(Handler):
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=[PublicId("fetchai", "ml_train", "0.1.0")],
+                skill_callback_ids=[self.context.skill_id],
                 tx_id=strategy.get_next_transition_id(),
                 tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
                 tx_counterparty_addr=terms.values["address"],
@@ -108,6 +105,7 @@ class TrainHandler(Handler):
                 tx_quantities_by_good_id={},
                 ledger_id=terms.values["ledger_id"],
                 info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty},
+                tx_nonce=uuid.uuid4().hex,
             )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             self.context.logger.info(

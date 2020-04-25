@@ -33,7 +33,7 @@ class TestMLSkills(AEAWithOefTestCase):
     """Test that ml skills work."""
 
     @pytest.mark.skipif(
-        sys.version_info > (3, 7),
+        sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
     )
     @skip_test_ci
