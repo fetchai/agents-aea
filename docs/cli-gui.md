@@ -8,7 +8,7 @@ Follow the Preliminaries and Installation instructions <a href="../quickstart" t
 
 Install the extra dependencies for the CLI GUI.
 
-```python
+``` bash
 pip install aea[cli_gui]
 ```
 

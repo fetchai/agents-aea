@@ -33,7 +33,6 @@ from aea.configurations.base import (
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.skills.base import Behaviour, Handler, Model
-from aea.skills.tasks import Task
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ DECISION_MAKER = "decision_maker"
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
 ComponentId = Tuple[SkillId, str]
-SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
+SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 
 
 class Registry(Generic[ItemId, Item], ABC):
@@ -341,7 +340,19 @@ class ComponentRegistry(
         :return: None
         """
         for item in self.fetch_all():
-            item.setup()
+            if item.context.is_active:
+                logger.debug(
+                    "Calling setup() of component {} of skill {}".format(
+                        item.name, item.skill_id
+                    )
+                )
+                item.setup()
+            else:
+                logger.debug(
+                    "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
+                        item.name, item.skill_id
+                    )
+                )
 
     def teardown(self) -> None:
         """

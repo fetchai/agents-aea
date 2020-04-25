@@ -343,7 +343,7 @@ class Envelope:
             try:
                 skill_id = PublicId.from_uri_path(uri_path)
             except ValueError:
-                logger.warning("URI - {} - not a valid skill id.".format(uri_path))
+                logger.debug("URI - {} - not a valid skill id.".format(uri_path))
         return skill_id
 
     def __eq__(self, other):

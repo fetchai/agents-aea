@@ -243,7 +243,6 @@ class EthereumApi(LedgerApi):
         if nonce is None:
             return tx_digest
 
-        # TODO : handle misconfiguration
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,

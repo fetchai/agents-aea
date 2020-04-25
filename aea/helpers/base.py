@@ -171,7 +171,9 @@ class _SysModules:
             old_keys = set(sys.modules.keys())
             try:
                 for import_path, module_obj in modules:
-                    assert import_path not in sys.modules
+                    assert (
+                        import_path not in sys.modules
+                    ), "Import path already present in sys.modules."
                     sys.modules[import_path] = module_obj
                 yield
             finally:

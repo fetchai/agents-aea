@@ -56,7 +56,7 @@ You can install the `svn` command with (`brew install subversion` or `sudo apt-g
 
 ## Installation
 
-The following installs the entire AEA package which also includes a command-line interface (CLI).
+The following installs the entire AEA package which also includes a [command-line interface (CLI)](../cli-commands).
 
 ``` bash
 pip install aea[all]
@@ -104,15 +104,19 @@ Confirm password:
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.0
+v0.3.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>If you would rather not create an account on the registry at this point, then run `aea init --local` instead.</p>
+</div>
+
 ## Echo skill demo
 
-The echo skill is a simple demo that introduces you to the main business logic components of an AEA. 
-The fastest way to create your first AEA is to fetch it! 
+The echo skill is a simple demo that introduces you to the main business logic components of an AEA. The fastest way to create your first AEA is to fetch it! 
 
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
@@ -120,6 +124,8 @@ If you want to follow a step by step guide we show you how to do it at the end o
 aea fetch fetchai/my_first_aea:0.1.0
 cd my_first_aea
 ```
+
+To learn more about the folder structure of an AEA project read on [here](../package-imports).
 
 ## Usage of the stub connection	
 
@@ -145,7 +151,7 @@ recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 
 ## Run the AEA
 
-Run the AEA with the default `stub` connection.
+Run the AEA with the default `fetchai/stub:0.2.0` connection.
 
 ``` bash
 aea run
@@ -154,7 +160,7 @@ aea run
 or 
 
 ``` bash
-aea run --connections fetchai/stub:0.1.0
+aea run --connections fetchai/stub:0.2.0
 ```
 
 You will see the echo skill running in the terminal window.
@@ -166,7 +172,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.0
+v0.3.1
 
 my_first_aea starting ...
 info: Echo Handler: setup method called.
@@ -213,6 +219,76 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 
+## Write a test for the AEA
+
+We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
+
+<details><summary>Step by step install</summary>
+
+The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` is a tool for AEA developers to write useful end-to-end tests of their AEAs.
+
+``` python
+import signal
+import time
+
+from aea.connections.stub.connection import (
+    DEFAULT_INPUT_FILE_NAME,
+    DEFAULT_OUTPUT_FILE_NAME,
+)
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.generic import (
+    read_envelope_from_file,
+    write_envelope_to_file,
+)
+from aea.test_tools.test_cases import AEATestCase
+
+
+class TestEchoSkill(AEATestCase):
+    """Test that echo skill works."""
+
+    def test_echo(self):
+        """Run the echo skill sequence."""
+        process = self.run_agent()
+        time.sleep(2.0)
+
+        # add sending and receiving envelope from input/output files
+        message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content=b"hello",
+        )
+        sent_envelope = Envelope(
+            to=self.agent_name,
+            sender="sender_aea",
+            protocol_id=message.protocol_id,
+            message=DefaultSerializer().encode(message),
+        )
+
+        write_envelope_to_file(sent_envelope, DEFAULT_INPUT_FILE_NAME)
+
+        time.sleep(2.0)
+        received_envelope = read_envelope_from_file(DEFAULT_OUTPUT_FILE_NAME)
+
+        assert sent_envelope.to == received_envelope.sender
+        assert sent_envelope.sender == received_envelope.to
+        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert sent_envelope.message == received_envelope.message
+
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=20)
+        assert process.returncode == 0
+```
+
+Place the above code into a file `test.py` in your AEA project directory (the same level as the `aea-config.yaml` file).
+
+To run, execute the following:
+
+``` python
+pytest test.py
+```
+
+</details>
+
 ## Delete the AEA
 
 Delete the AEA from the parent directory (`cd ..` to go to the parent directory).
@@ -239,15 +315,15 @@ For more demos, use cases or step by step guides, please check the following:
 <br>		
 First, create a new AEA project and enter it.		
 ``` bash		
-aea create my_first_aea		
-cd my_first_aea		
+aea create my_first_aea
+cd my_first_aea
 ```
 <br>  
 <b>Add the echo skill</b> 		
 <br>    
 Second, add the echo skill to the project.		
-```bash
+``` bash
 aea add skill fetchai/echo:0.1.0		
 ```		
-This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
+This copies the `fetchai/echo:0.1.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.		
 </details>

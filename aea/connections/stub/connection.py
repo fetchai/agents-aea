@@ -20,10 +20,13 @@
 """This module contains the stub connection."""
 
 import asyncio
+import fcntl
 import logging
 import os
+import re
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional, Union
+from typing import AnyStr, IO, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -79,9 +82,24 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    message = split[3].decode("unicode_escape").encode("utf-8")
+    message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+
+
+@contextmanager
+def lock_file(file_descriptor: IO[AnyStr]):
+    try:
+        fcntl.flock(file_descriptor, fcntl.LOCK_EX)
+    except OSError as e:
+        logger.error(
+            "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
+        )
+        raise e
+    try:
+        yield
+    finally:
+        fcntl.flock(file_descriptor, fcntl.LOCK_UN)
 
 
 class StubConnection(Connection):
@@ -125,7 +143,7 @@ class StubConnection(Connection):
         :param output_file_path: the output file for the outgoing messages.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
+            kwargs["connection_id"] = PublicId.from_str("fetchai/stub:0.2.0")
         super().__init__(**kwargs)
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -145,15 +163,25 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        line = self.input_file.readline()
-        logger.debug("read line: {!r}".format(line))
-        lines = b""
-        while len(line) > 0:
-            lines += line
-            line = self.input_file.readline()
-        if lines != b"":
-            self._process_line(lines)
-            self.input_file.truncate(0)
+        with lock_file(self.input_file):
+            lines = self.input_file.read()
+            if len(lines) > 0:
+                self.input_file.truncate(0)
+                self.input_file.seek(0)
+
+        #
+        if len(lines) == 0:
+            return
+
+        # get messages
+        # match with b"[^,]*,[^,]*,[^,]*,[^,]*,[\n]?"
+        regex = re.compile(
+            (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 4 + b"[\n]?", re.DOTALL
+        )
+        messages = [m.group(0) for m in regex.finditer(lines)]
+        for msg in messages:
+            logger.debug("processing: {!r}".format(msg))
+            self._process_line(msg)
 
     def _process_line(self, line) -> None:
         """Process a line of the file.
@@ -173,7 +201,7 @@ class StubConnection(Connection):
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
-            assert self.in_queue is not None
+            assert self.in_queue is not None, "Input queue not initialized."
             envelope = await self.in_queue.get()
             return envelope
         except Exception as e:
@@ -223,10 +251,12 @@ class StubConnection(Connection):
 
         :return: None
         """
+
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
-        self.output_file.write(encoded_envelope)
-        self.output_file.flush()
+        with lock_file(self.output_file):
+            self.output_file.write(encoded_envelope)
+            self.output_file.flush()
 
     @classmethod
     def from_config(

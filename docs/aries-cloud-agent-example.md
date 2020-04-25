@@ -46,7 +46,6 @@ class TestAEAToACA:
         """Initialise the class."""
         cls.aca_admin_address = "127.0.0.1"
         cls.aca_admin_port = 8020
-        ...
 ```
 
 The address and port fields `cls.aca_admin_address` and `cls.aca_admin_port` specify where the ACA should listen to receive administrative commands from the AEA.
@@ -75,7 +74,7 @@ cls.process = subprocess.Popen(  # nosec
 Now take a look at the following method. This is where the demo resides. It first creates an AEA programmatically.
 
 ``` python
-@pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):
         # AEA components
         ledger_apis = LedgerApis({}, FETCHAI)
@@ -86,7 +85,7 @@ Now take a look at the following method. This is where the demo resides. It firs
             default_address_key=FETCHAI,
         )
         http_client_connection = HTTPClientConnection(
-            agent_address=self.aea_address,
+            address=self.aea_address,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
@@ -94,7 +93,6 @@ Now take a look at the following method. This is where the demo resides. It firs
 
         # create AEA
         aea = AEA(identity, [http_client_connection], wallet, ledger_apis, resources)
-        ...
 ```
 
 It then adds the HTTP protocol to the AEA. THe HTTP protocol defines the format of HTTP interactions (e.g. HTTP Request and Response). 
@@ -115,9 +113,7 @@ It then adds the HTTP protocol to the AEA. THe HTTP protocol defines the format 
                 )
             )
         )
-        http_protocol = Protocol(
-            HttpMessage.protocol_id, HttpSerializer(), http_protocol_configuration,
-        )
+        http_protocol = Protocol(http_protocol_configuration, HttpSerializer())
         resources.add_protocol(http_protocol)
 ```
 

@@ -25,8 +25,6 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.test_tools.click_testing import CliRunner
 
@@ -117,9 +115,6 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -148,13 +143,12 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         The expected message is: 'Directory already exist. Aborting...'
         """
         s = "An error occurred while deleting the agent directory. Aborting..."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
-        cls.mocked_logger_error.__exit__()
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -173,9 +167,6 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         # directory is not AEA project -> command will fail.
         Path(cls.t, cls.agent_name).mkdir()
         cls.result = cls.runner.invoke(
@@ -192,12 +183,11 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
         The expected message is: 'Directory already exist. Aborting...'
         """
         s = "The name provided is not a path to an AEA project."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

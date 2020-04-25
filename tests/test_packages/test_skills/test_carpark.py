@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import signal
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
@@ -46,10 +45,11 @@ class TestCarPark(AEAWithOefTestCase):
         os.chdir(capark_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.run_install()
 
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
-        self.set_config(setting_path, False)
+        self.set_config(setting_path, False, "bool")
 
         setting_path = "agent.ledger_apis"
         ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
@@ -61,6 +61,7 @@ class TestCarPark(AEAWithOefTestCase):
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.run_install()
 
         force_set_config(setting_path, ledger_apis)
@@ -85,11 +86,7 @@ class TestCarPark(AEAWithOefTestCase):
         self.start_error_read_thread(process_two)
 
         time.sleep(10)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
 
-        process_one.wait(timeout=10)
-        process_two.wait(timeout=10)
+        self.terminate_agents()
 
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+        assert self.is_successfully_terminated(), "Carpark test not successful."

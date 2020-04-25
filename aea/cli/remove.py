@@ -20,7 +20,6 @@
 """Implementation of the 'aea remove' subcommand."""
 
 import shutil
-import sys
 from pathlib import Path
 
 import click
@@ -62,10 +61,10 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
         item_id not in existing_items_name_to_ids.keys()
         and item_id not in existing_item_ids
     ):
-        logger.error("The {} '{}' is not supported.".format(item_type, item_id))
-        sys.exit(1)
+        raise click.ClickException(
+            "The {} '{}' is not supported.".format(item_type, item_id)
+        )
 
-    # TODO we assume the item in the agent config are necessarily in the agent projects.
     item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
     if not item_folder.exists():
         # check if it is present in custom packages.
@@ -89,8 +88,7 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
     try:
         shutil.rmtree(item_folder)
     except BaseException:
-        logger.exception("An error occurred.")
-        sys.exit(1)
+        raise click.ClickException("An error occurred.")
 
     # removing the protocol to the configurations.
     item_public_id = existing_items_name_to_ids[item_name]

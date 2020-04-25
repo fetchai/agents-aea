@@ -89,8 +89,6 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 
-
-# TODO rename this to "PackageType"
 PackageVersion = Type[semver.VersionInfo]
 PackageVersionLike = Union[str, semver.VersionInfo]
 
@@ -229,7 +227,7 @@ class Configuration(JSONSerializable, ABC):
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
         for key in self._key_order:
-            assert key not in result
+            assert key not in result, "Key in results!"
             value = data.get(key)
             if value is not None:
                 result[key] = value
@@ -1584,7 +1582,7 @@ def _compute_fingerprint(
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in fingerprints  # nosec
+        assert key not in fingerprints, "Key in fingerprints!"  # nosec
         fingerprints[key] = file_hash
 
     return fingerprints

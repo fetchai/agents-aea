@@ -139,7 +139,8 @@ def test_real_search():
     )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
-    assert len(data) == 8
+
+    assert len(data) == 10
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -175,7 +176,13 @@ def test_real_search():
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/stub:0.1.0"
+    assert data[i]["id"] == "fetchai/p2p_stub:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/stub:0.2.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."
@@ -185,4 +192,10 @@ def test_real_search():
     assert (
         data[i]["description"]
         == "The tcp connection implements a tcp server and client."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/webhook:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The webhook connection that wraps a webhook functionality."
     )

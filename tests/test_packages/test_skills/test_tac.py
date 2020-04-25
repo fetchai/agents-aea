@@ -20,7 +20,6 @@
 """This test module contains the integration test for the tac skills."""
 
 import os
-import signal
 import time
 
 from aea.test_tools.decorators import skip_test_ci
@@ -47,7 +46,6 @@ class TestTacSkills(AEAWithOefTestCase):
         os.chdir(tac_controller_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("contract", "fetchai/erc1155:0.2.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
         self.run_install()
 
@@ -60,10 +58,8 @@ class TestTacSkills(AEAWithOefTestCase):
 
             self.add_item("connection", "fetchai/oef:0.2.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-            self.add_item("contract", "fetchai/erc1155:0.2.0")
             self.add_item("skill", "fetchai/tac_participation:0.1.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
-
             self.run_install()
 
         # run tac controller
@@ -78,15 +74,9 @@ class TestTacSkills(AEAWithOefTestCase):
         tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)
-        tac_aea_one_process.send_signal(signal.SIGINT)
-        tac_aea_one_process.wait(timeout=10)
 
-        tac_aea_two_process.send_signal(signal.SIGINT)
-        tac_aea_two_process.wait(timeout=10)
+        self.terminate_agents(
+            [tac_controller_process, tac_aea_one_process, tac_aea_two_process]
+        )
 
-        tac_controller_process.send_signal(signal.SIGINT)
-        tac_controller_process.wait(timeout=10)
-
-        assert tac_aea_one_process.returncode == 0
-        assert tac_aea_two_process.returncode == 0
-        assert tac_controller_process.returncode == 0
+        assert self.is_successfully_terminated(), "TAC test not successful."

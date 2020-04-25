@@ -36,7 +36,7 @@ Confirm password:
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.0
+v0.3.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -54,7 +54,7 @@ recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.1.0
+aea run --connections fetchai/stub:0.2.0
 ```
 ``` bash
     _     _____     _    
@@ -63,7 +63,7 @@ aea run --connections fetchai/stub:0.1.0
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.0
+v0.3.1
 
 my_first_aea starting ...
 info: Echo Handler: setup method called.
@@ -94,8 +94,8 @@ info: Echo Behaviour: teardown method called.
 aea delete my_first_aea
 ```
 ``` bash
-aea create my_first_aea		
-cd my_first_aea		
+aea create my_first_aea
+cd my_first_aea
 ```
 ``` bash
 aea add skill fetchai/echo:0.1.0		

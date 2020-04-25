@@ -40,6 +40,7 @@ from aea.helpers.search.models import (
     ConstraintTypes,
     DataModel,
     Description,
+    Location,
     Query,
 )
 from aea.mail.base import Envelope, Multiplexer
@@ -182,6 +183,47 @@ class TestOEF:
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OefSearchSerializer().decode(envelope.message)
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert search_result.dialogue_reference[0] == str(request_id)
+            assert search_result.agents == ()
+
+        def test_search_services_with_distance_query(self):
+            """Test that a search services request can be sent correctly.
+
+            In this test, the query has a simple data model.
+            """
+            tour_eiffel = Location(48.8581064, 2.29447)
+            request_id = 1
+            attribute = Attribute("latlon", Location, True)
+            data_model = DataModel("geolocation", [attribute])
+            search_query = Query(
+                [
+                    Constraint(
+                        attribute.name, ConstraintType("distance", (tour_eiffel, 1.0))
+                    )
+                ],
+                model=data_model,
+            )
+            search_request = OefSearchMessage(
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                dialogue_reference=(str(request_id), ""),
+                query=search_query,
+            )
+
+            self.multiplexer.put(
+                Envelope(
+                    to=DEFAULT_OEF,
+                    sender=self.crypto1.address,
+                    protocol_id=OefSearchMessage.protocol_id,
+                    message=OefSearchSerializer().encode(search_request),
+                )
+            )
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
+            search_result = OefSearchSerializer().decode(envelope.message)
+            print("HERE:" + str(search_result))
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -885,6 +927,16 @@ class TestOefConstraint:
         m_constr = self.obj_transaltor.from_oef_constraint_type(not_in)
         assert m_constraint == m_constr
         assert "C++" not in not_in._value
+        location = Location(47.692180, 10.039470)
+        distance_float = 0.2
+        m_constraint = ConstraintType("distance", (location, distance_float))
+        distance = self.obj_transaltor.to_oef_constraint_type(m_constraint)
+        m_constr = self.obj_transaltor.from_oef_constraint_type(distance)
+        assert m_constraint == m_constr
+        assert (
+            distance.center == self.obj_transaltor.to_oef_location(location)
+            and distance.distance == distance_float
+        )
 
         with pytest.raises(ValueError):
             m_constraint = ConstraintType(ConstraintTypes.EQUAL, "foo")
@@ -973,8 +1025,10 @@ async def test_send_oef_message(network_node):
     with pytest.raises(ValueError):
         await oef_connection.send(envelope)
 
-    data_model = DataModel("foobar", attributes=[])
-    query = Query(constraints=[], model=data_model)
+    data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
+    query = Query(
+        constraints=[Constraint("foo", ConstraintType("==", "bar"))], model=data_model
+    )
 
     request_id += 1
     msg = OefSearchMessage(

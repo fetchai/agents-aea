@@ -20,265 +20,64 @@
 """This test module contains the integration test for the generic buyer and seller skills."""
 
 import os
-import shutil
-import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
-from pathlib import Path
 
-import pytest
-
-from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.test_tools.click_testing import CliRunner
-
-from ...conftest import AUTHOR, CLI_LOG_OPTION
+from aea.crypto.ethereum import ETHEREUM as ETHEREUM_NAME
+from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.generic import force_set_config
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
-class TestGenericSkills:
+class TestGenericSkills(AEAWithOefTestCase):
     """Test that erc1155 skills work."""
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name_one = "my_erc1155_deploy"
-        cls.agent_name_two = "my_erc1155_client"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
+    @skip_test_ci
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
+        self.initialize_aea()
 
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        deploy_aea_name = "deploy_aea"
+        client_aea_name = "client_aea"
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # create agent one and agent two
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        self.create_agents(deploy_aea_name, client_aea_name)
 
         # add ethereum ledger in both configuration files
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-          ethereum:
-            address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            chain_id: 3
-            gas_price: 50"""
-
-        agent_one_config = Path(self.agent_name_one, DEFAULT_AEA_CONFIG_FILE)
-        agent_one_config_content = agent_one_config.read_text()
-        agent_one_config_content = agent_one_config_content.replace(
-            find_text, replace_text
-        )
-        agent_one_config.write_text(agent_one_config_content)
-
-        agent_two_config = Path(self.agent_name_two, DEFAULT_AEA_CONFIG_FILE)
-        agent_two_config_content = agent_two_config.read_text()
-        agent_two_config_content = agent_two_config_content.replace(
-            find_text, replace_text
-        )
-        agent_two_config.write_text(agent_two_config_content)
+        ledger_apis = {
+            ETHEREUM_NAME: {
+                "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+                "chain_id": 3,
+                "gas_price": 50,
+            }
+        }
+        setting_path = "agent.ledger_apis"
 
         # add packages for agent one
-        agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
-        os.chdir(agent_one_dir_path)
-
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/erc1155_deploy:0.1.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
+        deploy_aea_dir_path = os.path.join(self.t, deploy_aea_name)
+        os.chdir(deploy_aea_dir_path)
+        force_set_config(setting_path, ledger_apis)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.2.0")
+        self.run_install()
 
         # add packages for agent two
-        agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
-        os.chdir(agent_two_dir_path)
+        client_aea_dir_path = os.path.join(self.t, client_aea_name)
+        os.chdir(client_aea_dir_path)
+        force_set_config(setting_path, ledger_apis)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.1.0")
+        self.run_install()
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        # run agents
+        os.chdir(deploy_aea_dir_path)
+        deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                "fetchai/oef:0.2.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        os.chdir(client_aea_dir_path)
+        client_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/erc1155_client:0.1.0",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        time.sleep(10.0)
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "contract", "fetchai/erc1155:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        self.terminate_agents([deploy_aea_process, client_aea_process])
 
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        try:
-            os.chdir(agent_one_dir_path)
-            process_one = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            os.chdir(agent_two_dir_path)
-            process_two = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.2.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            time.sleep(10.0)
-
-            # TODO: check the erc1155 run ends
-
-            # TODO uncomment these to test success!
-            # assert process_one.returncode == 0
-            # assert process_two.returncode == 0
-
-        finally:
-            process_one.send_signal(signal.SIGINT)
-            process_one.wait(timeout=10)
-            process_two.send_signal(signal.SIGINT)
-            process_two.wait(timeout=10)
-
-            if process_one.returncode is None:
-                poll_one = process_one.poll()
-                if poll_one is None:
-                    process_one.terminate()
-                    process_one.wait(2)
-
-            if process_two.returncode is None:
-                poll_two = process_two.poll()
-                if poll_two is None:
-                    process_two.terminate()
-                    process_two.wait(2)
-
-            os.chdir(self.t)
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "delete", self.agent_name_one],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-            result = self.runner.invoke(
-                cli,
-                [*CLI_LOG_OPTION, "delete", self.agent_name_two],
-                standalone_mode=False,
-            )
-            assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        assert self.is_successfully_terminated(), "ERC1155 test not successful."

@@ -79,7 +79,7 @@ can always subclass the general-purpose `Behaviour` class.
 !!
 Follows an example of a custom behaviour:
 
-```python
+``` python
 
 from aea.skills.behaviours import OneShotBehaviour
 
@@ -101,12 +101,12 @@ class HelloWorldBehaviour(OneShotBehaviour):
 If we want to register this behaviour dynamically, in any part of the skill code
 (i.e. wherever the skill context is available), we can write:
 
-```python
+``` python
 self.context.new_behaviours.put(HelloWorldBehaviour())
 ```
 
 Or, equivalently:
-```python
+``` python
 def hello():
     print("Hello, World!")
 
@@ -141,13 +141,14 @@ not be updated.
 Here's an example:
 
 In `tasks.py`:
-```python
+``` python
 
 from aea.skills.tasks import Task
 
 
 def nth_prime_number(n: int) -> int:
     """A naive algorithm to find the n_th prime number."""
+    assert n > 0
     primes = [2]
     num = 3
     while len(primes) < n:
@@ -177,7 +178,7 @@ class LongTask(Task):
 ```
 
 In `behaviours.py`:
-```python
+``` python
 
 from aea.skills.behaviours import TickerBehaviour
 from packages.my_author_name.skills.my_skill.tasks import LongTask

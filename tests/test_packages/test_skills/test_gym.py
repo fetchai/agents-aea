@@ -21,91 +21,40 @@
 
 import os
 import shutil
-import signal
-import subprocess  # nosec
-import sys
-import tempfile
 import time
-from pathlib import Path
 
-import pytest
-
-import yaml
-
-from aea.cli import cli
-from aea.configurations.base import SkillConfig
-from aea.test_tools.click_testing import CliRunner
-
-from ...conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
-class TestGymSkill:
+class TestGymSkill(AEAWithOefTestCase):
     """Test that gym skill works."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name = "my_gym_agent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
+    @skip_test_ci
     def test_gym(self, pytestconfig):
         """Run the gym skill sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
+        self.initialize_aea()
 
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        gym_aea_name = "my_gym_agent"
+        self.create_agents(gym_aea_name)
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # create agent
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        agent_dir_path = os.path.join(self.t, self.agent_name)
-        os.chdir(agent_dir_path)
-
-        # add packages and install dependencies
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/gym:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/gym:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
+        gym_aea_dir_path = os.path.join(self.t, gym_aea_name)
+        os.chdir(gym_aea_dir_path)
+        self.add_item("skill", "fetchai/gym:0.1.0")
+        self.add_item("connection", "fetchai/gym:0.1.0")
+        self.run_install()
 
         # add gyms folder from examples
         gyms_src = os.path.join(self.cwd, "examples", "gym_ex", "gyms")
-        gyms_dst = os.path.join(self.t, self.agent_name, "gyms")
+        gyms_dst = os.path.join(self.t, gym_aea_name, "gyms")
         shutil.copytree(gyms_src, gyms_dst)
 
         # change config file of gym connection
-        file_src = os.path.join(ROOT_DIR, "tests", "data", "gym-connection.yaml")
+        file_src = os.path.join(self.cwd, "tests", "data", "gym-connection.yaml")
         file_dst = os.path.join(
             self.t,
-            self.agent_name,
+            gym_aea_name,
             "vendor",
             "fetchai",
             "connections",
@@ -115,51 +64,14 @@ class TestGymSkill:
         shutil.copyfile(file_src, file_dst)
 
         # change number of training steps
-        skill_config_path = Path(
-            self.t, self.agent_name, "vendor", "fetchai", "skills", "gym", "skill.yaml"
+        setting_path = "vendor.{}.skills.gym.handlers.gym.args.nb_steps".format(
+            FETCHAI_NAME
         )
-        skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
-        skill_config.handlers.read("gym").args["nb_steps"] = 20
-        yaml.safe_dump(dict(skill_config.json), open(skill_config_path, "w"))
+        self.set_config(setting_path, 20)
 
-        try:
-            process = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/gym:0.1.0",
-                ],
-                stdout=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-            time.sleep(10.0)
+        gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.1.0")
+        time.sleep(10.0)
 
-            # TODO: check the run ends properly
+        self.terminate_agents([gym_aea_process])
 
-        finally:
-            process.send_signal(signal.SIGINT)
-            process.wait(timeout=20)
-
-            if not process.returncode == 0:
-                poll = process.poll()
-                if poll is None:
-                    process.terminate()
-                    process.wait(2)
-
-            os.chdir(self.t)
-            result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
-            )
-            assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        assert self.is_successfully_terminated(), "Gym test not successful."
