@@ -9,3 +9,5 @@ This is the official list of Fetch.AI authors for copyright purposes.
 * Diarmid Campbell <diarmid.campbell@fetch.ai> [dishmop](https://github.com/dishmop)
 * Oleg Panasevych <oleg.panasevych@n-cube.co.uk> [Panasevychol](https://github.com/panasevychol)
 * Kevin Chen <kevin.chen@fetch.ai> [Kevin-Chen0](https://github.com/Kevin-Chen0)
+* Yuri Turchenkov <yuri.turchenkov@fetch.ai> [solarw](https://github.com/solarw)
+* Lokman Rahmani <lokman.rahmani@fetch.ai> [lrahmani](https://github.com/lrahmani)

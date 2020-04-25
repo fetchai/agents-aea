@@ -54,7 +54,7 @@ class AEA(Agent):
         ledger_apis: LedgerApis,
         resources: Resources,
         loop: Optional[AbstractEventLoop] = None,
-        timeout: float = 0.0,
+        timeout: float = 0.05,
         execution_timeout: float = 1,
         is_debug: bool = False,
         max_reactions: int = 20,

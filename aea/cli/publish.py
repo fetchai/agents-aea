@@ -52,7 +52,6 @@ def publish(click_context, local):
     if local:
         _save_agent_locally(ctx)
     else:
-        # TODO: check agent dependencies are available in local packages dir.
         publish_agent(ctx)
 
 

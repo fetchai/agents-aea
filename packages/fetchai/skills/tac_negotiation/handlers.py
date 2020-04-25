@@ -431,7 +431,7 @@ class FIPANegotiationHandler(Handler):
             )
             transaction_msg.set(
                 "skill_callback_ids",
-                [PublicId("fetchai", "tac_participation", "0.1.0")],
+                [PublicId.from_str("fetchai/tac_participation:0.1.0")],
             )
             transaction_msg.set(
                 "info",

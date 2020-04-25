@@ -65,7 +65,6 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
             "The {} '{}' is not supported.".format(item_type, item_id)
         )
 
-    # TODO we assume the item in the agent config are necessarily in the agent projects.
     item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
     if not item_folder.exists():
         # check if it is present in custom packages.

@@ -217,7 +217,6 @@ class EthereumApi(LedgerApi):
             balance = None
         return balance
 
-    # TODO : handle transaction misconfiguration
     def transfer(
         self,
         crypto: Crypto,

@@ -102,18 +102,18 @@ class SkillContext:
         return self._get_agent_context().agent_name
 
     @property
-    def skill_id(self):
+    def skill_id(self) -> PublicId:
         """Get the skill id of the skill context."""
         assert self._skill is not None, "Skill not set yet."
         return self._skill.configuration.public_id
 
     @property
-    def is_active(self):
+    def is_active(self) -> bool:
         """Get the status of the skill (active/not active)."""
         return self._is_active
 
     @is_active.setter
-    def is_active(self, value: bool):
+    def is_active(self, value: bool) -> None:
         """Set the status of the skill (active/not active)."""
         self._is_active = value
         logger.debug(
@@ -240,7 +240,7 @@ class SkillComponent(ABC):
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
         """
-        assert name is not None
+        assert name is not None, "SkillComponent name is not provided."
         # TODO solve it
         # assert configuration is not None
         # assert skill_context is not None
