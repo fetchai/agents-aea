@@ -26,6 +26,7 @@ func main() {
 	// Create connection to aea
 	agent := aea.AeaApi{}
 	check(agent.Init())
+	fmt.Printf("[noise-p2p][info] successfully initialised API to AEA!\n")
 
 	// Create a new configured node.
 	host, port := agent.Uri()
@@ -39,6 +40,7 @@ func main() {
 		noise.WithNodePrivateKey(key),
 	)
 	check(err)
+	fmt.Printf("[noise-p2p][info] successfully created noise node!\n")
 
 	// Release resources associated to node at the end of the program.
 	defer node.Close()
@@ -62,15 +64,15 @@ func main() {
 	}
 
 	overlay := kademlia.New(kademlia.WithProtocolEvents(events))
+	fmt.Printf("[noise-p2p][info] successfully created overlay!\n")
 
 	// Bind Kademlia to the node.
 	node.Bind(overlay.Protocol())
-
-	// Have the node start listening for new peers.
-	check(node.Listen())
-
-	//
 	fmt.Printf("[noise-p2p][info] started node %s (%s).\n", node.ID().Address, node.ID().ID.String())
+
+	// Once overlay setup, connect to agent
+	check(agent.Connect())
+	fmt.Printf("[noise-p2p][info] successfully connected to AEA!")
 
 	// Ping entry node to initially bootstrap, if non genesis
 	if len(agent.EntryUris()) > 0 {
@@ -78,15 +80,19 @@ func main() {
 	}
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
-	go func() {
-		for {
-			discover(overlay)
-			time.Sleep(2500 * time.Millisecond)
-		}
-	}()
+	if len(agent.EntryUris()) > 0 {
+		go func() {
+			for {
+				discover(overlay)
+				time.Sleep(2500 * time.Millisecond)
+			}
+		}()
+	}
 
-	// Once overlay setup, connect to agent
-	check(agent.Connect())
+	// Have the node start listening for new peers.
+	// if len(agent.EntryUris()) > 0 {
+	check(node.Listen())
+	// }
 
 	// Receive envelopes from agent and forward to peer
 	go func() {
@@ -99,6 +105,15 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
+
+	// remove sum file
+	sum_file := "go.sum"
+    file_err := os.Remove(sum_file)
+    if file_err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println("File %s successfully deleted", sum_file)
 
 	println("[noise-p2p][info] node stopped")
 }

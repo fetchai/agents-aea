@@ -299,7 +299,7 @@ class NoiseNode:
         self.aea_to_noise_path = "{}/{}-aea_to_noise".format(tmp_dir, self.pub[:5])
         self._noise_to_aea = -1
         self._aea_to_noise = -1
-        self._connection_attempts = 10
+        self._connection_attempts = 30
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self.proc = None  # type: Optional[subprocess.Popen]
@@ -356,6 +356,7 @@ class NoiseNode:
         logger.info("Starting noise node...")
         self.proc = _golang_run(self.source, self.clargs, self._log_file_desc)
 
+        logger.info("Connecting to noise node...")
         await self._connect()
 
     async def _connect(self) -> None:
@@ -381,7 +382,7 @@ class NoiseNode:
         except OSError as e:
             if e.errno == errno.ENXIO:
                 logger.debug(e)
-                await asyncio.sleep(30)
+                await asyncio.sleep(2)
                 await self._connect()
                 return
             else:
@@ -389,8 +390,8 @@ class NoiseNode:
 
         # setup reader
         assert (
-            self._noise_to_aea is not None
-            and self._aea_to_noise is not None
+            self._noise_to_aea != -1
+            and self._aea_to_noise != -1
             and self._loop is not None
         ), "Incomplete initialization."
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
@@ -400,7 +401,7 @@ class NoiseNode:
         self._fileobj = os.fdopen(self._noise_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
 
-        logger.info("Connected to noise node addr({})".format(self.pub))
+        logger.info("Successfully connected to noise node!")
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -467,6 +468,7 @@ class P2PNoiseConnection(Connection):
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
         # noise local node
+        logger.debug("Public key used by noise node: {}".format(str(key.pub)))
         self.node = NoiseNode(
             key,
             NOISE_NODE_SOURCE,
@@ -484,6 +486,7 @@ class P2PNoiseConnection(Connection):
             raise ValueError("Uri parameter must be set for genesis connection")
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
+        self._receive_from_node_task = None  # type: Optional[asyncio.Future]
 
     @property
     def noise_address(self) -> str:
@@ -512,7 +515,9 @@ class P2PNoiseConnection(Connection):
 
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
-            asyncio.ensure_future(self._receive_from_node(), loop=self._loop)
+            self._receive_from_node_task = asyncio.ensure_future(
+                self._receive_from_node(), loop=self._loop
+            )
         except (CancelledError, Exception) as e:
             self.connection_status.is_connected = False
             raise e
@@ -528,6 +533,9 @@ class P2PNoiseConnection(Connection):
         ), "Call connect before disconnect."
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
+        if self._receive_from_node_task is not None:
+            self._receive_from_node_task.cancel()
+            self._receive_from_node_task = None
         self.node.stop()
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
