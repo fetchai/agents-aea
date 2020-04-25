@@ -20,7 +20,6 @@
 """This test module contains the integration test for the generic buyer and seller skills."""
 
 import os
-import signal
 import time
 
 from aea.crypto.ethereum import ETHEREUM as ETHEREUM_NAME
@@ -79,12 +78,6 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         time.sleep(10.0)
 
-        deploy_aea_process.send_signal(signal.SIGINT)
-        deploy_aea_process.wait(timeout=10)
-        client_aea_process.send_signal(signal.SIGINT)
-        client_aea_process.wait(timeout=10)
+        self.terminate_agents([deploy_aea_process, client_aea_process])
 
-        # TODO: check the erc1155 run ends
-        # TODO uncomment these to test success!
-        # assert deploy_aea_process.returncode == 0
-        # assert client_aea_process.returncode == 0
+        assert self.is_successfully_terminated(), "Carpark test not successful."

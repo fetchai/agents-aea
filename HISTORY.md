@@ -5,24 +5,24 @@
 - Adds p2p_stub connection
 - Adds p2p_noise connection
 - Adds webhook connection
-- Upgrade error handling for error skill
-- Fix default timeout on main agent loop and provide seter in AEABuilder
+- Upgrades error handling for error skill
+- Fixes default timeout on main agent loop and provides setter in AEABuilder
 - Adds multithreading support for launch command
 - Provides support for kwargs to AEA constructor to be set on skill context
 - Renames ConfigurationType with PackageType for consistency
-- Provide a new AEATestCase class for improved testing
-- Add execution time limits for act/react calls
+- Provides a new AEATestCase class for improved testing
+- Adds execution time limits for act/react calls
 - TAC skills refactoring and contract integration
-- Support contract dependencies being added automatically
-- HTTP example skill
-- Allow for skill inactivation during initialisation
-- Improve error messages on skill loading errors
-- Readme improvements, particularly for PyPI
-- Add support for Location based queries and descriptions
-- Skills tests refactored to use AEATestCase
-- Add fingerprint and scaffold cli command for contract
-- Multiple additional docs tests
-- Task manager now initializes pool lazily
+- Supports contract dependencies being added automatically
+- Adds HTTP example skill
+- Allows for skill inactivation during initialisation
+- Improves error messages on skill loading errors
+- Improves Readme, particularly for PyPI
+- Adds support for Location based queries and descriptions
+- Refactors skills tests to use AEATestCase
+- Adds fingerprint and scaffold cli command for contract
+- Adds multiple additional docs tests
+- Makes task manager initialize pool lazily
 - Multiple docs updates
 - Multiple additional unit tests
 - Multiple additional minor fixes and changes

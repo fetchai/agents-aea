@@ -50,7 +50,7 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         if return_code == 1:
             # try a second time
             return_code = _try_install(command)
-        assert return_code == 0
+        assert return_code == 0, "Return code != 0."
     except Exception as e:
         raise AEAException(
             "An error occurred while installing {}, {}: {}".format(
@@ -83,7 +83,7 @@ def _install_from_requirement(file: str):
             [sys.executable, "-m", "pip", "install", "-r", file]
         )  # nosec
         subp.wait(30.0)
-        assert subp.returncode == 0
+        assert subp.returncode == 0, "Return code != 0."
     except Exception:
         raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(

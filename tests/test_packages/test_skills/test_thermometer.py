@@ -20,7 +20,6 @@
 """This test module contains the integration test for the thermometer skills."""
 
 import os
-import signal
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
@@ -90,11 +89,7 @@ class TestThermometerSkill(AEAWithOefTestCase):
         self.start_error_read_thread(thermometer_client_aea_process)
 
         time.sleep(20)
-        thermometer_aea_process.send_signal(signal.SIGINT)
-        thermometer_client_aea_process.send_signal(signal.SIGINT)
 
-        thermometer_aea_process.wait(timeout=10)
-        thermometer_client_aea_process.wait(timeout=10)
+        self.terminate_agents()
 
-        assert thermometer_aea_process.returncode == 0
-        assert thermometer_client_aea_process.returncode == 0
+        assert self.is_successfully_terminated(), "Carpark test not successful."

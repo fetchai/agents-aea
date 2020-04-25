@@ -20,7 +20,6 @@
 """This test module contains the integration test for the generic buyer and seller skills."""
 
 import os
-import signal
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
@@ -73,10 +72,6 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         time.sleep(10.0)
 
-        seller_aea_process.send_signal(signal.SIGINT)
-        seller_aea_process.wait(timeout=10)
-        buyer_aea_process.send_signal(signal.SIGINT)
-        buyer_aea_process.wait(timeout=10)
+        self.terminate_agents([seller_aea_process, buyer_aea_process])
 
-        assert seller_aea_process.returncode == 0
-        assert buyer_aea_process.returncode == 0
+        assert self.is_successfully_terminated(), "Carpark test not successful."

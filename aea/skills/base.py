@@ -240,7 +240,7 @@ class SkillComponent(ABC):
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
         """
-        assert name is not None
+        assert name is not None, "SkillComponent name is not provided."
         # TODO solve it
         # assert configuration is not None
         # assert skill_context is not None

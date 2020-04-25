@@ -20,7 +20,6 @@
 """This test module contains the integration test for the echo skill."""
 
 import os
-import signal
 import time
 
 from aea.connections.stub.connection import (
@@ -77,6 +76,6 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         assert sent_envelope.message == received_envelope.message
 
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=20)
-        assert process.returncode == 0
+        self.terminate_agents([process])
+
+        assert self.is_successfully_terminated(), "Carpark test not successful."
