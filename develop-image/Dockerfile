@@ -35,6 +35,14 @@ RUN apt-get install -y                                                       \
        python3-pip                                                           \
        python3-dev
 
+
+# matplotlib build dependencies
+RUN apt-get install -y                                                       \
+       libxft-dev															 \
+       libfreetype6											                 \
+       libfreetype6-dev
+
+
 # needed by Pipenv
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
