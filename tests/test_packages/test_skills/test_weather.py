@@ -75,4 +75,4 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         self.terminate_agents([process_one, process_two])
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Weather test not successful."

@@ -78,4 +78,4 @@ class TestEchoSkill(AEATestCase):
 
         self.terminate_agents([process])
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Echo test not successful."

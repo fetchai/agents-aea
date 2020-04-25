@@ -79,4 +79,4 @@ class TestTacSkills(AEAWithOefTestCase):
             [tac_controller_process, tac_aea_one_process, tac_aea_two_process]
         )
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "TAC test not successful."

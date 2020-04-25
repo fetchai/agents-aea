@@ -84,4 +84,4 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
 
         self.terminate_agents()
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Weather ledger test not successful."

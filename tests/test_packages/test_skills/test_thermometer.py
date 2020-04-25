@@ -92,4 +92,4 @@ class TestThermometerSkill(AEAWithOefTestCase):
 
         self.terminate_agents()
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Thermometer test not successful."

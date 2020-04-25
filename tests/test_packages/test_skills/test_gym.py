@@ -74,4 +74,4 @@ class TestGymSkill(AEAWithOefTestCase):
 
         self.terminate_agents([gym_aea_process])
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Gym test not successful."

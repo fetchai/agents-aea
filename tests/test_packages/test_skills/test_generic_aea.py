@@ -74,4 +74,4 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         self.terminate_agents([seller_aea_process, buyer_aea_process])
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "Generic AEA test not successful."

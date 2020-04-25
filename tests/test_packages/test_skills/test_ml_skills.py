@@ -79,4 +79,4 @@ class TestMLSkills(AEAWithOefTestCase):
 
         self.terminate_agents(timeout=60)
 
-        assert self.is_successfully_terminated(), "Carpark test not successful."
+        assert self.is_successfully_terminated(), "ML test not successful."
