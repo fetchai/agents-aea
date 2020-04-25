@@ -31,7 +31,7 @@ import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
 from random import randint
-from typing import IO, List, Mapping, Optional, Sequence, cast
+from typing import IO, List, Optional, Sequence, cast
 
 import nacl.encoding
 import nacl.signing
@@ -43,12 +43,19 @@ from aea.mail.base import Address, Envelope
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_noise")
 
 
+WORK_DIR = os.getcwd()
+
 NOISE_NODE_SOURCE = str(
     os.path.join(os.path.abspath(os.path.dirname(__file__)), "noise_node.go")
 )
-NOISE_NODE_CLARGS = list()  # type: List[str]
 
 NOISE_NODE_LOG_FILE = "noise_node.log"
+
+NOISE_NODE_ENV_FILE = ".env.noise"
+
+NOISE_NODE_CLARGS = [
+    str(os.path.join(WORK_DIR, NOISE_NODE_ENV_FILE))
+]  # type: List[str]
 
 NOISE = "noise"
 
@@ -122,7 +129,7 @@ def _golang_get_deps_mod(src: str, log_file_desc: IO[str]) -> subprocess.Popen:
 
 
 def _golang_run(
-    src: str, args: Sequence[str], env: Mapping[str, str], log_file_desc: IO[str]
+    src: str, args: Sequence[str], log_file_desc: IO[str]
 ) -> subprocess.Popen:
     """
     Runs the go 'src' as a subprocess
@@ -130,7 +137,9 @@ def _golang_run(
     cmd = ["go", "run", src]
 
     cmd.extend(args)
-    
+
+    env = os.environ
+
     env["GOPATH"] = "{}/go".format(Path.home())
 
     try:
@@ -250,6 +259,7 @@ class NoiseNode:
         uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[Uri]] = None,
         log_file: Optional[str] = None,
+        env_file: Optional[str] = None,
     ):
         """
         Initialize a p2p noise node.
@@ -260,6 +270,7 @@ class NoiseNode:
         :param uri: noise node ip address and port number in format ipaddress:port.
         :param entry_peers: noise entry peers ip address and port numbers.
         :param log_file: the logfile path for the noise node
+        :param env_file: the env file path for the exchange of environment variables
         """
 
         # node id in the p2p network
@@ -278,6 +289,9 @@ class NoiseNode:
 
         # log file
         self.log_file = log_file if log_file is not None else NOISE_NODE_LOG_FILE
+
+        # env file
+        self.env_file = env_file if env_file is not None else NOISE_NODE_ENV_FILE
 
         # named pipes (fifos)
         tmp_dir = tempfile.mkdtemp()
@@ -319,24 +333,34 @@ class NoiseNode:
         os.mkfifo(out_path)
 
         # setup config
-        env = os.environ
-        env["AEA_P2P_ID"] = self.key + self.pub
-        env["AEA_P2P_URI"] = str(self.uri)
-        env["AEA_P2P_ENTRY_URIS"] = ",".join(
-            [str(uri) for uri in self.entry_peers if str(uri) != str(self.uri)]
-        )
-        env["NOISE_TO_AEA"] = in_path
-        env["AEA_TO_NOISE"] = out_path
+        if os.path.exists(NOISE_NODE_ENV_FILE):
+            os.remove(NOISE_NODE_ENV_FILE)
+        with open(NOISE_NODE_ENV_FILE, "a") as env_file:
+            env_file.write("AEA_P2P_ID={}\n".format(self.key + self.pub))
+            env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
+            env_file.write(
+                "AEA_P2P_ENTRY_URIS={}\n".format(
+                    ",".join(
+                        [
+                            str(uri)
+                            for uri in self.entry_peers
+                            if str(uri) != str(self.uri)
+                        ]
+                    )
+                )
+            )
+            env_file.write("NOISE_TO_AEA={}\n".format(in_path))
+            env_file.write("AEA_TO_NOISE={}\n".format(out_path))
 
         # run node
         logger.info("Starting noise node...")
-        self.proc = _golang_run(self.source, self.clargs, env, self._log_file_desc)
+        self.proc = _golang_run(self.source, self.clargs, self._log_file_desc)
 
         await self._connect()
 
     async def _connect(self) -> None:
         if self._connection_attempts == 1:
-            raise Exception("couldn't connect to noise p2p process")
+            raise Exception("Couldn't connect to noise p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
 
@@ -356,20 +380,24 @@ class NoiseNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                await asyncio.sleep(2)
+                logger.debug(e)
+                await asyncio.sleep(30)
                 await self._connect()
                 return
             else:
                 raise e
 
         # setup reader
-        assert self._noise_to_aea is not None and self._aea_to_noise is not None
+        assert (
+            self._noise_to_aea is not None
+            and self._aea_to_noise is not None
+            and self._loop is not None
+        ), "Incomplete initialization."
         self._stream_reader = asyncio.StreamReader(loop=self._loop)
         self._reader_protocol = asyncio.StreamReaderProtocol(
             self._stream_reader, loop=self._loop
         )
         self._fileobj = os.fdopen(self._noise_to_aea, "r")
-        assert self._loop is not None
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
 
         logger.info("Connected to noise node addr({})".format(self.pub))
@@ -405,9 +433,13 @@ class NoiseNode:
 
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
-        assert self.proc is not None, "Process not set, call connect first!"
-        self.proc.terminate()
-        self.proc.wait()
+        if self.proc is not None:
+            self.proc.terminate()
+            self.proc.wait()
+        else:
+            logger.debug("Called stop when process not set!")
+        if os.path.exists(NOISE_NODE_ENV_FILE):
+            os.remove(NOISE_NODE_ENV_FILE)
 
 
 class P2PNoiseConnection(Connection):
@@ -420,6 +452,7 @@ class P2PNoiseConnection(Connection):
         uri: Optional[Uri] = None,
         entry_peers: Sequence[Uri] = None,
         log_file: Optional[str] = None,
+        env_file: Optional[str] = None,
         **kwargs
     ):
         """
@@ -435,7 +468,13 @@ class P2PNoiseConnection(Connection):
             kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
         # noise local node
         self.node = NoiseNode(
-            key, NOISE_NODE_SOURCE, NOISE_NODE_CLARGS, uri, entry_peers, log_file
+            key,
+            NOISE_NODE_SOURCE,
+            NOISE_NODE_CLARGS,
+            uri,
+            entry_peers,
+            log_file,
+            env_file,
         )
         # replace address in kwargs
         kwargs["address"] = self.node.pub
@@ -464,25 +503,36 @@ class P2PNoiseConnection(Connection):
         """
         if self.connection_status.is_connected:
             return
+        try:
+            # start noise node
+            self.connection_status.is_connecting = True
+            await self.node.start()
+            self.connection_status.is_connecting = False
+            self.connection_status.is_connected = True
 
-        # start noise node
-        await self.node.start()
-        self.connection_status.is_connected = True
-
-        # starting receiving msgs
-        self._in_queue = asyncio.Queue()
-        asyncio.ensure_future(self._receive_from_node(), loop=self._loop)
+            # starting receiving msgs
+            self._in_queue = asyncio.Queue()
+            asyncio.ensure_future(self._receive_from_node(), loop=self._loop)
+        except (CancelledError, Exception) as e:
+            self.connection_status.is_connected = False
+            raise e
 
     async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
-        :reutrn: None
+        :return: None
         """
+        assert (
+            self.connection_status.is_connected or self.connection_status.is_connecting
+        ), "Call connect before disconnect."
         self.connection_status.is_connected = False
+        self.connection_status.is_connecting = False
         self.node.stop()
-        assert self._in_queue is not None, "Input queue not initialized."
-        self._in_queue.put_nowait(None)
+        if self._in_queue is not None:
+            self._in_queue.put_nowait(None)
+        else:
+            logger.debug("Called disconnect when input queue not initialized.")
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
@@ -491,7 +541,7 @@ class P2PNoiseConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
-            assert self._in_queue is not None
+            assert self._in_queue is not None, "Input queue not initialized."
             data = await self._in_queue.get()
             if data is None:
                 logger.debug("Received None.")
@@ -554,7 +604,8 @@ class P2PNoiseConnection(Connection):
         noise_host = configuration.config.get("noise_host")  # Optional[str]
         noise_port = configuration.config.get("noise_port")  # Optional[int]
         entry_peers = list(cast(List, configuration.config.get("noise_entry_peers")))
-        log_file = configuration.config.get("log_file")  # Optional[str]
+        log_file = configuration.config.get("noise_log_file")  # Optional[str]
+        env_file = configuration.config.get("noise_env_file")  # Optional[str]
 
         if noise_key_file is None:
             key = Curve25519PrivKey()
@@ -576,6 +627,7 @@ class P2PNoiseConnection(Connection):
             uri,
             entry_peers_uris,
             log_file,
+            env_file,
             address=address,
             configuration=configuration,
         )

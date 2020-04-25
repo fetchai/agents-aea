@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	proto "github.com/golang/protobuf/proto"
+    "github.com/joho/godotenv"
+    "log"
 	"math"
 	"math/rand"
 	"net"
@@ -69,13 +71,24 @@ func (aea *AeaApi) Init() error {
 	if aea.sandbox {
 		return nil
 	}
+	env_file := os.Args[1]
+	fmt.Println("[aea-api  ][debug] env_file:", env_file)
 
 	// get config
+	err := godotenv.Load(env_file)
+	if err != nil {
+	    log.Fatal("Error loading .env.noise file")
+	  }
 	aea.msgin_path = os.Getenv("AEA_TO_NOISE")
 	aea.msgout_path = os.Getenv("NOISE_TO_AEA")
 	aea.id = os.Getenv("AEA_P2P_ID")
 	entry_uris := os.Getenv("AEA_P2P_ENTRY_URIS")
 	uri := os.Getenv("AEA_P2P_URI")
+	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
+	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
+	fmt.Println("[aea-api  ][debug] id:", aea.id)
+	fmt.Println("[aea-api  ][debug] entry_uris:", entry_uris)
+	fmt.Println("[aea-api  ][debug] uri:", uri)
 
 	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
 		fmt.Println("[aea-api  ][error] couldn't get configuration")
