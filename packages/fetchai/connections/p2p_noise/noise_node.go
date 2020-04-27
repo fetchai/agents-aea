@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+
 	//"strings"
-	aea "noise_aea/aea"
 	"errors"
+	aea "noise_aea/aea"
+	"time"
+
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"
-	"time"
 )
 
 // check panics if err is not nil.
@@ -70,29 +72,28 @@ func main() {
 	node.Bind(overlay.Protocol())
 	fmt.Printf("[noise-p2p][info] started node %s (%s).\n", node.ID().Address, node.ID().ID.String())
 
-	// Once overlay setup, connect to agent
-	check(agent.Connect())
-	fmt.Printf("[noise-p2p][info] successfully connected to AEA!")
+	// Have the node start listening for new peers.
+	check(node.Listen())
+	fmt.Printf("[noise-p2p][info] successfully listening...\n")
 
 	// Ping entry node to initially bootstrap, if non genesis
 	if len(agent.EntryUris()) > 0 {
 		check(bootstrap(node, agent.EntryUris()...))
+		fmt.Printf("[noise-p2p][info] successfully bootstrapped.\n")
 	}
+
+	// Once overlay setup, connect to agent
+	check(agent.Connect())
+	fmt.Printf("[noise-p2p][info] successfully connected to AEA!\n")
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
-	if len(agent.EntryUris()) > 0 {
-		go func() {
-			for {
-				discover(overlay)
-				time.Sleep(2500 * time.Millisecond)
-			}
-		}()
-	}
-
-	// Have the node start listening for new peers.
-	// if len(agent.EntryUris()) > 0 {
-	check(node.Listen())
-	// }
+	go func() {
+		fmt.Printf("[noise-p2p][debug] discovering...\n")
+		for {
+			discover(overlay)
+			time.Sleep(2500 * time.Millisecond)
+		}
+	}()
 
 	// Receive envelopes from agent and forward to peer
 	go func() {
@@ -108,14 +109,14 @@ func main() {
 
 	// remove sum file
 	sum_file := "go.sum"
-    file_err := os.Remove(sum_file)
-    if file_err != nil {
-        fmt.Println(err)
-        return
-    }
-    fmt.Println("File %s successfully deleted", sum_file)
+	file_err := os.Remove(sum_file)
+	if file_err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("File %s successfully deleted\n", sum_file)
 
-	println("[noise-p2p][info] node stopped")
+	fmt.Println("[noise-p2p][info] node stopped")
 }
 
 // Deliver an envelope from agent to receiver peer

@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, ownership_state: OwnershipState, preferences: Preferences, goal_pursuit_readiness: GoalPursuitReadiness, task_manager: TaskManager)
+ | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, ownership_state: OwnershipState, preferences: Preferences, goal_pursuit_readiness: GoalPursuitReadiness, task_manager: TaskManager, **kwargs)
 ```
 
 Initialize an agent context.
@@ -32,6 +32,7 @@ Initialize an agent context.
 - `preferences`: the preferences of the agent
 - `goal_pursuit_readiness`: if True, the agent is ready to pursuit its goals
 - `task_manager`: the task manager
+- `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 <a name=".aea.context.base.AgentContext.shared_state"></a>
 #### shared`_`state
@@ -176,4 +177,14 @@ Get the task manager.
 ```
 
 Get the address of the search service.
+
+<a name=".aea.context.base.AgentContext.namespace"></a>
+#### namespace
+
+```python
+ | @property
+ | namespace() -> SimpleNamespace
+```
+
+Get the agent context namespace.
 
