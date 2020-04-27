@@ -34,8 +34,9 @@ from aea.connections.stub.connection import (
 )
 from aea.mail.base import Address, Envelope
 
-
 logger = logging.getLogger(__name__)
+
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.1.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -57,7 +58,7 @@ class P2PStubConnection(StubConnection):
         :param namesapce_dir_path: directory path to share with other agents.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "p2p-stub", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
 
         self.namespace = os.path.abspath(namespace_dir_path)
 

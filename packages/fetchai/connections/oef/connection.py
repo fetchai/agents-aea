@@ -89,6 +89,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.2.0")
 
 
 class OEFObjectTranslator:
@@ -679,7 +680,7 @@ class OEFConnection(Connection):
         :param kwargs: the keyword arguments (check the parent constructor)
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "oef", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
         self.oef_addr = oef_addr
         self.oef_port = oef_port
