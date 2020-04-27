@@ -63,7 +63,7 @@ class P2PStubConnection(StubConnection):
 
         input_file_path = os.path.join(self.namespace, "{}.in".format(address))
         output_file_path = os.path.join(self.namespace, "{}.out".format(address))
-        super().__init__(input_file_path, output_file_path, **kwargs)
+        super().__init__(input_file_path, output_file_path, address=address, **kwargs)
 
     async def send(self, envelope: Envelope):
         """
@@ -103,14 +103,4 @@ class P2PStubConnection(StubConnection):
         namespace_dir = configuration.config.get(
             "namespace_dir", tempfile.mkdtemp()
         )  # type: str
-        restricted_to_protocols_names = {
-            p.name for p in configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
-        return P2PStubConnection(
-            address,
-            namespace_dir,
-            connection_id=configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
-        )
+        return P2PStubConnection(address, namespace_dir, configuration=configuration,)
