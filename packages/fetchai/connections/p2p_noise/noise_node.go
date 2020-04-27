@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+
 	//"strings"
-	aea "noise_aea/aea"
 	"errors"
+	aea "noise_aea/aea"
+	"time"
+
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"
-	"time"
 )
 
 // check panics if err is not nil.
@@ -86,8 +88,8 @@ func main() {
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
 	go func() {
+		fmt.Printf("[noise-p2p][debug] discovering...\n")
 		for {
-			fmt.Printf("[noise-p2p][debug] discovering...\n")
 			discover(overlay)
 			time.Sleep(2500 * time.Millisecond)
 		}
@@ -107,14 +109,14 @@ func main() {
 
 	// remove sum file
 	sum_file := "go.sum"
-    file_err := os.Remove(sum_file)
-    if file_err != nil {
-        fmt.Println(err)
-        return
-    }
-    fmt.Println("File %s successfully deleted\n", sum_file)
+	file_err := os.Remove(sum_file)
+	if file_err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("File %s successfully deleted\n", sum_file)
 
-	println("[noise-p2p][info] node stopped\n")
+	fmt.Println("[noise-p2p][info] node stopped")
 }
 
 // Deliver an envelope from agent to receiver peer

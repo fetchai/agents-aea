@@ -4,9 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	proto "github.com/golang/protobuf/proto"
-    "github.com/joho/godotenv"
-    "log"
+	"log"
 	"math"
 	"math/rand"
 	"net"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	proto "github.com/golang/protobuf/proto"
+	"github.com/joho/godotenv"
 )
 
 /*
@@ -77,8 +78,8 @@ func (aea *AeaApi) Init() error {
 	// get config
 	err := godotenv.Load(env_file)
 	if err != nil {
-	    log.Fatal("Error loading .env.noise file")
-	  }
+		log.Fatal("Error loading .env.noise file")
+	}
 	aea.msgin_path = os.Getenv("AEA_TO_NOISE")
 	aea.msgout_path = os.Getenv("NOISE_TO_AEA")
 	aea.id = os.Getenv("AEA_P2P_ID")
@@ -104,6 +105,17 @@ func (aea *AeaApi) Init() error {
 	aea.host = net.ParseIP(parts[0])
 	port, _ := strconv.ParseUint(parts[1], 10, 16)
 	aea.port = uint16(port)
+	// hack: test if port is taken
+	addr, err := net.ResolveTCPAddr("tcp", uri)
+	if err != nil {
+		return err
+	}
+	listener, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		fmt.Println("[aea-api  ][error] Uri already taken", uri)
+		return err
+	}
+	listener.Close()
 
 	// parse entry peers uris
 	if len(entry_uris) > 0 {
