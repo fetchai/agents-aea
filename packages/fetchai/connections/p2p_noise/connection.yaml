@@ -8,10 +8,10 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
-  aea/api.go: Qmd8C5Wa7ebdAmTKokHQNxjpShEChezdG9oSdiYt3HcBhZ
+  aea/api.go: QmXqDgrPRe6TqFMXSj5y1Ca2SvGVBkLzReFxpmaMHdBvAf
   connection.py: QmTyAJX1MHahctL8nsmBJseqYHZDUasroTyiAnNnn3QgHA
-  go.mod: QmVSRYVqSMRDvWTbMuEFj53gN64LhTRZyrAuvrQSRu2LVH
-  noise_node.go: Qmay1PPCRseAMYyiGNcYhExXq2MazaSp2i3crfP1d8auQK
+  go.mod: Qme5BZYRXnWjhdGFdCYNC3K1f6SwmyT2Dksu4eeoRYmBxG
+  noise_node.go: QmUUZSwNKk9vEusJnA7J6M1SgFtEHtBUsEaDtK9wY1yrDr
 fingerprint_ignore_patterns:
 - go.sum
 - noise_aea
