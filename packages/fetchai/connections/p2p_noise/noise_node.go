@@ -70,10 +70,6 @@ func main() {
 	node.Bind(overlay.Protocol())
 	fmt.Printf("[noise-p2p][info] started node %s (%s).\n", node.ID().Address, node.ID().ID.String())
 
-	// Once overlay setup, connect to agent
-	check(agent.Connect())
-	fmt.Printf("[noise-p2p][info] successfully connected to AEA!\n")
-
 	// Have the node start listening for new peers.
 	check(node.Listen())
 	fmt.Printf("[noise-p2p][info] successfully listening...\n")
@@ -83,6 +79,10 @@ func main() {
 		check(bootstrap(node, agent.EntryUris()...))
 		fmt.Printf("[noise-p2p][info] successfully bootstrapped.\n")
 	}
+
+	// Once overlay setup, connect to agent
+	check(agent.Connect())
+	fmt.Printf("[noise-p2p][info] successfully connected to AEA!\n")
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
 	go func() {
