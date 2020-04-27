@@ -39,11 +39,11 @@ The agent operation breaks down into three parts:
 * Teardown: calls the `teardown()` method of all registered resources
 
 
-To avoid block of main loop execution time limit applied to every `Behaviour.act` and `Handler.handle`
+To prevent a developer from blocking the main loop with custom skill code, an execution time limit is  applied to every `Behaviour.act` and `Handler.handle` call.
 
-Default execution limit is 1 second. If act or handle time exceed limit, code will be terminated.
+The default execution limit is `1` second. If the `act` or `handle` time exceed this limit, the call will be terminated.
 
-Appropriate message will be added to logs in case of some code execution was terminated.
+An appropriate message is added to the logs in the case of some code execution being terminated.
 
 
 <br />
