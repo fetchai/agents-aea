@@ -51,6 +51,7 @@ nav:
         - ERC1155 deploy and interact: 'erc1155-skills.md'
         - HTTP Connection: 'http-connection-and-skill.md'
         - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
+        - P2P Connection: 'p2p-connection.md'
       - Architecture:
         - Design principles: 'design-principles.md'
         - Architectural diagram: 'diagram.md'
