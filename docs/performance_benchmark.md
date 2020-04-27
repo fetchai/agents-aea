@@ -121,7 +121,7 @@ Run with multiple arguments set, multiple repeats and draw a chart on resources
 `python ./benchmark/cases/cpu_burn.py -N 5 -P 1 3,0.00001 3,0.001 3,0.01`
 
 Report is:
-```
+``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1
 Tested function name: cpu_burn
