@@ -19,7 +19,7 @@ The following figure illustrates the framework's architecture:
 <center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
 
 
-In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections. 
+In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections.
 The later doesn't try to discourage you though, from creating your own `connections` or `protocols` but you will need a better understanding of the framework than creating a skill.
 
 
@@ -37,5 +37,13 @@ The agent operation breaks down into three parts:
     * Decision maker loop (Thread 3- Synchronous): processes internal messages
     * Multiplexer (Thread 4 - Asynchronous event loop): the multiplexer has an event loop which processes incoming and outgoing messages across several connections asynchronously.
 * Teardown: calls the `teardown()` method of all registered resources
+
+
+To avoid block of main loop execution time limit applied to every `Behaviour.act` and `Handler.handle`
+
+Default execution limit is 1 second. If act or handle time exceed limit, code will be terminated.
+
+Appropriate message will be added to logs in case of some code execution was terminated.
+
 
 <br />

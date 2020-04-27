@@ -38,8 +38,6 @@ def cpu_burn(benchmark: BenchmarkControl, run_time=10, sleep=0.0001) -> None:
     start_time = time.time()
 
     while True:
-        for i in range(10000):
-            i ** 2
         time.sleep(sleep)
         if time.time() - start_time >= run_time:
             break

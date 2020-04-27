@@ -37,7 +37,7 @@ from aea.skills.base import Handler, Skill, SkillContext
 class AEATestWrapper:
     """A testing wrapper to run and control an agent."""
 
-    def __init__(self, name: str = "my_aea", skills: List[Dict[str, Skill]] = None):
+    def __init__(self, name: str = "my_aea", skills: List[Dict[str, Dict]] = None):
         """
         Make an agency with optional name and skills.
 
