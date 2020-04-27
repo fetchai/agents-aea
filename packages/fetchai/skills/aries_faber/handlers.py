@@ -22,19 +22,21 @@
 import json
 from typing import Dict, Optional, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.oef.connection import (
+    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 DEFAULT_PROTOCOL_PUBLIC_ID = DefaultMessage.protocol_id
-OEF_CONNECTION_PUBLIC_ID = PublicId("fetchai", "oef", "0.2.0")
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
@@ -126,7 +128,7 @@ class HTTPHandler(Handler):
                 self.connection_id = content["connection_id"]
                 invitation = connection["invitation"]
                 self.context.logger.info("connection: " + str(connection))
-                self.context.logger.info("connection id: " + self.connection_id)
+                self.context.logger.info("connection id: " + self.connection_id)  # type: ignore
                 self.context.logger.info("invitation: " + str(invitation))
                 self.context.logger.info(
                     "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."

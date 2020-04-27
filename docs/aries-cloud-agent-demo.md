@@ -10,6 +10,33 @@ Demonstrating an entire decentralised identity scenario involving AEAs and insta
 
 This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target=_blank>here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target=_blank> aries cloud agent repository </a>. 
 
+<div class="mermaid">
+    sequenceDiagram
+        participant faea as Faber_AEA
+        participant faca as Faber_ACA
+        participant aaca as Alice_ACA
+        participant aaea as Alice_AEA
+    
+        activate faea
+        activate faca
+        activate aaca
+        activate aaea
+        
+        Note right of aaea: Shows identity 
+        
+        faea->>faca: Request status?
+        faca->>faea: status
+        faea->>faca: create-invitation
+        faca->>faea: connection inc. invitation
+        faea->>aaea: invitation detail
+        aaea->>aaca: receive-invitation
+        
+        deactivate faea
+        deactivate faca
+        deactivate aaca
+        deactivate aaea
+</div>
+
 There are two AEAs: 
 
  * Alice_AEA
@@ -142,7 +169,7 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.1.0
+aea add connection fetchai/http_client:0.2.0
 aea add connection fetchai/webhook:0.1.0
 aea add connection fetchai/oef:0.2.0
 ```
@@ -179,7 +206,7 @@ aea install
 Then run Alice_AEA:
 
 ``` bash
-aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
+aea run --connections fetchai/http_client:0.2.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
 ```
 
 You should see Alice_AEA running and showing its identity on the terminal. For example:
@@ -224,7 +251,7 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add connection fetchai/http_client:0.1.0
+aea add connection fetchai/http_client:0.2.0
 aea add connection fetchai/webhook:0.1.0
 aea add connection fetchai/oef:0.2.0
 ```
@@ -242,12 +269,12 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 ### Configure Faber_AEA:
 
-You now need to ensure that Faber_AEA uses the HTTP_Client connection as its default connection. Open the agent's configuration file in `faber/aea-config.yaml` and ensure that the `default_connection`'s value is `fetchai/http_client:0.1.0`.
+You now need to ensure that Faber_AEA uses the HTTP_Client connection as its default connection. Open the agent's configuration file in `faber/aea-config.yaml` and ensure that the `default_connection`'s value is `fetchai/http_client:0.2.0`.
 
 You can use the following command to set this value:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_client:0.1.0
+aea config set agent.default_connection fetchai/http_client:0.2.0
 ```
 
 ### Install the Dependencies and Run Faber_AEA:
@@ -261,7 +288,7 @@ aea install
 Then run the Faber_AEA:
 
 ``` bash
-aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
+aea run --connections fetchai/http_client:0.2.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
 ```
 
 You should see Faber_AEA running and showing logs of its activities. For example: 

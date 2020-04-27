@@ -22,16 +22,18 @@
 import json
 from typing import Dict, Optional, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-HTTP_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
 HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
@@ -66,7 +68,7 @@ class DefaultHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        context = EnvelopeContext(connection_id=HTTP_CONNECTION_PUBLIC_ID)
+        context = EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID)
         envelope = Envelope(
             to=self.admin_url,
             sender=self.context.agent_address,
@@ -171,7 +173,7 @@ class HttpHandler(Handler):
                     self.connection_id = content["connection_id"]
                     invitation = connection["invitation"]
                     self.context.logger.info("invitation response: " + str(connection))
-                    self.context.logger.info("connection id: " + self.connection_id)
+                    self.context.logger.info("connection id: " + self.connection_id)  # type: ignore
                     self.context.logger.info("invitation: " + str(invitation))
 
     def teardown(self) -> None:
