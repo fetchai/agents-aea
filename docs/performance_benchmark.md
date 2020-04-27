@@ -2,24 +2,24 @@ Test AEA framework performance.
 
 ## What is it?
 
-Benchmark is a set of tools to measure execution time, CPU load, memory usage for Python code.
-It produces text reports and draw charts with results.
+The benchmark module is a set of tools to measure execution time, CPU load and memory usage of the AEA Python code. It produces text reports and draws charts to present the results.
 
 ## How does it work?
 
-* Framework spawns a dedicated process for each test run to execute function to test.
-* Measure CPU and RAM usage periodically.
-* Waits for function exits or terminates it by timeout.
-* Repeat it multiple times to get the most accurate results
+The framework:
+* spawns a dedicated process for each test run to execute the function to test.
+* measures CPU and RAM usage periodically.
+* waits for function exits or terminates them by timeout.
+* repeats test execution multiple times to get more accurate results.
 
 
 
 ## How to use
 
-Steps to make a test.
+Steps to run a test:
 
-* Write a function you d like to test with all arguments you d like to use to parameterize, add some dock strings.
-* Split it on two parts: prepare part and performance part. Prepare part will not be measured.
+* Write a function you would like to test with all arguments you would like to parameterise, add some doc strings.
+* Split the function into two parts: prepare part and performance part. The prepare part will not be included in the measurement.
 * Add `BenchmarkControl` support, to notify framework to start measurement.
 * Import `TestCli` class,  TestCli().run(function_to_be_tested)
 * Call it from console to get text results.
@@ -28,7 +28,7 @@ Steps to make a test.
 
 `cpuburn` - simple test of CPU load depends on idle sleep time. Shows how much CPU consumed during the execution.
 
-```
+``` python
 import time
 
 from benchmark.framework.benchmark import BenchmarkControl
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
 
 Run it with `python ./benchmark/cases/cpu_burn.py --help` to get help about usage.
-```
+``` bash
 Usage: cpu_burn.py [OPTIONS] [ARGS]...
 
        Do nothing, just burn cpu to check cpu load changed on sleep.
@@ -85,7 +85,7 @@ Options:
 
 
 Run it with `python ./benchmark/cases/cpu_burn.py` to start with default parameters.
-```
+``` bash
 Test execution timeout: 10.0
 Test execution measure period: 0.1
 Tested function name: cpu_burn
@@ -180,23 +180,25 @@ The most interesting part is CPU usage, as you can see  cPU usage decreases with
 Memory usage and execution time can slightly differ per case execution.
 
 
-## Requirements to tested function
-* The first function's argument has to be `benchmark: BenchmarkControl` it passed by default by framework.
+## Requirements for tested function
+
+* The first function's argument has to be `benchmark: BenchmarkControl` which is passed by default by the framework.
 * All arguments except the fist one have to set default values.
-* Function docstring is a must, it used for help information.
-* `benchmark.start()` has to be called once in the function body to start measurement. timeout is counted from this point!
-* All prepare part in the function that should not be measured has to be placed before `benchmark.start()`
+* Function doc string is required, it used for help information.
+* `benchmark.start()` has to be called once in the function body to start measurement. The timeout is counted from this point!
+* All the "prepare part" in the function that should not be measured has to be placed before `benchmark.start()`
 * Code to be measured has to go after `benchmark.start()`
-* Try to avoid infinitive loops and suppose test should exit after a while.
+* Try to avoid infinitive loops and assume the test should exit after a while.
 
 
 ## Execution options
-* To pass arguments set just provide it comma separated like `10,0.1`
-* To pass several arguremnt sets just separate it by space `10,0.1 20,0.2`
-* `--timeout FLOAT` is test execution timeout in seconds, it test takes more time, it will be terminated.
+
+* To pass an arguments set just provide it as a comma separated string like `10,0.1`
+* To pass several argument sets just separate them by whitespace `10,0.1 20,0.2`
+* `--timeout FLOAT` is test execution timeout in seconds. If the test takes more time, it will be terminated.
 * `--period FLOAT` is measurement interval in seconds, how often to make CPU and RAM usage measurements.
-* `-N, --num-executions INTEGER` - how many time run the same argument set to make result more accurate.
-* `-P, --plot INTEGER` -  Draw a chat using, using values of argument specified as values for axis X. argument positions started with 0, argument benchmark does not counted. for example `-P 0` will use `run_time` values, `-P 1` will use `sleep` values.
+* `-N, --num-executions INTEGER` - how many time to run the same argument set to make result more accurate.
+* `-P, --plot INTEGER` -  Draw a chart using, using values of argument specified as values for axis X. argument positions started with 0, argument benchmark does not counted. for example `-P 0` will use `run_time` values, `-P 1` will use `sleep` values.
 
 
 
@@ -204,8 +206,7 @@ Memory usage and execution time can slightly differ per case execution.
 
 ## Limitations
 
-Currently, the benchmark framework does not measure resources consumed by subprocess spawned in python code.
-So try to keep one process solutions during tests.
+Currently, the benchmark framework does not measure resources consumed by subprocess spawned in python code. So try to keep one process solutions during tests.
 
 Asynchronous functions or coroutines are not supported directly. So you have to set up an event loop inside test function and start loop manually.
 
@@ -215,7 +216,7 @@ Asynchronous functions or coroutines are not supported directly. So you have to 
 
 Test react speed on specific messages amount.
 
-```
+``` python
 def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
     """
     Test inbox message processing in a loop.
@@ -251,7 +252,7 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
 
 
 **create AEA wrapper with specified handler**
-```
+``` python
 skill_definition = {
     "handlers": {"dummy_handler": DummyHandler}
 }
@@ -263,7 +264,7 @@ aea_test_wrapper = AEATestWrapper(
 
 
 **populate inbox with dummy messages**
-```
+``` python
 for _ in range(inbox_amount):
     aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
 ```
@@ -276,14 +277,14 @@ for _ in range(inbox_amount):
 `benchmark.start()`
 
 **start/stop AEA**
-```
+``` python
 aea_test_wrapper.start()
 ...
 aea_test_wrapper.stop()
 ```
 
 **wait till messages present in inbox.**
-```
+``` python
 while not aea_test_wrapper.is_inbox_empty():
     time.sleep(0.1)
 ```
