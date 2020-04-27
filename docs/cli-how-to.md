@@ -12,7 +12,6 @@ The following installs the entire AEA package including the cli.
 
 ``` bash
 pip install aea[all]
-
 ```
 
 If you are using `zsh` rather than `bash` type 

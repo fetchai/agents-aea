@@ -39,9 +39,10 @@ Create the AEA that will provide thermometer measurements.
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Create the thermometer client
@@ -51,21 +52,22 @@ In another terminal, create the AEA that will query the thermometer AEA.
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/thermometer_client:0.1.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Additionally, create the private key for the weather_client AEA based on the network you want to transact.
 
 To generate and add a key for Fetch.ai use:
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
 To generate and add a key for Ethereum use:
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -83,7 +85,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -175,16 +177,17 @@ addr: ${OEF_ADDR: 127.0.0.1}
 
 Run both AEAs from their respective terminals
 
-```bash 
-aea add connection fetchai/oef:0.1.0
+``` bash 
+aea add connection fetchai/oef:0.2.0
 aea install
-aea run --connections fetchai/oef:0.1.0
+aea config set agent.default_connection fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.2.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
 ### Delete the AEAs
 When you're done, go up a level and delete the AEAs.
-```bash 
+``` bash 
 cd ..
 aea delete my_thermometer_aea
 aea delete my_thermometer_client

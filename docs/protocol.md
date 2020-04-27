@@ -27,6 +27,8 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 The `fetchai/default:0.1.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
+from enum import Enum
+
 class Performative(Enum):
     """Performatives for the default protocol."""
 
@@ -40,6 +42,8 @@ class Performative(Enum):
 
 * The `DefaultMessage` of performative `DefaultMessage.Performative.BYTES` is used to send payloads of byte strings to other AEAs. An example is:
 ``` python
+from aea.protocols.default.message import DefaultMessage
+
 msg = DefaultMessage(
     performative=DefaultMessage.Performative.BYTES,
     content=b"This is a bytes payload",
@@ -67,7 +71,7 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.1.0` skill utilises the `fetchai/default:0.1.0` protocol for error handling.
+Each AEA's `fetchai/error:0.2.0` skill utilises the `fetchai/default:0.1.0` protocol for error handling.
 
 ## `fetchai/oef_search:0.1.0` protocol
 
@@ -75,7 +79,7 @@ The `fetchai/oef_search:0.1.0` protocol is used by AEAs to interact with an [OEF
 
 The `fetchai/oef_search:0.1.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
-```python
+``` python
 class Performative(Enum):
 
     """Performatives for the oef_search protocol."""
@@ -98,6 +102,8 @@ my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
 and a description of the service we would like to register, for instance
 ```python
+from aea.helpers.search.models import Description
+
 my_service_data = {"country": "UK", "city": "Cambridge"}
 my_service_description = Description(
     my_service_data,
@@ -105,7 +111,7 @@ my_service_description = Description(
 )
 ```
 where we use, for instance
-``` python
+```python
 from aea.helpers.search.generic import GenericDataModel
 
 data_model_name = "location"
@@ -113,12 +119,12 @@ data_model = {
     "attribute_one": {
         "name": "country",
         "type": "str",
-        "is_required": "True",
+        "is_required": True,
     },
     "attribute_two": {
         "name": "city",
         "type": "str",
-        "is_required": "True",
+        "is_required": True,
     },
 }
 my_data_model = GenericDataModel(data_model_name, data_model)
@@ -183,7 +189,7 @@ oef_msg = OefSearchMessage(
 * The [OEF search node](../oef-ledger) will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The [agent address](../identity) can then be used to send a message to the agent utilising the [OEF communication node](../oef-ledger) and any protocol other than `fetchai/oef_search:0.1.0`.
 
 * If the [OEF search node](../oef-ledger) encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
-```python
+``` python
 class OefErrorOperation(Enum):
 
     """This class represents an instance of OefErrorOperation."""
@@ -199,7 +205,7 @@ class OefErrorOperation(Enum):
 
 The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the following performatives:
 
-```python
+``` python
 class Performative(Enum):
     """Performatives for the fipa protocol."""
 
@@ -213,13 +219,13 @@ class Performative(Enum):
     PROPOSE = "propose"
 
     def __str__(self):
-    	"""Get string representation."""
+        """Get string representation."""
         return self.value
 ```
 
 `FipaMessages` are constructed with a `performative`, `dialogue_reference`, `message_id`, and `target` as well as the `kwargs` specific to each message performative.
 
-```python
+``` python
 def __init__(
     self,
     performative: Performative,

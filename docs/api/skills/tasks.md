@@ -112,13 +112,17 @@ None
 #### init`_`worker
 
 ```python
-init_worker()
+init_worker() -> None
 ```
 
 Initialize a worker.
 
 Disable the SIGINT handler.
 Related to a well-known bug: https://bugs.python.org/issue8296
+
+**Returns**:
+
+None
 
 <a name=".aea.skills.tasks.TaskManager"></a>
 ### TaskManager
@@ -133,7 +137,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = 5)
+ | __init__(nb_workers: int = 1, is_lazy_pool_start: bool = True)
 ```
 
 Initialize the task manager.
@@ -141,6 +145,21 @@ Initialize the task manager.
 **Arguments**:
 
 - `nb_workers`: the number of worker processes.
+- `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
+
+<a name=".aea.skills.tasks.TaskManager.is_started"></a>
+#### is`_`started
+
+```python
+ | @property
+ | is_started() -> bool
+```
+
+Get started status of TaskManager.
+
+**Returns**:
+
+bool
 
 <a name=".aea.skills.tasks.TaskManager.nb_workers"></a>
 #### nb`_`workers
@@ -151,6 +170,10 @@ Initialize the task manager.
 ```
 
 Get the number of workers.
+
+**Returns**:
+
+int
 
 <a name=".aea.skills.tasks.TaskManager.enqueue_task"></a>
 #### enqueue`_`task
@@ -181,6 +204,10 @@ Enqueue a task with the executor.
 
 Get the result from a task.
 
+**Returns**:
+
+async result for task_id
+
 <a name=".aea.skills.tasks.TaskManager.start"></a>
 #### start
 
@@ -190,6 +217,10 @@ Get the result from a task.
 
 Start the task manager.
 
+**Returns**:
+
+None
+
 <a name=".aea.skills.tasks.TaskManager.stop"></a>
 #### stop
 
@@ -198,4 +229,8 @@ Start the task manager.
 ```
 
 Stop the task manager.
+
+**Returns**:
+
+None
 

@@ -20,93 +20,63 @@
 """This test module contains the integration test for the tac skills."""
 
 import os
-import signal
 import time
 
-import pytest
+from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
-from tests.test_packages.tools_for_testing import AeaTestCase
 
-
-class TestTacSkills(AeaTestCase):
+class TestTacSkills(AEAWithOefTestCase):
     """Test that tac skills work."""
 
+    @skip_test_ci
     def test_tac(self, pytestconfig):
         """Run the tac skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
-        agent_name_one = "tac_participant_one"
-        agent_name_two = "tac_participant_two"
+        tac_aea_one = "tac_participant_one"
+        tac_aea_two = "tac_participant_two"
         tac_controller_name = "tac_controller"
 
         # create tac controller, agent one and agent two
         self.create_agents(
-            agent_name_one, agent_name_two, tac_controller_name,
+            tac_aea_one, tac_aea_two, tac_controller_name,
         )
 
         # prepare tac controller for test
         tac_controller_dir_path = os.path.join(self.t, tac_controller_name)
         os.chdir(tac_controller_dir_path)
-        self.add_item("connection", "fetchai/oef:0.1.0")
-        self.add_item("contract", "fetchai/erc1155:0.1.0")
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
         self.run_install()
 
         # prepare agents for test
-        agent_one_dir_path = os.path.join(self.t, agent_name_one)
-        agent_two_dir_path = os.path.join(self.t, agent_name_two)
+        tac_aea_one_dir_path = os.path.join(self.t, tac_aea_one)
+        tac_aea_two_dir_path = os.path.join(self.t, tac_aea_two)
 
-        for agent_path in (agent_one_dir_path, agent_two_dir_path):
+        for agent_path in (tac_aea_one_dir_path, tac_aea_two_dir_path):
             os.chdir(agent_path)
 
-            self.add_item("connection", "fetchai/oef:0.1.0")
-            self.add_item("contract", "fetchai/erc1155:0.1.0")
+            self.add_item("connection", "fetchai/oef:0.2.0")
+            self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
             self.add_item("skill", "fetchai/tac_participation:0.1.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
-
             self.run_install()
 
-        try:
-            # run tac controller
-            os.chdir(tac_controller_dir_path)
-            tac_controller_process = self.run_oef_subprocess()
+        # run tac controller
+        os.chdir(tac_controller_dir_path)
+        tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-            # run two agents (participants)
-            os.chdir(agent_one_dir_path)
-            agent_one_process = self.run_oef_subprocess()
+        # run two agents (participants)
+        os.chdir(tac_aea_one_dir_path)
+        tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-            os.chdir(agent_two_dir_path)
-            agent_two_process = self.run_oef_subprocess()
+        os.chdir(tac_aea_two_dir_path)
+        tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-            time.sleep(10.0)
-            agent_one_process.send_signal(signal.SIGINT)
-            agent_one_process.wait(timeout=10)
+        time.sleep(10.0)
 
-            agent_two_process.send_signal(signal.SIGINT)
-            agent_two_process.wait(timeout=10)
+        self.terminate_agents(
+            [tac_controller_process, tac_aea_one_process, tac_aea_two_process]
+        )
 
-            tac_controller_process.send_signal(signal.SIGINT)
-            tac_controller_process.wait(timeout=10)
-
-            assert agent_one_process.returncode == 0
-            assert agent_two_process.returncode == 0
-            assert tac_controller_process.returncode == 0
-        finally:
-            poll_one = agent_one_process.poll()
-            if poll_one is None:
-                agent_one_process.terminate()
-                agent_one_process.wait(2)
-
-            poll_two = agent_two_process.poll()
-            if poll_two is None:
-                agent_two_process.terminate()
-                agent_two_process.wait(2)
-
-            poll_tac = tac_controller_process.poll()
-            if poll_tac is None:
-                tac_controller_process.terminate()
-                tac_controller_process.wait(2)
-
-        os.chdir(self.t)
-        self.delete_agents(agent_name_one, agent_name_two)
+        assert self.is_successfully_terminated(), "TAC test not successful."

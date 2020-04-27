@@ -21,6 +21,7 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
+	find . -name '.DS_Store' -exec rm -fr {} +
 
 .PHONY: clean-test
 clean-test:
@@ -39,18 +40,19 @@ clean-test:
 
 .PHONY: lint
 lint:
-	black aea examples packages scripts tests
-	flake8 aea examples packages scripts tests
+	black aea benchmark examples packages scripts tests
+	flake8 aea benchmark examples packages scripts tests
 
 .PHONY: security
 security:
 	bandit -s B101 -r aea packages scripts
 	bandit -s B101 -r tests
+	bandit -s B101 -r benchmark
 	safety check
 
 .PHONY: static
 static:
-	mypy aea packages tests scripts
+	mypy aea benchmark packages tests scripts
 
 .PHONY: test
 test:
@@ -99,4 +101,4 @@ new_env: clean
 .PHONY: install_env
 install_env:
 	pipenv install --dev --skip-lock
-	pip install -e .[all]	
+	pip install -e .[all]

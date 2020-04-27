@@ -16,6 +16,8 @@ This means it is possible to, at any point, grab the `context` and have access t
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
+Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
+
 ``` python
 self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
 ``` 
@@ -66,7 +68,7 @@ The framework supports different types of behaviours:
 There is another category of behaviours, called `CompositeBehaviour`. 
 - `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
   one after the other.
-- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+- `FSMBehaviour`: a state machine of `State` behaviours. 
     A state is in charge of scheduling the next state.
 
 
@@ -77,7 +79,7 @@ can always subclass the general-purpose `Behaviour` class.
 !!
 Follows an example of a custom behaviour:
 
-```python
+``` python
 
 from aea.skills.behaviours import OneShotBehaviour
 
@@ -99,12 +101,12 @@ class HelloWorldBehaviour(OneShotBehaviour):
 If we want to register this behaviour dynamically, in any part of the skill code
 (i.e. wherever the skill context is available), we can write:
 
-```python
+``` python
 self.context.new_behaviours.put(HelloWorldBehaviour())
 ```
 
 Or, equivalently:
-```python
+``` python
 def hello():
     print("Hello, World!")
 
@@ -139,13 +141,14 @@ not be updated.
 Here's an example:
 
 In `tasks.py`:
-```python
+``` python
 
 from aea.skills.tasks import Task
 
 
 def nth_prime_number(n: int) -> int:
     """A naive algorithm to find the n_th prime number."""
+    assert n > 0
     primes = [2]
     num = 3
     while len(primes) < n:
@@ -175,7 +178,7 @@ class LongTask(Task):
 ```
 
 In `behaviours.py`:
-```python
+``` python
 
 from aea.skills.behaviours import TickerBehaviour
 from packages.my_author_name.skills.my_skill.tasks import LongTask
@@ -241,7 +244,8 @@ handlers:
       foo: bar
 models: {}
 dependencies: {}
-protocols: ["fetchai/default:0.1.0"]
+protocols:
+- fetchai/default:0.1.0
 ```
 
 

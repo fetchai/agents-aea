@@ -64,7 +64,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
     tx_nonce = ledger_api.generate_tx_nonce(
         wallet_2.addresses.get(FETCHAI), wallet_1.addresses.get(FETCHAI)
     )
-    tx_digest = ledger_api.send_transaction(
+    tx_digest = ledger_api.transfer(
         crypto=wallet_1.crypto_objects.get(FETCHAI),
         destination_address=wallet_2.addresses.get(FETCHAI),
         amount=1,
@@ -115,7 +115,7 @@ def run():
     tx_nonce = ledger_api.generate_tx_nonce(
         wallet_2.addresses.get(FETCHAI), wallet_1.addresses.get(FETCHAI)
     )
-    tx_digest = ledger_api.send_transaction(
+    tx_digest = ledger_api.transfer(
         crypto=wallet_1.crypto_objects.get(FETCHAI),
         destination_address=wallet_2.addresses.get(FETCHAI),
         amount=1,

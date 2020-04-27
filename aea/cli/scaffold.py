@@ -21,7 +21,6 @@
 
 import os
 import shutil
-import sys
 from pathlib import Path
 
 import click
@@ -39,6 +38,7 @@ from aea.cli.common import (
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
@@ -57,6 +57,14 @@ def scaffold(click_context):
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
     _scaffold_item(ctx, "connection", connection_name)
+
+
+@scaffold.command()
+@click.argument("contract_name", type=str, required=True)
+@pass_ctx
+def contract(ctx: Context, contract_name: str) -> None:
+    """Add a contract scaffolding to the configuration file and agent."""
+    _scaffold_item(ctx, "contract", contract_name)
 
 
 @scaffold.command()
@@ -89,12 +97,11 @@ def _scaffold_item(ctx: Context, item_type, item_name):
     existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
     # check if we already have an item with the same public id
     if (author_name, item_name) in existing_ids_only_author_and_name:
-        logger.error(
+        raise click.ClickException(
             "A {} with name '{}' already exists. Aborting...".format(
                 item_type, item_name
             )
         )
-        sys.exit(1)
 
     try:
         agent_name = ctx.agent_config.agent_name
@@ -132,19 +139,16 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:
-        logger.error(
+        raise click.ClickException(
             "A {} with this name already exists. Please choose a different name and try again.".format(
                 item_type
             )
         )
-        sys.exit(1)
     except ValidationError:
-        logger.error(
+        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        raise click.ClickException(
             "Error when validating the {} configuration file.".format(item_type)
         )
-        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
-        sys.exit(1)
     except Exception as e:
-        logger.exception(e)
         shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
-        sys.exit(1)
+        raise click.ClickException(str(e))

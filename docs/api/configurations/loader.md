@@ -44,7 +44,7 @@ Get the json schema validator.
  | configuration_class() -> Type[T]
 ```
 
-Get the configuration type of the loader.
+Get the configuration class of the loader.
 
 <a name=".aea.configurations.loader.ConfigLoader.load_protocol_specification"></a>
 #### load`_`protocol`_`specification
@@ -105,7 +105,7 @@ None
 
 ```python
  | @classmethod
- | from_configuration_type(cls, configuration_type: Union[ConfigurationType, str]) -> "ConfigLoader"
+ | from_configuration_type(cls, configuration_type: Union[PackageType, str]) -> "ConfigLoader"
 ```
 
 Get the configuration loader from the type.

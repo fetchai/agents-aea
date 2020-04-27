@@ -19,9 +19,8 @@ speech_acts:
     tx_counterparty_fee: pt:int
     quantities_by_good_id: pt:dict[pt:str, pt:int]
     tx_nonce: pt:int
-    tx_sender_signature: pt:bytes
-    tx_counterparty_signature: pt:bytes
-  get_state_update: {}
+    tx_sender_signature: pt:str
+    tx_counterparty_signature: pt:str
   cancelled: {}
   game_data:
     amount_by_currency_id: pt:dict[pt:str, pt:int]

@@ -22,9 +22,11 @@ import inspect
 import itertools
 import logging
 import os
+import pprint
 import re
+import sys
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
 
 import jsonschema
 
@@ -35,16 +37,21 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    ConfigurationType,
     ConnectionConfig,
     ContractConfig,
     DEFAULT_AEA_CONFIG_FILE,
     Dependencies,
+    PackageType,
     ProtocolConfig,
     PublicId,
     SkillConfig,
 )
 from aea.configurations.components import Component
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
@@ -61,6 +68,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 from aea.mail.base import Address
@@ -190,19 +198,6 @@ class _DependenciesManager:
         for dependency in component.package_dependencies:
             self._inverse_dependency_graph[dependency].discard(component_id)
 
-    def check_package_dependencies(
-        self, component_configuration: ComponentConfiguration
-    ) -> bool:
-        """
-        Check that we have all the dependencies needed to the package.
-
-        return: True if all the dependencies are covered, False otherwise.
-        """
-        not_supported_packages = component_configuration.package_dependencies.difference(
-            self.all_dependencies
-        )
-        return len(not_supported_packages) == 0
-
     @property
     def pypi_dependencies(self) -> Dependencies:
         """Get all the PyPI dependencies."""
@@ -229,6 +224,8 @@ class AEABuilder:
     returns the instance of the builder itself.
     """
 
+    DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+
     def __init__(self, with_default_packages: bool = True):
         """
         Initialize the builder.
@@ -243,7 +240,8 @@ class AEABuilder:
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
-        self._default_connection = PublicId("fetchai", "stub", "0.1.0")
+        self._default_connection = DEFAULT_CONNECTION
+        self._context_namespace = {}  # type: Dict[str, Any]
 
         self._package_dependency_manager = _DependenciesManager()
 
@@ -253,11 +251,11 @@ class AEABuilder:
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add default protocol
-        self.add_protocol(Path(AEA_DIR, "protocols", "default"))
+        self.add_protocol(Path(AEA_DIR, "protocols", DEFAULT_PROTOCOL.name))
         # add stub connection
-        self.add_connection(Path(AEA_DIR, "connections", "stub"))
+        self.add_connection(Path(AEA_DIR, "connections", DEFAULT_CONNECTION.name))
         # add error skill
-        self.add_skill(Path(AEA_DIR, "skills", "error"))
+        self.add_skill(Path(AEA_DIR, "skills", DEFAULT_SKILL.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """
@@ -280,7 +278,6 @@ class AEABuilder:
 
         :param configuration: the configuration of the component.
         :return: None
-        :raises ValueError: if the component is not present.
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
@@ -381,7 +378,8 @@ class AEABuilder:
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises ValueError: if a component is already registered with the same component id.
+        :raises AEAException: if a component is already registered with the same component id.
+                            | or if there's a missing dependency.
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -394,6 +392,10 @@ class AEABuilder:
         configuration._directory = directory
 
         return self
+
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+        """Set the context namespace."""
+        self._context_namespace = context_namespace
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -559,10 +561,22 @@ class AEABuilder:
             ]
         else:
             selected_connections_ids = [
-                k.public_id for k in self._package_dependency_manager.connections.keys()
+                component_id.public_id
+                for component_id in self._package_dependency_manager.connections.keys()
             ]
 
-        return selected_connections_ids
+        # sort default id to be first
+        if self._default_connection in selected_connections_ids:
+            selected_connections_ids.remove(self._default_connection)
+            sorted_selected_connections_ids = [
+                self._default_connection
+            ] + selected_connections_ids
+        else:
+            raise ValueError(
+                "Default connection not a dependency. Please add it and retry."
+            )
+
+        return sorted_selected_connections_ids
 
     def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
         """
@@ -576,6 +590,7 @@ class AEABuilder:
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
+        identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
             identity,
             connections,
@@ -583,27 +598,85 @@ class AEABuilder:
             LedgerApis(self.ledger_apis_config, self._default_ledger),
             self._resources,
             loop=None,
-            timeout=0.0,
+            timeout=self._get_agent_loop_timeout(),
             is_debug=False,
-            is_programmatic=True,
             max_reactions=20,
+            **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
+    def _update_identity(
+        self, identity: Identity, wallet: Wallet, connections: List[Connection]
+    ) -> Identity:
+        """
+        TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection.
+        """
+        public_ids = []  # type: List[PublicId]
+        for connection in connections:
+            public_ids.append(connection.public_id)
+        if not PublicId("fetchai", "p2p_noise", "0.1.0") in public_ids:
+            return identity
+        if len(public_ids) == 1:
+            p2p_noise_connection = connections[0]
+            noise_addresses = {
+                p2p_noise_connection.noise_address_id: p2p_noise_connection.noise_address  # type: ignore
+            }
+            # update identity:
+            assert self._name is not None, "Name not set!"
+            if len(wallet.addresses) > 1:
+                identity = Identity(
+                    self._name,
+                    addresses={**wallet.addresses, **noise_addresses},
+                    default_address_key=p2p_noise_connection.noise_address_id,  # type: ignore
+                )
+            else:  # pragma: no cover
+                identity = Identity(self._name, address=p2p_noise_connection.noise_address)  # type: ignore
+            return identity
+        else:
+            logger.error(
+                "The p2p-noise connection can only be used as a single connection. "
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.1.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.1.0` to run it as a single connection."
+            )
+            sys.exit(1)
+
+    def _get_agent_loop_timeout(self) -> float:
+        return self.DEFAULT_AGENT_LOOP_TIMEOUT
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
             configuration.component_id
             in self._package_dependency_manager.all_dependencies
         ):
-            raise ValueError(
-                "Component {} of type {} already added.".format(
+            raise AEAException(
+                "Component '{}' of type '{}' already added.".format(
                     configuration.public_id, configuration.component_type
                 )
             )
 
-    def _check_package_dependencies(self, configuration):
-        self._package_dependency_manager.check_package_dependencies(configuration)
+    def _check_package_dependencies(
+        self, configuration: ComponentConfiguration
+    ) -> None:
+        """
+        Check that we have all the dependencies needed to the package.
+
+        :return: None
+        :raises AEAException: if there's a missing dependency.
+        """
+        not_supported_packages = configuration.package_dependencies.difference(
+            self._package_dependency_manager.all_dependencies
+        )  # type: Set[ComponentId]
+        has_all_dependencies = len(not_supported_packages) == 0
+        if not has_all_dependencies:
+            raise AEAException(
+                "Package '{}' of type '{}' cannot be added. Missing dependencies: {}".format(
+                    configuration.public_id,
+                    configuration.component_type.value,
+                    pprint.pformat(sorted(map(str, not_supported_packages))),
+                )
+            )
 
     @staticmethod
     def _find_component_directory_from_component_id(
@@ -638,7 +711,7 @@ class AEABuilder:
         try:
             configuration_file_path = Path(aea_project_path, DEFAULT_AEA_CONFIG_FILE)
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
-                loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+                loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 logging.config.dictConfig(agent_configuration.logging_config)
         except FileNotFoundError:
@@ -683,7 +756,7 @@ class AEABuilder:
         # load agent configuration file
         configuration_file = aea_project_path / DEFAULT_AEA_CONFIG_FILE
 
-        loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
         # set name and other configurations
@@ -757,12 +830,10 @@ class AEABuilder:
             configuration = cast(ProtocolConfig, configuration)
             try:
                 protocol = Protocol.from_config(configuration)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading protocol {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
@@ -770,12 +841,10 @@ class AEABuilder:
             configuration = cast(ContractConfig, configuration)
             try:
                 contract = Contract.from_config(configuration)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading contract {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
@@ -789,12 +858,10 @@ class AEABuilder:
             configuration = cast(SkillConfig, configuration)
             try:
                 skill = Skill.from_config(configuration, skill_context=skill_context)
+            except ModuleNotFoundError as e:
+                _handle_error_while_loading_component_module_not_found(configuration, e)
             except Exception as e:
-                raise Exception(
-                    "An error occurred while loading skill {}: {}".format(
-                        configuration.public_id, str(e)
-                    )
-                )
+                _handle_error_while_loading_component_generic_error(configuration, e)
             self._add_component_to_resources(skill)
 
 
@@ -888,9 +955,102 @@ def _load_connection(address: Address, configuration: ConnectionConfig) -> Conne
         return connection_class.from_config(
             address=address, configuration=configuration
         )
+    except ModuleNotFoundError as e:
+        _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:
-        raise Exception(
-            "An error occurred while loading connection {}: {}".format(
-                configuration.public_id, str(e)
-            )
+        _handle_error_while_loading_component_generic_error(configuration, e)
+    # this is to make MyPy stop complaining of "Missing return statement".
+    assert False  # noqa: B011
+
+
+def _handle_error_while_loading_component_module_not_found(
+    configuration: ComponentConfiguration, e: ModuleNotFoundError
+):
+    """
+    Handle ModuleNotFoundError for AEA packages.
+
+    It will rewrite the error message only if the import path starts with 'packages'.
+    To do that, it will extract the wrong import path from the error message.
+
+    Depending on the import path, the possible error messages can be:
+
+    - "No AEA package found with author name '{}', type '{}', name '{}'"
+    - "'{}' is not a valid type name, choose one of ['protocols', 'connections', 'skills', 'contracts']"
+    - "The package '{}/{}' of type '{}' exists, but cannot find module '{}'"
+
+    :raises ModuleNotFoundError: if it is not
+    :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
+    """
+
+    error_message = str(e)
+    extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
+    match = extract_import_path_regex.match(error_message)
+    if match is None:
+        # if for some reason we cannot extract the import path, just re-raise the error
+        raise e from e
+
+    import_path = match.group(1)
+    parts = import_path.split(".")
+    nb_parts = len(parts)
+    if parts[0] != "packages" and nb_parts < 2:
+        # if the first part of the import path is not 'packages',
+        # the error is due for other reasons - just re-raise the error
+        raise e from e
+
+    def get_new_error_message_no_package_found() -> str:
+        """Create a new error message in case the package is not found."""
+        assert nb_parts <= 4, "More than 4 parts!"
+        author = parts[1]
+        new_message = "No AEA package found with author name '{}'".format(author)
+
+        if nb_parts >= 3:
+            pkg_type = parts[2]
+            try:
+                ComponentType(pkg_type[:-1])
+            except ValueError:
+                return "'{}' is not a valid type name, choose one of {}".format(
+                    pkg_type, list(map(lambda x: x.to_plural(), ComponentType))
+                )
+            new_message += ", type '{}'".format(pkg_type)
+        if nb_parts == 4:
+            pkg_name = parts[3]
+            new_message += ", name '{}'".format(pkg_name)
+        return new_message
+
+    def get_new_error_message_with_package_found() -> str:
+        """Create a new error message in case the package is found."""
+        assert nb_parts >= 5, "Less than 5 parts!"
+        author, pkg_name, pkg_type = parts[:3]
+        the_rest = ".".join(parts[4:])
+        return "The package '{}/{}' of type '{}' exists, but cannot find module '{}'".format(
+            author, pkg_name, pkg_type, the_rest
         )
+
+    if nb_parts < 5:
+        new_message = get_new_error_message_no_package_found()
+    else:
+        new_message = get_new_error_message_with_package_found()
+
+    raise AEAPackageLoadingError(
+        "An error occurred while loading {} {}: No module named {}; {}".format(
+            str(configuration.component_type),
+            configuration.public_id,
+            import_path,
+            new_message,
+        )
+    ) from e
+
+
+def _handle_error_while_loading_component_generic_error(
+    configuration: ComponentConfiguration, e: Exception
+):
+    """
+    Handle Exception for AEA packages.
+
+    :raises Exception: the same exception, but prepending an informative message.
+    """
+    raise Exception(
+        "An error occurred while loading {} {}: {}".format(
+            str(configuration.component_type), configuration.public_id, str(e)
+        )
+    ) from e

@@ -37,8 +37,8 @@ import aea.configurations.base
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.test_tools.click_testing import CliRunner
 
-from ...common.click_testing import CliRunner
 from ...conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -137,8 +137,6 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -172,7 +170,7 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
         s = "A protocol with this name already exists. Please choose a different name and try again."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -202,8 +200,6 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -243,7 +239,7 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         s = "A protocol with name '{}' already exists. Aborting...".format(
             self.resource_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -273,8 +269,6 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -310,9 +304,8 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Error when validating the protocol configuration file."
-        )
+        s = "Error when validating the protocol configuration file."
+        assert self.result.exception.message == s
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.

@@ -21,6 +21,7 @@ The `aea install` command will install each dependency that the specific AEA nee
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Launch an OEF search and communication node
+
 In a separate terminal, launch a local [OEF search and communication node](../oef-ledger).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -37,57 +38,64 @@ Create the AEA that will provide the data.
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/ml_data_provider:0.1.0
-aea install
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/ml_data_provider:0.2.0
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Alternatively, install the AEA directly
+
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_data_provider:0.1.0
+aea fetch fetchai/ml_data_provider:0.2.0
 cd ml_data_provider
 ```
 The `aea fetch` command creates the entire AEA, including its dependencies for you.
 
 ### Install the dependencies
+
 The ml data provider uses `tensorflow` and `numpy`.
 ``` bash
 aea install
 ```
 
 ### Run the data provider AEA
+
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Create the model trainer AEA
+
 In a separate terminal, in the root directory, create the model trainer AEA.
 
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/ml_train:0.1.0
-aea install
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/ml_train:0.2.0
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Alternatively, install the AEA directly
+
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.1.0
+aea fetch fetchai/ml_model_trainer:0.2.0
 cd ml_model_trainer
 ```
 
 ### Install the dependencies
+
 The ml data provider uses `tensorflow` and `numpy`.
 ``` bash
 aea install
 ```
 
 ### Run the model trainer AEA
+
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 After some time, you should see the AEAs transact and the model trainer train its model.
@@ -105,9 +113,10 @@ Create the AEA that will provide the data.
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/ml_data_provider:0.1.0
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/ml_data_provider:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 ### Create the model trainer AEA
@@ -117,21 +126,22 @@ In a separate terminal, in the root directory, create the model trainer AEA.
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/ml_train:0.1.0
+aea add connection fetchai/oef:0.2.0
+aea add skill fetchai/ml_train:0.2.0
 aea install
+aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Additionally, create the private key for the model trainer AEA based on the network you want to transact.
 
 To generate and add a key for Fetch.ai use:
-```bash
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
 To generate and add a key for Ethereum use:
-```bash
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
@@ -149,7 +159,7 @@ ledger_apis:
 ```
 
 To connect to Ethereum:
-```yaml
+``` yaml
 ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
@@ -190,7 +200,6 @@ In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/
 |      dataset_id: 'fmnist'         |      dataset_id: 'fmnist'        |
 |      currency_id: 'FET'           |      currency_id: 'ETH'          |
 |      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
 |----------------------------------------------------------------------| 
 ```
 
@@ -225,6 +234,7 @@ Another way to update the skill config is via the `aea config get/set` command.
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.max_buyer_tx_fee 10000 --type int
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx True --type bool
 ```
 
 
@@ -232,7 +242,7 @@ aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id eth
 
 From their respective directories, run both AEAs
 ``` bash
-aea run --connections fetchai/oef:0.1.0
+aea run --connections fetchai/oef:0.2.0
 ```
 
 ### Clean up

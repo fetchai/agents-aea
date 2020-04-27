@@ -23,7 +23,6 @@ import logging.config
 import os
 import re
 import shutil
-import sys
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
@@ -40,10 +39,9 @@ from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import (
     AgentConfig,
-    ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_VERSION,
     Dependencies,
+    PackageType,
     PublicId,
     _check_aea_version,
     _compare_fingerprints,
@@ -66,14 +64,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
-AUTHOR = "author"
+AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:" + DEFAULT_VERSION)
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:" + DEFAULT_VERSION)
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)
-DEFAULT_LEDGER = FETCHAI
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
 NOT_PERMITTED_AUTHORS = [
     "skills",
     "connections",
@@ -102,27 +94,27 @@ class Context:
     @property
     def agent_loader(self) -> ConfigLoader:
         """Get the agent loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
+        return ConfigLoader.from_configuration_type(PackageType.AGENT)
 
     @property
     def protocol_loader(self) -> ConfigLoader:
         """Get the protocol loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.PROTOCOL)
+        return ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
 
     @property
     def connection_loader(self) -> ConfigLoader:
         """Get the connection loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.CONNECTION)
+        return ConfigLoader.from_configuration_type(PackageType.CONNECTION)
 
     @property
     def skill_loader(self) -> ConfigLoader:
         """Get the skill loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.SKILL)
+        return ConfigLoader.from_configuration_type(PackageType.SKILL)
 
     @property
     def contract_loader(self) -> ConfigLoader:
         """Get the contract loader."""
-        return ConfigLoader.from_configuration_type(ConfigurationType.CONTRACT)
+        return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
 
     def set_config(self, key, value) -> None:
         """
@@ -198,20 +190,18 @@ def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> No
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if is_exit_on_except:
-            logger.error(
+            raise click.ClickException(
                 "Agent configuration file '{}' not found in the current directory.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-            sys.exit(1)
     except jsonschema.exceptions.ValidationError:
         if is_exit_on_except:
-            logger.error(
+            raise click.ClickException(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-            sys.exit(1)
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:
@@ -237,12 +227,11 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         try:
             _try_validate_fet_private_key_path(fetchai_private_key_path)
         except FileNotFoundError:  # pragma: no cover
-            logger.error(
+            raise click.ClickException(
                 "File {} for private key {} not found.".format(
                     repr(fetchai_private_key_path), FETCHAI,
                 )
             )
-            sys.exit(1)
 
     ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_path is None:
@@ -252,12 +241,11 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         try:
             _try_validate_ethereum_private_key_path(ethereum_private_key_path)
         except FileNotFoundError:  # pragma: no cover
-            logger.error(
+            raise click.ClickException(
                 "File {} for private key {} not found.".format(
                     repr(ethereum_private_key_path), ETHEREUM,
                 )
             )
-            sys.exit(1)
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
@@ -293,7 +281,7 @@ def _retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> 
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
-    assert item_name == name
+    assert item_name == name, "Item names do not match!"
     return {
         "public_id": str(config.public_id),
         "name": item_name,
@@ -390,8 +378,9 @@ class AgentDirectory(click.Path):
             # everything ok - return the parameter to the command
             return value
         except Exception:
-            logger.error("The name provided is not a path to an AEA project.")
-            self.fail(value, param, ctx)
+            raise click.ClickException(
+                "The name provided is not a path to an AEA project."
+            )
         finally:
             os.chdir(cwd)
 
@@ -481,7 +470,9 @@ def _try_get_item_target_path(
     return target_path
 
 
-def _copy_package_directory(ctx, package_path, item_type, item_name, author_name):
+def _copy_package_directory(
+    ctx: Context, package_path: Path, item_type: str, item_name: str, author_name: str
+) -> Path:
     """
      Copy a package directory to the agent vendor resources.
 
@@ -490,7 +481,8 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
     :param item_type: the type of the package.
     :param item_name: the name of the package.
     :param author_name: the author of the package.
-    :return: None
+
+    :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
@@ -501,10 +493,10 @@ def _copy_package_directory(ctx, package_path, item_type, item_name, author_name
     try:
         shutil.copytree(src, dest)
     except Exception as e:
-        logger.error(str(e))
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
     Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
+    return Path(dest)
 
 
 def _find_item_locally(ctx, item_type, item_public_id) -> Path:
@@ -528,31 +520,30 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-        sys.exit(1)
+        raise click.ClickException(
+            "Cannot find {}: '{}'.".format(item_type, item_public_id)
+        )
 
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         item_configuration = item_configuration_loader.load(
             item_configuration_filepath.open()
         )
     except ValidationError as e:
-        logger.error(
+        raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
         )
-        sys.exit(1)
 
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
     if item_public_id.author != author or item_public_id.version != version:
-        logger.error(
+        raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
-        sys.exit(1)
 
     return package_path
 
@@ -576,31 +567,30 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
-        logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
-        sys.exit(1)
+        raise click.ClickException(
+            "Cannot find {}: '{}'.".format(item_type, item_public_id)
+        )
 
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            ConfigurationType(item_type)
+            PackageType(item_type)
         )
         item_configuration = item_configuration_loader.load(
             item_configuration_filepath.open()
         )
     except ValidationError as e:
-        logger.error(
+        raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
         )
-        sys.exit(1)
 
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
     if item_public_id.author != author or item_public_id.version != version:
-        logger.error(
+        raise click.ClickException(
             "Cannot find {} with author and version specified.".format(item_type)
         )
-        sys.exit(1)
 
     return package_path
 
@@ -616,15 +606,12 @@ def _validate_config_consistency(ctx: Context):
 
     packages_public_ids_to_types = dict(
         [
-            *map(lambda x: (x, ConfigurationType.PROTOCOL), ctx.agent_config.protocols),
-            *map(
-                lambda x: (x, ConfigurationType.CONNECTION),
-                ctx.agent_config.connections,
-            ),
-            *map(lambda x: (x, ConfigurationType.SKILL), ctx.agent_config.skills),
-            *map(lambda x: (x, ConfigurationType.CONTRACT), ctx.agent_config.contracts),
+            *map(lambda x: (x, PackageType.PROTOCOL), ctx.agent_config.protocols),
+            *map(lambda x: (x, PackageType.CONNECTION), ctx.agent_config.connections,),
+            *map(lambda x: (x, PackageType.SKILL), ctx.agent_config.skills),
+            *map(lambda x: (x, PackageType.CONTRACT), ctx.agent_config.contracts),
         ]
-    )  # type: Dict[PublicId, ConfigurationType]
+    )  # type: Dict[PublicId, PackageType]
 
     for public_id, item_type in packages_public_ids_to_types.items():
 
@@ -640,16 +627,16 @@ def _validate_config_consistency(ctx: Context):
                 )
                 is_vendor = True
             # we fail if none of the two alternative works.
-            assert package_directory.exists()
+            assert package_directory.exists(), "Package directory does not exist!"
 
-            loader = ConfigLoaders.from_configuration_type(item_type)
+            loader = ConfigLoaders.from_package_type(item_type)
             config_file_name = _get_default_configuration_file_name_from_type(item_type)
             configuration_file_path = package_directory / config_file_name
-            assert configuration_file_path.exists()
+            assert (
+                configuration_file_path.exists()
+            ), "Configuration file path does not exist!"
         except Exception:
-            raise ValueError(
-                "Cannot find {}: '{}'".format(item_type.value, public_id.name)
-            )
+            raise ValueError("Cannot find {}: '{}'".format(item_type.value, public_id))
 
         # load the configuration file.
         try:
@@ -684,8 +671,7 @@ def check_aea_project(f):
             if not skip_consistency_check:
                 _validate_config_consistency(ctx)
         except Exception as e:
-            logger.error(str(e))
-            sys.exit(1)
+            raise click.ClickException(str(e))
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)

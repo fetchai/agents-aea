@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 
 import logging
@@ -24,25 +23,24 @@ from asyncio import AbstractEventLoop
 from typing import List, Optional, cast
 
 from aea.agent import Agent
-from aea.configurations.base import PublicId
+from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
+from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
+from aea.skills.base import Behaviour, Handler
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
 logger = logging.getLogger(__name__)
-
-ERROR_SKILL_ID = PublicId(
-    "fetchai", "error", "0.1.0"
-)  # TODO; specify error handler in config
 
 
 class AEA(Agent):
@@ -56,10 +54,11 @@ class AEA(Agent):
         ledger_apis: LedgerApis,
         resources: Resources,
         loop: Optional[AbstractEventLoop] = None,
-        timeout: float = 0.0,
+        timeout: float = 0.05,
+        execution_timeout: float = 1,
         is_debug: bool = False,
-        is_programmatic: bool = True,
         max_reactions: int = 20,
+        **kwargs,
     ) -> None:
         """
         Instantiate the agent.
@@ -71,9 +70,10 @@ class AEA(Agent):
         :param resources: the resources (protocols and skills) of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
+        :param exeution_timeout: amount of time to limit single act/handle to execute.
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
-        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
         """
@@ -98,7 +98,9 @@ class AEA(Agent):
             self.decision_maker.preferences,
             self.decision_maker.goal_pursuit_readiness,
             self.task_manager,
+            **kwargs,
         )
+        self._execution_timeout = execution_timeout
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -143,6 +145,7 @@ class AEA(Agent):
         self.task_manager.start()
         self.decision_maker.start()
         self.resources.setup()
+        ExecTimeoutThreadGuard.start()
 
     def act(self) -> None:
         """
@@ -153,7 +156,7 @@ class AEA(Agent):
         :return: None
         """
         for behaviour in self._filter.get_active_behaviours():
-            behaviour.act_wrapper()
+            self._behaviour_act(behaviour)
 
     def react(self) -> None:
         """
@@ -173,9 +176,17 @@ class AEA(Agent):
         counter = 0
         while not self.inbox.empty() and counter < self.max_reactions:
             counter += 1
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
-                self._handle(envelope)
+            self._react_one()
+
+    def _react_one(self) -> None:
+        """
+        Get and process one envelop from inbox.
+
+        :return: None
+        """
+        envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
+        if envelope is not None:
+            self._handle(envelope)
 
     def _handle(self, envelope: Envelope) -> None:
         """
@@ -187,12 +198,15 @@ class AEA(Agent):
         logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.get_protocol(envelope.protocol_id)
 
-        # TODO make this working for different skill/protocol versions.
+        # TODO specify error handler in config and make this work for different skill/protocol versions.
         error_handler = self.resources.get_handler(
-            DefaultMessage.protocol_id, ERROR_SKILL_ID,
+            DefaultMessage.protocol_id, DEFAULT_SKILL
         )
 
-        assert error_handler is not None, "ErrorHandler not initialized"
+        if error_handler is None:
+            logger.warning("ErrorHandler not initialized. Stopping AEA!")
+            self.stop()
+            return
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
@@ -208,15 +222,48 @@ class AEA(Agent):
             return
 
         handlers = self._filter.get_active_handlers(
-            protocol.public_id, envelope.context
+            protocol.public_id, envelope.skill_id
         )
         if len(handlers) == 0:
-            if error_handler is not None:
-                error_handler.send_unsupported_skill(envelope)
+            error_handler.send_unsupported_skill(envelope)
             return
 
         for handler in handlers:
-            handler.handle(msg)
+            self._handle_message_with_handler(msg, handler)
+
+    def _handle_message_with_handler(self, message: Message, handler: Handler) -> None:
+        """
+        Handle one message with one predefined handler.
+
+        :param message: message to be handled.
+        :param handler: handler suitable for this message protocol.
+        """
+        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
+            handler.handle(message)
+
+        if timeout_result.is_cancelled_by_timeout():
+            logger.warning(
+                "Handler `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    handler, self._execution_timeout
+                )
+            )
+
+    def _behaviour_act(self, behaviour: Behaviour) -> None:
+        """
+        Call behaviour's act.
+
+        :param behaviour: behaviour already defined
+        :return: None
+        """
+        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
+            behaviour.act_wrapper()
+
+        if timeout_result.is_cancelled_by_timeout():
+            logger.warning(
+                "Act of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    behaviour, self._execution_timeout
+                )
+            )
 
     def update(self) -> None:
         """
@@ -243,3 +290,4 @@ class AEA(Agent):
         self.decision_maker.stop()
         self.task_manager.stop()
         self.resources.teardown()
+        ExecTimeoutThreadGuard.stop()

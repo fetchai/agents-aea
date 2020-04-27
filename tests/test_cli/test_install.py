@@ -27,12 +27,12 @@ from unittest import TestCase, mock
 
 import yaml
 
-import aea.cli.common
 from aea.cli import cli
 from aea.cli.install import _install_dependency
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.exceptions import AEAException
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
@@ -107,9 +107,6 @@ class TestInstallFailsWhenDependencyDoesNotExist:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-
-        cls.patch = mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -210,4 +207,5 @@ class InstallDependencyTestCase(TestCase):
         dependency = {
             "git": "url",
         }
-        _install_dependency("dependency_name", dependency)
+        with self.assertRaises(AEAException):
+            _install_dependency("dependency_name", dependency)

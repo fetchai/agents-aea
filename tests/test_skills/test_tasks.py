@@ -20,6 +20,7 @@
 """This module contains the tests for the tasks module."""
 
 from unittest import TestCase, mock
+from unittest.mock import Mock, patch
 
 from aea.skills.tasks import Task, TaskManager, init_worker
 
@@ -136,3 +137,56 @@ class TaskManagerTestCase(TestCase):
         obj = TaskManager()
         obj._results_by_task_id = {"task_id": "result"}
         obj.get_task_result("task_id")
+
+
+class TestTaskPoolManagementManager(TestCase):
+    """Tests for pool management by task manager. Lazy and non lazy."""
+
+    def tearDown(self):
+        """Stop task manager. assumed it's created on each test."""
+        self.task_manager.stop()
+
+    def test_start_stop_reflected_by_is_started(self) -> None:
+        """Test is_started property of task manaher."""
+        self.task_manager = TaskManager()
+        assert not self.task_manager.is_started
+        self.task_manager.start()
+        assert self.task_manager.is_started
+
+        self.task_manager.stop()
+        assert not self.task_manager.is_started
+
+    def test_lazy_pool_not_started(self) -> None:
+        """Lazy pool creation assumes pool create on first task enqueue."""
+        self.task_manager = TaskManager(is_lazy_pool_start=True)
+        self.task_manager.start()
+        assert not self.task_manager._pool
+
+    def test_not_lazy_pool_is_started(self) -> None:
+        """Lazy pool creation assumes pool create on first task enqueue."""
+        self.task_manager = TaskManager(is_lazy_pool_start=False)
+        self.task_manager.start()
+        assert self.task_manager._pool
+
+    @patch("aea.skills.tasks.Pool.apply_async")
+    def test_lazy_pool_start_on_enqueue(self, apply_async_mock: Mock) -> None:
+        """
+        Test lazy pool created on enqueue once.
+
+        :param apply_async_mock: is mock for aea.skills.tasks.Pool.apply_async
+        """
+        self.task_manager = TaskManager(is_lazy_pool_start=True)
+        self.task_manager.start()
+        assert not self.task_manager._pool
+
+        self.task_manager.enqueue_task(print)
+
+        apply_async_mock.assert_called_once()
+        assert self.task_manager._pool
+
+        """Check pool created once on several enqueues"""
+        pool = self.task_manager._pool
+
+        self.task_manager.enqueue_task(print)
+
+        assert self.task_manager._pool is pool

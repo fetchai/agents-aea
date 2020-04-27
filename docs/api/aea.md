@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.0, is_debug: bool = False, is_programmatic: bool = True, max_reactions: int = 20) -> None
+ | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 1, is_debug: bool = False, max_reactions: int = 20, **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
@@ -30,9 +30,10 @@ Instantiate the agent.
 - `resources`: the resources (protocols and skills) of the agent.
 - `loop`: the event loop to run the connections.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
+- `exeution_timeout`: amount of time to limit single act/handle to execute.
 - `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
-- `is_programmatic`: if True, run the agent in programmatic mode (skips loading of resources from directory).
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
+- `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 **Returns**:
 

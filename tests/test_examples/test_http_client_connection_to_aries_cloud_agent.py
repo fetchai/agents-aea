@@ -81,6 +81,7 @@ class TestAEAToACA:
             )
 
         # run an ACA
+        # command: aca-py start --admin 127.0.0.1 8020 --admin-insecure-mode --inbound-transport http 0.0.0.0 8000 --outbound-transport http
         cls.process = subprocess.Popen(  # nosec
             [
                 "aca-py",
@@ -195,7 +196,7 @@ class TestAEAToACA:
                 )
             )
         )
-        http_protocol = Protocol(http_protocol_configuration, HttpSerializer(),)
+        http_protocol = Protocol(http_protocol_configuration, HttpSerializer())
         resources.add_protocol(http_protocol)
 
         # Request message & envelope

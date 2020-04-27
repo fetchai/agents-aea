@@ -29,7 +29,7 @@ from vyper.utils import keccak256
 from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.ethereum import ETHEREUM, ETHEREUM_CURRENCY
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
@@ -46,9 +46,11 @@ class ERC1155Contract(Contract):
         CONTRACT_CREATE_BATCH = "contract_create_batch"
         CONTRACT_CREATE_SINGLE = "contract_create_single"
         CONTRACT_MINT_BATCH = "contract_mint_batch"
+        CONTRACT_MINT_SINGLE = "contract_mint_single"
         CONTRACT_ATOMIC_SWAP_SINGLE = "contract_atomic_swap_single"
         CONTRACT_ATOMIC_SWAP_BATCH = "contract_atomic_swap_batch"
-        CONTRACT_SIGN_HASH = "contract_sign_hash"
+        CONTRACT_SIGN_HASH_BATCH = "contract_sign_hash_batch"
+        CONTRACT_SIGN_HASH_SINGLE = "contract_sign_hash_single"
 
     def __init__(
         self, contract_config: ContractConfig, contract_interface: Dict[str, Any],
@@ -61,13 +63,13 @@ class ERC1155Contract(Contract):
         :param contract_interface: the contract interface.
         """
         super().__init__(contract_config, contract_interface)
-        self._token_ids = {}  # type: Dict[int, int]
+        self._token_id_to_type = {}  # type: Dict[int, int]
         self.nonce = 0
 
     @property
-    def token_ids(self) -> Dict[int, int]:
-        """The generated token ids."""
-        return self._token_ids
+    def token_id_to_type(self) -> Dict[int, int]:
+        """The generated token ids to types dict."""
+        return self._token_id_to_type
 
     def create_token_ids(self, token_type: int, nb_tokens: int) -> List[int]:
         """
@@ -77,38 +79,39 @@ class ERC1155Contract(Contract):
         :param nb_tokens: the number of tokens
         :return: the list of token ids newly created
         """
-        lowest_valid_integer = 1
-        token_id = Helpers().generate_id(lowest_valid_integer, token_type)
+        lowest_valid_integer = Helpers().get_next_min_index(self.token_id_to_type)
         token_id_list = []
         for _i in range(nb_tokens):
+            token_id = Helpers().generate_id(lowest_valid_integer, token_type)
             while self.instance.functions.is_token_id_exists(token_id).call():
                 # token_id already taken
                 lowest_valid_integer += 1
                 token_id = Helpers().generate_id(lowest_valid_integer, token_type)
             token_id_list.append(token_id)
-            self.token_ids[token_id] = token_type
+            self._token_id_to_type[token_id] = token_type
             lowest_valid_integer += 1
-            token_id = Helpers().generate_id(lowest_valid_integer, token_type)
         return token_id_list
 
-    def get_deploy_transaction(
+    def get_deploy_transaction_msg(
         self,
         deployer_address: Address,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_DEPLOY.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Deploy a smart contract.
+        Get the transaction message containing the transaction to deploy the smart contract.
 
         :param deployer_address: The address that deploys the smart-contract
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass with the transaction message
         :return: the transaction message for the decision maker
         """
         assert not self.is_deployed, "The contract is already deployed!"
-        tx = self._create_deploy_transaction(
+        tx = self.get_deploy_transaction(
             deployer_address=deployer_address, ledger_api=ledger_api
         )
         logger.debug(
@@ -119,25 +122,24 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_DEPLOY.value,
+            tx_id=transaction_id,
             tx_sender_addr=deployer_address,
-            tx_counterparty_addr="",
-            tx_amount_by_currency_id={"ETH": 0},
-            tx_sender_fee=0,
+            tx_counterparty_addr=deployer_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
+            tx_sender_fee=0,  # TODO: provide tx_sender_fee
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
             signing_payload={"tx": tx},
         )
-
         return tx_message
 
-    def _create_deploy_transaction(
+    def get_deploy_transaction(
         self, deployer_address: Address, ledger_api: LedgerApi
     ) -> Dict[str, Any]:
         """
-        Get the deployment transaction.
+        Get the transaction to deploy the smart contract.
 
         :param deployer_address: The address that will deploy the contract.
         :param ledger_api: the ledger API
@@ -161,25 +163,27 @@ class ERC1155Contract(Contract):
         tx["gas"] = gas_estimate
         return tx
 
-    def get_create_batch_transaction(
+    def get_create_batch_transaction_msg(
         self,
         deployer_address: Address,
         token_ids: List[int],
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_CREATE_BATCH.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Create a batch of items.
+        Get the transaction message containing the transaction to create a batch of tokens.
 
         :param deployer_address: the address of the deployer (owner)
         :param token_ids: the list of token ids for creation
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass with the transaction message
         :return: the transaction message for the decision maker
         """
-        tx = self._get_create_batch_tx(
+        tx = self.get_create_batch_transaction(
             deployer_address=deployer_address,
             token_ids=token_ids,
             ledger_api=ledger_api,
@@ -192,10 +196,10 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_BATCH.value,
+            tx_id=transaction_id,
             tx_sender_addr=deployer_address,
-            tx_counterparty_addr="",
-            tx_amount_by_currency_id={"ETH": 0},
+            tx_counterparty_addr=deployer_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
@@ -205,11 +209,11 @@ class ERC1155Contract(Contract):
         )
         return tx_message
 
-    def _get_create_batch_tx(
+    def get_create_batch_transaction(
         self, deployer_address: Address, token_ids: List[int], ledger_api: LedgerApi
     ) -> str:
         """
-        Create a batch of items.
+        Get the transaction to create a batch of tokens.
 
         :param deployer_address: the address of the deployer
         :param token_ids: the list of token ids for creation
@@ -231,25 +235,27 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_create_single_transaction(
+    def get_create_single_transaction_msg(
         self,
         deployer_address: Address,
         token_id: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_CREATE_SINGLE.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Create a single item.
+        Get the transaction message containing the transaction to create a single token.
 
         :param deployer_address: the address of the deployer (owner)
         :param token_id: the token id for creation
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass with the transaction message
         :return: the transaction message for the decision maker
         """
-        tx = self._get_create_single_tx(
+        tx = self.get_create_single_transaction(
             deployer_address=deployer_address, token_id=token_id, ledger_api=ledger_api,
         )
         logger.debug(
@@ -260,10 +266,10 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_CREATE_SINGLE.value,
+            tx_id=transaction_id,
             tx_sender_addr=deployer_address,
-            tx_counterparty_addr="",
-            tx_amount_by_currency_id={"ETH": 0},
+            tx_counterparty_addr=deployer_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
@@ -273,11 +279,11 @@ class ERC1155Contract(Contract):
         )
         return tx_message
 
-    def _get_create_single_tx(
+    def get_create_single_transaction(
         self, deployer_address: Address, token_id: int, ledger_api: LedgerApi
     ) -> str:
         """
-        Create a single item.
+        Get the transaction to create a single token.
 
         :param deployer_address: the address of the deployer
         :param token_id: the token id for creation
@@ -299,7 +305,7 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_mint_batch_transaction(
+    def get_mint_batch_transaction_msg(
         self,
         deployer_address: Address,
         recipient_address: Address,
@@ -307,10 +313,11 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_MINT_BATCH.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Mint a batch of tokens.
+        Get the transaction message containing the transaction to mint a batch of tokens.
 
         :param deployer_address: the deployer_address
         :param recipient_address: the recipient_address
@@ -318,11 +325,12 @@ class ERC1155Contract(Contract):
         :param mint_quantities: the mint_quantities of each token
         :param ledger_api: the ledger api
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: the optional info payload for the transaction message
         :return: the transaction message for the decision maker
         """
         assert len(mint_quantities) == len(token_ids), "Wrong number of items."
-        tx = self._create_mint_batch_tx(
+        tx = self.get_mint_batch_transaction(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
             token_ids=token_ids,
@@ -334,16 +342,20 @@ class ERC1155Contract(Contract):
                 deployer_address, recipient_address, token_ids, mint_quantities, tx,
             )
         )
+        tx_quantities_by_good_id = {
+            str(token_id): quantity
+            for token_id, quantity in zip(token_ids, mint_quantities)
+        }
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_MINT_BATCH.value,
+            tx_id=transaction_id,
             tx_sender_addr=deployer_address,
-            tx_counterparty_addr="",
-            tx_amount_by_currency_id={"ETH": 0},
+            tx_counterparty_addr=recipient_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
+            tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
             signing_payload={"tx": tx},
@@ -351,7 +363,7 @@ class ERC1155Contract(Contract):
 
         return tx_message
 
-    def _create_mint_batch_tx(
+    def get_mint_batch_transaction(
         self,
         deployer_address: Address,
         recipient_address: Address,
@@ -360,7 +372,7 @@ class ERC1155Contract(Contract):
         ledger_api: LedgerApi,
     ) -> str:
         """
-        Get transaction object to mint a batch of tokens.
+        Get the transaction to mint a batch of tokens.
 
         :param deployer_address: the address of the deployer
         :param recipient_address: the address of the recipient
@@ -393,7 +405,7 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_mint_single_tx(
+    def get_mint_single_transaction_msg(
         self,
         deployer_address: Address,
         recipient_address: Address,
@@ -401,10 +413,11 @@ class ERC1155Contract(Contract):
         mint_quantity: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_MINT_SINGLE.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Mint a single token.
+        Get the transaction message containing the transaction to mint a batch of tokens.
 
         :param deployer_address: the deployer_address
         :param recipient_address: the recipient_address
@@ -412,10 +425,11 @@ class ERC1155Contract(Contract):
         :param mint_quantity: the mint_quantity of each token
         :param ledger_api: the ledger api
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: the optional info payload for the transaction message
         :return: the transaction message for the decision maker
         """
-        tx = self._create_mint_single_tx(
+        tx = self.get_mint_single_transaction(
             deployer_address=deployer_address,
             recipient_address=recipient_address,
             token_id=token_id,
@@ -430,24 +444,24 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id="contract_mint_batch",
+            tx_id=transaction_id,
             tx_sender_addr=deployer_address,
-            tx_counterparty_addr="",
-            tx_amount_by_currency_id={"ETH": 0},
+            tx_counterparty_addr=recipient_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: 0},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
+            tx_quantities_by_good_id={str(token_id): mint_quantity},
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
             signing_payload={"tx": tx},
         )
         return tx_message
 
-    def _create_mint_single_tx(
+    def get_mint_single_transaction(
         self, deployer_address, recipient_address, token_id, mint_quantity, ledger_api,
     ) -> str:
         """
-        Get transaction object to mint single token.
+        Get the transaction to mint a single token.
 
         :param deployer_address: the address of the deployer
         :param recipient_address: the address of the recipient
@@ -488,9 +502,10 @@ class ERC1155Contract(Contract):
         :param token_id: the token id
         :return: the balance
         """
-        return self.instance.functions.balanceOf(address, token_id).call()
+        balance = self.instance.functions.balanceOf(address, token_id).call()
+        return balance
 
-    def get_atomic_swap_single_transaction_proposal(
+    def get_atomic_swap_single_transaction_msg(
         self,
         from_address: Address,
         to_address: Address,
@@ -502,10 +517,11 @@ class ERC1155Contract(Contract):
         signature: str,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Create a transaction message for a trustless trade between two agents for a single token.
+        Get the transaction message containing the transaction for a trustless trade between two agents for a single token.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
@@ -517,29 +533,29 @@ class ERC1155Contract(Contract):
         :param signature: the signature of the trade
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass around with the transaction message
         :return: the transaction message for the decision maker
         """
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx = self._create_trade_tx(
+        tx = self.get_atomic_swap_single_transaction(
             from_address,
             to_address,
             token_id,
             from_supply,
             to_supply,
-            value_eth_wei,
+            value,
             trade_nonce,
             signature,
             ledger_api,
         )
         logger.debug(
-            "get_atomic_swap_single_transaction_proposal: from_address={}, to_address={}, token_id={}, from_supply={}, to_supply={}, value_eth_wei={}, trade_nonce={}, signature={}, tx={}".format(
+            "get_atomic_swap_single_transaction_proposal: from_address={}, to_address={}, token_id={}, from_supply={}, to_supply={}, value={}, trade_nonce={}, signature={}, tx={}".format(
                 from_address,
                 to_address,
                 token_id,
                 from_supply,
                 to_supply,
-                value_eth_wei,
+                value,
                 trade_nonce,
                 signature,
                 tx,
@@ -548,7 +564,7 @@ class ERC1155Contract(Contract):
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value,
+            tx_id=transaction_id,
             tx_sender_addr=from_address,
             tx_counterparty_addr=to_address,
             tx_amount_by_currency_id={"ETH": value},
@@ -561,20 +577,20 @@ class ERC1155Contract(Contract):
         )
         return tx_message
 
-    def _create_trade_tx(
+    def get_atomic_swap_single_transaction(
         self,
         from_address: Address,
         to_address: Address,
         token_id: int,
         from_supply: int,
         to_supply: int,
-        value_eth_wei: int,
+        value: int,
         trade_nonce: int,
         signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
-        Create a trade tx.
+        Get the transaction for a trustless trade between two agents for a single token.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
@@ -587,6 +603,7 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :return: a ledger transaction object
         """
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
         data = b"single_atomic_swap"
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -613,20 +630,20 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_balance_of_batch(self, address: Address, token_ids: List[int]) -> List[int]:
+    def get_balances(self, address: Address, token_ids: List[int]) -> List[int]:
         """
-        Get the balance for a batch of specific token ids.
+        Get the balances for a batch of specific token ids.
 
         :param address: the address
         :param token_id: the token id
-        :return: the balance
+        :return: the balances
         """
-        result = self.instance.functions.balanceOfBatch(
+        balances = self.instance.functions.balanceOfBatch(
             [address] * 10, token_ids
         ).call()
-        return result
+        return balances
 
-    def get_atomic_swap_batch_transaction_proposal(
+    def get_atomic_swap_batch_transaction_msg(
         self,
         from_address: Address,
         to_address: Address,
@@ -636,12 +653,13 @@ class ERC1155Contract(Contract):
         value: int,
         trade_nonce: int,
         signature: str,
-        skill_callback_id: ContractId,
         ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Create a transaction message for a trustless trade between two agents for a batch of tokens.
+        Get the transaction message containing the transaction for a trustless trade between two agents for a batch of tokens.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
@@ -653,76 +671,82 @@ class ERC1155Contract(Contract):
         :param signature: the signature of the trade
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass around with the transaction message
         :return: the transaction message for the decision maker
         """
-        value_eth_wei = ledger_api.api.toWei(value, "ether")
-        tx = self._create_trade_batch_tx(
+        tx = self.get_atomic_swap_batch_transaction(
             from_address=from_address,
             to_address=to_address,
             token_ids=token_ids,
             from_supplies=from_supplies,
             to_supplies=to_supplies,
-            value_eth_wei=value_eth_wei,
+            value=value,
             trade_nonce=trade_nonce,
             signature=signature,
             ledger_api=ledger_api,
         )
         logger.debug(
-            "get_atomic_swap_batch_transaction_proposal: from_address={}, to_address={}, token_id={}, from_supplies={}, to_supplies={}, value_eth_wei={}, trade_nonce={}, signature={}, tx={}".format(
+            "get_atomic_swap_batch_transaction_proposal: from_address={}, to_address={}, token_id={}, from_supplies={}, to_supplies={}, value={}, trade_nonce={}, signature={}, tx={}".format(
                 from_address,
                 to_address,
                 token_ids,
                 from_supplies,
                 to_supplies,
-                value_eth_wei,
+                value,
                 trade_nonce,
                 signature,
                 tx,
             )
         )
+        tx_quantities_by_good_id = {}
+        for idx, token_id in enumerate(token_ids):
+            tx_quantities_by_good_id[str(token_id)] = (
+                -from_supplies[idx] + to_supplies[idx]
+            )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_ATOMIC_SWAP_BATCH.value,
+            tx_id=transaction_id,
             tx_sender_addr=from_address,
             tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={"ETH": value},
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
+            tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
             signing_payload={"tx": tx},
         )
         return tx_message
 
-    def _create_trade_batch_tx(
+    def get_atomic_swap_batch_transaction(
         self,
         from_address: Address,
         to_address: Address,
         token_ids: List[int],
         from_supplies: List[int],
         to_supplies: List[int],
-        value_eth_wei: int,
+        value: int,
         trade_nonce: int,
         signature: str,
         ledger_api: LedgerApi,
     ) -> str:
         """
-        Create a batch trade tx.
+        Get the transaction for a trustless trade between two agents for a batch of tokens.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
         :param token_id: the token id
         :param from_supply: the supply of tokens by the sender
         :param to_supply: the supply of tokens by the receiver
-        :param value_eth_wei: the amount of ether (in wei) sent from the to_address to the from_address
+        :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
         :param signature: the signature of the trade
         :param ledger_api: the ledger API
         :return: a ledger transaction object
         """
+        value_eth_wei = ledger_api.api.toWei(value, "ether")
         data = b"batch_atomic_swap"
         self.nonce += 1
         nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -749,7 +773,7 @@ class ERC1155Contract(Contract):
         )
         return tx
 
-    def get_hash_single_transaction(
+    def get_hash_single_transaction_msg(
         self,
         from_address: Address,
         to_address: Address,
@@ -760,10 +784,11 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
         ledger_api: LedgerApi,
         skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_SIGN_HASH_SINGLE.value,
         info: Optional[Dict[str, Any]] = None,
     ) -> TransactionMessage:
         """
-        Get the hash for a transaction involving a single token.
+        Get the transaction message containing a hash for a trustless trade between two agents for a single token.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
@@ -773,8 +798,70 @@ class ERC1155Contract(Contract):
         :param value: the amount of ether sent from the to_address to the from_address
         :param ledger_api: the ledger API
         :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
         :param info: optional info to pass with the transaction message
         :return: the transaction message for the decision maker
+        """
+        tx_hash = self.get_hash_single_transaction(
+            from_address,
+            to_address,
+            token_id,
+            from_supply,
+            to_supply,
+            value,
+            trade_nonce,
+            ledger_api,
+        )
+        logger.debug(
+            "get_hash_single_transaction: from_address={}, to_address={}, token_id={}, from_supply={}, to_supply={}, value={}, trade_nonce={}, tx_hash={!r}".format(
+                from_address,
+                to_address,
+                token_id,
+                from_supply,
+                to_supply,
+                value,
+                trade_nonce,
+                tx_hash,
+            )
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+            skill_callback_ids=[skill_callback_id],
+            tx_id=transaction_id,
+            tx_sender_addr=from_address,
+            tx_counterparty_addr=to_address,
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={str(token_id): -from_supply + to_supply},
+            info=info if info is not None else {},
+            ledger_id=ETHEREUM,
+            signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
+        )
+        return tx_message
+
+    def get_hash_single_transaction(
+        self,
+        from_address: Address,
+        to_address: Address,
+        token_id: int,
+        from_supply: int,
+        to_supply: int,
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
+    ) -> bytes:
+        """
+        Get the hash for a trustless trade between two agents for a single token.
+
+        :param from_address: the address of the agent sending tokens, receiving ether
+        :param to_address: the address of the agent receiving tokens, sending ether
+        :param token_id: the token id
+        :param from_supply: the supply of tokens by the sender
+        :param to_supply: the supply of tokens by the receiver
+        :param value: the amount of ether sent from the to_address to the from_address
+        :param ledger_api: the ledger API
+        :return: the transaction hash
         """
         from_address_hash = self.instance.functions.getAddress(from_address).call()
         to_address_hash = self.instance.functions.getAddress(to_address).call()
@@ -800,28 +887,75 @@ class ERC1155Contract(Contract):
                 trade_nonce,
             ).call()
         )
+        return tx_hash
+
+    def get_hash_batch_transaction_msg(
+        self,
+        from_address: Address,
+        to_address: Address,
+        token_ids: List[int],
+        from_supplies: List[int],
+        to_supplies: List[int],
+        value: int,
+        trade_nonce: int,
+        ledger_api: LedgerApi,
+        skill_callback_id: ContractId,
+        transaction_id: str = Performative.CONTRACT_SIGN_HASH_BATCH.value,
+        info: Optional[Dict[str, Any]] = None,
+    ) -> TransactionMessage:
+        """
+        Get the transaction message containing a hash for a trustless trade between two agents for a batch of tokens.
+
+        :param from_address: the address of the agent sending tokens, receiving ether
+        :param to_address: the address of the agent receiving tokens, sending ether
+        :param token_ids: the list of token ids for the bash transaction
+        :param from_supplies: the quantities of tokens sent from the from_address to the to_address
+        :param to_supplies: the quantities of tokens sent from the to_address to the from_address
+        :param value: the value of ether sent from the from_address to the to_address
+        :param trade_nonce: the trade nonce
+        :param ledger_api: the ledger API
+        :param skill_callback_id: the skill callback id
+        :param transaction_id: the transaction id
+        :param info: optional info to pass with the transaction message
+        :return: the transaction message for the decision maker
+        """
+        tx_hash = self.get_hash_batch_transaction(
+            from_address,
+            to_address,
+            token_ids,
+            from_supplies,
+            to_supplies,
+            value,
+            trade_nonce,
+            ledger_api,
+        )
         logger.debug(
-            "get_hash_single_transaction: from_address={}, to_address={}, token_id={}, from_supply={}, to_supply={}, value_eth_wei={}, trade_nonce={}, tx_hash={!r}".format(
+            "get_hash_batch_transaction: from_address={}, to_address={}, token_ids={}, from_supplies={}, to_supplies={}, value={}, trade_nonce={}, tx_hash={!r}".format(
                 from_address,
                 to_address,
-                token_id,
-                from_supply,
-                to_supply,
-                value_eth_wei,
+                token_ids,
+                from_supplies,
+                to_supplies,
+                value,
                 trade_nonce,
                 tx_hash,
             )
         )
+        tx_quantities_by_good_id = {}
+        for idx, token_id in enumerate(token_ids):
+            tx_quantities_by_good_id[str(token_id)] = (
+                -from_supplies[idx] + to_supplies[idx]
+            )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
             skill_callback_ids=[skill_callback_id],
-            tx_id=ERC1155Contract.Performative.CONTRACT_SIGN_HASH.value,
+            tx_id=transaction_id,
             tx_sender_addr=from_address,
             tx_counterparty_addr=to_address,
-            tx_amount_by_currency_id={"ETH": value},
+            tx_amount_by_currency_id={ETHEREUM_CURRENCY: value},
             tx_sender_fee=0,
             tx_counterparty_fee=0,
-            tx_quantities_by_good_id={},
+            tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
             ledger_id=ETHEREUM,
             signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
@@ -838,9 +972,9 @@ class ERC1155Contract(Contract):
         value: int,
         trade_nonce: int,
         ledger_api: LedgerApi,
-    ) -> None:
+    ) -> bytes:
         """
-        Sign the transaction before send them to agent1.
+        Get the hash for a trustless trade between two agents for a single token.
 
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
@@ -850,7 +984,7 @@ class ERC1155Contract(Contract):
         :param value: the value of ether sent from the from_address to the to_address
         :param trade_nonce: the trade nonce
         :param ledger_api: the ledger API
-        :raise: NotImplementedError
+        :return: the transaction hash
         """
         from_address_hash = self.instance.functions.getAddress(from_address).call()
         to_address_hash = self.instance.functions.getAddress(to_address).call()
@@ -864,8 +998,9 @@ class ERC1155Contract(Contract):
             _value_eth_wei=value_eth_wei,
             _nonce=trade_nonce,
         )
-        logger.debug(
-            "get_hash_batch_transaction: from_address={}, to_address={}, token_ids={}, from_supplies={}, to_supplies={}, value_eth_wei={}, trade_nonce={}, tx_hash={!r}".format(
+        assert (
+            tx_hash
+            == self.instance.functions.getBatchHash(
                 from_address,
                 to_address,
                 token_ids,
@@ -873,10 +1008,9 @@ class ERC1155Contract(Contract):
                 to_supplies,
                 value_eth_wei,
                 trade_nonce,
-                tx_hash,
-            )
+            ).call()
         )
-        raise NotImplementedError
+        return tx_hash
 
     def generate_trade_nonce(self, address: Address) -> int:  # nosec
         """
@@ -1002,3 +1136,13 @@ class Helpers:
         """
         decoded_type = token_id >> 128
         return decoded_type
+
+    def get_next_min_index(self, token_id_to_type: Dict[int, int]) -> int:
+        """Get the lowest valid index."""
+        if token_id_to_type != {}:
+            min_token_id = min(list(token_id_to_type.keys()))
+            min_index = self.decode_id(min_token_id)
+            next_min_index = min_index + 1
+        else:
+            next_min_index = 1
+        return next_min_index

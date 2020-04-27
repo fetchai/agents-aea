@@ -19,301 +19,77 @@
 
 """This test module contains the integration test for the thermometer skills."""
 
-import io
 import os
-import shutil
-import signal
-import subprocess  # nosec
-import sys
-import tempfile
-import threading
 import time
 
-import pytest
-
-from aea.cli import cli
-
-from ...common.click_testing import CliRunner
-from ...conftest import AUTHOR, CLI_LOG_OPTION
+from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.test_tools.generic import force_set_config
+from aea.test_tools.test_cases import AEAWithOefTestCase
 
 
-def _read_tty(pid: subprocess.Popen):
-    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        print("stdout: " + line.replace("\n", ""))
-
-
-def _read_error(pid: subprocess.Popen):
-    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
-        print("stderr: " + line.replace("\n", ""))
-
-
-class TestThermometerSkill:
+class TestThermometerSkill(AEAWithOefTestCase):
     """Test that thermometer skills work."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test class."""
-        cls.runner = CliRunner()
-        cls.agent_name_one = "my_thermometer"
-        cls.agent_name_two = "my_thermometer_client"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
 
     def test_thermometer(self, pytestconfig):
         """Run the thermometer skills sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-        # add packages folder
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(self.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
+        self.initialize_aea()
+        self.add_scripts_folder()
 
-        # Add scripts folder
-        scripts_src = os.path.join(self.cwd, "scripts")
-        scripts_dst = os.path.join(self.t, "scripts")
-        shutil.copytree(scripts_src, scripts_dst)
+        thermometer_aea_name = "my_thermometer"
+        thermometer_client_aea_name = "my_thermometer_client"
+        self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # create agent one and agent two
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_one],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", self.agent_name_two],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
 
         # add packages for agent one and run it
-        agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
-        os.chdir(agent_one_dir_path)
+        thermometer_aea_dir_path = os.path.join(self.t, thermometer_aea_name)
+        os.chdir(thermometer_aea_dir_path)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/thermometer:0.1.0")
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
-            standalone_mode=False,
+        setting_path = "agent.ledger_apis"
+        force_set_config(setting_path, ledger_apis)
+        setting_path = (
+            "vendor.fetchai.skills.thermometer.models.strategy.args.has_sensor"
         )
-        assert result.exit_code == 0
+        self.set_config(setting_path, False, "bool")
 
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", "fetchai/thermometer:0.1.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Load the agent yaml file and manually insert the things we need
-        file = open("aea-config.yaml", mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        # add in the ledger address
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        whole_file = whole_file.replace(find_text, replace_text)
-
-        file.close()
-
-        with open("aea-config.yaml", "w") as f:
-            f.write(whole_file)
-
-        # Load the skill yaml file and manually insert the things we need
-        yaml_path = os.path.join(
-            "vendor", "fetchai", "skills", "thermometer", "skill.yaml"
-        )
-        file = open(yaml_path, mode="r")
-
-        # read all lines at once
-        whole_file = file.read()
-
-        whole_file = whole_file.replace("has_sensor: true", "has_sensor: false")
-
-        # close the file
-        file.close()
-
-        with open(yaml_path, "w") as f:
-            f.write(whole_file)
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        os.chdir(self.t)
+        self.run_install()
 
         # add packages for agent two and run it
-        agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
-        os.chdir(agent_two_dir_path)
-
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", "fetchai/oef:0.1.0"],
-            standalone_mode=False,
+        thermometer_client_aea_dir_path = os.path.join(
+            self.t, thermometer_client_aea_name
         )
-        assert result.exit_code == 0
+        os.chdir(thermometer_client_aea_dir_path)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.1.0")
+        self.run_install()
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add",
-                "--local",
-                "skill",
-                "fetchai/thermometer_client:0.1.0",
-            ],
-            standalone_mode=False,
+        setting_path = "agent.ledger_apis"
+        force_set_config(setting_path, ledger_apis)
+
+        self.generate_private_key()
+        self.add_private_key()
+        self.generate_wealth()
+
+        # run AEAs
+        os.chdir(thermometer_aea_dir_path)
+        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        os.chdir(thermometer_client_aea_dir_path)
+        thermometer_client_aea_process = self.run_agent(
+            "--connections", "fetchai/oef:0.2.0"
         )
-        assert result.exit_code == 0
 
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
-        assert result.exit_code == 0
+        self.start_tty_read_thread(thermometer_aea_process)
+        self.start_error_read_thread(thermometer_aea_process)
+        self.start_tty_read_thread(thermometer_client_aea_process)
+        self.start_error_read_thread(thermometer_client_aea_process)
 
-        # Load the agent yaml file and manually insert the things we need
-        file = open("aea-config.yaml", mode="r")
+        time.sleep(20)
 
-        # read all lines at once
-        whole_file = file.read()
+        self.terminate_agents()
 
-        # add in the ledger address
-        find_text = "ledger_apis: {}"
-        replace_text = """ledger_apis:
-        fetchai:
-            network: testnet"""
-
-        whole_file = whole_file.replace(find_text, replace_text)
-
-        # close the file
-        file.close()
-
-        with open("aea-config.yaml", "w") as f:
-            f.write(whole_file)
-
-        # Generate the private keys
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-        # Add the private key
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        # Add some funds to the thermometer
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        try:
-            os.chdir(agent_one_dir_path)
-            process_one = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.1.0",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            os.chdir(agent_two_dir_path)
-            process_two = subprocess.Popen(  # nosec
-                [
-                    sys.executable,
-                    "-m",
-                    "aea.cli",
-                    "run",
-                    "--connections",
-                    "fetchai/oef:0.1.0",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=os.environ.copy(),
-            )
-
-            tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
-            tty_read_thread.start()
-
-            error_read_thread = threading.Thread(
-                target=_read_error, args=(process_one,)
-            )
-            error_read_thread.start()
-
-            tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
-            tty_read_thread.start()
-
-            error_read_thread = threading.Thread(
-                target=_read_error, args=(process_two,)
-            )
-            error_read_thread.start()
-
-            time.sleep(20)
-            process_one.send_signal(signal.SIGINT)
-            process_two.send_signal(signal.SIGINT)
-
-            process_one.wait(timeout=10)
-            process_two.wait(timeout=10)
-
-            assert process_one.returncode == 0
-            assert process_two.returncode == 0
-
-        finally:
-            poll_one = process_one.poll()
-            if poll_one is None:
-                process_one.terminate()
-                process_one.wait(2)
-
-            poll_two = process_two.poll()
-            if poll_two is None:
-                process_two.terminate()
-                process_two.wait(2)
-
-            tty_read_thread.join()
-            error_read_thread.join()
-
-        os.chdir(self.t)
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
-        )
-        assert result.exit_code == 0
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
-        )
-        assert result.exit_code == 0
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        assert self.is_successfully_terminated(), "Thermometer test not successful."

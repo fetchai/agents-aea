@@ -49,7 +49,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the AEABuilder to readily build an AEA. By default, the AEABuilder adds the `fetchai/default:0.1.0` protocol, the `fetchai/stub:0.1.0` connection and the `fetchai/error:0.1.0` skill.
+We use the AEABuilder to readily build an AEA. By default, the AEABuilder adds the `fetchai/default:0.1.0` protocol, the `fetchai/stub:0.2.0` connection and the `fetchai/error:0.2.0` skill.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -131,7 +131,7 @@ If you just want to copy and past the entire script in you can find it here:
 <details><summary>Click here to see full listing</summary>
 <p>
 
-```python
+``` python
 import os
 import time
 from threading import Thread

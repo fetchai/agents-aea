@@ -23,7 +23,7 @@ You can read more about the Search and Discovery <a href="/oef-ledger/">here</a>
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
 two different networks natively: the `Fetch.ai` network and the `Ethereum` network. 
 <br><br>
-You can read more about the intergration of ledger <a href="/integration/">here</a>
+You can read more about the intergration of ledger <a href="/ledger-integration/">here</a>
 
 </details>
 
@@ -37,7 +37,7 @@ You have two options to connect to a database:
 - Creating a wrapper that communicates with the database and imports a Model. You can find an example implementation in the `weather_station` package
 - Using an ORM (object-relational mapping) library, and implementing the logic inside a class that inherits from the Model abstract class.
 <br><br>
-For a detailed example of how to use an ORM follow the <a href='/orm-integration-to-generic/'>ORM use case</a>  
+For a detailed example of how to use an ORM follow the <a href='/orm-integration/'>ORM use case</a>  
 </details>
 
 <details><summary>How does one connect to a live-stream of data?</summary>
@@ -72,7 +72,7 @@ You can find more details about the CLI commands <a href="/cli-commands/">here</
 </details>
 
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `stub` connection, the `default` protocol and the `error` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+All AEA projects by default hold the `fetchai/stub:0.2.0` connection, the `fetchai/default:0.1.0` protocol and the `fetchai/error:0.1.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="/package-imports/">here</a>
 </details>

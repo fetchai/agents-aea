@@ -24,7 +24,6 @@ import json
 import os
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 from typing import Dict
 from unittest.mock import patch
@@ -40,9 +39,14 @@ import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_PROTOCOL,
+    DEFAULT_SKILL,
+)
 from aea.configurations.loader import ConfigLoader
+from aea.test_tools.click_testing import CliRunner
 
-from ..common.click_testing import CliRunner
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     AUTHOR,
@@ -130,15 +134,17 @@ class TestCreate:
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        assert self.agent_config["connections"] == ["fetchai/stub:0.1.0"]
+        assert self.agent_config["connections"] == [str(DEFAULT_CONNECTION)]
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
-        assert self.agent_config["default_connection"] == "fetchai/stub:0.1.0"
+        assert self.agent_config["default_connection"] == str(DEFAULT_CONNECTION)
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
-        assert self.agent_config["license"] == aea.cli.common.DEFAULT_LICENSE
+        assert (
+            self.agent_config["license"] == aea.configurations.constants.DEFAULT_LICENSE
+        )
 
     # def test_private_key_pem_path_field_is_empty_string(self):
     #     """Check that the 'private_key_pem_path' is the empty string."""
@@ -146,15 +152,15 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == ["fetchai/default:0.1.0"]
+        assert self.agent_config["protocols"] == [str(DEFAULT_PROTOCOL)]
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
+        assert self.agent_config["skills"] == [str(DEFAULT_SKILL)]
 
     def test_connections_field_is_not_empty_list(self):
         """Check that the 'connections' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
+        assert self.agent_config["skills"] == [str(DEFAULT_SKILL)]
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
@@ -270,9 +276,6 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
@@ -300,12 +303,11 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         The expected message is: 'Directory already exist. Aborting...'
         """
         s = "Directory already exist. Aborting..."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -418,9 +420,6 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         result = cls.runner.invoke(
@@ -455,12 +454,11 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         The expected message is: "The current folder is already an AEA project. Please move to the parent folder.".
         """
         s = "The current folder is already an AEA project. Please move to the parent folder."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.mocked_logger_error = cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

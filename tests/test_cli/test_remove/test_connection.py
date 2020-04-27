@@ -32,8 +32,8 @@ import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.test_tools.click_testing import CliRunner
 
-from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
@@ -114,8 +114,6 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_id = "fetchai/local:0.1.0"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -146,7 +144,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         The expected message is: 'Connection '{connection_name}' not found.'
         """
         s = "The connection '{}' is not supported.".format(self.connection_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):

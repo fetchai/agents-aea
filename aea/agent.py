@@ -79,7 +79,6 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
-        is_programmatic: bool = True,  # TODO to remove
     ) -> None:
         """
         Instantiate the agent.
@@ -89,7 +88,6 @@ class Agent(ABC):
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
-        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """
@@ -201,6 +199,18 @@ class Agent(ABC):
 
         :return: None
         """
+        self._start_setup()
+        self._run_main_loop()
+
+    def _start_setup(self) -> None:
+        """
+        Setup Agent on start:
+        - connect Multiplexer
+        - call agent.setup
+        - set liveness to started
+
+        :return: None
+        """
         if not self.is_debug:
             self.multiplexer.connect()
 
@@ -208,7 +218,6 @@ class Agent(ABC):
         self.setup()
 
         self.liveness.start()
-        self._run_main_loop()
 
     def _run_main_loop(self) -> None:
         """
@@ -219,11 +228,19 @@ class Agent(ABC):
         logger.debug("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self._tick += 1
-            self.act()
-            time.sleep(self._timeout)
-            self.react()
-            self.update()
+            self._spin_main_loop()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
+
+    def _spin_main_loop(self) -> None:
+        """
+        Run one cycle of agent's main loop
+
+        :return: None
+        """
+        self.act()
+        time.sleep(self._timeout)
+        self.react()
+        self.update()
 
     def stop(self) -> None:
         """

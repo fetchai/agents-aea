@@ -89,14 +89,12 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 
-
-# TODO rename this to "PackageType"
 PackageVersion = Type[semver.VersionInfo]
 PackageVersionLike = Union[str, semver.VersionInfo]
 
 
-class ConfigurationType(Enum):
-    """Configuration types."""
+class PackageType(Enum):
+    """Package types."""
 
     AGENT = "agent"
     PROTOCOL = "protocol"
@@ -108,15 +106,15 @@ class ConfigurationType(Enum):
         """
         Get the plural name.
 
-        >>> ConfigurationType.AGENT.to_plural()
+        >>> PackageType.AGENT.to_plural()
         'agents'
-        >>> ConfigurationType.PROTOCOL.to_plural()
+        >>> PackageType.PROTOCOL.to_plural()
         'protocols'
-        >>> ConfigurationType.CONNECTION.to_plural()
+        >>> PackageType.CONNECTION.to_plural()
         'connections'
-        >>> ConfigurationType.SKILL.to_plural()
+        >>> PackageType.SKILL.to_plural()
         'skills'
-        >>> ConfigurationType.CONTRACT.to_plural()
+        >>> PackageType.CONTRACT.to_plural()
         'contracts'
 
         """
@@ -128,19 +126,19 @@ class ConfigurationType(Enum):
 
 
 def _get_default_configuration_file_name_from_type(
-    item_type: Union[str, ConfigurationType]
+    item_type: Union[str, PackageType]
 ) -> str:
     """Get the default configuration file name from item type."""
-    item_type = ConfigurationType(item_type)
-    if item_type == ConfigurationType.AGENT:
+    item_type = PackageType(item_type)
+    if item_type == PackageType.AGENT:
         return DEFAULT_AEA_CONFIG_FILE
-    elif item_type == ConfigurationType.PROTOCOL:
+    elif item_type == PackageType.PROTOCOL:
         return DEFAULT_PROTOCOL_CONFIG_FILE
-    elif item_type == ConfigurationType.CONNECTION:
+    elif item_type == PackageType.CONNECTION:
         return DEFAULT_CONNECTION_CONFIG_FILE
-    elif item_type == ConfigurationType.SKILL:
+    elif item_type == PackageType.SKILL:
         return DEFAULT_SKILL_CONFIG_FILE
-    elif item_type == ConfigurationType.CONTRACT:
+    elif item_type == PackageType.CONTRACT:
         return DEFAULT_CONTRACT_CONFIG_FILE
     else:
         raise ValueError(
@@ -154,8 +152,8 @@ class ComponentType(Enum):
     SKILL = "skill"
     CONTRACT = "contract"
 
-    def to_configuration_type(self) -> ConfigurationType:
-        return ConfigurationType(self.value)
+    def to_configuration_type(self) -> PackageType:
+        return PackageType(self.value)
 
     def to_plural(self) -> str:
         """
@@ -229,7 +227,7 @@ class Configuration(JSONSerializable, ABC):
         # parse all the known keys. This might ignore some keys in the dictionary.
         seen_keys = set()
         for key in self._key_order:
-            assert key not in result
+            assert key not in result, "Key in results!"
             value = data.get(key)
             if value is not None:
                 result[key] = value
@@ -488,20 +486,18 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A package identifier."""
 
-    def __init__(
-        self, package_type: Union[ConfigurationType, str], public_id: PublicId
-    ):
+    def __init__(self, package_type: Union[PackageType, str], public_id: PublicId):
         """
         Initialize the package id.
 
         :param package_type: the package type.
         :param public_id: the public id.
         """
-        self._package_type = ConfigurationType(package_type)
+        self._package_type = PackageType(package_type)
         self._public_id = public_id
 
     @property
-    def package_type(self) -> ConfigurationType:
+    def package_type(self) -> PackageType:
         """Get the package type."""
         return self._package_type
 
@@ -526,7 +522,7 @@ class PackageId:
         return self.public_id.version
 
     @property
-    def package_prefix(self) -> Tuple[ConfigurationType, str, str]:
+    def package_prefix(self) -> Tuple[PackageType, str, str]:
         """Get the package identifier without the version."""
         return self.package_type, self.author, self.name
 
@@ -558,7 +554,7 @@ class ComponentId(PackageId):
     Class to represent a component identifier.
 
     A component id is a package id, but excludes the case when the package is an agent.
-    >>> pacakge_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+    >>> pacakge_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
     >>> component_id = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0"))
     >>> pacakge_id == component_id
     True
@@ -1586,7 +1582,7 @@ def _compute_fingerprint(
     for file in all_files:
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
-        assert key not in fingerprints  # nosec
+        assert key not in fingerprints, "Key in fingerprints!"  # nosec
         fingerprints[key] = file_hash
 
     return fingerprints
@@ -1596,7 +1592,7 @@ def _compare_fingerprints(
     package_configuration: PackageConfiguration,
     package_directory: Path,
     is_vendor: bool,
-    item_type: ConfigurationType,
+    item_type: PackageType,
 ):
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.

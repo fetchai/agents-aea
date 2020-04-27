@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 RUN apk add --no-cache make git bash
 
@@ -6,7 +6,7 @@ RUN apk add --no-cache make git bash
 RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev openssl-dev
 
 # https://stackoverflow.com/a/57485724
-RUN apk add --update --no-cache py3-numpy py3-scipy py3-pillow py3-zmq
+RUN apk add --update --no-cache py3-numpy py3-scipy py3-pillow
 ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 
 RUN pip install --upgrade pip
@@ -20,4 +20,5 @@ WORKDIR home
 WORKDIR /home/myagent
 
 COPY deploy-image/entrypoint.sh /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
+COPY deploy-image/.aea "/root/.aea"
+CMD [ "/entrypoint.sh" ]

@@ -38,11 +38,9 @@ message TacMessage{
         int32 tx_counterparty_fee = 6;
         map<string, int32> quantities_by_good_id = 7;
         int32 tx_nonce = 8;
-        bytes tx_sender_signature = 9;
-        bytes tx_counterparty_signature = 10;
+        string tx_sender_signature = 9;
+        string tx_counterparty_signature = 10;
     }
-
-    message Get_State_Update_Performative{}
 
     message Cancelled_Performative{}
 
@@ -81,11 +79,10 @@ message TacMessage{
     oneof performative{
         Cancelled_Performative cancelled = 5;
         Game_Data_Performative game_data = 6;
-        Get_State_Update_Performative get_state_update = 7;
-        Register_Performative register = 8;
-        Tac_Error_Performative tac_error = 9;
-        Transaction_Performative transaction = 10;
-        Transaction_Confirmation_Performative transaction_confirmation = 11;
-        Unregister_Performative unregister = 12;
+        Register_Performative register = 7;
+        Tac_Error_Performative tac_error = 8;
+        Transaction_Performative transaction = 9;
+        Transaction_Confirmation_Performative transaction_confirmation = 10;
+        Unregister_Performative unregister = 11;
     }
 }

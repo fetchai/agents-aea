@@ -31,8 +31,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
-INPUT_FILE = "input.txt"
-OUTPUT_FILE = "output.txt"
+INPUT_FILE = "input_file"
+OUTPUT_FILE = "output_file"
 
 
 class MyAgent(Agent):

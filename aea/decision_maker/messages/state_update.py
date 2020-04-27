@@ -19,10 +19,13 @@
 
 """The state update message module."""
 
+import logging
 from enum import Enum
 from typing import Dict, cast
 
 from aea.decision_maker.messages.base import InternalMessage
+
+logger = logging.getLogger(__name__)
 
 TransactionId = str
 
@@ -61,7 +64,6 @@ class StateUpdateMessage(InternalMessage):
             quantities_by_good_id=quantities_by_good_id,
             **kwargs
         )
-        assert self._is_consistent(), "StateUpdateMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -72,7 +74,7 @@ class StateUpdateMessage(InternalMessage):
     @property
     def amount_by_currency_id(self) -> Currencies:
         """Get the amount by currency."""
-        assert self.is_set("amount_by_currency_id")
+        assert self.is_set("amount_by_currency_id"), "amount_by_currency_id is not set."
         return cast(Currencies, self.get("amount_by_currency_id"))
 
     @property
@@ -84,19 +86,23 @@ class StateUpdateMessage(InternalMessage):
     @property
     def exchange_params_by_currency_id(self) -> ExchangeParams:
         """Get the exchange parameters by currency from the message."""
-        assert self.is_set("exchange_params_by_currency_id")
+        assert self.is_set(
+            "exchange_params_by_currency_id"
+        ), "exchange_params_by_currency_id is not set."
         return cast(ExchangeParams, self.get("exchange_params_by_currency_id"))
 
     @property
     def utility_params_by_good_id(self) -> UtilityParams:
         """Get the utility parameters by good id."""
-        assert self.is_set("utility_params_by_good_id")
+        assert self.is_set(
+            "utility_params_by_good_id"
+        ), "utility_params_by_good_id is not set."
         return cast(UtilityParams, self.get("utility_params_by_good_id"))
 
     @property
     def tx_fee(self) -> int:
         """Get the transaction fee."""
-        assert self.is_set("tx_fee")
+        assert self.is_set("tx_fee"), "tx_fee is not set."
         return cast(int, self.get("tx_fee"))
 
     def _is_consistent(self) -> bool:
@@ -139,6 +145,8 @@ class StateUpdateMessage(InternalMessage):
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
-        except (AssertionError, KeyError):
+        except (AssertionError, ValueError, KeyError) as e:
+            logger.error(str(e))
             return False
+
         return True

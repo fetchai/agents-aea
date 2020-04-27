@@ -20,6 +20,7 @@
 """This module contains the agent context class."""
 
 from queue import Queue
+from types import SimpleNamespace
 from typing import Any, Dict
 
 from aea.connections.base import ConnectionStatus
@@ -46,6 +47,7 @@ class AgentContext:
         preferences: Preferences,
         goal_pursuit_readiness: GoalPursuitReadiness,
         task_manager: TaskManager,
+        **kwargs
     ):
         """
         Initialize an agent context.
@@ -59,6 +61,7 @@ class AgentContext:
         :param preferences: the preferences of the agent
         :param goal_pursuit_readiness: if True, the agent is ready to pursuit its goals
         :param task_manager: the task manager
+        :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._identity = identity
@@ -73,6 +76,8 @@ class AgentContext:
         self._search_service_address = (
             DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
         )
+
+        self._namespace = SimpleNamespace(**kwargs)
 
     @property
     def shared_state(self) -> Dict[str, Any]:
@@ -149,3 +154,8 @@ class AgentContext:
     def search_service_address(self) -> Address:
         """Get the address of the search service."""
         return self._search_service_address
+
+    @property
+    def namespace(self) -> SimpleNamespace:
+        """Get the agent context namespace."""
+        return self._namespace

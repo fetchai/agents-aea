@@ -32,8 +32,8 @@ import yaml
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
+from aea.test_tools.click_testing import CliRunner
 
-from ...common.click_testing import CliRunner
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
@@ -53,8 +53,6 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.protocol_id = (
             cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
         )
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -97,7 +95,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         s = "A protocol with id '{}' already exists. Aborting...".format(
             self.protocol_author + "/" + self.protocol_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     # @unittest.mock.patch("aea.cli.add.fetch_package")
     # def test_add_protocol_from_registry_positive(self, fetch_package_mock):
@@ -140,8 +138,6 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         cls.protocol_id = (
             cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
         )
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -201,7 +197,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         s = "A protocol with id '{}' already exists. Aborting...".format(
             self.protocol_author + "/" + self.protocol_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock):
@@ -241,8 +237,6 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.protocol_id = "user/unknown_protocol:0.1.0"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -276,7 +270,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
         s = "Cannot find protocol: '{}'.".format(self.protocol_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -299,8 +293,6 @@ class TestAddProtocolFailsWhenDifferentPublicId:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.protocol_id = "different_author/default:0.1.0"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -331,7 +323,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
     def test_error_message_protocol_wrong_public_id(self):
         """Test that the log error message is fixed."""
         s = "Cannot find protocol: '{}'.".format(self.protocol_id)
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -354,8 +346,6 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.protocol_id = "fetchai/gym:0.1.0"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -397,9 +387,8 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Protocol configuration file not valid: ...'
         """
-        self.mocked_logger_error.assert_called_once_with(
-            "Protocol configuration file not valid: test error message"
-        )
+        s = "Protocol configuration file not valid: test error message"
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
@@ -424,8 +413,6 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.t = tempfile.mkdtemp()
         cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -465,7 +452,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         s = "[Errno 17] File exists: './vendor/fetchai/protocols/{}'".format(
             self.protocol_name
         )
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):

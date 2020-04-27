@@ -34,7 +34,7 @@ DEFAULT_BODY_SIZE = 4
 
 
 class TacMessage(Message):
-    """The tac protocol implements the messages an AEA needs to participate in the TAC"""
+    """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
     protocol_id = ProtocolId("fetchai", "tac", "0.1.0")
 
@@ -45,7 +45,6 @@ class TacMessage(Message):
 
         CANCELLED = "cancelled"
         GAME_DATA = "game_data"
-        GET_STATE_UPDATE = "get_state_update"
         REGISTER = "register"
         TAC_ERROR = "tac_error"
         TRANSACTION = "transaction"
@@ -82,7 +81,6 @@ class TacMessage(Message):
         self._performatives = {
             "cancelled",
             "game_data",
-            "get_state_update",
             "register",
             "tac_error",
             "transaction",
@@ -199,12 +197,12 @@ class TacMessage(Message):
         return cast(int, self.get("tx_counterparty_fee"))
 
     @property
-    def tx_counterparty_signature(self) -> bytes:
+    def tx_counterparty_signature(self) -> str:
         """Get the 'tx_counterparty_signature' content from the message."""
         assert self.is_set(
             "tx_counterparty_signature"
         ), "'tx_counterparty_signature' content is not set."
-        return cast(bytes, self.get("tx_counterparty_signature"))
+        return cast(str, self.get("tx_counterparty_signature"))
 
     @property
     def tx_fee(self) -> int:
@@ -237,12 +235,12 @@ class TacMessage(Message):
         return cast(int, self.get("tx_sender_fee"))
 
     @property
-    def tx_sender_signature(self) -> bytes:
+    def tx_sender_signature(self) -> str:
         """Get the 'tx_sender_signature' content from the message."""
         assert self.is_set(
             "tx_sender_signature"
         ), "'tx_sender_signature' content is not set."
-        return cast(bytes, self.get("tx_sender_signature"))
+        return cast(str, self.get("tx_sender_signature"))
 
     @property
     def utility_params_by_good_id(self) -> Dict[str, float]:
@@ -378,17 +376,15 @@ class TacMessage(Message):
                     type(self.tx_nonce)
                 )
                 assert (
-                    type(self.tx_sender_signature) == bytes
-                ), "Invalid type for content 'tx_sender_signature'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.tx_sender_signature) == str
+                ), "Invalid type for content 'tx_sender_signature'. Expected 'str'. Found '{}'.".format(
                     type(self.tx_sender_signature)
                 )
                 assert (
-                    type(self.tx_counterparty_signature) == bytes
-                ), "Invalid type for content 'tx_counterparty_signature'. Expected 'bytes'. Found '{}'.".format(
+                    type(self.tx_counterparty_signature) == str
+                ), "Invalid type for content 'tx_counterparty_signature'. Expected 'str'. Found '{}'.".format(
                     type(self.tx_counterparty_signature)
                 )
-            elif self.performative == TacMessage.Performative.GET_STATE_UPDATE:
-                expected_nb_of_contents = 0
             elif self.performative == TacMessage.Performative.CANCELLED:
                 expected_nb_of_contents = 0
             elif self.performative == TacMessage.Performative.GAME_DATA:

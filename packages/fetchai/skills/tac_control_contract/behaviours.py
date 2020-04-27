@@ -20,22 +20,30 @@
 """This package contains the behaviours."""
 
 import datetime
-import time
-from typing import Dict, List, Optional, Union, cast
+from typing import List, Optional, cast
 
-from aea.contracts.ethereum import Contract
-from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
-from aea.mail.base import Address
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.protocols.tac.serialization import TacSerializer
-from packages.fetchai.skills.tac_control_contract.game import Configuration, Game, Phase
+from packages.fetchai.skills.tac_control_contract.game import (
+    AgentState,
+    Configuration,
+    Game,
+    Phase,
+)
+from packages.fetchai.skills.tac_control_contract.helpers import (
+    generate_currency_id_to_name,
+    generate_currency_ids,
+    generate_good_id_to_name,
+    generate_good_ids,
+)
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel(
@@ -44,7 +52,7 @@ CONTROLLER_DATAMODEL = DataModel(
 )
 
 
-class TACBehaviour(Behaviour):
+class TACBehaviour(SimpleBehaviour):
     """This class implements the TAC control behaviour."""
 
     def __init__(self, **kwargs):
@@ -52,23 +60,6 @@ class TACBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
         self._registered_desc = None  # type: Optional[Description]
-        self.is_items_created = False
-        self.can_start = False
-        self.agent_counter = 0
-        self._token_ids = None  # type: Optional[List[int]]
-        self._currency_id = None  # type: Optional[int]
-
-    @property
-    def token_ids(self) -> List[int]:
-        """Return the list of token ids."""
-        assert self._token_ids is not None, "Token ids must not be None."
-        return cast(List[int], self._token_ids)
-
-    @property
-    def currency_id(self) -> int:
-        """Return the currency_id."""
-        assert self._currency_id is not None, "Currency id must not be None."
-        return cast(int, self._currency_id)
 
     def setup(self) -> None:
         """
@@ -77,24 +68,51 @@ class TACBehaviour(Behaviour):
         :return: None
         """
         parameters = cast(Parameters, self.context.parameters)
-        contract = cast(Contract, self.context.contracts.erc1155)
-        ledger_api = cast(EthereumApi, self.context.ledger_apis.apis.get("ethereum"))
-        #  Deploy the contract if there is no address in the parameters
-        if parameters.contract_address is None:
-            contract.set_instance(ledger_api)
-            transaction_message = contract.get_deploy_transaction(  # type: ignore
-                deployer_address=self.context.agent_address,
-                ledger_api=ledger_api,
-                skill_callback_id=self.context.skill_id,
-            )
-
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+        ledger_api = cast(
+            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
+        )
+        if parameters.is_contract_deployed:
+            self._set_contract(parameters, ledger_api, contract)
         else:
-            self.context.logger.info("Setting the address of the deployed contract")
-            contract.set_deployed_instance(
-                ledger_api=ledger_api,
-                contract_address=str(parameters.contract_address),
+            self._deploy_contract(ledger_api, contract)
+
+    def _set_contract(
+        self, parameters: Parameters, ledger_api: EthereumApi, contract: ERC1155Contract
+    ) -> None:
+        """Set the contract and configuration based on provided parameters."""
+        game = cast(Game, self.context.game)
+        game.phase = Phase.CONTRACT_DEPLOYED
+        self.context.logger.info("Setting the address of the deployed contract")
+        contract.set_deployed_instance(
+            ledger_api=ledger_api, contract_address=parameters.contract_address,
+        )
+        configuration = Configuration(parameters.version_id, parameters.tx_fee,)
+        configuration.good_id_to_name = generate_good_id_to_name(parameters.good_ids)
+        configuration.currency_id_to_name = generate_currency_id_to_name(
+            parameters.currency_ids
+        )
+        configuration.contract_address = parameters.contract_address
+        game.conf = configuration
+
+    def _deploy_contract(
+        self, ledger_api: EthereumApi, contract: ERC1155Contract
+    ) -> None:
+        """Send deploy contract tx msg to decision maker."""
+        game = cast(Game, self.context.game)
+        game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
+        self.context.logger.info(
+            "[{}]: Sending deploy transaction to decision maker.".format(
+                self.context.agent_name
             )
+        )
+        contract.set_instance(ledger_api)
+        transaction_message = contract.get_deploy_transaction_msg(
+            deployer_address=self.context.agent_address,
+            ledger_api=ledger_api,
+            skill_callback_id=self.context.skill_id,
+        )
+        self.context.decision_maker_message_queue.put_nowait(transaction_message)
 
     def act(self) -> None:
         """
@@ -105,81 +123,61 @@ class TACBehaviour(Behaviour):
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
-        contract = cast(Contract, self.context.contracts.erc1155)
-
+        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+        ledger_api = cast(
+            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
+        )
         if (
-            contract.is_deployed
-            and not self.is_items_created
-            and game.phase.value == Phase.PRE_GAME.value
+            game.phase.value == Phase.CONTRACT_DEPLOYED.value
+            and parameters.registration_start_time
+            < now
+            < parameters.registration_end_time
         ):
-            self.context.configuration = Configuration(  # type: ignore
-                parameters.version_id, parameters.tx_fee,
-            )
-            self.context.configuration.set_good_id_to_name(
-                parameters.nb_goods, contract
-            )
-            token_ids_dictionary = cast(
-                Dict[str, str], self.context.configuration.good_id_to_name
-            )
-            self._token_ids = [
-                int(token_id) for token_id in token_ids_dictionary.keys()
-            ]
-            self.context.logger.info("Creating the items.")
-            self._currency_id = self.token_ids[0]
-            self._token_ids = self.token_ids[1:11]
-            transaction_message = self._create_items(self.token_ids)
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
-
-            transaction_message = self._create_items(self.currency_id)
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
-            time.sleep(10)
-        if (
-            game.phase.value == Phase.PRE_GAME.value
-            and parameters.registration_start_time < now < parameters.start_time
-        ):
-
             game.phase = Phase.GAME_REGISTRATION
-            self._register_tac()
-            self.context.logger.info(
-                "[{}]: TAC open for registration until: {}".format(
-                    self.context.agent_name, parameters.start_time
-                )
-            )
+            self._register_tac(parameters)
         elif (
             game.phase.value == Phase.GAME_REGISTRATION.value
-            and parameters.start_time < now < parameters.end_time
+            and parameters.registration_end_time < now < parameters.start_time
         ):
+            self.context.logger.info(
+                "[{}] Closing registration!".format(self.context.agent_name)
+            )
             if game.registration.nb_agents < parameters.min_nb_agents:
-                self._cancel_tac()
-                game.phase = Phase.POST_GAME
+                game.phase = Phase.CANCELLED_GAME
+                self.context.logger.info(
+                    "[{}]: Registered agents={}, minimum agents required={}".format(
+                        self.context.agent_name,
+                        game.registration.nb_agents,
+                        parameters.min_nb_agents,
+                    )
+                )
+                self._end_tac(game, "cancelled")
                 self._unregister_tac()
+                self.context.is_active = False
             else:
-                self.context.logger.info("Setting Up the TAC game.")
                 game.phase = Phase.GAME_SETUP
-                # self._start_tac()
                 game.create()
                 self._unregister_tac()
-                self.context.logger.info("Mint objects after registration.")
-                for agent in self.context.configuration.agent_addr_to_name.keys():
-                    self._mint_objects(
-                        is_batch=True, address=agent,
-                    )
-                    # Mint the game currency.
-                    self._mint_objects(
-                        is_batch=False, address=agent,
-                    )
-                    self.agent_counter += 1
-                game.phase = Phase.GAME
         elif (
-            game.phase.value == Phase.GAME.value
-            and parameters.start_time < now < parameters.end_time
-            and self.can_start
+            game.phase.value == Phase.GAME_SETUP.value
+            and parameters.registration_end_time < now < parameters.start_time
         ):
-            self.context.logger.info("Starting the TAC game.")
-            self._start_tac()
+            game.phase = Phase.TOKENS_CREATION_PROPOSAL
+            self._create_items(game, ledger_api, contract)
+        elif game.phase.value == Phase.TOKENS_CREATED.value:
+            game.phase = Phase.TOKENS_MINTING_PROPOSAL
+            self._mint_items(game, ledger_api, contract)
+        elif (
+            game.phase.value == Phase.TOKENS_MINTED.value
+            and parameters.start_time < now < parameters.end_time
+        ):
+            game.phase = Phase.GAME
+            self._start_tac(game)
         elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
-            self._cancel_tac()
             game.phase = Phase.POST_GAME
+            self._end_tac(game, "finished")
+            self._game_finished_summary(game)
+            self.context.is_active = False
 
     def teardown(self) -> None:
         """
@@ -190,7 +188,7 @@ class TACBehaviour(Behaviour):
         if self._registered_desc is not None:
             self._unregister_tac()
 
-    def _register_tac(self) -> None:
+    def _register_tac(self, parameters) -> None:
         """
         Register on the OEF as a TAC controller agent.
 
@@ -198,8 +196,7 @@ class TACBehaviour(Behaviour):
         """
         self._oef_msg_id += 1
         desc = Description(
-            {"version": self.context.parameters.version_id},
-            data_model=CONTROLLER_DATAMODEL,
+            {"version": parameters.version_id}, data_model=CONTROLLER_DATAMODEL,
         )
         self.context.logger.info(
             "[{}]: Registering TAC data model".format(self.context.agent_name)
@@ -216,6 +213,11 @@ class TACBehaviour(Behaviour):
             message=OefSearchSerializer().encode(oef_msg),
         )
         self._registered_desc = desc
+        self.context.logger.info(
+            "[{}]: TAC open for registration until: {}".format(
+                self.context.agent_name, parameters.registration_end_time
+            )
+        )
 
     def _unregister_tac(self) -> None:
         """
@@ -240,39 +242,67 @@ class TACBehaviour(Behaviour):
         )
         self._registered_desc = None
 
-    def _start_tac(self):
-        """Create a game and send the game configuration to every registered agent."""
-        game = cast(Game, self.context.game)
-        # game.create()
-
+    def _create_items(
+        self, game: Game, ledger_api: EthereumApi, contract: ERC1155Contract
+    ) -> None:
+        """Send create items transaction to decision maker."""
         self.context.logger.info(
-            "[{}]: Started competition:\n{}".format(
+            "[{}]: Sending create_items transaction to decision maker.".format(
+                self.context.agent_name
+            )
+        )
+        tx_msg = self._get_create_items_tx_msg(game.conf, ledger_api, contract)
+        self.context.decision_maker_message_queue.put_nowait(tx_msg)
+
+    def _mint_items(
+        self, game: Game, ledger_api: EthereumApi, contract: ERC1155Contract
+    ) -> None:
+        """Send mint items transactions to decision maker."""
+        self.context.logger.info(
+            "[{}]: Sending mint_items transactions to decision maker.".format(
+                self.context.agent_name
+            )
+        )
+        for agent_state in game.initial_agent_states.values():
+            tx_msg = self._get_mint_goods_and_currency_tx_msg(
+                agent_state, ledger_api, contract
+            )
+            self.context.decision_maker_message_queue.put_nowait(tx_msg)
+
+    def _start_tac(self, game: Game) -> None:
+        """Create a game and send the game configuration to every registered agent."""
+        self.context.logger.info(
+            "[{}]: Starting competition with configuration:\n{}".format(
                 self.context.agent_name, game.holdings_summary
             )
         )
         self.context.logger.info(
-            "[{}]: Computed equilibrium:\n{}".format(
+            "[{}]: Computed theoretical equilibrium:\n{}".format(
                 self.context.agent_name, game.equilibrium_summary
             )
         )
-        for agent_address in game.configuration.agent_addr_to_name.keys():
+        for agent_address in game.conf.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TacMessage(
-                type=TacMessage.Performative.GAME_DATA,
+                performative=TacMessage.Performative.GAME_DATA,
                 amount_by_currency_id=agent_state.amount_by_currency_id,
                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                 quantities_by_good_id=agent_state.quantities_by_good_id,
                 utility_params_by_good_id=agent_state.utility_params_by_good_id,
-                tx_fee=game.configuration.tx_fee,
-                agent_addr_to_name=game.configuration.agent_addr_to_name,
-                good_id_to_name=game.configuration.good_id_to_name,
-                version_id=game.configuration.version_id,
-                contract_address=self.context.contracts.erc1155.instance.address,
+                tx_fee=game.conf.tx_fee,
+                agent_addr_to_name=game.conf.agent_addr_to_name,
+                good_id_to_name=game.conf.good_id_to_name,
+                currency_id_to_name=game.conf.currency_id_to_name,
+                version_id=game.conf.version_id,
+                info={"contract_address": game.conf.contract_address},
             )
             self.context.logger.debug(
-                "[{}]: sending game data to '{}': {}".format(
-                    self.context.agent_name, agent_address, str(tac_msg)
+                "[{}]: sending game data to '{}'.".format(
+                    self.context.agent_name, agent_address
                 )
+            )
+            self.context.logger.debug(
+                "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
             )
             self.context.outbox.put_message(
                 to=agent_address,
@@ -281,80 +311,188 @@ class TACBehaviour(Behaviour):
                 message=TacSerializer().encode(tac_msg),
             )
 
-    def _cancel_tac(self):
+    def _end_tac(self, game: Game, reason: str) -> None:
         """Notify agents that the TAC is cancelled."""
-        game = cast(Game, self.context.game)
         self.context.logger.info(
-            "[{}]: Notifying agents that TAC is cancelled.".format(
-                self.context.agent_name
+            "[{}]: Notifying agents that TAC is {}.".format(
+                self.context.agent_name, reason
             )
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
-            tac_msg = TacMessage(type=TacMessage.Performative.CANCELLED)
+            tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
             self.context.outbox.put_message(
                 to=agent_addr,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
                 message=TacSerializer().encode(tac_msg),
             )
-        if game.phase == Phase.GAME:
-            self.context.logger.info(
-                "[{}]: Finished competition:\n{}".format(
-                    self.context.agent_name, game.holdings_summary
-                )
-            )
-            self.context.logger.info(
-                "[{}]: Computed equilibrium:\n{}".format(
-                    self.context.agent_name, game.equilibrium_summary
-                )
-            )
 
-            self.context.is_active = False
-
-    def _create_items(self, token_ids: Union[List[int], int]) -> TransactionMessage:
-        contract = cast(Contract, self.context.contracts.erc1155)
-        ledger_api = cast(LedgerApi, self.context.ledger_apis.apis.get("ethereum"))
-        if type(token_ids) == list:
-            return contract.get_create_batch_transaction(  # type: ignore
-                deployer_address=self.context.agent_address,
-                ledger_api=ledger_api,
-                skill_callback_id=self.context.skill_id,
-                token_ids=token_ids,
+    def _game_finished_summary(self, game: Game) -> None:
+        """Provide summary of game stats."""
+        self.context.logger.info(
+            "[{}]: Finished competition:\n{}".format(
+                self.context.agent_name, game.holdings_summary
             )
-        else:
-            return contract.get_create_single_transaction(  # type: ignore
-                deployer_address=self.context.agent_address,
-                ledger_api=ledger_api,
-                skill_callback_id=self.context.skill_id,
-                token_id=token_ids,
+        )
+        self.context.logger.info(
+            "[{}]: Computed equilibrium:\n{}".format(
+                self.context.agent_name, game.equilibrium_summary
             )
+        )
 
-    def _mint_objects(self, is_batch: bool, address: Address):
-        self.context.logger.info("Minting the items")
-        contract = self.context.contracts.erc1155
+    def _get_create_items_tx_msg(
+        self,
+        configuration: Configuration,
+        ledger_api: EthereumApi,
+        contract: ERC1155Contract,
+    ) -> TransactionMessage:
+        token_ids = [
+            int(good_id) for good_id in configuration.good_id_to_name.keys()
+        ] + [
+            int(currency_id) for currency_id in configuration.currency_id_to_name.keys()
+        ]
+        tx_msg = contract.get_create_batch_transaction_msg(
+            deployer_address=self.context.agent_address,
+            ledger_api=ledger_api,
+            skill_callback_id=self.context.skill_id,
+            token_ids=token_ids,
+        )
+        return tx_msg
+
+    def _get_mint_goods_and_currency_tx_msg(
+        self,
+        agent_state: AgentState,
+        ledger_api: EthereumApi,
+        contract: ERC1155Contract,
+    ) -> TransactionMessage:
+        token_ids = []  # type: List[int]
+        mint_quantities = []  # type: List[int]
+        for good_id, quantity in agent_state.quantities_by_good_id.items():
+            token_ids.append(int(good_id))
+            mint_quantities.append(quantity)
+        for currency_id, amount in agent_state.amount_by_currency_id.items():
+            token_ids.append(int(currency_id))
+            mint_quantities.append(amount)
+        tx_msg = contract.get_mint_batch_transaction_msg(
+            deployer_address=self.context.agent_address,
+            recipient_address=agent_state.agent_address,
+            mint_quantities=mint_quantities,
+            ledger_api=ledger_api,
+            skill_callback_id=self.context.skill_id,
+            token_ids=token_ids,
+        )
+        return tx_msg
+
+
+class ContractBehaviour(TickerBehaviour):
+    """This class implements the TAC control behaviour."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
-        if is_batch:
-            # minting = [parameters.base_good_endowment] * (parameters.nb_goods - 1)
-            minting = [parameters.base_good_endowment] * (parameters.nb_goods)
-            transaction_message = contract.get_mint_batch_transaction(
-                deployer_address=self.context.agent_address,
-                recipient_address=address,
-                mint_quantities=minting,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                skill_callback_id=self.context.skill_id,
-                token_ids=self.token_ids,
+        contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+        ledger_api = cast(
+            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
+        )
+        if game.phase.value == Phase.CONTRACT_DEPLOYING.value:
+            tx_receipt = ledger_api.get_transaction_receipt(
+                tx_digest=game.contract_manager.deploy_tx_digest
             )
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
-        else:
-            self.context.logger.info("Minting the game currency")
-            contract = self.context.contracts.erc1155
-            parameters = cast(Parameters, self.context.parameters)
-            transaction_message = contract.get_mint_single_tx(
-                deployer_address=self.context.agent_address,
-                recipient_address=self.context.agent_address,
-                mint_quantity=parameters.money_endowment,
-                ledger_api=self.context.ledger_apis.apis.get("ethereum"),
-                skill_callback_id=self.context.skill_id,
-                token_id=self.currency_id,
+            if tx_receipt is None:
+                self.context.logger.info(
+                    "[{}]: Cannot verify whether contract deployment was successful. Retrying...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
+                self.context.is_active = False
+                self.context.warning(
+                    "[{}]: The contract did not deployed successfully. Transaction hash: {}. Aborting!".format(
+                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    )
+                )
+            else:
+                self.context.logger.info(
+                    "[{}]: The contract was successfully deployed. Contract address: {}. Transaction hash: {}".format(
+                        self.context.agent_name,
+                        tx_receipt.contractAddress,
+                        tx_receipt.transactionHash.hex(),
+                    )
+                )
+                contract.set_address(ledger_api, tx_receipt.contractAddress)
+                configuration = Configuration(parameters.version_id, parameters.tx_fee,)
+                currency_ids = generate_currency_ids(parameters.nb_currencies, contract)
+                configuration.currency_id_to_name = generate_currency_id_to_name(
+                    currency_ids
+                )
+                good_ids = generate_good_ids(parameters.nb_goods, contract)
+                configuration.good_id_to_name = generate_good_id_to_name(good_ids)
+                configuration.contract_address = tx_receipt.contractAddress
+                game.conf = configuration
+                game.phase = Phase.CONTRACT_DEPLOYED
+        elif game.phase.value == Phase.TOKENS_CREATING.value:
+            tx_receipt = ledger_api.get_transaction_receipt(
+                tx_digest=game.contract_manager.create_tokens_tx_digest
             )
-            self.context.decision_maker_message_queue.put_nowait(transaction_message)
+            if tx_receipt is None:
+                self.context.logger.info(
+                    "[{}]: Cannot verify whether token creation was successful. Retrying...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
+                self.context.is_active = False
+                self.context.warning(
+                    "[{}]: The token creation wasn't successful. Transaction hash: {}. Aborting!".format(
+                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    )
+                )
+            else:
+                self.context.logger.info(
+                    "[{}]: Successfully created the tokens. Transaction hash: {}".format(
+                        self.context.agent_name, tx_receipt.transactionHash.hex()
+                    )
+                )
+                game.phase = Phase.TOKENS_CREATED
+        elif game.phase.value == Phase.TOKENS_MINTING.value:
+            for (
+                agent_addr,
+                tx_digest,
+            ) in game.contract_manager.mint_tokens_tx_digests.items():
+                if agent_addr in game.contract_manager.confirmed_mint_tokens_agents:
+                    continue
+                tx_receipt = ledger_api.get_transaction_receipt(tx_digest=tx_digest)
+                if tx_receipt is None:
+                    self.context.logger.info(
+                        "[{}]: Cannot verify whether token minting for agent_addr={} was successful. Retrying...".format(
+                            self.context.agent_name, agent_addr
+                        )
+                    )
+                elif tx_receipt.status != 1:
+                    self.context.is_active = False
+                    self.context.logger.warning(
+                        "[{}]: The token minting for agent_addr={} wasn't successful. Transaction hash: {}. Aborting!".format(
+                            self.context.agent_name,
+                            agent_addr,
+                            tx_receipt.transactionHash.hex(),
+                        )
+                    )
+                else:
+                    self.context.logger.info(
+                        "[{}]: Successfully minted the tokens for agent_addr={}. Transaction hash: {}".format(
+                            self.context.agent_name,
+                            agent_addr,
+                            tx_receipt.transactionHash.hex(),
+                        )
+                    )
+                    game.contract_manager.add_confirmed_mint_tokens_agents(agent_addr)
+                    if len(game.contract_manager.confirmed_mint_tokens_agents) == len(
+                        game.initial_agent_states
+                    ):
+                        self.context.logger.info("All tokens minted!")
+                        game.phase = Phase.TOKENS_MINTED

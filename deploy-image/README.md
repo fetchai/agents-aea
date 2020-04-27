@@ -12,6 +12,16 @@ We recommend using the following command for building:
 
     docker run --env AGENT_REPO_URL=https://github.com/fetchai/echo_agent.git aea-deploy:latest
 
+This will run the `entrypoint.sh` script inside the deployment container.
+
+Or, you can try a dry run without setting `AGENT_REPO_URL` (it will build an echo agent):
+
+    docker run -it aea-deploy:latest
+
+To run a bash shell inside the container: 
+
+    docker run -it aea-deploy:latest bash
+
 ## Publish
 
 First, be sure you tagged the image with the `latest` tag: 

@@ -20,7 +20,6 @@
 """Implementation of the 'aea create' subcommand."""
 import os
 import shutil
-import sys
 from pathlib import Path
 from typing import cast
 
@@ -31,13 +30,8 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import _add_item
 from aea.cli.common import (
-    AUTHOR,
+    AUTHOR_KEY,
     Context,
-    DEFAULT_CONNECTION,
-    DEFAULT_LEDGER,
-    DEFAULT_LICENSE,
-    DEFAULT_REGISTRY_PATH,
-    DEFAULT_SKILL,
     _get_or_create_cli_config,
     logger,
 )
@@ -46,6 +40,13 @@ from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_VERSION,
+)
+from aea.configurations.constants import (
+    DEFAULT_CONNECTION,
+    DEFAULT_LEDGER,
+    DEFAULT_LICENSE,
+    DEFAULT_REGISTRY_PATH,
+    DEFAULT_SKILL,
 )
 
 
@@ -90,10 +91,9 @@ def create(click_context, agent_name, author, local):
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
-        logger.error(
+        raise click.ClickException(
             "The current folder is already an AEA project. Please move to the parent folder."
         )
-        sys.exit(1)
 
     if author is not None:
         if local:
@@ -104,12 +104,11 @@ def create(click_context, agent_name, author, local):
             )
 
     config = _get_or_create_cli_config()
-    set_author = config.get(AUTHOR, None)
+    set_author = config.get(AUTHOR_KEY, None)
     if set_author is None:
-        click.echo(
+        raise click.ClickException(
             "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
         )
-        sys.exit(1)
 
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
@@ -158,13 +157,10 @@ def create(click_context, agent_name, author, local):
         _add_item(click_context, "skill", DEFAULT_SKILL)
 
     except OSError:
-        logger.error("Directory already exist. Aborting...")
-        sys.exit(1)
+        raise click.ClickException("Directory already exist. Aborting...")
     except ValidationError as e:
-        logger.error(str(e))
         shutil.rmtree(agent_name, ignore_errors=True)
-        sys.exit(1)
+        raise click.ClickException(str(e))
     except Exception as e:
-        logger.exception(e)
         shutil.rmtree(agent_name, ignore_errors=True)
-        sys.exit(1)
+        raise click.ClickException(str(e))

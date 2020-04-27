@@ -23,16 +23,16 @@ The package name must satisfy [the constraints on Python packages names](https:/
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 
-<a name=".aea.configurations.base.ConfigurationType"></a>
-### ConfigurationType
+<a name=".aea.configurations.base.PackageType"></a>
+### PackageType
 
 ```python
-class ConfigurationType(Enum)
+class PackageType(Enum)
 ```
 
-Configuration types.
+Package types.
 
-<a name=".aea.configurations.base.ConfigurationType.to_plural"></a>
+<a name=".aea.configurations.base.PackageType.to_plural"></a>
 #### to`_`plural
 
 ```python
@@ -41,18 +41,18 @@ Configuration types.
 
 Get the plural name.
 
->>> ConfigurationType.AGENT.to_plural()
+>>> PackageType.AGENT.to_plural()
 'agents'
->>> ConfigurationType.PROTOCOL.to_plural()
+>>> PackageType.PROTOCOL.to_plural()
 'protocols'
->>> ConfigurationType.CONNECTION.to_plural()
+>>> PackageType.CONNECTION.to_plural()
 'connections'
->>> ConfigurationType.SKILL.to_plural()
+>>> PackageType.SKILL.to_plural()
 'skills'
->>> ConfigurationType.CONTRACT.to_plural()
+>>> PackageType.CONTRACT.to_plural()
 'contracts'
 
-<a name=".aea.configurations.base.ConfigurationType.__str__"></a>
+<a name=".aea.configurations.base.PackageType.__str__"></a>
 #### `__`str`__`
 
 ```python
@@ -505,7 +505,7 @@ A package identifier.
 #### `__`init`__`
 
 ```python
- | __init__(package_type: Union[ConfigurationType, str], public_id: PublicId)
+ | __init__(package_type: Union[PackageType, str], public_id: PublicId)
 ```
 
 Initialize the package id.
@@ -520,7 +520,7 @@ Initialize the package id.
 
 ```python
  | @property
- | package_type() -> ConfigurationType
+ | package_type() -> PackageType
 ```
 
 Get the package type.
@@ -570,7 +570,7 @@ Get the version of the package.
 
 ```python
  | @property
- | package_prefix() -> Tuple[ConfigurationType, str, str]
+ | package_prefix() -> Tuple[PackageType, str, str]
 ```
 
 Get the package identifier without the version.
@@ -621,7 +621,7 @@ class ComponentId(PackageId)
 Class to represent a component identifier.
 
 A component id is a package id, but excludes the case when the package is an agent.
->>> pacakge_id = PackageId(ConfigurationType.PROTOCOL, PublicId("author", "name", "0.1.0"))
+>>> pacakge_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
 >>> component_id = ComponentId(ComponentType.PROTOCOL, PublicId("author", "name", "0.1.0"))
 >>> pacakge_id == component_id
 True
