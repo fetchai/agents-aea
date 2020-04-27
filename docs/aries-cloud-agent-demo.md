@@ -37,7 +37,7 @@ The following lists the sequence of interactions between the four agents:
 
 All messages from an AEA to an ACA are http requests (using `http_client` connection).
 
-All messages from an AEA to another AEA are via the `oef` connection.
+All messages from an AEA to another AEA utilise the `oef` communication network accessed via the `oef` connection.
 
 All messages initiated from an ACA to an AEA are webhooks (using `webhook` connection).
 
@@ -46,12 +46,12 @@ This is the extent of the demo, at this point. The rest of the interactions requ
 The rest of the interactions are broadly as follows:
 
  * Alice_ACA: accepts the invitation.
- * Alice_AEA: sends a matching invitation request to Faber_ACA.
+ * Alice_ACA: sends a matching invitation request to Faber_ACA.
  * Faber_ACA: accepts
 
-At this point Alice_ACA and Faber_ACA are connected. 
+At this point, the two ACAs are connected to each other. 
 
- * Faber_AEA: issues a credential (e.g. university degree) to Alice_AEA, via Faber_ACA and Alice_ACA.
+ * Faber_AEA: requests Faber_ACA to issue a credential (e.g. university degree) to Alice_AEA, which Faber_ACA does via Alice_ACA.
  * Faber_AEA: requests proof that Alice_AEA's age is above 18.
  * Alice_AEA: presents proof that it's age is above 18, without presenting its credential.       
  
@@ -115,7 +115,7 @@ In the third terminal, create an Alice_AEA and move into its project folder:
 
 ``` bash
 aea create alice
-cd faber
+cd alice
 ```
 
 ### Add and Configure the Skill
@@ -123,28 +123,50 @@ cd faber
 Add the `aries_alice` skill:
 
 ``` bash
-aea add --local skill fetchai/aries_alice:0.1.0
+aea add skill fetchai/aries_alice:0.1.0
 ```
 
-You then need to configure this skill. Open the skill's configuration file in `alice/vendor/fetchai/skills/aries_alice/skill.yaml` and ensure `admin_host` and `admin_port` details match those you noted above for Faber_ACA. 
+You then need to configure this skill. Open the skill's configuration file in `alice/vendor/fetchai/skills/aries_alice/skill.yaml` and ensure `admin_host` and `admin_port` details match those you noted above for Alice_ACA.
+
+You can use `aea`'s handy `config` <a href="../cli-commands">command</a> to set these values:
+
+``` bash
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host <Alice admin IP>
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_host <Alice admin IP>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_port <Alice admin port>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_port <Alice admin port>
+```
 
 ### Add and Configure the Connections
 
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add --local connection fetchai/http_client:0.1.0
-aea add --local connection fetchai/webhook:0.1.0
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/http_client:0.1.0
+aea add connection fetchai/webhook:0.1.0
+aea add connection fetchai/oef:0.2.0
 ```
 
-You now need to configure the `webhook` connection. Open the connection's configuration file in `alice/vendor/fetchai/connections/webhook/connection.yaml` and ensure `webhook_port` matches with what you used above for Faber_ACA. 
+You now need to configure the `webhook` connection. 
 
-Next, make sure that the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
+Make sure that in `webhook` connection's configuration file `alice/vendor/fetchai/connections/webhook/connection.yaml`, the value of `webhook_port` matches with what you used above for Alice_ACA. 
+
+Also make sure that the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
+
+``` bash
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Alice webhook port>
+aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webhooks/topic/{topic}/ 
+```
 
 ### Configure Alice_AEA:
 
-You now need to ensure that Alice_AEA uses the OEF connection as its default connection. Open the agent's configuration file in `alice/aea-config.yaml` and ensure that the `default_connection`'s value is `fetchai/oef:0.1.0`.
+You now need to ensure that Alice_AEA uses the OEF connection as its default connection. Open the agent's configuration file in `alice/aea-config.yaml` and ensure that the `default_connection`'s value is `fetchai/oef:0.2.0`.
+
+You can use the following command to set this value:
+
+``` bash
+aea config set agent.default_connection fetchai/oef:0.2.0
+```
 
 ### Install the Dependencies and Run Alice_AEA:
 
@@ -157,7 +179,7 @@ aea install
 Then run Alice_AEA:
 
 ``` bash
-aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.1.0,fetchai/webhook:0.1.0
+aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
 ```
 
 You should see Alice_AEA running and showing its identity on the terminal. For example:
@@ -182,28 +204,51 @@ cd faber
 Add the `aries_faber` skill:
 
 ``` bash
-aea add --local skill fetchai/aries_faber:0.1.0
+aea add skill fetchai/aries_faber:0.1.0
 ```
 
 You then need to configure this skill. Open the skill's configuration file in `faber/vendor/fetchai/skills/aries_alice/skill.yaml` and ensure `admin_host` and `admin_port` details match those you noted above for Faber_ACA. In addition, make sure that the value of `alice_id` matches Alice_AEA's address as seen in the third terminal.
+
+To set these values:
+
+``` bash
+aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host <Faber admin IP>
+aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_port <Faber admin port>
+aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_host <Faber admin IP>
+aea config set --type int vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_port <Faber admin port>
+aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.alice_id <Alice_AEA's address>
+```
 
 ### Add and Configure the Connections:
 
 Add `http_client`, `oef` and `webhook` connections:
 
 ``` bash
-aea add --local connection fetchai/http_client:0.1.0
-aea add --local connection fetchai/webhook:0.1.0
-aea add connection fetchai/oef:0.1.0
+aea add connection fetchai/http_client:0.1.0
+aea add connection fetchai/webhook:0.1.0
+aea add connection fetchai/oef:0.2.0
 ```
 
-You now need to configure the `webhook` connection. Open the connection's configuration file in `faber/vendor/fetchai/connections/webhook/connection.yaml` and ensure `webhook_port` matches with what you used above for Faber_ACA. 
+You now need to configure the `webhook` connection. 
+
+Make sure that in `webhook` connection's configuration file `faber/vendor/fetchai/connections/webhook/connection.yaml`, the value of `webhook_port` matches with what you used above for Faber_ACA. 
 
 Next, make sure that the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
+
+``` bash
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Faber webhook port>
+aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webhooks/topic/{topic}/ 
+```
 
 ### Configure Faber_AEA:
 
 You now need to ensure that Faber_AEA uses the HTTP_Client connection as its default connection. Open the agent's configuration file in `faber/aea-config.yaml` and ensure that the `default_connection`'s value is `fetchai/http_client:0.1.0`.
+
+You can use the following command to set this value:
+
+``` bash
+aea config set agent.default_connection fetchai/http_client:0.1.0
+```
 
 ### Install the Dependencies and Run Faber_AEA:
 
@@ -216,7 +261,7 @@ aea install
 Then run the Faber_AEA:
 
 ``` bash
-aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.1.0,fetchai/webhook:0.1.0
+aea run --connections fetchai/http_client:0.1.0,fetchai/oef:0.2.0,fetchai/webhook:0.1.0
 ```
 
 You should see Faber_AEA running and showing logs of its activities. For example: 

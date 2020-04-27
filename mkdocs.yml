@@ -23,7 +23,6 @@ nav:
       - Identity: 'identity.md'
       - Trust issues: 'trust.md'
     - Demos:
-      - Aries Cloud Agents Example: 'aries-cloud-agent-example.md'
       - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
       - Generic skills: 'generic-skills.md'

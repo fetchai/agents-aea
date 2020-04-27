@@ -19,11 +19,8 @@
 
 """This package contains the handlers for the aries_alice skill."""
 
-import base64
-import binascii
 import json
 from typing import Dict, Optional, cast
-from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
 from aea.mail.base import Envelope, EnvelopeContext
@@ -35,13 +32,15 @@ from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
+HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 
-HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8031
 
+ADMIN_COMMAND_RECEIVE_INVITE = "/connections/receive-invitation"
 
-class AriesDemoDefaultHandler(Handler):
+
+class DefaultHandler(Handler):
     """This class represents alice's handler for default messages."""
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
@@ -55,7 +54,6 @@ class AriesDemoDefaultHandler(Handler):
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
 
-        self.kwargs = kwargs
         self.handled_message = None
 
     def _admin_post(self, path: str, content: Dict = None):
@@ -70,7 +68,7 @@ class AriesDemoDefaultHandler(Handler):
         )
         context = EnvelopeContext(connection_id=HTTP_CONNECTION_PUBLIC_ID)
         envelope = Envelope(
-            to="Alice_ACA",
+            to=self.admin_url,
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
             context=context,
@@ -94,13 +92,13 @@ class AriesDemoDefaultHandler(Handler):
         :return: None
         """
         message = cast(DefaultMessage, message)
+        self.handled_message = message
         if message.performative == DefaultMessage.Performative.BYTES:
             content_bytes = message.content
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
-                # self.handle_received_invite(content)
-                self._admin_post("/connections/receive-invitation", content)
+                self._admin_post(ADMIN_COMMAND_RECEIVE_INVITE, content)
 
     def teardown(self) -> None:
         """
@@ -110,42 +108,8 @@ class AriesDemoDefaultHandler(Handler):
         """
         pass
 
-    def handle_received_invite(self, invite_detail: Dict):
-        for details in invite_detail:
-            try:
-                url = urlparse(details)
-                query = url.query
-                if query and "c_i=" in query:
-                    pos = query.index("c_i=") + 4
-                    b64_invite = query[pos:]
-                else:
-                    b64_invite = details
-            except ValueError:
-                b64_invite = details
 
-            if b64_invite:
-                try:
-                    padlen = 4 - len(b64_invite) % 4
-                    if padlen <= 2:
-                        b64_invite += "=" * padlen
-                    invite_json = base64.urlsafe_b64decode(b64_invite)
-                    details = invite_json.decode("utf-8")
-                except binascii.Error:
-                    pass
-                except UnicodeDecodeError:
-                    pass
-
-            if details:
-                try:
-                    json.loads(details)
-                    break
-                except json.JSONDecodeError as e:
-                    self.context.logger.error("Invalid invitation:", str(e))
-
-        self._admin_post("/connections/receive-invitation", details)
-
-
-class AriesDemoHttpHandler(Handler):
+class HttpHandler(Handler):
     """This class represents alice's handler for HTTP messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
@@ -158,28 +122,10 @@ class AriesDemoHttpHandler(Handler):
         super().__init__(**kwargs)
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
-        self.connection_id = ""
+        self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Faber = False
 
-        self.kwargs = kwargs
         self.handled_message = None
-
-    def _admin_post(self, path: str, content: Dict = None):
-        # Request message & envelope
-        request_http_message = HttpMessage(
-            performative=HttpMessage.Performative.REQUEST,
-            method="POST",
-            url=self.admin_url + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        self.context.outbox.put_message(
-            to="Alice_ACA",
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
-        )
 
     def setup(self) -> None:
         """
@@ -187,7 +133,7 @@ class AriesDemoHttpHandler(Handler):
 
         :return: None
         """
-        pass
+        self.context.logger.info("My address is: " + self.context.agent_address)
 
     def handle(self, message: Message) -> None:
         """
@@ -197,6 +143,7 @@ class AriesDemoHttpHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
+        self.handled_message = message
         if message.performative == HttpMessage.Performative.REQUEST:  # webhook
             content_bytes = message.bodyy
             content = json.loads(content_bytes)

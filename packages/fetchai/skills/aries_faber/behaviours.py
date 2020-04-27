@@ -22,19 +22,19 @@
 import json
 from typing import Dict
 
-from aea.configurations.base import PublicId
 from aea.skills.behaviours import OneShotBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-
-HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
+HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
 
+ADMIN_COMMAND_STATUS = "/status"
 
-class AriesDemoFaberBehaviour(OneShotBehaviour):
+
+class FaberBehaviour(OneShotBehaviour):
     """This class represents the behaviour of faber."""
 
     def __init__(self, **kwargs):
@@ -45,23 +45,6 @@ class AriesDemoFaberBehaviour(OneShotBehaviour):
         super().__init__(**kwargs)
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
-
-    def admin_post(self, path: str, content: Dict = None):
-        # Request message & envelope
-        request_http_message = HttpMessage(
-            performative=HttpMessage.Performative.REQUEST,
-            method="POST",
-            url=self.admin_url + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        self.context.outbox.put_message(
-            to="Faber_ACA",
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
-        )
 
     def admin_get(self, path: str, content: Dict = None):
         # Request message & envelope
@@ -74,14 +57,11 @@ class AriesDemoFaberBehaviour(OneShotBehaviour):
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         self.context.outbox.put_message(
-            to="Faber_ACA",
+            to=self.admin_url,
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
             message=HttpSerializer().encode(request_http_message),
         )
-
-    # def put(self, msg):
-    #     pass
 
     def setup(self) -> None:
         """
@@ -97,7 +77,7 @@ class AriesDemoFaberBehaviour(OneShotBehaviour):
 
         :return: None
         """
-        self.admin_get("/status")
+        self.admin_get(ADMIN_COMMAND_STATUS)
 
     def teardown(self) -> None:
         """

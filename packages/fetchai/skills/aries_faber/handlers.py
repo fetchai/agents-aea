@@ -32,17 +32,18 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.serialization import HttpSerializer
 
-HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
-DEFAULT_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "default", "0.1.0")
-
-OEF_CONNECTION_PUBLIC_ID = PublicId("fetchai", "oef", "0.1.0")
+HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
+DEFAULT_PROTOCOL_PUBLIC_ID = DefaultMessage.protocol_id
+OEF_CONNECTION_PUBLIC_ID = PublicId("fetchai", "oef", "0.2.0")
 
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
 SUPPORT_REVOCATION = False
 
+ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
 
-class AriesDemoHTTPHandler(Handler):
+
+class HTTPHandler(Handler):
     """This class represents faber's handler for default messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[ProtocolId]
@@ -56,10 +57,9 @@ class AriesDemoHTTPHandler(Handler):
         super().__init__(**kwargs)
 
         self.admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
-        self.connection_id = ""
+        self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Alice = False
 
-        self.kwargs = kwargs
         self.handled_message = None
 
     def _admin_post(self, path: str, content: Dict = None):
@@ -73,61 +73,11 @@ class AriesDemoHTTPHandler(Handler):
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         self.context.outbox.put_message(
-            to="Faber_ACA",
+            to=self.admin_url,
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
             message=HttpSerializer().encode(request_http_message),
         )
-
-    def _admin_get(self, path: str, content: Dict = None):
-        # Request message & envelope
-        request_http_message = HttpMessage(
-            performative=HttpMessage.Performative.REQUEST,
-            method="GET",
-            url=self.admin_url + path,
-            headers="",
-            version="",
-            bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
-        )
-        self.context.outbox.put_message(
-            to="Faber_ACA",
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
-        )
-
-    # def register_did(self, ledger_url: str = None, alias: str = None):
-    # self.log(f"Registering {self.ident} with seed {self.seed}")
-    # if not ledger_url:
-    #     ledger_url = LEDGER_URL
-    # if not ledger_url:
-    #     ledger_url = f"http://{self.external_host}:9000"
-    # data = {"alias": alias or self.ident, "seed": self.seed, "role": "TRUST_ANCHOR"}
-    # async with self.client_session.post(
-    #     ledger_url + "/register", json=data
-    # ) as resp:
-    #     if resp.status != 200:
-    #         raise Exception(f"Error registering DID, response code {resp.status}")
-    #     nym_info = await resp.json()
-    #     self.did = nym_info["did"]
-    # self.log(f"Got DID: {self.did}")
-
-    def register_schema(self, schema_name, version, schema_attrs):
-        # Create a schema
-        schema_body = {
-            "schema_name": schema_name,
-            "schema_version": version,
-            "attributes": schema_attrs,
-        }
-        self._admin_post("/schemas", schema_body)
-
-    def register_creddef(self, schema_id):
-        # Create a cred def for the schema
-        credential_definition_body = {
-            "schema_id": schema_id,
-            "support_revocation": SUPPORT_REVOCATION,
-        }
-        self._admin_post("/credential-definitions", credential_definition_body)
 
     def send_message(self, content: Dict):
         # message & envelope
@@ -160,7 +110,6 @@ class AriesDemoHTTPHandler(Handler):
         :param message: the message
         :return: None
         """
-        # self.context.behaviours.aries_demo_behaviour.put(message)
         message = cast(HttpMessage, message)
         self.handled_message = message
         if (
@@ -171,18 +120,7 @@ class AriesDemoHTTPHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info("Received message: " + str(content))
             if "version" in content:  # response to /status
-                # self.register_did()
-                # self.register_schema(
-                #     schema_name="degree schema",
-                #     version="0.0.1",
-                #     schema_attrs=["name", "date", "degree", "age", "timestamp"],
-                # )
-                # elif "schema_id" in content:
-                #     schema_id = content["schema_id"]
-                #     self.register_creddef(schema_id)
-                # elif "credential_definition_id" in content:
-                #     credential_definition_id = content["credential_definition_id"]
-                self._admin_post("/connections/create-invitation")
+                self._admin_post(ADMIN_COMMAND_CREATE_INVITATION)
             elif "connection_id" in content:
                 connection = content
                 self.connection_id = content["connection_id"]
@@ -212,3 +150,4 @@ class AriesDemoHTTPHandler(Handler):
 
         :return: None
         """
+        pass
