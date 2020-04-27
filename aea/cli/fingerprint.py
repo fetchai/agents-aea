@@ -18,13 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea add' subcommand."""
-import sys
 from pathlib import Path
 from typing import Dict, cast
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter, logger
+from aea.cli.common import Context, PublicIdParameter
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -72,8 +71,9 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
 
         if not package_dir.exists():
             # we only permit non-vendorized packages to be fingerprinted
-            logger.error("Package not found at path {}".format(package_dir))
-            sys.exit(1)
+            raise click.ClickException(
+                "Package not found at path {}".format(package_dir)
+            )
 
         fingerprints_dict = _compute_fingerprint(
             package_dir, ignore_patterns=config.fingerprint_ignore_patterns
@@ -83,8 +83,7 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
         config.fingerprint = fingerprints_dict
         config_loader.dump(config, open(config_file_path, "w"))
     except Exception as e:
-        logger.exception(e)
-        sys.exit(1)
+        raise click.ClickException(str(e))
 
 
 @fingerprint.command()

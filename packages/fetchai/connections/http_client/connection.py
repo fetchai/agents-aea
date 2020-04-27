@@ -38,6 +38,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.2.0")
 
 logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -177,7 +178,7 @@ class HTTPClientConnection(Connection):
         :param provider_port: server port number
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "http_client", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
 
         super().__init__(**kwargs)
         self.channel = HTTPClientChannel(

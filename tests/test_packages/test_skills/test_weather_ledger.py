@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import signal
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
@@ -82,14 +81,7 @@ class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
         self.start_error_read_thread(process_two)
 
         time.sleep(10)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
 
-        process_one.wait(timeout=10)
-        process_two.wait(timeout=10)
+        self.terminate_agents()
 
-        # text1, err1 = process_one.communicate()
-        # text2, err2 = process_two.communicate()
-
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+        assert self.is_successfully_terminated(), "Weather ledger test not successful."

@@ -35,6 +35,8 @@ from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.1.0")
+
 
 class PeerToPeerChannel:
     """A wrapper for an SDK or API."""
@@ -164,7 +166,7 @@ class PeerToPeerClientConnection(Connection):
         :param kwargs: keyword argument for the parent class.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "p2p_client", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
         provider_addr = provider_addr
         provider_port = provider_port

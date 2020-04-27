@@ -1,5 +1,32 @@
 # Release History
 
+## 0.3.1 (2020-04-27)
+
+- Adds p2p_stub connection
+- Adds p2p_noise connection
+- Adds webhook connection
+- Upgrades error handling for error skill
+- Fixes default timeout on main agent loop and provides setter in AEABuilder
+- Adds multithreading support for launch command
+- Provides support for kwargs to AEA constructor to be set on skill context
+- Renames ConfigurationType with PackageType for consistency
+- Provides a new AEATestCase class for improved testing
+- Adds execution time limits for act/react calls
+- TAC skills refactoring and contract integration
+- Supports contract dependencies being added automatically
+- Adds HTTP example skill
+- Allows for skill inactivation during initialisation
+- Improves error messages on skill loading errors
+- Improves Readme, particularly for PyPI
+- Adds support for Location based queries and descriptions
+- Refactors skills tests to use AEATestCase
+- Adds fingerprint and scaffold cli command for contract
+- Adds multiple additional docs tests
+- Makes task manager initialize pool lazily
+- Multiple docs updates
+- Multiple additional unit tests
+- Multiple additional minor fixes and changes
+
 ## 0.3.0 (2020-04-02)
 
 - Introduces IPFS based hashing of files to detect changes, ensure consistency and allow for content addressing

@@ -201,7 +201,7 @@ class StubConnection(Connection):
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
-            assert self.in_queue is not None
+            assert self.in_queue is not None, "Input queue not initialized."
             envelope = await self.in_queue.get()
             return envelope
         except Exception as e:
@@ -275,14 +275,6 @@ class StubConnection(Connection):
         output_file = configuration.config.get(
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )  # type: str
-        restricted_to_protocols_names = {
-            p.name for p in configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {p.name for p in configuration.excluded_protocols}
         return StubConnection(
-            input_file,
-            output_file,
-            connection_id=configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            input_file, output_file, address=address, configuration=configuration,
         )

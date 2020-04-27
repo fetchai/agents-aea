@@ -24,7 +24,6 @@ import json
 import os
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
 from typing import Dict
 from unittest.mock import patch
@@ -277,9 +276,6 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
@@ -307,12 +303,11 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         The expected message is: 'Directory already exist. Aborting...'
         """
         s = "Directory already exist. Aborting..."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -425,9 +420,6 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         result = cls.runner.invoke(
@@ -462,12 +454,11 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         The expected message is: "The current folder is already an AEA project. Please move to the parent folder.".
         """
         s = "The current folder is already an AEA project. Please move to the parent folder."
-        self.mocked_logger_error.assert_called_once_with(s)
+        assert self.result.exception.message == s
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.mocked_logger_error = cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

@@ -484,7 +484,7 @@ class Multiplexer:
                 )
                 self._connect_all_task.result()
                 self._connect_all_task = None
-                assert self.is_connected
+                assert self.is_connected, "At least one connection failed to connect!"
                 self._connection_status.is_connected = True
                 self._recv_loop_task = asyncio.run_coroutine_threadsafe(
                     self._receiving_loop(), loop=self._loop
