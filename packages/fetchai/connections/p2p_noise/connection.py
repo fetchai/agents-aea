@@ -59,6 +59,8 @@ NOISE_NODE_CLARGS = [
 
 NOISE = "noise"
 
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_noise:0.1.0")
+
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
 async def _async_golang_get_deps(
@@ -466,7 +468,7 @@ class P2PNoiseConnection(Connection):
         """
         self._check_go_installed()
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "p2p-noise", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
         # noise local node
         logger.debug("Public key used by noise node: {}".format(str(key.pub)))
         self.node = NoiseNode(
