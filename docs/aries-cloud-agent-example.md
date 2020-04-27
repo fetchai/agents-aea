@@ -1,4 +1,4 @@
-Demonstrating the interaction between an AEA and an instance of Aries Cloud Agent (ACA).
+Demonstrating interactions between AEAs and and an instance of Aries Cloud Agent (ACA).
 
 ### Discussion
 
