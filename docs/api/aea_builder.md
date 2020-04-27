@@ -186,11 +186,21 @@ Add a component, given its type and the directory.
 
 **Raises**:
 
-- `ValueError`: if a component is already registered with the same component id.
+- `AEAException`: if a component is already registered with the same component id.
+| or if there's a missing dependency.
 
 **Returns**:
 
 the AEABuilder
+
+<a name=".aea.aea_builder.AEABuilder.set_context_namespace"></a>
+#### set`_`context`_`namespace
+
+```python
+ | set_context_namespace(context_namespace: Dict[str, Any]) -> None
+```
+
+Set the context namespace.
 
 <a name=".aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component

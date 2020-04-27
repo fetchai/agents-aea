@@ -55,7 +55,7 @@ Get agent name.
 
 ```python
  | @property
- | skill_id()
+ | skill_id() -> PublicId
 ```
 
 Get the skill id of the skill context.
@@ -65,7 +65,7 @@ Get the skill id of the skill context.
 
 ```python
  | @is_active.setter
- | is_active(value: bool)
+ | is_active(value: bool) -> None
 ```
 
 Set the status of the skill (active/not active).
@@ -234,6 +234,16 @@ Get behaviours of the skill.
 ```
 
 Get contracts the skill has access to.
+
+<a name=".aea.skills.base.SkillContext.namespace"></a>
+#### namespace
+
+```python
+ | @property
+ | namespace() -> SimpleNamespace
+```
+
+Get the agent context namespace.
 
 <a name=".aea.skills.base.SkillContext.__getattr__"></a>
 #### `__`getattr`__`
