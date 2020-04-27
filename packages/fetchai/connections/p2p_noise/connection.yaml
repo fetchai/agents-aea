@@ -11,7 +11,7 @@ fingerprint:
   aea/api.go: Qmd8C5Wa7ebdAmTKokHQNxjpShEChezdG9oSdiYt3HcBhZ
   connection.py: QmTyAJX1MHahctL8nsmBJseqYHZDUasroTyiAnNnn3QgHA
   go.mod: QmVSRYVqSMRDvWTbMuEFj53gN64LhTRZyrAuvrQSRu2LVH
-  noise_node.go: QmVYEZHAi32LejNcN5RuhZ1NtHKKSN7vPEK4xbjY3pvDYq
+  noise_node.go: Qmew2VFPtZizuZue1okrU3n1BKcu7zUiKs51pkGLVtrvFK
 fingerprint_ignore_patterns:
 - go.sum
 - noise_aea

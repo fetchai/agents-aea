@@ -72,27 +72,26 @@ func main() {
 
 	// Once overlay setup, connect to agent
 	check(agent.Connect())
-	fmt.Printf("[noise-p2p][info] successfully connected to AEA!")
+	fmt.Printf("[noise-p2p][info] successfully connected to AEA!\n")
+
+	// Have the node start listening for new peers.
+	check(node.Listen())
+	fmt.Printf("[noise-p2p][info] successfully listening...\n")
 
 	// Ping entry node to initially bootstrap, if non genesis
 	if len(agent.EntryUris()) > 0 {
 		check(bootstrap(node, agent.EntryUris()...))
+		fmt.Printf("[noise-p2p][info] successfully bootstrapped.\n")
 	}
 
 	// Attempt to discover peers if we are bootstrapped to any nodes.
-	if len(agent.EntryUris()) > 0 {
-		go func() {
-			for {
-				discover(overlay)
-				time.Sleep(2500 * time.Millisecond)
-			}
-		}()
-	}
-
-	// Have the node start listening for new peers.
-	// if len(agent.EntryUris()) > 0 {
-	check(node.Listen())
-	// }
+	go func() {
+		for {
+			fmt.Printf("[noise-p2p][debug] discovering...\n")
+			discover(overlay)
+			time.Sleep(2500 * time.Millisecond)
+		}
+	}()
 
 	// Receive envelopes from agent and forward to peer
 	go func() {
@@ -113,9 +112,9 @@ func main() {
         fmt.Println(err)
         return
     }
-    fmt.Println("File %s successfully deleted", sum_file)
+    fmt.Println("File %s successfully deleted\n", sum_file)
 
-	println("[noise-p2p][info] node stopped")
+	println("[noise-p2p][info] node stopped\n")
 }
 
 // Deliver an envelope from agent to receiver peer
