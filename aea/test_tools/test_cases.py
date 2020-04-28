@@ -28,7 +28,7 @@ import tempfile
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List
 
 import pytest
 
@@ -252,9 +252,7 @@ class AEATestCase:
         for process in subprocesses:
             process.wait(timeout=timeout)
 
-    def is_successfully_terminated(
-        self, *subprocesses: subprocess.Popen
-    ):
+    def is_successfully_terminated(self, *subprocesses: subprocess.Popen):
         """
         Check if all subprocesses terminated successfully
         """
