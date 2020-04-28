@@ -73,6 +73,7 @@ class AEA(Agent):
         :param exeution_timeout: amount of time to limit single act/handle to execute.
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param search_service_address: OEF address to use.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
