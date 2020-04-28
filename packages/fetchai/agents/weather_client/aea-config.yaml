@@ -1,7 +1,7 @@
 agent_name: weather_client
 author: fetchai
 version: 0.2.0
-description: ''
+description: This AEA purchases weather data from the weather station.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}

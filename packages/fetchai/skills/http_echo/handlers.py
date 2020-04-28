@@ -1,55 +1,24 @@
-## Description
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 
-The HTTP server connection allows you to run a server inside a connection which accepts requests from clients. The HTTP server connection validates requests it receives against the provided OpenAPI file. It translates each valid request into an envelope, sends the envelope to the agent and if it receives, within a timeout window, a valid response envelope, serves the response to the client.
+"""This module contains the handler for the 'http_echo' skill."""
 
-## Steps
-
-Create a new AEA:
-
-``` bash
-aea create my_aea
-```
-
-Add the http server connection package
-
-``` bash
-aea add connection fetchai/http_server:0.1.0
-```
-
-Update the default connection:
-
-``` bash
-aea config set agent.default_connection fetchai/http_server:0.1.0
-```
-
-Modify the `api_spec_path`:
-
-``` bash
-aea config set vendor.fetchai.connections.http_server.config.api_spec_path "../examples/http_ex/petstore.yaml"
-```
-
-Ensure the file exists under the specified path!
-
-Install the dependencies:
-
-``` bash
-aea install
-```
-
-Write and add your skill:
-
-``` bash
-aea scaffold skill http_echo
-```
-
-We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
-
-
-First, we delete the `my_model.py` and `behaviour.py`. The server will be pyrely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
-
-Next we implement a basic handler which prints the received envelopes and responds:
-
-``` python
 import json
 from typing import cast
 
@@ -83,7 +52,7 @@ class HttpHandler(Handler):
         http_msg = cast(HttpMessage, message)
         if http_msg.performative == HttpMessage.Performative.REQUEST:
             self.context.logger.info(
-                "[{}] received http request with method={}, url={} and body={}".format(
+                "[{}] received http request with method={}, url={} and body={!r}".format(
                     self.context.agent_name,
                     http_msg.method,
                     http_msg.url,
@@ -164,48 +133,3 @@ class HttpHandler(Handler):
         :return: None
         """
         pass
-```
-
-We also need to update the `skill.yaml` accordingly:
-
-``` yaml
-handlers:
-  http_handler:
-    args: {}
-    class_name: HttpHandler
-``` 
-
-Finally, we run the fingerprinter:
-``` bash
-aea fingerprint skill fetchai/http_echo:0.1.0
-```
-Note, you will have to replace the author name with your author handle.
-
-We can now run the AEA:
-``` bash
-aea run
-```
-
-In a separate terminal, we can create a client and communicate with the server:
-``` python
-import requests
-
-response = requests.get('http://127.0.0.1:8000')
-response.status_code 
-# >>> 404
-# we receive a not found since the path is not available in the api spec
-
-response = requests.get('http://127.0.0.1:8000/pets')
-response.status_code
-# >>> 200
-response.content
-# >>> b'{"tom": {"type": "cat", "age": 10}}'
-
-response = requests.post('http://127.0.0.1:8000/pets')
-response.status_code
-# >>> 200
-response.content
-# >>> b''
-```
-
-
