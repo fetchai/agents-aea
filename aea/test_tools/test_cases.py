@@ -202,7 +202,7 @@ class AEATestCase:
         try:
             output, _err = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
-            self.terminate_agents([process])
+            self.terminate_agents(process)
             output, _err = process.communicate()
 
         return string in str(output)
@@ -233,7 +233,7 @@ class AEATestCase:
 
     def terminate_agents(
         self,
-        subprocesses: Optional[List[subprocess.Popen]] = None,
+        *subprocesses: List[subprocess.Popen],
         signal: signal.Signals = signal.SIGINT,
         timeout: int = 10,
     ) -> None:
@@ -245,7 +245,7 @@ class AEATestCase:
         :param signal: the signal for interuption
         :timeout: the timeout for interuption
         """
-        if subprocesses is None:
+        if not subprocesses:
             subprocesses = self.subprocesses
         for process in subprocesses:
             process.send_signal(signal.SIGINT)

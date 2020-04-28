@@ -78,6 +78,6 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         time.sleep(10.0)
 
-        self.terminate_agents([deploy_aea_process, client_aea_process])
+        self.terminate_agents(deploy_aea_process, client_aea_process)
 
         assert self.is_successfully_terminated(), "ERC1155 test not successful."
