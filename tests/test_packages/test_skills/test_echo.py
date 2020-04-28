@@ -76,6 +76,11 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         assert sent_envelope.message == received_envelope.message
 
-        self.terminate_agents([process])
+        check_string = "hello"
+        assert self.is_present_in_output(
+            process, check_string
+        ), "String '{}' didn't appear in agent output.".format(check_string)
 
-        assert self.is_successfully_terminated(), "Echo test not successful."
+        assert (
+            self.is_successfully_terminated()
+        ), "Echo agent wasn't successfully terminated."

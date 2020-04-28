@@ -46,6 +46,8 @@ from aea.test_tools.exceptions import AEATestingException
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
+DEFAULT_PROCESS_TIMEOUT = 5
+
 
 class AEATestCase:
     """Test case for AEA end-to-end tests."""
@@ -181,6 +183,29 @@ class AEATestCase:
         )
         self.subprocesses.append(process)
         return process
+
+    def is_present_in_output(
+        self,
+        process: subprocess.Popen,
+        string: str,
+        timeout: int = DEFAULT_PROCESS_TIMEOUT,
+    ) -> bool:
+        """
+        Check if string present in agent process output.
+
+        :param process: a subprocess object to communicate.
+        :param string: a substring expected to appear in process output.
+        :param timeout: a timeout in seconds.
+
+        :return: boolean is string in process output.
+        """
+        try:
+            output, _err = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            self.terminate_agents([process])
+            output, _err = process.communicate()
+
+        return string in str(output)
 
     def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
         """
