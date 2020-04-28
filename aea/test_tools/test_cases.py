@@ -233,7 +233,7 @@ class AEATestCase:
 
     def terminate_agents(
         self,
-        *subprocesses: List[subprocess.Popen],
+        *subprocesses: subprocess.Popen,
         signal: signal.Signals = signal.SIGINT,
         timeout: int = 10,
     ) -> None:
@@ -246,20 +246,20 @@ class AEATestCase:
         :timeout: the timeout for interuption
         """
         if not subprocesses:
-            subprocesses = self.subprocesses
+            subprocesses = self.subprocesses  # type: ignore
         for process in subprocesses:
             process.send_signal(signal.SIGINT)
         for process in subprocesses:
             process.wait(timeout=timeout)
 
     def is_successfully_terminated(
-        self, subprocesses: Optional[List[subprocess.Popen]] = None
+        self, *subprocesses: subprocess.Popen
     ):
         """
         Check if all subprocesses terminated successfully
         """
-        if subprocesses is None:
-            subprocesses = self.subprocesses
+        if not subprocesses:
+            subprocesses = self.subprocesses  # type: ignore
         all_terminated = [process.returncode == 0 for process in subprocesses]
         return all_terminated
 
