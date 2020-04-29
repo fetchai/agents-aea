@@ -56,19 +56,17 @@ class AEATestCase:
     runner: CliRunner  # CLI runner
     agent_configuration: AgentConfig  # AgentConfig
     agent_name: str  # the agent name derived from the config
-    subprocesses: List  # list of launched subprocesses
+    subprocesses: List[subprocess.Popen]  # list of launched subprocesses
     t: str  # temporary directory path
-    threads: List  # list of started threads
+    threads: List[Thread]  # list of started threads
 
     @classmethod
     def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
         """Set up the test class."""
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
-        aea_config_file_path = Path(
-            os.path.join(PROJECT_ROOT_DIR, DEFAULT_AEA_CONFIG_FILE)
-        )
-        cls.is_project_dir_test = os.path.isfile(aea_config_file_path)
+        aea_config_file_path = Path(PROJECT_ROOT_DIR, DEFAULT_AEA_CONFIG_FILE)
+        cls.is_project_dir_test = aea_config_file_path.is_file()
         if not cls.is_project_dir_test:
             cls.t = tempfile.mkdtemp()
 
@@ -200,7 +198,7 @@ class AEATestCase:
         Run agent as subprocess.
         Run from agent's directory.
 
-        :param *args: CLI args
+        :param args: CLI args
 
         :return: subprocess object.
         """
@@ -263,7 +261,7 @@ class AEATestCase:
         """
         Delete agents in current working directory.
 
-        :param *agents_names: str agent names.
+        :param agents_names: str agent names.
 
         :return: None
         """
@@ -338,6 +336,15 @@ class AEATestCase:
         """
         assert src.is_file() and dest.is_file(), "Source or destination is not a file."
         src.write_text(dest.read_text())
+
+    def change_directory(self, path: Path) -> None:
+        """
+        Change current working directory.
+
+        :param path: path to the new working directory.
+        :return: None
+        """
+        os.chdir(path)
 
 
 class AEAWithOefTestCase(AEATestCase):
