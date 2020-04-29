@@ -67,7 +67,7 @@ def _try_install(install_command: List[str]) -> int:
     """
     try:
         subp = subprocess.Popen(install_command)  # nosec
-        subp.wait(60.0)
+        subp.wait(120.0)
         return_code = subp.returncode
     finally:
         poll = subp.poll()
