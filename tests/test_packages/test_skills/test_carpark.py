@@ -42,7 +42,7 @@ class TestCarPark(AEAWithOefTestCase):
 
         # Setup agent one
         capark_aea_dir_path = os.path.join(self.t, capark_aea_name)
-        os.chdir(capark_aea_dir_path)
+        self.change_directory(capark_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_detection:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -57,7 +57,7 @@ class TestCarPark(AEAWithOefTestCase):
 
         # Setup Agent two
         carpark_client_aea_dir_path = os.path.join(self.t, capark_client_aea_name)
-        os.chdir(carpark_client_aea_dir_path)
+        self.change_directory(carpark_client_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
@@ -74,10 +74,10 @@ class TestCarPark(AEAWithOefTestCase):
         self.generate_wealth()
 
         # Fire the sub-processes and the threads.
-        os.chdir(capark_aea_dir_path)
+        self.change_directory(capark_aea_dir_path)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(carpark_client_aea_dir_path)
+        self.change_directory(carpark_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.start_tty_read_thread(process_one)

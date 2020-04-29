@@ -43,7 +43,7 @@ class TestTacSkills(AEAWithOefTestCase):
 
         # prepare tac controller for test
         tac_controller_dir_path = os.path.join(self.t, tac_controller_name)
-        os.chdir(tac_controller_dir_path)
+        self.change_directory(tac_controller_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
@@ -54,7 +54,7 @@ class TestTacSkills(AEAWithOefTestCase):
         tac_aea_two_dir_path = os.path.join(self.t, tac_aea_two)
 
         for agent_path in (tac_aea_one_dir_path, tac_aea_two_dir_path):
-            os.chdir(agent_path)
+            self.change_directory(agent_path)
 
             self.add_item("connection", "fetchai/oef:0.2.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -63,14 +63,14 @@ class TestTacSkills(AEAWithOefTestCase):
             self.run_install()
 
         # run tac controller
-        os.chdir(tac_controller_dir_path)
+        self.change_directory(tac_controller_dir_path)
         tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         # run two agents (participants)
-        os.chdir(tac_aea_one_dir_path)
+        self.change_directory(tac_aea_one_dir_path)
         tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(tac_aea_two_dir_path)
+        self.change_directory(tac_aea_two_dir_path)
         tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

@@ -43,7 +43,7 @@ class TestThermometerSkill(AEAWithOefTestCase):
 
         # add packages for agent one and run it
         thermometer_aea_dir_path = os.path.join(self.t, thermometer_aea_name)
-        os.chdir(thermometer_aea_dir_path)
+        self.change_directory(thermometer_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/thermometer:0.1.0")
@@ -61,7 +61,7 @@ class TestThermometerSkill(AEAWithOefTestCase):
         thermometer_client_aea_dir_path = os.path.join(
             self.t, thermometer_client_aea_name
         )
-        os.chdir(thermometer_client_aea_dir_path)
+        self.change_directory(thermometer_client_aea_dir_path)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/thermometer_client:0.1.0")
@@ -75,10 +75,10 @@ class TestThermometerSkill(AEAWithOefTestCase):
         self.generate_wealth()
 
         # run AEAs
-        os.chdir(thermometer_aea_dir_path)
+        self.change_directory(thermometer_aea_dir_path)
         thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(thermometer_client_aea_dir_path)
+        self.change_directory(thermometer_client_aea_dir_path)
         thermometer_client_aea_process = self.run_agent(
             "--connections", "fetchai/oef:0.2.0"
         )

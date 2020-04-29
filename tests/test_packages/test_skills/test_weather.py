@@ -40,7 +40,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         # prepare agent one (weather station)
         weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
-        os.chdir(weather_station_aea_dir_path)
+        self.change_directory(weather_station_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
@@ -53,7 +53,7 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         # prepare agent two (weather client)
         weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
-        os.chdir(weather_client_aea_dir_path)
+        self.change_directory(weather_client_aea_dir_path)
 
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
@@ -65,10 +65,10 @@ class TestWeatherSkills(AEAWithOefTestCase):
         self.run_install()
 
         # run agents
-        os.chdir(weather_station_aea_dir_path)
+        self.change_directory(weather_station_aea_dir_path)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(weather_client_aea_dir_path)
+        self.change_directory(weather_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

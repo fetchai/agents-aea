@@ -45,7 +45,7 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         # prepare seller agent
         seller_aea_dir_path = os.path.join(self.t, seller_aea_name)
-        os.chdir(seller_aea_dir_path)
+        self.change_directory(seller_aea_dir_path)
 
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
@@ -55,7 +55,7 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         # prepare buyer agent
         buyer_aea_dir_path = os.path.join(self.t, buyer_aea_name)
-        os.chdir(buyer_aea_dir_path)
+        self.change_directory(buyer_aea_dir_path)
 
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
@@ -64,10 +64,10 @@ class TestGenericSkills(AEAWithOefTestCase):
         self.run_install()
 
         # run AEAs
-        os.chdir(seller_aea_dir_path)
+        self.change_directory(seller_aea_dir_path)
         seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(buyer_aea_dir_path)
+        self.change_directory(buyer_aea_dir_path)
         buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

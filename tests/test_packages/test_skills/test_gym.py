@@ -40,7 +40,7 @@ class TestGymSkill(AEAWithOefTestCase):
         self.create_agents(gym_aea_name)
 
         gym_aea_dir_path = os.path.join(self.t, gym_aea_name)
-        os.chdir(gym_aea_dir_path)
+        self.change_directory(gym_aea_dir_path)
         self.add_item("skill", "fetchai/gym:0.1.0")
         self.add_item("connection", "fetchai/gym:0.1.0")
         self.run_install()

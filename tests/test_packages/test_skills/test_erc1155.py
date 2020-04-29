@@ -53,7 +53,7 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         # add packages for agent one
         deploy_aea_dir_path = os.path.join(self.t, deploy_aea_name)
-        os.chdir(deploy_aea_dir_path)
+        self.change_directory(deploy_aea_dir_path)
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -62,7 +62,7 @@ class TestGenericSkills(AEAWithOefTestCase):
 
         # add packages for agent two
         client_aea_dir_path = os.path.join(self.t, client_aea_name)
-        os.chdir(client_aea_dir_path)
+        self.change_directory(client_aea_dir_path)
         force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
@@ -70,10 +70,10 @@ class TestGenericSkills(AEAWithOefTestCase):
         self.run_install()
 
         # run agents
-        os.chdir(deploy_aea_dir_path)
+        self.change_directory(deploy_aea_dir_path)
         deploy_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(client_aea_dir_path)
+        self.change_directory(client_aea_dir_path)
         client_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

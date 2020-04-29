@@ -344,7 +344,7 @@ class AEATestCase:
         :param path: path to the new working directory.
         :return: None
         """
-        os.chdir(path)
+        os.chdir(Path(path))
 
 
 class AEAWithOefTestCase(AEATestCase):
