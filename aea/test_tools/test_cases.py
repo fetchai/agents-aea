@@ -20,11 +20,14 @@
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
 
 import os
+import random
 import shutil
 import signal
+import string
 import subprocess  # nosec
 import sys
 import tempfile
+from abc import ABC
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
@@ -33,7 +36,7 @@ from typing import Any, Callable, List, Optional
 import pytest
 
 from aea.cli import cli
-from aea.cli_gui import DEFAULT_AUTHOR as AUTHOR
+from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.configurations.loader import ConfigLoader
@@ -45,6 +48,304 @@ from aea.test_tools.exceptions import AEATestingException
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
+
+
+class BaseAEATestCase(ABC):
+    """Base class for AEA test cases."""
+
+    runner: CliRunner  # CLI runner
+    author: str = DEFAULT_AUTHOR  # author
+    subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
+    threads: List[Thread] = []  # list of started threads
+
+    @classmethod
+    def initialize_aea(cls, author) -> None:
+        """
+        Initialize AEA locally with author name.
+
+        :return: None
+        """
+        cls.run_cli_command("init", "--local", "--author", author)
+
+    def set_config(self, dotted_path: str, value: Any, type: str = "str") -> None:
+        """
+        Set a config.
+        Run from agent's directory.
+
+        :param dotted_path: str dotted path to config param.
+        :param value: a new value to set.
+        :param type: the type
+
+        :return: None
+        """
+        self.run_cli_command("config", "set", dotted_path, str(value), "--type", type)
+
+    def disable_aea_logging(self):
+        """
+        Disable AEA logging of specific agent.
+        Run from agent's directory.
+
+        :return: None
+        """
+        config_update_dict = {
+            "agent.logging_config.disable_existing_loggers": "False",
+            "agent.logging_config.version": "1",
+        }
+        for path, value in config_update_dict.items():
+            self.run_cli_command("config", "set", path, value)
+
+    @classmethod
+    def run_cli_command(cls, *args: str) -> None:
+        """
+        Run AEA CLI command.
+
+        :param args: CLI args
+        :raises AEATestingException: if command fails.
+
+        :return: None
+        """
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, *args], standalone_mode=False)
+        if result.exit_code != 0:
+            raise AEATestingException(
+                "Failed to execute AEA CLI command with args {}.\n"
+                "Exit code: {}\nException: {}".format(
+                    args, result.exit_code, result.exception
+                )
+            )
+
+    def _run_python_subprocess(self, *args: str) -> subprocess.Popen:
+        """
+        Run python with args as subprocess.
+
+        :param *args: CLI args
+
+        :return: subprocess object.
+        """
+        process = subprocess.Popen(  # nosec
+            [sys.executable, *args], stdout=subprocess.PIPE, env=os.environ.copy(),
+        )
+        self.subprocesses.append(process)
+        return process
+
+    def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
+        """
+        Start python Thread.
+
+        :param target: target method.
+        :param process: subprocess passed to thread args.
+
+        :return: None.
+        """
+        thread = Thread(target=target, args=(process,))
+        thread.start()
+        self.threads.append(thread)
+
+    @classmethod
+    def create_agents(cls, *agents_names: str) -> None:
+        """
+        Create agents in current working directory.
+
+        :param agents_names: str agent names.
+
+        :return: None
+        """
+        for name in agents_names:
+            cls.run_cli_command("create", "--local", name, "--author", cls.author)
+
+    def delete_agents(self, *agents_names: str) -> None:
+        """
+        Delete agents in current working directory.
+
+        :param agents_names: str agent names.
+
+        :return: None
+        """
+        for name in agents_names:
+            self.run_cli_command("delete", name)
+
+    def run_agent(self, *args: str) -> subprocess.Popen:
+        """
+        Run agent as subprocess.
+        Run from agent's directory.
+
+        :param args: CLI args
+
+        :return: subprocess object.
+        """
+        return self._run_python_subprocess("-m", "aea.cli", "run", *args)
+
+    def terminate_agents(
+        self,
+        subprocesses: Optional[List[subprocess.Popen]] = None,
+        signal: signal.Signals = signal.SIGINT,
+        timeout: int = 10,
+    ) -> None:
+        """
+        Terminate agent subprocesses.
+        Run from agent's directory.
+
+        :param subprocesses: the subprocesses running the agents
+        :param signal: the signal for interuption
+        :timeout: the timeout for interuption
+        """
+        if subprocesses is None:
+            subprocesses = self.subprocesses
+        for process in subprocesses:
+            process.send_signal(signal.SIGINT)
+        for process in subprocesses:
+            process.wait(timeout=timeout)
+
+    def add_item(self, item_type: str, public_id: str) -> None:
+        """
+        Add an item to the agent.
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param item_type: str item type.
+
+        :return: None
+        """
+        self.run_cli_command("add", "--local", item_type, public_id)
+
+    def run_install(self):
+        """
+        Execute AEA CLI install command.
+        Run from agent's directory.
+
+        :return: None
+        """
+        self.run_cli_command("install")
+
+    def generate_private_key(self, ledger_api_id: str = FETCHAI_NAME) -> None:
+        """
+        Generate AEA private key with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+
+        :return: None
+        """
+        self.run_cli_command("generate-key", ledger_api_id)
+
+    def add_private_key(
+        self,
+        ledger_api_id: str = FETCHAI_NAME,
+        private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE,
+    ) -> None:
+        """
+        Add private key with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+        :param private_key_filepath: private key filepath.
+
+        :return: None
+        """
+        self.run_cli_command("add-key", ledger_api_id, private_key_filepath)
+
+    def generate_wealth(self, ledger_api_id: str = FETCHAI_NAME) -> None:
+        """
+        Generate wealth with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+
+        :return: None
+        """
+        self.run_cli_command("generate-wealth", ledger_api_id)
+
+    def replace_file_content(self, src: Path, dest: Path) -> None:
+        """
+        Replace the content of the source file to the dest file.
+        :param src: the source file.
+        :param dest: the destination file.
+        :return: None
+        """
+        assert src.is_file() and dest.is_file(), "Source or destination is not a file."
+        src.write_text(dest.read_text())
+
+    @classmethod
+    def change_directory(cls, path: Path) -> None:
+        """
+        Change current working directory.
+
+        :param path: path to the new working directory.
+        :return: None
+        """
+        os.chdir(Path(path))
+
+    @classmethod
+    def _terminate_subprocesses(cls):
+        """Terminate all launched subprocesses."""
+        for process in cls.subprocesses:
+            if not process.returncode == 0:
+                poll = process.poll()
+                if poll is None:
+                    process.terminate()
+                    process.wait(2)
+
+    @classmethod
+    def _join_threads(cls):
+        """Join all started threads."""
+        for thread in cls.threads:
+            thread.join()
+
+    def is_successfully_terminated(
+        self, subprocesses: Optional[List[subprocess.Popen]] = None
+    ):
+        """
+        Check if all subprocesses terminated successfully
+        """
+        if subprocesses is None:
+            subprocesses = self.subprocesses
+        all_terminated = [process.returncode == 0 for process in subprocesses]
+        return all_terminated
+
+
+class AEATestCaseSingle(BaseAEATestCase):
+    """
+    Test case for a single AEA project.
+
+    It is assumed to be run from an AEA project.
+    """
+
+    cwd: Path  # current working directory path
+    author: str = DEFAULT_AUTHOR  # author name
+    packages_dir_path: Path = Path("packages")
+    runner: CliRunner  # CLI runner
+    subprocesses: List[subprocess.Popen]  # list of launched subprocesses
+    t: Path  # temporary directory path
+    threads: List[Thread]  # list of started threads
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.runner = CliRunner()
+        cls.cwd = Path(os.getcwd())
+        cls.subprocesses = []
+        cls.threads = []
+
+        cls.t = Path(tempfile.mkdtemp())
+        # random.choices(string.ascii_lowercase, 5)
+        cls.registry_tmp_dir = cls.t / "packages"
+        package_registry_src = cls.cwd / cls.packages_dir_path
+        shutil.copytree(str(package_registry_src), str(cls.registry_tmp_dir))
+
+        cls.change_directory(cls.t)
+        cls.initialize_aea(cls.author)
+        cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
+        cls.create_agents(cls.agent_name)
+        cls.change_directory(Path(cls.agent_name))
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test."""
+        cls._terminate_subprocesses()
+        cls._join_threads()
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class AEATestCase:
@@ -85,7 +386,7 @@ class AEATestCase:
         cls.subprocesses = []
         cls.threads = []
 
-        cls.author = AUTHOR
+        cls.author = DEFAULT_AUTHOR
 
         os.chdir(cls.t)
 

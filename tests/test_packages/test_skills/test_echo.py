@@ -20,7 +20,6 @@
 """This test module contains the integration test for the echo skill."""
 
 import time
-from pathlib import Path
 
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
@@ -33,21 +32,14 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
-from aea.test_tools.test_cases import AEATestCase
+from aea.test_tools.test_cases import AEATestCaseSingle
 
 
-class TestEchoSkill(AEATestCase):
+class TestEchoSkill(AEATestCaseSingle):
     """Test that echo skill works."""
 
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
-        self.initialize_aea()
-        agent_name = "my_first_agent"
-        self.create_agents(agent_name)
-
-        agent_dir_path = Path(self.t, agent_name)
-        self.change_directory(agent_dir_path)
-
         self.add_item("skill", "fetchai/echo:0.1.0")
 
         process = self.run_agent()
@@ -58,7 +50,7 @@ class TestEchoSkill(AEATestCase):
             performative=DefaultMessage.Performative.BYTES, content=b"hello",
         )
         sent_envelope = Envelope(
-            to=agent_name,
+            to=self.agent_name,
             sender="sender",
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
