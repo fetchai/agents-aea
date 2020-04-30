@@ -43,7 +43,7 @@ class TestDemoDocs:
     def test_thermometer_skill_behaviour(self):
         """Test behaviours.py of thermometer skill."""
         path = Path(
-            os.getcwd(), "packages", "fetchai", "skills", "thermometer", "behaviours.py"
+            ROOT_DIR, "packages", "fetchai", "skills", "thermometer", "behaviours.py"
         )
         with open(path, "r") as file:
             python_code = file.read()
@@ -52,7 +52,7 @@ class TestDemoDocs:
     def test_thermometer_skill_handler(self):
         """Test handlers.py of thermometer skill."""
         path = Path(
-            os.getcwd(), "packages", "fetchai", "skills", "thermometer", "handlers.py"
+            ROOT_DIR, "packages", "fetchai", "skills", "thermometer", "handlers.py"
         )
 
         with open(path, "r") as file:
@@ -63,7 +63,7 @@ class TestDemoDocs:
     def test_thermometer_skill_strategy(self):
         """Test strategy.py of thermometer skill."""
         path = Path(
-            os.getcwd(), "packages", "fetchai", "skills", "thermometer", "strategy.py"
+            ROOT_DIR, "packages", "fetchai", "skills", "thermometer", "strategy.py"
         )
         with open(path, "r") as file:
             python_code = file.read()
@@ -74,7 +74,7 @@ class TestDemoDocs:
     def test_thermometer_skill_dialogues(self):
         """Test dialogues.py of thermometer skill."""
         path = Path(
-            os.getcwd(), "packages", "fetchai", "skills", "thermometer", "dialogues.py"
+            ROOT_DIR, "packages", "fetchai", "skills", "thermometer", "dialogues.py"
         )
         with open(path, "r") as file:
             python_code = file.read()
@@ -83,7 +83,7 @@ class TestDemoDocs:
     def test_thermometer_skill_data_model(self):
         """Test thermometer_data_model.py of thermometer skill."""
         path = Path(
-            os.getcwd(),
+            ROOT_DIR,
             "packages",
             "fetchai",
             "skills",
@@ -97,7 +97,7 @@ class TestDemoDocs:
     def test_thermometer_client_skill_behaviour(self):
         """Test that the code blocks exist in the thermometer_client_skill."""
         path = Path(
-            os.getcwd(),
+            ROOT_DIR,
             "packages",
             "fetchai",
             "skills",
@@ -111,7 +111,7 @@ class TestDemoDocs:
     def test_thermometer_client_skill_handler(self):
         """Test handlers.py of thermometer skill."""
         path = Path(
-            os.getcwd(),
+            ROOT_DIR,
             "packages",
             "fetchai",
             "skills",
@@ -127,7 +127,7 @@ class TestDemoDocs:
     def test_thermometer_client_skill_strategy(self):
         """Test strategy.py correctness of thermometer client skill."""
         path = Path(
-            os.getcwd(),
+            ROOT_DIR,
             "packages",
             "fetchai",
             "skills",
@@ -143,7 +143,7 @@ class TestDemoDocs:
     def test_thermometer_client_skill_dialogues(self):
         """Test dialogues.py of thermometer client skill."""
         path = Path(
-            os.getcwd(),
+            ROOT_DIR,
             "packages",
             "fetchai",
             "skills",

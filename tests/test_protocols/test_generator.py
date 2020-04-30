@@ -97,11 +97,11 @@ class TestEndToEndGenerator(UseOef):
         # Specification
         protocol_name = "t_protocol"
         path_to_specification = os.path.join(
-            self.cwd, "tests", "data", "sample_specification.yaml"
+            ROOT_DIR, "tests", "data", "sample_specification.yaml"
         )
         path_to_generated_protocol = self.t
         path_to_original_protocol = os.path.join(
-            self.cwd, "tests", "data", "generator", protocol_name
+            ROOT_DIR, "tests", "data", "generator", protocol_name
         )
         path_to_package = "tests.data.generator."
 
