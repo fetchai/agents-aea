@@ -259,7 +259,7 @@ class AEATestCase:
         if not subprocesses:
             subprocesses = tuple(self.subprocesses)
 
-        all_terminated = any([process.returncode == 0 for process in subprocesses])
+        all_terminated = all([process.returncode == 0 for process in subprocesses])
         return all_terminated
 
     def initialize_aea(self, author=None) -> None:
