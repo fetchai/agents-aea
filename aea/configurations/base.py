@@ -56,7 +56,8 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
+DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
+DEFAULT_LICENSE = "Apache-2.0"
 
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -617,8 +618,8 @@ class PackageConfiguration(Configuration, ABC):
         self,
         name: str,
         author: str,
-        version: str,
-        license: str,
+        version: str = "",
+        license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -638,10 +639,13 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         """
         super().__init__()
+        assert (
+            name is not None and author is not None
+        ), "Name and author must be set on the configuration!"
         self.name = name
         self.author = author
         self.version = version if version != "" else DEFAULT_VERSION
-        self.license = license
+        self.license = license if license != "" else DEFAULT_LICENSE
         self.fingerprint = fingerprint if fingerprint is not None else {}
         self.fingerprint_ignore_patterns = (
             fingerprint_ignore_patterns
@@ -689,8 +693,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         self,
         name: str,
         author: str,
-        version: str,
-        license: str,
+        version: str = "",
+        license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
@@ -817,8 +821,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: str,
+        author: str,
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -930,8 +934,8 @@ class ProtocolConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: str,
+        author: str,
         version: str = "",
         license: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
@@ -1028,8 +1032,8 @@ class SkillConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: str,
+        author: str,
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -1156,14 +1160,14 @@ class AgentConfig(PackageConfiguration):
 
     def __init__(
         self,
-        agent_name: str = "",
-        author: str = "",
+        agent_name: str,
+        author: str,
         version: str = "",
         license: str = "",
         aea_version: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
-        registry_path: str = "",
+        registry_path: str = DEFAULT_REGISTRY_PATH,
         description: str = "",
         logging_config: Optional[Dict] = None,
     ):
@@ -1382,8 +1386,8 @@ class ProtocolSpecification(ProtocolConfig):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: str,
+        author: str,
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -1484,8 +1488,8 @@ class ContractConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str = "",
-        author: str = "",
+        name: str,
+        author: str,
         version: str = "",
         license: str = "",
         aea_version: str = "",
