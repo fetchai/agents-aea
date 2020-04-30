@@ -56,6 +56,7 @@ class TestEchoSkill(AEATestCase):
         time.sleep(2.0)
 
         # add sending and receiving envelope from input/output files
+        message_content = b"hello"
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES, content=b"hello",
         )
@@ -76,10 +77,15 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         assert sent_envelope.message == received_envelope.message
 
-        check_string = "hello"
-        assert self.is_present_in_output(
-            process, check_string
-        ), "String '{}' didn't appear in agent output.".format(check_string)
+        check_strings = (
+            "{} starting ...".format(agent_name),
+            "content={}".format(message_content),
+            "{} stopping ...".format(agent_name),
+        )
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
 
         assert (
             self.is_successfully_terminated()

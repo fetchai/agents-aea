@@ -28,7 +28,7 @@ import tempfile
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Tuple
 
 import pytest
 
@@ -184,28 +184,27 @@ class AEATestCase:
         self.subprocesses.append(process)
         return process
 
-    def is_present_in_output(
+    def missing_from_output(
         self,
         process: subprocess.Popen,
-        string: str,
+        strings: Tuple[str],
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
-    ) -> bool:
+    ) -> List[str]:
         """
-        Check if string present in agent process output.
+        Check if strings are missing in agent process output.
 
         :param process: a subprocess object to communicate.
-        :param string: a substring expected to appear in process output.
+        :param strings: a tuple of substrings expected to appear in process output.
         :param timeout: a timeout in seconds.
 
-        :return: boolean is string in process output.
+        :return: list of strings missing from output.
         """
         try:
             output, _err = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             self.terminate_agents(process)
             output, _err = process.communicate()
-
-        return string in str(output)
+        return [s for s in strings if s not in str(output)]
 
     def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
         """
@@ -260,7 +259,7 @@ class AEATestCase:
         if not subprocesses:
             subprocesses = tuple(self.subprocesses)
 
-        all_terminated = [process.returncode == 0 for process in subprocesses]
+        all_terminated = any([process.returncode == 0 for process in subprocesses])
         return all_terminated
 
     def initialize_aea(self, author=None) -> None:
