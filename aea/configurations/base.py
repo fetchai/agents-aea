@@ -148,12 +148,15 @@ def _get_default_configuration_file_name_from_type(
 
 
 class ComponentType(Enum):
+    """Enum of component types supported."""
+
     PROTOCOL = "protocol"
     CONNECTION = "connection"
     SKILL = "skill"
     CONTRACT = "contract"
 
     def to_configuration_type(self) -> PackageType:
+        """Get package type for component type."""
         return PackageType(self.value)
 
     def to_plural(self) -> str:
@@ -443,6 +446,10 @@ class PublicId(JSONSerializable):
             author=self.author, name=self.name, version=self.version
         )
 
+    def __repr__(self):
+        """Get the representation."""
+        return f"<{self}>"
+
     def __eq__(self, other):
         """Compare with another object."""
         return (
@@ -659,7 +666,7 @@ class PackageConfiguration(Configuration, ABC):
 
     @property
     def directory(self) -> Optional[Path]:
-        """The path to the configuration file associated to this file, if any."""
+        """Get the path to the configuration file associated to this file, if any."""
         return self._directory
 
     def _parse_aea_version_specifier(self, aea_version_specifiers: str) -> SpecifierSet:
@@ -700,6 +707,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         dependencies: Optional[Dependencies] = None,
     ):
+        """Set component configuration."""
         super().__init__(
             name,
             author,
@@ -834,7 +842,7 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
-        **config
+        **config,
     ):
         """Initialize a connection configuration object."""
         super().__init__(
@@ -923,7 +931,7 @@ class ConnectionConfig(ComponentConfiguration):
             excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
-            **cast(dict, obj.get("config"))
+            **cast(dict, obj.get("config")),
         )
 
 
@@ -1170,6 +1178,9 @@ class AgentConfig(PackageConfiguration):
         registry_path: str = DEFAULT_REGISTRY_PATH,
         description: str = "",
         logging_config: Optional[Dict] = None,
+        timeout: Optional[float] = None,
+        execution_timeout: Optional[float] = None,
+        max_reactions: Optional[int] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1199,6 +1210,10 @@ class AgentConfig(PackageConfiguration):
             self.logging_config["version"] = 1
             self.logging_config["disable_existing_loggers"] = False
 
+        self.timeout: Optional[float] = timeout
+        self.execution_timeout: Optional[float] = execution_timeout
+        self.max_reactions: Optional[int] = max_reactions
+
     @property
     def package_dependencies(self) -> Set[ComponentId]:
         """Get the package dependencies."""
@@ -1223,12 +1238,12 @@ class AgentConfig(PackageConfiguration):
 
     @property
     def private_key_paths_dict(self) -> Dict[str, str]:
-        """Dictionary version of private key paths."""
+        """Get dictionary version of private key paths."""
         return {key: path for key, path in self.private_key_paths.read_all()}
 
     @property
     def ledger_apis_dict(self) -> Dict[str, Dict[str, Union[str, int]]]:
-        """Dictionary version of ledger apis."""
+        """Get dictionary version of ledger apis."""
         return {
             cast(str, key): cast(Dict[str, Union[str, int]], config)
             for key, config in self.ledger_apis.read_all()
@@ -1294,6 +1309,9 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
+                "timeout": self.timeout,
+                "execution_timeout": self.execution_timeout,
+                "max_reactions": self.max_reactions,
             }
         )
 
@@ -1313,6 +1331,9 @@ class AgentConfig(PackageConfiguration):
                 Sequence[str], obj.get("fingerprint_ignore_patterns")
             ),
             logging_config=cast(Dict, obj.get("logging_config", {})),
+            timeout=cast(float, obj.get("timeout")),
+            execution_timeout=cast(float, obj.get("execution_timeout")),
+            max_reactions=cast(int, obj.get("max_reactions")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
