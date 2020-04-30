@@ -85,7 +85,7 @@ class BaseTimeExecutionCase(TestCase):
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
 
         test_skill = Skill(
-            SkillConfig(name="test_skill"),
+            SkillConfig(name="test_skill", author="fetchai"),
             skill_context=skill_context,
             handlers={
                 "handler1": handler_cls(name="handler1", skill_context=skill_context)

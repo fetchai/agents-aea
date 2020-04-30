@@ -58,12 +58,12 @@ class ConnectionTestCase(TestCase):
 
     def test_loop_positive(self):
         """Test loop property positive result."""
-        obj = self.TestConnection(ConnectionConfig())
+        obj = self.TestConnection(ConnectionConfig("some_connection", "fetchai"))
         obj._loop = "loop"
         obj.loop
 
     def test_excluded_protocols_positive(self):
         """Test excluded_protocols property positive result."""
-        obj = self.TestConnection(ConnectionConfig())
+        obj = self.TestConnection(ConnectionConfig("some_connection", "fetchai"))
         obj._excluded_protocols = "excluded_protocols"
         obj.excluded_protocols
