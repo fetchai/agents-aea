@@ -73,8 +73,8 @@ class AgentContext:
         self._preferences = preferences
         self._goal_pursuit_readiness = goal_pursuit_readiness
         self._task_manager = task_manager
-        self._search_service_address = (	
-            DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml	
+        self._search_service_address = (
+            DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
         )
 
         self._namespace = SimpleNamespace(**kwargs)
