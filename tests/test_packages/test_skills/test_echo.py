@@ -58,7 +58,7 @@ class TestEchoSkill(AEATestCase):
         # add sending and receiving envelope from input/output files
         message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=b"hello",
+            performative=DefaultMessage.Performative.BYTES, content=message_content,
         )
         sent_envelope = Envelope(
             to=agent_name,
