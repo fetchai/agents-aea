@@ -246,7 +246,8 @@ class AEATestCase:
         :timeout: the timeout for interuption
         """
         if not subprocesses:
-            subprocesses = self.subprocesses  # type: ignore
+            subprocesses = tuple(self.subprocesses)
+
         for process in subprocesses:
             process.send_signal(signal.SIGINT)
         for process in subprocesses:
@@ -257,7 +258,8 @@ class AEATestCase:
         Check if all subprocesses terminated successfully
         """
         if not subprocesses:
-            subprocesses = self.subprocesses  # type: ignore
+            subprocesses = tuple(self.subprocesses)
+
         all_terminated = [process.returncode == 0 for process in subprocesses]
         return all_terminated
 
