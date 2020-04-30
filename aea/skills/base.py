@@ -190,6 +190,11 @@ class SkillContext:
         """Get ledger APIs."""
         return self._get_agent_context().ledger_apis
 
+    @property	
+    def search_service_address(self) -> Address:	
+        """Get the address of the search service."""	
+        return self._get_agent_context().search_service_address	
+
     @property
     def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
