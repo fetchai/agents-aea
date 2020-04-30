@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains AEA/AEABuilder wrapper to make performance tests easy."""
+
+import uuid
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -89,7 +91,9 @@ class AEATestWrapper:
         """
         handlers = handlers or {}
         context = context or SkillContext()
-        config = config or SkillConfig()
+        config = config or SkillConfig(
+            name="skill_{}".format(uuid.uuid4().hex[0:5]), author="fetchai"
+        )
 
         handlers_instances = {
             name: handler_cls(name=name, skill_context=context)

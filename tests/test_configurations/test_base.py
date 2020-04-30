@@ -238,11 +238,11 @@ class AgentConfigTestCase(TestCase):
 
     def test_init_logging_config_positive(self):
         """Test case for from_json method positive result."""
-        AgentConfig(logging_config={})
+        AgentConfig(agent_name="my_agent", author="fetchai", logging_config={})
 
     def test_default_connection(self):
         """Test case for default_connection setter positive result."""
-        agent_config = AgentConfig()
+        agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
         agent_config.default_connection = None
         agent_config.default_connection = 1
         agent_config.public_id
@@ -279,11 +279,11 @@ class ProtocolSpecificationTestCase(TestCase):
 
     def test_init_positive(self):
         """Test case for __init__ method positive result."""
-        ProtocolSpecification()
+        ProtocolSpecification(name="my_protocol", author="fetchai")
 
     def test_json_positive(self):
         """Test case for json property positive result."""
-        obj = ProtocolSpecification()
+        obj = ProtocolSpecification(name="my_protocol", author="fetchai")
         obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
@@ -302,7 +302,7 @@ class ProtocolSpecificationTestCase(TestCase):
 
     def test__check_consistency_positive(self):
         """Test case for _check_consistency method positive result."""
-        obj = ProtocolSpecification()
+        obj = ProtocolSpecification(name="my_protocol", author="fetchai")
         with self.assertRaises(ProtocolSpecificationParseError):
             obj._check_consistency()
 
