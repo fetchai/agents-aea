@@ -25,12 +25,12 @@ import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.test_cases import AEATestCaseSingle
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from ...conftest import ROOT_DIR
 
 
-class TestGymSkill(AEATestCaseSingle):
+class TestGymSkill(AEATestCaseEmpty):
     """Test that gym skill works."""
 
     @skip_test_ci

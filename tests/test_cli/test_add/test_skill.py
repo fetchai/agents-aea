@@ -43,7 +43,7 @@ from aea.configurations.base import (
 )
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
-from aea.test_tools.test_cases import AEATestCaseSingle
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
 
@@ -479,7 +479,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddSkillWithContractsDeps(AEATestCaseSingle):
+class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
     """Test add skill with contract dependencies."""
 
     def test_add_skill_with_contracts_positive(self):

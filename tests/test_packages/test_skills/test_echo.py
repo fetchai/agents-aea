@@ -24,10 +24,10 @@ import time
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.test_tools.test_cases import AEATestCaseSingle
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 
-class TestEchoSkill(AEATestCaseSingle):
+class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
     def test_echo(self, pytestconfig):

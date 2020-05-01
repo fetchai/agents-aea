@@ -31,12 +31,14 @@ from abc import ABC
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List, Optional, Set
+from typing import Any, Callable, List, Optional, Set, Union
 
 import pytest
 
 from aea.cli import cli
 from aea.cli_gui import DEFAULT_AUTHOR
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
@@ -429,7 +431,6 @@ class BaseAEATestCase(ABC):
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
-        # random.choices(string.ascii_lowercase, 5)
         cls.registry_tmp_dir = cls.t / "packages"
         package_registry_src = cls.old_cwd / cls.packages_dir_path
         shutil.copytree(str(package_registry_src), str(cls.registry_tmp_dir))
@@ -443,6 +444,9 @@ class BaseAEATestCase(ABC):
         cls._join_threads()
         cls.unset_agent_context()
         cls.change_directory(cls.old_cwd)
+        cls.packages_dir_path = Path("packages")
+        cls.agents = set()
+        cls.current_agent_context = ""
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -455,10 +459,12 @@ class UseOef:
         """Start an oef node."""
 
 
-class AEATestCaseSingle(BaseAEATestCase):
-    """Test case for a single AEA project."""
+class AEATestCaseEmpty(BaseAEATestCase):
+    """
+    Test case for a default AEA project.
 
-    agent_name: str
+    This test case will create a default AEA project.
+    """
 
     @classmethod
     def setup_class(cls):
@@ -486,3 +492,39 @@ class AEATestCaseMany(BaseAEATestCase):
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class AEATestCase(BaseAEATestCase):
+    """
+    Test case from an existing AEA project.
+
+    Subclass this class and set `path_to_aea` properly. By default,
+    it is assumed the project is inside the current working directory.
+    """
+
+    path_to_aea: Union[Path, str] = Path(".")
+    packages_dir_path = Path("..", "packages")
+    agent_configuration: AgentConfig
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        # make paths absolute
+        cls.path_to_aea = cls.path_to_aea.absolute()
+        cls.packages_dir_path = cls.packages_dir_path.absolute()
+        # load agent configuration
+        with Path(cls.path_to_aea, DEFAULT_AEA_CONFIG_FILE).open(
+            mode="r", encoding="utf-8"
+        ) as fp:
+            loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+            agent_configuration = loader.load(fp)
+        cls.agent_configuration = agent_configuration
+        cls.agent_name = agent_configuration.agent_name
+
+        # this will create a temporary directory and move into it
+        BaseAEATestCase.packages_dir_path = cls.packages_dir_path
+        BaseAEATestCase.setup_class()
+
+        # copy the content of the agent into the temporary directory
+        shutil.copytree(str(cls.path_to_aea), str(cls.t / cls.agent_name))
+        cls.set_agent_context(cls.agent_name)

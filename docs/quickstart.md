@@ -231,21 +231,13 @@ The following test class replicates the preceding demo and tests it's correct be
 import signal
 import time
 
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-)
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.test_tools.generic import (
-    read_envelope_from_file,
-    write_envelope_to_file,
-)
-from aea.test_tools.test_cases import AEATestCaseSingle
+from aea.test_tools.test_cases import AEATestCase
 
 
-class TestEchoSkill(AEATestCaseSingle):
+class TestEchoSkill(AEATestCase):
     """Test that echo skill works."""
 
     def test_echo(self):
@@ -263,11 +255,11 @@ class TestEchoSkill(AEATestCaseSingle):
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
-
-        write_envelope_to_file(sent_envelope, DEFAULT_INPUT_FILE_NAME)
+        
+        self.send_envelope_to_agent(sent_envelope, self.agent_name)
 
         time.sleep(2.0)
-        received_envelope = read_envelope_from_file(DEFAULT_OUTPUT_FILE_NAME)
+        received_envelope = self.read_envelope_from_agent(self.agent_name)
 
         assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
