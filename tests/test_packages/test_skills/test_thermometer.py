@@ -93,6 +93,3 @@ class TestThermometerSkill(AEAWithOefTestCase):
         self.terminate_agents()
 
         assert self.is_successfully_terminated(), "Thermometer test not successful."
-        import pdb
-
-        pdb.set_trace()
