@@ -62,8 +62,8 @@ class AEATestCase:
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
     threads: List  # list of started threads
-    stdout: Dict[int, str]  # dict of process.pid: list of stdout strings
-    stderr: Dict[int, str]  # dict of process.pid: list of stderr strings
+    stdout: Dict[int, str]  # dict of process.pid: string stdout
+    stderr: Dict[int, str]  # dict of process.pid: string stderr
 
     @classmethod
     def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
