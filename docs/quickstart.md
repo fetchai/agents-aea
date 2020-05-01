@@ -225,7 +225,7 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 <details><summary>Step by step install</summary>
 
-The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` is a tool for AEA developers to write useful end-to-end tests of their AEAs.
+The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
 ``` python
 import signal
@@ -242,10 +242,10 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
-from aea.test_tools.test_cases import AEATestCase
+from aea.test_tools.test_cases import AEATestCaseSingle
 
 
-class TestEchoSkill(AEATestCase):
+class TestEchoSkill(AEATestCaseSingle):
     """Test that echo skill works."""
 
     def test_echo(self):

@@ -25,36 +25,30 @@ import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseSingle
+
+from ...conftest import ROOT_DIR
 
 
-class TestGymSkill(AEAWithOefTestCase):
+class TestGymSkill(AEATestCaseSingle):
     """Test that gym skill works."""
 
     @skip_test_ci
     def test_gym(self, pytestconfig):
         """Run the gym skill sequence."""
-        self.initialize_aea()
-
-        gym_aea_name = "my_gym_agent"
-        self.create_agents(gym_aea_name)
-
-        gym_aea_dir_path = os.path.join(self.t, gym_aea_name)
-        self.change_directory(gym_aea_dir_path)
         self.add_item("skill", "fetchai/gym:0.1.0")
         self.add_item("connection", "fetchai/gym:0.1.0")
         self.run_install()
 
         # add gyms folder from examples
-        gyms_src = os.path.join(self.cwd, "examples", "gym_ex", "gyms")
-        gyms_dst = os.path.join(self.t, gym_aea_name, "gyms")
+        gyms_src = os.path.join(ROOT_DIR, "examples", "gym_ex", "gyms")
+        gyms_dst = os.path.join(self.agent_name, "gyms")
         shutil.copytree(gyms_src, gyms_dst)
 
         # change config file of gym connection
-        file_src = os.path.join(self.cwd, "tests", "data", "gym-connection.yaml")
+        file_src = os.path.join(ROOT_DIR, "tests", "data", "gym-connection.yaml")
         file_dst = os.path.join(
-            self.t,
-            gym_aea_name,
+            self.agent_name,
             "vendor",
             "fetchai",
             "connections",
