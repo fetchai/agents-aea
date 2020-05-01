@@ -1310,7 +1310,7 @@ class AgentConfig(PackageConfiguration):
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
             }
-        )
+        )  # type: Dict[str, Any]
         if self.timeout is not None:
             config["timeout"] = self.timeout
         if self.execution_timeout is not None:
