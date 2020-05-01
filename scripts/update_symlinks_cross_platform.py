@@ -21,6 +21,7 @@
 """
 This script will update the symlinks of the project, cross-platform compatible.
 """
+import contextlib
 import inspect
 import os
 import subprocess  # nosec
@@ -62,6 +63,32 @@ SYMLINKS = [
 """A list of pairs: (link_path, target_path)"""
 
 
+def make_symlink(link_name: str, target: str):
+    """
+    Make a symbolic link, cross platform.
+
+    :param link_name: the link name.
+    :param target: the target.
+    """
+    try:
+        Path(link_name).unlink()
+    except FileNotFoundError:
+        pass
+    Path(link_name).symlink_to(target, target_is_directory=True)
+
+
+@contextlib.contextmanager
+def cd(path):
+    """Change directory with context manager."""
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    except Exception as e:
+        os.chdir(old_cwd)
+        raise e from e
+
+
 def do_symlink(link_path: Path, target_path: Path):
     """
     Change directory and call the cross-platform script.
@@ -98,17 +125,11 @@ def do_symlink(link_path: Path, target_path: Path):
     root_relative_to_cwd = reduce(
         lambda x, y: x / y, [Path("../")] * nb_parents, Path(".")
     )
-
     link_name = link_path.name
     target = root_relative_to_cwd / target_relative_to_root
-    args = [
-        "bash",
-        str(ROOT_PATH / "scripts" / "create_symlink_crossplatform.sh"),
-        str(link_name),
-        str(target),
-    ]
-    print("Calling '{}'".format(" ".join(args)))
-    return subprocess.call(args, cwd=str(working_directory.absolute()))  # nosec
+    with cd(working_directory.absolute()):
+        make_symlink(str(link_name), str(target))
+    return 0
 
 
 if __name__ == "__main__":
@@ -125,7 +146,6 @@ if __name__ == "__main__":
             exception = e
             return_code = 1
             traceback.print_exc()
-        if return_code != 0:
             print(
                 "Last command failed with return code {} and exception {}".format(
                     return_code, exception
