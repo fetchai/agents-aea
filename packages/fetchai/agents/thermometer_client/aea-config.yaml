@@ -1,4 +1,4 @@
-agent_name: my_thermometer_client
+agent_name: thermometer_client
 author: fetchai
 version: 0.1.0
 description: 'An AEA that purchases thermometer data.'

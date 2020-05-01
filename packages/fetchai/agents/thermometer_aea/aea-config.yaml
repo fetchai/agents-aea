@@ -1,4 +1,4 @@
-agent_name: my_thermometer_aea
+agent_name: thermometer_aea
 author: fetchai
 version: 0.1.0
 description: 'An AEA to represent a thermometer and sell temperature data.'
