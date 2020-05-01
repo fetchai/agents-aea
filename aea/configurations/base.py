@@ -1289,7 +1289,7 @@ class AgentConfig(PackageConfiguration):
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return OrderedDict(
+        config = OrderedDict(
             {
                 "agent_name": self.agent_name,
                 "author": self.author,
@@ -1309,11 +1309,15 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
                 "registry_path": self.registry_path,
-                "timeout": self.timeout,
-                "execution_timeout": self.execution_timeout,
-                "max_reactions": self.max_reactions,
             }
         )
+        if self.timeout is not None:
+            config["timeout"] = self.timeout
+        if self.execution_timeout is not None:
+            config["execution_timeout"] = self.execution_timeout
+        if self.max_reactions is not None:
+            config["max_reactions"] = self.max_reactions
+        return config
 
     @classmethod
     def from_json(cls, obj: Dict):
