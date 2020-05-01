@@ -35,3 +35,6 @@ private_key_paths:
   ethereum: eth_private_key.txt
   fetchai: fet_private_key.txt
 registry_path: ../../packages
+timeout: null
+execution_timeout: null
+max_reactions: null
