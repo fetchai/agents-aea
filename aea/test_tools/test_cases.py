@@ -47,7 +47,7 @@ from aea.test_tools.exceptions import AEATestingException
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
-DEFAULT_PROCESS_TIMEOUT = 5
+DEFAULT_PROCESS_TIMEOUT = 60
 
 
 class AEATestCase:
