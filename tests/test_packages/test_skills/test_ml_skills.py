@@ -70,10 +70,10 @@ class TestMLSkills(AEAWithOefTestCase):
         os.chdir(model_trainer_aea_dir_path)
         model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self.start_tty_read_thread(data_provider_aea_process)
-        self.start_error_read_thread(data_provider_aea_process)
-        self.start_tty_read_thread(model_trainer_aea_process)
-        self.start_error_read_thread(model_trainer_aea_process)
+        self._start_output_read_thread(data_provider_aea_process)
+        self._start_error_read_thread(data_provider_aea_process)
+        self._start_output_read_thread(model_trainer_aea_process)
+        self._start_error_read_thread(model_trainer_aea_process)
 
         time.sleep(60)
 

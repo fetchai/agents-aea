@@ -25,10 +25,11 @@ import signal
 import subprocess  # nosec
 import sys
 import tempfile
+import time
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
 
@@ -61,6 +62,8 @@ class AEATestCase:
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
     threads: List  # list of started threads
+    stdout: Dict[int, str]  # dict of process.pid: list of stdout strings
+    stderr: Dict[int, str]  # dict of process.pid: list of stderr strings
 
     @classmethod
     def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
@@ -88,6 +91,8 @@ class AEATestCase:
 
         cls.subprocesses = []
         cls.threads = []
+        cls.stdout = {}
+        cls.stderr = {}
 
         cls.author = AUTHOR
 
@@ -183,28 +188,6 @@ class AEATestCase:
         )
         self.subprocesses.append(process)
         return process
-
-    def missing_from_output(
-        self,
-        process: subprocess.Popen,
-        strings: Tuple[str],
-        timeout: int = DEFAULT_PROCESS_TIMEOUT,
-    ) -> List[str]:
-        """
-        Check if strings are missing in agent process output.
-
-        :param process: a subprocess object to communicate.
-        :param strings: a tuple of substrings expected to appear in process output.
-        :param timeout: a timeout in seconds.
-
-        :return: list of strings missing from output.
-        """
-        try:
-            output, _err = process.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            self.terminate_agents(process)
-            output, _err = process.communicate()
-        return [s for s in strings if s not in str(output)]
 
     def start_thread(self, target: Callable, process: subprocess.Popen) -> None:
         """
@@ -363,36 +346,27 @@ class AEATestCase:
         assert src.is_file() and dest.is_file(), "Source or destination is not a file."
         src.write_text(dest.read_text())
 
+    def _read_out(self, process: subprocess.Popen):
+        for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+            self.stdout[process.pid] += line
 
-class AEAWithOefTestCase(AEATestCase):
-    """Test case for AEA end-to-end tests with OEF node."""
+    def _read_err(self, process: subprocess.Popen):
+        if process.stderr is not None:
+            for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+                self.stderr[process.pid] += line
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @staticmethod
-    def _read_tty(pid: subprocess.Popen):
-        for line in TextIOWrapper(pid.stdout, encoding="utf-8"):
-            print("stdout: " + line.replace("\n", ""))
-
-    @staticmethod
-    def _read_error(pid: subprocess.Popen):
-        if pid.stderr is not None:
-            for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
-                print("stderr: " + line.replace("\n", ""))
-
-    def start_tty_read_thread(self, process: subprocess.Popen) -> None:
+    def _start_output_read_thread(self, process: subprocess.Popen) -> None:
         """
-        Start a tty reading thread.
+        Start an output reading thread.
 
         :param process: target process passed to a thread args.
 
         :return: None.
         """
-        self.start_thread(target=self._read_tty, process=process)
+        self.stdout[process.pid] = ""
+        self.start_thread(target=self._read_out, process=process)
 
-    def start_error_read_thread(self, process: subprocess.Popen) -> None:
+    def _start_error_read_thread(self, process: subprocess.Popen) -> None:
         """
         Start an error reading thread.
 
@@ -400,7 +374,49 @@ class AEAWithOefTestCase(AEATestCase):
 
         :return: None.
         """
-        self.start_thread(target=self._read_error, process=process)
+        self.stderr[process.pid] = ""
+        self.start_thread(target=self._read_err, process=process)
+
+    def missing_from_output(
+        self,
+        process: subprocess.Popen,
+        strings: Tuple[str],
+        timeout: int = DEFAULT_PROCESS_TIMEOUT,
+        period: int = 1,
+    ) -> List[str]:
+        """
+        Check if strings are present in process output.
+        Read process stdout in thread and terminate when all strings are present
+        or timeout expired.
+
+        :param process: agent subprocess.
+        :param strings: tuple of strings expected to appear in output.
+        :param timeout: int amount of seconds before stopping check.
+        :param period: int period of checking.
+
+        :return: list of missed strings.
+        """
+        self._start_output_read_thread(process)
+        missing_strings = list(strings)
+        end_time = time.time() + timeout
+        while missing_strings:
+            if time.time() > end_time:
+                break
+            missing_strings = [
+                line for line in missing_strings if line not in self.stdout[process.pid]
+            ]
+            time.sleep(period)
+
+        self.terminate_agents(process)
+        return missing_strings
+
+
+class AEAWithOefTestCase(AEATestCase):
+    """Test case for AEA end-to-end tests with OEF node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
 
     def add_scripts_folder(self):
         scripts_src = os.path.join(self.cwd, "scripts")

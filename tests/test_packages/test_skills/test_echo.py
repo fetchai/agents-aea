@@ -80,7 +80,6 @@ class TestEchoSkill(AEATestCase):
         check_strings = (
             "{} starting ...".format(agent_name),
             "content={}".format(message_content),
-            "{} stopping ...".format(agent_name),
         )
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
