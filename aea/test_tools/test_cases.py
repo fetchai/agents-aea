@@ -27,11 +27,12 @@ import string
 import subprocess  # nosec
 import sys
 import tempfile
+import time
 from abc import ABC
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, Union
 
 import pytest
 
@@ -57,6 +58,10 @@ from aea.test_tools.generic import (
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
+DEFAULT_PROCESS_TIMEOUT = 60
+DEFAULT_LAUNCH_TIMEOUT = 10
+LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
+
 
 @contextlib.contextmanager
 def cd(path):
@@ -81,6 +86,8 @@ class BaseAEATestCase(ABC):
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
     agents: Set[str] = set()  # the set of created agents
+    stdout: Dict[int, str]  # dict of process.pid: string stdout
+    stderr: Dict[int, str]  # dict of process.pid: string stderr
 
     @classmethod
     def set_agent_context(cls, agent_name: str):
@@ -91,15 +98,6 @@ class BaseAEATestCase(ABC):
     def unset_agent_context(cls):
         """Unset the current agent context."""
         cls.current_agent_context = ""
-
-    @classmethod
-    def initialize_aea(cls, author) -> None:
-        """
-        Initialize AEA locally with author name.
-
-        :return: None
-        """
-        cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
     def set_config(cls, dotted_path: str, value: Any, type: str = "str") -> None:
@@ -229,14 +227,17 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        return cls._run_python_subprocess(
+        process = cls._run_python_subprocess(
             "-m", "aea.cli", "run", *args, cwd=cls._get_cwd()
         )
+        cls._start_output_read_thread(process)
+        cls._start_error_read_thread(process)
+        return process
 
     @classmethod
     def terminate_agents(
         cls,
-        subprocesses: Optional[List[subprocess.Popen]] = None,
+        *subprocesses: subprocess.Popen,
         signal: signal.Signals = signal.SIGINT,
         timeout: int = 10,
     ) -> None:
@@ -248,12 +249,32 @@ class BaseAEATestCase(ABC):
         :param signal: the signal for interuption
         :param timeout: the timeout for interuption
         """
-        if subprocesses is None:
-            subprocesses = cls.subprocesses
+        if not subprocesses:
+            subprocesses = tuple(cls.subprocesses)
         for process in subprocesses:
             process.send_signal(signal.SIGINT)
         for process in subprocesses:
             process.wait(timeout=timeout)
+
+    @classmethod
+    def is_successfully_terminated(cls, *subprocesses: subprocess.Popen):
+        """
+        Check if all subprocesses terminated successfully
+        """
+        if not subprocesses:
+            subprocesses = tuple(cls.subprocesses)
+
+        all_terminated = all([process.returncode == 0 for process in subprocesses])
+        return all_terminated
+
+    @classmethod
+    def initialize_aea(cls, author) -> None:
+        """
+        Initialize AEA locally with author name.
+
+        :return: None
+        """
+        cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
     def add_item(cls, item_type: str, public_id: str) -> None:
@@ -361,41 +382,30 @@ class BaseAEATestCase(ABC):
         cls.threads = []
 
     @classmethod
-    def is_successfully_terminated(
-        cls, subprocesses: Optional[List[subprocess.Popen]] = None
-    ):
-        """
-        Check if all subprocesses terminated successfully
-        """
-        if subprocesses is None:
-            subprocesses = cls.subprocesses
-        all_terminated = [process.returncode == 0 for process in subprocesses]
-        return all_terminated
-
-    @staticmethod
-    def _read_tty(pid: subprocess.Popen):
-        for line in TextIOWrapper(pid.stdout, encoding="utf-8"):
-            print("stdout: " + line.replace("\n", ""))
-
-    @staticmethod
-    def _read_error(pid: subprocess.Popen):
-        if pid.stderr is not None:
-            for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
-                print("stderr: " + line.replace("\n", ""))
+    def _read_out(cls, process: subprocess.Popen):
+        for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+            cls.stdout[process.pid] += line
 
     @classmethod
-    def start_tty_read_thread(cls, process: subprocess.Popen) -> None:
+    def _read_err(cls, process: subprocess.Popen):
+        if process.stderr is not None:
+            for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+                cls.stderr[process.pid] += line
+
+    @classmethod
+    def _start_output_read_thread(cls, process: subprocess.Popen) -> None:
         """
-        Start a tty reading thread.
+        Start an output reading thread.
 
         :param process: target process passed to a thread args.
 
         :return: None.
         """
-        cls.start_thread(target=cls._read_tty, process=process)
+        cls.stdout[process.pid] = ""
+        cls.start_thread(target=cls._read_out, process=process)
 
     @classmethod
-    def start_error_read_thread(cls, process: subprocess.Popen) -> None:
+    def _start_error_read_thread(cls, process: subprocess.Popen) -> None:
         """
         Start an error reading thread.
 
@@ -403,7 +413,8 @@ class BaseAEATestCase(ABC):
 
         :return: None.
         """
-        cls.start_thread(target=cls._read_error, process=process)
+        cls.stderr[process.pid] = ""
+        cls.start_thread(target=cls._read_err, process=process)
 
     @classmethod
     def _get_cwd(cls) -> str:
@@ -421,6 +432,59 @@ class BaseAEATestCase(ABC):
         return read_envelope_from_file(str(cls.t / agent / DEFAULT_OUTPUT_FILE_NAME))
 
     @classmethod
+    def missing_from_output(
+        cls,
+        process: subprocess.Popen,
+        strings: Tuple[str],
+        timeout: int = DEFAULT_PROCESS_TIMEOUT,
+        period: int = 1,
+        is_terminating: bool = True,
+    ) -> List[str]:
+        """
+        Check if strings are present in process output.
+        Read process stdout in thread and terminate when all strings are present
+        or timeout expired.
+
+        :param process: agent subprocess.
+        :param strings: tuple of strings expected to appear in output.
+        :param timeout: int amount of seconds before stopping check.
+        :param period: int period of checking.
+        :param is_terminating: whether or not the agents are terminated
+
+        :return: list of missed strings.
+        """
+        missing_strings = list(strings)
+        end_time = time.time() + timeout
+        while missing_strings:
+            if time.time() > end_time:
+                break
+            missing_strings = [
+                line for line in missing_strings if line not in cls.stdout[process.pid]
+            ]
+            time.sleep(period)
+
+        if is_terminating:
+            cls.terminate_agents(process)
+        if missing_strings != []:
+            print("Non-empty missing strings, stderr:\n" + cls.stderr[process.pid])
+        return missing_strings
+
+    @classmethod
+    def is_running(
+        cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT
+    ):
+        """
+        Check if the AEA is launched and running (ready to process messages).
+
+        :param process: agent subprocess.
+        :param timeout: the timeout to wait for launch to complete
+        """
+        missing_strings = cls.missing_from_output(
+            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+        )
+        return missing_strings == []
+
+    @classmethod
     def setup_class(cls):
         """Set up the test class."""
         cls.runner = CliRunner()
@@ -436,6 +500,8 @@ class BaseAEATestCase(ABC):
         shutil.copytree(str(package_registry_src), str(cls.registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
+        cls.stdout = {}
+        cls.stderr = {}
 
     @classmethod
     def teardown_class(cls):
@@ -447,6 +513,8 @@ class BaseAEATestCase(ABC):
         cls.packages_dir_path = Path("packages")
         cls.agents = set()
         cls.current_agent_context = ""
+        cls.stdout = {}
+        cls.stderr = {}
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):

@@ -66,6 +66,6 @@ class TestGymSkill(AEATestCaseEmpty):
         gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.1.0")
         time.sleep(10.0)
 
-        self.terminate_agents([gym_aea_process])
+        self.terminate_agents(gym_aea_process)
 
         assert self.is_successfully_terminated(), "Gym test not successful."

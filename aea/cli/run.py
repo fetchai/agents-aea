@@ -75,15 +75,15 @@ def _build_aea(
 
 def _run_aea(aea: AEA) -> None:
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo("{} starting ...".format(aea.name))
+    click.echo("Starting AEA '{}' ...".format(aea.name))
     try:
         aea.start()
     except KeyboardInterrupt:
-        click.echo(" {} interrupted!".format(aea.name))  # pragma: no cover
+        click.echo(" AEA '{}' interrupted!".format(aea.name))  # pragma: no cover
     except Exception as e:
         raise click.ClickException(str(e))
     finally:
-        click.echo("{} stopping ...".format(aea.name))
+        click.echo("Stopping AEA '{}' ...".format(aea.name))
         aea.stop()
 
 

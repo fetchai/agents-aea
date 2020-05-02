@@ -161,10 +161,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.set_agent_context(buyer_aea_name)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self.start_tty_read_thread(process_one)
-        self.start_error_read_thread(process_one)
-        self.start_tty_read_thread(process_two)
-        self.start_error_read_thread(process_two)
+        self._start_output_read_thread(process_one)
+        self._start_error_read_thread(process_one)
+        self._start_output_read_thread(process_two)
+        self._start_error_read_thread(process_two)
 
         time.sleep(30)
         process_one.send_signal(signal.SIGINT)

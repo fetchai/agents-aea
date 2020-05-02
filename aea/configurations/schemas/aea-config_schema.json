@@ -98,6 +98,15 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "timeout": {
+      "$ref": "definitions.json#/definitions/timeout"
+    },
+    "execution_timeout": {
+      "$ref": "definitions.json#/definitions/execution_timeout"
+    },
+    "max_reactions": {
+      "$ref": "definitions.json#/definitions/max_reactions"
     }
   }
 }

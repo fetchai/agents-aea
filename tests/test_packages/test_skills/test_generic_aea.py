@@ -64,6 +64,6 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         time.sleep(10.0)
 
-        self.terminate_agents([seller_aea_process, buyer_aea_process])
+        self.terminate_agents(seller_aea_process, buyer_aea_process)
 
         assert self.is_successfully_terminated(), "Generic AEA test not successful."

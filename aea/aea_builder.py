@@ -225,6 +225,8 @@ class AEABuilder:
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    DEFAULT_EXECUTION_TIMEOUT = 1
+    DEFAULT_MAX_REACTIONS = 20
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -243,10 +245,44 @@ class AEABuilder:
         self._default_connection = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
+        self._timeout: Optional[float] = None
+        self._execution_timeout: Optional[float] = None
+        self._max_reactions: Optional[int] = None
+
         self._package_dependency_manager = _DependenciesManager()
 
         if with_default_packages:
             self._add_default_packages()
+
+    def set_timeout(self, timeout: Optional[float]) -> None:
+        """
+        Set agent loop idle timeout in seconds.
+
+        :param timeout: timeout in seconds
+
+        :return: None
+        """
+        self._timeout = timeout
+
+    def set_execution_timeout(self, execution_timeout: Optional[float]) -> None:
+        """
+        Set agent execution timeout in seconds.
+
+        :param execution_timeout: execution_timeout in seconds
+
+        :return: None
+        """
+        self._execution_timeout = execution_timeout
+
+    def set_max_reactions(self, max_reactions: Optional[int]) -> None:
+        """
+        Set agent max reaction in one react.
+
+        :param max_reactions: int
+
+        :return: None
+        """
+        self._max_reactions = max_reactions
 
     def _add_default_packages(self) -> None:
         """Add default packages."""
@@ -599,8 +635,9 @@ class AEABuilder:
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
+            execution_timeout=self._get_execution_timeout(),
             is_debug=False,
-            max_reactions=20,
+            max_reactions=self._get_max_reactions(),
             **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
@@ -610,9 +647,7 @@ class AEABuilder:
     def _update_identity(
         self, identity: Identity, wallet: Wallet, connections: List[Connection]
     ) -> Identity:
-        """
-        TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection.
-        """
+        """TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection."""
         public_ids = []  # type: List[PublicId]
         for connection in connections:
             public_ids.append(connection.public_id)
@@ -643,7 +678,40 @@ class AEABuilder:
             sys.exit(1)
 
     def _get_agent_loop_timeout(self) -> float:
-        return self.DEFAULT_AGENT_LOOP_TIMEOUT
+        """
+        Return agent loop idle timeout.
+
+        :return: timeout in seconds if set else default value.
+        """
+        return (
+            self._timeout
+            if self._timeout is not None
+            else self.DEFAULT_AGENT_LOOP_TIMEOUT
+        )
+
+    def _get_execution_timeout(self) -> float:
+        """
+        Return execution timeout.
+
+        :return: timeout in seconds if set else default value.
+        """
+        return (
+            self._execution_timeout
+            if self._execution_timeout is not None
+            else self.DEFAULT_EXECUTION_TIMEOUT
+        )
+
+    def _get_max_reactions(self) -> int:
+        """
+        Return agent max_reaction.
+
+        :return: max-reactions if set else default value.
+        """
+        return (
+            self._max_reactions
+            if self._max_reactions is not None
+            else self.DEFAULT_MAX_REACTIONS
+        )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
@@ -727,12 +795,79 @@ class AEABuilder:
                 )
             )
 
+    def _set_from_configuration(
+        self,
+        agent_configuration: AgentConfig,
+        aea_project_path: Path,
+        skip_consistency_check: bool = False,
+    ) -> None:
+        """
+        Set builder variables from AgentConfig.
+
+        :params agent_configuration: AgentConfig to get values from.
+        :params aea_project_path: PathLike root directory of the agent project.
+        :param skip_consistency_check: if True, the consistency check are skipped.
+
+        :return: None
+        """
+        # set name and other configurations
+        self.set_name(agent_configuration.name)
+        self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_default_connection(
+            PublicId.from_str(agent_configuration.default_connection)
+        )
+        self.set_timeout(agent_configuration.timeout)
+        self.set_execution_timeout(agent_configuration.execution_timeout)
+        self.set_max_reactions(agent_configuration.max_reactions)
+
+        # load private keys
+        for (
+            ledger_identifier,
+            private_key_path,
+        ) in agent_configuration.private_key_paths_dict.items():
+            self.add_private_key(ledger_identifier, private_key_path)
+
+        # load ledger API configurations
+        for (
+            ledger_identifier,
+            ledger_api_conf,
+        ) in agent_configuration.ledger_apis_dict.items():
+            self.add_ledger_api_config(ledger_identifier, ledger_api_conf)
+
+        component_ids = itertools.chain(
+            [
+                ComponentId(ComponentType.PROTOCOL, p_id)
+                for p_id in agent_configuration.protocols
+            ],
+            [
+                ComponentId(ComponentType.CONTRACT, p_id)
+                for p_id in agent_configuration.contracts
+            ],
+            [
+                ComponentId(ComponentType.CONNECTION, p_id)
+                for p_id in agent_configuration.connections
+            ],
+            [
+                ComponentId(ComponentType.SKILL, p_id)
+                for p_id in agent_configuration.skills
+            ],
+        )
+        for component_id in component_ids:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, component_id
+            )
+            self.add_component(
+                component_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
+
     @classmethod
     def from_aea_project(
         cls, aea_project_path: PathLike, skip_consistency_check: bool = False
     ) -> "AEABuilder":
         """
-        Construct the builder from an AEA project
+        Construct the builder from an AEA project.
 
         - load agent configuration file
         - set name and default configurations
@@ -759,55 +894,9 @@ class AEABuilder:
         loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
-        # set name and other configurations
-        builder.set_name(agent_configuration.name)
-        builder.set_default_ledger(agent_configuration.default_ledger)
-        builder.set_default_connection(
-            PublicId.from_str(agent_configuration.default_connection)
+        builder._set_from_configuration(
+            agent_configuration, aea_project_path, skip_consistency_check
         )
-
-        # load private keys
-        for (
-            ledger_identifier,
-            private_key_path,
-        ) in agent_configuration.private_key_paths_dict.items():
-            builder.add_private_key(ledger_identifier, private_key_path)
-
-        # load ledger API configurations
-        for (
-            ledger_identifier,
-            ledger_api_conf,
-        ) in agent_configuration.ledger_apis_dict.items():
-            builder.add_ledger_api_config(ledger_identifier, ledger_api_conf)
-
-        component_ids = itertools.chain(
-            [
-                ComponentId(ComponentType.PROTOCOL, p_id)
-                for p_id in agent_configuration.protocols
-            ],
-            [
-                ComponentId(ComponentType.CONTRACT, p_id)
-                for p_id in agent_configuration.contracts
-            ],
-            [
-                ComponentId(ComponentType.CONNECTION, p_id)
-                for p_id in agent_configuration.connections
-            ],
-            [
-                ComponentId(ComponentType.SKILL, p_id)
-                for p_id in agent_configuration.skills
-            ],
-        )
-        for component_id in component_ids:
-            component_path = cls._find_component_directory_from_component_id(
-                aea_project_path, component_id
-            )
-            builder.add_component(
-                component_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
-            )
-
         return builder
 
     def _load_connections(
@@ -981,7 +1070,6 @@ def _handle_error_while_loading_component_module_not_found(
     :raises ModuleNotFoundError: if it is not
     :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
-
     error_message = str(e)
     extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
     match = extract_import_path_regex.match(error_message)
