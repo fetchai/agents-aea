@@ -19,60 +19,50 @@
 
 """This test module contains the integration test for the weather skills."""
 
-import os
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.generic import force_set_config
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestWeatherSkillsFetchaiLedger(AEAWithOefTestCase):
+class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
     @skip_test_ci
     def test_weather(self, pytestconfig):
         """Run the weather skills sequence."""
-
         weather_station_aea_name = "my_weather_station"
         weather_client_aea_name = "my_weather_client"
-
-        self.add_scripts_folder()
-
-        self.initialize_aea()
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
+        # prepare ledger configurations
+        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
+
         # add packages for agent one and run it
-        weather_station_aea_dir_path = os.path.join(self.t, weather_station_aea_name)
-        os.chdir(weather_station_aea_dir_path)
+        self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_station:0.1.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 
-        setting_path = "agent.ledger_apis"
-        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
-        force_set_config(setting_path, ledger_apis)
-
         # add packages for agent two and run it
-        weather_client_aea_dir_path = os.path.join(self.t, weather_client_aea_name)
-        os.chdir(weather_client_aea_dir_path)
+        self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/weather_client:0.1.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
-
-        force_set_config(setting_path, ledger_apis)
 
         self.generate_private_key()
         self.add_private_key()
         self.generate_wealth()
 
-        os.chdir(weather_station_aea_dir_path)
+        self.set_agent_context(weather_station_aea_name)
         process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(weather_client_aea_dir_path)
+        self.set_agent_context(weather_client_aea_name)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10)

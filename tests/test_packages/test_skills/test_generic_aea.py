@@ -19,23 +19,19 @@
 
 """This test module contains the integration test for the generic buyer and seller skills."""
 
-import os
 import time
 
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.generic import force_set_config
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestGenericSkills(AEAWithOefTestCase):
+class TestGenericSkills(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
     @skip_test_ci
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
-        self.initialize_aea()
-
         seller_aea_name = "my_generic_seller"
         buyer_aea_name = "my_generic_buyer"
         self.create_agents(seller_aea_name, buyer_aea_name)
@@ -44,30 +40,26 @@ class TestGenericSkills(AEAWithOefTestCase):
         ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
 
         # prepare seller agent
-        seller_aea_dir_path = os.path.join(self.t, seller_aea_name)
-        os.chdir(seller_aea_dir_path)
-
-        force_set_config(setting_path, ledger_apis)
+        self.set_agent_context(seller_aea_name)
+        self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/generic_seller:0.2.0")
         self.run_install()
 
         # prepare buyer agent
-        buyer_aea_dir_path = os.path.join(self.t, buyer_aea_name)
-        os.chdir(buyer_aea_dir_path)
-
-        force_set_config(setting_path, ledger_apis)
+        self.set_agent_context(buyer_aea_name)
+        self.force_set_config(setting_path, ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.2.0")
         self.run_install()
 
         # run AEAs
-        os.chdir(seller_aea_dir_path)
+        self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(buyer_aea_dir_path)
+        self.set_agent_context(buyer_aea_name)
         buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

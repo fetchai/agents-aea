@@ -19,14 +19,13 @@
 
 """This test module contains the integration test for the tac skills."""
 
-import os
 import time
 
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestTacSkills(AEAWithOefTestCase):
+class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
     @skip_test_ci
@@ -42,20 +41,15 @@ class TestTacSkills(AEAWithOefTestCase):
         )
 
         # prepare tac controller for test
-        tac_controller_dir_path = os.path.join(self.t, tac_controller_name)
-        os.chdir(tac_controller_dir_path)
+        self.set_agent_context(tac_controller_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/tac_control:0.1.0")
         self.run_install()
 
         # prepare agents for test
-        tac_aea_one_dir_path = os.path.join(self.t, tac_aea_one)
-        tac_aea_two_dir_path = os.path.join(self.t, tac_aea_two)
-
-        for agent_path in (tac_aea_one_dir_path, tac_aea_two_dir_path):
-            os.chdir(agent_path)
-
+        for agent_name in (tac_aea_one, tac_aea_two):
+            self.set_agent_context(agent_name)
             self.add_item("connection", "fetchai/oef:0.2.0")
             self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
             self.add_item("skill", "fetchai/tac_participation:0.1.0")
@@ -63,14 +57,14 @@ class TestTacSkills(AEAWithOefTestCase):
             self.run_install()
 
         # run tac controller
-        os.chdir(tac_controller_dir_path)
+        self.set_agent_context(tac_controller_name)
         tac_controller_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         # run two agents (participants)
-        os.chdir(tac_aea_one_dir_path)
+        self.set_agent_context(tac_aea_one)
         tac_aea_one_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(tac_aea_two_dir_path)
+        self.set_agent_context(tac_aea_two)
         tac_aea_two_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(10.0)

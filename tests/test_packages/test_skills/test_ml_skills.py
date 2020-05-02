@@ -19,17 +19,16 @@
 
 """This test module contains the integration test for the weather skills."""
 
-import os
 import sys
 import time
 
 import pytest
 
 from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestMLSkills(AEAWithOefTestCase):
+class TestMLSkills(AEATestCaseMany, UseOef):
     """Test that ml skills work."""
 
     @pytest.mark.skipif(
@@ -39,35 +38,28 @@ class TestMLSkills(AEAWithOefTestCase):
     @skip_test_ci
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
-        self.initialize_aea()
-        self.add_scripts_folder()
-
         data_provider_aea_name = "ml_data_provider"
         model_trainer_aea_name = "ml_model_trainer"
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         # prepare data provider agent
-        data_provider_aea_dir_path = os.path.join(self.t, data_provider_aea_name)
-        os.chdir(data_provider_aea_dir_path)
-
+        self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.1.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.2.0")
         self.run_install()
 
         # prepare model trainer agent
-        model_trainer_aea_dir_path = os.path.join(self.t, model_trainer_aea_name)
-        os.chdir(model_trainer_aea_dir_path)
-
+        self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.1.0")
+        self.add_item("skill", "fetchai/ml_train:0.2.0")
         self.run_install()
 
-        os.chdir(data_provider_aea_dir_path)
+        self.set_agent_context(data_provider_aea_name)
         data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(model_trainer_aea_dir_path)
+        self.set_agent_context(model_trainer_aea_name)
         model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         time.sleep(60)
