@@ -585,6 +585,9 @@ class Skill(Component):
 
         self._contracts = {}  # type: Dict[str, Contract]
 
+        if self._skill_context is not None:
+            self._skill_context._skill = self
+
     @property
     def contracts(self) -> Dict[str, Contract]:
         """Get the contracts associated with the skill."""

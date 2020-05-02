@@ -250,6 +250,7 @@ class AEABuilder:
         self._max_reactions: Optional[int] = None
 
         self._package_dependency_manager = _DependenciesManager()
+        self._connections: List[Connection] = []
 
         if with_default_packages:
             self._add_default_packages()
@@ -428,6 +429,19 @@ class AEABuilder:
         configuration._directory = directory
 
         return self
+
+    def add_component_instance(self, component: Component) -> None:
+        """
+        Add already initialized component object to resources or connections.
+
+        Please, pay attention, all dependencies have to be already loaded.
+
+        :params component: Component instance already initialized.
+        """
+        if component.component_type == ComponentType.CONNECTION:
+            self._connections.append(cast(Connection, component))
+        else:
+            self._add_component_to_resources(component)
 
     def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
         """Set the context namespace."""
@@ -626,6 +640,8 @@ class AEABuilder:
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
+        # add already loaded connections
+        connections += self._connections
         identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
             identity,
@@ -781,7 +797,7 @@ class AEABuilder:
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                logging.config.dictConfig(agent_configuration.logging_config)
+                logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
         except FileNotFoundError:
             raise Exception(
                 "Agent configuration file '{}' not found in the current directory.".format(

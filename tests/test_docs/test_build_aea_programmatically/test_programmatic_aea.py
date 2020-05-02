@@ -82,9 +82,9 @@ class TestProgrammaticAEA:
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
-        for blocks in self.code_blocks:
+        for block in self.code_blocks:
             assert (
-                blocks in self.python_file
+                block in self.python_file
             ), "Code-block doesn't exist in the python file."
 
     @classmethod
