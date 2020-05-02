@@ -68,6 +68,7 @@ v0.3.1
 my_first_aea starting ...
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.

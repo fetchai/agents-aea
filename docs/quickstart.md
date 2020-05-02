@@ -177,6 +177,7 @@ v0.3.1
 my_first_aea starting ...
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
@@ -251,11 +252,13 @@ class TestEchoSkill(AEATestCase):
     def test_echo(self):
         """Run the echo skill sequence."""
         process = self.run_agent()
-        time.sleep(2.0)
+        is_running = self.is_running(process)
+        assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=b"hello",
+            performative=DefaultMessage.Performative.BYTES, content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
@@ -274,9 +277,21 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         assert sent_envelope.message == received_envelope.message
 
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=20)
-        assert process.returncode == 0
+        check_strings = (
+            "Echo Handler: setup method called.",
+            "Echo Behaviour: setup method called.",
+            "Echo Behaviour: act method called.",
+            "content={}".format(message_content),
+        )
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+
+        assert (
+            self.is_successfully_terminated()
+        ), "Echo agent wasn't successfully terminated."
+
 ```
 
 Place the above code into a file `test.py` in your AEA project directory (the same level as the `aea-config.yaml` file).

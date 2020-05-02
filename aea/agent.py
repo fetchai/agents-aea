@@ -225,7 +225,7 @@ class Agent(ABC):
 
         :return: None
         """
-        logger.debug("[{}]: Start processing messages...".format(self.name))
+        logger.info("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self._tick += 1
             self._spin_main_loop()

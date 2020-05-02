@@ -73,6 +73,6 @@ class TestWeatherSkills(AEAWithOefTestCase):
 
         time.sleep(10.0)
 
-        self.terminate_agents([process_one, process_two])
+        self.terminate_agents(process_one, process_two)
 
         assert self.is_successfully_terminated(), "Weather test not successful."

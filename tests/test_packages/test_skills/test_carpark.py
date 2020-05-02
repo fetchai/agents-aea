@@ -80,13 +80,8 @@ class TestCarPark(AEAWithOefTestCase):
         os.chdir(carpark_client_aea_dir_path)
         process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self.start_tty_read_thread(process_one)
-        self.start_error_read_thread(process_one)
-        self.start_tty_read_thread(process_two)
-        self.start_error_read_thread(process_two)
-
         time.sleep(10)
 
-        self.terminate_agents()
+        self.terminate_agents(process_one, process_two)
 
         assert self.is_successfully_terminated(), "Carpark test not successful."
