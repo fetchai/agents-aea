@@ -70,13 +70,8 @@ class TestMLSkills(AEAWithOefTestCase):
         os.chdir(model_trainer_aea_dir_path)
         model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self._start_output_read_thread(data_provider_aea_process)
-        self._start_error_read_thread(data_provider_aea_process)
-        self._start_output_read_thread(model_trainer_aea_process)
-        self._start_error_read_thread(model_trainer_aea_process)
-
         time.sleep(60)
 
-        self.terminate_agents(timeout=60)
+        self.terminate_agents(data_provider_aea_process, model_trainer_aea_process)
 
         assert self.is_successfully_terminated(), "ML test not successful."

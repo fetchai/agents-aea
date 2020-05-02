@@ -83,13 +83,8 @@ class TestThermometerSkill(AEAWithOefTestCase):
             "--connections", "fetchai/oef:0.2.0"
         )
 
-        self._start_output_read_thread(thermometer_aea_process)
-        self._start_error_read_thread(thermometer_aea_process)
-        self._start_output_read_thread(thermometer_client_aea_process)
-        self._start_error_read_thread(thermometer_client_aea_process)
-
         time.sleep(20)
 
-        self.terminate_agents()
+        self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
 
         assert self.is_successfully_terminated(), "Thermometer test not successful."

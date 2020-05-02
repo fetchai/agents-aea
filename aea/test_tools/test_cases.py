@@ -48,6 +48,8 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
 DEFAULT_PROCESS_TIMEOUT = 60
+DEFAULT_LAUNCH_TIMEOUT = 10
+LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
 class AEATestCase:
@@ -211,7 +213,10 @@ class AEATestCase:
 
         :return: subprocess object.
         """
-        return self._run_python_subprocess("-m", "aea.cli", "run", *args)
+        process = self._run_python_subprocess("-m", "aea.cli", "run", *args)
+        self._start_output_read_thread(process)
+        self._start_error_read_thread(process)
+        return process
 
     def terminate_agents(
         self,
@@ -383,6 +388,7 @@ class AEATestCase:
         strings: Tuple[str],
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
         period: int = 1,
+        is_terminating: bool = True,
     ) -> List[str]:
         """
         Check if strings are present in process output.
@@ -393,10 +399,10 @@ class AEATestCase:
         :param strings: tuple of strings expected to appear in output.
         :param timeout: int amount of seconds before stopping check.
         :param period: int period of checking.
+        :param is_terminating: whether or not the agents are terminated
 
         :return: list of missed strings.
         """
-        self._start_output_read_thread(process)
         missing_strings = list(strings)
         end_time = time.time() + timeout
         while missing_strings:
@@ -407,8 +413,25 @@ class AEATestCase:
             ]
             time.sleep(period)
 
-        self.terminate_agents(process)
+        if is_terminating:
+            self.terminate_agents(process)
+        if missing_strings != []:
+            print("Non-empty missing strings, stderr:\n" + self.stderr[process.pid])
         return missing_strings
+
+    def is_running(
+        self, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT
+    ):
+        """
+        Check if the AEA is launched and running (ready to process messages).
+
+        :param process: agent subprocess.
+        :param timeout: the timeout to wait for launch to complete
+        """
+        missing_strings = self.missing_from_output(
+            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+        )
+        return missing_strings == []
 
 
 class AEAWithOefTestCase(AEATestCase):

@@ -53,7 +53,8 @@ class TestEchoSkill(AEATestCase):
         self.add_item("skill", "fetchai/echo:0.1.0")
 
         process = self.run_agent()
-        time.sleep(2.0)
+        is_running = self.is_running(process)
+        assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
         message_content = b"hello"
@@ -78,7 +79,9 @@ class TestEchoSkill(AEATestCase):
         assert sent_envelope.message == received_envelope.message
 
         check_strings = (
-            "{} starting ...".format(agent_name),
+            "Echo Handler: setup method called.",
+            "Echo Behaviour: setup method called.",
+            "Echo Behaviour: act method called.",
             "content={}".format(message_content),
         )
         missing_strings = self.missing_from_output(process, check_strings)
