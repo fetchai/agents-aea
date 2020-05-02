@@ -40,7 +40,8 @@ def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
     # noqa
     def _make_skill(id):
         return AEATestWrapper.make_skill(
-            config=SkillConfig(name=f"sc{id}"), handlers={"dummy_handler": DummyHandler}
+            config=SkillConfig(name=f"sc{id}", author="fetchai"),
+            handlers={"dummy_handler": DummyHandler},
         )
 
     return {

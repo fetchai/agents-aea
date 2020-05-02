@@ -23,7 +23,7 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Skill
 ```
 
 Set up a variable pointing to where the packages directory is located - this should be our current directory - and where the input and output files are located.
@@ -95,16 +95,13 @@ Also, we can add a component that was instantiated programmatically. :
             """Handle incoming message."""
             self.context.logger.info("You got a message: {}".format(str(message)))
 
-    context = SkillContext()
-    config = SkillConfig(name="test_skill")
-    dummy_handler = DummyHandler(name="dummy_handler", skill_context=context)
-
-    skill_instance = Skill(
-        configuration=config,
-        skill_context=context,
-        handlers={"dummy_handler": dummy_handler},
+    config = SkillConfig(name="test_skill", author="fetchai")
+    skill = Skill(configuration=config)
+    dummy_handler = DummyHandler(
+        name="dummy_handler", skill_context=skill.skill_context
     )
-    builder.add_component_instance(skill_instance)
+    skill.handlers.update({dummy_handler.name: dummy_handler})
+    builder.add_component_instance(skill)
 ```
 
 Finally, we can build our AEA:
@@ -176,7 +173,7 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Skill
 
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
@@ -226,16 +223,13 @@ def run():
             """Handle incoming message."""
             self.context.logger.info("You got a message: {}".format(str(message)))
 
-    context = SkillContext()
-    config = SkillConfig(name="test_skill")
-    dummy_handler = DummyHandler(name="dummy_handler", skill_context=context)
-
-    skill_instance = Skill(
-        configuration=config,
-        skill_context=context,
-        handlers={"dummy_handler": dummy_handler},
+    config = SkillConfig(name="test_skill", author="fetchai")
+    skill = Skill(configuration=config)
+    dummy_handler = DummyHandler(
+        name="dummy_handler", skill_context=skill.skill_context
     )
-    builder.add_component_instance(skill_instance)
+    skill.handlers.update({dummy_handler.name: dummy_handler})
+    builder.add_component_instance(skill)
 
     # Create our AEA
     my_aea = builder.build()

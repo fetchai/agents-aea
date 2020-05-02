@@ -250,12 +250,17 @@ class AEABuilder:
         self._max_reactions: Optional[int] = None
 
         self._package_dependency_manager = _DependenciesManager()
-        self._connections: List[Connection] = []
+        self._component_instances = {
+            ComponentType.CONNECTION: {},
+            ComponentType.CONTRACT: {},
+            ComponentType.PROTOCOL: {},
+            ComponentType.SKILL: {},
+        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
 
         if with_default_packages:
             self._add_default_packages()
 
-    def set_timeout(self, timeout: Optional[float]) -> None:
+    def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
         """
         Set agent loop idle timeout in seconds.
 
@@ -264,8 +269,9 @@ class AEABuilder:
         :return: None
         """
         self._timeout = timeout
+        return self
 
-    def set_execution_timeout(self, execution_timeout: Optional[float]) -> None:
+    def set_execution_timeout(self, execution_timeout: Optional[float]) -> "AEABuilder":
         """
         Set agent execution timeout in seconds.
 
@@ -274,8 +280,9 @@ class AEABuilder:
         :return: None
         """
         self._execution_timeout = execution_timeout
+        return self
 
-    def set_max_reactions(self, max_reactions: Optional[int]) -> None:
+    def set_max_reactions(self, max_reactions: Optional[int]) -> "AEABuilder":
         """
         Set agent max reaction in one react.
 
@@ -284,6 +291,7 @@ class AEABuilder:
         :return: None
         """
         self._max_reactions = max_reactions
+        return self
 
     def _add_default_packages(self) -> None:
         """Add default packages."""
@@ -430,7 +438,7 @@ class AEABuilder:
 
         return self
 
-    def add_component_instance(self, component: Component) -> None:
+    def add_component_instance(self, component: Component) -> "AEABuilder":
         """
         Add already initialized component object to resources or connections.
 
@@ -438,14 +446,18 @@ class AEABuilder:
 
         :params component: Component instance already initialized.
         """
-        if component.component_type == ComponentType.CONNECTION:
-            self._connections.append(cast(Connection, component))
-        else:
-            self._add_component_to_resources(component)
+        self._check_can_add(component.configuration)
+        # update dependency graph
+        self._package_dependency_manager.add_component(component.configuration)
+        self._component_instances[component.component_type][
+            component.configuration
+        ] = component
+        return self
 
-    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> "AEABuilder":
         """Set the context namespace."""
         self._context_namespace = context_namespace
+        return self
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -640,8 +652,6 @@ class AEABuilder:
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
-        # add already loaded connections
-        connections += self._connections
         identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
             identity,
@@ -926,30 +936,54 @@ class AEABuilder:
             ]
 
         return [
-            _load_connection(address, get_connection_configuration(connection_id))
+            self._load_connection(address, get_connection_configuration(connection_id))
             for connection_id in connections_ids
         ]
 
     def _load_and_add_protocols(self) -> None:
         for configuration in self._package_dependency_manager.protocols.values():
             configuration = cast(ProtocolConfig, configuration)
-            try:
-                protocol = Protocol.from_config(configuration)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if (
+                configuration
+                in self._component_instances[ComponentType.PROTOCOL].keys()
+            ):
+                protocol = self._component_instances[ComponentType.PROTOCOL][
+                    configuration
+                ]
+            else:
+                try:
+                    protocol = Protocol.from_config(configuration)
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
         for configuration in self._package_dependency_manager.contracts.values():
             configuration = cast(ContractConfig, configuration)
-            try:
-                contract = Contract.from_config(configuration)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if (
+                configuration
+                in self._component_instances[ComponentType.CONTRACT].keys()
+            ):
+                contract = self._component_instances[ComponentType.CONTRACT][
+                    configuration
+                ]
+            else:
+                try:
+                    contract = Contract.from_config(configuration)
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
@@ -957,17 +991,86 @@ class AEABuilder:
             logger_name = "aea.packages.{}.skills.{}".format(
                 configuration.author, configuration.name
             )
-            skill_context = SkillContext()
-            skill_context.set_agent_context(context)
-            skill_context.logger = logging.getLogger(logger_name)
             configuration = cast(SkillConfig, configuration)
-            try:
-                skill = Skill.from_config(configuration, skill_context=skill_context)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if configuration in self._component_instances[ComponentType.SKILL].keys():
+                skill = cast(
+                    Skill, self._component_instances[ComponentType.SKILL][configuration]
+                )
+                skill.skill_context.set_agent_context(context)
+                skill.skill_context.logger = logging.getLogger(logger_name)
+            else:
+                skill_context = SkillContext()
+                skill_context.set_agent_context(context)
+                skill_context.logger = logging.getLogger(logger_name)
+                try:
+                    skill = Skill.from_config(
+                        configuration, skill_context=skill_context
+                    )
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(skill)
+
+    def _load_connection(
+        self, address: Address, configuration: ConnectionConfig
+    ) -> Connection:
+        """
+        Load a connection from a directory.
+
+        :param address: the connection address.
+        :param configuration: the connection configuration.
+        :return: the connection.
+        """
+        if configuration in self._component_instances[ComponentType.CONNECTION].keys():
+            connection = cast(
+                Connection,
+                self._component_instances[ComponentType.CONNECTION][configuration],
+            )
+            if connection.address != address:
+                logger.warning(
+                    "The address set on connection '{}' does not match the default address!".format(
+                        str(connection.connection_id)
+                    )
+                )
+            return connection
+        try:
+            directory = cast(Path, configuration.directory)
+            package_modules = load_all_modules(
+                directory, glob="__init__.py", prefix=configuration.prefix_import_path
+            )
+            add_modules_to_sys_modules(package_modules)
+            connection_module_path = directory / "connection.py"
+            assert (
+                connection_module_path.exists() and connection_module_path.is_file()
+            ), "Connection module '{}' not found.".format(connection_module_path)
+            connection_module = load_module(
+                "connection_module", directory / "connection.py"
+            )
+            classes = inspect.getmembers(connection_module, inspect.isclass)
+            connection_class_name = cast(str, configuration.class_name)
+            connection_classes = list(
+                filter(lambda x: re.match(connection_class_name, x[0]), classes)
+            )
+            name_to_class = dict(connection_classes)
+            logger.debug("Processing connection {}".format(connection_class_name))
+            connection_class = name_to_class.get(connection_class_name, None)
+            assert (
+                connection_class is not None
+            ), "Connection class '{}' not found.".format(connection_class_name)
+            return connection_class.from_config(
+                address=address, configuration=configuration
+            )
+        except ModuleNotFoundError as e:
+            _handle_error_while_loading_component_module_not_found(configuration, e)
+        except Exception as e:
+            _handle_error_while_loading_component_generic_error(configuration, e)
+        # this is to make MyPy stop complaining of "Missing return statement".
+        assert False  # noqa: B011
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
@@ -1023,49 +1126,6 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
-
-
-def _load_connection(address: Address, configuration: ConnectionConfig) -> Connection:
-    """
-    Load a connection from a directory.
-
-    :param address: the connection address.
-    :param configuration: the connection configuration.
-    :return: the connection.
-    """
-    try:
-        directory = cast(Path, configuration.directory)
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
-        connection_module_path = directory / "connection.py"
-        assert (
-            connection_module_path.exists() and connection_module_path.is_file()
-        ), "Connection module '{}' not found.".format(connection_module_path)
-        connection_module = load_module(
-            "connection_module", directory / "connection.py"
-        )
-        classes = inspect.getmembers(connection_module, inspect.isclass)
-        connection_class_name = cast(str, configuration.class_name)
-        connection_classes = list(
-            filter(lambda x: re.match(connection_class_name, x[0]), classes)
-        )
-        name_to_class = dict(connection_classes)
-        logger.debug("Processing connection {}".format(connection_class_name))
-        connection_class = name_to_class.get(connection_class_name, None)
-        assert connection_class is not None, "Connection class '{}' not found.".format(
-            connection_class_name
-        )
-        return connection_class.from_config(
-            address=address, configuration=configuration
-        )
-    except ModuleNotFoundError as e:
-        _handle_error_while_loading_component_module_not_found(configuration, e)
-    except Exception as e:
-        _handle_error_while_loading_component_generic_error(configuration, e)
-    # this is to make MyPy stop complaining of "Missing return statement".
-    assert False  # noqa: B011
 
 
 def _handle_error_while_loading_component_module_not_found(
