@@ -36,18 +36,16 @@ class GymHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        self.context.logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
+        nb_steps = kwargs.pop("nb_steps", DEFAULT_NB_STEPS)
         super().__init__(**kwargs)
-
-        nb_steps = kwargs.get("nb_steps", DEFAULT_NB_STEPS)
         self.task = GymTask(self.context, nb_steps)
-        # launch the task
-        self.task.setup()
-        self.task.execute()
 
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("Gym handler: setup method called.")
+        # launch the task
+        self.task.setup()
+        self.task.execute()
 
     def handle(self, message: Message) -> None:
         """

@@ -74,3 +74,6 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         )
 
         assert self.is_successfully_terminated(), "TAC test not successful."
+
+
+# TODO: test ledger version

@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
@@ -11,8 +11,8 @@ fingerprint:
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
   dialogues.py: QmPMbvi61YDoJBv1T4cpYBazeZJYMNGNpfX76fyjFM5P1G
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
-  handlers.py: QmNjqj3bkFVEetpS4cKeNw4wk2NaT8FfLkqKFBLD4AgiyD
-  strategy.py: QmcpW7KBigxBdQXh4Wx8yXwaMyzjzzdQa8KXCYftVA8Y2J
+  handlers.py: QmNf8BuAdnDEioqirQYaw3mUfhJSweQVknr4qcFSTAxPLi
+  strategy.py: QmUhh2vWUU3fD8iD2si65RXURNvtVvPc97BtAxhvYrpETs
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'

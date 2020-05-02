@@ -1,18 +1,18 @@
 name: carpark_detection
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmQf5q2aFExYXn6JXhXNM1nV8j3eTYJioHmBsB9GR1dxkt
+  behaviours.py: Qme44yoYofRQwDrEV1kmMtvKqsoGzWdgMu8Q6nkYZKa9j4
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmPxtPHs9x8jQ3ByM62NwE2ehGvHqATWPDMrKCEJkoRGtj
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
   handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
-  strategy.py: QmUYZXoditJCimqbDqMsfmztWSi8xjWXR74qtjFx7D9SxY
+  strategy.py: QmVwR1apyGtENHXE68EUvSiVbBxM5CiQ8fBR9D5R9cDC2y
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
@@ -44,7 +44,6 @@ models:
       data_price_fet: 200000000
       db_is_rel_to_cwd: true
       db_rel_dir: ../temp_files
-      is_ledger_tx: true
       ledger_id: fetchai
       seller_tx_fee: 0
     class_name: Strategy

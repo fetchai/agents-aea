@@ -36,6 +36,53 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         buyer_aea_name = "my_generic_buyer"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
+        # prepare seller agent
+        self.set_agent_context(seller_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/generic_seller:0.2.0")
+        setting_path = (
+            "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
+        self.run_install()
+
+        # prepare buyer agent
+        self.set_agent_context(buyer_aea_name)
+        self.force_set_config(setting_path, ledger_apis)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.2.0")
+        setting_path = (
+            "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
+        self.run_install()
+
+        # run AEAs
+        self.set_agent_context(seller_aea_name)
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        self.set_agent_context(buyer_aea_name)
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        time.sleep(10.0)
+
+        self.terminate_agents(seller_aea_process, buyer_aea_process)
+
+        assert self.is_successfully_terminated(), "Generic AEA test not successful."
+
+
+class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+    """Test that generic skills work."""
+
+    @skip_test_ci
+    def test_generic(self, pytestconfig):
+        """Run the generic skills sequence."""
+        seller_aea_name = "my_generic_seller"
+        buyer_aea_name = "my_generic_buyer"
+        self.create_agents(seller_aea_name, buyer_aea_name)
+
         setting_path = "agent.ledger_apis"
         ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
 

@@ -54,16 +54,8 @@ class Strategy(Model):
 
         :return: None
         """
-        db_is_rel_to_cwd = (
-            kwargs.pop("db_is_rel_to_cwd")
-            if "db_is_rel_to_cwd" in kwargs.keys()
-            else DEFAULT_DB_IS_REL_TO_CWD
-        )
-        db_rel_dir = (
-            kwargs.pop("db_rel_dir")
-            if "db_rel_dir" in kwargs.keys()
-            else DEFAULT_DB_REL_DIR
-        )
+        db_is_rel_to_cwd = kwargs.pop("db_is_rel_to_cwd", DEFAULT_DB_IS_REL_TO_CWD)
+        db_rel_dir = kwargs.pop("db_rel_dir", DEFAULT_DB_REL_DIR)
 
         if db_is_rel_to_cwd:
             db_dir = os.path.join(os.getcwd(), db_rel_dir)
@@ -71,26 +63,11 @@ class Strategy(Model):
             db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
 
         self.data_price = kwargs.pop("data_price", DEFAULT_PRICE)
-
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
-
         self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-
-        self.data_price_fet = (
-            kwargs.pop("data_price_fet")
-            if "data_price_fet" in kwargs.keys()
-            else DEFAULT_PRICE
-        )
-        self.currency_id = (
-            kwargs.pop("currency_id")
-            if "currency_id" in kwargs.keys()
-            else DEFAULT_CURRENCY_ID
-        )
-        self.ledger_id = (
-            kwargs.pop("ledger_id")
-            if "ledger_id" in kwargs.keys()
-            else DEFAULT_LEDGER_ID
-        )
+        self.data_price_fet = kwargs.pop("data_price_fet", DEFAULT_PRICE)
+        self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
+        self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
 
         super().__init__(**kwargs)

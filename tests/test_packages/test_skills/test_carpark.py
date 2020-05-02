@@ -21,7 +21,6 @@
 
 import time
 
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -36,9 +35,6 @@ class TestCarPark(AEATestCaseMany, UseOef):
         capark_client_aea_name = "my_carpark_client_aea"
         self.create_agents(capark_aea_name, capark_client_aea_name)
 
-        # prepare ledger configuration
-        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
-
         # Setup agent one
         self.set_agent_context(capark_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
@@ -46,7 +42,6 @@ class TestCarPark(AEATestCaseMany, UseOef):
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
         self.set_config(setting_path, False, "bool")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 
         # Setup Agent two
@@ -54,15 +49,11 @@ class TestCarPark(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/carpark_client:0.1.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
+        setting_path = (
+            "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
         self.run_install()
-
-        # Generate and add private keys
-        self.generate_private_key()
-        self.add_private_key()
-
-        # Add some funds to the car park client
-        self.generate_wealth()
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(capark_aea_name)
@@ -76,3 +67,6 @@ class TestCarPark(AEATestCaseMany, UseOef):
         self.terminate_agents(process_one, process_two)
 
         assert self.is_successfully_terminated(), "Carpark test not successful."
+
+
+# TODO: test ledger version

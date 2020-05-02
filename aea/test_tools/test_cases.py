@@ -340,7 +340,9 @@ class BaseAEATestCase(ABC):
 
         :return: None
         """
-        cls.run_cli_command("generate-wealth", ledger_api_id, cwd=cls._get_cwd())
+        cls.run_cli_command(
+            "generate-wealth", ledger_api_id, "--sync", cwd=cls._get_cwd()
+        )
 
     @classmethod
     def replace_file_content(cls, src: Path, dest: Path) -> None:
@@ -495,9 +497,9 @@ class BaseAEATestCase(ABC):
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
-        cls.registry_tmp_dir = cls.t / "packages"
+        registry_tmp_dir = cls.t / "packages"
         package_registry_src = cls.old_cwd / cls.packages_dir_path
-        shutil.copytree(str(package_registry_src), str(cls.registry_tmp_dir))
+        shutil.copytree(str(package_registry_src), str(registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
         cls.stdout = {}
@@ -553,13 +555,8 @@ class AEATestCaseMany(BaseAEATestCase):
 
     @classmethod
     def teardown_class(cls):
-        """Teardown the test."""
-        cls._terminate_subprocesses()
-        cls._join_threads()
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        """Teardown the test class."""
+        BaseAEATestCase.teardown_class()
 
 
 class AEATestCase(BaseAEATestCase):
@@ -571,7 +568,7 @@ class AEATestCase(BaseAEATestCase):
     """
 
     path_to_aea: Union[Path, str] = Path(".")
-    packages_dir_path = Path("..", "packages")
+    packages_dir_path: Path = Path("..", "packages")
     agent_configuration: AgentConfig
 
     @classmethod
@@ -596,3 +593,11 @@ class AEATestCase(BaseAEATestCase):
         # copy the content of the agent into the temporary directory
         shutil.copytree(str(cls.path_to_aea), str(cls.t / cls.agent_name))
         cls.set_agent_context(cls.agent_name)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test class."""
+        cls.path_to_aea = Path(".")
+        cls.packages_dir_path = Path("..", "packages")
+        cls.agent_configuration = None
+        BaseAEATestCase.teardown_class()

@@ -46,21 +46,11 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        self.image_capture_interval = (
-            kwargs.pop("image_capture_interval")
-            if "image_capture_interval" in kwargs.keys()
-            else DEFAULT_IMAGE_CAPTURE_INTERVAL
+        self.image_capture_interval = kwargs.pop(
+            "image_capture_interval", DEFAULT_IMAGE_CAPTURE_INTERVAL
         )
-        self.default_latitude = (
-            kwargs.pop("default_latitude")
-            if "default_latitude" in kwargs.keys()
-            else DEFAULT_LAT
-        )
-        self.default_longitude = (
-            kwargs.pop("default_longitude")
-            if "default_longitude" in kwargs.keys()
-            else DEFAULT_LON
-        )
+        self.default_latitude = kwargs.pop("default_latitude", DEFAULT_LAT)
+        self.default_longitude = kwargs.pop("default_longitude", DEFAULT_LON)
         self.process_id = None
         super().__init__(**kwargs)
 
@@ -102,7 +92,7 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
             strategy.other_carpark_processes_running = True
         else:
             self.context.logger.info(
-                "[{}]: Failed to find run_carpakragent.py - either you are running this without the rest of the carpark agent code (which can be got from here: https://github.com/fetchai/carpark_agent or you are running the aea from the wrong directory.".format(
+                "[{}]: Failed to find run_carparkagent.py - either you are running this without the rest of the carpark agent code (which can be got from here: https://github.com/fetchai/carpark_agent or you are running the aea from the wrong directory.".format(
                     self.context.agent_name
                 )
             )
