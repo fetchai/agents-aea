@@ -83,10 +83,10 @@ class TestThermometerSkill(AEAWithOefTestCase):
             "--connections", "fetchai/oef:0.2.0"
         )
 
-        self.start_tty_read_thread(thermometer_aea_process)
-        self.start_error_read_thread(thermometer_aea_process)
-        self.start_tty_read_thread(thermometer_client_aea_process)
-        self.start_error_read_thread(thermometer_client_aea_process)
+        self._start_output_read_thread(thermometer_aea_process)
+        self._start_error_read_thread(thermometer_aea_process)
+        self._start_output_read_thread(thermometer_client_aea_process)
+        self._start_error_read_thread(thermometer_client_aea_process)
 
         time.sleep(20)
 

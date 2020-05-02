@@ -25,10 +25,11 @@ import signal
 import subprocess  # nosec
 import sys
 import tempfile
+import time
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
 
@@ -46,6 +47,8 @@ from aea.test_tools.exceptions import AEATestingException
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
+DEFAULT_PROCESS_TIMEOUT = 60
+
 
 class AEATestCase:
     """Test case for AEA end-to-end tests."""
@@ -59,6 +62,8 @@ class AEATestCase:
     subprocesses: List  # list of launched subprocesses
     t: str  # temporary directory path
     threads: List  # list of started threads
+    stdout: Dict[int, str]  # dict of process.pid: string stdout
+    stderr: Dict[int, str]  # dict of process.pid: string stderr
 
     @classmethod
     def setup_class(cls, packages_dir_path: str = DEFAULT_REGISTRY_PATH):
@@ -86,6 +91,8 @@ class AEATestCase:
 
         cls.subprocesses = []
         cls.threads = []
+        cls.stdout = {}
+        cls.stderr = {}
 
         cls.author = AUTHOR
 
@@ -208,7 +215,7 @@ class AEATestCase:
 
     def terminate_agents(
         self,
-        subprocesses: Optional[List[subprocess.Popen]] = None,
+        *subprocesses: subprocess.Popen,
         signal: signal.Signals = signal.SIGINT,
         timeout: int = 10,
     ) -> None:
@@ -220,22 +227,22 @@ class AEATestCase:
         :param signal: the signal for interuption
         :timeout: the timeout for interuption
         """
-        if subprocesses is None:
-            subprocesses = self.subprocesses
+        if not subprocesses:
+            subprocesses = tuple(self.subprocesses)
+
         for process in subprocesses:
             process.send_signal(signal.SIGINT)
         for process in subprocesses:
             process.wait(timeout=timeout)
 
-    def is_successfully_terminated(
-        self, subprocesses: Optional[List[subprocess.Popen]] = None
-    ):
+    def is_successfully_terminated(self, *subprocesses: subprocess.Popen):
         """
         Check if all subprocesses terminated successfully
         """
-        if subprocesses is None:
-            subprocesses = self.subprocesses
-        all_terminated = [process.returncode == 0 for process in subprocesses]
+        if not subprocesses:
+            subprocesses = tuple(self.subprocesses)
+
+        all_terminated = all([process.returncode == 0 for process in subprocesses])
         return all_terminated
 
     def initialize_aea(self, author=None) -> None:
@@ -339,36 +346,27 @@ class AEATestCase:
         assert src.is_file() and dest.is_file(), "Source or destination is not a file."
         src.write_text(dest.read_text())
 
+    def _read_out(self, process: subprocess.Popen):
+        for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+            self.stdout[process.pid] += line
 
-class AEAWithOefTestCase(AEATestCase):
-    """Test case for AEA end-to-end tests with OEF node."""
+    def _read_err(self, process: subprocess.Popen):
+        if process.stderr is not None:
+            for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+                self.stderr[process.pid] += line
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-    @staticmethod
-    def _read_tty(pid: subprocess.Popen):
-        for line in TextIOWrapper(pid.stdout, encoding="utf-8"):
-            print("stdout: " + line.replace("\n", ""))
-
-    @staticmethod
-    def _read_error(pid: subprocess.Popen):
-        if pid.stderr is not None:
-            for line in TextIOWrapper(pid.stderr, encoding="utf-8"):
-                print("stderr: " + line.replace("\n", ""))
-
-    def start_tty_read_thread(self, process: subprocess.Popen) -> None:
+    def _start_output_read_thread(self, process: subprocess.Popen) -> None:
         """
-        Start a tty reading thread.
+        Start an output reading thread.
 
         :param process: target process passed to a thread args.
 
         :return: None.
         """
-        self.start_thread(target=self._read_tty, process=process)
+        self.stdout[process.pid] = ""
+        self.start_thread(target=self._read_out, process=process)
 
-    def start_error_read_thread(self, process: subprocess.Popen) -> None:
+    def _start_error_read_thread(self, process: subprocess.Popen) -> None:
         """
         Start an error reading thread.
 
@@ -376,7 +374,49 @@ class AEAWithOefTestCase(AEATestCase):
 
         :return: None.
         """
-        self.start_thread(target=self._read_error, process=process)
+        self.stderr[process.pid] = ""
+        self.start_thread(target=self._read_err, process=process)
+
+    def missing_from_output(
+        self,
+        process: subprocess.Popen,
+        strings: Tuple[str],
+        timeout: int = DEFAULT_PROCESS_TIMEOUT,
+        period: int = 1,
+    ) -> List[str]:
+        """
+        Check if strings are present in process output.
+        Read process stdout in thread and terminate when all strings are present
+        or timeout expired.
+
+        :param process: agent subprocess.
+        :param strings: tuple of strings expected to appear in output.
+        :param timeout: int amount of seconds before stopping check.
+        :param period: int period of checking.
+
+        :return: list of missed strings.
+        """
+        self._start_output_read_thread(process)
+        missing_strings = list(strings)
+        end_time = time.time() + timeout
+        while missing_strings:
+            if time.time() > end_time:
+                break
+            missing_strings = [
+                line for line in missing_strings if line not in self.stdout[process.pid]
+            ]
+            time.sleep(period)
+
+        self.terminate_agents(process)
+        return missing_strings
+
+
+class AEAWithOefTestCase(AEATestCase):
+    """Test case for AEA end-to-end tests with OEF node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
 
     def add_scripts_folder(self):
         scripts_src = os.path.join(self.cwd, "scripts")
