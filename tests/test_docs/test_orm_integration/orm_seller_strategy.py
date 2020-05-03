@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+
 import json
 import random
 import time
-from typing import Any, Dict, List, Optional, Tuple
+import uuid
+from typing import Any, Dict, Optional, Tuple
 
 import sqlalchemy as db
 
@@ -115,7 +117,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
@@ -123,11 +125,14 @@ class Strategy(Model):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
-            identifier=self._ledger_id,
-            seller=self.context.agent_addresses[self._ledger_id],
-            client=counterparty,
-        )
+        if self.is_ledger_tx:
+            tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+                identifier=self._ledger_id,
+                seller=self.context.agent_addresses[self._ledger_id],
+                client=counterparty,
+            )
+        else:
+            tx_nonce = uuid.uuid4().hex
         assert (
             self._total_price - self._seller_tx_fee > 0
         ), "This sale would generate a loss, change the configs!"

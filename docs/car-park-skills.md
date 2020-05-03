@@ -130,6 +130,7 @@ In the carpark detection skill config (`car_detector/vendor/fetchai/skills/carpa
 |      db_rel_dir: ../temp_files    |      db_rel_dir: ../temp_files   |
 |      currency_id: 'FET'           |      currency_id: 'ETH'          |
 |      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
 |      seller_tx_fee: 0             |      seller_tx_fee: 0            |
 |----------------------------------------------------------------------| 
 ```

@@ -25,7 +25,7 @@ from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
     @skip_test_ci
