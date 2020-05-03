@@ -37,15 +37,16 @@ def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
 
     :return: dict to be used in AEATestWrapper(**result)
     """
+    # noqa
+    def _make_skill(id):
+        return AEATestWrapper.make_skill(
+            config=SkillConfig(name=f"sc{id}", author="fetchai"),
+            handlers={"dummy_handler": DummyHandler},
+        )
+
     return {
         "name": "dummy_a",
-        "skills": [
-            {
-                "config": SkillConfig(name=f"sc{i}"),  # type: ignore
-                "handlers": {"dummy_handler": DummyHandler},
-            }
-            for i in range(skills_num)
-        ],
+        "components": [_make_skill(i) for i in range(skills_num)],
     }
 
 
