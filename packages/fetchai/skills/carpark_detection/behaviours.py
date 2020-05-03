@@ -65,13 +65,11 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
                 self.context.agent_name
             )
         )
-        old_cwp = os.getcwd()
-        os.chdir("../")
         strategy = cast(Strategy, self.context.strategy)
         if os.path.isfile("run_scripts/run_carparkagent.py"):
             param_list = [
                 "python",
-                "run_scripts/run_carparkagent.py",
+                os.path.join("..", "run_scripts", "run_carparkagent.py"),
                 "-ps",
                 str(self.image_capture_interval),
                 "-lat",
@@ -83,7 +81,6 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
                 "[{}]:Launchng process {}".format(self.context.agent_name, param_list)
             )
             self.process_id = subprocess.Popen(param_list)  # nosec
-            os.chdir(old_cwp)
             self.context.logger.info(
                 "[{}]: detection and gui process launched, process_id {}".format(
                     self.context.agent_name, self.process_id
@@ -184,10 +181,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
-        strategy.db.set_system_status(
-            "ledger-status",
-            self.context.ledger_apis.last_tx_statuses[strategy.ledger_id],
-        )
+        if strategy.is_ledger_tx:
+            strategy.db.set_system_status(
+                "ledger-status",
+                self.context.ledger_apis.last_tx_statuses[strategy.ledger_id],
+            )
 
         self._register_service()
 

@@ -69,6 +69,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(client_aea_name)
         client_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
+        # TODO: finish adding string checks
         time.sleep(10.0)
 
         self.terminate_agents(deploy_aea_process, client_aea_process)

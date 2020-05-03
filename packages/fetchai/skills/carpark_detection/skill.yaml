@@ -7,12 +7,12 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: Qme44yoYofRQwDrEV1kmMtvKqsoGzWdgMu8Q6nkYZKa9j4
+  behaviours.py: QmfGepbkknTZ4VGeQKuUBVMmNMkMWf4EwMKxbsPqAqhDdN
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
-  detection_database.py: QmPxtPHs9x8jQ3ByM62NwE2ehGvHqATWPDMrKCEJkoRGtj
+  detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
   handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
-  strategy.py: QmVwR1apyGtENHXE68EUvSiVbBxM5CiQ8fBR9D5R9cDC2y
+  strategy.py: QmbMfUkBN4poBxBFqseDGcxSbUCauHKM5kNHn6WwfZu4Qf
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
@@ -28,7 +28,8 @@ behaviours:
       image_capture_interval: 120
     class_name: CarParkDetectionAndGUIBehaviour
   service_registration:
-    args: {}
+    args:
+      tick_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:
@@ -41,9 +42,10 @@ models:
   strategy:
     args:
       currency_id: FET
-      data_price_fet: 200000000
+      data_price: 200000000
       db_is_rel_to_cwd: true
       db_rel_dir: ../temp_files
+      is_ledger_tx: true
       ledger_id: fetchai
       seller_tx_fee: 0
     class_name: Strategy

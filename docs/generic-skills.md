@@ -40,7 +40,7 @@ Create the AEA that will provide data.
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/generic_seller:0.2.0
+aea add skill fetchai/generic_seller:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```

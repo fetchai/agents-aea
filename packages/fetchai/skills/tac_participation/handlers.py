@@ -42,10 +42,6 @@ class OEFSearchHandler(Handler):
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
-        super().__init__(**kwargs)
-
     def setup(self) -> None:
         """
         Implement the handler setup.

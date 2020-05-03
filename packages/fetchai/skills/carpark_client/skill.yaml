@@ -20,7 +20,7 @@ protocols:
 behaviours:
   search:
     args:
-      tick_interval: 120
+      tick_interval: 20
     class_name: MySearchBehaviour
 handlers:
   fipa:

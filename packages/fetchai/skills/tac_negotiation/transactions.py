@@ -46,10 +46,8 @@ class Transactions(Model):
 
     def __init__(self, **kwargs) -> None:
         """Initialize the transactions."""
-        self._pending_transaction_timeout = (
-            kwargs.pop("pending_transaction_timeout")
-            if "pending_transaction_timeout" in kwargs.keys()
-            else 30
+        self._pending_transaction_timeout = kwargs.pop(
+            "pending_transaction_timeout", 30
         )
         super().__init__(**kwargs)
         self._pending_proposals = defaultdict(

@@ -64,16 +64,8 @@ class Strategy(Model):
 
         :return: None
         """
-        self._register_as = (
-            Strategy.RegisterAs(kwargs.pop("register_as"))
-            if "register_as" in kwargs.keys()
-            else Strategy.RegisterAs.BOTH
-        )
-        self._search_for = (
-            Strategy.SearchFor(kwargs.pop("search_for"))
-            if "search_for" in kwargs.keys()
-            else Strategy.SearchFor.BOTH
-        )
+        self._register_as = Strategy.RegisterAs(kwargs.pop("register_as", "both"))
+        self._search_for = Strategy.SearchFor(kwargs.pop("search_for", "both"))
         super().__init__(**kwargs)
 
     @property
@@ -270,8 +262,8 @@ class Strategy(Model):
             good_id: 0 for good_id in good_id_to_quantities.keys()
         }  # type: Dict[str, int]
         proposals = []
-        seller_tx_fee = self.context.agent_preferences.transaction_fees["seller_tx_fee"]
-        buyer_tx_fee = self.context.agent_preferences.transaction_fees["buyer_tx_fee"]
+        seller_tx_fee = self.context.agent_preferences.seller_transaction_fee
+        buyer_tx_fee = self.context.agent_preferences.buyer_transaction_fee
         currency_id = list(
             self.context.agent_ownership_state.amount_by_currency_id.keys()
         )[0]

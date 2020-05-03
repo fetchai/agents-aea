@@ -99,7 +99,9 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
 
         self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
         assert (
@@ -187,7 +189,9 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in thermometer_client_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
 
         self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
         assert (

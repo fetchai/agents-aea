@@ -58,7 +58,7 @@ from aea.test_tools.generic import (
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."
 
-DEFAULT_PROCESS_TIMEOUT = 60
+DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
 LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
