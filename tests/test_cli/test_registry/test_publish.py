@@ -20,49 +20,44 @@
 
 from unittest import TestCase, mock
 
-# from click import ClickException
+from aea.cli.registry.publish import _compress, publish_agent
 
-from aea.cli.registry.publish import _compress  # , publish_agent
-
-# from tests.test_cli.tools_for_testing import ContextMock
+from tests.test_cli.tools_for_testing import ContextMock
 
 
-# @mock.patch("aea.cli.core.try_to_load_agent_config")
-# @mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
-# @mock.patch("aea.cli.registry.utils._rm_tarfiles")
-# @mock.patch("aea.cli.registry.publish.os.getcwd", return_value="cwd")
-# @mock.patch("aea.cli.registry.publish._compress")
-# @mock.patch(
-#     "aea.cli.registry.publish.request_api", return_value={"public_id": "public-id"}
-# )
-# class PublishAgentTestCase(TestCase):
-#     """Test case for publish_agent method."""
+@mock.patch("aea.cli.registry.publish.shutil.copy")
+@mock.patch("aea.cli.registry.publish.try_to_load_agent_config")
+@mock.patch("aea.cli.registry.publish.check_is_author_logged_in")
+@mock.patch("aea.cli.registry.utils._rm_tarfiles")
+@mock.patch("aea.cli.registry.publish.os.getcwd", return_value="cwd")
+@mock.patch("aea.cli.registry.publish._compress")
+@mock.patch(
+    "aea.cli.registry.publish.request_api", return_value={"public_id": "public-id"}
+)
+class PublishAgentTestCase(TestCase):
+    """Test case for publish_agent method."""
 
-#     def test_push_item_positive(
-#         self,
-#         request_api_mock,
-#         _load_agent_config_mock,
-#         _compress_mock,
-#         getcwd_mock,
-#         _rm_tarfiles_mock,
-#         check_is_author_logged_in_mock,
-#     ):
-#         """Test for publish_agent positive result."""
-#         publish_agent(ContextMock())
-#         request_api_mock.assert_called_once_with(
-#             "POST",
-#             "/agents/create",
-#             data={
-#                 "name": "agent-name",
-#                 "description": "some-description",
-#                 "version": "some-version",
-#                 "connections": [],
-#                 "protocols": [],
-#                 "skills": [],
-#             },
-#             is_auth=True,
-#             filepath="cwd/agent-name.tar.gz",
-#         )
+    def test_push_item_positive(self, request_api_mock, *mocks):
+        """Test for publish_agent positive result."""
+        description = "Some description."
+        version = "0.1.0"
+        context_mock = ContextMock(description=description, version=version)
+        publish_agent(context_mock)
+        request_api_mock.assert_called_once_with(
+            "POST",
+            "/agents/create",
+            data={
+                "name": "agent-name",
+                "description": description,
+                "version": version,
+                "connections": [],
+                "contracts": [],
+                "protocols": [],
+                "skills": [],
+            },
+            is_auth=True,
+            filepath="cwd/agent-name.tar.gz",
+        )
 
 
 @mock.patch("aea.cli.registry.publish.tarfile")
