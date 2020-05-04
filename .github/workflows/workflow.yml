@@ -49,6 +49,8 @@ jobs:
            tox -e flake8
        - name: Static type check
          run: tox -e mypy
+       - name: Check package versions in documentation
+         run: tox -e package_version_checks
        - name: Generate Documentation
          run: tox -e docs
 
