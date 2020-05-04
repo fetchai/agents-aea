@@ -32,7 +32,9 @@ from typing import Callable, Set
 
 import yaml
 
+
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
+
 
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 """This regex removes the '^' and '$' respectively, at the beginning and at the end."""
@@ -60,7 +62,7 @@ This regex matches strings of the form:
 class PackageIdNotFound(Exception):
     """Custom exception for package id not found."""
 
-    def __init__(self, file: Path, package_id: PackageId, match_obj: re.Match, *args):
+    def __init__(self, file: Path, package_id: PackageId, match_obj, *args):
         """
         Initialize PackageIdNotFound exception.
 
@@ -101,9 +103,7 @@ ALL_PACKAGE_IDS: Set[PackageId] = find_all_packages_ids()
 
 
 def _checks(
-    file: Path,
-    regex: re.Pattern,
-    extract_package_id_from_match: Callable[[re.Match], PackageId],
+    file: Path, regex, extract_package_id_from_match: Callable[["re.Match"], PackageId],
 ):
     matches = regex.finditer(file.read_text())
     for match in matches:
@@ -126,7 +126,7 @@ def check_add_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match: re.Match):
+    def extract_package_id(match):
         package_type, package = match.group(1), match.group(2)
         package_id = PackageId(PackageType(package_type), PublicId.from_str(package))
         return package_id
@@ -144,7 +144,7 @@ def check_fetch_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match: re.Match):
+    def extract_package_id(match):
         package_public_id = match.group(1)
         package_id = PackageId(PackageType.AGENT, PublicId.from_str(package_public_id))
         return package_id
