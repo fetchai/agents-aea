@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,25 +16,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Dummy handler to use in test skills."""
-from random import randint
 
-from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.skills.base import Handler
-
-
-class DummyHandler(Handler):
-    """Dummy handler to handle messages."""
-
-    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
-
-    def setup(self) -> None:
-        """Noop setup."""
-
-    def teardown(self) -> None:
-        """Noop teardown."""
-
-    def handle(self, message: Message) -> None:
-        """Handle incoming message, actually noop."""
-        randint(1, 100) + randint(1, 100)  # nosec
+"""Examples using the AEA framework."""
