@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the http protocol."""
+"""This module contains the support resources for the t_protocol protocol."""

@@ -11,7 +11,7 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/http:0.1.0
+- fetchai/t_protocol:0.1.0
 skills:
 - fetchai/error:0.2.0
 default_connection: fetchai/stub:0.2.0
