@@ -80,23 +80,20 @@ indent = ""
 def change_indent(number: int, mode: str = None):
     global indent
 
-    if number:
-        if number >= 0:
-            if mode and mode == "s":
-                if number >= 0:
-                    indent = number * "    "
-                else:
-                    raise ValueError("Error: setting indent to be a negative number.")
+    if number >= 0:
+        if mode and mode == "s":
+            if number >= 0:
+                indent = number * "    "
             else:
-                for _ in itertools.repeat(None, number):
-                    indent += "    "
+                raise ValueError("Error: setting indent to be a negative number.")
         else:
-            if abs(number) <= len(indent)/4:
-                indent = indent[number*4:]
-            else:
-                raise ValueError("Not enough spaces in the 'indent' variable to remove.")
+            for _ in itertools.repeat(None, number):
+                indent += "    "
     else:
-        raise AttributeError("Argument 'number' is missing.")
+        if abs(number) <= len(indent)/4:
+            indent = indent[number*4:]
+        else:
+            raise ValueError("Not enough spaces in the 'indent' variable to remove.")
 
 
 def _copyright_header_str(author: str) -> str:
@@ -151,17 +148,17 @@ def _camel_case_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-# def _get_indent_str(no_of_indents: int) -> str:
-#     """
-#     Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
-#
-#     :param no_of_indents: The number of indents.
-#     :return: The string containing spaces.
-#     """
-#     indents_str = ""
-#     for _ in itertools.repeat(None, no_of_indents):
-#         indents_str += "    "
-#     return indents_str
+def _get_indent_str(no_of_indents: int) -> str:
+    """
+    Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
+
+    :param no_of_indents: The number of indents.
+    :return: The string containing spaces.
+    """
+    indents_str = ""
+    for _ in itertools.repeat(None, no_of_indents):
+        indents_str += "    "
+    return indents_str
 
 
 def _is_composition_type_with_custom_type(content_type: str) -> bool:
@@ -988,15 +985,16 @@ class ProtocolGenerator:
 
         # __init__
         cls_str += indent + "def __init__(\n"
-        cls_str += "        self,\n"
-        cls_str += "        performative: Performative,\n"
-        cls_str += '        dialogue_reference: Tuple[str, str] = ("", ""),\n'
-        cls_str += "        message_id: int = 1,\n"
-        cls_str += "        target: int = 0,\n"
-        cls_str += "        **kwargs,\n"
-        cls_str += "    ):\n"
-        cls_str += '        """\n'
-        cls_str += "        Initialise an instance of {}Message.\n\n".format(
+        change_indent(1)
+        cls_str += indent + "self,\n"
+        cls_str += indent + "performative: Performative,\n"
+        cls_str += indent + 'dialogue_reference: Tuple[str, str] = ("", ""),\n'
+        cls_str += indent + "message_id: int = 1,\n"
+        cls_str += indent + "target: int = 0,\n"
+        cls_str += indent + "**kwargs,\n"
+        cls_str += indent + "):\n"
+        cls_str += indent + '"""\n'
+        cls_str += indent + "Initialise an instance of {}Message.\n\n".format(
             self.protocol_specification_in_camel_case
         )
         cls_str += "        :param message_id: the message id.\n"

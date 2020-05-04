@@ -1,0 +1,24 @@
+agent_name: agent
+author: fetchai
+version: 0.1.0
+description: ''
+license: Apache-2.0
+aea_version: 0.3.1
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/stub:0.2.0
+contracts: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/http:0.1.0
+skills:
+- fetchai/error:0.2.0
+default_connection: fetchai/stub:0.2.0
+default_ledger: fetchai
+ledger_apis: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+registry_path: ../packages
