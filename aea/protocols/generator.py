@@ -74,6 +74,30 @@ RESERVED_NAMES = {"body", "message_id", "dialogue_reference", "target", "perform
 
 logger = logging.getLogger(__name__)
 
+indent = ""
+
+
+def change_indent(number: int, mode: str = None):
+    global indent
+
+    if number:
+        if number >= 0:
+            if mode and mode == "s":
+                if number >= 0:
+                    indent = number * "    "
+                else:
+                    raise ValueError("Error: setting indent to be a negative number.")
+            else:
+                for _ in itertools.repeat(None, number):
+                    indent += "    "
+        else:
+            if abs(number) <= len(indent)/4:
+                indent = indent[number*4:]
+            else:
+                raise ValueError("Not enough spaces in the 'indent' variable to remove.")
+    else:
+        raise AttributeError("Argument 'number' is missing.")
+
 
 def _copyright_header_str(author: str) -> str:
     """
@@ -127,17 +151,17 @@ def _camel_case_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def _get_indent_str(no_of_indents: int) -> str:
-    """
-    Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
-
-    :param no_of_indents: The number of indents.
-    :return: The string containing spaces.
-    """
-    indents_str = ""
-    for _ in itertools.repeat(None, no_of_indents):
-        indents_str += "    "
-    return indents_str
+# def _get_indent_str(no_of_indents: int) -> str:
+#     """
+#     Produce a string containing a number of white spaces equal to 4 times the no_of_indents.
+#
+#     :param no_of_indents: The number of indents.
+#     :return: The string containing spaces.
+#     """
+#     indents_str = ""
+#     for _ in itertools.repeat(None, no_of_indents):
+#         indents_str += "    "
+#     return indents_str
 
 
 def _is_composition_type_with_custom_type(content_type: str) -> bool:
@@ -920,14 +944,14 @@ class ProtocolGenerator:
         :return: the message.py file content
         """
         # Header
+        change_indent(0, 's')
+
         cls_str = _copyright_header_str(self.protocol_specification.author) + "\n"
 
         # Module docstring
-        cls_str += str.format(
-            '"""This module contains {}\'s message definition."""\n\n'.format(
+        cls_str += '"""This module contains {}\'s message definition."""\n\n'.format(
                 self.protocol_specification.name
             )
-        )
 
         # Imports
         cls_str += "import logging\n"
@@ -945,29 +969,25 @@ class ProtocolGenerator:
         cls_str += "\nDEFAULT_BODY_SIZE = 4\n"
 
         # Class Header
-        cls_str += str.format(
-            "\n\nclass {}Message(Message):\n",
-            self.protocol_specification_in_camel_case,
-        )
-        cls_str += str.format(
-            '    """{}"""\n\n', self.protocol_specification.description
-        )
+        cls_str += "\n\nclass {}Message(Message):\n".format(self.protocol_specification_in_camel_case)
+        change_indent(1)
+        cls_str += indent + '"""{}"""\n\n'.format(self.protocol_specification.description)
 
         # Class attribute
-        cls_str += '    protocol_id = ProtocolId("{}", "{}", "{}")\n'.format(
+        cls_str += indent + 'protocol_id = ProtocolId("{}", "{}", "{}")\n'.format(
             self.protocol_specification.author,
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
         for custom_type in self._all_custom_types:
             cls_str += "\n"
-            cls_str += "    {} = Custom{}\n".format(custom_type, custom_type)
+            cls_str += indent + "{} = Custom{}\n".format(custom_type, custom_type)
 
         # Performatives Enum
         cls_str += "\n{}".format(self._performatives_enum_str())
 
         # __init__
-        cls_str += "    def __init__(\n"
+        cls_str += indent + "def __init__(\n"
         cls_str += "        self,\n"
         cls_str += "        performative: Performative,\n"
         cls_str += '        dialogue_reference: Tuple[str, str] = ("", ""),\n'
