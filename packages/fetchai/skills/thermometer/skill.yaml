@@ -1,6 +1,6 @@
 name: thermometer
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
@@ -8,8 +8,8 @@ fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmZthbn7xGzCAXHZMUxSD2QNn3n2v1Ukk2asrH426nMcRu
   dialogues.py: QmaUUzZJJJyC8zRDvHjdrNXbeaJ15Le7qNsZfe5BKoAkq1
-  handlers.py: QmRELUM8WbNxsg3o7a99Q2U1bo7WczMhYwSHtrUtmDXu7t
-  strategy.py: QmSoFFxMJhPejHaYztRtMFmgykThnSncV42kLChWeum5H7
+  handlers.py: QmaJVvyxucBdhLDcDCAfJHCPxvoTFsB5wUutZuVPfWzaog
+  strategy.py: QmdVZihzTZcAhthT2tiSkhfkHFiWYsnTstjPNMxTHdfWNm
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 fingerprint_ignore_patterns: []
 contracts: []
@@ -20,7 +20,7 @@ protocols:
 behaviours:
   service_registration:
     args:
-      services_interval: 60
+      services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:

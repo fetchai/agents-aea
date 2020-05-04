@@ -574,7 +574,9 @@ class Skill(Component):
 
         super().__init__(configuration)
         self.config = configuration
-        self._skill_context = skill_context  # type: Optional[SkillContext]
+        self._skill_context = (
+            skill_context if skill_context is not None else SkillContext()
+        )
         self._handlers = (
             {} if handlers is None else handlers
         )  # type: Dict[str, Handler]
@@ -584,6 +586,8 @@ class Skill(Component):
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
         self._contracts = {}  # type: Dict[str, Contract]
+
+        self._skill_context._skill = self
 
     @property
     def contracts(self) -> Dict[str, Contract]:
@@ -649,7 +653,6 @@ class Skill(Component):
         # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
         skill_context = SkillContext() if skill_context is None else skill_context
         skill = Skill(configuration, skill_context)
-        skill_context._skill = skill
 
         directory = configuration.directory
         package_modules = load_all_modules(

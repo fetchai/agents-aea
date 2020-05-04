@@ -221,27 +221,33 @@ class Description:
 
         # check that all values are defined in the data model
         all_attributes = [attribute.name for attribute in self.data_model.attributes]
-        if not all(key in all_attributes for key in self.values):
+        if not all(key in all_attributes for key in self.values.keys()):
             raise AttributeInconsistencyException(
                 "Have extra attribute not in data model."
             )
 
-        # check that each of the values are consistent with that specified in the data model
-        for attribute in self.data_model.attributes:
-            if type(self.values[attribute.name]) != attribute.type:
+        # check that each of the provided values are consistent with that specified in the data model
+        for key, value in self.values.items():
+            attribute = next(
+                (
+                    attribute
+                    for attribute in self.data_model.attributes
+                    if attribute.name == key
+                ),
+                None,
+            )
+            if type(value) != attribute.type:
                 # values does not match type in data model
                 raise AttributeInconsistencyException(
                     "Attribute {} has incorrect type: {}".format(
                         attribute.name, attribute.type
                     )
                 )
-            elif not type(self.values[attribute.name]) in ALLOWED_ATTRIBUTE_TYPES:
+            elif not type(value) in ALLOWED_ATTRIBUTE_TYPES:
                 # value type matches data model, but it is not an allowed type
                 raise AttributeInconsistencyException(
                     "Attribute {} has unallowed type: {}. Allowed types: {}".format(
-                        attribute.name,
-                        type(self.values[attribute.name]),
-                        ALLOWED_ATTRIBUTE_TYPES,
+                        attribute.name, type(value), ALLOWED_ATTRIBUTE_TYPES,
                     )
                 )
 

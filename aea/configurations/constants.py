@@ -19,8 +19,8 @@
 
 """Module to declare constants."""
 
-from pathlib import Path
-
+from aea.configurations.base import DEFAULT_LICENSE as DL
+from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
 from aea.configurations.base import PublicId
 from aea.crypto.fetchai import FETCHAI
 
@@ -28,5 +28,5 @@ DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:0.2.0")
 DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:0.1.0")
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:0.2.0")
 DEFAULT_LEDGER = FETCHAI
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_LICENSE = "Apache-2.0"
+DEFAULT_REGISTRY_PATH = DRP
+DEFAULT_LICENSE = DL

@@ -42,7 +42,7 @@ Write and add your skill:
 aea scaffold skill http_echo
 ```
 
-We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received envelopes.
+We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
 
 First, we delete the `my_model.py` and `behaviour.py`. The server will be pyrely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
@@ -61,7 +61,7 @@ from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 
 class HttpHandler(Handler):
-    """This class scaffolds a handler."""
+    """This implements the echo handler."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 

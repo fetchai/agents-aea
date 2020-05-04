@@ -193,7 +193,7 @@ class DetectionDatabase:
     def set_dialogue_status(self, dialogue_id, other_agent_key, received_msg, sent_msg):
         """Record the status of a dialog we are having."""
         t = time.time()
-        command = "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) VALUES('{}', {}, '{}', '{}', '{}')"
+        command = "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) VALUES(?,?,?,?,?)"
         variables = (
             str(dialogue_id),
             str(t),
