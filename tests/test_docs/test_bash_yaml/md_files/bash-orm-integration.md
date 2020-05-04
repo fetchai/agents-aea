@@ -5,7 +5,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/generic_seller:0.2.0
+aea add skill fetchai/generic_seller:0.3.0
 ```
 ``` bash
 aea create my_buyer_aea

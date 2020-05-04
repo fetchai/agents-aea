@@ -21,12 +21,11 @@
 
 import time
 
-from aea.crypto.ethereum import ETHEREUM as ETHEREUM_NAME
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestGenericSkills(AEATestCaseMany, UseOef):
+class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
     @skip_test_ci
@@ -39,7 +38,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # add ethereum ledger in both configuration files
         ledger_apis = {
-            ETHEREUM_NAME: {
+            "ethereum": {
                 "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
                 "chain_id": 3,
                 "gas_price": 50,
@@ -70,6 +69,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(client_aea_name)
         client_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
+        # TODO: finish adding string checks
         time.sleep(10.0)
 
         self.terminate_agents(deploy_aea_process, client_aea_process)

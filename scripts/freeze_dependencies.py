@@ -44,7 +44,8 @@ if __name__ == "__main__":
     requirements = stdout.decode("utf-8")
 
     # remove 'aea' itself
-    requirements = re.sub("aea==.*", "", requirements)
+    regex = re.compile("^aea(==.*| .*)?$", re.MULTILINE)
+    requirements = re.sub(regex, "", requirements)
     if arguments.output is None:
         print(requirements)
     else:

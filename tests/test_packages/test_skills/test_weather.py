@@ -19,8 +19,6 @@
 
 """This test module contains the integration test for the weather skills."""
 
-import time
-
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -38,7 +36,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/weather_station:0.1.0")
+        self.add_item("skill", "fetchai/weather_station:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
@@ -59,13 +57,122 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 
         # run agents
         self.set_agent_context(weather_station_aea_name)
-        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.set_agent_context(weather_client_aea_name)
-        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        time.sleep(10.0)
+        check_strings = (
+            "updating weather station services on OEF service directory.",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "unregistering weather station services from OEF service directory.",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
-        self.terminate_agents(process_one, process_two)
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following weather data=",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
-        assert self.is_successfully_terminated(), "Weather test not successful."
+        self.terminate_agents(weather_station_process, weather_client_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
+
+
+class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+    """Test that weather skills work."""
+
+    @skip_test_ci
+    def test_weather(self, pytestconfig):
+        """Run the weather skills sequence."""
+        weather_station_aea_name = "my_weather_station"
+        weather_client_aea_name = "my_weather_client"
+        self.create_agents(weather_station_aea_name, weather_client_aea_name)
+
+        # prepare ledger configurations
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+
+        # add packages for agent one and run it
+        self.set_agent_context(weather_station_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/weather_station:0.2.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+        self.run_install()
+
+        # add packages for agent two and run it
+        self.set_agent_context(weather_client_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/weather_client:0.1.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+        self.run_install()
+
+        self.generate_private_key()
+        self.add_private_key()
+        self.generate_wealth()
+
+        self.set_agent_context(weather_station_aea_name)
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        self.set_agent_context(weather_client_aea_name)
+        weather_client_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        # TODO: finish test
+        check_strings = (
+            "updating weather station services on OEF service directory.",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            # "received ACCEPT from sender=",
+            # "sending MATCH_ACCEPT_W_INFORM to sender=",
+            # "received INFORM from sender=",
+            "unregistering weather station services from OEF service directory.",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
+
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            # "accepting the proposal from sender=",
+            # "informing counterparty=",
+            # "received INFORM from sender=",
+            # "received the following weather data=",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
+
+        self.terminate_agents(weather_station_process, weather_client_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

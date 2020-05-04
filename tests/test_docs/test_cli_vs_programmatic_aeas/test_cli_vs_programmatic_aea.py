@@ -83,7 +83,7 @@ class TestCliVsProgrammaticAEA:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "fetch", "--local", "fetchai/weather_station:0.2.0"],
+            [*CLI_LOG_OPTION, "fetch", "--local", "fetchai/weather_station:0.3.0"],
             standalone_mode=False,
         )
         assert result.exit_code == 0

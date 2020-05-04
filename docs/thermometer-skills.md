@@ -40,7 +40,7 @@ Create the AEA that will provide thermometer measurements.
 aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/thermometer:0.1.0
+aea add skill fetchai/thermometer:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```

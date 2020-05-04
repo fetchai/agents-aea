@@ -18,9 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the orm-integration.md guide."""
+
 import logging
-import signal
-import time
 from pathlib import Path
 
 import mistune
@@ -106,7 +105,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         # Setup seller
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.2.0")
+        self.add_item("skill", "fetchai/generic_seller:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
@@ -156,25 +155,42 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)
-        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
         self.set_agent_context(buyer_aea_name)
-        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self._start_output_read_thread(process_one)
-        self._start_error_read_thread(process_one)
-        self._start_output_read_thread(process_two)
-        self._start_error_read_thread(process_two)
+        # TODO: finish test
+        check_strings = (
+            "updating generic seller services on OEF service directory.",
+            "unregistering generic seller services from OEF service directory.",
+            "received CFP from sender=",
+            "sending sender=",
+        )
+        missing_strings = self.missing_from_output(
+            seller_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in seller_aea output.".format(missing_strings)
 
-        time.sleep(30)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "declining the proposal from sender=",
+        )
+        missing_strings = self.missing_from_output(
+            buyer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in buyer_aea output.".format(missing_strings)
 
-        process_one.wait(timeout=10)
-        process_two.wait(timeout=10)
-
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+        self.terminate_agents(seller_aea_process, buyer_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
 
 
 def test_strategy_consistency():

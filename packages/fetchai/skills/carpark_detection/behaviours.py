@@ -46,21 +46,11 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        self.image_capture_interval = (
-            kwargs.pop("image_capture_interval")
-            if "image_capture_interval" in kwargs.keys()
-            else DEFAULT_IMAGE_CAPTURE_INTERVAL
+        self.image_capture_interval = kwargs.pop(
+            "image_capture_interval", DEFAULT_IMAGE_CAPTURE_INTERVAL
         )
-        self.default_latitude = (
-            kwargs.pop("default_latitude")
-            if "default_latitude" in kwargs.keys()
-            else DEFAULT_LAT
-        )
-        self.default_longitude = (
-            kwargs.pop("default_longitude")
-            if "default_longitude" in kwargs.keys()
-            else DEFAULT_LON
-        )
+        self.default_latitude = kwargs.pop("default_latitude", DEFAULT_LAT)
+        self.default_longitude = kwargs.pop("default_longitude", DEFAULT_LON)
         self.process_id = None
         super().__init__(**kwargs)
 
@@ -75,13 +65,11 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
                 self.context.agent_name
             )
         )
-        old_cwp = os.getcwd()
-        os.chdir("../")
         strategy = cast(Strategy, self.context.strategy)
         if os.path.isfile("run_scripts/run_carparkagent.py"):
             param_list = [
                 "python",
-                "run_scripts/run_carparkagent.py",
+                os.path.join("..", "run_scripts", "run_carparkagent.py"),
                 "-ps",
                 str(self.image_capture_interval),
                 "-lat",
@@ -93,7 +81,6 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
                 "[{}]:Launchng process {}".format(self.context.agent_name, param_list)
             )
             self.process_id = subprocess.Popen(param_list)  # nosec
-            os.chdir(old_cwp)
             self.context.logger.info(
                 "[{}]: detection and gui process launched, process_id {}".format(
                     self.context.agent_name, self.process_id
@@ -102,7 +89,7 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
             strategy.other_carpark_processes_running = True
         else:
             self.context.logger.info(
-                "[{}]: Failed to find run_carpakragent.py - either you are running this without the rest of the carpark agent code (which can be got from here: https://github.com/fetchai/carpark_agent or you are running the aea from the wrong directory.".format(
+                "[{}]: Failed to find run_carparkagent.py - either you are running this without the rest of the carpark agent code (which can be got from here: https://github.com/fetchai/carpark_agent or you are running the aea from the wrong directory.".format(
                     self.context.agent_name
                 )
             )
@@ -194,10 +181,11 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
-        strategy.db.set_system_status(
-            "ledger-status",
-            self.context.ledger_apis.last_tx_statuses[strategy.ledger_id],
-        )
+        if strategy.is_ledger_tx:
+            strategy.db.set_system_status(
+                "ledger-status",
+                self.context.ledger_apis.last_tx_statuses[strategy.ledger_id],
+            )
 
         self._register_service()
 

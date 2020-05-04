@@ -47,7 +47,7 @@ class TestRemoveSkillWithPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.1.0"
+        cls.skill_id = "fetchai/gym:0.2.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -118,7 +118,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.1.0"
+        cls.skill_id = "fetchai/gym:0.2.0"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -172,7 +172,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "fetchai/gym:0.1.0"
+        cls.skill_id = "fetchai/gym:0.2.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()

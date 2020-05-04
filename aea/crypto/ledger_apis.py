@@ -153,7 +153,9 @@ class LedgerApis:
     @property
     def last_tx_statuses(self) -> Dict[str, str]:
         """Get last tx statuses."""
-        logger.warning("This API is deprecated, please no longer use this API.")
+        logger.warning(
+            "This API (`LedgerApis.last_tx_statuses`) is deprecated, please no longer use this API."
+        )
         return {identifier: LEDGER_STATUS_UNKNOWN for identifier in self.apis.keys()}
 
     @property

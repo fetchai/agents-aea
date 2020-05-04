@@ -21,6 +21,7 @@
 
 import os
 import time
+import uuid
 from typing import Any, Dict, List, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
@@ -40,6 +41,7 @@ DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
 DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_IS_LEDGER_TX = True
 
 
 class Strategy(Model):
@@ -54,16 +56,8 @@ class Strategy(Model):
 
         :return: None
         """
-        db_is_rel_to_cwd = (
-            kwargs.pop("db_is_rel_to_cwd")
-            if "db_is_rel_to_cwd" in kwargs.keys()
-            else DEFAULT_DB_IS_REL_TO_CWD
-        )
-        db_rel_dir = (
-            kwargs.pop("db_rel_dir")
-            if "db_rel_dir" in kwargs.keys()
-            else DEFAULT_DB_REL_DIR
-        )
+        db_is_rel_to_cwd = kwargs.pop("db_is_rel_to_cwd", DEFAULT_DB_IS_REL_TO_CWD)
+        db_rel_dir = kwargs.pop("db_rel_dir", DEFAULT_DB_REL_DIR)
 
         if db_is_rel_to_cwd:
             db_dir = os.path.join(os.getcwd(), db_rel_dir)
@@ -71,43 +65,28 @@ class Strategy(Model):
             db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
 
         self.data_price = kwargs.pop("data_price", DEFAULT_PRICE)
-
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
-
         self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-
-        self.data_price_fet = (
-            kwargs.pop("data_price_fet")
-            if "data_price_fet" in kwargs.keys()
-            else DEFAULT_PRICE
-        )
-        self.currency_id = (
-            kwargs.pop("currency_id")
-            if "currency_id" in kwargs.keys()
-            else DEFAULT_CURRENCY_ID
-        )
-        self.ledger_id = (
-            kwargs.pop("ledger_id")
-            if "ledger_id" in kwargs.keys()
-            else DEFAULT_LEDGER_ID
-        )
+        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
 
         super().__init__(**kwargs)
 
-        self.db = DetectionDatabase(db_dir, False)
-
-        balance = self.context.ledger_apis.token_balance(
-            self.ledger_id, cast(str, self.context.agent_addresses.get(self.ledger_id))
-        )
-        self.db.set_system_status(
-            "ledger-status", self.context.ledger_apis.last_tx_statuses[self.ledger_id]
-        )
-
         if not os.path.isdir(db_dir):
             self.context.logger.warning("Database directory does not exist!")
 
-        self.record_balance(balance)
+        self.db = DetectionDatabase(db_dir, False)
+
+        if self.is_ledger_tx:
+            balance = self.context.ledger_apis.token_balance(
+                self.ledger_id,
+                cast(str, self.context.agent_addresses.get(self.ledger_id)),
+            )
+            self.db.set_system_status(
+                "ledger-status",
+                self.context.ledger_apis.last_tx_statuses[self.ledger_id],
+            )
+            self.record_balance(balance)
         self.other_carpark_processes_running = False
 
     def record_balance(self, balance):
@@ -173,12 +152,14 @@ class Strategy(Model):
         :param query: the query
         :return: a tuple of proposal and the bytes of carpark data
         """
-        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
-            identifier=self.ledger_id,
-            seller=self.context.agent_addresses[self.ledger_id],
-            client=counterparty,
-        )
-
+        if self.is_ledger_tx:
+            tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+                identifier=self.ledger_id,
+                seller=self.context.agent_addresses[self.ledger_id],
+                client=counterparty,
+            )
+        else:
+            tx_nonce = uuid.uuid4().hex
         assert self.db.is_db_exits()
 
         data = self.db.get_latest_detection_data(1)
@@ -188,7 +169,7 @@ class Strategy(Model):
         del data[0]["processed_image_path"]
 
         assert (
-            self.data_price_fet - self._seller_tx_fee > 0
+            self.data_price - self._seller_tx_fee > 0
         ), "This sale would generate a loss, change the configs!"
 
         last_detection_time = data[0]["epoch"]

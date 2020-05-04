@@ -33,14 +33,14 @@ First, create the car detector AEA:
 aea create car_detector
 cd car_detector
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/carpark_detection:0.1.0
+aea add skill fetchai/carpark_detection:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Alternatively to the previous two steps, simply run:
 ``` bash
-aea fetch fetchai/car_detector:0.2.0
+aea fetch fetchai/car_detector:0.3.0
 cd car_detector
 aea install
 ```
@@ -52,14 +52,14 @@ Then, create the car data client AEA:
 aea create car_data_buyer
 cd car_data_buyer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/carpark_client:0.1.0
+aea add skill fetchai/carpark_client:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
 Alternatively to the previous two steps, simply run:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.2.0
+aea fetch fetchai/car_data_buyer:0.3.0
 cd car_data_buyer
 aea install
 ```

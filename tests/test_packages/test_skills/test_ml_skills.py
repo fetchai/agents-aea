@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import sys
-import time
 
 import pytest
 
@@ -62,8 +61,110 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(model_trainer_aea_name)
         model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        time.sleep(60)
+        check_strings = ("Got a Call for Terms", "Got an Accept", "a Data message:")
+        missing_strings = self.missing_from_output(
+            data_provider_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in data_provider_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "found agents=",
+            "sending CFT to agent=",
+            "Received terms message",
+            "Received data message",
+            "Loss:",
+        )
+        missing_strings = self.missing_from_output(
+            model_trainer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+            missing_strings
+        )
 
         self.terminate_agents(data_provider_aea_process, model_trainer_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
 
-        assert self.is_successfully_terminated(), "ML test not successful."
+
+class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
+    """Test that ml skills work."""
+
+    @pytest.mark.skipif(
+        sys.version_info >= (3, 8),
+        reason="cannot run on 3.8 as tensorflow not installable",
+    )
+    @skip_test_ci
+    def test_ml_skills(self, pytestconfig):
+        """Run the ml skills sequence."""
+        data_provider_aea_name = "ml_data_provider"
+        model_trainer_aea_name = "ml_model_trainer"
+        self.create_agents(data_provider_aea_name, model_trainer_aea_name)
+
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+
+        # prepare data provider agent
+        self.set_agent_context(data_provider_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.2.0")
+        setting_path = "agent.ledger_apis"
+        self.force_set_config(setting_path, ledger_apis)
+        self.run_install()
+
+        # prepare model trainer agent
+        self.set_agent_context(model_trainer_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/ml_train:0.2.0")
+        setting_path = (
+            "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, True, "bool")
+        setting_path = "agent.ledger_apis"
+        self.force_set_config(setting_path, ledger_apis)
+        self.run_install()
+
+        self.set_agent_context(data_provider_aea_name)
+        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        self.set_agent_context(model_trainer_aea_name)
+        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        # TODO: finish test
+        check_strings = ("Got a Call for Terms",)  # "Got an Accept", "a Data message:")
+        missing_strings = self.missing_from_output(
+            data_provider_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in data_provider_aea output.".format(
+            missing_strings
+        )
+
+        check_strings = (
+            "found agents=",
+            "sending CFT to agent=",
+            # "Received terms message",
+            # "Received data message",
+            # "Loss:",
+        )
+        missing_strings = self.missing_from_output(
+            model_trainer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in model_trainer_aea output.".format(
+            missing_strings
+        )
+
+        self.terminate_agents(data_provider_aea_process, model_trainer_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

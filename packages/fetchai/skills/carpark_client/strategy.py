@@ -47,34 +47,21 @@ class Strategy(Model):
 
         :return: None
         """
-        self._country = (
-            kwargs.pop("country") if "country" in kwargs.keys() else DEFAULT_COUNTRY
+        self._country = kwargs.pop("country", DEFAULT_COUNTRY)
+        self._search_interval = cast(
+            float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
         )
-        self._search_interval = (
-            cast(float, kwargs.pop("search_interval"))
-            if "search_interval" in kwargs.keys()
-            else DEFAULT_SEARCH_INTERVAL
+        self._no_find_search_interval = kwargs.pop(
+            "no_find_search_interval", DEFAULT_NO_FINDSEARCH_INTERVAL
         )
-        self._no_find_search_interval = (
-            cast(float, kwargs.pop("no_find_search_interval"))
-            if "no_find_search_interval" in kwargs.keys()
-            else DEFAULT_NO_FINDSEARCH_INTERVAL
+        self._max_price = kwargs.pop("max_price", DEFAULT_MAX_PRICE)
+        self._max_detection_age = kwargs.pop(
+            "max_detection_age", DEFAULT_MAX_DETECTION_AGE
         )
-        self._max_price = (
-            kwargs.pop("max_price")
-            if "max_price" in kwargs.keys()
-            else DEFAULT_MAX_PRICE
-        )
-        self._max_detection_age = (
-            kwargs.pop("max_detection_age")
-            if "max_detection_age" in kwargs.keys()
-            else DEFAULT_MAX_DETECTION_AGE
-        )
-
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
-        self.max_buyer_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
+        self.max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_TX_FEE)
 
         super().__init__(**kwargs)
 
