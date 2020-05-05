@@ -90,7 +90,11 @@ At this point, the two ACAs are connected to each other.
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-Install Aries cloud-agents (run `pip install aries-cloudagent` or see <a href="https://github.com/hyperledger/aries-cloudagent-python#install" target=_blank>here</a>) if you do not have it on your machine.
+Install Aries cloud-agents (for more info see <a href="https://github.com/hyperledger/aries-cloudagent-python#install" target=_blank>here</a>) if you do not have it on your machine:
+
+``` bash
+pip install aries-cloudagent
+```
 
 ### Terminals
 
@@ -166,16 +170,16 @@ You now need to configure this skill to ensure `admin_host` and `admin_port` val
 You can use the framework's handy `config` <a href="../cli-commands">CLI command</a> to set these values:
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host <Alice admin IP>
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_host <Alice admin IP>
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_port <Alice admin port>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_port 8031
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_port <Alice admin port>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_port 8031
 ```
 
 #### Add and Configure the Connections
@@ -193,7 +197,7 @@ You now need to configure the `webhook` connection.
 First is ensuring the value of `webhook_port` in `webhook` connection's configuration file `alice/vendor/fetchai/connections/webhook/connection.yaml` matches with what you used above for **Alice_ACA**. 
 
 ``` bash
-aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Alice webhook port>
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8032
 ```
 
 Next, make sure the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
@@ -226,16 +230,16 @@ You need to configure the `aries_alice` skill of the AEA to ensure `admin_host` 
 You can use the framework's handy `config` <a href="../cli-commands">CLI command</a> to set these values:
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host <Alice admin IP>
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_host <Alice admin IP>
+aea config set vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_host 127.0.0.1
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_port <Alice admin port>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_default.args.admin_port 8031
 ```
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_port <Alice admin port>
+aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_http.args.admin_port 8031
 ```
 
 You now need to configure the `webhook` connection. 
@@ -243,7 +247,7 @@ You now need to configure the `webhook` connection.
 First is ensuring the value of `webhook_port` in `webhook` connection's configuration file `alice/vendor/fetchai/connections/webhook/connection.yaml` matches with what you used above for **Alice_ACA**. 
 
 ``` bash
-aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Alice webhook port>
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8032
 ```
 
 Next, make sure the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
@@ -293,19 +297,19 @@ aea add skill fetchai/aries_faber:0.1.0
 You now need to configure this skill to ensure `admin_host` and `admin_port` values in the skill's configuration file `faber/vendor/fetchai/skills/aries_alice/skill.yaml` match with the values you noted above for **Faber_ACA**.
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host <Faber admin IP>
+aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host 127.0.0.1
 ```
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_host <Faber admin IP>
+aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_host 127.0.0.1
 ```
 
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_port <Faber admin port>
+aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_port 8021
 ```
 
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_port <Faber admin port>
+aea config set --type int vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_port 8021
 ```
 
 Additionally, make sure that the value of `alice_id` matches **Alice_AEA's address** as displayed in the third terminal.
@@ -329,7 +333,7 @@ You now need to configure the `webhook` connection.
 First is ensuring the value of `webhook_port` in `webhook` connection's configuration file `faber/vendor/fetchai/connections/webhook/connection.yaml` matches with what you used above for **Faber_ACA**. 
 
 ``` bash
-aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Faber webhook port>
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8022
 ```
 
 Next, make sure the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
@@ -360,19 +364,19 @@ cd aries_faber
 You need to configure the `aries_faber` skill of the AEA to ensure `admin_host` and `admin_port` values in the skill's configuration file `faber/vendor/fetchai/skills/aries_alice/skill.yaml` match with the values you noted above for **Faber_ACA**.
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host <Faber admin IP>
+aea config set vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_host 127.0.0.1
 ```
 
 ``` bash
-aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_host <Faber admin IP>
+aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_host 127.0.0.1
 ```
 
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_port <Faber admin port>
+aea config set --type int vendor.fetchai.skills.aries_faber.behaviours.aries_demo_faber.args.admin_port 8021
 ```
 
 ``` bash
-aea config set --type int vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_port <Faber admin port>
+aea config set --type int vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.admin_port 8021
 ```
 
 Additionally, make sure that the value of `alice_id` matches **Alice_AEA's address** as displayed in the third terminal.
@@ -386,7 +390,7 @@ You now need to configure the `webhook` connection.
 First is ensuring the value of `webhook_port` in `webhook` connection's configuration file `faber/vendor/fetchai/connections/webhook/connection.yaml` matches with what you used above for **Faber_ACA**. 
 
 ``` bash
-aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port <Faber webhook port>
+aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8022
 ```
 
 Next, make sure the value of `webhook_url_path` is `/webhooks/topic/{topic}/`.
