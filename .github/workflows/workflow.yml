@@ -31,10 +31,8 @@ jobs:
            tar xvfz go-ipfs.tar.gz
            sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
            ipfs init
-       - name: Security Check - Main
-         run: tox -e bandit-main
-       - name: Security Check - Tests
-         run: tox -e bandit-tests
+       - name: Security Check
+         run: tox -e bandit
        - name: Safety Check
          run: tox -e safety
        - name: License Check
