@@ -31,7 +31,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
 def _raise_click_exception(*args, **kwargs):
-    raise ClickException()
+    raise ClickException("Message")
 
 
 @mock.patch("builtins.open", mock.mock_open())
@@ -41,7 +41,6 @@ def _raise_click_exception(*args, **kwargs):
 class FetchAgentLocallyTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
-    @mock.patch("aea.cli.fetch._add_item")
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_positive(self, copy_tree, *mocks):
@@ -51,7 +50,6 @@ class FetchAgentLocallyTestCase(TestCase):
         )
         copy_tree.assert_called_once_with("path", "joined-path")
 
-    @mock.patch("aea.cli.fetch._add_item")
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_already_exists(self, *mocks):
