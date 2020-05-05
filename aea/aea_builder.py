@@ -225,7 +225,7 @@ class AEABuilder:
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
-    DEFAULT_EXECUTION_TIMEOUT = 1
+    DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
 
     def __init__(self, with_default_packages: bool = True):
