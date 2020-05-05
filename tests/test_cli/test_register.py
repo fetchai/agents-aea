@@ -40,7 +40,7 @@ class RegisterTestCase(TestCase):
         """Test for CLI register positive result."""
         username = "username"
         email = "email@example.com"
-        fake_pwd = "fake_pwd"
+        fake_pwd = "fake_pwd"  # nosec
 
         result = self.runner.invoke(
             cli,
@@ -68,7 +68,7 @@ class DoRegisterTestCase(TestCase):
         """Test for do_register method positive result."""
         username = "username"
         email = "email@example.com"
-        fake_pwd = "fake_pwd"
+        fake_pwd = "fake_pwd"  # nosec
 
         do_register(username, email, fake_pwd, fake_pwd)
         update_cli_config_mock.assert_called_once_with({AUTH_TOKEN_KEY: "token"})
