@@ -28,7 +28,6 @@ import pytest
 
 import yaml
 
-from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -100,7 +99,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         buyer_aea_name = "my_buyer_aea"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        ledger_apis = {FETCHAI: {"network": "testnet"}}
+        ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # Setup seller
         self.set_agent_context(seller_aea_name)

@@ -26,13 +26,14 @@ import pytest
 
 def skip_test_ci(pytest_func: Callable) -> Callable:
     """
-    Decorate a pytest method to skip a test in a case of CI usage.
+    Decorate a pytest method with integration mark and to skip a test in a case of CI usage.
 
     :param pytest_func: a pytest method to decorate.
 
     :return: decorated method.
     """
 
+    @pytest.mark.integration
     def wrapped(self, pytestconfig, *args, **kwargs):
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
