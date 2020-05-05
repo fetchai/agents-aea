@@ -94,6 +94,10 @@ def _fetch_agent_locally(
         for item_id in required_items:
             try:
                 _add_item(click_context, item_type, item_id)
-            except SystemExit:
-                continue
+            except click.ClickException as e:
+                raise click.ClickException(
+                    "Failed to add {} dependency {}: {}".format(
+                        item_type, item_id, str(e)
+                    )
+                )
     click.echo("Agent {} successfully fetched.".format(public_id.name))
