@@ -51,6 +51,8 @@ jobs:
          run: tox -e package_version_checks
        - name: Generate Documentation
          run: tox -e docs
+       - name: Integration tests
+         run: tox -e py${{ matrix.python-version }}
 
   platform_checks:
     runs-on: ${{ matrix.os }}
@@ -86,8 +88,8 @@ jobs:
         brew install protobuf
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }}
-    # optionally, use flags beyond above command: -- --no-integration-tests --ci
+        tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
+    # optionally, for all tests, remove flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
