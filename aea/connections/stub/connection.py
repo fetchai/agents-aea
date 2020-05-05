@@ -20,7 +20,6 @@
 """This module contains the stub connection."""
 
 import asyncio
-import fcntl
 import logging
 import os
 import re
@@ -33,6 +32,7 @@ from watchdog.observers import Observer
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.helpers import file_lock
 from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 @contextmanager
 def lock_file(file_descriptor: IO[AnyStr]):
     try:
-        fcntl.flock(file_descriptor, fcntl.LOCK_EX)
+        file_lock.lock(file_descriptor, file_lock.LOCK_EX)
     except OSError as e:
         logger.error(
             "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
@@ -99,7 +99,7 @@ def lock_file(file_descriptor: IO[AnyStr]):
     try:
         yield
     finally:
-        fcntl.flock(file_descriptor, fcntl.LOCK_UN)
+        file_lock.unlock(file_descriptor)
 
 
 class StubConnection(Connection):
