@@ -20,7 +20,7 @@
 """This module contains the stub connection."""
 
 import asyncio
-# import fcntl
+import fcntl
 import logging
 import os
 import re
