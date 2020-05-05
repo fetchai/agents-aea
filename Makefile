@@ -60,6 +60,7 @@ misc_checks:
 	# rm -fr requirements.txt
 	python scripts/check_copyright_notice.py
 	python scripts/generate_ipfs_hashes.py --check
+	python scripts/check_package_versions_in_docs.py
 
 .PHONY: docs
 docs:
