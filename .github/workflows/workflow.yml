@@ -52,7 +52,7 @@ jobs:
        - name: Generate Documentation
          run: tox -e docs
        - name: Integration tests
-         run: tox -e py3.6 -- -m integration
+         run: tox -e py3.6 -- --ci -m integration
 
   platform_checks:
     runs-on: ${{ matrix.os }}
