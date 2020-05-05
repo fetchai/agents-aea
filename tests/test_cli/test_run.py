@@ -21,7 +21,6 @@
 
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -39,6 +38,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
@@ -92,7 +92,7 @@ def test_run(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -141,7 +141,7 @@ def test_run_with_default_connection(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -209,7 +209,7 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
         )
 
         time.sleep(5.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=5)
 
         assert process.returncode == 0
@@ -581,7 +581,7 @@ def test_run_ledger_apis(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -675,7 +675,7 @@ def test_run_fet_ledger_apis(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -749,7 +749,7 @@ def test_run_with_install_deps(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.communicate(timeout=20)
 
         assert process.returncode == 0
@@ -825,7 +825,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0

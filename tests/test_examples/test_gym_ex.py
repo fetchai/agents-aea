@@ -20,13 +20,14 @@
 """The tests module contains the tests of the gym example."""
 
 import os
-import signal
 import subprocess  # nosec
 import sys
 import time
 from pathlib import Path
 
 import pytest
+
+from aea.helpers.base import sigint_crossplatform
 
 from ..conftest import CUR_PATH
 
@@ -51,7 +52,7 @@ def test_gym_ex(pytestconfig):
 
         time.sleep(5.0)
     finally:
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=10)
 
         if not process.returncode == 0:

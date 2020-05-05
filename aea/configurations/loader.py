@@ -57,6 +57,20 @@ T = TypeVar(
 )
 
 
+def make_jsonschema_base_uri(base_uri_path: Path) -> str:
+    """
+    Make the JSONSchema base URI, cross-platform.
+
+    :param base_uri_path: the path to the base directory.
+    :return: the string in URI form.
+    """
+    if os.name == "nt":
+        root_path = "file:///{}/".format("/".join(base_uri_path.absolute().parts))
+    else:
+        root_path = "file://{}/".format(base_uri_path.absolute())
+    return root_path
+
+
 class ConfigLoader(Generic[T]):
     """This class implement parsing, serialization and validation functionalities for the 'aea' configuration files."""
 
@@ -69,10 +83,7 @@ class ConfigLoader(Generic[T]):
         """
         base_uri = Path(_SCHEMAS_DIR)
         self._schema = json.load((base_uri / schema_filename).open())
-        if os.name == "nt":
-            root_path = "file:///{}/".format("/".join(base_uri.absolute().parts))
-        else:
-            root_path = "file://{}/".format(base_uri.absolute())
+        root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
         self._validator = Draft4Validator(self._schema, resolver=self._resolver)
         self._configuration_class = configuration_class  # type: Type[T]

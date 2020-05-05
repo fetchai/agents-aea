@@ -116,6 +116,7 @@ def init_worker() -> None:
     :return: None
     """
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+    signal.signal(signal.CTRL_C_EVENT, signal.SIG_IGN)
 
 
 class TaskManager:

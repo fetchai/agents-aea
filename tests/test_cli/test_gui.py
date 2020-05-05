@@ -32,6 +32,8 @@ from jsonschema import Draft4Validator
 
 import pytest
 
+from aea.test_tools.decorators import skip_test_windows
+
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
@@ -61,6 +63,7 @@ class TestGui:
         )
         time.sleep(10.0)
 
+    @skip_test_windows(is_class_test=True)
     def test_gui(self, pytestconfig):
         """Test that the gui process has been spawned correctly."""
         if pytestconfig.getoption("ci"):

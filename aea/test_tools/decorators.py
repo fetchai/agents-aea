@@ -40,3 +40,36 @@ def skip_test_ci(pytest_func: Callable) -> Callable:
             pytest_func(self, pytestconfig, *args, **kwargs)
 
     return wrapped
+
+
+def skip_test_windows(is_class_test=False) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on Windows.
+
+    :param pytest_func: a pytest method to decorate.
+
+    :return: decorated method.
+    """
+
+    def decorator(pytest_func):
+        def check_windows_is_set(pytestconfig):
+            if pytestconfig.getoption("windows"):
+                pytest.skip("Skipping the test since it doesn't work on Windows.")
+                return False
+            return True
+
+        if is_class_test:
+
+            def wrapper(self, pytestconfig, *args, **kwargs):  # type: ignore
+                if check_windows_is_set(pytestconfig):
+                    pytest_func(self, pytestconfig, *args, **kwargs)
+
+        else:
+
+            def wrapper(pytestconfig, *args, **kwargs):  # type: ignore
+                if check_windows_is_set(pytestconfig):
+                    pytest_func(pytestconfig, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

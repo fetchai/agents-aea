@@ -1583,7 +1583,9 @@ def _compute_fingerprint(
         file_hash = hasher.get(str(file))
         key = str(file.relative_to(package_directory))
         assert key not in fingerprints, "Key in fingerprints!"  # nosec
-        fingerprints[key] = file_hash
+        # use '/' as path separator
+        normalized_path = Path(key).as_posix()
+        fingerprints[normalized_path] = file_hash
 
     return fingerprints
 

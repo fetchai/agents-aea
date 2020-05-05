@@ -449,10 +449,10 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/protocols/{}'".format(
-            self.protocol_name
-        )
-        assert self.result.exception.message == s
+        missing_path = "./vendor/fetchai/protocols/{}".format(self.protocol_name)
+        # on Windows we have to escape the '\' character.
+        missing_path = str(Path(missing_path)).replace("\\", "\\\\")
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):

@@ -21,7 +21,6 @@
 
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -31,6 +30,7 @@ from threading import Thread
 import pytest
 
 from aea.cli import cli
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
 from .programmatic_aea import run
@@ -119,7 +119,7 @@ class TestCliVsProgrammaticAEA:
         )
 
         time.sleep(10.0)
-        process_one.send_signal(signal.SIGINT)
+        sigint_crossplatform(process_one)
         process_one.wait(timeout=20)
 
         assert process_one.returncode == 0

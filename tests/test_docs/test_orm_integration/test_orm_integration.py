@@ -20,7 +20,6 @@
 """This module contains the tests for the orm-integration.md guide."""
 import logging
 import os
-import signal
 import time
 from pathlib import Path
 
@@ -31,6 +30,7 @@ import pytest
 import yaml
 
 from aea.crypto.fetchai import FETCHAI
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.generic import force_set_config
 from aea.test_tools.test_cases import AEAWithOefTestCase
@@ -176,8 +176,8 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         self.start_error_read_thread(process_two)
 
         time.sleep(30)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
+        sigint_crossplatform(process_one)
+        sigint_crossplatform(process_two)
 
         process_one.wait(timeout=10)
         process_two.wait(timeout=10)

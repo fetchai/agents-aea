@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -462,10 +461,10 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(
-            self.connection_name
-        )
-        assert self.result.exception.message == s
+        missing_path = "./vendor/fetchai/connections/{}".format(self.connection_name)
+        # on Windows we have to escape the '\' character.
+        missing_path = str(Path(missing_path)).replace("\\", "\\\\")
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):

@@ -24,7 +24,6 @@ import json
 import logging
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -39,6 +38,7 @@ import pytest
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_VERSION
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
 from ..helper import extract_code_blocks
@@ -234,8 +234,8 @@ class TestBuildSkill:
             )
 
             time.sleep(7.0)
-            process_one.send_signal(signal.SIGINT)
-            process_two.send_signal(signal.SIGINT)
+            sigint_crossplatform(process_one)
+            sigint_crossplatform(process_two)
             process_one.wait(timeout=5)
             process_two.wait(timeout=5)
             assert process_one.returncode == 0

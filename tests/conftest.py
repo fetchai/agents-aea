@@ -281,6 +281,7 @@ agent_config_files = [
 def pytest_addoption(parser):
     """Add options to the parser."""
     parser.addoption("--ci", action="store_true", default=False)
+    parser.addoption("--windows", action="store_true", default=False)
     parser.addoption(
         "--no-integration-tests",
         action="store_true",

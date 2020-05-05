@@ -39,6 +39,7 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.exceptions import AEATestingException
 
@@ -223,7 +224,7 @@ class AEATestCase:
         if subprocesses is None:
             subprocesses = self.subprocesses
         for process in subprocesses:
-            process.send_signal(signal.SIGINT)
+            sigint_crossplatform(process)
         for process in subprocesses:
             process.wait(timeout=timeout)
 

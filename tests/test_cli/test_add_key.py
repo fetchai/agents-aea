@@ -36,6 +36,7 @@ from aea.crypto.helpers import (
     FETCHAI_PRIVATE_KEY_FILE,
 )
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.decorators import skip_test_windows
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
@@ -176,7 +177,8 @@ class TestAddManyKeys:
             cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE,
         )
 
-    def test_add_many_keys(self):
+    @skip_test_windows(is_class_test=True)
+    def test_add_many_keys(self, pytestconfig):
         """Test that the keys are added correctly."""
 
         result = self.runner.invoke(
@@ -204,6 +206,7 @@ class TestAddManyKeys:
         shutil.rmtree(cls.t)
 
 
+@skip_test_windows()
 def test_add_key_fails_bad_key():
     """Test that 'aea add-key' fails because the key is not valid."""
     oldcwd = os.getcwd()
@@ -245,6 +248,7 @@ def test_add_key_fails_bad_key():
     os.chdir(oldcwd)
 
 
+@skip_test_windows()
 def test_add_key_fails_bad_ledger_id():
     """Test that 'aea add-key' fails because the ledger id is not valid."""
     oldcwd = os.getcwd()
