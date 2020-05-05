@@ -38,9 +38,7 @@ class LogoutTestCase(TestCase):
     def test_logout_positive(self, _update_cli_config_mock, registry_logout_mock):
         """Test for CLI logout positive result."""
         result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "logout"],
-            standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "logout"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         registry_logout_mock.assert_called_once()
