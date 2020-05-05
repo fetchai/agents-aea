@@ -45,6 +45,7 @@ from tests.test_cli.tools_for_testing import (
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
 @mock.patch("aea.cli.publish._try_get_item_target_path", return_value="target-dir")
 @mock.patch("aea.cli.publish.os.path.join", return_value="joined-path")
+@mock.patch("aea.cli.publish.DEFAULT_CONNECTION", "author/default_connection:version")
 class SaveAgentLocallyTestCase(TestCase):
     """Test case for _save_agent_locally method."""
 
@@ -58,7 +59,11 @@ class SaveAgentLocallyTestCase(TestCase):
         _check_is_item_in_local_registry_mock,
     ):
         """Test for save_agent_locally positive result."""
-        _save_agent_locally(ContextMock(connections=["author/name:version"]))
+        _save_agent_locally(
+            ContextMock(
+                connections=["author/default_connection:version", "author/name:version"]
+            )
+        )
         makedirs_mock.assert_called_once_with("target-dir", exist_ok=True)
         copyfile_mock.assert_called_once_with("joined-path", "joined-path")
 
@@ -87,10 +92,11 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
             _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.common._check_aea_project")
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 @mock.patch("aea.cli.publish._validate_pkp")
+@mock.patch("aea.cli.publish.cast", return_value=ContextMock())
 class PublishCommandTestCase(TestCase):
     """Test case for CLI publish command."""
 
@@ -100,12 +106,14 @@ class PublishCommandTestCase(TestCase):
 
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
-        self.runner.invoke(
+        result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
         )
-        self.runner.invoke(
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
         )
+        self.assertEqual(result.exit_code, 0)
 
 
 class ValidatePkpTestCase(TestCase):

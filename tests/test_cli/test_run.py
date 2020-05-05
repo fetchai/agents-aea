@@ -27,18 +27,23 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from unittest import TestCase, mock
+
+from click import ClickException
 
 import pytest
 
 import yaml
 
 from aea.cli import cli
+from aea.cli.run import _build_aea, _run_aea
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.exceptions import AEAPackageLoadingError
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
@@ -1499,3 +1504,32 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+def _raise_click_exception(*args, **kwargs):
+    raise ClickException()
+
+
+class RunAEATestCase(TestCase):
+    """Test case for _run_aea method."""
+
+    def test__run_aea_negative(self, *mocks):
+        """Test _run_aea method for negative result."""
+        aea_mock = mock.Mock()
+        aea_mock.start = _raise_click_exception
+        with self.assertRaises(ClickException):
+            _run_aea(aea_mock)
+
+
+def _raise_aea_package_loading_error(*args, **kwargs):
+    raise AEAPackageLoadingError()
+
+
+@mock.patch("aea.cli.run.AEABuilder.from_aea_project", _raise_aea_package_loading_error)
+class BuildAEATestCase(TestCase):
+    """Test case for _run_aea method."""
+
+    def test__build_aea_negative(self, *mocks):
+        """Test _build_aea method for negative result."""
+        with self.assertRaises(ClickException):
+            _build_aea(connection_ids=[], skip_consistency_check=True)
