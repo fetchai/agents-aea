@@ -502,6 +502,12 @@ def network_node(oef_addr, oef_port, pytestconfig):
             c.remove()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config for each test."""
+    _init_cli_config()
+
+
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -524,12 +530,6 @@ def get_host():
     finally:
         s.close()
     return IP
-
-
-@pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
-    """Resets the cli config."""
-    _init_cli_config()
 
 
 def _make_dummy_connection() -> Connection:
