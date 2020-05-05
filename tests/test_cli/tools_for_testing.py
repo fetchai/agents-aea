@@ -43,6 +43,8 @@ class AgentConfigMock:
         """Init the AgentConfigMock object."""
         self.connections: List[str] = kwargs.get("connections", [])
         self.contracts: List[str] = kwargs.get("contracts", [])
+        self.description: str = kwargs.get("description", "")
+        self.version: str = kwargs.get("version", "")
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
         self.agent_name: str = kwargs.get("agent_name", "agent-name")

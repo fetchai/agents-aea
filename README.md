@@ -108,8 +108,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To run bandit security checks:
 
-      tox -e bandit-main
-      tox -e bandit-tests
+      tox -e bandit
 
 - To start a live-reloading docs server on localhost
 	

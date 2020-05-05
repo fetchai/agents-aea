@@ -116,6 +116,7 @@ class TestPushLocalFailsArgumentNotPublicId:
 @mock.patch("aea.cli.common.try_to_load_agent_config")
 @mock.patch("aea.cli.push._save_item_locally")
 @mock.patch("aea.cli.push.push_item")
+@mock.patch("aea.cli.common._check_aea_project")
 class PushCommandTestCase(TestCase):
     """Test case for CLI push command."""
 
@@ -125,42 +126,48 @@ class PushCommandTestCase(TestCase):
 
     def test_push_connection_positive(self, *mocks):
         """Test for CLI push connection positive result."""
-        self.runner.invoke(
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
-        self.runner.invoke(
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "--local", "connection", "author/name:0.1.0"],
             standalone_mode=False,
         )
+        self.assertEqual(result.exit_code, 0)
 
     def test_push_protocol_positive(self, *mocks):
         """Test for CLI push protocol positive result."""
-        self.runner.invoke(
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
-        self.runner.invoke(
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "--local", "protocol", "author/name:0.1.0"],
             standalone_mode=False,
         )
+        self.assertEqual(result.exit_code, 0)
 
     def test_push_skill_positive(self, *mocks):
         """Test for CLI push skill positive result."""
-        self.runner.invoke(
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
-        self.runner.invoke(
+        self.assertEqual(result.exit_code, 0)
+        result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "push", "--local", "skill", "author/name:0.1.0"],
             standalone_mode=False,
         )
+        self.assertEqual(result.exit_code, 0)
 
 
 @mock.patch("aea.cli.common.try_to_load_agent_config")

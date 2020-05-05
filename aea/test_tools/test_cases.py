@@ -32,7 +32,7 @@ from abc import ABC
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -47,7 +47,7 @@ from aea.connections.stub.connection import (
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.mail.base import Envelope
-from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.generic import (
     force_set_config,
@@ -78,6 +78,7 @@ class BaseAEATestCase(ABC):
     """Base class for AEA test cases."""
 
     runner: CliRunner  # CLI runner
+    last_cli_runner_result: Optional[Result] = None
     author: str = DEFAULT_AUTHOR  # author
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
@@ -151,6 +152,7 @@ class BaseAEATestCase(ABC):
             result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, *args], standalone_mode=False
             )
+            cls.last_cli_runner_result = result
             if result.exit_code != 0:
                 raise AEATestingException(
                     "Failed to execute AEA CLI command with args {}.\n"
@@ -331,6 +333,23 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
+    def replace_private_key_in_file(
+        cls, private_key: str, private_key_filepath: str = FETCHAI_PRIVATE_KEY_FILE
+    ) -> None:
+        """
+        Replace the private key in the provided file with the provided key.
+
+        :param private_key: the private key
+        :param private_key_filepath: the filepath to the private key file
+
+        :return: None
+        :raises: exception if file does not exist
+        """
+        with cd(cls._get_cwd()):
+            with open(private_key_filepath, "wt") as f:
+                f.write(private_key)
+
+    @classmethod
     def generate_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> None:
         """
         Generate wealth with CLI command.
@@ -343,6 +362,20 @@ class BaseAEATestCase(ABC):
         cls.run_cli_command(
             "generate-wealth", ledger_api_id, "--sync", cwd=cls._get_cwd()
         )
+
+    @classmethod
+    def get_wealth(cls, ledger_api_id: str = FETCHAI_NAME) -> str:
+        """
+        Get wealth with CLI command.
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+
+        :return: command line output
+        """
+        cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
+        assert cls.last_cli_runner_result is not None, "Runner result not set!"
+        return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
 
     @classmethod
     def replace_file_content(cls, src: Path, dest: Path) -> None:
@@ -512,6 +545,7 @@ class BaseAEATestCase(ABC):
         cls._join_threads()
         cls.unset_agent_context()
         cls.change_directory(cls.old_cwd)
+        cls.last_cli_runner_result = None
         cls.packages_dir_path = Path("packages")
         cls.agents = set()
         cls.current_agent_context = ""

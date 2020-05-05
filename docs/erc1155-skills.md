@@ -37,8 +37,7 @@ Create the AEA that will deploy the contract.
 aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/erc1155_deploy:0.2.0
-aea add contract fetchai/erc1155:0.2.0
+aea add skill fetchai/erc1155_deploy:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -59,7 +58,6 @@ aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/oef:0.2.0
 aea add skill fetchai/erc1155_client:0.2.0
-aea add contract fetchai/erc1155:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -85,8 +83,8 @@ ledger_apis:
     gas_price: 50
 ```
 And change the default ledger:
-``` yaml
-default_ledger: ethereum
+``` bash
+aea config set agent.default_ledger ethereum
 ```
 
 ### Fund the AEAs
