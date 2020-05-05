@@ -152,7 +152,7 @@ def test_real_search():
         == "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/http_server:0.1.0"
+    assert data[i]["id"] == "fetchai/http_server:0.2.0"
     assert (
         data[i]["description"]
         == "The HTTP server connection that wraps http server implementing a RESTful API specification."
