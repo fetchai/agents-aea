@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package fetch.aea.TwoPartyNegotiation;
+
+message TwoPartyNegotiationMessage{
+
+    // Custom Types
+    message Description{
+        bytes description = 1;
+    }
+
+    message Query{
+        message Nothing {
+        }
+        oneof query{
+            bytes bytes = 1;
+            Nothing nothing = 2;
+            bytes query_bytes = 3;
+        }
+    }
+
+
+    // Performatives and contents
+    message Cfp_Performative{
+        Query query = 1;
+    }
+
+    message Propose_Performative{
+        Description proposal = 1;
+    }
+
+    message Accept_Performative{}
+
+        message Decline_Performative{}
+
+            message Match_Accept_Performative{}
+
+
+            // Standard TwoPartyNegotiationMessage fields
+            int32 message_id = 1;
+            string dialogue_starter_reference = 2;
+            string dialogue_responder_reference = 3;
+            int32 target = 4;
+            oneof performative{
+                Accept_Performative accept = 5;
+                Cfp_Performative cfp = 6;
+                Decline_Performative decline = 7;
+                Match_Accept_Performative match_accept = 8;
+                Propose_Performative propose = 9;
+            }
+        }

@@ -27,24 +27,29 @@ ct:Description: |
   bytes description = 1;
 ...
 ---
-reply: {...}
-initial-move:
-  id: 1
-  from: {buyer, seller}
-  sa: cfp
-  target: 0
-last-move:
-  id: None
-  from: {seller, buyer}
-  sa: match_accept
-  target: None
-roles: {buyer, seller}
-role-assignment: buyer
-role_multiplicity:
-  min:
-    buyer: 1
-    seller: 1
-  max:
-    buyer: 1
-    seller: 1
+reply:
+  cfp: [propose, decline]
+  propose: [accept, decline]
+  accept: [decline, match_accept]
+  decline: []
+  match_accept: []
+#initial-move:
+#  id: 1
+#  from: {buyer, seller}
+#  sa: cfp
+#  target: 0
+#last-move:
+#  id: None
+#  from: {seller, buyer}
+#  sa: match_accept
+#  target: None
+#roles: {buyer, seller}
+#role-assignment: buyer
+#role_multiplicity:
+#  min:
+#    buyer: 1
+#    seller: 1
+#  max:
+#    buyer: 1
+#    seller: 1
 ...
