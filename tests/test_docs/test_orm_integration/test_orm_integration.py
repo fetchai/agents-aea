@@ -19,7 +19,6 @@
 
 """This module contains the tests for the orm-integration.md guide."""
 
-import logging
 from pathlib import Path
 
 import mistune
@@ -32,9 +31,6 @@ from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from ...conftest import ROOT_DIR
-
-logger = logging.getLogger(__name__)
-
 
 seller_strategy_replacement = """models:
   dialogues:

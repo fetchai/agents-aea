@@ -40,6 +40,10 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
+``` bash
+aea fetch fetchai/simple_service_registration:0.2.0 && cd simple_service_registration
+aea run --connections fetchai/oef:0.2.0
+```
 ``` yaml
 name: simple_service_registration
 author: fetchai
