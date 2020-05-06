@@ -61,7 +61,7 @@ class TestGui:
 
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
-        assert tcpping("localhost", 8080)
+        assert tcpping("127.0.0.1", 8080)
 
     @classmethod
     def teardown_class(cls):
