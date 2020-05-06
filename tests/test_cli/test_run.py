@@ -49,11 +49,8 @@ from aea.test_tools.click_testing import CliRunner
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
-def test_run(pytestconfig):
+def test_run():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -115,11 +112,8 @@ def test_run(pytestconfig):
             pass
 
 
-def test_run_with_default_connection(pytestconfig):
+def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -172,11 +166,8 @@ def test_run_with_default_connection(pytestconfig):
         ["fetchai/local:0.1.0,,{},".format(str(DEFAULT_CONNECTION))],
     ],
 )
-def test_run_multiple_connections(pytestconfig, connection_ids):
+def test_run_multiple_connections(connection_ids):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -232,11 +223,8 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
             pass
 
 
-def test_run_unknown_private_key(pytestconfig):
+def test_run_unknown_private_key():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -309,11 +297,8 @@ def test_run_unknown_private_key(pytestconfig):
         pass
 
 
-def test_run_unknown_ledger(pytestconfig):
+def test_run_unknown_ledger():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -386,11 +371,8 @@ def test_run_unknown_ledger(pytestconfig):
         pass
 
 
-def test_run_fet_private_key_config(pytestconfig):
+def test_run_fet_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -447,11 +429,8 @@ def test_run_fet_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ethereum_private_key_config(pytestconfig):
+def test_run_ethereum_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -508,11 +487,8 @@ def test_run_ethereum_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ledger_apis(pytestconfig):
+def test_run_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -605,11 +581,8 @@ def test_run_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_fet_ledger_apis(pytestconfig):
+def test_run_fet_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -698,10 +671,8 @@ def test_run_fet_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_with_install_deps(pytestconfig):
+def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -772,10 +743,8 @@ def test_run_with_install_deps(pytestconfig):
             pass
 
 
-def test_run_with_install_deps_and_requirement_file(pytestconfig):
+def test_run_with_install_deps_and_requirement_file():
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
