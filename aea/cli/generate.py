@@ -143,11 +143,11 @@ def _generate_item(click_context, item_type, specification_path):
         shutil.rmtree(
             os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
         )
-        raise #click.ClickException(
-        #     "There was an error while generating the protocol. The protocol is NOT generated. Exception: "
-        #     + str(e)
-        #     + str(e.with_traceback())
-        # )
+        raise click.ClickException(
+            "There was an error while generating the protocol. The protocol is NOT generated. Exception: "
+            + str(e)
+            + str(e.with_traceback())
+        )
 
     # Run black code formatting
     try:
