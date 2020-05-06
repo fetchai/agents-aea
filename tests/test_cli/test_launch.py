@@ -65,7 +65,7 @@ class TestLaunch:
         )
         assert result.exit_code == 0
 
-    @skip_test_windows(is_class_test=True)
+    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         try:
@@ -144,7 +144,7 @@ class TestLaunchWithOneFailingAgent:
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
-    @skip_test_windows(is_class_test=True)
+    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         try:
@@ -246,7 +246,7 @@ class TestLaunchMultithreaded:
         )
         assert result.exit_code == 0
 
-    @skip_test_windows(is_class_test=True)
+    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         try:

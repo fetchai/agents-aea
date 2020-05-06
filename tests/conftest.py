@@ -278,7 +278,7 @@ agent_config_files = [
 ]
 
 
-def skip_test_windows(is_class_test=False) -> Callable:
+def skip_test_windows(is_test_class=False) -> Callable:
     """
     Decorate a pytest method to skip a test in a case we are on Windows.
 
@@ -292,7 +292,7 @@ def skip_test_windows(is_class_test=False) -> Callable:
                 return False
             return True
 
-        if is_class_test:
+        if is_test_class:
 
             def wrapper(self, *args, **kwargs):  # type: ignore
                 if check_windows_is_set():

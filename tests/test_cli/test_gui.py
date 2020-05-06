@@ -65,7 +65,7 @@ class TestGui:
         )
         time.sleep(10.0)
 
-    @skip_test_windows(is_class_test=True)
+    @skip_test_windows(is_test_class=True)
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
         assert tcpping("127.0.0.1", 8080)

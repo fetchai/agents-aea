@@ -30,7 +30,7 @@ from ...conftest import ROOT_DIR, skip_test_windows
 class TestGymSkill(AEATestCaseEmpty):
     """Test that gym skill works."""
 
-    @skip_test_windows(is_class_test=True)
+    @skip_test_windows(is_test_class=True)
     def test_gym(self):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.2.0")
