@@ -99,7 +99,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             "Successfully minted items. Transaction digest:",
         )
         missing_strings = self.missing_from_output(
-            deploy_aea_process, check_strings, timeout=240, is_terminating=False
+            deploy_aea_process, check_strings, timeout=360, is_terminating=False
         )
         assert (
             missing_strings == []
