@@ -794,7 +794,6 @@ def validate_author_name(author: Optional[str] = None) -> str:
 def _rmdirs(*paths):
     for path in paths:
         if os.path.exists(path):
-            click.echo(f"Removing this shit: {path}")
             shutil.rmtree(path)
 
 
