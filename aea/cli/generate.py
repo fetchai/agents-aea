@@ -146,7 +146,6 @@ def _generate_item(click_context, item_type, specification_path):
         raise click.ClickException(
             "There was an error while generating the protocol. The protocol is NOT generated. Exception: "
             + str(e)
-            + str(e.with_traceback())
         )
 
     # Run black code formatting
