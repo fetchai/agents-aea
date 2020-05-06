@@ -17,45 +17,44 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains two_party_negotiation's message definition."""
+"""This module contains fipa's message definition."""
 
 import logging
 from enum import Enum
-from typing import Set, Tuple, cast
+from typing import Dict, Set, Tuple, cast
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.two_party_negotiation.custom_types import (
+from packages.fetchai.protocols.fipa.custom_types import (
     Description as CustomDescription,
 )
-from packages.fetchai.protocols.two_party_negotiation.custom_types import (
-    Query as CustomQuery,
-)
+from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
 
-logger = logging.getLogger(
-    "aea.packages.fetchai.protocols.two_party_negotiation.message"
-)
+logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
 
 DEFAULT_BODY_SIZE = 4
 
 
-class TwoPartyNegotiationMessage(Message):
-    """A protocol for negotiation over a fixed set of resources involving two parties."""
+class FipaMessage(Message):
+    """A protocol for FIPA ACL."""
 
-    protocol_id = ProtocolId("fetchai", "two_party_negotiation", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "fipa", "0.1.0")
 
     Description = CustomDescription
 
     Query = CustomQuery
 
     class Performative(Enum):
-        """Performatives for the two_party_negotiation protocol."""
+        """Performatives for the fipa protocol."""
 
         ACCEPT = "accept"
+        ACCEPT_W_INFORM = "accept_w_inform"
         CFP = "cfp"
         DECLINE = "decline"
+        INFORM = "inform"
         MATCH_ACCEPT = "match_accept"
+        MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
         PROPOSE = "propose"
 
         def __str__(self):
@@ -71,7 +70,7 @@ class TwoPartyNegotiationMessage(Message):
         **kwargs,
     ):
         """
-        Initialise an instance of TwoPartyNegotiationMessage.
+        Initialise an instance of FipaMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -82,10 +81,19 @@ class TwoPartyNegotiationMessage(Message):
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=TwoPartyNegotiationMessage.Performative(performative),
+            performative=FipaMessage.Performative(performative),
             **kwargs,
         )
-        self._performatives = {"accept", "cfp", "decline", "match_accept", "propose"}
+        self._performatives = {
+            "accept",
+            "accept_w_inform",
+            "cfp",
+            "decline",
+            "inform",
+            "match_accept",
+            "match_accept_w_inform",
+            "propose",
+        }
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -108,13 +116,19 @@ class TwoPartyNegotiationMessage(Message):
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set."
-        return cast(TwoPartyNegotiationMessage.Performative, self.get("performative"))
+        return cast(FipaMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
         assert self.is_set("target"), "target is not set."
         return cast(int, self.get("target"))
+
+    @property
+    def info(self) -> Dict[str, str]:
+        """Get the 'info' content from the message."""
+        assert self.is_set("info"), "'info' content is not set."
+        return cast(Dict[str, str], self.get("info"))
 
     @property
     def proposal(self) -> CustomDescription:
@@ -129,7 +143,7 @@ class TwoPartyNegotiationMessage(Message):
         return cast(CustomQuery, self.get("query"))
 
     def _is_consistent(self) -> bool:
-        """Check that the message follows the two_party_negotiation protocol."""
+        """Check that the message follows the fipa protocol."""
         try:
             assert (
                 type(self.dialogue_reference) == tuple
@@ -160,7 +174,7 @@ class TwoPartyNegotiationMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             assert (
-                type(self.performative) == TwoPartyNegotiationMessage.Performative
+                type(self.performative) == FipaMessage.Performative
             ), "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                 self.valid_performatives, self.performative
             )
@@ -168,28 +182,79 @@ class TwoPartyNegotiationMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == TwoPartyNegotiationMessage.Performative.CFP:
+            if self.performative == FipaMessage.Performative.CFP:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.query) == CustomQuery
                 ), "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
                     type(self.query)
                 )
-            elif self.performative == TwoPartyNegotiationMessage.Performative.PROPOSE:
+            elif self.performative == FipaMessage.Performative.PROPOSE:
                 expected_nb_of_contents = 1
                 assert (
                     type(self.proposal) == CustomDescription
                 ), "Invalid type for content 'proposal'. Expected 'Description'. Found '{}'.".format(
                     type(self.proposal)
                 )
-            elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
+            elif self.performative == FipaMessage.Performative.ACCEPT_W_INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.INFORM:
+                expected_nb_of_contents = 1
+                assert (
+                    type(self.info) == dict
+                ), "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    type(self.info)
+                )
+                for key_of_info, value_of_info in self.info.items():
+                    assert (
+                        type(key_of_info) == str
+                    ), "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(key_of_info)
+                    )
+                    assert (
+                        type(value_of_info) == str
+                    ), "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
+                        type(value_of_info)
+                    )
+            elif self.performative == FipaMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
-            elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
+            elif self.performative == FipaMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif (
-                self.performative
-                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
-            ):
+            elif self.performative == FipaMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
 
             # Check correct content count

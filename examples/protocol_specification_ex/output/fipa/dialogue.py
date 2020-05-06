@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the classes required for two_party_negotiation dialogue management.
+This module contains the classes required for fipa dialogue management.
 
 - DialogueLabel: The dialogue label class acts as an identifier for dialogues.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
@@ -32,21 +32,22 @@ from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.two_party_negotiation.message import (
-    TwoPartyNegotiationMessage,
-)
+from packages.fetchai.protocols.fipa.message import FipaMessage
 
 REPLY = {
     "cfp": ["propose", "decline"],
-    "propose": ["accept", "decline"],
-    "accept": ["decline", "match_accept"],
+    "propose": ["accept", "accept_w_inform", "decline"],
+    "accept": ["decline", "match_accept", "match_accept_w_inform"],
+    "accept_w_inform": ["decline", "match_accept", "match_accept_w_inform", "inform"],
     "decline": [],
     "match_accept": [],
+    "match_accept_w_inform": ["inform"],
+    "inform": ["inform"],
 }
 
 
-class TwoPartyNegotiationDialogue(Dialogue):
-    """The two_party_negotiation dialogue class maintains state of a dialogue and manages it."""
+class FipaDialogue(Dialogue):
+    """The fipa dialogue class maintains state of a dialogue and manages it."""
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
@@ -79,9 +80,7 @@ class TwoPartyNegotiationDialogue(Dialogue):
         super().__init__(self, dialogue_label=dialogue_label)
         self._is_seller = is_seller
         self._role = (
-            TwoPartyNegotiationDialogue.AgentRole.SELLER
-            if is_seller
-            else TwoPartyNegotiationDialogue.AgentRole.BUYER
+            FipaDialogue.AgentRole.SELLER if is_seller else FipaDialogue.AgentRole.BUYER
         )
 
     @property
@@ -90,26 +89,22 @@ class TwoPartyNegotiationDialogue(Dialogue):
         return self._is_seller
 
     @property
-    def role(self) -> "TwoPartyNegotiationDialogue.AgentRole":
+    def role(self) -> "FipaDialogue.AgentRole":
         """Get role of agent in dialogue."""
         return self._role
 
-    def is_valid_next_message(self, two_party_negotiation_msg: Message) -> bool:
-        """Check that the message is consistent with respect to the two_party_negotiation dialogue according to the protocol."""
-        two_party_negotiation_msg = cast(
-            TwoPartyNegotiationMessage, two_party_negotiation_msg
-        )
-        this_message_id = two_party_negotiation_msg.message_id
-        this_target = two_party_negotiation_msg.target
-        this_performative = two_party_negotiation_msg.performative
-        last_outgoing_message = cast(
-            TwoPartyNegotiationMessage, self.last_outgoing_message
-        )
+    def is_valid_next_message(self, fipa_msg: Message) -> bool:
+        """Check that the message is consistent with respect to the fipa dialogue according to the protocol."""
+        fipa_msg = cast(FipaMessage, fipa_msg)
+        this_message_id = fipa_msg.message_id
+        this_target = fipa_msg.target
+        this_performative = fipa_msg.performative
+        last_outgoing_message = cast(FipaMessage, self.last_outgoing_message)
         if last_outgoing_message is None:
             result = (
-                this_message_id == TwoPartyNegotiationDialogue.STARTING_MESSAGE_ID
-                and this_target == TwoPartyNegotiationDialogue.STARTING_TARGET
-                and this_performative == TwoPartyNegotiationMessage.Performative.CFP
+                this_message_id == FipaDialogue.STARTING_MESSAGE_ID
+                and this_target == FipaDialogue.STARTING_TARGET
+                and this_performative == FipaMessage.Performative.CFP
             )
         else:
             last_message_id = last_outgoing_message.message_id
@@ -146,36 +141,36 @@ class TwoPartyNegotiationDialogue(Dialogue):
         self._dialogue_label = final_dialogue_label
 
 
-class TwoPartyNegotiationDialogueStats(object):
-    """Class to handle statistics for two_party_negotiation dialogues."""
+class FipaDialogueStats(object):
+    """Class to handle statistics for fipa dialogues."""
 
     def __init__(self) -> None:
         """Initialize a StatsManager."""
         self._self_initiated = {
-            TwoPartyNegotiationDialogue.EndState.SUCCESSFUL: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_CFP: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_PROPOSE: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_ACCEPT: 0,
-        }  # type: Dict[TwoPartyNegotiationDialogue.EndState, int]
+            FipaDialogue.EndState.SUCCESSFUL: 0,
+            FipaDialogue.EndState.DECLINED_CFP: 0,
+            FipaDialogue.EndState.DECLINED_PROPOSE: 0,
+            FipaDialogue.EndState.DECLINED_ACCEPT: 0,
+        }  # type: Dict[FipaDialogue.EndState, int]
         self._other_initiated = {
-            TwoPartyNegotiationDialogue.EndState.SUCCESSFUL: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_CFP: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_PROPOSE: 0,
-            TwoPartyNegotiationDialogue.EndState.DECLINED_ACCEPT: 0,
-        }  # type: Dict[TwoPartyNegotiationDialogue.EndState, int]
+            FipaDialogue.EndState.SUCCESSFUL: 0,
+            FipaDialogue.EndState.DECLINED_CFP: 0,
+            FipaDialogue.EndState.DECLINED_PROPOSE: 0,
+            FipaDialogue.EndState.DECLINED_ACCEPT: 0,
+        }  # type: Dict[FipaDialogue.EndState, int]
 
     @property
-    def self_initiated(self) -> Dict[TwoPartyNegotiationDialogue.EndState, int]:
+    def self_initiated(self) -> Dict[FipaDialogue.EndState, int]:
         """Get the stats dictionary on self initiated dialogues."""
         return self._self_initiated
 
     @property
-    def other_initiated(self) -> Dict[TwoPartyNegotiationDialogue.EndState, int]:
+    def other_initiated(self) -> Dict[FipaDialogue.EndState, int]:
         """Get the stats dictionary on other initiated dialogues."""
         return self._other_initiated
 
     def add_dialogue_endstate(
-        self, end_state: TwoPartyNegotiationDialogue.EndState, is_self_initiated: bool
+        self, end_state: FipaDialogue.EndState, is_self_initiated: bool
     ) -> None:
         """
         Add dialogue endstate stats.
@@ -191,8 +186,8 @@ class TwoPartyNegotiationDialogueStats(object):
             self._other_initiated[end_state] += 1
 
 
-class TwoPartyNegotiationDialogues(Dialogues):
-    """This class keeps track of all {} dialogues."""
+class FipaDialogues(Dialogues):
+    """This class keeps track of all fipa dialogues."""
 
     def __init__(self) -> None:
         """
@@ -201,71 +196,55 @@ class TwoPartyNegotiationDialogues(Dialogues):
         :return: None
         """
         super().__init__(self)
-        self._initiated_dialogues = (
-            {}
-        )  # type: Dict[DialogueLabel, TwoPartyNegotiationDialogue]
-        self._dialogues_as_seller = (
-            {}
-        )  # type: Dict[DialogueLabel, TwoPartyNegotiationDialogue]
-        self._dialogues_as_buyer = (
-            {}
-        )  # type: Dict[DialogueLabel, TwoPartyNegotiationDialogue]
-        self._dialogue_stats = TwoPartyNegotiationDialogueStats()
+        self._initiated_dialogues = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        self._dialogue_stats = FipaDialogueStats()
 
     @property
-    def dialogues_as_seller(self) -> Dict[DialogueLabel, TwoPartyNegotiationDialogue]:
+    def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
         """Get dictionary of dialogues in which the agent acts as a seller."""
         return self._dialogues_as_seller
 
     @property
-    def dialogues_as_buyer(self) -> Dict[DialogueLabel, TwoPartyNegotiationDialogue]:
+    def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
         """Get dictionary of dialogues in which the agent acts as a buyer."""
         return self._dialogues_as_buyer
 
     @property
-    def dialogue_stats(self) -> TwoPartyNegotiationDialogueStats:
+    def dialogue_stats(self) -> FipaDialogueStats:
         """Get the dialogue statistics."""
         return self._dialogue_stats
 
-    def get_dialogue(
-        self, two_party_negotiation_msg: Message, agent_addr: Address
-    ) -> Dialogue:
+    def get_dialogue(self, fipa_msg: Message, agent_addr: Address) -> Dialogue:
         """
         Given a message addressed to a specific dialogue, retrieve this dialogue if the message is a valid next move.
 
-        :param two_party_negotiation_msg: the message
+        :param fipa_msg: the message
         :param agent_addr: the address of the agent
 
         :return: the dialogue
         """
         result = None
-        two_party_negotiation_msg = cast(
-            TwoPartyNegotiationMessage, two_party_negotiation_msg
-        )
-        dialogue_reference = two_party_negotiation_msg.dialogue_reference
+        fipa_msg = cast(FipaMessage, fipa_msg)
+        dialogue_reference = fipa_msg.dialogue_reference
         self_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference, two_party_negotiation_msg.counterparty, agent_addr
+            dialogue_reference, fipa_msg.counterparty, agent_addr
         )
         other_initiated_dialogue_label = DialogueLabel(
-            dialogue_reference,
-            two_party_negotiation_msg.counterparty,
-            two_party_negotiation_msg.counterparty,
+            dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty
         )
         if other_initiated_dialogue_label in self.dialogues:
             other_initiated_dialogue = cast(
-                TwoPartyNegotiationDialogue,
-                self.dialogues[other_initiated_dialogue_label],
+                FipaDialogue, self.dialogues[other_initiated_dialogue_label]
             )
-            if other_initiated_dialogue.is_valid_next_message(
-                two_party_negotiation_msg
-            ):
+            if other_initiated_dialogue.is_valid_next_message(fipa_msg):
                 result = other_initiated_dialogue
         if self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(
-                TwoPartyNegotiationDialogue,
-                self.dialogues[self_initiated_dialogue_label],
+                FipaDialogue, self.dialogues[self_initiated_dialogue_label]
             )
-            if self_initiated_dialogue.is_valid_next_message(two_party_negotiation_msg):
+            if self_initiated_dialogue.is_valid_next_message(fipa_msg):
                 result = self_initiated_dialogue
         if result is None:
             raise ValueError("Should have found dialogue.")
@@ -285,12 +264,12 @@ class TwoPartyNegotiationDialogues(Dialogues):
         :param is_seller: boolean indicating the agent role
 
         :return: the created dialogue.
-            """
+        """
         dialogue_reference = (str(self._next_dialogue_nonce()), "")
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_starter_addr
         )
-        dialogue = TwoPartyNegotiationDialogue(dialogue_label, is_seller)
+        dialogue = FipaDialogue(dialogue_label, is_seller)
         self._initiated_dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -321,9 +300,7 @@ class TwoPartyNegotiationDialogues(Dialogues):
         result = self._create(dialogue_label, is_seller)
         return result
 
-    def _create(
-        self, dialogue_label: DialogueLabel, is_seller: bool
-    ) -> TwoPartyNegotiationDialogue:
+    def _create(self, dialogue_label: DialogueLabel, is_seller: bool) -> FipaDialogue:
         """
         Create a dialogue.
 
@@ -333,7 +310,7 @@ class TwoPartyNegotiationDialogues(Dialogues):
         :return: the created dialogue
         """
         assert dialogue_label not in self.dialogues
-        dialogue = TwoPartyNegotiationDialogue(dialogue_label, is_seller)
+        dialogue = FipaDialogue(dialogue_label, is_seller)
         if is_seller:
             assert dialogue_label not in self.dialogues_as_seller
             self._dialogues_as_seller.update({dialogue_label: dialogue})
