@@ -33,6 +33,8 @@ from aea.cli.common import (
     _find_item_in_distribution,
     _find_item_locally,
     check_aea_project,
+    clean_after,
+    get_package_dest_path,
     logger,
 )
 from aea.cli.registry.utils import fetch_package
@@ -112,6 +114,7 @@ def _validate_fingerprint(package_path, item_config):
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
 
+@clean_after
 def _add_item(click_context, item_type, item_public_id) -> None:
     """
     Add an item.
@@ -148,18 +151,35 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         )
 
     # find and add protocol
+    dest_path = get_package_dest_path(
+        ctx, item_public_id.author, item_type_plural, item_public_id.name
+    )
+    ctx.clean_paths.append(dest_path)
+
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
         source_path = _find_item_in_distribution(ctx, item_type, item_public_id)
         package_path = _copy_package_directory(
-            ctx, source_path, item_type, item_public_id.name, item_public_id.author
+            ctx,
+            source_path,
+            item_type,
+            item_public_id.name,
+            item_public_id.author,
+            dest_path,
         )
     elif is_local:
         source_path = _find_item_locally(ctx, item_type, item_public_id)
         package_path = _copy_package_directory(
-            ctx, source_path, item_type, item_public_id.name, item_public_id.author
+            ctx,
+            source_path,
+            item_type,
+            item_public_id.name,
+            item_public_id.author,
+            dest_path,
         )
     else:
-        package_path = fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
+        package_path = fetch_package(
+            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
+        )
 
     configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
     configuration_path = package_path / configuration_file_name

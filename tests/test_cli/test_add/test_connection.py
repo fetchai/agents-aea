@@ -89,8 +89,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             standalone_mode=False,
         )
 
+    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_connection_from_registry_positive(self, fetch_package_mock):
+    def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
             "vendor/{}/connections/{}".format(
@@ -107,7 +108,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd="."
+            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
         )
 
     def test_exit_code_equal_to_1(self):

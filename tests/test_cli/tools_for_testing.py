@@ -70,6 +70,7 @@ class ContextMock:
         self.config = self.agent_config
         self.connection_loader = ConfigLoaderMock()
         self.agent_loader = ConfigLoaderMock()
+        self.clean_paths: List = []
         self.obj = self
 
 
