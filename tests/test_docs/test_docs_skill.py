@@ -72,14 +72,17 @@ class TestSkillDocs:
         # of new behaviours
         block = self.code_blocks[offset + 1]
         text = block["text"]
-        assert text.strip() == "self.context.new_behaviours.put(HelloWorldBehaviour())"
+        assert (
+            text.strip()
+            == 'self.context.new_behaviours.put(HelloWorldBehaviour(name="hello_world", skill_context=self.context))'
+        )
 
         block = self.code_blocks[offset + 2]
         assert (
             block["text"] == "def hello():\n"
             '    print("Hello, World!")\n'
             "\n"
-            "self.context.new_behaviours.put(OneShotBehaviour(act=hello))\n"
+            'self.context.new_behaviours.put(OneShotBehaviour(act=hello, name="hello_world", skill_context=self.context))\n'
         )
 
     def test_task(self):

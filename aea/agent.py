@@ -288,7 +288,7 @@ class Agent(ABC):
     @abstractmethod
     def update(self) -> None:
         """
-        Update the internal state of the agent.
+        Update the internals of the agent which are not exposed to the skills.
 
         :return None
         """

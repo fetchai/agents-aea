@@ -310,9 +310,13 @@ For more detailed analysis of the core components of the framework, please check
 
 - <a href="../core-components/">Core components</a>
 
-If you would like to learn more about the protocols agents use to communicate with each other, then check the following:
+We recommend you learn more about the protocols agents use to communicate with each other. Understanding protocols is core to developing your own agent. Check out the following:
 
-- <a href="../protocol/">Protocol</a>
+- <a href="../protocol/">Protocols</a>
+
+We also recommend you have a look at skill development. Skills are the core business logic commponents of an AEA. Check out the following:
+
+- <a href="../skill/">Skills</a>
 
 For more demos, use cases or step by step guides, please check the following:
 
