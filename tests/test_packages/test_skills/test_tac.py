@@ -21,9 +21,6 @@
 
 import datetime
 
-#  import pytest
-
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 FUNDED_ETH_PRIVATE_KEY_1 = (
@@ -34,8 +31,7 @@ FUNDED_ETH_PRIVATE_KEY_1 = (
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
-    @skip_test_ci
-    def test_tac(self, pytestconfig):
+    def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
         tac_aea_two = "tac_participant_two"
@@ -137,8 +133,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
-    @skip_test_ci
-    def test_tac(self, pytestconfig):
+    def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
         tac_aea_two = "tac_participant_two"
@@ -209,7 +204,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseOef):
             "TAC open for registration until:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, is_terminating=False
+            tac_controller_process, check_strings, timeout=180, is_terminating=False
         )
         assert (
             missing_strings == []

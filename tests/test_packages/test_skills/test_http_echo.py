@@ -33,7 +33,7 @@ API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute(
 class TestHttpEchoSkill(AEATestCaseEmpty):
     """Test that http echo skill works."""
 
-    def test_echo(self, pytestconfig):
+    def test_echo(self):
         """Run the echo skill sequence."""
         self.add_item("connection", "fetchai/http_server:0.2.0")
         self.add_item("skill", "fetchai/http_echo:0.1.0")

@@ -19,14 +19,12 @@
 
 """This test module contains the integration test for the generic buyer and seller skills."""
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
-    @skip_test_ci
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -98,7 +96,6 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
-    @skip_test_ci
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"

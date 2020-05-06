@@ -281,16 +281,6 @@ agent_config_files = [
 def pytest_addoption(parser):
     """Add options to the parser."""
     parser.addoption("--ci", action="store_true", default=False)
-    parser.addoption(
-        "--no-integration-tests",
-        action="store_true",
-        default=False,
-        help="Skip integration tests.",
-    )
-
-
-def pytest_configure(config):
-    config.addinivalue_line("markers", "ci: mark test as not for ci")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -468,8 +458,6 @@ def network_node(oef_addr, oef_port, pytestconfig):
     """Network node initialization."""
     if sys.version_info < (3, 7):
         pytest.skip("Python version < 3.7 not supported by the OEF.")
-    if pytestconfig.getoption("no_integration_tests"):
-        pytest.skip("skipped: no OEF running")
         return
 
     if pytestconfig.getoption("ci"):
@@ -502,6 +490,12 @@ def network_node(oef_addr, oef_port, pytestconfig):
             c.remove()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config for each test."""
+    _init_cli_config()
+
+
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -524,12 +518,6 @@ def get_host():
     finally:
         s.close()
     return IP
-
-
-@pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
-    """Resets the cli config."""
-    _init_cli_config()
 
 
 def _make_dummy_connection() -> Connection:
