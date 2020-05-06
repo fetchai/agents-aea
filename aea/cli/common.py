@@ -26,7 +26,7 @@ import shutil
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional, cast
 
 import click
 
@@ -474,6 +474,16 @@ def _try_get_item_target_path(
 def get_package_dest_path(
     ctx: Context, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
+    """
+    Get a destenation path for a package.
+
+    :param ctx: context.
+    :param author_name: package author name.
+    :param item_type_plural: plural of item type.
+    :param item_name: package name.
+
+    :return: destenation path for package.
+    """
     return os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
 
 
@@ -791,17 +801,40 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def _rmdirs(*paths):
+def _rmdirs(*paths: str) -> None:
+    """
+    Remove directories.
+
+    :param paths: paths to folders to remove.
+
+    :return: None
+    """
     for path in paths:
         if os.path.exists(path):
             shutil.rmtree(path)
 
 
-def clean_after(func):
+def clean_after(func: Callable) -> Callable:
+    """
+    Decorate a function to remove created folders after ClickException raise.
+
+    :param func: a method to decorate.
+
+    :return: decorated method.
+    """
+
     def wrapper(click_context, *args, **kwargs):
+        """
+        Call a source method, remove dirs listed in ctx.clean_paths if ClickException raised.
+
+        :param click_context: click context object.
+        :raises ClickException: if catched re-raises it.
+
+        :return: source method output.
+        """
         ctx = cast(Context, click_context.obj)
         try:
-            func(click_context, *args, **kwargs)
+            return func(click_context, *args, **kwargs)
         except click.ClickException as e:
             _rmdirs(*ctx.clean_paths)
             raise e
