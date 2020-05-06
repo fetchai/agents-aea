@@ -825,10 +825,11 @@ def clean_after(func: Callable) -> Callable:
 
     def wrapper(click_context, *args, **kwargs):
         """
-        Call a source method, remove dirs listed in ctx.clean_paths if ClickException raised.
+        Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
         :param click_context: click context object.
-        :raises ClickException: if catched re-raises it.
+
+        :raises ClickException: if caught re-raises it.
 
         :return: source method output.
         """
