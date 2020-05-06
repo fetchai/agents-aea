@@ -55,7 +55,7 @@ def test_create_and_run_oef(pytestconfig):
     # Wait for key message to appear
     start_time = time.time()
     # wait for a bit to ensure polling
-    oef_startup_timeout = 60
+    oef_startup_timeout = 180
     oef_started = False
     while time.time() - start_time < oef_startup_timeout and not oef_started:
         response_status = app.get(

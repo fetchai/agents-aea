@@ -108,7 +108,7 @@ class TestStubConnectionReception:
         """Tear down the test."""
         os.chdir(cls.cwd)
         try:
-            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+            shutil.rmtree(cls.tmpdir)
         except (OSError, IOError):
             pass
         cls.multiplexer.disconnect()
@@ -197,7 +197,7 @@ class TestStubConnectionSending:
         """Tear down the test."""
         os.chdir(cls.cwd)
         try:
-            shutil.rmtree(cls.tmpdir, ignore_errors=True)
+            shutil.rmtree(cls.tmpdir)
         except (OSError, IOError):
             pass
         cls.multiplexer.disconnect()

@@ -120,7 +120,6 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
 
         check_strings = (
             "sending search request to OEF search node, search_count=",
-            "found number of agents=0, received search count=",
             "number of search requests sent=",
             "found number of agents=1, received search count=",
         )
