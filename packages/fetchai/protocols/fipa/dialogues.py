@@ -26,7 +26,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from enum import Enum
-from typing import Dict, Tuple, cast
+from typing import Dict, List, Tuple, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -34,16 +34,33 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
-REPLY = {
-    "cfp": ["propose", "decline"],
-    "propose": ["accept", "accept_w_inform", "decline"],
-    "accept": ["decline", "match_accept", "match_accept_w_inform"],
-    "accept_w_inform": ["decline", "match_accept", "match_accept_w_inform", "inform"],
-    "decline": [],
-    "match_accept": [],
-    "match_accept_w_inform": ["inform"],
-    "inform": ["inform"],
-}
+VALID_REPLIES = {
+    FipaMessage.Performative.CFP: [
+        FipaMessage.Performative.PROPOSE,
+        FipaMessage.Performative.DECLINE,
+    ],
+    FipaMessage.Performative.PROPOSE: [
+        FipaMessage.Performative.ACCEPT,
+        FipaMessage.Performative.ACCEPT_W_INFORM,
+        FipaMessage.Performative.DECLINE,
+    ],
+    FipaMessage.Performative.ACCEPT: [
+        FipaMessage.Performative.DECLINE,
+        FipaMessage.Performative.MATCH_ACCEPT,
+        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+        FipaMessage.Performative.INFORM,
+    ],
+    FipaMessage.Performative.ACCEPT_W_INFORM: [
+        FipaMessage.Performative.DECLINE,
+        FipaMessage.Performative.MATCH_ACCEPT,
+        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+        FipaMessage.Performative.INFORM,
+    ],
+    FipaMessage.Performative.DECLINE: [],
+    FipaMessage.Performative.MATCH_ACCEPT: [FipaMessage.Performative.INFORM,],
+    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [FipaMessage.Performative.INFORM,],
+    FipaMessage.Performative.INFORM: [FipaMessage.Performative.INFORM,],
+}  # type: Dict[FipaMessage.Performative, List[FipaMessage.Performative]]
 
 
 class FipaDialogue(Dialogue):
@@ -63,30 +80,28 @@ class FipaDialogue(Dialogue):
     class AgentRole(Enum):
         """This class defines the agent's role in the dialogue."""
 
-        SELLER = "seller"
         BUYER = "buyer"
+        SELLER = "seller"
 
-    def __init__(
-        self, dialogue_label: DialogueLabel, is_seller: bool, **kwargs
-    ) -> None:
+    def __init__(self, dialogue_label: DialogueLabel, is_buyer: bool, **kwargs) -> None:
         """
         Initialize a dialogue label.
 
         :param dialogue_label: the identifier of the dialogue.
-        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
+        :param is_buyer: indicates whether the agent associated with the dialogue is a buyer or seller
 
         :return: None
         """
         super().__init__(self, dialogue_label=dialogue_label)
-        self._is_seller = is_seller
+        self._is_buyer = is_buyer
         self._role = (
-            FipaDialogue.AgentRole.SELLER if is_seller else FipaDialogue.AgentRole.BUYER
+            FipaDialogue.AgentRole.BUYER if is_buyer else FipaDialogue.AgentRole.SELLER
         )
 
     @property
-    def is_seller(self) -> bool:
-        """Check whether the agent acts as the seller in this dialogue."""
-        return self._is_seller
+    def is_buyer(self) -> bool:
+        """Check whether the agent acts as a buyer in this dialogue."""
+        return self._is_buyer
 
     @property
     def role(self) -> "FipaDialogue.AgentRole":
@@ -94,7 +109,12 @@ class FipaDialogue(Dialogue):
         return self._role
 
     def is_valid_next_message(self, fipa_msg: Message) -> bool:
-        """Check that the message is consistent with respect to the fipa dialogue according to the protocol."""
+        """
+        Check whether the message "fipa_msg" is consistent with respect to this according to the protocol.
+
+        :param fipa_msg: the message to evaluate
+        :return: True if consistent, False otherwise.
+        """
         fipa_msg = cast(FipaMessage, fipa_msg)
         this_message_id = fipa_msg.message_id
         this_target = fipa_msg.target
@@ -113,7 +133,7 @@ class FipaDialogue(Dialogue):
             result = (
                 this_message_id == last_message_id + 1
                 and this_target == last_target + 1
-                and last_performative in REPLY[this_performative]
+                and this_performative in VALID_REPLIES[last_performative]
             )
         return result
 
@@ -197,14 +217,9 @@ class FipaDialogues(Dialogues):
         """
         super().__init__(self)
         self._initiated_dialogues = {}  # type: Dict[DialogueLabel, FipaDialogue]
-        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
         self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
         self._dialogue_stats = FipaDialogueStats()
-
-    @property
-    def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
-        """Get dictionary of dialogues in which the agent acts as a seller."""
-        return self._dialogues_as_seller
 
     @property
     def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
@@ -212,9 +227,84 @@ class FipaDialogues(Dialogues):
         return self._dialogues_as_buyer
 
     @property
+    def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
+        """Get dictionary of dialogues in which the agent acts as a seller."""
+        return self._dialogues_as_seller
+
+    @property
     def dialogue_stats(self) -> FipaDialogueStats:
         """Get the dialogue statistics."""
         return self._dialogue_stats
+
+    def is_permitted_for_new_dialogue(self, fipa_msg: Message) -> bool:
+        """
+        Check whether a fipa message is permitted for a new dialogue.
+
+        :param message: the fipa message
+
+        :return: a boolean indicating whether the message is permitted for a new dialogue
+        """
+        fipa_msg = cast(FipaMessage, fipa_msg)
+        dialogue_reference = fipa_msg.dialogue_reference
+        new_dialogue_label = DialogueLabel(
+            (dialogue_reference[0], ""), fipa_msg.counterparty, ""
+        )
+        new_dialogue = FipaDialogue(new_dialogue_label, False)
+
+        return new_dialogue.is_valid_next_message(fipa_msg)
+
+    def is_belonging_to_registered_dialogue(
+        self, fipa_msg: Message, agent_addr: Address
+    ) -> bool:
+        """
+        Check whether an agent message is part of a registered dialogue.
+
+        :param fipa_msg: the fipa message
+        :param agent_addr: the address of the agent
+
+        :return: boolean indicating whether the message belongs to a registered dialogue
+        """
+        fipa_msg = cast(FipaMessage, fipa_msg)
+        dialogue_reference = fipa_msg.dialogue_reference
+        alt_dialogue_reference = (dialogue_reference[0], "")
+        self_initiated_dialogue_label = DialogueLabel(
+            dialogue_reference, fipa_msg.counterparty, agent_addr
+        )
+        alt_self_initiated_dialogue_label = DialogueLabel(
+            alt_dialogue_reference, fipa_msg.counterparty, agent_addr
+        )
+        other_initiated_dialogue_label = DialogueLabel(
+            dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty
+        )
+        result = False
+        if other_initiated_dialogue_label in self.dialogues:
+            other_initiated_dialogue = cast(
+                FipaDialogue, self.dialogues[other_initiated_dialogue_label]
+            )
+            result = other_initiated_dialogue.is_valid_next_message(fipa_msg)
+        if self_initiated_dialogue_label in self.dialogues:
+            self_initiated_dialogue = cast(
+                FipaDialogue, self.dialogues[self_initiated_dialogue_label]
+            )
+            result = self_initiated_dialogue.is_valid_next_message(fipa_msg)
+        if alt_self_initiated_dialogue_label in self._initiated_dialogues:
+            self_initiated_dialogue = cast(
+                FipaDialogue,
+                self._initiated_dialogues[alt_self_initiated_dialogue_label],
+            )
+            result = self_initiated_dialogue.is_valid_next_message(fipa_msg)
+            if result:
+                self._initiated_dialogues.pop(alt_self_initiated_dialogue_label)
+                final_dialogue_label = DialogueLabel(
+                    dialogue_reference,
+                    alt_self_initiated_dialogue_label.dialogue_opponent_addr,
+                    alt_self_initiated_dialogue_label.dialogue_starter_addr,
+                )
+                self_initiated_dialogue.assign_final_dialogue_label(
+                    final_dialogue_label
+                )
+                self._add(self_initiated_dialogue)
+        return result
 
     def get_dialogue(self, fipa_msg: Message, agent_addr: Address) -> Dialogue:
         """
@@ -254,22 +344,22 @@ class FipaDialogues(Dialogues):
         self,
         dialogue_opponent_addr: Address,
         dialogue_starter_addr: Address,
-        is_seller: bool,
+        is_buyer: bool,
     ) -> Dialogue:
         """
         Create a self initiated dialogue.
 
         :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
         :param dialogue_starter_addr: the pbk of the agent which started the dialogue
-        :param is_seller: boolean indicating the agent role
-
+        :param is_buyer: boolean indicating the agent role
+        
         :return: the created dialogue.
         """
         dialogue_reference = (str(self._next_dialogue_nonce()), "")
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_starter_addr
         )
-        dialogue = FipaDialogue(dialogue_label, is_seller)
+        dialogue = FipaDialogue(dialogue_label, is_buyer)
         self._initiated_dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -277,14 +367,15 @@ class FipaDialogues(Dialogues):
         self,
         dialogue_opponent_addr: Address,
         dialogue_reference: Tuple[str, str],
-        is_seller: bool,
+        is_buyer: bool,
     ) -> Dialogue:
         """
         Save an opponent initiated dialogue.
 
         :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
         :param dialogue_reference: the reference of the dialogue.
-        :param is_seller: keeps track if the counterparty is a seller.
+        :param is_buyer: keeps track if the counterparty is a buyer.
+        
         :return: the created dialogue
         """
         assert (
@@ -297,25 +388,42 @@ class FipaDialogues(Dialogues):
         dialogue_label = DialogueLabel(
             new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
         )
-        result = self._create(dialogue_label, is_seller)
+        result = self._create(dialogue_label, is_buyer)
         return result
 
-    def _create(self, dialogue_label: DialogueLabel, is_seller: bool) -> FipaDialogue:
+    def _create(self, dialogue_label: DialogueLabel, is_buyer: bool) -> FipaDialogue:
         """
         Create a dialogue.
 
         :param dialogue_label: the dialogue label
-        :param is_seller: boolean indicating the agent role
+        :param is_buyer: boolean indicating the agent role
 
         :return: the created dialogue
         """
         assert dialogue_label not in self.dialogues
-        dialogue = FipaDialogue(dialogue_label, is_seller)
-        if is_seller:
-            assert dialogue_label not in self.dialogues_as_seller
-            self._dialogues_as_seller.update({dialogue_label: dialogue})
-        else:
+        dialogue = FipaDialogue(dialogue_label, is_buyer)
+        if is_buyer:
             assert dialogue_label not in self.dialogues_as_buyer
             self._dialogues_as_buyer.update({dialogue_label: dialogue})
+        else:
+            assert dialogue_label not in self.dialogues_as_seller
+            self._dialogues_as_seller.update({dialogue_label: dialogue})
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
+
+    def _add(self, dialogue: FipaDialogue) -> None:
+        """
+        Add a dialogue.
+
+        :param dialogue: the dialogue
+
+        :return: None
+        """
+        assert dialogue.dialogue_label not in self.dialogues
+        if dialogue.is_buyer:
+            assert dialogue.dialogue_label not in self.dialogues_as_buyer
+            self._dialogues_as_buyer.update({dialogue.dialogue_label: dialogue})
+        else:
+            assert dialogue.dialogue_label not in self.dialogues_as_seller
+            self._dialogues_as_seller.update({dialogue.dialogue_label: dialogue})
+        self.dialogues.update({dialogue.dialogue_label: dialogue})
