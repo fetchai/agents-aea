@@ -26,7 +26,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from enum import Enum
-from typing import Dict, List, Tuple, Union, cast
+from typing import Dict, Tuple, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address

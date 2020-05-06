@@ -1627,7 +1627,12 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case
         )
         _change_indent(1)
-        cls_str += indent + '"""This class keeps track of all {} dialogues."""\n\n'.format(self.protocol_specification.name)
+        cls_str += (
+            indent
+            + '"""This class keeps track of all {} dialogues."""\n\n'.format(
+                self.protocol_specification.name
+            )
+        )
         cls_str += indent + "def __init__(self) -> None:\n"
         _change_indent(1)
         cls_str += indent + '"""\n'
