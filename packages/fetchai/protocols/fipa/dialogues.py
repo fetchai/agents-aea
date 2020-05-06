@@ -57,9 +57,9 @@ VALID_REPLIES = {
         FipaMessage.Performative.INFORM,
     ],
     FipaMessage.Performative.DECLINE: [],
-    FipaMessage.Performative.MATCH_ACCEPT: [FipaMessage.Performative.INFORM,],
-    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [FipaMessage.Performative.INFORM,],
-    FipaMessage.Performative.INFORM: [FipaMessage.Performative.INFORM,],
+    FipaMessage.Performative.MATCH_ACCEPT: [FipaMessage.Performative.INFORM],
+    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [FipaMessage.Performative.INFORM],
+    FipaMessage.Performative.INFORM: [FipaMessage.Performative.INFORM],
 }  # type: Dict[FipaMessage.Performative, List[FipaMessage.Performative]]
 
 
@@ -80,28 +80,30 @@ class FipaDialogue(Dialogue):
     class AgentRole(Enum):
         """This class defines the agent's role in the dialogue."""
 
-        BUYER = "buyer"
         SELLER = "seller"
+        BUYER = "buyer"
 
-    def __init__(self, dialogue_label: DialogueLabel, is_buyer: bool, **kwargs) -> None:
+    def __init__(
+        self, dialogue_label: DialogueLabel, is_seller: bool, **kwargs
+    ) -> None:
         """
         Initialize a dialogue label.
 
         :param dialogue_label: the identifier of the dialogue.
-        :param is_buyer: indicates whether the agent associated with the dialogue is a buyer or seller
+        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
 
         :return: None
         """
-        super().__init__(self, dialogue_label=dialogue_label)
-        self._is_buyer = is_buyer
+        Dialogue.__init__(self, dialogue_label=dialogue_label)
+        self._is_seller = is_seller
         self._role = (
-            FipaDialogue.AgentRole.BUYER if is_buyer else FipaDialogue.AgentRole.SELLER
+            FipaDialogue.AgentRole.SELLER if is_seller else FipaDialogue.AgentRole.BUYER
         )
 
     @property
-    def is_buyer(self) -> bool:
-        """Check whether the agent acts as a buyer in this dialogue."""
-        return self._is_buyer
+    def is_seller(self) -> bool:
+        """Check whether the agent acts as a seller in this dialogue."""
+        return self._is_seller
 
     @property
     def role(self) -> "FipaDialogue.AgentRole":
@@ -215,21 +217,21 @@ class FipaDialogues(Dialogues):
 
         :return: None
         """
-        super().__init__(self)
+        Dialogues.__init__(self)
         self._initiated_dialogues = {}  # type: Dict[DialogueLabel, FipaDialogue]
-        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
         self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
         self._dialogue_stats = FipaDialogueStats()
-
-    @property
-    def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
-        """Get dictionary of dialogues in which the agent acts as a buyer."""
-        return self._dialogues_as_buyer
 
     @property
     def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
         """Get dictionary of dialogues in which the agent acts as a seller."""
         return self._dialogues_as_seller
+
+    @property
+    def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
+        """Get dictionary of dialogues in which the agent acts as a buyer."""
+        return self._dialogues_as_buyer
 
     @property
     def dialogue_stats(self) -> FipaDialogueStats:
@@ -344,22 +346,22 @@ class FipaDialogues(Dialogues):
         self,
         dialogue_opponent_addr: Address,
         dialogue_starter_addr: Address,
-        is_buyer: bool,
+        is_seller: bool,
     ) -> Dialogue:
         """
         Create a self initiated dialogue.
 
         :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
         :param dialogue_starter_addr: the pbk of the agent which started the dialogue
-        :param is_buyer: boolean indicating the agent role
-        
+        :param is_seller: boolean indicating the agent role
+
         :return: the created dialogue.
         """
         dialogue_reference = (str(self._next_dialogue_nonce()), "")
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, dialogue_starter_addr
         )
-        dialogue = FipaDialogue(dialogue_label, is_buyer)
+        dialogue = FipaDialogue(dialogue_label, is_seller)
         self._initiated_dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -367,15 +369,15 @@ class FipaDialogues(Dialogues):
         self,
         dialogue_opponent_addr: Address,
         dialogue_reference: Tuple[str, str],
-        is_buyer: bool,
+        is_seller: bool,
     ) -> Dialogue:
         """
         Save an opponent initiated dialogue.
 
         :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
         :param dialogue_reference: the reference of the dialogue.
-        :param is_buyer: keeps track if the counterparty is a buyer.
-        
+        :param is_seller: keeps track if the counterparty is a seller.
+
         :return: the created dialogue
         """
         assert (
@@ -388,26 +390,26 @@ class FipaDialogues(Dialogues):
         dialogue_label = DialogueLabel(
             new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
         )
-        result = self._create(dialogue_label, is_buyer)
+        result = self._create(dialogue_label, is_seller)
         return result
 
-    def _create(self, dialogue_label: DialogueLabel, is_buyer: bool) -> FipaDialogue:
+    def _create(self, dialogue_label: DialogueLabel, is_seller: bool) -> FipaDialogue:
         """
         Create a dialogue.
 
         :param dialogue_label: the dialogue label
-        :param is_buyer: boolean indicating the agent role
+        :param is_seller: boolean indicating the agent role
 
         :return: the created dialogue
         """
         assert dialogue_label not in self.dialogues
-        dialogue = FipaDialogue(dialogue_label, is_buyer)
-        if is_buyer:
-            assert dialogue_label not in self.dialogues_as_buyer
-            self._dialogues_as_buyer.update({dialogue_label: dialogue})
-        else:
+        dialogue = FipaDialogue(dialogue_label, is_seller)
+        if is_seller:
             assert dialogue_label not in self.dialogues_as_seller
             self._dialogues_as_seller.update({dialogue_label: dialogue})
+        else:
+            assert dialogue_label not in self.dialogues_as_buyer
+            self._dialogues_as_buyer.update({dialogue_label: dialogue})
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -420,10 +422,10 @@ class FipaDialogues(Dialogues):
         :return: None
         """
         assert dialogue.dialogue_label not in self.dialogues
-        if dialogue.is_buyer:
-            assert dialogue.dialogue_label not in self.dialogues_as_buyer
-            self._dialogues_as_buyer.update({dialogue.dialogue_label: dialogue})
-        else:
+        if dialogue.is_seller:
             assert dialogue.dialogue_label not in self.dialogues_as_seller
             self._dialogues_as_seller.update({dialogue.dialogue_label: dialogue})
+        else:
+            assert dialogue.dialogue_label not in self.dialogues_as_buyer
+            self._dialogues_as_buyer.update({dialogue.dialogue_label: dialogue})
         self.dialogues.update({dialogue.dialogue_label: dialogue})

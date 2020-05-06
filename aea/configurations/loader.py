@@ -106,7 +106,9 @@ class ConfigLoader(Generic[T]):
             protobuf_snippets_json = yaml_documents[1]
             dialogue_configuration = yaml_documents[2]
         else:
-            raise ValueError("Incorrect number of Yaml documents in the protocol specification.")
+            raise ValueError(
+                "Incorrect number of Yaml documents in the protocol specification."
+            )
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
