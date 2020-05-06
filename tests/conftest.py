@@ -286,7 +286,7 @@ def skip_test_windows(is_test_class=False) -> Callable:
     """
 
     def decorator(pytest_func):
-        def check_windows_is_set():
+        def check_windows():
             if os.name == "nt":
                 pytest.skip("Skipping the test since it doesn't work on Windows.")
                 return False
@@ -295,13 +295,13 @@ def skip_test_windows(is_test_class=False) -> Callable:
         if is_test_class:
 
             def wrapper(self, *args, **kwargs):  # type: ignore
-                if check_windows_is_set():
+                if check_windows():
                     pytest_func(self, *args, **kwargs)
 
         else:
 
             def wrapper(*args, **kwargs):  # type: ignore
-                if check_windows_is_set():
+                if check_windows():
                     pytest_func(*args, **kwargs)
 
         return wrapper
