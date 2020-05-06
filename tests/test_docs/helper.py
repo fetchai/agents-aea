@@ -59,7 +59,7 @@ def extract_python_code(filepath):
 
 def read_md_file(filepath):
     """Reads an md file and returns the string."""
-    with open(filepath, "r") as md_file:
+    with open(filepath, "r", encoding="utf-8") as md_file:
         md_file_str = md_file.read()
     return md_file_str
 

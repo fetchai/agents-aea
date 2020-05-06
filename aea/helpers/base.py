@@ -25,7 +25,7 @@ import logging
 import os
 import re
 import signal
-import subprocess
+import subprocess  # nosec
 import sys
 import types
 from collections import OrderedDict

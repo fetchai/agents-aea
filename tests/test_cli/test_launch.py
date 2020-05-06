@@ -35,7 +35,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.test_tools.click_testing import CliRunner
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, skip_test_windows
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,7 @@ class TestLaunch:
         )
         assert result.exit_code == 0
 
+    @skip_test_windows(is_class_test=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         try:
@@ -143,6 +144,7 @@ class TestLaunchWithOneFailingAgent:
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
+    @skip_test_windows(is_class_test=True)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         try:
@@ -244,6 +246,7 @@ class TestLaunchMultithreaded:
         )
         assert result.exit_code == 0
 
+    @skip_test_windows(is_class_test=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         try:
