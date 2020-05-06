@@ -1,6 +1,6 @@
 site_name: AEA Developer Documentation
 site_url: https://docs.fetch.ai/
-site_description: Everything you need to know about Fetch.AI. 
+site_description: Everything you need to know about Fetch.AI.
 #repo_url: https://github.com/fetchai/docs // commented out to remove edit option
 #repo_name: 'GitHub'
 site_author: diarmid.campbell@fetch.ai
@@ -10,7 +10,7 @@ theme:
   logo:
     icon: code
   feature:
-    tabs: true  
+    tabs: true
 
 nav:
   - AEA Framework:
@@ -23,6 +23,7 @@ nav:
       - Identity: 'identity.md'
       - Trust issues: 'trust.md'
     - Demos:
+      - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
       - Car park skills: 'car-park-skills.md'
       - Generic skills: 'generic-skills.md'
       - Gym example: 'gym-example.md'
@@ -51,6 +52,7 @@ nav:
         - ERC1155 deploy and interact: 'erc1155-skills.md'
         - HTTP Connection: 'http-connection-and-skill.md'
         - Identity - Aries Cloud Agent: 'aries-cloud-agent-example.md'
+        - P2P Connection: 'p2p-connection.md'
       - Architecture:
         - Design principles: 'design-principles.md'
         - Architectural diagram: 'diagram.md'
@@ -79,6 +81,7 @@ nav:
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
+      - Performance benchmark: 'performance_benchmark.md'
       - API:
         - AEA: 'api/aea.md'
         - AEA Builder: 'api/aea_builder.md'
@@ -88,7 +91,7 @@ nav:
           - Components: 'api/configurations/components.md'
           - Loader: 'api/configurations/loader.md'
         - Connections:
-          - Base: 'api/connections/base.md'          
+          - Base: 'api/connections/base.md'
           - Stub Connection: 'api/connections/stub/connection.md'
         - Context: 'api/context/base.md'
         - Contracts:

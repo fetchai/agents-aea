@@ -34,7 +34,9 @@ def _raise_exception():
     raise Exception()
 
 
+@mock.patch("builtins.open", mock.mock_open())
 @mock.patch("aea.cli.registry.fetch.PublicId", PublicIdMock)
+@mock.patch("aea.cli.registry.fetch.os.rename")
 @mock.patch("aea.cli.registry.fetch.os.makedirs")
 @mock.patch("aea.cli.registry.fetch.try_to_load_agent_config")
 @mock.patch("aea.cli.registry.fetch.download_file", return_value="filepath")
@@ -60,16 +62,11 @@ class TestFetchAgent(TestCase):
         },
     )
     def test_fetch_agent_positive(
-        self,
-        request_api_mock,
-        extract_mock,
-        download_file_mock,
-        try_to_load_agent_config_mock,
-        makedirs_mock,
+        self, request_api_mock, extract_mock, download_file_mock, *mocks
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
-        fetch_agent(ContextMock(), public_id_mock, ContextMock())
+        fetch_agent(ContextMock(), public_id_mock, ContextMock(), alias="alias")
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -91,13 +88,7 @@ class TestFetchAgent(TestCase):
         },
     )
     def test_fetch_agent_with_dependencies_positive(
-        self,
-        request_api_mock,
-        add_item_mock,
-        extract_mock,
-        download_file_mock,
-        try_to_load_agent_config_mock,
-        makedirs_mock,
+        self, request_api_mock, add_item_mock, extract_mock, download_file_mock, *mocks
     ):
         """Test for fetch_agent method with dependencies positive result."""
         public_id_mock = PublicIdMock()

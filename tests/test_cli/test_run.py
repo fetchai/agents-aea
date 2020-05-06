@@ -26,29 +26,35 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from unittest import TestCase, mock
+
+from click import ClickException
 
 import pytest
 
 import yaml
 
 from aea.cli import cli
+from aea.cli.run import _build_aea, _run_aea
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 
-def test_run(pytestconfig):
-    """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
+if sys.platform.startswith("win"):
+    pytest.skip("skipping tests on Windows", allow_module_level=True)
 
+
+def test_run():
+    """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -110,11 +116,8 @@ def test_run(pytestconfig):
             pass
 
 
-def test_run_with_default_connection(pytestconfig):
+def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -167,11 +170,8 @@ def test_run_with_default_connection(pytestconfig):
         ["fetchai/local:0.1.0,,{},".format(str(DEFAULT_CONNECTION))],
     ],
 )
-def test_run_multiple_connections(pytestconfig, connection_ids):
+def test_run_multiple_connections(connection_ids):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -227,11 +227,8 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
             pass
 
 
-def test_run_unknown_private_key(pytestconfig):
+def test_run_unknown_private_key():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -304,11 +301,8 @@ def test_run_unknown_private_key(pytestconfig):
         pass
 
 
-def test_run_unknown_ledger(pytestconfig):
+def test_run_unknown_ledger():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -381,11 +375,8 @@ def test_run_unknown_ledger(pytestconfig):
         pass
 
 
-def test_run_fet_private_key_config(pytestconfig):
+def test_run_fet_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -442,11 +433,8 @@ def test_run_fet_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ethereum_private_key_config(pytestconfig):
+def test_run_ethereum_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -503,11 +491,8 @@ def test_run_ethereum_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ledger_apis(pytestconfig):
+def test_run_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -600,11 +585,8 @@ def test_run_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_fet_ledger_apis(pytestconfig):
+def test_run_fet_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -693,10 +675,8 @@ def test_run_fet_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_with_install_deps(pytestconfig):
+def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -767,10 +747,8 @@ def test_run_with_install_deps(pytestconfig):
             pass
 
 
-def test_run_with_install_deps_and_requirement_file(pytestconfig):
+def test_run_with_install_deps_and_requirement_file():
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
@@ -1499,3 +1477,32 @@ class TestRunFailsWhenProtocolNotComplete:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+def _raise_click_exception(*args, **kwargs):
+    raise ClickException()
+
+
+class RunAEATestCase(TestCase):
+    """Test case for _run_aea method."""
+
+    def test__run_aea_negative(self, *mocks):
+        """Test _run_aea method for negative result."""
+        aea_mock = mock.Mock()
+        aea_mock.start = _raise_click_exception
+        with self.assertRaises(ClickException):
+            _run_aea(aea_mock)
+
+
+def _raise_aea_package_loading_error(*args, **kwargs):
+    raise AEAPackageLoadingError()
+
+
+@mock.patch("aea.cli.run.AEABuilder.from_aea_project", _raise_aea_package_loading_error)
+class BuildAEATestCase(TestCase):
+    """Test case for _run_aea method."""
+
+    def test__build_aea_negative(self, *mocks):
+        """Test _build_aea method for negative result."""
+        with self.assertRaises(ClickException):
+            _build_aea(connection_ids=[], skip_consistency_check=True)

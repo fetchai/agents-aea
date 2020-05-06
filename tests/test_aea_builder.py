@@ -27,11 +27,10 @@ from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FETCHAI
 from aea.exceptions import AEAException
-from aea.test_tools.decorators import skip_test_windows
 
 from tests.common.utils import timeit_context
 
-from .conftest import CUR_PATH, ROOT_DIR
+from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 
 @skip_test_windows()

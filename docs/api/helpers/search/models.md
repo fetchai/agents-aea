@@ -3,6 +3,40 @@
 
 Useful classes for the OEF search.
 
+<a name=".aea.helpers.search.models.Location"></a>
+### Location
+
+```python
+class Location()
+```
+
+Data structure to represent locations (i.e. a pair of latitude and longitude).
+
+<a name=".aea.helpers.search.models.Location.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(latitude: float, longitude: float)
+```
+
+Initialize a location.
+
+**Arguments**:
+
+- `latitude`: the latitude of the location.
+- `longitude`: the longitude of the location.
+
+<a name=".aea.helpers.search.models.AttributeInconsistencyException"></a>
+### AttributeInconsistencyException
+
+```python
+class AttributeInconsistencyException(Exception)
+```
+
+Raised when the attributes in a Description are inconsistent.
+Inconsistency is defined when values do not meet their respective schema, or if the values
+are not of an allowed type.
+
 <a name=".aea.helpers.search.models.Attribute"></a>
 ### Attribute
 
@@ -69,6 +103,27 @@ Initialize a data model.
 
 Compare with another object.
 
+<a name=".aea.helpers.search.models.generate_data_model"></a>
+#### generate`_`data`_`model
+
+```python
+generate_data_model(model_name: str, attribute_values: Mapping[str, ATTRIBUTE_TYPES]) -> DataModel
+```
+
+Generate a data model that matches the values stored in this description.
+
+That is, for each attribute (name, value), generate an Attribute.
+It is assumed that each attribute is required.
+
+**Arguments**:
+
+- `model_name`: the name of the model.
+- `attribute_values`: the values of each attribute
+
+**Returns**:
+
+the schema compliant with the values specified.
+
 <a name=".aea.helpers.search.models.Description"></a>
 ### Description
 
@@ -82,7 +137,7 @@ Implements an OEF description.
 #### `__`init`__`
 
 ```python
- | __init__(values: Dict, data_model: Optional[DataModel] = None)
+ | __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "")
 ```
 
 Initialize the description object.
@@ -90,6 +145,18 @@ Initialize the description object.
 **Arguments**:
 
 - `values`: the values in the description.
+- `data_model`: the data model (optional)
+:pram data_model_name: the data model name if a datamodel is created on the fly.
+
+<a name=".aea.helpers.search.models.Description.values"></a>
+#### values
+
+```python
+ | @property
+ | values() -> Dict
+```
+
+Get the values.
 
 <a name=".aea.helpers.search.models.Description.__eq__"></a>
 #### `__`eq`__`
@@ -212,6 +279,56 @@ Initialize a constraint type.
 
 - `ValueError`: if the type of the constraint is not
 
+<a name=".aea.helpers.search.models.ConstraintType.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(attribute: Attribute) -> bool
+```
+
+Check if the constraint type is valid wrt a given attribute.
+
+A constraint type is valid wrt an attribute if the
+type of its operand(s) is the same of the attribute type.
+
+>>> attribute = Attribute("year", int, True)
+>>> valid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, 2000)
+>>> valid_constraint_type.is_valid(attribute)
+True
+
+>>> valid_constraint_type = ConstraintType(ConstraintTypes.WITHIN, (2000, 2001))
+>>> valid_constraint_type.is_valid(attribute)
+True
+
+The following constraint is invalid: the year is in a string variable,
+whereas the attribute is defined over integers.
+
+>>> invalid_constraint_type = ConstraintType(ConstraintTypes.GREATER_THAN, "2000")
+>>> invalid_constraint_type.is_valid(attribute)
+False
+
+**Arguments**:
+
+- `attribute`: the data model used to check the validity of the constraint type.
+
+**Returns**:
+
+``True`` if the constraint type is valid wrt the attribute, ``False`` otherwise.
+
+<a name=".aea.helpers.search.models.ConstraintType.get_data_type"></a>
+#### get`_`data`_`type
+
+```python
+ | get_data_type() -> Type[ATTRIBUTE_TYPES]
+```
+
+Get the type of the data used to define the constraint type.
+
+For instance:
+>>> c = ConstraintType(ConstraintTypes.EQUAL, 1)
+>>> c.get_data_type()
+<class 'int'>
+
 <a name=".aea.helpers.search.models.ConstraintType.check"></a>
 #### check
 
@@ -271,6 +388,27 @@ Check if a description satisfies the constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
+<a name=".aea.helpers.search.models.ConstraintExpr.is_valid"></a>
+#### is`_`valid
+
+```python
+ | @abstractmethod
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Check whether a constraint expression is valid wrt a data model
+
+Specifically, check the following conditions:
+- If all the attributes referenced by the constraints are correctly associated with the Data Model attributes.
+
+**Arguments**:
+
+- `data_model`: the data model used to check the validity of the constraint expression.
+
+**Returns**:
+
+``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
 <a name=".aea.helpers.search.models.And"></a>
 ### And
 
@@ -309,6 +447,23 @@ Check if a value satisfies the 'And' constraint expression.
 **Returns**:
 
 True if the description satisfy the constraint expression, False otherwise.
+
+<a name=".aea.helpers.search.models.And.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Check whether the constraint expression is valid wrt a data model
+
+**Arguments**:
+
+- `data_model`: the data model used to check the validity of the constraint expression.
+
+**Returns**:
+
+``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
 <a name=".aea.helpers.search.models.And.__eq__"></a>
 #### `__`eq`__`
@@ -358,6 +513,23 @@ Check if a value satisfies the 'Or' constraint expression.
 
 True if the description satisfy the constraint expression, False otherwise.
 
+<a name=".aea.helpers.search.models.Or.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Check whether the constraint expression is valid wrt a data model
+
+**Arguments**:
+
+- `data_model`: the data model used to check the validity of the constraint expression.
+
+**Returns**:
+
+``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
 <a name=".aea.helpers.search.models.Or.__eq__"></a>
 #### `__`eq`__`
 
@@ -405,6 +577,23 @@ Check if a value satisfies the 'Not' constraint expression.
 **Returns**:
 
 True if the description satisfy the constraint expression, False otherwise.
+
+<a name=".aea.helpers.search.models.Not.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Check whether the constraint expression is valid wrt a data model
+
+**Arguments**:
+
+- `data_model`: the data model used to check the validity of the constraint expression.
+
+**Returns**:
+
+``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
 
 <a name=".aea.helpers.search.models.Not.__eq__"></a>
 #### `__`eq`__`
@@ -490,6 +679,23 @@ False
 >>> c3.check(Description({"author": "Stephen King", "genre": False}))
 False
 
+<a name=".aea.helpers.search.models.Constraint.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Check whether the constraint expression is valid wrt a data model
+
+**Arguments**:
+
+- `data_model`: the data model used to check the validity of the constraint expression.
+
+**Returns**:
+
+``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
+
 <a name=".aea.helpers.search.models.Constraint.__eq__"></a>
 #### `__`eq`__`
 
@@ -541,6 +747,19 @@ The constraints are interpreted as conjunction.
 
 True if the description satisfies all the constraints, False otherwise.
 
+<a name=".aea.helpers.search.models.Query.is_valid"></a>
+#### is`_`valid
+
+```python
+ | is_valid(data_model: DataModel) -> bool
+```
+
+Given a data model, check whether the query is valid for that data model.
+
+**Returns**:
+
+``True`` if the query is compliant with the data model, ``False`` otherwise.
+
 <a name=".aea.helpers.search.models.Query.__eq__"></a>
 #### `__`eq`__`
 
@@ -590,4 +809,24 @@ A new instance of this class must be created that matches the protocol buffer ob
 **Returns**:
 
 A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
+
+<a name=".aea.helpers.search.models.haversine"></a>
+#### haversine
+
+```python
+haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float
+```
+
+Compute the Haversine distance between two locations (i.e. two pairs of latitude and longitude).
+
+**Arguments**:
+
+- `lat1`: the latitude of the first location.
+- `lon1`: the longitude of the first location.
+- `lat2`: the latitude of the second location.
+- `lon2`: the longitude of the second location.
+
+**Returns**:
+
+the Haversine distance.
 

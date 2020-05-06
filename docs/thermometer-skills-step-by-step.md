@@ -417,8 +417,8 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             dialogue.temp_data = temp_data
             dialogue.proposal = proposal
             self.context.logger.info(
-                "[{}]: sending sender={} a PROPOSE with proposal={}".format(
-                    self.context.agent_name, msg.counterparty[-5:], proposal.values
+                "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:],
                 )
             )
             proposal_msg = FipaMessage(
@@ -726,13 +726,14 @@ the [OEF search node](../oef-ledger) registration and we assume that the query m
         :param query: the query
         :return: a tuple of proposal and the temprature data
         """
-
-        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
-            identifier=self._ledger_id,
-            seller=self.context.agent_addresses[self._ledger_id],
-            client=counterparty,
-        )
-
+        if self.is_ledger_tx:
+            tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+                identifier=self._ledger_id,
+                seller=self.context.agent_addresses[self._ledger_id],
+                client=counterparty,
+            )
+        else:
+            tx_nonce = uuid.uuid4().hex
         temp_data = self._build_data_payload()
         total_price = self._price_per_row
         assert (
@@ -856,7 +857,7 @@ Firstly, we will update the `skill.yaml`. Make sure that your `skill.yaml` match
 ``` yaml
 name: thermometer
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 license: Apache-2.0
 fingerprint: {}
 aea_version: '>=0.3.0, <0.4.0'

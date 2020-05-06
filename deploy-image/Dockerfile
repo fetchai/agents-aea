@@ -14,6 +14,9 @@ RUN pip install --upgrade pip
 RUN pip install protobuf colorlog graphviz
 RUN pip install aea[all]
 
+# golang
+RUN apk add --no-cache go
+
 COPY ./packages /home/packages
 WORKDIR home
 

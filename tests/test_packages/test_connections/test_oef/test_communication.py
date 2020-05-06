@@ -46,6 +46,7 @@ from aea.helpers.search.models import (
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.test_tools.test_cases import UseOef
 
 import packages
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
@@ -62,12 +63,8 @@ DEFAULT_OEF = "default_oef"
 logger = logging.getLogger(__name__)
 
 
-class TestDefault:
+class TestDefault(UseOef):
     """Test that the default protocol is correctly implemented by the OEF channel."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     @classmethod
     def setup_class(cls):
@@ -105,12 +102,8 @@ class TestDefault:
         cls.multiplexer.disconnect()
 
 
-class TestOEF:
+class TestOEF(UseOef):
     """Test that the OEF protocol is correctly implemented by the OEF channel."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     class TestSearchServices:
         """Tests related to service search functionality."""
@@ -483,13 +476,8 @@ class TestOEF:
             cls.multiplexer.disconnect()
 
 
-class TestFIPA:
+class TestFIPA(UseOef):
     """Test that the FIPA protocol is correctly implemented by the OEF channel."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Activate the OEF Node fixture."""
-        pass
 
     @classmethod
     def setup_class(cls):
@@ -837,12 +825,8 @@ class TestFIPA:
         cls.multiplexer2.disconnect()
 
 
-class TestOefConnection:
+class TestOefConnection(UseOef):
     """Tests the con.connection_status.is_connected property."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
@@ -1000,100 +984,119 @@ class DummyConstrainExpr(ConstraintExpr):
         pass
 
 
-@pytest.mark.asyncio
-async def test_send_oef_message(network_node):
-    """Test the send oef message."""
-    address = FetchAICrypto().address
-    oef_connection = _make_oef_connection(
-        address=address, oef_addr="127.0.0.1", oef_port=10000,
-    )
-    request_id = 1
-    oef_connection.loop = asyncio.get_event_loop()
-    await oef_connection.connect()
-    msg = OefSearchMessage(
-        performative=OefSearchMessage.Performative.OEF_ERROR,
-        dialogue_reference=(str(request_id), ""),
-        oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
-    )
-    msg_bytes = OefSearchSerializer().encode(msg)
-    envelope = Envelope(
-        to=DEFAULT_OEF,
-        sender=address,
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg_bytes,
-    )
-    with pytest.raises(ValueError):
+class TestSendWithOEF(UseOef):
+    """Test other usecases with OEF."""
+
+    @pytest.mark.asyncio
+    async def test_send_oef_message(self, pytestconfig):
+        """Test the send oef message."""
+        address = FetchAICrypto().address
+        oef_connection = _make_oef_connection(
+            address=address, oef_addr="127.0.0.1", oef_port=10000,
+        )
+        request_id = 1
+        oef_connection.loop = asyncio.get_event_loop()
+        await oef_connection.connect()
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.OEF_ERROR,
+            dialogue_reference=(str(request_id), ""),
+            oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+        )
+        msg_bytes = OefSearchSerializer().encode(msg)
+        envelope = Envelope(
+            to=DEFAULT_OEF,
+            sender=address,
+            protocol_id=OefSearchMessage.protocol_id,
+            message=msg_bytes,
+        )
+        with pytest.raises(ValueError):
+            await oef_connection.send(envelope)
+
+        data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
+        query = Query(
+            constraints=[Constraint("foo", ConstraintType("==", "bar"))],
+            model=data_model,
+        )
+
+        request_id += 1
+        msg = OefSearchMessage(
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            dialogue_reference=(str(request_id), ""),
+            query=query,
+        )
+        msg_bytes = OefSearchSerializer().encode(msg)
+        envelope = Envelope(
+            to=DEFAULT_OEF,
+            sender=address,
+            protocol_id=OefSearchMessage.protocol_id,
+            message=msg_bytes,
+        )
         await oef_connection.send(envelope)
+        search_result = await oef_connection.receive()
+        assert isinstance(search_result, Envelope)
+        await asyncio.sleep(2.0)
+        await oef_connection.disconnect()
 
-    data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
-    query = Query(
-        constraints=[Constraint("foo", ConstraintType("==", "bar"))], model=data_model
-    )
+    @pytest.mark.asyncio
+    async def test_cancelled_receive(self, pytestconfig):
+        """Test the case when a receive request is cancelled."""
+        address = FetchAICrypto().address
+        oef_connection = _make_oef_connection(
+            address=address, oef_addr="127.0.0.1", oef_port=10000,
+        )
+        oef_connection.loop = asyncio.get_event_loop()
+        await oef_connection.connect()
 
-    request_id += 1
-    msg = OefSearchMessage(
-        performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-        dialogue_reference=(str(request_id), ""),
-        query=query,
-    )
-    msg_bytes = OefSearchSerializer().encode(msg)
-    envelope = Envelope(
-        to=DEFAULT_OEF,
-        sender=address,
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg_bytes,
-    )
-    await oef_connection.send(envelope)
-    search_result = await oef_connection.receive()
-    assert isinstance(search_result, Envelope)
-    await asyncio.sleep(2.0)
-    await oef_connection.disconnect()
+        patch = unittest.mock.patch.object(
+            packages.fetchai.connections.oef.connection.logger, "debug"
+        )
+        mocked_logger_debug = patch.__enter__()
 
+        async def receive():
+            await oef_connection.receive()
 
-@pytest.mark.asyncio
-async def test_cancelled_receive(network_node):
-    """Test the case when a receive request is cancelled."""
-    address = FetchAICrypto().address
-    oef_connection = _make_oef_connection(
-        address=address, oef_addr="127.0.0.1", oef_port=10000,
-    )
-    oef_connection.loop = asyncio.get_event_loop()
-    await oef_connection.connect()
+        task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
+        await asyncio.sleep(0.1)
+        task.cancel()
+        await asyncio.sleep(0.1)
+        await oef_connection.disconnect()
 
-    patch = unittest.mock.patch.object(
-        packages.fetchai.connections.oef.connection.logger, "debug"
-    )
-    mocked_logger_debug = patch.__enter__()
+        mocked_logger_debug.assert_called_once_with("Receive cancelled.")
 
-    async def receive():
-        await oef_connection.receive()
+    @pytest.mark.asyncio
+    async def test_exception_during_receive(self, pytestconfig):
+        """Test the case when there is an exception during a receive request."""
+        address = FetchAICrypto().address
+        oef_connection = _make_oef_connection(
+            address=address, oef_addr="127.0.0.1", oef_port=10000,
+        )
+        oef_connection.loop = asyncio.get_event_loop()
+        await oef_connection.connect()
 
-    task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
-    await asyncio.sleep(0.1)
-    task.cancel()
-    await asyncio.sleep(0.1)
-    await oef_connection.disconnect()
+        with unittest.mock.patch.object(
+            oef_connection.in_queue, "get", side_effect=Exception
+        ):
+            result = await oef_connection.receive()
+            assert result is None
 
-    mocked_logger_debug.assert_called_once_with("Receive cancelled.")
+        await oef_connection.disconnect()
 
+    @pytest.mark.asyncio
+    async def test_connecting_twice_is_ok(self, pytestconfig):
+        """Test that calling 'connect' twice works as expected."""
+        address = FetchAICrypto().address
+        oef_connection = _make_oef_connection(
+            address=address, oef_addr="127.0.0.1", oef_port=10000,
+        )
+        oef_connection.loop = asyncio.get_event_loop()
 
-@pytest.mark.asyncio
-async def test_exception_during_receive(network_node):
-    """Test the case when there is an exception during a receive request."""
-    address = FetchAICrypto().address
-    oef_connection = _make_oef_connection(
-        address=address, oef_addr="127.0.0.1", oef_port=10000,
-    )
-    oef_connection.loop = asyncio.get_event_loop()
-    await oef_connection.connect()
+        assert not oef_connection.connection_status.is_connected
+        await oef_connection.connect()
+        assert oef_connection.connection_status.is_connected
+        await oef_connection.connect()
+        assert oef_connection.connection_status.is_connected
 
-    with unittest.mock.patch.object(
-        oef_connection.in_queue, "get", side_effect=Exception
-    ):
-        result = await oef_connection.receive()
-        assert result is None
-
-    await oef_connection.disconnect()
+        await oef_connection.disconnect()
 
 
 @pytest.mark.asyncio
@@ -1123,21 +1126,3 @@ async def test_cannot_connect_to_oef():
     )
     task.cancel()
     await asyncio.sleep(1.0)
-
-
-@pytest.mark.asyncio
-async def test_connecting_twice_is_ok(network_node):
-    """Test that calling 'connect' twice works as expected."""
-    address = FetchAICrypto().address
-    oef_connection = _make_oef_connection(
-        address=address, oef_addr="127.0.0.1", oef_port=10000,
-    )
-    oef_connection.loop = asyncio.get_event_loop()
-
-    assert not oef_connection.connection_status.is_connected
-    await oef_connection.connect()
-    assert oef_connection.connection_status.is_connected
-    await oef_connection.connect()
-    assert oef_connection.connection_status.is_connected
-
-    await oef_connection.disconnect()

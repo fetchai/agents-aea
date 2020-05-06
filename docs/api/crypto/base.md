@@ -271,6 +271,28 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
+<a name=".aea.crypto.base.LedgerApi.is_transaction_valid"></a>
+#### is`_`transaction`_`valid
+
+```python
+ | @abstractmethod
+ | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+```
+
+Check whether a transaction is valid or not (non-blocking).
+
+**Arguments**:
+
+- `seller`: the address of the seller.
+- `client`: the address of the client.
+- `tx_nonce`: the transaction nonce.
+- `amount`: the amount we expect to get from the transaction.
+- `tx_digest`: the transaction digest.
+
+**Returns**:
+
+True if the transaction referenced by the tx_digest matches the terms.
+
 <a name=".aea.crypto.base.LedgerApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
@@ -307,26 +329,4 @@ Generate a random str message.
 **Returns**:
 
 return the hash in hex.
-
-<a name=".aea.crypto.base.LedgerApi.is_transaction_valid"></a>
-#### is`_`transaction`_`valid
-
-```python
- | @abstractmethod
- | is_transaction_valid(tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
-```
-
-Check whether a transaction is valid or not (non-blocking).
-
-**Arguments**:
-
-- `seller`: the address of the seller.
-- `client`: the address of the client.
-- `tx_nonce`: the transaction nonce.
-- `amount`: the amount we expect to get from the transaction.
-- `tx_digest`: the transaction digest.
-
-**Returns**:
-
-True if the transaction referenced by the tx_digest matches the terms.
 

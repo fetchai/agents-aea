@@ -29,8 +29,6 @@ import tempfile
 import time
 from pathlib import Path
 
-import pytest
-
 import yaml
 
 from aea.cli import cli
@@ -67,11 +65,8 @@ class TestLaunch:
         )
         assert result.exit_code == 0
 
-    def test_exit_code_equal_to_zero(self, pytestconfig):
+    def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         try:
             process_launch = subprocess.Popen(  # nosec
                 [
@@ -148,11 +143,8 @@ class TestLaunchWithOneFailingAgent:
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
-    def test_exit_code_equal_to_one(self, pytestconfig):
+    def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         try:
             process_launch = subprocess.Popen(  # nosec
                 [
@@ -252,11 +244,8 @@ class TestLaunchMultithreaded:
         )
         assert result.exit_code == 0
 
-    def test_exit_code_equal_to_zero(self, pytestconfig):
+    def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         try:
             process_launch = subprocess.Popen(  # nosec
                 [

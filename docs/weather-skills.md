@@ -41,7 +41,7 @@ aea create my_weather_station
 ``` bash
 cd my_weather_station
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/weather_station:0.1.0
+aea add skill fetchai/weather_station:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -150,7 +150,7 @@ Create the AEA that will provide weather measurements.
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/weather_station:0.1.0
+aea add skill fetchai/weather_station:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```

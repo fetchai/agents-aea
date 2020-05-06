@@ -46,7 +46,6 @@ from aea.configurations.constants import (
 )
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 from aea.test_tools.click_testing import CliRunner
-from aea.test_tools.decorators import skip_test_windows
 
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -54,6 +53,7 @@ from ..conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     ROOT_DIR,
+    skip_test_windows,
 )
 
 

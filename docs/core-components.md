@@ -53,11 +53,11 @@ Additional protocols can be added as packages, including:
 
 Skills are a result of the framework's extensibility. They are self-contained capabilities that AEAs can dynamically take on board, 
 in order to expand their effectiveness in different situations. 
-A skill can be given permission to read the internal state of the the AEA, and suggest action(s) to the AEA according to its specific logic. 
+A skill can be given permission to read (parts of) the state of the the AEA, and suggest action(s) to the AEA according to its specific logic. 
 As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. 
 
 For instance, an AEA who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy. 
-The skills could then read the internal state of the AEA, and independently suggest profitable transactions. 
+The skills could then read the preference and ownership state of the AEA, and independently suggest profitable transactions. 
 
 A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`:
 

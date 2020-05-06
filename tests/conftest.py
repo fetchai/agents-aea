@@ -27,7 +27,7 @@ import socket
 import sys
 import time
 from threading import Timer
-from typing import Optional
+from typing import Callable, Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -93,7 +93,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "http_client", "0.1.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.2.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -278,28 +278,35 @@ agent_config_files = [
 ]
 
 
-def pytest_addoption(parser):
-    """Add options to the parser."""
-    parser.addoption("--ci", action="store_true", default=False)
-    parser.addoption("--windows", action="store_true", default=False)
-    parser.addoption(
-        "--no-integration-tests",
-        action="store_true",
-        default=False,
-        help="Skip integration tests.",
-    )
+def skip_test_windows(is_class_test=False) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on Windows.
 
+    :return: decorated method.
+    """
 
-def pytest_configure(config):
-    config.addinivalue_line("markers", "ci: mark test as not for ci")
+    def decorator(pytest_func):
+        def check_windows_is_set():
+            if os.name == "nt":
+                pytest.skip("Skipping the test since it doesn't work on Windows.")
+                return False
+            return True
 
+        if is_class_test:
 
-def pytest_collection_modifyitems(config, items):
-    if config.getoption("--ci"):
-        skip_ci = pytest.mark.skip(reason="need no --ci to run")
-        for item in items:
-            if "ci" in item.keywords:
-                item.add_marker(skip_ci)
+            def wrapper(self, *args, **kwargs):  # type: ignore
+                if check_windows_is_set():
+                    pytest_func(self, *args, **kwargs)
+
+        else:
+
+            def wrapper(*args, **kwargs):  # type: ignore
+                if check_windows_is_set():
+                    pytest_func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 @pytest.fixture(scope="session")
@@ -465,42 +472,42 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
 
 
 @pytest.fixture(scope="session")
-def network_node(oef_addr, oef_port, pytestconfig):
+def network_node(
+    oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
+):
     """Network node initialization."""
     if sys.version_info < (3, 7):
         pytest.skip("Python version < 3.7 not supported by the OEF.")
-    if pytestconfig.getoption("no_integration_tests"):
-        pytest.skip("skipped: no OEF running")
         return
 
-    if pytestconfig.getoption("ci"):
-        logger.warning("Skipping creation of OEF Docker image...")
-        success = _wait_for_oef(max_attempts=10, sleep_rate=2.0)
-        if not success:
-            pytest.fail("OEF doesn't work. Exiting...")
-        else:
-            yield
-            return
+    if os.name == "nt":
+        pytest.skip("Skip test as it doesn't work on Windows.")
+
+    _stop_oef_search_images()
+    c = _create_oef_docker_image(oef_addr, oef_port)
+    c.start()
+
+    # wait for the setup...
+    logger.info("Setting up the OEF node...")
+    success = _wait_for_oef(max_attempts=max_attempts, sleep_rate=timeout)
+
+    if not success:
+        c.stop()
+        c.remove()
+        pytest.fail("OEF doesn't work. Exiting...")
     else:
-        _stop_oef_search_images()
-        c = _create_oef_docker_image(oef_addr, oef_port)
-        c.start()
+        logger.info("Done!")
+        time.sleep(timeout)
+        yield
+        logger.info("Stopping the OEF node...")
+        c.stop()
+        c.remove()
 
-        # wait for the setup...
-        logger.info("Setting up the OEF node...")
-        success = _wait_for_oef(max_attempts=10, sleep_rate=2.0)
 
-        if not success:
-            c.stop()
-            c.remove()
-            pytest.fail("OEF doesn't work. Exiting...")
-        else:
-            logger.info("Done!")
-            time.sleep(1.0)
-            yield
-            logger.info("Stopping the OEF node...")
-            c.stop()
-            c.remove()
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config for each test."""
+    _init_cli_config()
 
 
 def get_unused_tcp_port():
@@ -525,12 +532,6 @@ def get_host():
     finally:
         s.close()
     return IP
-
-
-@pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
-    """Resets the cli config."""
-    _init_cli_config()
 
 
 def double_escape_windows_path_separator(path):

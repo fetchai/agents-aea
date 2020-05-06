@@ -228,9 +228,9 @@ class SkillComponent(ABC):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str,
+        skill_context: SkillContext,
         configuration: Optional[SkillComponentConfiguration] = None,
-        skill_context: Optional[SkillContext] = None,
         **kwargs,
     ):
         """
@@ -241,9 +241,10 @@ class SkillComponent(ABC):
         :param skill_context: the skill context.
         """
         assert name is not None, "SkillComponent name is not provided."
-        # TODO solve it
-        # assert configuration is not None
-        # assert skill_context is not None
+        assert skill_context is not None, "SkillConext is not provided"
+        if configuration is None:
+            class_name = type(self).__name__
+            configuration = SkillComponentConfiguration(class_name=class_name, **kwargs)
         self._configuration = configuration
         self._name = name
         self._context = skill_context
@@ -259,7 +260,7 @@ class SkillComponent(ABC):
 
     @property
     def context(self) -> SkillContext:
-        """Get the context of the behaviour."""
+        """Get the context of the skill component."""
         assert self._context is not None, "Skill context not set yet."
         return self._context
 
@@ -277,7 +278,7 @@ class SkillComponent(ABC):
     # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
-        """Get the config of the behaviour."""
+        """Get the config of the skill component."""
         return self.configuration.args
 
     @abstractmethod
@@ -574,7 +575,9 @@ class Skill(Component):
 
         super().__init__(configuration)
         self.config = configuration
-        self._skill_context = skill_context  # type: Optional[SkillContext]
+        self._skill_context = (
+            skill_context if skill_context is not None else SkillContext()
+        )
         self._handlers = (
             {} if handlers is None else handlers
         )  # type: Dict[str, Handler]
@@ -584,6 +587,8 @@ class Skill(Component):
         self._models = {} if models is None else models  # type: Dict[str, Model]
 
         self._contracts = {}  # type: Dict[str, Contract]
+
+        self._skill_context._skill = self
 
     @property
     def contracts(self) -> Dict[str, Contract]:
@@ -649,7 +654,6 @@ class Skill(Component):
         # (e.g. see https://github.com/fetchai/agents-aea/issues/1095)
         skill_context = SkillContext() if skill_context is None else skill_context
         skill = Skill(configuration, skill_context)
-        skill_context._skill = skill
 
         directory = configuration.directory
         package_modules = load_all_modules(

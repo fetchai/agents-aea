@@ -25,19 +25,13 @@ import sys
 import time
 from pathlib import Path
 
-import pytest
-
 from aea.helpers.base import sigint_crossplatform
 
 from ..conftest import CUR_PATH
 
 
-def test_gym_ex(pytestconfig):
+def test_gym_ex():
     """Run the gym ex sequence."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
-    # run the example
     try:
         process = subprocess.Popen(  # nosec
             [
@@ -51,10 +45,10 @@ def test_gym_ex(pytestconfig):
         )
 
         time.sleep(5.0)
-    finally:
         sigint_crossplatform(process)
         process.wait(timeout=10)
-
+        assert process.returncode == 0, "Test did not succeed."
+    finally:
         if not process.returncode == 0:
             poll = process.poll()
             if poll is None:

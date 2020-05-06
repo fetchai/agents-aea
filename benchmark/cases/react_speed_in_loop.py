@@ -26,12 +26,6 @@ from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
-DUMMMY_AGENT_CONF = {
-    "name": "dummy_a",
-    "skills": [{"handlers": {"dummy_handler": DummyHandler}}],
-}
-
-
 def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
     """
     Test inbox message processing in a loop.
@@ -41,7 +35,12 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
 
     :return: None
     """
-    aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
+    aea_test_wrapper = AEATestWrapper(
+        name="dummy agent",
+        components=[
+            AEATestWrapper.make_skill(handlers={"dummy_handler": DummyHandler})
+        ],
+    )
 
     for _ in range(inbox_amount):
         aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())
@@ -50,9 +49,12 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
 
     benchmark.start()
 
-    with aea_test_wrapper:
-        while not aea_test_wrapper.is_inbox_empty():
-            time.sleep(0.1)
+    aea_test_wrapper.start_loop()
+
+    while not aea_test_wrapper.is_inbox_empty():
+        time.sleep(0.1)
+
+    aea_test_wrapper.stop_loop()
 
 
 if __name__ == "__main__":

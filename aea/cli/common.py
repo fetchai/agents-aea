@@ -654,6 +654,18 @@ def _validate_config_consistency(ctx: Context):
         )
 
 
+def _check_aea_project(args):
+    try:
+        click_context = args[0]
+        ctx = cast(Context, click_context.obj)
+        try_to_load_agent_config(ctx)
+        skip_consistency_check = ctx.config["skip_consistency_check"]
+        if not skip_consistency_check:
+            _validate_config_consistency(ctx)
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+
 def check_aea_project(f):
     """
     Decorator that checks the consistency of the project.
@@ -663,15 +675,7 @@ def check_aea_project(f):
     """
 
     def wrapper(*args, **kwargs):
-        try:
-            click_context = args[0]
-            ctx = cast(Context, click_context.obj)
-            try_to_load_agent_config(ctx)
-            skip_consistency_check = ctx.config["skip_consistency_check"]
-            if not skip_consistency_check:
-                _validate_config_consistency(ctx)
-        except Exception as e:
-            raise click.ClickException(str(e))
+        _check_aea_project(args)
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)

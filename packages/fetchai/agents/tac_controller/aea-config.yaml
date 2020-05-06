@@ -9,8 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/oef:0.2.0
 - fetchai/stub:0.2.0
-contracts:
-- fetchai/erc1155:0.2.0
+contracts: []
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0
@@ -21,11 +20,7 @@ skills:
 - fetchai/tac_control:0.1.0
 default_connection: fetchai/oef:0.2.0
 default_ledger: ethereum
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 20
+ledger_apis: {}
 logging_config:
   disable_existing_loggers: false
   version: 1

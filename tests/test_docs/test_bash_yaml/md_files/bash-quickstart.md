@@ -41,7 +41,7 @@ v0.3.1
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.1.0
+aea fetch fetchai/my_first_aea:0.2.0
 cd my_first_aea
 ```
 ``` bash
@@ -68,6 +68,7 @@ v0.3.1
 my_first_aea starting ...
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.

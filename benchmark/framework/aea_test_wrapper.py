@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains AEA/AEABuilder wrapper to make performance tests easy."""
+
+import uuid
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -37,19 +39,18 @@ from aea.skills.base import Handler, Skill, SkillContext
 class AEATestWrapper:
     """A testing wrapper to run and control an agent."""
 
-    def __init__(self, name: str = "my_aea", skills: List[Dict[str, Skill]] = None):
+    def __init__(self, name: str = "my_aea", components: List[Component] = None):
         """
         Make an agency with optional name and skills.
 
         :param name: name of the agent
         :param skills: dict of skills to add to agent
         """
-        self.skills = skills or []
+        self.components = components or []
         self.name = name
+        self._fake_connection: Optional[FakeConnection] = None
 
-        self.aea = self.make_aea(
-            self.name, [self.make_skill(**skill) for skill in self.skills]  # type: ignore
-        )
+        self.aea = self.make_aea(self.name, self.components)
 
     def make_aea(self, name: str = "my_aea", components: List[Component] = None) -> AEA:
         """
@@ -67,13 +68,14 @@ class AEATestWrapper:
         builder.add_private_key(FETCHAI, "")
 
         for component in components:
-            builder._resources.add_component(component)
+            builder.add_component_instance(component)
 
         aea = builder.build()
         return aea
 
+    @classmethod
     def make_skill(
-        self,
+        cls,
         config: SkillConfig = None,
         context: SkillContext = None,
         handlers: Optional[Dict[str, Type[Handler]]] = None,
@@ -89,17 +91,18 @@ class AEATestWrapper:
         """
         handlers = handlers or {}
         context = context or SkillContext()
-        config = config or SkillConfig()
+        config = config or SkillConfig(
+            name="skill_{}".format(uuid.uuid4().hex[0:5]), author="fetchai"
+        )
 
         handlers_instances = {
-            name: cls(name=name, skill_context=context)
-            for name, cls in handlers.items()
+            name: handler_cls(name=name, skill_context=context)
+            for name, handler_cls in handlers.items()
         }
 
         skill = Skill(
             configuration=config, skill_context=context, handlers=handlers_instances
         )
-        context._skill = skill  # TODO: investigate why
         return skill
 
     @classmethod
@@ -254,18 +257,21 @@ class AEATestWrapper:
         self, inbox_num: int, envelope: Optional[Envelope] = None
     ) -> None:
         """
-        Replace first conenction with fake one.
+        Add fake connection for testing.
 
         :param inbox_num: number of messages to generate by connection.
         :param envelope: envelope to generate. dummy one created by default.
 
         :return: None
         """
+        if self._fake_connection:
+            raise Exception("Fake connection is already set!")
+
         envelope = envelope or self.dummy_envelope()
-        self.aea._connections.clear()
-        self.aea._connections.append(
-            FakeConnection(envelope, inbox_num, connection_id="fake_connection")
+        self._fake_connection = FakeConnection(
+            envelope, inbox_num, connection_id="fake_connection"
         )
+        self.aea._connections.append(self._fake_connection)
 
     def is_messages_in_fake_connection(self) -> bool:
         """
@@ -273,4 +279,6 @@ class AEATestWrapper:
 
         :return: bool
         """
-        return self.aea._connections[0].num != 0  # type: ignore # cause fake connection is used.
+        if not self._fake_connection:
+            raise Exception("Fake connection is not set!")
+        return self._fake_connection.num != 0  # type: ignore # cause fake connection is used.

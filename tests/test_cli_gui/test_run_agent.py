@@ -27,10 +27,9 @@ from pathlib import Path
 
 import aea
 from aea.configurations.constants import DEFAULT_CONNECTION
-from aea.test_tools.decorators import skip_test_windows
 
 from .test_base import TempCWD, create_app
-from ..conftest import CUR_PATH
+from ..conftest import CUR_PATH, skip_test_windows
 
 
 @skip_test_windows()

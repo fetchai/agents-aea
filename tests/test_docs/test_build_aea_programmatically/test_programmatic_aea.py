@@ -19,41 +19,30 @@
 
 """This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
-import logging
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
-from aea.test_tools.decorators import skip_test_ci
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR
+from ...conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
 
-logger = logging.getLogger(__name__)
 
-
-class TestProgrammaticAEA:
+class TestProgrammaticAEA(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
-        path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = extract_python_code(path)
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # add packages folder
-        packages_src = os.path.join(cls.cwd, "packages")
-        packages_dst = os.path.join(cls.t, "packages")
-        shutil.copytree(packages_src, packages_dst)
-        os.chdir(cls.t)
+        BaseAEATestCase.setup_class()
+        doc_path = os.path.join(ROOT_DIR, MD_FILE)
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        test_code_path = os.path.join(CUR_PATH, PY_FILE)
+        cls.python_file = extract_python_code(test_code_path)
 
     def test_read_md_file(self):
         """Read the code blocks. Last block should be the whole code."""
@@ -61,8 +50,8 @@ class TestProgrammaticAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    @skip_test_ci
-    def test_run_agent(self, pytestconfig):
+    @skip_test_windows()
+    def test_run_agent(self):
         """Run the agent from the file."""
         run()
         assert os.path.exists(Path(self.t, "input_file"))
@@ -79,16 +68,7 @@ class TestProgrammaticAEA:
 
     def test_code_blocks_exist(self):
         """Test that all the code-blocks exist in the python file."""
-        for blocks in self.code_blocks:
+        for block in self.code_blocks:
             assert (
-                blocks in self.python_file
+                block in self.python_file
             ), "Code-block doesn't exist in the python file."
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass

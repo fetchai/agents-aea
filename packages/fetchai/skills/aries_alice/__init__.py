@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the code-blocks in the protocol.md file."""
+"""This module contains the implementation of the aries_alice skill."""

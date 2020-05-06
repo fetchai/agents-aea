@@ -5,12 +5,12 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 aea create car_detector
 cd car_detector
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/carpark_detection:0.1.0
+aea add skill fetchai/carpark_detection:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/car_detector:0.2.0
+aea fetch fetchai/car_detector:0.3.0
 cd car_detector
 aea install
 ```
@@ -18,12 +18,12 @@ aea install
 aea create car_data_buyer
 cd car_data_buyer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/carpark_client:0.1.0
+aea add skill fetchai/carpark_client:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.2.0
+aea fetch fetchai/car_data_buyer:0.3.0
 cd car_data_buyer
 aea install
 ```
