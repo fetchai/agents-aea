@@ -21,6 +21,7 @@ import asyncio
 import concurrent
 import ctypes
 import logging
+import os
 import signal
 import threading
 from abc import ABC, abstractmethod
@@ -29,6 +30,7 @@ from asyncio.events import AbstractEventLoop
 from types import TracebackType
 from typing import Optional, Type
 
+import pytest
 
 logger = logging.getLogger(__file__)
 
@@ -150,6 +152,8 @@ class ExecTimeoutSigAlarm(BaseExecTimeout):
 
         :return: None
         """
+        if os.name == "nt":
+            pytest.skip("signal.settimer non available on Windows.")
         signal.setitimer(signal.ITIMER_REAL, self.timeout, 0)
         signal.signal(signal.SIGALRM, self._on_timeout)
 

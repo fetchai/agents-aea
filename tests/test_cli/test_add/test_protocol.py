@@ -34,7 +34,12 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
 from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddProtocolFailsWhenProtocolAlreadyExists:
@@ -449,9 +454,10 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        missing_path = "./vendor/fetchai/protocols/{}".format(self.protocol_name)
-        # on Windows we have to escape the '\' character.
-        missing_path = str(Path(missing_path)).replace("\\", "\\\\")
+        missing_path = os.path.join(
+            "vendor", "fetchai", "protocols", self.protocol_name
+        )
+        missing_path = double_escape_windows_path_separator(missing_path)
         assert missing_path in self.result.exception.message
 
     @classmethod

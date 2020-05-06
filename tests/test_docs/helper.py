@@ -28,7 +28,7 @@ import pytest
 def extract_code_blocks(filepath, filter=None):
     """Extract code blocks from .md files."""
     code_blocks = []
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         while True:
             line = f.readline()
             if not line:

@@ -533,6 +533,11 @@ def reset_aea_cli_config() -> None:
     _init_cli_config()
 
 
+def double_escape_windows_path_separator(path):
+    """Double-escape Windows path separator '\'."""
+    return path.replace("\\", "\\\\")
+
+
 def _make_dummy_connection() -> Connection:
     dummy_connection = DummyConnection()
     return dummy_connection

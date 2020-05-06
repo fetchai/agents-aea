@@ -294,7 +294,7 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:
     doesn't have an API to send a SIGINT-like signal
     both on Posix and Windows with a single method.
 
-    However, a subprocess.Popen object has the method
+    However, a subprocess.Popen class has the method
     'send_signal' that gives more flexibility in this terms.
 
     :param process: the process to send the signal to.

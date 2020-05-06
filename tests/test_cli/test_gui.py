@@ -21,6 +21,7 @@
 
 import json
 import os
+import shutil
 import subprocess  # nosec
 import sys
 import tempfile
@@ -32,6 +33,7 @@ from jsonschema import Draft4Validator
 
 import pytest
 
+from aea.configurations.loader import make_jsonschema_base_uri
 from aea.test_tools.decorators import skip_test_windows
 
 from ..conftest import (
@@ -50,7 +52,8 @@ class TestGui:
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
@@ -77,3 +80,7 @@ class TestGui:
         cls.proc.terminate()
         cls.proc.wait(2.0)
         os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except OSError:
+            pass

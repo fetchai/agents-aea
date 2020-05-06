@@ -33,7 +33,12 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddConnectionFailsWhenConnectionAlreadyExists:
@@ -461,9 +466,10 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        missing_path = "./vendor/fetchai/connections/{}".format(self.connection_name)
-        # on Windows we have to escape the '\' character.
-        missing_path = str(Path(missing_path)).replace("\\", "\\\\")
+        missing_path = os.path.join(
+            "vendor", "fetchai", "connections", self.connection_name
+        )
+        missing_path = double_escape_windows_path_separator(missing_path)
         assert missing_path in self.result.exception.message
 
     @classmethod

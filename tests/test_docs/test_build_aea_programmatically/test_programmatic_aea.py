@@ -25,7 +25,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-import pytest
+from aea.test_tools.decorators import skip_test_ci
 
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
@@ -46,7 +46,7 @@ class TestProgrammaticAEA:
         cls.path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
         path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = cls.python_file = extract_python_code(path)
+        cls.python_file = extract_python_code(path)
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # add packages folder
@@ -61,12 +61,9 @@ class TestProgrammaticAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @skip_test_ci
     def test_run_agent(self, pytestconfig):
         """Run the agent from the file."""
-
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         run()
         assert os.path.exists(Path(self.t, "input_file"))
         assert os.path.exists(Path(self.t, "output_file"))

@@ -44,6 +44,7 @@ from .conftest import (
     _make_dummy_connection,
     _make_local_connection,
     _make_stub_connection,
+    logger,
 )
 
 
@@ -155,7 +156,11 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     assert not connection_2.connection_status.is_connected
     assert not connection_3.connection_status.is_connected
 
-    shutil.rmtree(tmpdir)
+    try:
+        shutil.rmtree(tmpdir)
+    except OSError as e:
+        logger.warning("Couldn't delete {}".format(tmpdir))
+        logger.exception(e)
 
 
 @pytest.mark.asyncio
@@ -233,7 +238,11 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         # clean the test up.
         await connection_3.disconnect()
         multiplexer.disconnect()
-        shutil.rmtree(tmpdir)
+        try:
+            shutil.rmtree(tmpdir)
+        except OSError as e:
+            logger.warning("Couldn't delete {}".format(tmpdir))
+            logger.exception(e)
 
 
 @pytest.mark.asyncio

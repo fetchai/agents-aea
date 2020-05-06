@@ -45,7 +45,13 @@ from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCase
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    ROOT_DIR,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddSkillFailsWhenSkillAlreadyExists:
@@ -464,10 +470,9 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(
-            self.skill_name
-        )
-        assert self.result.exception.message == s
+        missing_path = os.path.join("vendor", "fetchai", "skills", self.skill_name)
+        missing_path = double_escape_windows_path_separator(missing_path)
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):
