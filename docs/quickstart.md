@@ -304,9 +304,15 @@ Delete the AEA from the parent directory (`cd ..` to go to the parent directory)
 aea delete my_first_aea
 ```
 
+## Next steps
+
 For more detailed analysis of the core components of the framework, please check the following:
 
 - <a href="../core-components/">Core components</a>
+
+If you would like to learn more about the protocols agents use to communicate with each other, then check the following:
+
+- <a href="../protocol/">Protocol</a>
 
 For more demos, use cases or step by step guides, please check the following:
 

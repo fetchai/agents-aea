@@ -16,11 +16,19 @@ Each `Message` in an interaction protocol has a set of default metadata, which i
 * `message_id: int`, the id of the message. The default value is `1`.
 * `target: int`, the id of the message which is referenced by this message. The default value is `0`.
 
-By default, `dialogue_reference`, `message_id` and `target` are set, however, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep reference to the preceding messages in a dialogue for a given interaction. For instance, following receipt of a message with `target=0` and `message_id=1` the responding AEA should respond with a `message_id=2` and `target=1`. In particular, `target` holds the id of the message being referenced. This can be the preceding message, it can also be an older message. Hence, `0 < target < message_id` for `message_id > 1` and `target=0` if `message_id = 1`. 
+By default, `dialogue_reference`, `message_id` and `target` are set, however, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep reference to the preceding messages in a dialogue for a given interaction. For instance, following receipt of a message with `target=0` and `message_id=1` the responding AEA should respond with a `message_id=2` and `target=1`. In particular, `target` holds the id of the message being referenced. This can be the preceding message, it can also be an older message. Hence, `0 < target < message_id` for `message_id > 1` and `target=0` if `message_id = 1`.
+
+## Speech acts (`Performatives`)
+
+Each message must define a `performative`. This is the "type" of the message of a given protocol. The `performative` is one way in which message flow in a given protocol is handled.
+
+## Dialogue rules
+
+Protocols can optionaly define dialogue rules. These are rules on the permitted order of message performatives in a given dialogue. For instance, a protocol might specify that a certain performative, say `peformative_a`, can only be followed by `performative_b`. It might further specify that `performative_b` can only be replied to with a message of `performative_c` or `performative_d`.
 
 ## Custom protocol
 
-The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. 
+The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech acts, speech act contents as well as the optional reply structure.
 
 ## `fetchai/default:0.1.0` protocol
 
@@ -235,6 +243,8 @@ def __init__(
     **kwargs,
 )
 ```
+
+The `fetchai/fipa:0.1.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
 For examples of the usage of the `fetchai/fipa:0.1.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
