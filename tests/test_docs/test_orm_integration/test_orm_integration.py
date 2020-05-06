@@ -27,7 +27,6 @@ import pytest
 
 import yaml
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from ...conftest import ROOT_DIR
@@ -88,8 +87,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @skip_test_ci
-    def test_orm_integration_docs_example(self, pytestconfig):
+    def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
         seller_aea_name = "my_seller_aea"
         buyer_aea_name = "my_buyer_aea"

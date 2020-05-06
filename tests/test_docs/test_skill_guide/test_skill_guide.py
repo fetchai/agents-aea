@@ -25,7 +25,6 @@ from pathlib import Path
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from ..helper import extract_code_blocks
@@ -51,8 +50,7 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
         """Teat that the md file is not empty."""
         assert self.code_blocks != [], "File must not be empty."
 
-    @skip_test_ci
-    def test_update_skill_and_run(self, pytestconfig):
+    def test_update_skill_and_run(self):
         """Test that the resource folder contains scaffold handlers.py module."""
         self.initialize_aea(AUTHOR)
 

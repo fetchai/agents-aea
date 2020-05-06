@@ -24,7 +24,6 @@ import sys
 import time
 import unittest.mock
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import UseOef
 
 from .test_base import DummyPID, create_app
@@ -32,8 +31,9 @@ from ..common.mocks import ctx_mock_Popen
 
 
 class TestCreateWithOEF(UseOef):
-    @skip_test_ci
-    def test_create_and_run_oef(self, pytestconfig):
+    """Use OEF to test create."""
+
+    def test_create_and_run_oef(self):
         """Test for running oef, reading TTY and errors."""
         app = create_app()
 
@@ -108,8 +108,7 @@ class TestCreateWithOEF(UseOef):
         data = json.loads(response_status.get_data(as_text=True))
         assert "NOT_STARTED" in data["status"]
 
-    @skip_test_ci
-    def test_create_and_run_oef_fail(self, pytestconfig):
+    def test_create_and_run_oef_fail(self):
         """Test for running oef, reading TTY and errors."""
         app = create_app()
 

@@ -19,15 +19,13 @@
 
 """This test module contains the integration test for the thermometer skills."""
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
 class TestThermometerSkill(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
-    @skip_test_ci
-    def test_thermometer(self, pytestconfig):
+    def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
         thermometer_aea_name = "my_thermometer"
@@ -112,8 +110,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
-    @skip_test_ci
-    def test_thermometer(self, pytestconfig):
+    def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
         thermometer_aea_name = "my_thermometer"

@@ -21,7 +21,6 @@
 
 import os
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from .programmatic_aea import run
@@ -46,8 +45,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
-    @skip_test_ci
-    def test_cli_programmatic_communication(self, pytestconfig):
+    def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"

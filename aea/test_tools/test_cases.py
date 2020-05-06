@@ -599,6 +599,7 @@ class BaseAEATestCase(ABC):
             pass
 
 
+@pytest.mark.integration
 class UseOef:
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):

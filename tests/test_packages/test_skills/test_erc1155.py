@@ -21,7 +21,6 @@
 
 # import pytest
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 FUNDED_ETH_PRIVATE_KEY_1 = (
@@ -35,8 +34,7 @@ FUNDED_ETH_PRIVATE_KEY_2 = (
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
-    @skip_test_ci
-    def test_generic(self, pytestconfig):
+    def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"
         client_aea_name = "client_aea"

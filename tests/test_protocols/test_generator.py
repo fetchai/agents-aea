@@ -55,6 +55,7 @@ from aea.protocols.generator import (
 )
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.test_cases import UseOef
 
 from tests.data.generator.t_protocol.message import (  # type: ignore
     TProtocolMessage,
@@ -73,12 +74,8 @@ HOST = "127.0.0.1"
 PORT = 10000
 
 
-class TestEndToEndGenerator:
+class TestEndToEndGenerator(UseOef):
     """Test that the generating a protocol works correctly in correct preconditions."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     @classmethod
     def setup_class(cls):
