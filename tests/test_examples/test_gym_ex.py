@@ -30,7 +30,7 @@ from tests.conftest import skip_test_windows
 
 @skip_test_windows()
 @run_in_root_dir
-def test_gym_ex(pytestconfig):
+def test_gym_ex():
     """Run the gym ex sequence."""
     try:
         process = PexpectSpawn(  # nosec
