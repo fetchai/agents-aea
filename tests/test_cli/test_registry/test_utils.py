@@ -54,12 +54,12 @@ class TestFetchPackage:
         obj_type = "connection"
         public_id = PublicId.from_str("author/name:0.1.0")
         cwd = "cwd"
-        expected_path = os.path.join("cwd", "vendor", "author", "connections")
+        dest_path = "dest/path"
 
-        fetch_package(obj_type, public_id, cwd)
+        fetch_package(obj_type, public_id, cwd, dest_path)
         request_api_mock.assert_called_with("GET", "/connections/author/name/0.1.0")
         download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", str(expected_path))
+        extract_mock.assert_called_once_with("filepath", dest_path)
 
 
 def _raise_connection_error(*args, **kwargs):
