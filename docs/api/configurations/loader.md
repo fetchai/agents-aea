@@ -3,6 +3,23 @@
 
 Implementation of the parser for configuration file.
 
+<a name=".aea.configurations.loader.make_jsonschema_base_uri"></a>
+#### make`_`jsonschema`_`base`_`uri
+
+```python
+make_jsonschema_base_uri(base_uri_path: Path) -> str
+```
+
+Make the JSONSchema base URI, cross-platform.
+
+**Arguments**:
+
+- `base_uri_path`: the path to the base directory.
+
+**Returns**:
+
+the string in URI form.
+
 <a name=".aea.configurations.loader.ConfigLoader"></a>
 ### ConfigLoader
 

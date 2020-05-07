@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 1, is_debug: bool = False, max_reactions: int = 20, **kwargs, ,) -> None
+ | __init__(identity: Identity, connections: List[Connection], wallet: Wallet, ledger_apis: LedgerApis, resources: Resources, loop: Optional[AbstractEventLoop] = None, timeout: float = 0.05, execution_timeout: float = 0, is_debug: bool = False, max_reactions: int = 20, **kwargs, ,) -> None
 ```
 
 Instantiate the agent.
