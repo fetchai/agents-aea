@@ -24,7 +24,7 @@ from click import ClickException
 from click.testing import CliRunner
 
 from aea.cli import cli
-from aea.cli.fetch import _fetch_agent_locally
+from aea.cli.fetch import _fetch_agent_locally, _is_version_correct
 
 from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -41,6 +41,7 @@ def _raise_click_exception(*args, **kwargs):
 class FetchAgentLocallyTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
+    @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_positive(self, copy_tree, *mocks):
@@ -50,6 +51,7 @@ class FetchAgentLocallyTestCase(TestCase):
         )
         copy_tree.assert_called_once_with("path", "joined-path")
 
+    @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)
     @mock.patch("aea.cli.fetch.copy_tree")
     def test_fetch_agent_locally_already_exists(self, *mocks):
@@ -57,6 +59,15 @@ class FetchAgentLocallyTestCase(TestCase):
         with self.assertRaises(ClickException):
             _fetch_agent_locally(ContextMock(), PublicIdMock(), ContextMock())
 
+    @mock.patch("aea.cli.fetch._is_version_correct", return_value=False)
+    @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.fetch.copy_tree")
+    def test_fetch_agent_locally_incorrect_version(self, *mocks):
+        """Test for fetch_agent_locally method incorrect agent version."""
+        with self.assertRaises(ClickException):
+            _fetch_agent_locally(ContextMock(), PublicIdMock(), ContextMock())
+
+    @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch._add_item")
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
@@ -72,6 +83,7 @@ class FetchAgentLocallyTestCase(TestCase):
         )
         _fetch_agent_locally(ctx_mock, PublicIdMock(), click_context_mock)
 
+    @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=False)
     @mock.patch("aea.cli.fetch.copy_tree")
     @mock.patch("aea.cli.fetch._add_item", _raise_click_exception)
@@ -108,3 +120,23 @@ class FetchCommandTestCase(TestCase):
             [*CLI_LOG_OPTION, "fetch", "--local", "author/name:0.1.0"],
             standalone_mode=False,
         )
+
+
+class IsVersionCorrectTestCase(TestCase):
+    """Test case for _is_version_correct method."""
+
+    def test__is_version_correct_positive(self):
+        """Test for _is_version_correct method positive result."""
+        ctx_mock = ContextMock(version="correct")
+        public_id_mock = PublicIdMock()
+        public_id_mock.version = "correct"
+        result = _is_version_correct(ctx_mock, public_id_mock)
+        self.assertTrue(result)
+
+    def test__is_version_correct_negative(self):
+        """Test for _is_version_correct method negative result."""
+        ctx_mock = ContextMock(version="correct")
+        public_id_mock = PublicIdMock()
+        public_id_mock.version = "incorrect"
+        result = _is_version_correct(ctx_mock, public_id_mock)
+        self.assertFalse(result)
