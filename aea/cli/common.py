@@ -182,7 +182,7 @@ def try_to_load_agent_config(
 
     :param ctx: click command context object.
     :param is_exit_on_except: bool option to exit on exception (default = True).
-    :param agent_src_path: path do an agent dir if needed to load a custom config.
+    :param agent_src_path: path to an agent dir if needed to load a custom config.
 
     :return None
     """
