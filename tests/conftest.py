@@ -603,3 +603,34 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
         connection_id=DEFAULT_CONNECTION,
     )
     return connection
+
+
+class CwdException(Exception):
+    """Exception to raise if cwd was not restored by test."""
+
+    def __init__(self):
+        """Init expcetion with default message."""
+        super().__init__("CWD was not restored")
+
+
+@pytest.fixture(scope="class", autouse=True)
+def check_test_class_cwd():
+    """Check test case class restore CWD."""
+    os.chdir(ROOT_DIR)
+    old_cwd = os.getcwd()
+    yield
+    if old_cwd != os.getcwd():
+        raise CwdException()
+
+
+@pytest.fixture(autouse=True)
+def check_test_cwd(request):
+    """Check particular test restore CWD."""
+    if request.cls:
+        yield
+        return
+    os.chdir(ROOT_DIR)
+    old_cwd = os.getcwd()
+    yield
+    if old_cwd != os.getcwd():
+        raise CwdException()
