@@ -16,12 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea run` sub-command."""
-
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -44,22 +41,24 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
 
 
-def test_run(pytestconfig):
+if sys.platform.startswith("win"):
+    pytest.skip("skipping tests on Windows", allow_module_level=True)
+
+
+def test_run():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -97,7 +96,7 @@ def test_run(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -115,17 +114,14 @@ def test_run(pytestconfig):
             pass
 
 
-def test_run_with_default_connection(pytestconfig):
+def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -146,7 +142,7 @@ def test_run_with_default_connection(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -172,17 +168,14 @@ def test_run_with_default_connection(pytestconfig):
         ["fetchai/local:0.1.0,,{},".format(str(DEFAULT_CONNECTION))],
     ],
 )
-def test_run_multiple_connections(pytestconfig, connection_ids):
+def test_run_multiple_connections(connection_ids):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -214,7 +207,7 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
         )
 
         time.sleep(5.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=5)
 
         assert process.returncode == 0
@@ -232,17 +225,14 @@ def test_run_multiple_connections(pytestconfig, connection_ids):
             pass
 
 
-def test_run_unknown_private_key(pytestconfig):
+def test_run_unknown_private_key():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -309,17 +299,14 @@ def test_run_unknown_private_key(pytestconfig):
         pass
 
 
-def test_run_unknown_ledger(pytestconfig):
+def test_run_unknown_ledger():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -386,17 +373,14 @@ def test_run_unknown_ledger(pytestconfig):
         pass
 
 
-def test_run_fet_private_key_config(pytestconfig):
+def test_run_fet_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -447,17 +431,14 @@ def test_run_fet_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ethereum_private_key_config(pytestconfig):
+def test_run_ethereum_private_key_config():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -508,17 +489,14 @@ def test_run_ethereum_private_key_config(pytestconfig):
         pass
 
 
-def test_run_ledger_apis(pytestconfig):
+def test_run_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -586,7 +564,7 @@ def test_run_ledger_apis(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -605,17 +583,14 @@ def test_run_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_fet_ledger_apis(pytestconfig):
+def test_run_fet_ledger_apis():
     """Test that the command 'aea run' works as expected."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -680,7 +655,7 @@ def test_run_fet_ledger_apis(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -698,16 +673,14 @@ def test_run_fet_ledger_apis(pytestconfig):
             pass
 
 
-def test_run_with_install_deps(pytestconfig):
+def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    packages_src = os.path.join(cwd, "packages")
+    packages_src = os.path.join(ROOT_DIR, "packages")
     packages_dst = os.path.join(t, "packages")
     shutil.copytree(packages_src, packages_dst)
 
@@ -754,7 +727,7 @@ def test_run_with_install_deps(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.communicate(timeout=20)
 
         assert process.returncode == 0
@@ -772,16 +745,14 @@ def test_run_with_install_deps(pytestconfig):
             pass
 
 
-def test_run_with_install_deps_and_requirement_file(pytestconfig):
+def test_run_with_install_deps_and_requirement_file():
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -830,7 +801,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -859,7 +830,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -884,7 +855,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         assert result.exit_code == 0
 
         shutil.copytree(
-            Path(CUR_PATH, "data", "exception_skill"),
+            Path(ROOT_DIR, "tests", "data", "exception_skill"),
             Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", "exception"),
         )
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
@@ -922,7 +893,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -978,7 +949,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1035,7 +1006,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1093,7 +1064,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1186,7 +1157,7 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1277,7 +1248,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1365,7 +1336,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1440,7 +1411,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

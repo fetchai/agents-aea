@@ -22,17 +22,16 @@
 import os
 import shutil
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ...conftest import ROOT_DIR
+from ...conftest import ROOT_DIR, skip_test_windows
 
 
 class TestGymSkill(AEATestCaseEmpty):
     """Test that gym skill works."""
 
-    @skip_test_ci
-    def test_gym(self, pytestconfig):
+    @skip_test_windows(is_test_class=True)
+    def test_gym(self):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.2.0")
         self.add_item("connection", "fetchai/gym:0.1.0")

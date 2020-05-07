@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -34,7 +33,12 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddConnectionFailsWhenConnectionAlreadyExists:
@@ -463,10 +467,11 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(
-            self.connection_name
+        missing_path = os.path.join(
+            "vendor", "fetchai", "connections", self.connection_name
         )
-        assert self.result.exception.message == s
+        missing_path = double_escape_windows_path_separator(missing_path)
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):

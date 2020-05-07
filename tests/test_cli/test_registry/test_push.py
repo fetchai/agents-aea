@@ -77,7 +77,7 @@ class PushItemTestCase(TestCase):
                 "protocols": ["protocol_id"],
             },
             is_auth=True,
-            filepath="cwd/some-name.tar.gz",
+            filepath=os.path.join("cwd", "some-name.tar.gz"),
         )
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=False)

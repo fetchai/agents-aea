@@ -46,6 +46,7 @@ from aea.connections.stub.connection import (
 )
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.helpers.base import sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.exceptions import AEATestingException
@@ -180,7 +181,7 @@ class BaseAEATestCase(ABC):
         return process
 
     @classmethod
-    def start_thread(cls, target: Callable, process: subprocess.Popen) -> None:
+    def start_thread(cls, target: Callable, **kwargs) -> None:
         """
         Start python Thread.
 
@@ -189,7 +190,10 @@ class BaseAEATestCase(ABC):
 
         :return: None.
         """
-        thread = Thread(target=target, args=(process,))
+        if "process" in kwargs:
+            thread = Thread(target=target, args=(kwargs["process"],))
+        else:
+            thread = Thread(target=target)
         thread.start()
         cls.threads.append(thread)
 
@@ -205,6 +209,19 @@ class BaseAEATestCase(ABC):
         for name in set(agents_names):
             cls.run_cli_command("create", "--local", name, "--author", cls.author)
             cls.agents.add(name)
+
+    @classmethod
+    def fetch_agent(cls, public_id: str, agent_name: str) -> None:
+        """
+        Create agents in current working directory.
+
+        :param public_id: str public id
+        :param agents_name: str agent name.
+
+        :return: None
+        """
+        cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
+        cls.agents.add(agent_name)
 
     @classmethod
     def delete_agents(cls, *agents_names: str) -> None:
@@ -254,7 +271,7 @@ class BaseAEATestCase(ABC):
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
         for process in subprocesses:
-            process.send_signal(signal.SIGINT)
+            sigint_crossplatform(process)
         for process in subprocesses:
             process.wait(timeout=timeout)
 
@@ -285,11 +302,37 @@ class BaseAEATestCase(ABC):
         Run from agent's directory.
 
         :param item_type: str item type.
-        :param item_type: str item type.
+        :param public_id: public id of the item.
 
         :return: None
         """
         cls.run_cli_command("add", "--local", item_type, public_id, cwd=cls._get_cwd())
+
+    @classmethod
+    def scaffold_item(cls, item_type: str, name: str) -> None:
+        """
+        Scaffold an item for the agent.
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param name: name of the item.
+
+        :return: None
+        """
+        cls.run_cli_command("scaffold", item_type, name, cwd=cls._get_cwd())
+
+    @classmethod
+    def fingerprint_item(cls, item_type: str, public_id: str) -> None:
+        """
+        Scaffold an item for the agent.
+        Run from agent's directory.
+
+        :param item_type: str item type.
+        :param name: public id of the item.
+
+        :return: None
+        """
+        cls.run_cli_command("fingerprint", item_type, public_id, cwd=cls._get_cwd())
 
     @classmethod
     def run_install(cls):
@@ -557,6 +600,7 @@ class BaseAEATestCase(ABC):
             pass
 
 
+@pytest.mark.integration
 class UseOef:
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):

@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the orm-integration.md guide."""
-
-import logging
 from pathlib import Path
 
 import mistune
@@ -28,14 +26,9 @@ import pytest
 
 import yaml
 
-from aea.crypto.fetchai import FETCHAI
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from ...conftest import ROOT_DIR
-
-logger = logging.getLogger(__name__)
-
 
 seller_strategy_replacement = """models:
   dialogues:
@@ -93,14 +86,13 @@ ORM_SELLER_STRATEGY_PATH = Path(
 class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @skip_test_ci
-    def test_orm_integration_docs_example(self, pytestconfig):
+    def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
         seller_aea_name = "my_seller_aea"
         buyer_aea_name = "my_buyer_aea"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        ledger_apis = {FETCHAI: {"network": "testnet"}}
+        ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # Setup seller
         self.set_agent_context(seller_aea_name)

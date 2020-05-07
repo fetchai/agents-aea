@@ -54,6 +54,18 @@ def fetch(click_context, public_id, alias, local):
         fetch_agent(ctx, public_id, click_context, alias)
 
 
+def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
+    """
+    Compare agent version to the one in public ID.
+
+    :param ctx: Context object.
+    :param public_id: public ID of an agent.
+
+    :return: bool is version correct.
+    """
+    return ctx.agent_config.version == agent_public_id.version
+
+
 def _fetch_agent_locally(
     ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
 ) -> None:
@@ -70,6 +82,14 @@ def _fetch_agent_locally(
     source_path = _try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
+    try_to_load_agent_config(ctx, agent_src_path=source_path)
+    if not _is_version_correct(ctx, public_id):
+        raise click.ClickException(
+            "Wrong agent version in public ID: specified {}, found {}.".format(
+                public_id.version, ctx.agent_config.version
+            )
+        )
+
     folder_name = public_id.name if alias is None else alias
     target_path = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(target_path):

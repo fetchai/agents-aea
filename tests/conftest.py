@@ -27,7 +27,7 @@ import socket
 import sys
 import time
 from threading import Timer
-from typing import Optional
+from typing import Callable, Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -278,27 +278,35 @@ agent_config_files = [
 ]
 
 
-def pytest_addoption(parser):
-    """Add options to the parser."""
-    parser.addoption("--ci", action="store_true", default=False)
-    parser.addoption(
-        "--no-integration-tests",
-        action="store_true",
-        default=False,
-        help="Skip integration tests.",
-    )
+def skip_test_windows(is_test_class=False) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on Windows.
 
+    :return: decorated method.
+    """
 
-def pytest_configure(config):
-    config.addinivalue_line("markers", "ci: mark test as not for ci")
+    def decorator(pytest_func):
+        def check_windows():
+            if os.name == "nt":
+                pytest.skip("Skipping the test since it doesn't work on Windows.")
+                return False
+            return True
 
+        if is_test_class:
 
-def pytest_collection_modifyitems(config, items):
-    if config.getoption("--ci"):
-        skip_ci = pytest.mark.skip(reason="need no --ci to run")
-        for item in items:
-            if "ci" in item.keywords:
-                item.add_marker(skip_ci)
+            def wrapper(self, *args, **kwargs):  # type: ignore
+                if check_windows():
+                    pytest_func(self, *args, **kwargs)
+
+        else:
+
+            def wrapper(*args, **kwargs):  # type: ignore
+                if check_windows():
+                    pytest_func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 @pytest.fixture(scope="session")
@@ -464,42 +472,42 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
 
 
 @pytest.fixture(scope="session")
-def network_node(oef_addr, oef_port, pytestconfig):
+def network_node(
+    oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
+):
     """Network node initialization."""
     if sys.version_info < (3, 7):
         pytest.skip("Python version < 3.7 not supported by the OEF.")
-    if pytestconfig.getoption("no_integration_tests"):
-        pytest.skip("skipped: no OEF running")
         return
 
-    if pytestconfig.getoption("ci"):
-        logger.warning("Skipping creation of OEF Docker image...")
-        success = _wait_for_oef(max_attempts=10, sleep_rate=2.0)
-        if not success:
-            pytest.fail("OEF doesn't work. Exiting...")
-        else:
-            yield
-            return
+    if os.name == "nt":
+        pytest.skip("Skip test as it doesn't work on Windows.")
+
+    _stop_oef_search_images()
+    c = _create_oef_docker_image(oef_addr, oef_port)
+    c.start()
+
+    # wait for the setup...
+    logger.info("Setting up the OEF node...")
+    success = _wait_for_oef(max_attempts=max_attempts, sleep_rate=timeout)
+
+    if not success:
+        c.stop()
+        c.remove()
+        pytest.fail("OEF doesn't work. Exiting...")
     else:
-        _stop_oef_search_images()
-        c = _create_oef_docker_image(oef_addr, oef_port)
-        c.start()
+        logger.info("Done!")
+        time.sleep(timeout)
+        yield
+        logger.info("Stopping the OEF node...")
+        c.stop()
+        c.remove()
 
-        # wait for the setup...
-        logger.info("Setting up the OEF node...")
-        success = _wait_for_oef(max_attempts=10, sleep_rate=2.0)
 
-        if not success:
-            c.stop()
-            c.remove()
-            pytest.fail("OEF doesn't work. Exiting...")
-        else:
-            logger.info("Done!")
-            time.sleep(1.0)
-            yield
-            logger.info("Stopping the OEF node...")
-            c.stop()
-            c.remove()
+@pytest.fixture(scope="session", autouse=True)
+def reset_aea_cli_config() -> None:
+    """Resets the cli config for each test."""
+    _init_cli_config()
 
 
 def get_unused_tcp_port():
@@ -526,10 +534,9 @@ def get_host():
     return IP
 
 
-@pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
-    """Resets the cli config."""
-    _init_cli_config()
+def double_escape_windows_path_separator(path):
+    """Double-escape Windows path separator '\'."""
+    return path.replace("\\", "\\\\")
 
 
 def _make_dummy_connection() -> Connection:
@@ -596,3 +603,34 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
         connection_id=DEFAULT_CONNECTION,
     )
     return connection
+
+
+class CwdException(Exception):
+    """Exception to raise if cwd was not restored by test."""
+
+    def __init__(self):
+        """Init expcetion with default message."""
+        super().__init__("CWD was not restored")
+
+
+@pytest.fixture(scope="class", autouse=True)
+def check_test_class_cwd():
+    """Check test case class restore CWD."""
+    os.chdir(ROOT_DIR)
+    old_cwd = os.getcwd()
+    yield
+    if old_cwd != os.getcwd():
+        raise CwdException()
+
+
+@pytest.fixture(autouse=True)
+def check_test_cwd(request):
+    """Check particular test restore CWD."""
+    if request.cls:
+        yield
+        return
+    os.chdir(ROOT_DIR)
+    old_cwd = os.getcwd()
+    yield
+    if old_cwd != os.getcwd():
+        raise CwdException()

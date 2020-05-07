@@ -331,8 +331,9 @@ class NoiseNode:
             os.remove(in_path)
         if os.path.exists(out_path):
             os.remove(out_path)
-        os.mkfifo(in_path)
-        os.mkfifo(out_path)
+        # Ignore type-hinting check for Windows
+        os.mkfifo(in_path)  # type: ignore
+        os.mkfifo(out_path)  # type: ignore
 
         # setup config
         if os.path.exists(NOISE_NODE_ENV_FILE):

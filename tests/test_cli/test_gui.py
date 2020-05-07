@@ -16,15 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea gui` sub-command."""
-
 import json
 import os
-import subprocess  # nosec
+import shutil
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 import jsonschema
@@ -32,45 +29,57 @@ from jsonschema import Draft4Validator
 
 import pytest
 
+from aea.configurations.loader import make_jsonschema_base_uri
+
+
+from tests.common.pexpect_popen import PexpectSpawn
+
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
-    CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     tcpping,
 )
+
+if os.name == "nt":
+    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 class TestGui:
     """Test that the command 'aea gui' works as expected."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set the test up."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        self.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        self.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            self.schema,
         )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
 
-        cls.agent_name = "myagent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-        cls.proc = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"]
-        )
-        time.sleep(10.0)
+        self.agent_name = "myagent"
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
 
-    def test_gui(self, pytestconfig):
+    @pytest.mark.integration
+    def test_gui(self):
         """Test that the gui process has been spawned correctly."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("skipped: CI")
-        else:
-            assert tcpping("localhost", 8080)
+        self.proc = PexpectSpawn(  # nosec
+            sys.executable,
+            ["-m", "aea.cli", "-v", "DEBUG", "gui"],
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+        self.proc.expect_exact(["Running on http://"], timeout=20)
 
-    @classmethod
-    def teardown_class(cls):
+        assert tcpping("127.0.0.1", 8080)
+
+    def teardown(self):
         """Tear the test down."""
-        cls.proc.terminate()
-        cls.proc.wait(2.0)
-        os.chdir(cls.cwd)
+        self.proc.terminate()
+        self.proc.wait_to_complete(10)
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except OSError:
+            pass

@@ -121,13 +121,16 @@ def run():
     resources.add_protocol(fipa_protocol)
 
     # Add the error and weather_station skills
-    error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), my_aea.context
-    )
+    error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
+    error_skill.skill_context.set_agent_context(my_aea.context)
+    logger_name = "aea.packages.fetchai.skills.error"
+    error_skill.skill_context.logger = logging.getLogger(logger_name)
     weather_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),
-        my_aea.context,
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client")
     )
+    weather_skill.skill_context.set_agent_context(my_aea.context)
+    logger_name = "aea.packages.fetchai.skills.weather_client"
+    weather_skill.skill_context.logger = logging.getLogger(logger_name)
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False

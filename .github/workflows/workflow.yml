@@ -9,55 +9,74 @@ on:
 
 jobs:
   common_checks:
-     runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-     timeout-minutes: 30
+    timeout-minutes: 30
 
-     steps:
-       - uses: actions/checkout@master
-       - uses: actions/setup-python@master
-         with:
-           python-version: 3.6
-       - name: Install dependencies (ubuntu-latest)
-         run: |
-           sudo apt-get update --fix-missing
-           sudo apt-get autoremove
-           sudo apt-get autoclean
-           pip install pipenv
-           pip install tox
-           # install IPFS
-           sudo apt-get install -y wget
-           wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
-           tar xvfz go-ipfs.tar.gz
-           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
-           ipfs init
-       - name: Security Check
-         run: tox -e bandit
-       - name: Safety Check
-         run: tox -e safety
-       - name: License Check
-         run: tox -e liccheck
-       - name: Copyright Check
-         run: tox -e copyright_check
-       - name: AEA Package Hashes Check
-         run: tox -e hash_check -- --timeout 20.0
-       - name: Code style check
-         run: |
-           tox -e black-check
-           tox -e flake8
-       - name: Static type check
-         run: tox -e mypy
-       - name: Check package versions in documentation
-         run: tox -e package_version_checks
-       - name: Generate Documentation
-         run: tox -e docs
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install pipenv
+          pip install tox
+          # install IPFS
+          sudo apt-get install -y wget
+          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.4.23/go-ipfs_v0.4.23_linux-amd64.tar.gz
+          tar xvfz go-ipfs.tar.gz
+          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+          ipfs init
+      - name: Security Check
+        run: tox -e bandit
+      - name: Safety Check
+        run: tox -e safety
+      - name: License Check
+        run: tox -e liccheck
+      - name: Copyright Check
+        run: tox -e copyright_check
+      - name: AEA Package Hashes Check
+        run: tox -e hash_check -- --timeout 20.0
+      - name: Code style check
+        run: |
+          tox -e black-check
+          tox -e flake8
+      - name: Static type check
+        run: tox -e mypy
+      - name: Check package versions in documentation
+        run: tox -e package_version_checks
+      - name: Generate Documentation
+        run: tox -e docs
+
+  integration_checks:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.7
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install pipenv
+          pip install tox
+      - name: Integration tests
+        run: tox -e py3.7 -- -m integration
 
   platform_checks:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8]
 
     timeout-minutes: 30
@@ -84,10 +103,18 @@ jobs:
         pip install pipenv
         pip install tox
         brew install protobuf
+    - if: matrix.os == 'windows-latest'
+      name: Install dependencies (windows-latest)
+      run: |
+        pip install pipenv
+        pip install tox
+        echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+        choco install protoc
+        python scripts/update_symlinks_cross_platform.py
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }} -- --no-integration-tests --ci
-    # optionally, use flags beyond above command: -- --no-integration-tests --ci
+        tox -e py${{ matrix.python-version }} -- -m 'not integration'
+    # optionally, for all tests, remove flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -26,11 +26,14 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from ...conftest import skip_test_windows
+
 
 class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
-    def test_echo(self, pytestconfig):
+    @skip_test_windows(is_test_class=True)
+    def test_echo(self):
         """Run the echo skill sequence."""
         self.add_item("skill", "fetchai/echo:0.1.0")
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,23 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'exception' skill."""
-from aea.skills.base import Behaviour
-
-
-class ExceptionBehaviour(Behaviour):
-    """A behaviour that raises an exception.."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-
-    def act(self) -> None:
-        """Act."""
-        raise Exception("Expected exception!")
-
-    def teardown(self) -> None:
-        """Teardown the task."""
+"""This test module contains the generator test data."""

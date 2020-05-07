@@ -175,17 +175,23 @@ class Context:
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> None:
+def try_to_load_agent_config(
+    ctx: Context, is_exit_on_except: bool = True, agent_src_path: str = None
+) -> None:
     """
     Load agent config to a click context object.
 
     :param ctx: click command context object.
     :param is_exit_on_except: bool option to exit on exception (default = True).
+    :param agent_src_path: path to an agent dir if needed to load a custom config.
 
     :return None
     """
+    if agent_src_path is None:
+        agent_src_path = ctx.cwd
+
     try:
-        path = Path(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE))
+        path = Path(os.path.join(agent_src_path, DEFAULT_AEA_CONFIG_FILE))
         with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             logging.config.dictConfig(ctx.agent_config.logging_config)

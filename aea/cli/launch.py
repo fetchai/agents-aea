@@ -41,13 +41,13 @@ def _run_agent(click_context, agent_directory: str):
     click_context.invoke(run)
 
 
-def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
+def _launch_subprocesses(click_context: click.Context, agents: List[Path]) -> int:
     """
     Launch many agents using subprocesses.
 
     :param agents: the click context.
     :param agents: list of paths to agent projects.
-    :return: None
+    :return: execution status
     """
     ctx = cast(Context, click_context.obj)
     processes = []
@@ -80,18 +80,18 @@ def _launch_subprocesses(click_context: click.Context, agents: List[Path]):
                     agent_directory.name, process.returncode
                 )
             )
-            failed |= process.returncode if process.returncode is not None else -1
+            if process.returncode not in [None, 0]:
+                failed += 1
+    return failed
 
-    sys.exit(failed)
 
-
-def _launch_threads(click_context: click.Context, agents: List[Path]):
+def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
     """
     Launch many agents, multithreaded.
 
     :param agents: the click context.
     :param agents: list of paths to agent projects.
-    :return: None
+    :return: exit status
     """
     aeas = []  # type: List[AEA]
     for agent_directory in agents:
@@ -112,6 +112,7 @@ def _launch_threads(click_context: click.Context, agents: List[Path]):
                 agent.stop()
             threads[idx].join()
             logger.info("Agent {} has been stopped.".format(agent.name))
+    return 0
 
 
 @click.command()
@@ -121,7 +122,9 @@ def _launch_threads(click_context: click.Context, agents: List[Path]):
 def launch(click_context, agents: List[str], multithreaded: bool):
     """Launch many agents at the same time."""
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    if not multithreaded:
-        _launch_subprocesses(click_context, agents_directories)
+    if multithreaded:
+        failed = _launch_threads(click_context, agents_directories)
     else:
-        _launch_threads(click_context, agents_directories)
+        failed = _launch_subprocesses(click_context, agents_directories)
+    logger.debug(f"Exit cli. code: {failed}")
+    sys.exit(failed)

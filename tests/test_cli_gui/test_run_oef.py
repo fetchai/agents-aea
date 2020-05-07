@@ -24,105 +24,104 @@ import sys
 import time
 import unittest.mock
 
-import pytest
-
-from tests.common.mocks import ctx_mock_Popen
+from aea.test_tools.test_cases import UseOef
 
 from .test_base import DummyPID, create_app
+from ..common.mocks import ctx_mock_Popen
 
 
-def test_create_and_run_oef(pytestconfig):
-    """Test for running oef, reading TTY and errors."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
+class TestCreateWithOEF(UseOef):
+    """Use OEF to test create."""
 
-    app = create_app()
+    def test_create_and_run_oef(self):
+        """Test for running oef, reading TTY and errors."""
+        app = create_app()
 
-    pid = DummyPID(None, "A thing of beauty is a joy forever\n", "Testing Error\n")
+        pid = DummyPID(None, "A thing of beauty is a joy forever\n", "Testing Error\n")
 
-    def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == sys.executable
-        assert "launch.py" in param_list[1]
-        return pid
+        def _dummy_call_aea_async(param_list, dir_arg):
+            assert param_list[0] == sys.executable
+            assert "launch.py" in param_list[1]
+            return pid
 
-    with ctx_mock_Popen():
-        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-            response_start = app.post(
+        with ctx_mock_Popen():
+            with unittest.mock.patch(
+                "aea.cli_gui._call_aea_async", _dummy_call_aea_async
+            ):
+                response_start = app.post(
+                    "api/oef", data=None, content_type="application/json",
+                )
+        assert response_start.status_code == 200
+
+        # Wait for key message to appear
+        start_time = time.time()
+        # wait for a bit to ensure polling
+        oef_startup_timeout = 180
+        oef_started = False
+        while time.time() - start_time < oef_startup_timeout and not oef_started:
+            response_status = app.get(
                 "api/oef", data=None, content_type="application/json",
             )
-    assert response_start.status_code == 200
+            assert response_status.status_code == 200
+            data = json.loads(response_status.get_data(as_text=True))
+            assert "RUNNING" in data["status"]
+            if "A thing of beauty is a joy forever" in data["tty"]:
+                assert "Testing Error" in data["error"]
+                oef_started = True
 
-    # Wait for key message to appear
-    start_time = time.time()
-    # wait for a bit to ensure polling
-    oef_startup_timeout = 60
-    oef_started = False
-    while time.time() - start_time < oef_startup_timeout and not oef_started:
-        response_status = app.get(
-            "api/oef", data=None, content_type="application/json",
-        )
+        assert oef_started
+
+        # get the status if failed
+        pid.return_code = 1
+        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+            response_status = app.get(
+                "api/oef", data=None, content_type="application/json",
+            )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
-        assert "RUNNING" in data["status"]
-        if "A thing of beauty is a joy forever" in data["tty"]:
-            assert "Testing Error" in data["error"]
-            oef_started = True
+        assert "FAILED" in data["status"]
 
-    assert oef_started
-
-    # get the status if failed
-    pid.return_code = 1
-    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-        response_status = app.get(
-            "api/oef", data=None, content_type="application/json",
-        )
-    assert response_status.status_code == 200
-    data = json.loads(response_status.get_data(as_text=True))
-    assert "FAILED" in data["status"]
-
-    # get the status if finished
-    pid.return_code = 0
-    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-        response_status = app.get(
-            "api/oef", data=None, content_type="application/json",
-        )
-    assert response_status.status_code == 200
-    data = json.loads(response_status.get_data(as_text=True))
-    assert "FINISHED" in data["status"]
-
-    # Stop the OEF Node
-    with ctx_mock_Popen():
-        response_stop = app.delete(
-            "api/oef", data=None, content_type="application/json",
-        )
-    assert response_stop.status_code == 200
-
-    # get the status
-    pid.return_code = 0
-    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-        response_status = app.get(
-            "api/oef", data=None, content_type="application/json",
-        )
-    assert response_status.status_code == 200
-    data = json.loads(response_status.get_data(as_text=True))
-    assert "NOT_STARTED" in data["status"]
-
-
-def test_create_and_run_oef_fail(pytestconfig):
-    """Test for running oef, reading TTY and errors."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
-    app = create_app()
-
-    def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == sys.executable
-        assert "launch.py" in param_list[1]
-        return None
-
-    with ctx_mock_Popen():
+        # get the status if finished
+        pid.return_code = 0
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-            response_start = app.post(
+            response_status = app.get(
                 "api/oef", data=None, content_type="application/json",
             )
-    assert response_start.status_code == 400
+        assert response_status.status_code == 200
+        data = json.loads(response_status.get_data(as_text=True))
+        assert "FINISHED" in data["status"]
+
+        # Stop the OEF Node
+        with ctx_mock_Popen():
+            response_stop = app.delete(
+                "api/oef", data=None, content_type="application/json",
+            )
+        assert response_stop.status_code == 200
+
+        # get the status
+        pid.return_code = 0
+        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+            response_status = app.get(
+                "api/oef", data=None, content_type="application/json",
+            )
+        assert response_status.status_code == 200
+        data = json.loads(response_status.get_data(as_text=True))
+        assert "NOT_STARTED" in data["status"]
+
+    def test_create_and_run_oef_fail(self):
+        """Test for running oef, reading TTY and errors."""
+        app = create_app()
+
+        def _dummy_call_aea_async(param_list, dir_arg):
+            assert param_list[0] == sys.executable
+            assert "launch.py" in param_list[1]
+            return None
+
+        with ctx_mock_Popen():
+            with unittest.mock.patch(
+                "aea.cli_gui._call_aea_async", _dummy_call_aea_async
+            ):
+                response_start = app.post(
+                    "api/oef", data=None, content_type="application/json",
+                )
+        assert response_start.status_code == 400
