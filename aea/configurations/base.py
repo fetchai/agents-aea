@@ -1429,6 +1429,7 @@ class ProtocolSpecification(ProtocolConfig):
         )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = None  # type: Optional[Dict]
+        self._dialogue_config = None  # type: Optional[Dict]
 
     @property
     def protobuf_snippets(self) -> Optional[Dict]:
@@ -1439,6 +1440,16 @@ class ProtocolSpecification(ProtocolConfig):
     def protobuf_snippets(self, protobuf_snippets: Optional[Dict]):
         """Set the protobuf snippets."""
         self._protobuf_snippets = protobuf_snippets
+
+    @property
+    def dialogue_config(self) -> Optional[Dict]:
+        """Get the dialogue config."""
+        return self._dialogue_config
+
+    @dialogue_config.setter
+    def dialogue_config(self, dialogue_config: Optional[Dict]):
+        """Set the dialogue config."""
+        self._dialogue_config = dialogue_config
 
     @property
     def json(self) -> Dict:

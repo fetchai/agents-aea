@@ -32,3 +32,16 @@ ct:Query: |
 ct:Description: |
   bytes description = 1;
 ...
+---
+reply:
+  cfp: [propose, decline]
+  propose: [propose, accept, accept_w_inform, decline]
+  accept: [decline, match_accept, match_accept_w_inform]
+  accept_w_inform: [decline, match_accept, match_accept_w_inform]
+  decline: []
+  match_accept: [inform]
+  match_accept_w_inform: [inform]
+  inform: [inform]
+roles: {seller, buyer}
+end_states: [successful, declined_cfp, declined_propose, declined_accept]
+...
