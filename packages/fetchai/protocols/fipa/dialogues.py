@@ -48,13 +48,11 @@ VALID_REPLIES = {
         FipaMessage.Performative.DECLINE,
         FipaMessage.Performative.MATCH_ACCEPT,
         FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-        FipaMessage.Performative.INFORM,
     ],
     FipaMessage.Performative.ACCEPT_W_INFORM: [
         FipaMessage.Performative.DECLINE,
         FipaMessage.Performative.MATCH_ACCEPT,
         FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-        FipaMessage.Performative.INFORM,
     ],
     FipaMessage.Performative.DECLINE: [],
     FipaMessage.Performative.MATCH_ACCEPT: [FipaMessage.Performative.INFORM],

@@ -7,10 +7,28 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 speech_acts:
   cfp:
-    query: ct:Query
+    query: pt:str
   propose:
-    proposal: ct:Description
+    number: pt:int
+    price: pt:float
+    description: pt:str
+    flag: pt:bool
+    query: pt:str
+    proposal: pt:optional[pt:dict[pt:str, pt:str]]
+    rounds: pt:set[pt:int]
+    items: pt:list[pt:str]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:str], pt:dict[pt:str, pt:float]]]
+  request:
+    method: pt:str
+    url: pt:str
+    version: pt:str
+    headers: pt:str
+    bodyy: pt:optional[pt:bytes]
   accept: {}
+  inform:
+    inform_number: pt:list[pt:int]
+  inform_reply:
+    reply_message: pt:dict[pt:int, pt:str]
   decline: {}
   match_accept: {}
 ...
@@ -33,23 +51,6 @@ reply:
   accept: [decline, match_accept]
   decline: []
   match_accept: []
-#initial-move:
-#  id: 1
-#  from: {buyer, seller}
-#  sa: cfp
-#  target: 0
-#last-move:
-#  id: None
-#  from: {seller, buyer}
-#  sa: match_accept
-#  target: None
-#roles: {buyer, seller}
-#role-assignment: buyer
-#role_multiplicity:
-#  min:
-#    buyer: 1
-#    seller: 1
-#  max:
-#    buyer: 1
-#    seller: 1
+roles: {buyer, seller}
+end_states: [successful, failed]
 ...

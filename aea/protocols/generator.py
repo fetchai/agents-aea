@@ -616,7 +616,9 @@ class ProtocolGenerator:
         :return: import statement for the custom_types module
         """
         import_str = ""
-        if len(self._all_custom_types) > 0:
+        if len(self._all_custom_types) == 0:
+            pass
+        else:
             for custom_class in self._all_custom_types:
                 import_str += "from {}.custom_types import {} as Custom{}\n".format(
                     self.path_to_protocol_package, custom_class, custom_class,
