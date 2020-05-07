@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """Core definitions for the AEA command-line tool."""
 
 import os
@@ -68,7 +69,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-
+from aea.helpers.win32 import enable_ctrl_c_support
 
 FUNDS_RELEASE_TIMEOUT = 10
 
@@ -90,6 +91,9 @@ def cli(click_context, skip_consistency_check: bool) -> None:
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
+
+    # enables CTRL+C support on windows!
+    enable_ctrl_c_support()
 
 
 @cli.command()
