@@ -46,6 +46,7 @@ from aea.connections.stub.connection import (
 )
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.helpers.base import sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.exceptions import AEATestingException
@@ -270,7 +271,7 @@ class BaseAEATestCase(ABC):
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
         for process in subprocesses:
-            process.send_signal(signal.SIGINT)
+            sigint_crossplatform(process)
         for process in subprocesses:
             process.wait(timeout=timeout)
 

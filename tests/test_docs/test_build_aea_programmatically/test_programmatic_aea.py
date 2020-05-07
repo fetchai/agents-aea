@@ -26,7 +26,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR
+from ...conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
@@ -50,6 +50,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @skip_test_windows()
     def test_run_agent(self):
         """Run the agent from the file."""
         run()

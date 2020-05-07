@@ -27,7 +27,7 @@ import socket
 import sys
 import time
 from threading import Timer
-from typing import Optional
+from typing import Callable, Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -278,6 +278,37 @@ agent_config_files = [
 ]
 
 
+def skip_test_windows(is_test_class=False) -> Callable:
+    """
+    Decorate a pytest method to skip a test in a case we are on Windows.
+
+    :return: decorated method.
+    """
+
+    def decorator(pytest_func):
+        def check_windows():
+            if os.name == "nt":
+                pytest.skip("Skipping the test since it doesn't work on Windows.")
+                return False
+            return True
+
+        if is_test_class:
+
+            def wrapper(self, *args, **kwargs):  # type: ignore
+                if check_windows():
+                    pytest_func(self, *args, **kwargs)
+
+        else:
+
+            def wrapper(*args, **kwargs):  # type: ignore
+                if check_windows():
+                    pytest_func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 @pytest.fixture(scope="session")
 def oef_addr() -> str:
     """IP address pointing to the OEF Node to use during the tests."""
@@ -449,6 +480,9 @@ def network_node(
         pytest.skip("Python version < 3.7 not supported by the OEF.")
         return
 
+    if os.name == "nt":
+        pytest.skip("Skip test as it doesn't work on Windows.")
+
     _stop_oef_search_images()
     c = _create_oef_docker_image(oef_addr, oef_port)
     c.start()
@@ -498,6 +532,11 @@ def get_host():
     finally:
         s.close()
     return IP
+
+
+def double_escape_windows_path_separator(path):
+    """Double-escape Windows path separator '\'."""
+    return path.replace("\\", "\\\\")
 
 
 def _make_dummy_connection() -> Connection:

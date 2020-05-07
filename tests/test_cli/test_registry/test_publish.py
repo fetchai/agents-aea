@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
-
+import os
 from unittest import TestCase, mock
 
 from aea.cli.registry.publish import _compress, publish_agent
@@ -56,7 +56,7 @@ class PublishAgentTestCase(TestCase):
                 "skills": [],
             },
             is_auth=True,
-            filepath="cwd/agent-name.tar.gz",
+            filepath=os.path.join("cwd", "agent-name.tar.gz"),
         )
 
 

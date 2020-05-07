@@ -24,6 +24,8 @@ import importlib.util
 import logging
 import os
 import re
+import signal
+import subprocess  # nosec
 import sys
 import types
 from collections import OrderedDict
@@ -282,3 +284,25 @@ def load_env_file(env_file: str):
     :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
+
+
+def sigint_crossplatform(process: subprocess.Popen) -> None:
+    """
+    Send a SIGINT, cross-platform.
+
+    The reason is because the subprocess module
+    doesn't have an API to send a SIGINT-like signal
+    both on Posix and Windows with a single method.
+
+    However, a subprocess.Popen class has the method
+    'send_signal' that gives more flexibility in this terms.
+
+    :param process: the process to send the signal to.
+    :return: None
+    """
+    if os.name == "posix":
+        process.send_signal(signal.SIGINT)
+    elif os.name == "nt":
+        process.send_signal(signal.CTRL_C_EVENT)
+    else:
+        raise ValueError("Other platforms not supported.")

@@ -57,7 +57,7 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     :raise ValueError: if a parent folder has a file named 'aea-config.yaml'.
     """
     current = Path(".").resolve()
-    root = Path("/")
+    root = Path("/").resolve()
     home = current.home()
     while current not in (home, root):
         files = set(map(lambda x: x.name, current.iterdir()))

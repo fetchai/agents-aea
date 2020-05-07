@@ -25,10 +25,12 @@ from pathlib import Path
 
 from tests.common.pexpect_popen import PexpectSpawn
 from tests.common.utils import run_in_root_dir
+from tests.conftest import skip_test_windows
 
 
+@skip_test_windows()
 @run_in_root_dir
-def test_gym_ex(pytestconfig):
+def test_gym_ex():
     """Run the gym ex sequence."""
     try:
         process = PexpectSpawn(  # nosec

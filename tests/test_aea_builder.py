@@ -30,9 +30,10 @@ from aea.exceptions import AEAException
 
 from tests.common.utils import timeit_context
 
-from .conftest import CUR_PATH, ROOT_DIR
+from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 
+@skip_test_windows()
 def test_default_timeout_for_agent():
     """
     Tests agents loop sleep timeout
