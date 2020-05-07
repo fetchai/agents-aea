@@ -37,9 +37,11 @@ from tests.common.pexpect_popen import PexpectSpawn
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
-    skip_test_windows,
     tcpping,
 )
+
+if os.name == "nt":
+    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 class TestGui:
@@ -59,7 +61,6 @@ class TestGui:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
 
-    @skip_test_windows(is_test_class=True)
     @pytest.mark.integration
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
