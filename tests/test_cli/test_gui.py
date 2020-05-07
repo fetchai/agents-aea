@@ -44,6 +44,8 @@ if os.name == "nt":
     pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
+@pytest.mark.unstable
+@pytest.mark.integration
 class TestGui:
     """Test that the command 'aea gui' works as expected."""
 
@@ -61,7 +63,6 @@ class TestGui:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
 
-    @pytest.mark.integration
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
         self.proc = PexpectSpawn(  # nosec

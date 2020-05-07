@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.2.0
 - fetchai/oef:0.2.0
-- fetchai/stub:0.2.0
+- fetchai/stub:0.3.0
 - fetchai/webhook:0.1.0
 contracts: []
 protocols:

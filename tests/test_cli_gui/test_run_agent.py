@@ -25,6 +25,8 @@ import time
 import unittest.mock
 from pathlib import Path
 
+import pytest
+
 import aea
 from aea.configurations.constants import DEFAULT_CONNECTION
 
@@ -32,6 +34,7 @@ from .test_base import TempCWD, create_app
 from ..conftest import CUR_PATH, skip_test_windows
 
 
+@pytest.mark.unstable
 @skip_test_windows()
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""

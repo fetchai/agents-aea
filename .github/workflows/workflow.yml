@@ -70,7 +70,7 @@ jobs:
           pip install pipenv
           pip install tox
       - name: Integration tests
-        run: tox -e py3.7 -- -m integration
+        run: tox -e py3.7 -- -m 'integration and not unstable'
 
   platform_checks:
     runs-on: ${{ matrix.os }}
@@ -113,8 +113,8 @@ jobs:
         python scripts/update_symlinks_cross_platform.py
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }} -- -m 'not integration'
-    # optionally, for all tests, remove flags beyond above command: -- --no-integration-tests --ci
+        tox -e py${{ matrix.python-version }} -- -m 'not integration and not unstable'
+    # optionally, for all tests, remove 'not unstable' to run unstable tests as well
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -9,7 +9,7 @@ aea add skill fetchai/ml_data_provider:0.2.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_data_provider:0.2.0
+aea fetch fetchai/ml_data_provider:0.3.0
 cd ml_data_provider
 ```
 ``` bash
@@ -26,7 +26,7 @@ aea add skill fetchai/ml_train:0.2.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.2.0
+aea fetch fetchai/ml_model_trainer:0.3.0
 cd ml_model_trainer
 ```
 ``` bash
