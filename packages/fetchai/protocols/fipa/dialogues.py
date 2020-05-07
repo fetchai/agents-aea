@@ -40,6 +40,7 @@ VALID_REPLIES = {
         FipaMessage.Performative.DECLINE,
     ],
     FipaMessage.Performative.PROPOSE: [
+        FipaMessage.Performative.PROPOSE,
         FipaMessage.Performative.ACCEPT,
         FipaMessage.Performative.ACCEPT_W_INFORM,
         FipaMessage.Performative.DECLINE,
