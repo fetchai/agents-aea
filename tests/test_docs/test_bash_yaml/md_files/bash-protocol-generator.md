@@ -30,4 +30,14 @@ speech_acts:
 ct:DataModel: |
   bytes data_model = 1;
 ...
+---
+reply:
+  cfp: [propose, decline]
+  propose: [accept, decline]
+  accept: [decline, match_accept]
+  decline: []
+  match_accept: []
+roles: {buyer, seller}
+end_states: [successful, failed]
+...
 ```
