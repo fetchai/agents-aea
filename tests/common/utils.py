@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains some utils for testing purposes."""
-
+import os
 import time
 from contextlib import contextmanager
-from typing import Callable, Tuple, Type, Union
+from functools import wraps
+from typing import Any, Callable, Tuple, Type, Union
 
 
 from aea.aea import AEA
@@ -31,6 +32,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Behaviour, Handler
 
+from tests.conftest import ROOT_DIR
 
 DEFAULT_SLEEP = 0.0001
 DEFAULT_TIMEOUT = 3
@@ -215,7 +217,7 @@ def make_handler_cls_from_funcion(func: Callable) -> Type[Handler]:
     :param func: function or callable to be called from Handler.handle method
     :return: Handler class
     """
-    # pydocstyle: igonre # case confilct with black
+    # pydocstyle: ignore # case conflicts with black
     class TestHandler(Handler):
         SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
@@ -237,7 +239,7 @@ def make_behaviour_cls_from_funcion(func: Callable) -> Type[Behaviour]:
     :param func: function or callable to be called from Behaviour.act method
     :return: Behaviour class
     """
-    # pydocstyle: igonre # case confilct with black
+    # pydocstyle: ignore # case conflicts with black
     class TestBehaviour(Behaviour):
         def act(self) -> None:
             func(self)
@@ -249,3 +251,27 @@ def make_behaviour_cls_from_funcion(func: Callable) -> Type[Behaviour]:
             pass
 
     return TestBehaviour
+
+
+def run_in_root_dir(fn) -> Callable:
+    """
+    Chdir to ROOT DIR and return back during tests.
+
+    Decorator.
+
+    :param fn: function to decorate
+
+    :return: wrapped function
+    """
+    # pydocstyle: ignore # case conflicts with black
+    @wraps(fn)
+    def wrap(*args, **kwargs) -> Any:
+        """Do a chdir."""
+        cwd = os.getcwd()
+        os.chdir(ROOT_DIR)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            os.chdir(cwd)
+
+    return wrap

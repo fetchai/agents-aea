@@ -21,16 +21,14 @@ import asyncio
 import concurrent
 import ctypes
 import logging
-import os
 import signal
 import threading
 from abc import ABC, abstractmethod
 from asyncio import Future
 from asyncio.events import AbstractEventLoop
+from threading import Lock
 from types import TracebackType
 from typing import Optional, Type
-
-import pytest
 
 logger = logging.getLogger(__file__)
 
@@ -152,8 +150,6 @@ class ExecTimeoutSigAlarm(BaseExecTimeout):
 
         :return: None
         """
-        if os.name == "nt":
-            pytest.skip("signal.settimer non available on Windows.")
         signal.setitimer(signal.ITIMER_REAL, self.timeout, 0)
         signal.signal(signal.SIGALRM, self._on_timeout)
 
@@ -179,6 +175,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
     _loop: Optional[AbstractEventLoop] = None
     _stopped_future: Optional[Future] = None
     _start_count: int = 0
+    _lock: Lock = Lock()
 
     def __init__(self, timeout: float = 0.0):
         """
@@ -220,15 +217,16 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         :param force: force stop regardless number of start.
         :return: None
         """
-        if not cls._supervisor_thread:
-            return
+        with cls._lock:
+            if not cls._supervisor_thread:
+                return
 
-        cls._start_count -= 1
+            cls._start_count -= 1
 
-        if cls._start_count <= 0 or force:
-            cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
-            cls._supervisor_thread.join()
-            cls._supervisor_thread = None
+            if cls._start_count <= 0 or force:
+                cls._loop.call_soon_threadsafe(cls._stopped_future.set_result, True)  # type: ignore
+                cls._supervisor_thread.join()
+                cls._supervisor_thread = None
 
     @classmethod
     def _supervisor_event_loop(cls) -> None:
