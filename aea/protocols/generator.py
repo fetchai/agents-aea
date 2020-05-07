@@ -1857,7 +1857,9 @@ class ProtocolGenerator:
         # is belonging to registered dialogue method
         cls_str += self.indent + "def is_belonging_to_registered_dialogue(\n"
         self._change_indent(1)
-        cls_str += self.indent + "self, fipa_msg: Message, agent_addr: Address\n"
+        cls_str += self.indent + "self, {}_msg: Message, agent_addr: Address\n".format(
+            self.protocol_specification.name
+        )
         self._change_indent(-1)
         cls_str += self.indent + ") -> bool:\n"
         self._change_indent(1)
@@ -1866,29 +1868,46 @@ class ProtocolGenerator:
             self.indent
             + "Check whether an agent message is part of a registered dialogue.\n\n"
         )
-        cls_str += self.indent + ":param fipa_msg: the fipa message\n"
+        cls_str += self.indent + ":param {}_msg: the {} message\n".format(
+            self.protocol_specification.name, self.protocol_specification.name
+        )
         cls_str += self.indent + ":param agent_addr: the address of the agent\n\n"
         cls_str += (
             self.indent
             + ":return: boolean indicating whether the message belongs to a registered dialogue\n"
         )
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "fipa_msg = cast(FipaMessage, fipa_msg)\n"
-        cls_str += self.indent + "dialogue_reference = fipa_msg.dialogue_reference\n"
+        cls_str += self.indent + "{}_msg = cast({}Message, {}_msg)\n".format(
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+            self.protocol_specification.name,
+        )
+        cls_str += (
+            self.indent
+            + "dialogue_reference = {}_msg.dialogue_reference\n".format(
+                self.protocol_specification.name
+            )
+        )
         cls_str += (
             self.indent + 'alt_dialogue_reference = (dialogue_reference[0], "")\n'
         )
         cls_str += self.indent + "self_initiated_dialogue_label = DialogueLabel(\n"
         self._change_indent(1)
         cls_str += (
-            self.indent + "dialogue_reference, fipa_msg.counterparty, agent_addr\n"
+            self.indent
+            + "dialogue_reference, {}_msg.counterparty, agent_addr\n".format(
+                self.protocol_specification.name
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
         cls_str += self.indent + "alt_self_initiated_dialogue_label = DialogueLabel(\n"
         self._change_indent(1)
         cls_str += (
-            self.indent + "alt_dialogue_reference, fipa_msg.counterparty, agent_addr\n"
+            self.indent
+            + "alt_dialogue_reference, {}_msg.counterparty, agent_addr\n".format(
+                self.protocol_specification.name
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
@@ -1896,7 +1915,9 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += (
             self.indent
-            + "dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty\n"
+            + "dialogue_reference, {}_msg.counterparty, {}_msg.counterparty\n".format(
+                self.protocol_specification.name, self.protocol_specification.name
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
@@ -1909,13 +1930,17 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += (
             self.indent
-            + "FipaDialogue, self.dialogues[other_initiated_dialogue_label]\n"
+            + "{}Dialogue, self.dialogues[other_initiated_dialogue_label]\n".format(
+                self.protocol_specification_in_camel_case
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
         cls_str += (
             self.indent
-            + "result = other_initiated_dialogue.is_valid_next_message(fipa_msg)\n"
+            + "result = other_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
+                self.protocol_specification.name
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + "if self_initiated_dialogue_label in self.dialogues:\n"
@@ -1924,13 +1949,17 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += (
             self.indent
-            + "FipaDialogue, self.dialogues[self_initiated_dialogue_label]\n"
+            + "{}Dialogue, self.dialogues[self_initiated_dialogue_label]\n".format(
+                self.protocol_specification_in_camel_case
+            )
         )
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
         cls_str += (
             self.indent
-            + "result = self_initiated_dialogue.is_valid_next_message(fipa_msg)\n"
+            + "result = self_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
+                self.protocol_specification.name
+            )
         )
         self._change_indent(-1)
         cls_str += (
@@ -1940,7 +1969,9 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + "self_initiated_dialogue = cast(\n"
         self._change_indent(1)
-        cls_str += self.indent + "FipaDialogue,\n"
+        cls_str += self.indent + "{}Dialogue,\n".format(
+            self.protocol_specification_in_camel_case
+        )
         cls_str += (
             self.indent
             + "self._initiated_dialogues[alt_self_initiated_dialogue_label],\n"
@@ -1949,7 +1980,9 @@ class ProtocolGenerator:
         cls_str += self.indent + ")\n"
         cls_str += (
             self.indent
-            + "result = self_initiated_dialogue.is_valid_next_message(fipa_msg)\n"
+            + "result = self_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
+                self.protocol_specification.name
+            )
         )
         cls_str += self.indent + "if result:\n"
         self._change_indent(1)
@@ -2281,7 +2314,12 @@ class ProtocolGenerator:
         self._change_indent(-1)
 
         # add method
-        cls_str += self.indent + "def _add(self, dialogue: FipaDialogue) -> None:\n"
+        cls_str += (
+            self.indent
+            + "def _add(self, dialogue: {}Dialogue) -> None:\n".format(
+                self.protocol_specification_in_camel_case
+            )
+        )
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Add a dialogue.\n\n"
