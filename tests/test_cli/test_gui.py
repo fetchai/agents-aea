@@ -19,6 +19,7 @@
 """This test module contains the tests for the `aea gui` sub-command."""
 import json
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -28,6 +29,9 @@ from jsonschema import Draft4Validator
 
 import pytest
 
+from aea.configurations.loader import make_jsonschema_base_uri
+
+
 from tests.common.pexpect_popen import PexpectSpawn
 
 from ..conftest import (
@@ -35,6 +39,9 @@ from ..conftest import (
     CONFIGURATION_SCHEMA_DIR,
     tcpping,
 )
+
+if os.name == "nt":
+    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 @pytest.mark.unstable
@@ -46,7 +53,8 @@ class TestGui:
         """Set the test up."""
         self.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
         self.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), self.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            self.schema,
         )
         self.validator = Draft4Validator(self.schema, resolver=self.resolver)
 
@@ -72,3 +80,7 @@ class TestGui:
         self.proc.terminate()
         self.proc.wait_to_complete(10)
         os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except OSError:
+            pass

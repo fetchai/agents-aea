@@ -26,7 +26,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from .multiplexer_standalone import run
 from ..helper import extract_code_blocks, extract_python_code
-from ...conftest import CUR_PATH, ROOT_DIR
+from ...conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 MD_FILE = "docs/multiplexer-standalone.md"
 PY_FILE = "test_docs/test_multiplexer_standalone/multiplexer_standalone.py"
@@ -50,6 +50,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @skip_test_windows(is_test_class=True)
     def test_run_agent(self):
         """Run the agent from the file."""
         run()
@@ -59,8 +60,8 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         message_text = (
             "some_agent,multiplexer,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
         )
-        path = os.path.join(self.t, "output.txt")
-        with open(path, "r") as file:
+        path = os.path.join(str(self.t), "output.txt")
+        with open(path, "r", encoding="utf-8") as file:
             msg = file.read()
         assert msg == message_text, "The messages must be identical."
 

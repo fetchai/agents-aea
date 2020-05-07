@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the orm-integration.md guide."""
-
 from pathlib import Path
 
 import mistune

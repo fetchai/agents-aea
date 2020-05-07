@@ -30,7 +30,6 @@ from threading import Lock
 from types import TracebackType
 from typing import Optional, Type
 
-
 logger = logging.getLogger(__file__)
 
 

@@ -19,7 +19,6 @@
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
-import signal
 import subprocess  # nosec
 import sys
 import tempfile
@@ -42,9 +41,14 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
+from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
+
+
+if sys.platform.startswith("win"):
+    pytest.skip("skipping tests on Windows", allow_module_level=True)
 
 
 def test_run():
@@ -92,7 +96,7 @@ def test_run():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -138,7 +142,7 @@ def test_run_with_default_connection():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -203,7 +207,7 @@ def test_run_multiple_connections(connection_ids):
         )
 
         time.sleep(5.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=5)
 
         assert process.returncode == 0
@@ -560,7 +564,7 @@ def test_run_ledger_apis():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -651,7 +655,7 @@ def test_run_fet_ledger_apis():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0
@@ -723,7 +727,7 @@ def test_run_with_install_deps():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.communicate(timeout=20)
 
         assert process.returncode == 0
@@ -797,7 +801,7 @@ def test_run_with_install_deps_and_requirement_file():
         )
 
         time.sleep(10.0)
-        process.send_signal(signal.SIGINT)
+        sigint_crossplatform(process)
         process.wait(timeout=20)
 
         assert process.returncode == 0

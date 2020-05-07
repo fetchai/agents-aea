@@ -41,9 +41,13 @@ from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectSpawn
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, skip_test_windows
 
 logger = logging.getLogger(__name__)
+
+
+if os.name == "nt":
+    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 class BaseLaunchTestCase:
@@ -157,6 +161,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
+    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
@@ -207,6 +212,7 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
 class TestLaunchMultithreaded(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_names> --multithreaded' works as expected."""
 
+    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch(
