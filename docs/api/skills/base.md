@@ -267,7 +267,7 @@ This class defines an abstract interface for skill component classes.
 #### `__`init`__`
 
 ```python
- | __init__(name: Optional[str] = None, configuration: Optional[SkillComponentConfiguration] = None, skill_context: Optional[SkillContext] = None, **kwargs, ,)
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs, ,)
 ```
 
 Initialize a skill component.
@@ -296,7 +296,7 @@ Get the name of the skill component.
  | context() -> SkillContext
 ```
 
-Get the context of the behaviour.
+Get the context of the skill component.
 
 <a name=".aea.skills.base.SkillComponent.skill_id"></a>
 #### skill`_`id
@@ -326,7 +326,7 @@ Get the skill component configuration.
  | config() -> Dict[Any, Any]
 ```
 
-Get the config of the behaviour.
+Get the config of the skill component.
 
 <a name=".aea.skills.base.SkillComponent.setup"></a>
 #### setup

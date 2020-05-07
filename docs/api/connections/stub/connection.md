@@ -3,6 +3,20 @@
 
 This module contains the stub connection.
 
+<a name=".aea.connections.stub.connection.lock_file"></a>
+#### lock`_`file
+
+```python
+@contextmanager
+lock_file(file_descriptor: IO[AnyStr])
+```
+
+Lock file in context manager.
+
+**Arguments**:
+
+- `file_descriptor`: file descriptio of file to lock.
+
 <a name=".aea.connections.stub.connection.StubConnection.__init__"></a>
 #### `__`init`__`
 
