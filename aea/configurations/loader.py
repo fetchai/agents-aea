@@ -111,12 +111,19 @@ class ConfigLoader(Generic[T]):
         for document in yaml_data:
             yaml_documents.append(document)
         configuration_file_json = yaml_documents[0]
-        if len(yaml_documents) == 2:
-            protobuf_snippets_json = yaml_documents[1]
-        elif len(yaml_documents) == 1:
+        if len(yaml_documents) == 1:
             protobuf_snippets_json = {}
+            dialogue_configuration = {}  # type: Dict
+        elif len(yaml_documents) == 2:
+            protobuf_snippets_json = yaml_documents[1]
+            dialogue_configuration = {}
+        elif len(yaml_documents) == 3:
+            protobuf_snippets_json = yaml_documents[1]
+            dialogue_configuration = yaml_documents[2]
         else:
-            raise ValueError("Wrong number of documents in protocol specification.")
+            raise ValueError(
+                "Incorrect number of Yaml documents in the protocol specification."
+            )
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
@@ -125,6 +132,7 @@ class ConfigLoader(Generic[T]):
             configuration_file_json
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
+        protocol_specification.dialogue_config = dialogue_configuration
         return protocol_specification
 
     def load(self, file_pointer: TextIO) -> T:
