@@ -17,17 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers.exec_timout."""
-
+import os
 import time
 import unittest
 from functools import partial
 from threading import Thread
 from unittest.case import TestCase
 
+import pytest
+
 from aea.helpers.exec_timeout import BaseExecTimeout, ExecTimeoutSigAlarm
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 
 from tests.common.utils import timeit_context
+
+
+if os.name == "nt":
+    pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
 
 
 class BaseTestExecTimeout(TestCase):
