@@ -31,6 +31,8 @@ from typing import Generator, List, Optional
 
 from pexpect.exceptions import EOF  # type: ignore
 
+import pytest
+
 import yaml
 
 from aea.cli import cli
@@ -42,6 +44,10 @@ from tests.common.pexpect_popen import PexpectSpawn
 from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, skip_test_windows
 
 logger = logging.getLogger(__name__)
+
+
+if os.name == "nt":
+    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 class BaseLaunchTestCase:
