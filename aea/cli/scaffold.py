@@ -64,7 +64,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def contract(ctx: Context, contract_name: str) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
-    _scaffold_item(ctx, "contract", contract_name)
+    _scaffold_item(ctx, "contract", contract_name)  # pragma: no cover
 
 
 @scaffold.command()

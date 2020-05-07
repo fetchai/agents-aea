@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,26 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains decorators for AEA end-to-end testing."""
-
-from typing import Callable
-
-import pytest
-
-
-def skip_test_ci(pytest_func: Callable) -> Callable:
-    """
-    Decorate a pytest method to skip a test in a case of CI usage.
-
-    :param pytest_func: a pytest method to decorate.
-
-    :return: decorated method.
-    """
-
-    def wrapped(self, pytestconfig, *args, **kwargs):
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-        else:
-            pytest_func(self, pytestconfig, *args, **kwargs)
-
-    return wrapped
+"""Examples using the AEA framework."""

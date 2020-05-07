@@ -23,7 +23,6 @@ import sys
 
 import pytest
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
@@ -34,7 +33,6 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
     )
-    @skip_test_ci
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
         data_provider_aea_name = "ml_data_provider"
@@ -100,7 +98,6 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         sys.version_info >= (3, 8),
         reason="cannot run on 3.8 as tensorflow not installable",
     )
-    @skip_test_ci
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
         data_provider_aea_name = "ml_data_provider"

@@ -228,9 +228,9 @@ class SkillComponent(ABC):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str,
+        skill_context: SkillContext,
         configuration: Optional[SkillComponentConfiguration] = None,
-        skill_context: Optional[SkillContext] = None,
         **kwargs,
     ):
         """
@@ -241,9 +241,10 @@ class SkillComponent(ABC):
         :param skill_context: the skill context.
         """
         assert name is not None, "SkillComponent name is not provided."
-        # TODO solve it
-        # assert configuration is not None
-        # assert skill_context is not None
+        assert skill_context is not None, "SkillConext is not provided"
+        if configuration is None:
+            class_name = type(self).__name__
+            configuration = SkillComponentConfiguration(class_name=class_name, **kwargs)
         self._configuration = configuration
         self._name = name
         self._context = skill_context
@@ -259,7 +260,7 @@ class SkillComponent(ABC):
 
     @property
     def context(self) -> SkillContext:
-        """Get the context of the behaviour."""
+        """Get the context of the skill component."""
         assert self._context is not None, "Skill context not set yet."
         return self._context
 
@@ -277,7 +278,7 @@ class SkillComponent(ABC):
     # TODO consider rename this property
     @property
     def config(self) -> Dict[Any, Any]:
-        """Get the config of the behaviour."""
+        """Get the config of the skill component."""
         return self.configuration.args
 
     @abstractmethod

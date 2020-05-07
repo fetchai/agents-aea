@@ -40,6 +40,7 @@ from ...conftest import AUTHOR
         "description": "some-description",
         "version": "some-version",
         "author": AUTHOR,
+        "protocols": ["protocol_id"],
     },
 )
 @mock.patch(
@@ -73,6 +74,7 @@ class PushItemTestCase(TestCase):
                 "name": "some-name",
                 "description": "some-description",
                 "version": "some-version",
+                "protocols": ["protocol_id"],
             },
             is_auth=True,
             filepath="cwd/some-name.tar.gz",

@@ -19,15 +19,13 @@
 
 """This test module contains the integration test for the weather skills."""
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
 class TestWeatherSkills(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
-    @skip_test_ci
-    def test_weather(self, pytestconfig):
+    def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
         weather_client_aea_name = "my_weather_client"
@@ -103,8 +101,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
-    @skip_test_ci
-    def test_weather(self, pytestconfig):
+    def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
         weather_client_aea_name = "my_weather_client"

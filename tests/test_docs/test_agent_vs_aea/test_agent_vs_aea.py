@@ -19,13 +19,10 @@
 
 """This module contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
-import logging
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
-import pytest
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from .agent_code_block import run
 from ..helper import extract_code_blocks, extract_python_code
@@ -34,22 +31,18 @@ from ...conftest import CUR_PATH, ROOT_DIR
 MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
 
-logger = logging.getLogger(__name__)
 
-
-class TestAgentVsAEA:
+class TestAgentVsAEA(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
-        path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = extract_python_code(path)
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        BaseAEATestCase.setup_class()
+        doc_path = os.path.join(ROOT_DIR, MD_FILE)
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        test_code_path = os.path.join(CUR_PATH, PY_FILE)
+        cls.python_file = extract_python_code(test_code_path)
 
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""
@@ -57,12 +50,8 @@ class TestAgentVsAEA:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_run_agent(self, pytestconfig):
+    def test_run_agent(self):
         """Run the agent from the file."""
-
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         run()
         assert os.path.exists(Path(self.t, "input_file"))
 
@@ -80,12 +69,3 @@ class TestAgentVsAEA:
             assert (
                 blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass

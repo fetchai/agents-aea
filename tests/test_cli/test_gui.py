@@ -30,8 +30,6 @@ from pathlib import Path
 import jsonschema
 from jsonschema import Draft4Validator
 
-import pytest
-
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CLI_LOG_OPTION,
@@ -61,12 +59,9 @@ class TestGui:
         )
         time.sleep(10.0)
 
-    def test_gui(self, pytestconfig):
+    def test_gui(self):
         """Test that the gui process has been spawned correctly."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("skipped: CI")
-        else:
-            assert tcpping("localhost", 8080)
+        assert tcpping("127.0.0.1", 8080)
 
     @classmethod
     def teardown_class(cls):

@@ -19,52 +19,53 @@
 
 """This test module contains the integration test for the echo skill."""
 
-import time
+from pathlib import Path
 
-from aea.mail.base import Envelope
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+import requests
+
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from ...conftest import ROOT_DIR
 
-class TestEchoSkill(AEATestCaseEmpty):
-    """Test that echo skill works."""
+API_SPEC_PATH = Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absolute()
+
+
+class TestHttpEchoSkill(AEATestCaseEmpty):
+    """Test that http echo skill works."""
 
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.1.0")
+        self.add_item("connection", "fetchai/http_server:0.2.0")
+        self.add_item("skill", "fetchai/http_echo:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.2.0")
+        self.set_config(
+            "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
+        )
+        self.run_install()
 
         process = self.run_agent()
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
-        message_content = b"hello"
-        message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=message_content,
-        )
-        sent_envelope = Envelope(
-            to=self.agent_name,
-            sender="sender",
-            protocol_id=message.protocol_id,
-            message=DefaultSerializer().encode(message),
-        )
 
-        self.send_envelope_to_agent(sent_envelope, self.agent_name)
+        response = requests.get("http://127.0.0.1:8000")
+        assert response.status_code == 404, "Failed to receive not found"
+        # we receive a not found since the path is not available in the api spec
 
-        time.sleep(2.0)
-        received_envelope = self.read_envelope_from_agent(self.agent_name)
+        response = requests.get("http://127.0.0.1:8000/pets")
+        assert response.status_code == 200, "Failed to receive ok"
+        assert (
+            response.content == b'{"tom": {"type": "cat", "age": 10}}'
+        ), "Wrong body on get"
 
-        assert sent_envelope.to == received_envelope.sender
-        assert sent_envelope.sender == received_envelope.to
-        assert sent_envelope.protocol_id == received_envelope.protocol_id
-        assert sent_envelope.message == received_envelope.message
+        response = requests.post("http://127.0.0.1:8000/pets")
+        assert response.status_code == 200
+        assert response.content == b"", "Wrong body on post"
 
         check_strings = (
-            "Echo Handler: setup method called.",
-            "Echo Behaviour: setup method called.",
-            "Echo Behaviour: act method called.",
-            "content={}".format(message_content),
+            "received http request with method=get, url=http://127.0.0.1:8000/pets and body=b''",
+            "received http request with method=post, url=http://127.0.0.1:8000/pets and body=b''",
         )
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
@@ -73,4 +74,4 @@ class TestEchoSkill(AEATestCaseEmpty):
 
         assert (
             self.is_successfully_terminated()
-        ), "Echo agent wasn't successfully terminated."
+        ), "Http echo agent wasn't successfully terminated."

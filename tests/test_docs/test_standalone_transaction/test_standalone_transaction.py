@@ -21,11 +21,9 @@
 
 import logging
 import os
-import shutil
-import tempfile
 from unittest.mock import patch
 
-import pytest
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from .standalone_transaction import (
     logger,
@@ -40,7 +38,7 @@ PY_FILE = "test_docs/test_standalone_transaction/standalone_transaction.py"
 test_logger = logging.getLogger(__name__)
 
 
-class TestStandaloneTransaction:
+class TestStandaloneTransaction(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @classmethod
@@ -56,14 +54,12 @@ class TestStandaloneTransaction:
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
+        BaseAEATestCase.setup_class()
         cls._patch_logger()
-        cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
-        path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = extract_python_code(path)
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        doc_path = os.path.join(ROOT_DIR, MD_FILE)
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        test_code_path = os.path.join(CUR_PATH, PY_FILE)
+        cls.python_file = extract_python_code(test_code_path)
 
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""
@@ -71,11 +67,8 @@ class TestStandaloneTransaction:
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
-    def test_run_end_to_end(self, pytestconfig):
+    def test_run_end_to_end(self):
         """Run the transaction from the file."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
         try:
             run()
             self.mocked_logger_info.assert_any_call("Transaction complete.")
@@ -106,12 +99,3 @@ class TestStandaloneTransaction:
             assert (
                 blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
-
-    @classmethod
-    def teardown_class(cls):
-        cls._unpatch_logger()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError) as e:
-            print(e)

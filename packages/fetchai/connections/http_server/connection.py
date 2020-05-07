@@ -25,6 +25,7 @@ from asyncio import CancelledError
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Lock, Thread
 from typing import Dict, Optional, Set, cast
+from urllib.parse import parse_qs, urlencode, urlparse
 from uuid import uuid4
 
 from openapi_core import create_spec
@@ -71,11 +72,10 @@ class Request(OpenAPIRequest):
     def create(cls, request_handler: BaseHTTPRequestHandler) -> "Request":
         method = request_handler.command.lower()
 
-        # gets deduced by path finder against spec
-        path = {}  # type: Dict
+        parsed_path = urlparse(request_handler.path)
 
         url = "http://{}:{}{}".format(
-            *request_handler.server.server_address, request_handler.path
+            *request_handler.server.server_address, parsed_path.path
         )
 
         content_length = request_handler.headers["Content-Length"]
@@ -86,10 +86,12 @@ class Request(OpenAPIRequest):
         )
 
         mimetype = request_handler.headers.get_content_type()
+
+        query_params = parse_qs(parsed_path.query, keep_blank_values=True)
         parameters = RequestParameters(
-            query=ImmutableMultiDict(request_handler.headers.get_params()),
-            header=request_handler.headers,
-            path=path,
+            query=ImmutableMultiDict(query_params),
+            header=request_handler.headers.as_string(),
+            path={},
         )
         request = Request(
             full_url_pattern=url,
@@ -112,6 +114,11 @@ class Request(OpenAPIRequest):
         :param param: the parameter
         :param body: the body
         """
+        url = (
+            self.full_url_pattern
+            if self.parameters.query == {}
+            else self.full_url_pattern + "?" + urlencode(self.parameters.query)
+        )
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message = HttpMessage(
@@ -120,8 +127,8 @@ class Request(OpenAPIRequest):
             message_id=1,
             performative=HttpMessage.Performative.REQUEST,
             method=self.method,
-            url=self.full_url_pattern,
-            headers=self.parameters.header.as_string(),
+            url=url,
+            headers=self.parameters.header,
             bodyy=self.body.encode() if self.body is not None else b"",
             version="",
         )

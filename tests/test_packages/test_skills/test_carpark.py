@@ -19,15 +19,13 @@
 
 """This test module contains the integration test for the weather skills."""
 
-from aea.test_tools.decorators import skip_test_ci
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
 class TestCarPark(AEATestCaseMany, UseOef):
     """Test that carpark skills work."""
 
-    @skip_test_ci
-    def test_carpark(self, pytestconfig):
+    def test_carpark(self):
         """Run the weather skills sequence."""
         carpark_aea_name = "my_carpark_aea"
         carpark_client_aea_name = "my_carpark_client_aea"
@@ -108,8 +106,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
 class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that carpark skills work."""
 
-    @skip_test_ci
-    def test_carpark(self, pytestconfig):
+    def test_carpark(self):
         """Run the weather skills sequence."""
         carpark_aea_name = "my_carpark_aea"
         carpark_client_aea_name = "my_carpark_client_aea"
