@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the stub connection."""
 
 import asyncio
@@ -29,11 +28,19 @@ from pathlib import Path
 from typing import AnyStr, IO, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
-from watchdog.observers import Observer
+from watchdog.utils import platform
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
+
+
+if platform.is_darwin():
+    """Cause fsevent fails on multithreading on macos."""
+    from watchdog.observers.kqueue import KqueueObserver as Observer
+else:
+    from watchdog.observers import Observer
+
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +96,10 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
 @contextmanager
 def lock_file(file_descriptor: IO[AnyStr]):
+    """Lock file in context manager.
+
+    :param file_descriptor: file descriptio of file to lock.
+    """
     try:
         fcntl.flock(file_descriptor, fcntl.LOCK_EX)
     except OSError as e:
@@ -251,7 +262,6 @@ class StubConnection(Connection):
 
         :return: None
         """
-
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
         with lock_file(self.output_file):

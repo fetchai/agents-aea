@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea run` sub-command."""
-
 import os
 import shutil
 import signal
@@ -46,7 +44,7 @@ from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
 from aea.test_tools.click_testing import CliRunner
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
 
 
 def test_run():
@@ -56,7 +54,7 @@ def test_run():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -119,7 +117,7 @@ def test_run_with_default_connection():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -173,7 +171,7 @@ def test_run_multiple_connections(connection_ids):
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -230,7 +228,7 @@ def test_run_unknown_private_key():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -304,7 +302,7 @@ def test_run_unknown_ledger():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -378,7 +376,7 @@ def test_run_fet_private_key_config():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -436,7 +434,7 @@ def test_run_ethereum_private_key_config():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -494,7 +492,7 @@ def test_run_ledger_apis():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -588,7 +586,7 @@ def test_run_fet_ledger_apis():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -678,7 +676,7 @@ def test_run_with_install_deps():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    packages_src = os.path.join(cwd, "packages")
+    packages_src = os.path.join(ROOT_DIR, "packages")
     packages_dst = os.path.join(t, "packages")
     shutil.copytree(packages_src, packages_dst)
 
@@ -750,7 +748,7 @@ def test_run_with_install_deps_and_requirement_file():
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
-    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+    shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
     result = runner.invoke(
@@ -828,7 +826,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -853,7 +851,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         assert result.exit_code == 0
 
         shutil.copytree(
-            Path(CUR_PATH, "data", "exception_skill"),
+            Path(ROOT_DIR, "tests", "data", "exception_skill"),
             Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", "exception"),
         )
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
@@ -891,7 +889,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -947,7 +945,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1004,7 +1002,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1062,7 +1060,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1155,7 +1153,7 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1246,7 +1244,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1334,7 +1332,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -1409,7 +1407,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
