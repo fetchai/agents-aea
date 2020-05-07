@@ -16,10 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import unittest.mock
+
+
+from tests.common.utils import run_in_root_dir
 
 from .test_base import DummyPID, create_app
 
@@ -129,10 +131,10 @@ def test_list_skills():
     _test_search_items_with_query("skill", "test")
 
 
+@run_in_root_dir
 def test_real_search():
     """Call at least one function that actually calls call_aea_async."""
     app = create_app()
-
     # Test for actual agent
     response_list = app.get(
         "api/connection", data=None, content_type="application/json",
@@ -140,7 +142,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 11
+    assert len(data) == 11, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
