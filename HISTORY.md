@@ -3,7 +3,7 @@
 ## 0.3.2 (2020-05-07)
 
 - Adds dialogue generation functionality to protocol generator
-- Fixes all CLI commands to be atomic
+- Fixes add CLI commands to be atomic
 - Adds Windows platform support
 - Stability improvements to test pipeline
 - Improves test coverage of CLI
