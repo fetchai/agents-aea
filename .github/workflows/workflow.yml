@@ -70,7 +70,7 @@ jobs:
           pip install pipenv
           pip install tox
       - name: Integration tests
-        run: tox -e py3.7 -- -m integration
+        run: tox -e py3.7 -- -m integration -m 'not unstable'
 
   platform_checks:
     runs-on: ${{ matrix.os }}
@@ -105,7 +105,7 @@ jobs:
         brew install protobuf
     - name: Unit tests and coverage
       run: |
-        tox -e py${{ matrix.python-version }} -- -m 'not integration'
+        tox -e py${{ matrix.python-version }} -- -m 'not integration' -m 'not unstable'
     # optionally, for all tests, remove flags beyond above command: -- --no-integration-tests --ci
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
