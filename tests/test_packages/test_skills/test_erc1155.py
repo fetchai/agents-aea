@@ -19,7 +19,7 @@
 
 """This test module contains the integration test for the generic buyer and seller skills."""
 
-# import pytest
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -31,6 +31,7 @@ FUNDED_ETH_PRIVATE_KEY_2 = (
 )
 
 
+@pytest.mark.unstable
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 

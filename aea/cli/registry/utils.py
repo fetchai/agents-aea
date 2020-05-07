@@ -192,6 +192,9 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
         )
     )
     filepath = download_file(file_url, cwd)
+
+    # next code line is needed because the items are stored in tarball packages as folders
+    dest = os.path.split(dest)[0]  # TODO: replace this hotfix with a proper solution
     logger.debug(
         "Extracting {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
