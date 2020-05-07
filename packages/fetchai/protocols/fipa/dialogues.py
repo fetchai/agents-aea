@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the classes required for fipa dialogue management.
+This module contains the classes required for FIPA dialogue management.
 
 - DialogueLabel: The dialogue label class acts as an identifier for dialogues.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
@@ -26,7 +26,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from enum import Enum
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, Tuple, Union, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -34,36 +34,35 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
-VALID_REPLIES = {
-    FipaMessage.Performative.CFP: [
-        FipaMessage.Performative.PROPOSE,
-        FipaMessage.Performative.DECLINE,
+VALID_PREVIOUS_PERFORMATIVES = {
+    FipaMessage.Performative.CFP: [None],
+    FipaMessage.Performative.PROPOSE: [FipaMessage.Performative.CFP],
+    FipaMessage.Performative.ACCEPT: [FipaMessage.Performative.PROPOSE],
+    FipaMessage.Performative.ACCEPT_W_INFORM: [FipaMessage.Performative.PROPOSE],
+    FipaMessage.Performative.MATCH_ACCEPT: [
+        FipaMessage.Performative.ACCEPT,
+        FipaMessage.Performative.ACCEPT_W_INFORM,
     ],
-    FipaMessage.Performative.PROPOSE: [
+    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [
+        FipaMessage.Performative.ACCEPT,
+        FipaMessage.Performative.ACCEPT_W_INFORM,
+    ],
+    FipaMessage.Performative.INFORM: [
+        FipaMessage.Performative.MATCH_ACCEPT,
+        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+        FipaMessage.Performative.INFORM,
+    ],
+    FipaMessage.Performative.DECLINE: [
+        FipaMessage.Performative.CFP,
         FipaMessage.Performative.PROPOSE,
         FipaMessage.Performative.ACCEPT,
         FipaMessage.Performative.ACCEPT_W_INFORM,
-        FipaMessage.Performative.DECLINE,
     ],
-    FipaMessage.Performative.ACCEPT: [
-        FipaMessage.Performative.DECLINE,
-        FipaMessage.Performative.MATCH_ACCEPT,
-        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-    ],
-    FipaMessage.Performative.ACCEPT_W_INFORM: [
-        FipaMessage.Performative.DECLINE,
-        FipaMessage.Performative.MATCH_ACCEPT,
-        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-    ],
-    FipaMessage.Performative.DECLINE: [],
-    FipaMessage.Performative.MATCH_ACCEPT: [FipaMessage.Performative.INFORM],
-    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [FipaMessage.Performative.INFORM],
-    FipaMessage.Performative.INFORM: [FipaMessage.Performative.INFORM],
-}  # type: Dict[FipaMessage.Performative, List[FipaMessage.Performative]]
+}  # type: Dict[FipaMessage.Performative, List[Union[None, FipaMessage.Performative]]]
 
 
 class FipaDialogue(Dialogue):
-    """The fipa dialogue class maintains state of a dialogue and manages it."""
+    """The FIPA dialogue class maintains state of a dialogue and manages it."""
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0
@@ -88,7 +87,7 @@ class FipaDialogue(Dialogue):
         """
         Initialize a dialogue label.
 
-        :param dialogue_label: the identifier of the dialogue.
+        :param dialogue_label: the identifier of the dialogue
         :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
 
         :return: None
@@ -101,7 +100,7 @@ class FipaDialogue(Dialogue):
 
     @property
     def is_seller(self) -> bool:
-        """Check whether the agent acts as a seller in this dialogue."""
+        """Check whether the agent acts as the seller in this dialogue."""
         return self._is_seller
 
     @property
@@ -111,10 +110,9 @@ class FipaDialogue(Dialogue):
 
     def is_valid_next_message(self, fipa_msg: Message) -> bool:
         """
-        Check whether the message "fipa_msg" is consistent with respect to this according to the protocol.
+        Check whether this is a valid next message in the dialogue.
 
-        :param fipa_msg: the message to evaluate
-        :return: True if consistent, False otherwise.
+        :return: True if yes, False otherwise.
         """
         fipa_msg = cast(FipaMessage, fipa_msg)
         this_message_id = fipa_msg.message_id
@@ -134,7 +132,7 @@ class FipaDialogue(Dialogue):
             result = (
                 this_message_id == last_message_id + 1
                 and this_target == last_target + 1
-                and this_performative in VALID_REPLIES[last_performative]
+                and last_performative in VALID_PREVIOUS_PERFORMATIVES[this_performative]
             )
         return result
 
@@ -163,7 +161,7 @@ class FipaDialogue(Dialogue):
 
 
 class FipaDialogueStats(object):
-    """Class to handle statistics for fipa dialogues."""
+    """Class to handle statistics on the negotiation."""
 
     def __init__(self) -> None:
         """Initialize a StatsManager."""
@@ -208,7 +206,7 @@ class FipaDialogueStats(object):
 
 
 class FipaDialogues(Dialogues):
-    """This class keeps track of all fipa dialogues."""
+    """The FIPA dialogues class keeps track of all dialogues."""
 
     def __init__(self) -> None:
         """
@@ -241,18 +239,26 @@ class FipaDialogues(Dialogues):
         """
         Check whether a fipa message is permitted for a new dialogue.
 
+        That is, the message has to
+        - be a CFP, and
+        - have the correct msg id and message target
+        - have msg counterparty set.
+
         :param message: the fipa message
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
         fipa_msg = cast(FipaMessage, fipa_msg)
-        dialogue_reference = fipa_msg.dialogue_reference
-        new_dialogue_label = DialogueLabel(
-            (dialogue_reference[0], ""), fipa_msg.counterparty, ""
-        )
-        new_dialogue = FipaDialogue(new_dialogue_label, False)
+        this_message_id = fipa_msg.message_id
+        this_target = fipa_msg.target
+        this_performative = fipa_msg.performative
 
-        return new_dialogue.is_valid_next_message(fipa_msg)
+        result = (
+            this_message_id == FipaDialogue.STARTING_MESSAGE_ID
+            and this_target == FipaDialogue.STARTING_TARGET
+            and this_performative == FipaMessage.Performative.CFP
+        )
+        return result
 
     def is_belonging_to_registered_dialogue(
         self, fipa_msg: Message, agent_addr: Address
@@ -309,9 +315,9 @@ class FipaDialogues(Dialogues):
 
     def get_dialogue(self, fipa_msg: Message, agent_addr: Address) -> Dialogue:
         """
-        Given a message addressed to a specific dialogue, retrieve this dialogue if the message is a valid next move.
+        Retrieve dialogue.
 
-        :param fipa_msg: the message
+        :param fipa_msg: the fipa message
         :param agent_addr: the address of the agent
 
         :return: the dialogue
@@ -376,7 +382,6 @@ class FipaDialogues(Dialogues):
         :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
         :param dialogue_reference: the reference of the dialogue.
         :param is_seller: keeps track if the counterparty is a seller.
-
         :return: the created dialogue
         """
         assert (
