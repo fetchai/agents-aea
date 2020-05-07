@@ -17,10 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """Code execution timeout tests."""
+import os
 import time
 import unittest
 from typing import Callable
 from unittest.case import TestCase
+
+import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -34,6 +37,9 @@ from tests.common.utils import (
     make_handler_cls_from_funcion,
     timeit_context,
 )
+
+if os.name == "nt":
+    pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
 
 
 def sleep_a_bit(sleep_time: float = 0.1, num_of_sleeps: int = 1) -> None:
@@ -85,7 +91,7 @@ class BaseTimeExecutionCase(TestCase):
         behaviour_cls = make_behaviour_cls_from_funcion(handler_func)
 
         test_skill = Skill(
-            SkillConfig(name="test_skill"),
+            SkillConfig(name="test_skill", author="fetchai"),
             skill_context=skill_context,
             handlers={
                 "handler1": handler_cls(name="handler1", skill_context=skill_context)

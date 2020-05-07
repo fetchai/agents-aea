@@ -20,23 +20,12 @@
 """This module contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
 import os
-import shutil
-import signal
-import subprocess  # nosec
-import sys
-import tempfile
-import time
-from threading import Thread
 
-import pytest
-
-from aea.cli import cli
-from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import (
-    CLI_LOG_OPTION,
     CUR_PATH,
     ROOT_DIR,
 )
@@ -45,99 +34,49 @@ MD_FILE = "docs/cli-vs-programmatic-aeas.md"
 PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 
 
-# TODO this test does not work properly...
-class TestCliVsProgrammaticAEA:
+class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
-
-    @classmethod
-    def setup_class(cls):
-        """Setup the test class."""
-        cls.path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.path, filter="python")
-        path = os.path.join(CUR_PATH, PY_FILE)
-        cls.python_file = extract_python_code(path)
-        cls.runner = CliRunner()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
 
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
-        assert (
-            self.code_blocks[-1] == self.python_file
-        ), "Files must be exactly the same."
+        doc_path = os.path.join(ROOT_DIR, MD_FILE)
+        code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        test_code_path = os.path.join(CUR_PATH, PY_FILE)
+        python_file = extract_python_code(test_code_path)
+        assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
-    def test_cli_programmatic_communication(self, pytestconfig):
+    def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""
 
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
-
-        packages_src = os.path.join(self.cwd, "packages")
-        packages_dst = os.path.join(os.getcwd(), "packages")
-        shutil.copytree(packages_src, packages_dst)
-
-        result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "fetch", "--local", "fetchai/weather_station:0.2.0"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        path = os.path.join(os.getcwd(), "weather_station")
-        os.chdir(path)
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
-                "False",
-                "--type",
-                "bool",
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        process_one = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "aea.cli",
-                "--skip-consistency-check",
-                "run",
-                "--connections",
-                "fetchai/oef:0.2.0",
-            ],
-            env=os.environ.copy(),
+        weather_station = "weather_station"
+        self.fetch_agent("fetchai/weather_station:0.3.0", weather_station)
+        self.set_agent_context(weather_station)
+        self.set_config(
+            "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
+            False,
+            "bool",
         )
 
-        time.sleep(10.0)
-        process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=20)
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        assert process_one.returncode == 0
+        self.start_thread(target=run)
 
-        client_thread = Thread(target=run)
-        client_thread.start()
-        poll_one = process_one.poll()
-        if poll_one is None:
-            process_one.terminate()
-            process_one.wait(2)
+        check_strings = (
+            "updating weather station services on OEF service directory.",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "unregistering weather station services from OEF service directory.",
+        )
+        missing_strings = self.missing_from_output(
+            weather_station_process, check_strings
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
-        client_thread.join()
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

@@ -80,7 +80,6 @@ Options:
   -N, --num-executions INTEGER  Number of runs for each case  [default: 1]
   -P, --plot INTEGER            X axis parameter idx
   --help                        Show this message and exit.
-
 ```
 
 
@@ -170,7 +169,6 @@ cpu mean (%): 0.06666666666666667 ± 0.14907119849998599
 mem min (kb): 53.9078125 ± 0.11487297672320501
 mem max (kb): 53.9078125 ± 0.11487297672320501
 mem mean (kb): 53.9078125 ± 0.11487297672320501
-
 ```
 
 Chart is drawn for argument 1: sleep:

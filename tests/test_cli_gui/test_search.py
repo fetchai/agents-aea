@@ -16,10 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import unittest.mock
+
+
+from tests.common.utils import run_in_root_dir
 
 from .test_base import DummyPID, create_app
 
@@ -129,10 +131,10 @@ def test_list_skills():
     _test_search_items_with_query("skill", "test")
 
 
+@run_in_root_dir
 def test_real_search():
     """Call at least one function that actually calls call_aea_async."""
     app = create_app()
-
     # Test for actual agent
     response_list = app.get(
         "api/connection", data=None, content_type="application/json",
@@ -140,7 +142,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 11
+    assert len(data) == 11, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -152,7 +154,7 @@ def test_real_search():
         == "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/http_server:0.1.0"
+    assert data[i]["id"] == "fetchai/http_server:0.2.0"
     assert (
         data[i]["description"]
         == "The HTTP server connection that wraps http server implementing a RESTful API specification."
@@ -176,7 +178,7 @@ def test_real_search():
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_noise:0.1.0"
+    assert data[i]["id"] == "fetchai/p2p_noise:0.2.0"
     assert (
         data[i]["description"]
         == "The p2p noise connection implements an interface to standalone golang noise node that can exchange aea envelopes with other agents participating in the same p2p network."
@@ -188,7 +190,7 @@ def test_real_search():
         == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/stub:0.2.0"
+    assert data[i]["id"] == "fetchai/stub:0.3.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."

@@ -81,7 +81,7 @@ nav:
         - Create decision-maker transaction: 'decision-maker-transaction.md'
         - Deployment: 'deployment.md'
         - Known limitations: 'known-limits.md'
-      - Performance benchmark: 'performance_benchmark.md'
+      - Performance benchmark: 'performance-benchmark.md'
       - API:
         - AEA: 'api/aea.md'
         - AEA Builder: 'api/aea_builder.md'

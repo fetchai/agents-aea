@@ -176,7 +176,8 @@ class TestAddManyKeys:
             cls.agent_folder / ETHEREUM_PRIVATE_KEY_FILE,
         )
 
-    def test_add_many_keys(self):
+    # @skip_test_windows(is_class_test=True)
+    def test_add_many_keys(self, pytestconfig):
         """Test that the keys are added correctly."""
 
         result = self.runner.invoke(
@@ -201,7 +202,10 @@ class TestAddManyKeys:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
-        shutil.rmtree(cls.t)
+        try:
+            shutil.rmtree(cls.t)
+        except OSError:
+            pass
 
 
 def test_add_key_fails_bad_key():
@@ -209,9 +213,10 @@ def test_add_key_fails_bad_key():
     oldcwd = os.getcwd()
     runner = CliRunner()
     agent_name = "myagent"
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = tempfile.mkdtemp()
+    os.chdir(tmpdir)
+    try:
         with mock.patch.object(aea.crypto.helpers.logger, "error") as mock_logger_error:
-            os.chdir(tmpdir)
 
             result = runner.invoke(
                 cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
@@ -241,8 +246,8 @@ def test_add_key_fails_bad_key():
             expected_json = yaml.safe_load(f)
             config = AgentConfig.from_json(expected_json)
             assert len(config.private_key_paths.read_all()) == 0
-
-    os.chdir(oldcwd)
+    finally:
+        os.chdir(oldcwd)
 
 
 def test_add_key_fails_bad_ledger_id():
@@ -250,9 +255,9 @@ def test_add_key_fails_bad_ledger_id():
     oldcwd = os.getcwd()
     runner = CliRunner()
     agent_name = "myagent"
-    with tempfile.TemporaryDirectory() as tmpdir:
-        os.chdir(tmpdir)
-
+    tmpdir = tempfile.mkdtemp()
+    os.chdir(tmpdir)
+    try:
         result = runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -277,5 +282,5 @@ def test_add_key_fails_bad_ledger_id():
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
         assert len(config.private_key_paths.read_all()) == 0
-
-    os.chdir(oldcwd)
+    finally:
+        os.chdir(oldcwd)

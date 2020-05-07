@@ -9,7 +9,7 @@ An `AEA` can interact with multiple connections at the same time.
 
 The `connection.yaml` file in the AEA directory contains protocol details and connection url and port details. For example, the oef `connection.yaml` contains the connection class name, supported protocols, and any connection configuration details.
 
-``` json
+``` yaml
 name: oef
 author: fetchai
 version: 0.1.0

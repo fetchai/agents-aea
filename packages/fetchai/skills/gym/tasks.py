@@ -37,7 +37,7 @@ class GymTask(Task):
 
     def __init__(self, skill_context: SkillContext, nb_steps: int = DEFAULT_NB_STEPS):
         """Initialize the task."""
-        logger.info("GymTask.__init__: arguments: nb_steps={}".format(nb_steps))
+        logger.debug("GymTask.__init__: arguments: nb_steps={}".format(nb_steps))
         super().__init__()
         self._rl_agent = MyRLAgent(NB_GOODS)
         self._proxy_env = ProxyEnv(skill_context)

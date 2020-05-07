@@ -16,8 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for commands in aea.cli.core module."""
+from pathlib import Path
 from unittest import TestCase, mock
 
 from aea.cli import cli
@@ -32,7 +32,7 @@ from aea.cli.core import (
 from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.click_testing import CliRunner
 
-from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -188,7 +188,9 @@ class AddKeyCommandTestCase(TestCase):
 
     def test_run_positive(self, *mocks):
         """Test for CLI add_key positive result."""
-        filepath = "setup.py"  # some existing filepath to pass CLI argument check
+        filepath = str(
+            Path(ROOT_DIR, "setup.py")
+        )  # some existing filepath to pass CLI argument check
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI, filepath],

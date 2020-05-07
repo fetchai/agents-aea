@@ -104,7 +104,7 @@ Confirm password:
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.1
+v0.3.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -121,7 +121,7 @@ The echo skill is a simple demo that introduces you to the main business logic c
 If you want to follow a step by step guide we show you how to do it at the end of the file.
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.1.0
+aea fetch fetchai/my_first_aea:0.3.0
 cd my_first_aea
 ```
 
@@ -151,7 +151,7 @@ recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 
 ## Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.2.0` connection.
+Run the AEA with the default `fetchai/stub:0.3.0` connection.
 
 ``` bash
 aea run
@@ -160,7 +160,7 @@ aea run
 or 
 
 ``` bash
-aea run --connections fetchai/stub:0.2.0
+aea run --connections fetchai/stub:0.3.0
 ```
 
 You will see the echo skill running in the terminal window.
@@ -172,11 +172,12 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.1
+v0.3.2
 
 my_first_aea starting ...
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
@@ -225,23 +226,15 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 <details><summary>Step by step install</summary>
 
-The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` is a tool for AEA developers to write useful end-to-end tests of their AEAs.
+The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
 ``` python
 import signal
 import time
 
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-)
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.test_tools.generic import (
-    read_envelope_from_file,
-    write_envelope_to_file,
-)
 from aea.test_tools.test_cases import AEATestCase
 
 
@@ -251,11 +244,13 @@ class TestEchoSkill(AEATestCase):
     def test_echo(self):
         """Run the echo skill sequence."""
         process = self.run_agent()
-        time.sleep(2.0)
+        is_running = self.is_running(process)
+        assert is_running, "AEA not running within timeout!"
 
         # add sending and receiving envelope from input/output files
+        message_content = b"hello"
         message = DefaultMessage(
-            performative=DefaultMessage.Performative.BYTES, content=b"hello",
+            performative=DefaultMessage.Performative.BYTES, content=message_content,
         )
         sent_envelope = Envelope(
             to=self.agent_name,
@@ -263,20 +258,32 @@ class TestEchoSkill(AEATestCase):
             protocol_id=message.protocol_id,
             message=DefaultSerializer().encode(message),
         )
-
-        write_envelope_to_file(sent_envelope, DEFAULT_INPUT_FILE_NAME)
+        
+        self.send_envelope_to_agent(sent_envelope, self.agent_name)
 
         time.sleep(2.0)
-        received_envelope = read_envelope_from_file(DEFAULT_OUTPUT_FILE_NAME)
+        received_envelope = self.read_envelope_from_agent(self.agent_name)
 
         assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
         assert sent_envelope.message == received_envelope.message
 
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=20)
-        assert process.returncode == 0
+        check_strings = (
+            "Echo Handler: setup method called.",
+            "Echo Behaviour: setup method called.",
+            "Echo Behaviour: act method called.",
+            "content={}".format(message_content),
+        )
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+
+        assert (
+            self.is_successfully_terminated()
+        ), "Echo agent wasn't successfully terminated."
+
 ```
 
 Place the above code into a file `test.py` in your AEA project directory (the same level as the `aea-config.yaml` file).
@@ -297,9 +304,19 @@ Delete the AEA from the parent directory (`cd ..` to go to the parent directory)
 aea delete my_first_aea
 ```
 
+## Next steps
+
 For more detailed analysis of the core components of the framework, please check the following:
 
 - <a href="../core-components/">Core components</a>
+
+We recommend you learn more about the protocols agents use to communicate with each other. Understanding protocols is core to developing your own agent. Check out the following:
+
+- <a href="../protocol/">Protocols</a>
+
+We also recommend you have a look at skill development. Skills are the core business logic commponents of an AEA. Check out the following:
+
+- <a href="../skill/">Skills</a>
 
 For more demos, use cases or step by step guides, please check the following:
 

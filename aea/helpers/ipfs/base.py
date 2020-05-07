@@ -21,6 +21,7 @@
 
 import codecs
 import hashlib
+import re
 
 import base58
 
@@ -30,6 +31,16 @@ from aea.helpers.ipfs.pb import unixfs_pb2
 # https://github.com/multiformats/multicodec/blob/master/table.csv
 SHA256_ID = "12"  # 0x12
 LEN_SHA256 = "20"  # 0x20
+
+
+def _dos2unix(file_content: bytes) -> bytes:
+    """
+    Replace occurrences of Windows line terminator CR/LF with only LF.
+
+    :param file_content: teh content of the file.
+    :return the same content but with the line terminator
+    """
+    return re.sub(b"\r$", b"", file_content, flags=re.M)
 
 
 class IPFSHashOnly:
@@ -44,7 +55,7 @@ class IPFSHashOnly:
         :param file_path: the file path
         """
         with open(file_path, "rb") as file:
-            file_b = file.read()
+            file_b = _dos2unix(file.read())
         file_pb = self._pb_serialize_file(file_b)
         ipfs_hash = self._generate_multihash(file_pb)
         return ipfs_hash

@@ -57,6 +57,20 @@ T = TypeVar(
 )
 
 
+def make_jsonschema_base_uri(base_uri_path: Path) -> str:
+    """
+    Make the JSONSchema base URI, cross-platform.
+
+    :param base_uri_path: the path to the base directory.
+    :return: the string in URI form.
+    """
+    if os.name == "nt":
+        root_path = "file:///{}/".format("/".join(base_uri_path.absolute().parts))
+    else:
+        root_path = "file://{}/".format(base_uri_path.absolute())
+    return root_path
+
+
 class ConfigLoader(Generic[T]):
     """This class implement parsing, serialization and validation functionalities for the 'aea' configuration files."""
 
@@ -67,8 +81,9 @@ class ConfigLoader(Generic[T]):
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         :param configuration_class: the configuration class (e.g. AgentConfig, SkillConfig etc.)
         """
-        self._schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
-        root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
+        base_uri = Path(_SCHEMAS_DIR)
+        self._schema = json.load((base_uri / schema_filename).open())
+        root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
         self._validator = Draft4Validator(self._schema, resolver=self._resolver)
         self._configuration_class = configuration_class  # type: Type[T]
@@ -96,12 +111,19 @@ class ConfigLoader(Generic[T]):
         for document in yaml_data:
             yaml_documents.append(document)
         configuration_file_json = yaml_documents[0]
-        if len(yaml_documents) == 2:
-            protobuf_snippets_json = yaml_documents[1]
-        elif len(yaml_documents) == 1:
+        if len(yaml_documents) == 1:
             protobuf_snippets_json = {}
+            dialogue_configuration = {}  # type: Dict
+        elif len(yaml_documents) == 2:
+            protobuf_snippets_json = yaml_documents[1]
+            dialogue_configuration = {}
+        elif len(yaml_documents) == 3:
+            protobuf_snippets_json = yaml_documents[1]
+            dialogue_configuration = yaml_documents[2]
         else:
-            raise ValueError("Wrong number of documents in protocol specification.")
+            raise ValueError(
+                "Incorrect number of Yaml documents in the protocol specification."
+            )
         try:
             self.validator.validate(instance=configuration_file_json)
         except Exception:
@@ -110,6 +132,7 @@ class ConfigLoader(Generic[T]):
             configuration_file_json
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
+        protocol_specification.dialogue_config = dialogue_configuration
         return protocol_specification
 
     def load(self, file_pointer: TextIO) -> T:

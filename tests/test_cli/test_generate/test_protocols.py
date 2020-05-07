@@ -33,6 +33,7 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.loader import make_jsonschema_base_uri
 from aea.test_tools.click_testing import CliRunner
 
 from ...conftest import (
@@ -62,7 +63,8 @@ class TestGenerateProtocol:
 
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 

@@ -225,6 +225,8 @@ class AEABuilder:
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    DEFAULT_EXECUTION_TIMEOUT = 0
+    DEFAULT_MAX_REACTIONS = 20
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -243,10 +245,53 @@ class AEABuilder:
         self._default_connection = DEFAULT_CONNECTION
         self._context_namespace = {}  # type: Dict[str, Any]
 
+        self._timeout: Optional[float] = None
+        self._execution_timeout: Optional[float] = None
+        self._max_reactions: Optional[int] = None
+
         self._package_dependency_manager = _DependenciesManager()
+        self._component_instances = {
+            ComponentType.CONNECTION: {},
+            ComponentType.CONTRACT: {},
+            ComponentType.PROTOCOL: {},
+            ComponentType.SKILL: {},
+        }  # type: Dict[ComponentType, Dict[ComponentConfiguration, Component]]
 
         if with_default_packages:
             self._add_default_packages()
+
+    def set_timeout(self, timeout: Optional[float]) -> "AEABuilder":
+        """
+        Set agent loop idle timeout in seconds.
+
+        :param timeout: timeout in seconds
+
+        :return: None
+        """
+        self._timeout = timeout
+        return self
+
+    def set_execution_timeout(self, execution_timeout: Optional[float]) -> "AEABuilder":
+        """
+        Set agent execution timeout in seconds.
+
+        :param execution_timeout: execution_timeout in seconds
+
+        :return: None
+        """
+        self._execution_timeout = execution_timeout
+        return self
+
+    def set_max_reactions(self, max_reactions: Optional[int]) -> "AEABuilder":
+        """
+        Set agent max reaction in one react.
+
+        :param max_reactions: int
+
+        :return: None
+        """
+        self._max_reactions = max_reactions
+        return self
 
     def _add_default_packages(self) -> None:
         """Add default packages."""
@@ -393,9 +438,26 @@ class AEABuilder:
 
         return self
 
-    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> None:
+    def add_component_instance(self, component: Component) -> "AEABuilder":
+        """
+        Add already initialized component object to resources or connections.
+
+        Please, pay attention, all dependencies have to be already loaded.
+
+        :params component: Component instance already initialized.
+        """
+        self._check_can_add(component.configuration)
+        # update dependency graph
+        self._package_dependency_manager.add_component(component.configuration)
+        self._component_instances[component.component_type][
+            component.configuration
+        ] = component
+        return self
+
+    def set_context_namespace(self, context_namespace: Dict[str, Any]) -> "AEABuilder":
         """Set the context namespace."""
         self._context_namespace = context_namespace
+        return self
 
     def _add_component_to_resources(self, component: Component) -> None:
         """Add component to the resources."""
@@ -599,8 +661,9 @@ class AEABuilder:
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
+            execution_timeout=self._get_execution_timeout(),
             is_debug=False,
-            max_reactions=20,
+            max_reactions=self._get_max_reactions(),
             **self._context_namespace
         )
         self._load_and_add_skills(aea.context)
@@ -610,9 +673,7 @@ class AEABuilder:
     def _update_identity(
         self, identity: Identity, wallet: Wallet, connections: List[Connection]
     ) -> Identity:
-        """
-        TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection.
-        """
+        """TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection."""
         public_ids = []  # type: List[PublicId]
         for connection in connections:
             public_ids.append(connection.public_id)
@@ -637,13 +698,46 @@ class AEABuilder:
         else:
             logger.error(
                 "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.1.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.1.0` to run it as a single connection."
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
             )
             sys.exit(1)
 
     def _get_agent_loop_timeout(self) -> float:
-        return self.DEFAULT_AGENT_LOOP_TIMEOUT
+        """
+        Return agent loop idle timeout.
+
+        :return: timeout in seconds if set else default value.
+        """
+        return (
+            self._timeout
+            if self._timeout is not None
+            else self.DEFAULT_AGENT_LOOP_TIMEOUT
+        )
+
+    def _get_execution_timeout(self) -> float:
+        """
+        Return execution timeout.
+
+        :return: timeout in seconds if set else default value.
+        """
+        return (
+            self._execution_timeout
+            if self._execution_timeout is not None
+            else self.DEFAULT_EXECUTION_TIMEOUT
+        )
+
+    def _get_max_reactions(self) -> int:
+        """
+        Return agent max_reaction.
+
+        :return: max-reactions if set else default value.
+        """
+        return (
+            self._max_reactions
+            if self._max_reactions is not None
+            else self.DEFAULT_MAX_REACTIONS
+        )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
@@ -713,7 +807,7 @@ class AEABuilder:
             with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                logging.config.dictConfig(agent_configuration.logging_config)
+                logging.config.dictConfig(agent_configuration.logging_config)  # type: ignore
         except FileNotFoundError:
             raise Exception(
                 "Agent configuration file '{}' not found in the current directory.".format(
@@ -727,12 +821,79 @@ class AEABuilder:
                 )
             )
 
+    def _set_from_configuration(
+        self,
+        agent_configuration: AgentConfig,
+        aea_project_path: Path,
+        skip_consistency_check: bool = False,
+    ) -> None:
+        """
+        Set builder variables from AgentConfig.
+
+        :params agent_configuration: AgentConfig to get values from.
+        :params aea_project_path: PathLike root directory of the agent project.
+        :param skip_consistency_check: if True, the consistency check are skipped.
+
+        :return: None
+        """
+        # set name and other configurations
+        self.set_name(agent_configuration.name)
+        self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_default_connection(
+            PublicId.from_str(agent_configuration.default_connection)
+        )
+        self.set_timeout(agent_configuration.timeout)
+        self.set_execution_timeout(agent_configuration.execution_timeout)
+        self.set_max_reactions(agent_configuration.max_reactions)
+
+        # load private keys
+        for (
+            ledger_identifier,
+            private_key_path,
+        ) in agent_configuration.private_key_paths_dict.items():
+            self.add_private_key(ledger_identifier, private_key_path)
+
+        # load ledger API configurations
+        for (
+            ledger_identifier,
+            ledger_api_conf,
+        ) in agent_configuration.ledger_apis_dict.items():
+            self.add_ledger_api_config(ledger_identifier, ledger_api_conf)
+
+        component_ids = itertools.chain(
+            [
+                ComponentId(ComponentType.PROTOCOL, p_id)
+                for p_id in agent_configuration.protocols
+            ],
+            [
+                ComponentId(ComponentType.CONTRACT, p_id)
+                for p_id in agent_configuration.contracts
+            ],
+            [
+                ComponentId(ComponentType.CONNECTION, p_id)
+                for p_id in agent_configuration.connections
+            ],
+            [
+                ComponentId(ComponentType.SKILL, p_id)
+                for p_id in agent_configuration.skills
+            ],
+        )
+        for component_id in component_ids:
+            component_path = self._find_component_directory_from_component_id(
+                aea_project_path, component_id
+            )
+            self.add_component(
+                component_id.component_type,
+                component_path,
+                skip_consistency_check=skip_consistency_check,
+            )
+
     @classmethod
     def from_aea_project(
         cls, aea_project_path: PathLike, skip_consistency_check: bool = False
     ) -> "AEABuilder":
         """
-        Construct the builder from an AEA project
+        Construct the builder from an AEA project.
 
         - load agent configuration file
         - set name and default configurations
@@ -759,55 +920,9 @@ class AEABuilder:
         loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
         agent_configuration = loader.load(configuration_file.open())
 
-        # set name and other configurations
-        builder.set_name(agent_configuration.name)
-        builder.set_default_ledger(agent_configuration.default_ledger)
-        builder.set_default_connection(
-            PublicId.from_str(agent_configuration.default_connection)
+        builder._set_from_configuration(
+            agent_configuration, aea_project_path, skip_consistency_check
         )
-
-        # load private keys
-        for (
-            ledger_identifier,
-            private_key_path,
-        ) in agent_configuration.private_key_paths_dict.items():
-            builder.add_private_key(ledger_identifier, private_key_path)
-
-        # load ledger API configurations
-        for (
-            ledger_identifier,
-            ledger_api_conf,
-        ) in agent_configuration.ledger_apis_dict.items():
-            builder.add_ledger_api_config(ledger_identifier, ledger_api_conf)
-
-        component_ids = itertools.chain(
-            [
-                ComponentId(ComponentType.PROTOCOL, p_id)
-                for p_id in agent_configuration.protocols
-            ],
-            [
-                ComponentId(ComponentType.CONTRACT, p_id)
-                for p_id in agent_configuration.contracts
-            ],
-            [
-                ComponentId(ComponentType.CONNECTION, p_id)
-                for p_id in agent_configuration.connections
-            ],
-            [
-                ComponentId(ComponentType.SKILL, p_id)
-                for p_id in agent_configuration.skills
-            ],
-        )
-        for component_id in component_ids:
-            component_path = cls._find_component_directory_from_component_id(
-                aea_project_path, component_id
-            )
-            builder.add_component(
-                component_id.component_type,
-                component_path,
-                skip_consistency_check=skip_consistency_check,
-            )
-
         return builder
 
     def _load_connections(
@@ -821,30 +936,54 @@ class AEABuilder:
             ]
 
         return [
-            _load_connection(address, get_connection_configuration(connection_id))
+            self._load_connection(address, get_connection_configuration(connection_id))
             for connection_id in connections_ids
         ]
 
     def _load_and_add_protocols(self) -> None:
         for configuration in self._package_dependency_manager.protocols.values():
             configuration = cast(ProtocolConfig, configuration)
-            try:
-                protocol = Protocol.from_config(configuration)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if (
+                configuration
+                in self._component_instances[ComponentType.PROTOCOL].keys()
+            ):
+                protocol = self._component_instances[ComponentType.PROTOCOL][
+                    configuration
+                ]
+            else:
+                try:
+                    protocol = Protocol.from_config(configuration)
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
         for configuration in self._package_dependency_manager.contracts.values():
             configuration = cast(ContractConfig, configuration)
-            try:
-                contract = Contract.from_config(configuration)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if (
+                configuration
+                in self._component_instances[ComponentType.CONTRACT].keys()
+            ):
+                contract = self._component_instances[ComponentType.CONTRACT][
+                    configuration
+                ]
+            else:
+                try:
+                    contract = Contract.from_config(configuration)
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(contract)
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
@@ -852,17 +991,86 @@ class AEABuilder:
             logger_name = "aea.packages.{}.skills.{}".format(
                 configuration.author, configuration.name
             )
-            skill_context = SkillContext()
-            skill_context.set_agent_context(context)
-            skill_context.logger = logging.getLogger(logger_name)
             configuration = cast(SkillConfig, configuration)
-            try:
-                skill = Skill.from_config(configuration, skill_context=skill_context)
-            except ModuleNotFoundError as e:
-                _handle_error_while_loading_component_module_not_found(configuration, e)
-            except Exception as e:
-                _handle_error_while_loading_component_generic_error(configuration, e)
+            if configuration in self._component_instances[ComponentType.SKILL].keys():
+                skill = cast(
+                    Skill, self._component_instances[ComponentType.SKILL][configuration]
+                )
+                skill.skill_context.set_agent_context(context)
+                skill.skill_context.logger = logging.getLogger(logger_name)
+            else:
+                skill_context = SkillContext()
+                skill_context.set_agent_context(context)
+                skill_context.logger = logging.getLogger(logger_name)
+                try:
+                    skill = Skill.from_config(
+                        configuration, skill_context=skill_context
+                    )
+                except ModuleNotFoundError as e:
+                    _handle_error_while_loading_component_module_not_found(
+                        configuration, e
+                    )
+                except Exception as e:
+                    _handle_error_while_loading_component_generic_error(
+                        configuration, e
+                    )
             self._add_component_to_resources(skill)
+
+    def _load_connection(
+        self, address: Address, configuration: ConnectionConfig
+    ) -> Connection:
+        """
+        Load a connection from a directory.
+
+        :param address: the connection address.
+        :param configuration: the connection configuration.
+        :return: the connection.
+        """
+        if configuration in self._component_instances[ComponentType.CONNECTION].keys():
+            connection = cast(
+                Connection,
+                self._component_instances[ComponentType.CONNECTION][configuration],
+            )
+            if connection.address != address:
+                logger.warning(
+                    "The address set on connection '{}' does not match the default address!".format(
+                        str(connection.connection_id)
+                    )
+                )
+            return connection
+        try:
+            directory = cast(Path, configuration.directory)
+            package_modules = load_all_modules(
+                directory, glob="__init__.py", prefix=configuration.prefix_import_path
+            )
+            add_modules_to_sys_modules(package_modules)
+            connection_module_path = directory / "connection.py"
+            assert (
+                connection_module_path.exists() and connection_module_path.is_file()
+            ), "Connection module '{}' not found.".format(connection_module_path)
+            connection_module = load_module(
+                "connection_module", directory / "connection.py"
+            )
+            classes = inspect.getmembers(connection_module, inspect.isclass)
+            connection_class_name = cast(str, configuration.class_name)
+            connection_classes = list(
+                filter(lambda x: re.match(connection_class_name, x[0]), classes)
+            )
+            name_to_class = dict(connection_classes)
+            logger.debug("Processing connection {}".format(connection_class_name))
+            connection_class = name_to_class.get(connection_class_name, None)
+            assert (
+                connection_class is not None
+            ), "Connection class '{}' not found.".format(connection_class_name)
+            return connection_class.from_config(
+                address=address, configuration=configuration
+            )
+        except ModuleNotFoundError as e:
+            _handle_error_while_loading_component_module_not_found(configuration, e)
+        except Exception as e:
+            _handle_error_while_loading_component_generic_error(configuration, e)
+        # this is to make MyPy stop complaining of "Missing return statement".
+        assert False  # noqa: B011
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
@@ -920,49 +1128,6 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_loader.dump(agent_configuration, fp_write)
 
 
-def _load_connection(address: Address, configuration: ConnectionConfig) -> Connection:
-    """
-    Load a connection from a directory.
-
-    :param address: the connection address.
-    :param configuration: the connection configuration.
-    :return: the connection.
-    """
-    try:
-        directory = cast(Path, configuration.directory)
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
-        )
-        add_modules_to_sys_modules(package_modules)
-        connection_module_path = directory / "connection.py"
-        assert (
-            connection_module_path.exists() and connection_module_path.is_file()
-        ), "Connection module '{}' not found.".format(connection_module_path)
-        connection_module = load_module(
-            "connection_module", directory / "connection.py"
-        )
-        classes = inspect.getmembers(connection_module, inspect.isclass)
-        connection_class_name = cast(str, configuration.class_name)
-        connection_classes = list(
-            filter(lambda x: re.match(connection_class_name, x[0]), classes)
-        )
-        name_to_class = dict(connection_classes)
-        logger.debug("Processing connection {}".format(connection_class_name))
-        connection_class = name_to_class.get(connection_class_name, None)
-        assert connection_class is not None, "Connection class '{}' not found.".format(
-            connection_class_name
-        )
-        return connection_class.from_config(
-            address=address, configuration=configuration
-        )
-    except ModuleNotFoundError as e:
-        _handle_error_while_loading_component_module_not_found(configuration, e)
-    except Exception as e:
-        _handle_error_while_loading_component_generic_error(configuration, e)
-    # this is to make MyPy stop complaining of "Missing return statement".
-    assert False  # noqa: B011
-
-
 def _handle_error_while_loading_component_module_not_found(
     configuration: ComponentConfiguration, e: ModuleNotFoundError
 ):
@@ -981,7 +1146,6 @@ def _handle_error_while_loading_component_module_not_found(
     :raises ModuleNotFoundError: if it is not
     :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
-
     error_message = str(e)
     extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
     match = extract_import_path_regex.match(error_message)

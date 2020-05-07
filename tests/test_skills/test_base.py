@@ -223,16 +223,16 @@ class SkillComponentTestCase(TestCase):
         """Test init method no context provided."""
 
         with self.assertRaises(AssertionError):
-            self.TestComponent()
+            self.TestComponent(name="some_name", skill_context=None)
         with self.assertRaises(AssertionError):
-            self.TestComponent(skill_context="skill_context")
+            self.TestComponent(name=None, skill_context="skill_context")
 
     def test_skill_id_positive(self):
         """Test skill_id property positive."""
         ctx = mock.Mock()
         ctx.skill_id = "skill_id"
         component = self.TestComponent(
-            configuration=Mock(), skill_context=ctx, name="name"
+            name="name", skill_context=ctx, configuration=Mock()
         )
         component.skill_id
 

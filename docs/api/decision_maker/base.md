@@ -265,12 +265,22 @@ Get exchange parameter for each currency.
 
 Get utility parameter for each good.
 
-<a name=".aea.decision_maker.base.Preferences.transaction_fees"></a>
-#### transaction`_`fees
+<a name=".aea.decision_maker.base.Preferences.seller_transaction_fee"></a>
+#### seller`_`transaction`_`fee
 
 ```python
  | @property
- | transaction_fees() -> Dict[str, int]
+ | seller_transaction_fee() -> int
+```
+
+Get the transaction fee.
+
+<a name=".aea.decision_maker.base.Preferences.buyer_transaction_fee"></a>
+#### buyer`_`transaction`_`fee
+
+```python
+ | @property
+ | buyer_transaction_fee() -> int
 ```
 
 Get the transaction fee.

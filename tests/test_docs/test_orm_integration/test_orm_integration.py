@@ -18,10 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the orm-integration.md guide."""
-import logging
-import os
-import signal
-import time
 from pathlib import Path
 
 import mistune
@@ -30,15 +26,9 @@ import pytest
 
 import yaml
 
-from aea.crypto.fetchai import FETCHAI
-from aea.test_tools.decorators import skip_test_ci
-from aea.test_tools.generic import force_set_config
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 from ...conftest import ROOT_DIR
-
-logger = logging.getLogger(__name__)
-
 
 seller_strategy_replacement = """models:
   dialogues:
@@ -93,38 +83,43 @@ ORM_SELLER_STRATEGY_PATH = Path(
 )
 
 
-class TestOrmIntegrationDocs(AEAWithOefTestCase):
+class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @skip_test_ci
-    def test_orm_integration_docs_example(self, pytestconfig):
+    def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
-        self.initialize_aea()
-
         seller_aea_name = "my_seller_aea"
         buyer_aea_name = "my_buyer_aea"
         self.create_agents(seller_aea_name, buyer_aea_name)
 
-        ledger_apis = {FETCHAI: {"network": "testnet"}}
+        ledger_apis = {"fetchai": {"network": "testnet"}}
 
         # Setup seller
-        seller_aea_dir_path = Path(self.t, seller_aea_name)
-        os.chdir(seller_aea_dir_path)
+        self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_seller:0.2.0")
-        self.run_install()
-        force_set_config("agent.ledger_apis", ledger_apis)
+        self.add_item("skill", "fetchai/generic_seller:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+        seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
+        self.force_set_config(
+            "vendor.fetchai.skills.generic_seller.models",
+            seller_skill_config_replacement["models"],
+        )
+        self.run_install()
 
         # Setup Buyer
-        buyer_aea_dir_path = Path(self.t, buyer_aea_name)
-        os.chdir(buyer_aea_dir_path)
-
+        self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/generic_buyer:0.2.0")
-        self.run_install()
-        force_set_config("agent.ledger_apis", ledger_apis)
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+        buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
+        self.force_set_config(
+            "vendor.fetchai.skills.generic_buyer.models",
+            buyer_skill_config_replacement["models"],
+        )
+
+        self.run_install()
 
         # Generate and add private keys
         self.generate_private_key()
@@ -133,25 +128,9 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
         # Add some funds to the buyer
         self.generate_wealth()
 
-        # Update the seller AEA skill configs.
-        os.chdir(seller_aea_dir_path)
-        seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
-        force_set_config(
-            "vendor.fetchai.skills.generic_seller.models",
-            seller_skill_config_replacement["models"],
-        )
-
-        # Update the buyer AEA skill configs.
-        os.chdir(buyer_aea_dir_path)
-        buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
-        force_set_config(
-            "vendor.fetchai.skills.generic_buyer.models",
-            buyer_skill_config_replacement["models"],
-        )
-
         # Replace the seller strategy
         seller_stategy_path = Path(
-            seller_aea_dir_path,
+            seller_aea_name,
             "vendor",
             "fetchai",
             "skills",
@@ -159,31 +138,51 @@ class TestOrmIntegrationDocs(AEAWithOefTestCase):
             "strategy.py",
         )
         self.replace_file_content(seller_stategy_path, ORM_SELLER_STRATEGY_PATH)
-        os.chdir(seller_aea_dir_path / "vendor" / "fetchai")
-        self.run_cli_command("fingerprint", "skill", "fetchai/generic_seller:0.1.0")
+        self.run_cli_command(
+            "fingerprint",
+            "skill",
+            "fetchai/generic_seller:0.1.0",
+            cwd=str(Path(seller_aea_name, "vendor", "fetchai")),
+        )
 
         # Fire the sub-processes and the threads.
-        os.chdir(seller_aea_dir_path)
-        self.run_install()
-        process_one = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        self.set_agent_context(seller_aea_name)
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(buyer_aea_dir_path)
-        process_two = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        self.set_agent_context(buyer_aea_name)
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self.start_tty_read_thread(process_one)
-        self.start_error_read_thread(process_one)
-        self.start_tty_read_thread(process_two)
-        self.start_error_read_thread(process_two)
+        # TODO: finish test
+        check_strings = (
+            "updating generic seller services on OEF service directory.",
+            "unregistering generic seller services from OEF service directory.",
+            "received CFP from sender=",
+            "sending sender=",
+        )
+        missing_strings = self.missing_from_output(
+            seller_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in seller_aea output.".format(missing_strings)
 
-        time.sleep(30)
-        process_one.send_signal(signal.SIGINT)
-        process_two.send_signal(signal.SIGINT)
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "declining the proposal from sender=",
+        )
+        missing_strings = self.missing_from_output(
+            buyer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in buyer_aea output.".format(missing_strings)
 
-        process_one.wait(timeout=10)
-        process_two.wait(timeout=10)
-
-        assert process_one.returncode == 0
-        assert process_two.returncode == 0
+        self.terminate_agents(seller_aea_process, buyer_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
 
 
 def test_strategy_consistency():

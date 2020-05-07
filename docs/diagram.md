@@ -41,7 +41,7 @@ The agent operation breaks down into three parts:
 
 To prevent a developer from blocking the main loop with custom skill code, an execution time limit is  applied to every `Behaviour.act` and `Handler.handle` call.
 
-The default execution limit is `1` second. If the `act` or `handle` time exceed this limit, the call will be terminated.
+By default, the execution limit is set to `0` seconds, which disables the feature. You can set the limit to `0.1` seconds to test your AEA for production readiness. If the `act` or `handle` time exceed this limit, the call will be terminated.
 
 An appropriate message is added to the logs in the case of some code execution being terminated.
 

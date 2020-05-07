@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+import uuid
 from random import randrange
 from typing import Any, Dict, Tuple
 
@@ -100,13 +101,14 @@ class Strategy(Model):
         :param query: the query
         :return: a tuple of proposal and the temprature data
         """
-
-        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
-            identifier=self._ledger_id,
-            seller=self.context.agent_addresses[self._ledger_id],
-            client=counterparty,
-        )
-
+        if self.is_ledger_tx:
+            tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+                identifier=self._ledger_id,
+                seller=self.context.agent_addresses[self._ledger_id],
+                client=counterparty,
+            )
+        else:
+            tx_nonce = uuid.uuid4().hex
         temp_data = self._build_data_payload()
         total_price = self._price_per_row
         assert (

@@ -29,8 +29,8 @@ from eth_account.messages import encode_defunct
 
 from hexbytes import HexBytes
 
-from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import ETHEREUM
+from web3 import Web3
+
 from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
@@ -445,15 +445,16 @@ class Transaction:
                 self.counterparty_amount >= 0
             ), "Counterparty_amount must be positive when the counterpary is the payment receiver."
 
-    def has_matching_signatures(self, api: LedgerApi) -> bool:
+    def has_matching_signatures(self) -> bool:
         """
         Check that the signatures match the terms of trade.
 
         :return: True if the transaction has been signed by both parties
         """
+        w3 = Web3()
         singable_message = encode_defunct(primitive=self.sender_hash)
         result = (
-            api.api.eth.account.recover_message(
+            w3.eth.account.recover_message(
                 signable_message=singable_message,
                 signature=HexBytes(self.sender_signature),
             )
@@ -462,7 +463,7 @@ class Transaction:
         counterparty_signable_message = encode_defunct(primitive=self.counterparty_hash)
         result = (
             result
-            and api.api.eth.account.recover_message(
+            and w3.eth.account.recover_message(
                 signable_message=counterparty_signable_message,
                 signature=HexBytes(self.counterparty_signature),
             )
@@ -1021,7 +1022,7 @@ class Game(Model):
         """
         sender_state = self.current_agent_states[tx.sender_addr]
         counterparty_state = self.current_agent_states[tx.counterparty_addr]
-        result = tx.has_matching_signatures(self.context.ledger_apis.apis[ETHEREUM])
+        result = tx.has_matching_signatures()
         result = result and sender_state.is_consistent_transaction(tx)
         result = result and counterparty_state.is_consistent_transaction(tx)
         return result

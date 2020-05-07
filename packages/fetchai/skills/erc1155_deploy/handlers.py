@@ -246,10 +246,17 @@ class TransactionHandler(Handler):
                 tx_digest
             ):
                 time.sleep(3.0)
-            transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
+            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
                 tx_digest=tx_digest
             )
-            if transaction.status != 1:
+            if tx_receipt is None:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "[{}]: Failed to get tx receipt for deploy. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.logger.info(
                     "[{}]: Failed to deploy. Aborting...".format(
@@ -258,7 +265,7 @@ class TransactionHandler(Handler):
                 )
             else:
                 contract.set_address(
-                    self.context.ledger_apis.ethereum_api, transaction.contractAddress
+                    self.context.ledger_apis.ethereum_api, tx_receipt.contractAddress
                 )
                 self.context.logger.info(
                     "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
@@ -277,10 +284,17 @@ class TransactionHandler(Handler):
                 tx_digest
             ):
                 time.sleep(3.0)
-            transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
+            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
                 tx_digest=tx_digest
             )
-            if transaction.status != 1:
+            if tx_receipt is None:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "[{}]: Failed to get tx receipt for create items. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.logger.info(
                     "[{}]: Failed to create items. Aborting...".format(
@@ -305,10 +319,17 @@ class TransactionHandler(Handler):
                 tx_digest
             ):
                 time.sleep(3.0)
-            transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
+            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
                 tx_digest=tx_digest
             )
-            if transaction.status != 1:
+            if tx_receipt is None:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "[{}]: Failed to get tx receipt for mint items. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.logger.info(
                     "[{}]: Failed to mint items. Aborting...".format(
@@ -343,10 +364,17 @@ class TransactionHandler(Handler):
                 tx_digest
             ):
                 time.sleep(3.0)
-            transaction = self.context.ledger_apis.ethereum_api.get_transaction_status(  # type: ignore
+            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(  # type: ignore
                 tx_digest=tx_digest
             )
-            if transaction.status != 1:
+            if tx_receipt is None:
+                self.context.is_active = False
+                self.context.logger.info(
+                    "[{}]: Failed to get tx receipt for atomic swap. Aborting...".format(
+                        self.context.agent_name
+                    )
+                )
+            elif tx_receipt.status != 1:
                 self.context.is_active = False
                 self.context.logger.info(
                     "[{}]: Failed to conduct atomic swap. Aborting...".format(

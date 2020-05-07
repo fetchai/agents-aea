@@ -107,7 +107,10 @@ class TestContractRegistry:
         """Tear down the tests."""
         cls.mocked_logger.__exit__()
         os.chdir(cls.oldcwd)
-        shutil.rmtree(cls.t, ignore_errors=True)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestProtocolRegistry:
@@ -166,8 +169,11 @@ class TestProtocolRegistry:
     def teardown_class(cls):
         """Tear down the tests."""
         cls.mocked_logger.__exit__()
-        shutil.rmtree(cls.t, ignore_errors=True)
         os.chdir(cls.oldcwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestResources:
@@ -386,8 +392,11 @@ class TestResources:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
-        shutil.rmtree(cls.t, ignore_errors=True)
         os.chdir(cls.oldcwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestFilter:
@@ -446,5 +455,8 @@ class TestFilter:
     @classmethod
     def teardown_class(cls):
         """Tear the tests down."""
-        shutil.rmtree(cls.t, ignore_errors=True)
         os.chdir(cls.oldcwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

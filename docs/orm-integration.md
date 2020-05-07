@@ -44,7 +44,7 @@ Create the AEA that will provide data.
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/generic_seller:0.2.0
+aea add skill fetchai/generic_seller:0.3.0
 ```
 
 ### Create the buyer client (ledger version)
@@ -188,8 +188,6 @@ Then modify your strategy's \_\_init__ function to match the following code:
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
         self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
-        self._scheme = kwargs.pop("search_data")
-        self._datamodel = kwargs.pop("search_schema")
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)

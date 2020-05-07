@@ -59,7 +59,7 @@ NOISE_NODE_CLARGS = [
 
 NOISE = "noise"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_noise:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_noise:0.2.0")
 
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
@@ -331,8 +331,9 @@ class NoiseNode:
             os.remove(in_path)
         if os.path.exists(out_path):
             os.remove(out_path)
-        os.mkfifo(in_path)
-        os.mkfifo(out_path)
+        # Ignore type-hinting check for Windows
+        os.mkfifo(in_path)  # type: ignore
+        os.mkfifo(out_path)  # type: ignore
 
         # setup config
         if os.path.exists(NOISE_NODE_ENV_FILE):
@@ -594,7 +595,7 @@ class P2PNoiseConnection(Connection):
         res = shutil.which("go")
         if res is None:
             logger.error(
-                "Please install go before running the `fetchai/p2p_noise:0.1.0` connection. "
+                "Please install go before running the `fetchai/p2p_noise:0.2.0` connection. "
                 "Go is available for download here: https://golang.org/doc/install"
             )
             sys.exit(1)

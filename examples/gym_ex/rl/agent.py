@@ -170,7 +170,7 @@ class RLAgent:
 
         :return: a random good
         """
-        return random.choice(list(self.good_price_models.keys()))
+        return random.choice(list(self.good_price_models.keys()))  # nosec
 
     def fit(self, env: gym.Env, nb_steps: int) -> None:
         """

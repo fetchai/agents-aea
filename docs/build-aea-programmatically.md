@@ -1,8 +1,8 @@
 ## Preliminaries
 
-These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface. 
+These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
-  
+
 This guide assumes you have already followed the Preliminaries and Installation section in the [quick start](quickstart.md) guide and so have the framework installed and the packages and scripts directory downloaded into the directory you are working in.
 
 
@@ -20,8 +20,10 @@ Then, import the application specific libraries.
 
 ``` python
 from aea.aea_builder import AEABuilder
+from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
+from aea.skills.base import Skill
 ```
 
 Set up a variable pointing to where the packages directory is located - this should be our current directory - and where the input and output files are located.
@@ -49,7 +51,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the AEABuilder to readily build an AEA. By default, the AEABuilder adds the `fetchai/default:0.1.0` protocol, the `fetchai/stub:0.2.0` connection and the `fetchai/error:0.2.0` skill.
+We use the AEABuilder to readily build an AEA. By default, the AEABuilder adds the `fetchai/default:0.1.0` protocol, the `fetchai/stub:0.3.0` connection and the `fetchai/error:0.2.0` skill.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -69,6 +71,37 @@ Next, we add the echo skill which will bounce our messages back to us. We first 
 ``` python
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
+```
+
+Also, we can add a component that was instantiated programmatically. :
+``` python
+    # create skill and handler manually
+    from aea.protocols.base import Message
+    from aea.protocols.default.message import DefaultMessage
+    from aea.skills.base import Handler
+
+    class DummyHandler(Handler):
+        """Dummy handler to handle messages."""
+
+        SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
+
+        def setup(self) -> None:
+            """Noop setup."""
+
+        def teardown(self) -> None:
+            """Noop teardown."""
+
+        def handle(self, message: Message) -> None:
+            """Handle incoming message."""
+            self.context.logger.info("You got a message: {}".format(str(message)))
+
+    config = SkillConfig(name="test_skill", author="fetchai")
+    skill = Skill(configuration=config)
+    dummy_handler = DummyHandler(
+        name="dummy_handler", skill_context=skill.skill_context
+    )
+    skill.handlers.update({dummy_handler.name: dummy_handler})
+    builder.add_component_instance(skill)
 ```
 
 Finally, we can build our AEA:
@@ -137,8 +170,10 @@ import time
 from threading import Thread
 
 from aea.aea_builder import AEABuilder
+from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
+from aea.skills.base import Skill
 
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
@@ -167,6 +202,34 @@ def run():
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
+
+    # create skill and handler manually
+    from aea.protocols.base import Message
+    from aea.protocols.default.message import DefaultMessage
+    from aea.skills.base import Handler
+
+    class DummyHandler(Handler):
+        """Dummy handler to handle messages."""
+
+        SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
+
+        def setup(self) -> None:
+            """Noop setup."""
+
+        def teardown(self) -> None:
+            """Noop teardown."""
+
+        def handle(self, message: Message) -> None:
+            """Handle incoming message."""
+            self.context.logger.info("You got a message: {}".format(str(message)))
+
+    config = SkillConfig(name="test_skill", author="fetchai")
+    skill = Skill(configuration=config)
+    dummy_handler = DummyHandler(
+        name="dummy_handler", skill_context=skill.skill_context
+    )
+    skill.handlers.update({dummy_handler.name: dummy_handler})
+    builder.add_component_instance(skill)
 
     # Create our AEA
     my_aea = builder.build()

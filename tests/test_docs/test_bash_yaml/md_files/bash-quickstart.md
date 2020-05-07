@@ -36,12 +36,12 @@ Confirm password:
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.1
+v0.3.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.1.0
+aea fetch fetchai/my_first_aea:0.3.0
 cd my_first_aea
 ```
 ``` bash
@@ -54,7 +54,7 @@ recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.2.0
+aea run --connections fetchai/stub:0.3.0
 ```
 ``` bash
     _     _____     _    
@@ -63,11 +63,12 @@ aea run --connections fetchai/stub:0.2.0
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
                          
-v0.3.1
+v0.3.2
 
 my_first_aea starting ...
 info: Echo Handler: setup method called.
 info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.

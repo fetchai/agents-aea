@@ -73,8 +73,8 @@ def test_preferences_init():
     )
     assert preferences.utility_params_by_good_id is not None
     assert preferences.exchange_params_by_currency_id is not None
-    assert preferences.transaction_fees["seller_tx_fee"] == 4
-    assert preferences.transaction_fees["buyer_tx_fee"] == 5
+    assert preferences.seller_transaction_fee == 4
+    assert preferences.buyer_transaction_fee == 5
     assert preferences.is_initialized
 
 
@@ -184,8 +184,8 @@ def test_score_diff_from_transaction():
         tx_sender_addr="agent_1",
         tx_counterparty_addr="pk",
         tx_amount_by_currency_id={"FET": -20},
-        tx_sender_fee=preferences.transaction_fees["seller_tx_fee"],
-        tx_counterparty_fee=preferences.transaction_fees["buyer_tx_fee"],
+        tx_sender_fee=preferences.seller_transaction_fee,
+        tx_counterparty_fee=preferences.buyer_transaction_fee,
         tx_quantities_by_good_id={"good_id": 10},
         info={"some_info_key": "some_info_value"},
         ledger_id="fetchai",
