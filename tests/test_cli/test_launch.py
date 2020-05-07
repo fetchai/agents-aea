@@ -31,6 +31,8 @@ from typing import Generator, List, Optional
 
 from pexpect.exceptions import EOF  # type: ignore
 
+import pytest
+
 import yaml
 
 from aea.cli import cli
@@ -135,6 +137,7 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
+@pytest.mark.unstable
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     """Test aea launch when there is a failing agent.."""
 
