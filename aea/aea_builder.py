@@ -698,8 +698,8 @@ class AEABuilder:
         else:
             logger.error(
                 "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.1.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.1.0` to run it as a single connection."
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
             )
             sys.exit(1)
 

@@ -47,7 +47,7 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_data_provider:0.2.0
+aea fetch fetchai/ml_data_provider:0.3.0
 cd ml_data_provider
 ```
 The `aea fetch` command creates the entire AEA, including its dependencies for you.
@@ -81,7 +81,7 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.2.0
+aea fetch fetchai/ml_model_trainer:0.3.0
 cd ml_model_trainer
 ```
 

@@ -56,7 +56,7 @@ class TestBuildSkill(AEATestCaseMany, UseOef):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.2.0", simple_service_registration_aea
+            "fetchai/simple_service_registration:0.3.0", simple_service_registration_aea
         )
 
         search_aea = "search_aea"

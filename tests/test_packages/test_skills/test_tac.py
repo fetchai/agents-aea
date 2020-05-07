@@ -21,6 +21,8 @@
 
 import datetime
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 FUNDED_ETH_PRIVATE_KEY_1 = (
@@ -130,6 +132,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 

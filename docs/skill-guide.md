@@ -238,7 +238,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.2.0 && cd simple_service_registration
+aea fetch fetchai/simple_service_registration:0.3.0 && cd simple_service_registration
 aea run --connections fetchai/oef:0.2.0
 ```
 

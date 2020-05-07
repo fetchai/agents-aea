@@ -17,8 +17,8 @@ aea_version: '>=0.3.0, <0.4.0'
 agent_name: my_aea
 author: ''
 connections:
-- fetchai/stub:0.2.0
-default_connection: fetchai/stub:0.2.0
+- fetchai/stub:0.3.0
+default_connection: fetchai/stub:0.3.0
 default_ledger: fetchai
 description: ''
 fingerprint: ''
