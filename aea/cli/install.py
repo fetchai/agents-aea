@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea install' subcommand."""
-
+import os
 import pprint
 import subprocess  # nosec
 import sys
-from typing import List, Optional, cast
+from tempfile import NamedTemporaryFile
+from typing import Dict, List, Optional, cast
 
 import click
 
@@ -31,20 +31,34 @@ from aea.configurations.base import Dependency
 from aea.exceptions import AEAException
 
 
+def _package_spec(dependency_name: str, dependency: Dependency) -> str:
+    """Get string spec of package.
+
+    :param dependency_name: name of the package
+    :param dependency: dependency
+
+    :return: package spec string
+    """
+    package: List[str] = []
+    index = dependency.get("index", None)
+    git_url = dependency.get("git", None)
+    revision = dependency.get("ref", "")
+    version_constraint = dependency.get("version", "")
+    if git_url is not None:
+        package += ["-i", index] if index is not None else []
+        package += ["git+" + git_url + "@" + revision + "#egg=" + dependency_name]
+    else:
+        package += ["-i", index] if index is not None else []
+        package += [dependency_name + version_constraint]
+
+    return " ".join(package)
+
+
 def _install_dependency(dependency_name: str, dependency: Dependency):
     click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
-        index = dependency.get("index", None)
-        git_url = dependency.get("git", None)
-        revision = dependency.get("ref", "")
-        version_constraint = dependency.get("version", "")
-        command = [sys.executable, "-m", "pip", "install"]
-        if git_url is not None:
-            command += ["-i", index] if index is not None else []
-            command += ["git+" + git_url + "@" + revision + "#egg=" + dependency_name]
-        else:
-            command += ["-i", index] if index is not None else []
-            command += [dependency_name + version_constraint]
+        package = _package_spec(dependency_name, dependency)
+        command = [sys.executable, "-m", "pip", "install", *package.split(" ")]
         logger.debug("Calling '{}'".format(" ".join(command)))
         return_code = _try_install(command)
         if return_code == 1:
@@ -66,6 +80,7 @@ def _try_install(install_command: List[str]) -> int:
     :param return_code: the return code of the subprocess
     """
     try:
+        print(install_command)
         subp = subprocess.Popen(install_command)  # nosec
         subp.wait(120.0)
         return_code = subp.returncode
@@ -97,6 +112,38 @@ def _install_from_requirement(file: str):
             subp.wait(2)
 
 
+def _install_dependencies(dependencies: Dict[str, Dependency]) -> None:
+    """
+    Install multiple dependencies at once.
+
+    :param: dependencies list of tuples name, dependency
+
+    :return: None
+    """
+    if not dependencies:
+        return
+
+    try:
+        f = NamedTemporaryFile(delete=False)
+        for name, d in dependencies.items():
+            f.write(_package_spec(name, d).encode("utf-8"))
+            f.write(b"\n")
+            f.flush()
+        f.close()
+        subp = subprocess.Popen(  # nosec
+            [sys.executable, "-m", "pip", "install", "-r", f.name],
+            env={"GIT_TERMINAL_PROMPT": "0"},
+        )  # nosec
+        subp.wait()
+        assert subp.returncode == 0, "Return code != 0."
+    except Exception:
+        raise AEAException(
+            "An error occurred while installing dependencies. Stopping..."
+        )
+    finally:
+        os.unlink(f.name)
+
+
 @click.command()
 @click.option(
     "-r",
@@ -119,7 +166,7 @@ def install(click_context, requirement: Optional[str]):
         else:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
-            for name, d in dependencies.items():
-                _install_dependency(name, d)
+            _install_dependencies(dependencies)
+
     except AEAException as e:
         raise click.ClickException(str(e))
