@@ -1,7 +1,8 @@
 agent_name: gym_aea
 author: fetchai
 version: 0.1.0
-description: The gym aea demos the interaction between a skill containing a RL agent and a gym connection.
+description: The gym aea demos the interaction between a skill containing a RL agent
+  and a gym connection.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}
