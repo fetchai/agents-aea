@@ -578,13 +578,16 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
+    def build(self, ledger_api: Optional[LedgerApis] = None,
+              connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
         """
         Build the AEA.
 
+        :param ledger_api: the api ledger that we want to use.
         :param connection_ids: select only these connections to run the AEA.
         :return: the AEA object.
         """
+        _ledger_api = ledger_api if ledger_api is not None else LedgerApis(self.ledger_apis_config, self._default_ledger)
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
         self._load_and_add_protocols()
@@ -595,7 +598,7 @@ class AEABuilder:
             identity,
             connections,
             wallet,
-            LedgerApis(self.ledger_apis_config, self._default_ledger),
+            _ledger_api,
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
