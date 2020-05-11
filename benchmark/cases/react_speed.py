@@ -18,17 +18,10 @@
 #
 # ------------------------------------------------------------------------------
 """Example performance test using benchmark framework. test react speed on amount of incoming messages."""
-
 from benchmark.cases.helpers.dummy_handler import DummyHandler
 from benchmark.framework.aea_test_wrapper import AEATestWrapper
 from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
-
-
-DUMMMY_AGENT_CONF = {
-    "name": "dummy_a",
-    "skills": [{"handlers": {"dummy_handler": DummyHandler}}],
-}
 
 
 def react_speed(benchmark: BenchmarkControl, amount: int = 1000) -> None:
@@ -39,7 +32,12 @@ def react_speed(benchmark: BenchmarkControl, amount: int = 1000) -> None:
 
     :return: None
     """
-    aea_test_wrapper = AEATestWrapper(**DUMMMY_AGENT_CONF)  # type: ignore
+    aea_test_wrapper = AEATestWrapper(
+        name="dummy_aea",
+        components=[
+            AEATestWrapper.make_skill(handlers={"dummy_handler": DummyHandler})
+        ],
+    )  # type: ignore
     aea_test_wrapper.setup()
 
     for _ in range(amount):

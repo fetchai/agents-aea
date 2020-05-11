@@ -35,8 +35,12 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
 
     :return: None
     """
-    skill_definition = {"handlers": {"dummy_handler": DummyHandler}}
-    aea_test_wrapper = AEATestWrapper(name="dummy agent", skills=[skill_definition],)
+    aea_test_wrapper = AEATestWrapper(
+        name="dummy agent",
+        components=[
+            AEATestWrapper.make_skill(handlers={"dummy_handler": DummyHandler})
+        ],
+    )
 
     for _ in range(inbox_amount):
         aea_test_wrapper.put_inbox(aea_test_wrapper.dummy_envelope())

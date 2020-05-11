@@ -225,7 +225,7 @@ class Agent(ABC):
 
         :return: None
         """
-        logger.debug("[{}]: Start processing messages...".format(self.name))
+        logger.info("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self._tick += 1
             self._spin_main_loop()
@@ -288,7 +288,7 @@ class Agent(ABC):
     @abstractmethod
     def update(self) -> None:
         """
-        Update the internal state of the agent.
+        Update the internals of the agent which are not exposed to the skills.
 
         :return None
         """

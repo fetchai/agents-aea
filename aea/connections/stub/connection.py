@@ -16,11 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the stub connection."""
 
 import asyncio
-import fcntl
 import logging
 import os
 import re
@@ -29,11 +27,20 @@ from pathlib import Path
 from typing import AnyStr, IO, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
-from watchdog.observers import Observer
+from watchdog.utils import platform
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.helpers import file_lock
 from aea.mail.base import Address, Envelope
+
+
+if platform.is_darwin():
+    """Cause fsevent fails on multithreading on macos."""
+    from watchdog.observers.kqueue import KqueueObserver as Observer
+else:
+    from watchdog.observers import Observer
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +49,8 @@ OUTPUT_FILE_KEY = "output_file"
 DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
+
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.3.0")
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
@@ -89,8 +98,12 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
 @contextmanager
 def lock_file(file_descriptor: IO[AnyStr]):
+    """Lock file in context manager.
+
+    :param file_descriptor: file descriptio of file to lock.
+    """
     try:
-        fcntl.flock(file_descriptor, fcntl.LOCK_EX)
+        file_lock.lock(file_descriptor, file_lock.LOCK_EX)
     except OSError as e:
         logger.error(
             "Couldn't acquire lock for file {}: {}".format(file_descriptor.name, e)
@@ -99,7 +112,7 @@ def lock_file(file_descriptor: IO[AnyStr]):
     try:
         yield
     finally:
-        fcntl.flock(file_descriptor, fcntl.LOCK_UN)
+        file_lock.unlock(file_descriptor)
 
 
 class StubConnection(Connection):
@@ -143,7 +156,7 @@ class StubConnection(Connection):
         :param output_file_path: the output file for the outgoing messages.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId.from_str("fetchai/stub:0.2.0")
+            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -251,7 +264,6 @@ class StubConnection(Connection):
 
         :return: None
         """
-
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
         with lock_file(self.output_file):

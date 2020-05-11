@@ -1,5 +1,24 @@
 # Release History
 
+## 0.3.2 (2020-05-07)
+
+- Adds dialogue generation functionality to protocol generator
+- Fixes add CLI commands to be atomic
+- Adds Windows platform support
+- Stability improvements to test pipeline
+- Improves test coverage of CLI
+- Implements missing doc tests
+- Implements end-to-end tests for all skills
+- Adds missing agent projects to registry
+- Improves AEABuilder class for programmatic usage
+- Exposes missing AEA configs on agent config file
+- Extends Aries demo
+- Adds method to check sdtout for test cases
+- Adds code of conduct and security guidelines to repo
+- Multiple docs updates
+- Multiple additional unit tests
+- Multiple additional minor fixes and changes
+
 ## 0.3.1 (2020-04-27)
 
 - Adds p2p_stub connection

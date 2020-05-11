@@ -28,6 +28,57 @@ Initialize the builder.
 
 - `with_default_packages`: add the default packages.
 
+<a name=".aea.aea_builder.AEABuilder.set_timeout"></a>
+#### set`_`timeout
+
+```python
+ | set_timeout(timeout: Optional[float]) -> "AEABuilder"
+```
+
+Set agent loop idle timeout in seconds.
+
+**Arguments**:
+
+- `timeout`: timeout in seconds
+
+**Returns**:
+
+None
+
+<a name=".aea.aea_builder.AEABuilder.set_execution_timeout"></a>
+#### set`_`execution`_`timeout
+
+```python
+ | set_execution_timeout(execution_timeout: Optional[float]) -> "AEABuilder"
+```
+
+Set agent execution timeout in seconds.
+
+**Arguments**:
+
+- `execution_timeout`: execution_timeout in seconds
+
+**Returns**:
+
+None
+
+<a name=".aea.aea_builder.AEABuilder.set_max_reactions"></a>
+#### set`_`max`_`reactions
+
+```python
+ | set_max_reactions(max_reactions: Optional[int]) -> "AEABuilder"
+```
+
+Set agent max reaction in one react.
+
+**Arguments**:
+
+- `max_reactions`: int
+
+**Returns**:
+
+None
+
 <a name=".aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
@@ -193,11 +244,24 @@ Add a component, given its type and the directory.
 
 the AEABuilder
 
+<a name=".aea.aea_builder.AEABuilder.add_component_instance"></a>
+#### add`_`component`_`instance
+
+```python
+ | add_component_instance(component: Component) -> "AEABuilder"
+```
+
+Add already initialized component object to resources or connections.
+
+Please, pay attention, all dependencies have to be already loaded.
+
+:params component: Component instance already initialized.
+
 <a name=".aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
 
 ```python
- | set_context_namespace(context_namespace: Dict[str, Any]) -> None
+ | set_context_namespace(context_namespace: Dict[str, Any]) -> "AEABuilder"
 ```
 
 Set the context namespace.
@@ -380,7 +444,7 @@ the AEA object.
  | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
 ```
 
-Construct the builder from an AEA project
+Construct the builder from an AEA project.
 
 - load agent configuration file
 - set name and default configurations

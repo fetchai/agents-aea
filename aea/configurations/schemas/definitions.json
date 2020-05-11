@@ -101,6 +101,18 @@
     },
     "ignore_pattern": {
       "type": "string"
+    },
+    "max_reactions": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "timeout": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "execution_timeout": {
+      "type": ["number", "null"],
+      "minimum": 0
     }
   }
 }

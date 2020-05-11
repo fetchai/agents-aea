@@ -34,9 +34,13 @@ class TestHelpersBase:
         """Test the locate function to locate modules."""
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
-        assert locate("packages.fetchai.connections.gym") is not None
-        assert locate("packages.fetchai.connections.non_existing_connection") is None
+        gym_package = locate("packages.fetchai.connections.gym")
+        non_existing_package = locate(
+            "packages.fetchai.connections.non_existing_connection"
+        )
         os.chdir(cwd)
+        assert gym_package is not None
+        assert non_existing_package is None
 
     def test_locate_class(self):
         """Test the locate function to locate classes."""
@@ -46,12 +50,12 @@ class TestHelpersBase:
         actual_class = locate(
             "packages.fetchai.connections.oef.connection.OEFConnection"
         )
+        os.chdir(cwd)
         # although they are the same class, they are different instances in memory
         # and the build-in default "__eq__" method does not compare the attributes.
         # so compare the names
         assert actual_class is not None
         assert expected_class.__name__ == actual_class.__name__
-        os.chdir(cwd)
 
     def test_locate_with_builtins(self):
         """Test that locate function returns the built-in."""

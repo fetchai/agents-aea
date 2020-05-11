@@ -30,6 +30,8 @@ import pytest
 
 import yaml
 
+from aea.configurations.loader import make_jsonschema_base_uri
+
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
@@ -120,7 +122,7 @@ def test_validate_agent_config():
     )
     agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
     resolver = jsonschema.RefResolver(
-        "file://{}/".format(CONFIGURATION_SCHEMA_DIR), agent_config_schema
+        make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR)), agent_config_schema
     )
     validate(instance=agent_config_file, schema=agent_config_schema, resolver=resolver)
 
@@ -133,7 +135,8 @@ class TestAgentSchema:
         """Set up the test class."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
@@ -152,7 +155,8 @@ class TestProtocolsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
@@ -171,7 +175,8 @@ class TestConnectionsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
@@ -190,7 +195,8 @@ class TestSkillsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 

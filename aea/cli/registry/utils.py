@@ -163,7 +163,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> Path:
+def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
     """
     Fetch connection/protocol/skill from Registry.
 
@@ -192,20 +192,21 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> Path:
         )
     )
     filepath = download_file(file_url, cwd)
-    target_folder = os.path.join(cwd, "vendor", author, item_type_plural)
 
+    # next code line is needed because the items are stored in tarball packages as folders
+    dest = os.path.split(dest)[0]  # TODO: replace this hotfix with a proper solution
     logger.debug(
         "Extracting {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
-    extract(filepath, target_folder)
+    extract(filepath, dest)
     click.echo(
         "Successfully fetched {obj_type}: {public_id}.".format(
             public_id=public_id, obj_type=obj_type
         )
     )
-    package_path = os.path.join(target_folder, public_id.name)
+    package_path = os.path.join(dest, public_id.name)
     return Path(package_path)
 
 

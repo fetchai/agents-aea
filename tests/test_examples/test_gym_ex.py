@@ -20,42 +20,30 @@
 """The tests module contains the tests of the gym example."""
 
 import os
-import signal
-import subprocess  # nosec
 import sys
-import time
 from pathlib import Path
 
-import pytest
+from tests.common.pexpect_popen import PexpectSpawn
+from tests.common.utils import run_in_root_dir
+from tests.conftest import skip_test_windows
 
-from ..conftest import CUR_PATH
 
-
-def test_gym_ex(pytestconfig):
+@skip_test_windows()
+@run_in_root_dir
+def test_gym_ex():
     """Run the gym ex sequence."""
-    if pytestconfig.getoption("ci"):
-        pytest.skip("Skipping the test since it doesn't work in CI.")
-
-    # run the example
     try:
-        process = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),
-                "--nb-steps",
-                "50",
-            ],
-            stdout=subprocess.PIPE,
+        process = PexpectSpawn(  # nosec
+            sys.executable,
+            [str(Path("examples/gym_ex/train.py").resolve()), "--nb-steps", "50"],
             env=os.environ.copy(),
+            encoding="utf-8",
+            logfile=sys.stdout,
         )
 
-        time.sleep(5.0)
+        process.expect(["Step 50/50"], timeout=10)
+        process.wait_to_complete(5)
+        assert process.returncode == 0, "Test failed"
     finally:
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=10)
-
-        if not process.returncode == 0:
-            poll = process.poll()
-            if poll is None:
-                process.terminate()
-                process.wait(2)
+        process.terminate()
+        process.wait()

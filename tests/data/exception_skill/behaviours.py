@@ -33,7 +33,7 @@ class ExceptionBehaviour(Behaviour):
 
     def act(self) -> None:
         """Act."""
-        raise Exception()
+        raise Exception("Expected exception!")
 
     def teardown(self) -> None:
         """Teardown the task."""

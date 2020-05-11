@@ -88,11 +88,11 @@ class HelloWorldBehaviour(OneShotBehaviour):
     def setup(self):
         """This method is called once, when the behaviour gets loaded."""
 
-    def act(self): 
+    def act(self):
         """This methods is called in every iteration of the agent main loop."""
         print("Hello, World!")
 
-    def teardown(self): 
+    def teardown(self):
         """This method is called once, when the behaviour is teared down."""
     
 
@@ -102,15 +102,15 @@ If we want to register this behaviour dynamically, in any part of the skill code
 (i.e. wherever the skill context is available), we can write:
 
 ``` python
-self.context.new_behaviours.put(HelloWorldBehaviour())
+self.context.new_behaviours.put(HelloWorldBehaviour(name="hello_world", skill_context=self.context))
 ```
 
-Or, equivalently:
+Or, equivalently to the previous two code blocks:
 ``` python
 def hello():
     print("Hello, World!")
 
-self.context.new_behaviours.put(OneShotBehaviour(act=hello))
+self.context.new_behaviours.put(OneShotBehaviour(act=hello, name="hello_world", skill_context=self.context))
 ```
 
 The callable passed to the `act` parameter is equivalent to the implementation

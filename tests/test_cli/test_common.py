@@ -20,6 +20,7 @@
 """This test module contains the tests for cli.common module."""
 
 from builtins import FileNotFoundError
+from typing import cast
 from unittest import TestCase, mock
 
 from click import ClickException
@@ -28,6 +29,7 @@ from yaml import YAMLError
 
 from aea.cli.common import (
     # AEAConfigException,
+    Context,
     PublicIdParameter,
     _format_items,
     _get_or_create_cli_config,
@@ -35,7 +37,10 @@ from aea.cli.common import (
     _try_get_item_source_path,
     _try_get_item_target_path,
     _update_cli_config,
+    clean_after,
 )
+
+from tests.test_cli.tools_for_testing import ContextMock
 
 AUTHOR = "author"
 
@@ -175,3 +180,22 @@ class GetOrCreateCLIConfigTestCase(TestCase):
     #     """Test for read_cli_config method bad yaml behavior."""
     #     with self.assertRaises(AEAConfigException):
     #         _get_or_create_cli_config()
+
+
+class CleanAfterTestCase(TestCase):
+    """Test case for clean_after decorator method."""
+
+    @mock.patch("aea.cli.common.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.common.shutil.rmtree")
+    def test_clean_after_positive(self, rmtree_mock, *mocks):
+        """Test clean_after decorator method for positive result."""
+
+        @clean_after
+        def func(click_context):
+            ctx = cast(Context, click_context.obj)
+            ctx.clean_paths.append("clean/path")
+            raise ClickException("Message")
+
+        with self.assertRaises(ClickException):
+            func(ContextMock())
+            rmtree_mock.assert_called_once_with("clean/path")

@@ -352,10 +352,16 @@ class Preferences:
         return self._utility_params_by_good_id
 
     @property
-    def transaction_fees(self) -> Dict[str, int]:
+    def seller_transaction_fee(self) -> int:
         """Get the transaction fee."""
         assert self._transaction_fees is not None, "Transaction fee not set!"
-        return self._transaction_fees
+        return self._transaction_fees["seller_tx_fee"]
+
+    @property
+    def buyer_transaction_fee(self) -> int:
+        """Get the transaction fee."""
+        assert self._transaction_fees is not None, "Transaction fee not set!"
+        return self._transaction_fees["buyer_tx_fee"]
 
     def logarithmic_utility(self, quantities_by_good_id: GoodHoldings) -> float:
         """

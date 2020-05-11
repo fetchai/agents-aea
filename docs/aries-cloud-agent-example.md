@@ -25,7 +25,7 @@ Install Aries cloud-agents (run `pip install aries-cloudagent` or see <a href="h
 Run the following test file using PyTest:
 
 ``` bash
-PyTest tests/test_examples/test_http_client_connection_to_aries_cloud_agent.py
+pytest tests/test_examples/test_http_client_connection_to_aries_cloud_agent.py
 ```
 
 You should see that the two tests pass.

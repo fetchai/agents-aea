@@ -26,7 +26,7 @@ import shutil
 from collections import OrderedDict
 from functools import update_wrapper
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional, cast
 
 import click
 
@@ -90,6 +90,7 @@ class Context:
         self.config = dict()  # type: Dict
         self.cwd = cwd
         self.verbosity = verbosity
+        self.clean_paths: List = []
 
     @property
     def agent_loader(self) -> ConfigLoader:
@@ -174,17 +175,23 @@ class Context:
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def try_to_load_agent_config(ctx: Context, is_exit_on_except: bool = True) -> None:
+def try_to_load_agent_config(
+    ctx: Context, is_exit_on_except: bool = True, agent_src_path: str = None
+) -> None:
     """
     Load agent config to a click context object.
 
     :param ctx: click command context object.
     :param is_exit_on_except: bool option to exit on exception (default = True).
+    :param agent_src_path: path to an agent dir if needed to load a custom config.
 
     :return None
     """
+    if agent_src_path is None:
+        agent_src_path = ctx.cwd
+
     try:
-        path = Path(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE))
+        path = Path(os.path.join(agent_src_path, DEFAULT_AEA_CONFIG_FILE))
         with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             logging.config.dictConfig(ctx.agent_config.logging_config)
@@ -470,8 +477,29 @@ def _try_get_item_target_path(
     return target_path
 
 
+def get_package_dest_path(
+    ctx: Context, author_name: str, item_type_plural: str, item_name: str
+) -> str:
+    """
+    Get a destenation path for a package.
+
+    :param ctx: context.
+    :param author_name: package author name.
+    :param item_type_plural: plural of item type.
+    :param item_name: package name.
+
+    :return: destenation path for package.
+    """
+    return os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
+
+
 def _copy_package_directory(
-    ctx: Context, package_path: Path, item_type: str, item_name: str, author_name: str
+    ctx: Context,
+    package_path: Path,
+    item_type: str,
+    item_name: str,
+    author_name: str,
+    dest: str,
 ) -> Path:
     """
      Copy a package directory to the agent vendor resources.
@@ -488,7 +516,6 @@ def _copy_package_directory(
     # copy the item package into the agent's supported packages.
     item_type_plural = item_type + "s"
     src = str(package_path.absolute())
-    dest = os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
     logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
     try:
         shutil.copytree(src, dest)
@@ -654,6 +681,18 @@ def _validate_config_consistency(ctx: Context):
         )
 
 
+def _check_aea_project(args):
+    try:
+        click_context = args[0]
+        ctx = cast(Context, click_context.obj)
+        try_to_load_agent_config(ctx)
+        skip_consistency_check = ctx.config["skip_consistency_check"]
+        if not skip_consistency_check:
+            _validate_config_consistency(ctx)
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+
 def check_aea_project(f):
     """
     Decorator that checks the consistency of the project.
@@ -663,15 +702,7 @@ def check_aea_project(f):
     """
 
     def wrapper(*args, **kwargs):
-        try:
-            click_context = args[0]
-            ctx = cast(Context, click_context.obj)
-            try_to_load_agent_config(ctx)
-            skip_consistency_check = ctx.config["skip_consistency_check"]
-            if not skip_consistency_check:
-                _validate_config_consistency(ctx)
-        except Exception as e:
-            raise click.ClickException(str(e))
+        _check_aea_project(args)
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)
@@ -774,3 +805,45 @@ def validate_author_name(author: Optional[str] = None) -> str:
             )
 
     return valid_author
+
+
+def _rmdirs(*paths: str) -> None:
+    """
+    Remove directories.
+
+    :param paths: paths to folders to remove.
+
+    :return: None
+    """
+    for path in paths:
+        if os.path.exists(path):
+            shutil.rmtree(path)
+
+
+def clean_after(func: Callable) -> Callable:
+    """
+    Decorate a function to remove created folders after ClickException raise.
+
+    :param func: a method to decorate.
+
+    :return: decorated method.
+    """
+
+    def wrapper(click_context, *args, **kwargs):
+        """
+        Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
+
+        :param click_context: click context object.
+
+        :raises ClickException: if caught re-raises it.
+
+        :return: source method output.
+        """
+        ctx = cast(Context, click_context.obj)
+        try:
+            return func(click_context, *args, **kwargs)
+        except click.ClickException as e:
+            _rmdirs(*ctx.clean_paths)
+            raise e
+
+    return wrapper

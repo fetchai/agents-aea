@@ -40,6 +40,7 @@ from ...conftest import AUTHOR
         "description": "some-description",
         "version": "some-version",
         "author": AUTHOR,
+        "protocols": ["protocol_id"],
     },
 )
 @mock.patch(
@@ -73,9 +74,10 @@ class PushItemTestCase(TestCase):
                 "name": "some-name",
                 "description": "some-description",
                 "version": "some-version",
+                "protocols": ["protocol_id"],
             },
             is_auth=True,
-            filepath="cwd/some-name.tar.gz",
+            filepath=os.path.join("cwd", "some-name.tar.gz"),
         )
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=False)

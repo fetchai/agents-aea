@@ -151,8 +151,8 @@ class FIPAHandler(Handler):
             dialogue.weather_data = weather_data
             dialogue.proposal = proposal
             self.context.logger.info(
-                "[{}]: sending sender={} a PROPOSE with proposal={}".format(
-                    self.context.agent_name, msg.counterparty[-5:], proposal.values
+                "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:],
                 )
             )
             proposal_msg = FipaMessage(

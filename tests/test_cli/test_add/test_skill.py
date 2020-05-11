@@ -43,9 +43,15 @@ from aea.configurations.base import (
 )
 from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
-from aea.test_tools.test_cases import AEATestCase
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    ROOT_DIR,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddSkillFailsWhenSkillAlreadyExists:
@@ -102,8 +108,9 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         )
         assert self.result.exception.message == s
 
+    @mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
     @mock.patch("aea.cli.add.fetch_package")
-    def test_add_skill_from_registry_positive(self, fetch_package_mock):
+    def test_add_skill_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
             "vendor/{}/skills/{}".format(self.skill_author, self.skill_name)
@@ -116,7 +123,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd="."
+            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
         )
 
     @classmethod
@@ -464,10 +471,9 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(
-            self.skill_name
-        )
-        assert self.result.exception.message == s
+        missing_path = os.path.join("vendor", "fetchai", "skills", self.skill_name)
+        missing_path = double_escape_windows_path_separator(missing_path)
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):
@@ -479,22 +485,15 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddSkillWithContractsDeps(AEATestCase):
+class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
     """Test add skill with contract dependencies."""
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.initialize_aea()
-        agent_name = "my_first_agent"
-        self.create_agents(agent_name)
-
-        agent_dir_path = os.path.join(self.t, agent_name)
-        os.chdir(agent_dir_path)
-
         self.add_item("skill", "fetchai/erc1155_client:0.2.0")
 
         contracts_path = os.path.join(
-            agent_dir_path, "vendor", FETCHAI_NAME, "contracts"
+            self.agent_name, "vendor", FETCHAI_NAME, "contracts"
         )
         contracts_folders = os.listdir(contracts_path)
         contract_dependency_name = "erc1155"

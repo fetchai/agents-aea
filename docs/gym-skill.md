@@ -23,7 +23,7 @@ cd my_gym_aea
 
 ### Add the gym skill 
 ``` bash
-aea add skill fetchai/gym:0.1.0
+aea add skill fetchai/gym:0.2.0
 ```
 
 ### Copy the gym environment to the AEA directory
@@ -35,6 +35,7 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 ### Add a gym connection
 ``` bash
 aea add connection fetchai/gym:0.1.0
+aea config set agent.default_connection fetchai/gym:0.1.0
 ```
 
 ### Update the connection config

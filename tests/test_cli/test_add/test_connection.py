@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
@@ -34,7 +33,12 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddConnectionFailsWhenConnectionAlreadyExists:
@@ -89,8 +93,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             standalone_mode=False,
         )
 
+    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_connection_from_registry_positive(self, fetch_package_mock):
+    def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
             "vendor/{}/connections/{}".format(
@@ -107,7 +112,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd="."
+            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
         )
 
     def test_exit_code_equal_to_1(self):
@@ -462,10 +467,11 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(
-            self.connection_name
+        missing_path = os.path.join(
+            "vendor", "fetchai", "connections", self.connection_name
         )
-        assert self.result.exception.message == s
+        missing_path = double_escape_windows_path_separator(missing_path)
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):

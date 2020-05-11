@@ -19,37 +19,113 @@
 
 """This test module contains the integration test for the thermometer skills."""
 
-import os
-import time
-
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
-from aea.test_tools.generic import force_set_config
-from aea.test_tools.test_cases import AEAWithOefTestCase
+from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
-class TestThermometerSkill(AEAWithOefTestCase):
+class TestThermometerSkill(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
-    def test_thermometer(self, pytestconfig):
+    def test_thermometer(self):
         """Run the thermometer skills sequence."""
-        self.initialize_aea()
-        self.add_scripts_folder()
 
         thermometer_aea_name = "my_thermometer"
         thermometer_client_aea_name = "my_thermometer_client"
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
-        ledger_apis = {FETCHAI_NAME: {"network": "testnet"}}
-
         # add packages for agent one and run it
-        thermometer_aea_dir_path = os.path.join(self.t, thermometer_aea_name)
-        os.chdir(thermometer_aea_dir_path)
+        self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/thermometer:0.1.0")
+        self.add_item("skill", "fetchai/thermometer:0.2.0")
+        setting_path = (
+            "vendor.fetchai.skills.thermometer.models.strategy.args.has_sensor"
+        )
+        self.set_config(setting_path, False, "bool")
+        setting_path = (
+            "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
+        self.run_install()
 
+        # add packages for agent two and run it
+        self.set_agent_context(thermometer_client_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.1.0")
+        setting_path = (
+            "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
+        self.run_install()
+
+        # run AEAs
+        self.set_agent_context(thermometer_aea_name)
+        thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+
+        self.set_agent_context(thermometer_client_aea_name)
+        thermometer_client_aea_process = self.run_agent(
+            "--connections", "fetchai/oef:0.2.0"
+        )
+
+        check_strings = (
+            "updating thermometer services on OEF service directory.",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "unregistering thermometer station services from OEF service directory.",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
+
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following thermometer data=",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_client_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
+
+        self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
+
+
+class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
+    """Test that thermometer skills work."""
+
+    def test_thermometer(self):
+        """Run the thermometer skills sequence."""
+
+        thermometer_aea_name = "my_thermometer"
+        thermometer_client_aea_name = "my_thermometer_client"
+        self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
+
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+
+        # add packages for agent one and run it
+        self.set_agent_context(thermometer_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/thermometer:0.2.0")
         setting_path = "agent.ledger_apis"
-        force_set_config(setting_path, ledger_apis)
+        self.force_set_config(setting_path, ledger_apis)
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.has_sensor"
         )
@@ -58,38 +134,63 @@ class TestThermometerSkill(AEAWithOefTestCase):
         self.run_install()
 
         # add packages for agent two and run it
-        thermometer_client_aea_dir_path = os.path.join(
-            self.t, thermometer_client_aea_name
-        )
-        os.chdir(thermometer_client_aea_dir_path)
+        self.set_agent_context(thermometer_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.add_item("skill", "fetchai/thermometer_client:0.1.0")
         self.run_install()
-
         setting_path = "agent.ledger_apis"
-        force_set_config(setting_path, ledger_apis)
+        self.force_set_config(setting_path, ledger_apis)
 
         self.generate_private_key()
         self.add_private_key()
         self.generate_wealth()
 
         # run AEAs
-        os.chdir(thermometer_aea_dir_path)
+        self.set_agent_context(thermometer_aea_name)
         thermometer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        os.chdir(thermometer_client_aea_dir_path)
+        self.set_agent_context(thermometer_client_aea_name)
         thermometer_client_aea_process = self.run_agent(
             "--connections", "fetchai/oef:0.2.0"
         )
 
-        self.start_tty_read_thread(thermometer_aea_process)
-        self.start_error_read_thread(thermometer_aea_process)
-        self.start_tty_read_thread(thermometer_client_aea_process)
-        self.start_error_read_thread(thermometer_client_aea_process)
+        # TODO: finish test
+        check_strings = (
+            "updating thermometer services on OEF service directory.",
+            "received CFP from sender=",
+            "sending a PROPOSE with proposal=",
+            # "received ACCEPT from sender=",
+            # "sending MATCH_ACCEPT_W_INFORM to sender=",
+            # "received INFORM from sender=",
+            "unregistering thermometer station services from OEF service directory.",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_aea output.".format(missing_strings)
 
-        time.sleep(20)
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            # "accepting the proposal from sender=",
+            # "informing counterparty=",
+            # "received INFORM from sender=",
+            # "received the following thermometer data=",
+        )
+        missing_strings = self.missing_from_output(
+            thermometer_client_aea_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in thermometer_client_aea output.".format(
+            missing_strings
+        )
 
-        self.terminate_agents()
-
-        assert self.is_successfully_terminated(), "Thermometer test not successful."
+        self.terminate_agents(thermometer_aea_process, thermometer_client_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."

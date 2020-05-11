@@ -45,14 +45,29 @@ lint:
 
 .PHONY: security
 security:
-	bandit -s B101 -r aea packages scripts
-	bandit -s B101 -r tests
-	bandit -s B101 -r benchmark
-	safety check
+	bandit -s B101 -r aea benchmark examples packages scripts tests
+	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
 static:
-	mypy aea benchmark packages tests scripts
+	mypy aea benchmark examples packages scripts tests
+
+.PHONY: misc_checks
+misc_checks:
+	# pip install '.[all]'
+	# python scripts/freeze_dependencies.py -o requirements.txt
+	# liccheck -s strategy.ini -r requirements.txt -l PARANOID
+	# rm -fr requirements.txt
+	python scripts/check_copyright_notice.py
+	python scripts/generate_ipfs_hashes.py --check
+	python scripts/check_package_versions_in_docs.py
+
+.PHONY: docs
+docs:
+	mkdocs build --clean
+
+.PHONY: common_checks
+common_checks: security misc_checks lint static docs
 
 .PHONY: test
 test:

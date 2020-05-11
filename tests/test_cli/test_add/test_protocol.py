@@ -34,7 +34,12 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
 from aea.test_tools.click_testing import CliRunner
 
-from ...conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import (
+    AUTHOR,
+    CLI_LOG_OPTION,
+    CUR_PATH,
+    double_escape_windows_path_separator,
+)
 
 
 class TestAddProtocolFailsWhenProtocolAlreadyExists:
@@ -199,8 +204,9 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         )
         assert self.result.exception.message == s
 
+    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
-    def test_add_protocol_from_registry_positive(self, fetch_package_mock):
+    def test_add_protocol_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
             "vendor/{}/protocols/{}".format(self.protocol_author, self.protocol_name)
@@ -213,7 +219,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd="."
+            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
         )
 
     @classmethod
@@ -449,10 +455,11 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/protocols/{}'".format(
-            self.protocol_name
+        missing_path = os.path.join(
+            "vendor", "fetchai", "protocols", self.protocol_name
         )
-        assert self.result.exception.message == s
+        missing_path = double_escape_windows_path_separator(missing_path)
+        assert missing_path in self.result.exception.message
 
     @classmethod
     def teardown_class(cls):
