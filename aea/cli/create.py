@@ -19,13 +19,10 @@
 
 """Implementation of the 'aea create' subcommand."""
 import os
-import shutil
 from pathlib import Path
 from typing import cast
 
 import click
-
-from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import _add_item
@@ -33,6 +30,7 @@ from aea.cli.common import (
     AUTHOR_KEY,
     Context,
     _get_or_create_cli_config,
+    clean_after,
     logger,
 )
 from aea.cli.init import do_init
@@ -76,50 +74,18 @@ def _setup_package_folder(path: Path):
     Path(init_module).touch(exist_ok=False)
 
 
-@click.command()
-@click.argument("agent_name", type=str, required=True)
-@click.option(
-    "--author",
-    type=str,
-    required=False,
-    help="Add the author to run `init` before `create` execution.",
-)
-@click.option("--local", is_flag=True, help="For using local folder.")
-@click.pass_context
-def create(click_context, agent_name, author, local):
-    """Create an agent."""
-    try:
-        _check_is_parent_folders_are_aea_projects_recursively()
-    except Exception:
-        raise click.ClickException(
-            "The current folder is already an AEA project. Please move to the parent folder."
-        )
-
-    if author is not None:
-        if local:
-            do_init(author, False, False)
-        else:
-            raise click.ClickException(
-                "Author is not set up. Please use 'aea init' to initialize."
-            )
-
-    config = _get_or_create_cli_config()
-    set_author = config.get(AUTHOR_KEY, None)
-    if set_author is None:
-        raise click.ClickException(
-            "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
-        )
-
+@clean_after
+def _create_aea(click_context, agent_name, set_author, local):
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
+    ctx.clean_paths.append(str(path))
 
-    click.echo("Initializing AEA project '{}'".format(agent_name))
-    click.echo("Creating project directory './{}'".format(agent_name))
-
-    # create the agent's directory
     try:
         path.mkdir(exist_ok=False)
+    except OSError:
+        raise click.ClickException("Directory already exist. Aborting...")
 
+    try:
         # set up packages directories.
         _setup_package_folder(Path(agent_name, "protocols"))
         _setup_package_folder(Path(agent_name, "contracts"))
@@ -156,11 +122,44 @@ def create(click_context, agent_name, author, local):
         _add_item(click_context, "connection", DEFAULT_CONNECTION)
         _add_item(click_context, "skill", DEFAULT_SKILL)
 
-    except OSError:
-        raise click.ClickException("Directory already exist. Aborting...")
-    except ValidationError as e:
-        shutil.rmtree(agent_name, ignore_errors=True)
-        raise click.ClickException(str(e))
     except Exception as e:
-        shutil.rmtree(agent_name, ignore_errors=True)
         raise click.ClickException(str(e))
+
+
+@click.command()
+@click.argument("agent_name", type=str, required=True)
+@click.option(
+    "--author",
+    type=str,
+    required=False,
+    help="Add the author to run `init` before `create` execution.",
+)
+@click.option("--local", is_flag=True, help="For using local folder.")
+@click.pass_context
+def create(click_context, agent_name, author, local):
+    """Create an agent."""
+    try:
+        _check_is_parent_folders_are_aea_projects_recursively()
+    except Exception:
+        raise click.ClickException(
+            "The current folder is already an AEA project. Please move to the parent folder."
+        )
+
+    if author is not None:
+        if local:
+            do_init(author, False, False)
+        else:
+            raise click.ClickException(
+                "Author is not set up. Please use 'aea init' to initialize."
+            )
+
+    config = _get_or_create_cli_config()
+    set_author = config.get(AUTHOR_KEY, None)
+    if set_author is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
+        )
+
+    click.echo("Initializing AEA project '{}'".format(agent_name))
+    click.echo("Creating project directory './{}'".format(agent_name))
+    _create_aea(click_context, agent_name, set_author, local)
