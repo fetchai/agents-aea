@@ -178,16 +178,26 @@ class Dialogue:
         :param message: a message to be added
         :return: None
         """
-        self._outgoing_messages.extend([message])
+        if self.is_valid_next_message(message):
+            self._outgoing_messages.extend([message])
 
     def incoming_extend(self, message: "Message") -> None:
         """
         Extend the list of messages which keeps track of incoming messages.
 
-        :param messages: a message to be added
+        :param message: a message to be added
         :return: None
         """
-        self._incoming_messages.extend([message])
+        if self.is_valid_next_message(message):
+            self._incoming_messages.extend([message])
+
+    def is_valid_next_message(self, message: "Message") -> bool:
+        """
+        Check whether 'message' is a valid next message in this dialogue.
+
+        :return: True if yes, False otherwise.
+        """
+        pass
 
 
 class Dialogues:
@@ -240,6 +250,25 @@ class Dialogues:
 
         :return: the dialogue
         """
+
+    @staticmethod
+    def empty_dialogue(
+        opponent_address: Address = "", starter_address: Address = ""
+    ) -> Dialogue:
+        """
+        Create an empty dialogue, optionally with the supplied opponent address and dialogue starter address.
+
+        :param opponent_address: the address of the opponent in the dialogue
+        :param starter_address: the address of whoever starts the dialogue
+
+        :return: a new empty dialogue
+        """
+        dialogue_reference = ("", "")
+        dialogue_label = DialogueLabel(
+            dialogue_reference, opponent_address, starter_address
+        )
+        dialogue = Dialogue(dialogue_label)
+        return dialogue
 
     def _next_dialogue_nonce(self) -> int:
         """

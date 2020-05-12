@@ -26,7 +26,7 @@ This module contains the classes required for FIPA dialogue management.
 """
 
 from enum import Enum
-from typing import Dict, List, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -244,20 +244,12 @@ class FipaDialogues(Dialogues):
         - have the correct msg id and message target
         - have msg counterparty set.
 
-        :param message: the fipa message
+        :param fipa_msg: the fipa message
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
-        fipa_msg = cast(FipaMessage, fipa_msg)
-        this_message_id = fipa_msg.message_id
-        this_target = fipa_msg.target
-        this_performative = fipa_msg.performative
-
-        result = (
-            this_message_id == FipaDialogue.STARTING_MESSAGE_ID
-            and this_target == FipaDialogue.STARTING_TARGET
-            and this_performative == FipaMessage.Performative.CFP
-        )
+        empty_dialogue = self.empty_dialogue()
+        result = empty_dialogue.is_valid_next_message(fipa_msg)
         return result
 
     def is_belonging_to_registered_dialogue(
@@ -315,7 +307,7 @@ class FipaDialogues(Dialogues):
 
     def get_dialogue(self, fipa_msg: Message, agent_addr: Address) -> Dialogue:
         """
-        Retrieve dialogue.
+        Retrieve the dialogue the fipa_message belongs to.
 
         :param fipa_msg: the fipa message
         :param agent_addr: the address of the agent
@@ -335,17 +327,65 @@ class FipaDialogues(Dialogues):
             other_initiated_dialogue = cast(
                 FipaDialogue, self.dialogues[other_initiated_dialogue_label]
             )
-            if other_initiated_dialogue.is_valid_next_message(fipa_msg):
-                result = other_initiated_dialogue
+            result = other_initiated_dialogue
         if self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(
                 FipaDialogue, self.dialogues[self_initiated_dialogue_label]
             )
-            if self_initiated_dialogue.is_valid_next_message(fipa_msg):
-                result = self_initiated_dialogue
+            result = self_initiated_dialogue
         if result is None:
             raise ValueError("Should have found dialogue.")
         return result
+
+    def update(
+        self,
+        message: Message,
+        is_self_message: bool,
+        agent_addr: Address,
+        is_seller: bool,
+    ) -> Optional[Dialogue]:
+        """
+        Update the state of dialogues with a new message.
+
+        If the message is for a new dialogue, a new dialogue is created with 'message' as its first message and returned.
+        If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
+        If there are any errors, e.g. the message dialogue reference does not exists, the message is invalid w.r.t. the dialogue, return None.
+
+        :param message: a new message
+        :param agent_addr: the agent address
+        :return: the new or existing dialogue the message is intended for, or None in case of any errors.
+        """
+        fipa_msg = cast(FipaMessage, message)
+        dialogue_reference = fipa_msg.dialogue_reference
+
+        # new dialogue by other
+        if (
+            dialogue_reference[0] != ""
+            and dialogue_reference[1] == ""
+            and not is_self_message
+        ):
+            dialogue = self.create_opponent_initiated(
+                message.counterparty, fipa_msg.dialogue_reference, is_seller
+            )
+            dialogue.incoming_extend(message)
+        # new dialogue by self
+        elif (
+            dialogue_reference[0] != ""
+            and dialogue_reference[1] == ""
+            and is_self_message
+        ):
+            dialogue = self.create_self_initiated(
+                message.counterparty, agent_addr, is_seller
+            )
+            dialogue.outgoing_extend(message)
+        # existing dialogue
+        else:
+            dialogue = self.get_dialogue(message, agent_addr)
+            if is_self_message:
+                dialogue.outgoing_extend(message)
+            else:
+                dialogue.incoming_extend(message)
+        return dialogue
 
     def create_self_initiated(
         self,
