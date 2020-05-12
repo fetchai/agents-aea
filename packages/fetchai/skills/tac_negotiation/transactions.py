@@ -25,7 +25,7 @@ from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple
 
 from aea.configurations.base import PublicId
-from aea.decision_maker.base import OwnershipState
+from aea.decision_maker.active import OwnershipState
 from aea.decision_maker.messages.transaction import (
     OFF_CHAIN,
     TransactionId,

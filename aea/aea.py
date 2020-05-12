@@ -28,7 +28,7 @@ from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMaker
+from aea.decision_maker.active import DecisionMaker
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -87,7 +87,9 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
-        self._decision_maker = DecisionMaker(identity, wallet, ledger_apis)
+        self._decision_maker = DecisionMaker(
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis
+        )
         self._context = AgentContext(
             self.identity,
             ledger_apis,

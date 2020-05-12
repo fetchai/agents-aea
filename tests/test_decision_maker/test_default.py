@@ -28,14 +28,18 @@ import pytest
 from web3.auto import Web3
 
 import aea
-import aea.decision_maker.base
+import aea.decision_maker.default
 from aea.configurations.base import PublicId
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import FETCHAI, Wallet
-from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
-from aea.decision_maker.base import LedgerStateProxy
+from aea.decision_maker.default import (
+    DecisionMaker,
+    LedgerStateProxy,
+    OwnershipState,
+    Preferences,
+)
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.identity.base import Identity
@@ -66,7 +70,7 @@ def test_preferences_init():
     exchange_params = {"FET": 10.0}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         exchange_params_by_currency_id=exchange_params,
         utility_params_by_good_id=utility_params,
         tx_fee=tx_fee,
@@ -85,7 +89,7 @@ def test_logarithmic_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -101,7 +105,7 @@ def test_linear_utility():
     exchange_params = {"FET": 10.0}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -118,7 +122,7 @@ def test_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -141,7 +145,7 @@ def test_marginal_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -149,7 +153,7 @@ def test_marginal_utility():
     delta_good_holdings = {"good_id": 1}
     delta_currency_holdings = {"FET": -5}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings,
     )
     marginal_utility = preferences.marginal_utility(
@@ -168,11 +172,11 @@ def test_score_diff_from_transaction():
     exchange_params = {"FET": 10.0}
     tx_fee = 3
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
     )
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -215,7 +219,7 @@ class TestDecisionMaker:
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_warning = mock.patch.object(
-            aea.decision_maker.base.logger, "warning"
+            aea.decision_maker.default.logger, "warning"
         )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
@@ -367,7 +371,9 @@ class TestDecisionMaker:
 
     def test_decision_maker_handle_unknown_tx_message(self):
         """Test the handle tx message method."""
-        patch_logger_error = mock.patch.object(aea.decision_maker.base.logger, "error")
+        patch_logger_error = mock.patch.object(
+            aea.decision_maker.default.logger, "error"
+        )
         mocked_logger_error = patch_logger_error.__enter__()
 
         with mock.patch(
@@ -823,11 +829,11 @@ class DecisionMakerTestCase(TestCase):
     """Test case for DecisionMaker class."""
 
     # @mock.patch(
-    #     "aea.decision_maker.base.DecisionMaker._is_acceptable_for_signing",
+    #     "aea.decision_maker.default.DecisionMaker._is_acceptable_for_signing",
     #     return_value=True,
     # )
-    # @mock.patch("aea.decision_maker.base.DecisionMaker._sign_ledger_tx")
-    # @mock.patch("aea.decision_maker.base.TransactionMessage.respond_signing")
+    # @mock.patch("aea.decision_maker.default.DecisionMaker._sign_ledger_tx")
+    # @mock.patch("aea.decision_maker.messages.transaction.TransactionMessage.respond_signing")
     # def test__handle_tx_message_for_signing_positive(self, *mocks):
     #     """Test for _handle_tx_message_for_signing positive result."""
     #     private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
@@ -847,7 +853,7 @@ class DecisionMakerTestCase(TestCase):
         identity = Identity(
             "agent_name", addresses=wallet.addresses, default_address_key=FETCHAI
         )
-        dm = DecisionMaker(identity, wallet, ledger_apis)
+        dm = DecisionMaker(identity=identity, wallet=wallet, ledger_apis=ledger_apis)
         tx_message = mock.Mock()
         tx_message.ledger_id = OFF_CHAIN
         dm._is_affordable(tx_message)
