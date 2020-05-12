@@ -1181,6 +1181,7 @@ class AgentConfig(PackageConfiguration):
         timeout: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
+        decision_maker_path: Optional[str] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1213,6 +1214,8 @@ class AgentConfig(PackageConfiguration):
         self.timeout: Optional[float] = timeout
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
+
+        self.decision_maker_path = decision_maker_path
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1317,6 +1320,8 @@ class AgentConfig(PackageConfiguration):
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
             config["max_reactions"] = self.max_reactions
+        if self.decision_maker_path is not None:
+            config["decision_maker_path"] = self.decision_maker_path
         return config
 
     @classmethod
@@ -1338,6 +1343,7 @@ class AgentConfig(PackageConfiguration):
             timeout=cast(float, obj.get("timeout")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
+            decision_maker_path=cast(str, obj.get("decision_maker_path")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore

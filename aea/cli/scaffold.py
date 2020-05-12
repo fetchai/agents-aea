@@ -83,6 +83,13 @@ def skill(ctx: Context, skill_name: str):
     _scaffold_item(ctx, "skill", skill_name)
 
 
+@scaffold.command()
+@pass_ctx
+def decision_maker(ctx: Context):
+    """Add a decision maker scaffolding to the configuration file and agent."""
+    _scaffold_dm(ctx)
+
+
 def _scaffold_item(ctx: Context, item_type, item_name):
     """Add an item scaffolding to the configuration file and agent."""
     _validate_package_name(item_name)
@@ -151,4 +158,44 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         )
     except Exception as e:
         shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        raise click.ClickException(str(e))
+
+
+def _scaffold_dm(ctx: Context):
+    """Add a scaffolded decision maker to the project and configuration."""
+
+    existing_dm_path = getattr(ctx.agent_config, "decision_maker_path")
+
+    # check if we already have a decision maker in the project
+    if existing_dm_path is not None:
+        raise click.ClickException("A decision maker file already exists. Aborting...")
+
+    try:
+        agent_name = ctx.agent_config.agent_name
+        click.echo(
+            "Adding decision maker scaffold to the agent '{}'...".format(agent_name)
+        )
+
+        # create the file name
+        dest = Path("decision_maker.py")
+
+        # copy the item package into the agent project.
+        src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
+        logger.debug("Copying decision maker. src={} dst={}".format(src, dest))
+        shutil.copyfile(src, dest)
+
+        # add the item to the configurations.
+        logger.debug(
+            "Registering the decision_maker into {}".format(DEFAULT_AEA_CONFIG_FILE)
+        )
+        import pdb
+
+        pdb.set_trace()
+        ctx.agent_config.decision_maker_path = str(dest)
+        ctx.agent_loader.dump(
+            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        )
+
+    except Exception as e:
+        os.remove(dest)
         raise click.ClickException(str(e))

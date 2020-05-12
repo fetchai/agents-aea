@@ -40,22 +40,23 @@ class OwnershipState(BaseOwnershipState):
         """
         raise NotImplementedError
 
-    def set(self, **kwargs,) -> None:
+    def set(self, **kwargs) -> None:
         """
         Set values on the ownership state.
 
-        :param amount_by_currency_id: the currency endowment of the agent in this state.
-        :param quantities_by_good_id: the good endowment of the agent in this state.
+        This method is used to initialize the ownership state with raw values.
+
+        :param kwargs: the keyword arguments required to set the ownership state.
         """
         raise NotImplementedError
 
-    def apply_delta(self, **kwargs,) -> None:
+    def apply_delta(self, **kwargs) -> None:
         """
         Apply a state update to the ownership state.
 
         This method is used to apply a raw state update without a transaction.
 
-        :param
+        :param kwargs: the keyword arguments required to apply an update the ownership state.
         :return: None
         """
         raise NotImplementedError
@@ -63,9 +64,6 @@ class OwnershipState(BaseOwnershipState):
     def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable (and consistent).
-
-        E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
-        Note, the agent is the sender of the transaction message by design.
 
         :param tx_message: the transaction message
         :return: True if the transaction is legal wrt the current state, false otherwise.
@@ -119,11 +117,13 @@ class Preferences(BasePreferences):
         """
         raise NotImplementedError
 
-    def set(self, **kwargs,) -> None:
+    def set(self, **kwargs) -> None:
         """
         Set values on the preferences.
 
-        :param kwargs: the relevant keyword arguments
+        This method is used to initialize the preferences with raw values.
+
+        :param kwargs: the keyword arguments required to apply an update the preferences.
         """
         raise NotImplementedError
 
@@ -136,23 +136,28 @@ class Preferences(BasePreferences):
         """
         raise NotImplementedError
 
-    def marginal_utility(self, ownership_state: BaseOwnershipState, **kwargs,) -> float:
+    def marginal_utility(self, ownership_state: BaseOwnershipState, **kwargs) -> float:
         """
         Compute the marginal utility.
 
         :param ownership_state: the ownership state against which to compute the marginal utility.
+        :param kwargs: additional key word arguments
         :return: the marginal utility score
         """
         raise NotImplementedError
 
     def utility_diff_from_transaction(
-        self, ownership_state: BaseOwnershipState, tx_message: TransactionMessage
+        self,
+        ownership_state: BaseOwnershipState,
+        tx_message: TransactionMessage,
+        **kwargs
     ) -> float:
         """
         Simulate a transaction and get the resulting utility difference (taking into account the fee).
 
         :param ownership_state: the ownership state against which to apply the transaction.
         :param tx_message: a transaction message.
+        :param kwargs: additional key word arguments
         :return: the score.
         """
         raise NotImplementedError
@@ -182,6 +187,10 @@ class DecisionMaker(BaseDecisionMaker):
     def handle(self, message: InternalMessage) -> None:
         """
         Handle an internal message from the skills.
+
+        This method is used to:
+            - update the ownership state
+            - check transactions satisfy the preferences
 
         :param message: the internal message
         :return: None

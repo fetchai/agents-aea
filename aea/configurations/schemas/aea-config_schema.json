@@ -107,6 +107,9 @@
     },
     "max_reactions": {
       "$ref": "definitions.json#/definitions/max_reactions"
+    },
+    "decision_maker_path": {
+      "$ref": "definitions.json#/definitions/decision_maker_path"
     }
   }
 }

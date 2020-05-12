@@ -113,6 +113,9 @@
     "execution_timeout": {
       "type": ["number", "null"],
       "minimum": 0
+    },
+    "decision_maker_path": {
+      "type": ["string", "null"]
     }
   }
 }
