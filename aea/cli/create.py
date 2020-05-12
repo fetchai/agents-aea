@@ -75,7 +75,7 @@ def _setup_package_folder(path: Path):
 
 
 @clean_after
-def _create_aea(click_context, agent_name, set_author, local):
+def _create_aea(click_context, agent_name: str, set_author: str, local: bool) -> None:
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
     ctx.clean_paths.append(str(path))
