@@ -108,7 +108,7 @@ def _create_aea(click_context, agent_name: str, set_author: str, local: bool) ->
             registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
             description="",
         )
-        agent_config.default_connection = DEFAULT_CONNECTION
+        agent_config.default_connection = DEFAULT_CONNECTION  # type: ignore
         agent_config.default_ledger = DEFAULT_LEDGER
         ctx.agent_loader.dump(agent_config, config_file)
 
