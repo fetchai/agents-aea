@@ -17,12 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
-
 import logging
 from asyncio import AbstractEventLoop
-from typing import List, Optional, cast
+from typing import Dict, List, Optional, Type, cast
 
 from aea.agent import Agent
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
@@ -45,6 +45,12 @@ logger = logging.getLogger(__name__)
 
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
+
+    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
+        "sync": SyncAgentLoop,
+        "async": AsyncAgentLoop,
+    }
+    DEFAULT_RUN_LOOP: str = "async"
 
     def __init__(
         self,
@@ -155,7 +161,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._filter.get_active_behaviours():
+        for behaviour in self._get_active_behaviours():
             self._behaviour_act(behaviour)
 
     def react(self) -> None:
@@ -265,6 +271,10 @@ class AEA(Agent):
                 )
             )
 
+    def _get_active_behaviours(self) -> List[Behaviour]:
+        """Get all active behaviours to use in act."""
+        return self._filter.get_active_behaviours()
+
     def update(self) -> None:
         """
         Update the current state of the agent.
@@ -291,3 +301,13 @@ class AEA(Agent):
         self.task_manager.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
+
+    def _run_main_loop(self) -> None:
+        """
+        Run the main loop of the agent.
+
+        :return: None
+        """
+        logger.info("[{}]: Start processing messages...".format(self.name))
+        self._main_loop.start()  # type: ignore
+        logger.debug("[{}]: Exiting main loop...".format(self.name))

@@ -212,14 +212,6 @@ class AEATestWrapper:
         """
         self.aea.react()
 
-    def spin_main_loop(self) -> None:
-        """
-        One time process agent's main loop.
-
-        :return: None
-        """
-        self.aea._spin_main_loop()
-
     def __enter__(self) -> None:
         """Contenxt manager enter."""
         self.start_loop()

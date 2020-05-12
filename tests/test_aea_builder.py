@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """ This module contains tests for aea/aea_builder.py """
 import os
 import re
@@ -28,9 +29,10 @@ from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 
-from tests.common.utils import timeit_context
-
 from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+
+
+FETCHAI = FetchAICrypto.identifier
 
 
 @skip_test_windows()
@@ -43,50 +45,18 @@ def test_default_timeout_for_agent():
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
+    builder.add_private_key(FETCHAI, private_key_path)
 
-    """ Default timeout == 0.05 """
     aea = builder.build()
     assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0_05 = time_result.time_passed
-
-    """ Timeout == 0.001 """
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.001
+    builder.add_private_key(FETCHAI, private_key_path)
+    builder.set_timeout(100)
 
     aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
-
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0_001 = time_result.time_passed
-
-    """ Timeout == 0.0 """
-    builder = AEABuilder()
-    builder.set_name(agent_name)
-    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.0
-
-    aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
-
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0 = time_result.time_passed
-
-    assert time_0 < time_0_001 < time_0_05
+    assert aea._timeout == 100
 
 
 def test_add_package_already_existing():
