@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Optional, Tuple, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxContents, TxStatus
@@ -131,14 +131,14 @@ class FetchAICrypto(Crypto):
 
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Address:
+    ) -> Tuple[Address, ...]:
         """
-        Recover the address from the hash.
+        Recover the addresses from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
         :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered address
+        :return: the recovered addresses
         """
         raise NotImplementedError  # praggma: no cover
 

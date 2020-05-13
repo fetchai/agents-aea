@@ -22,8 +22,6 @@
 import os
 from unittest.mock import MagicMock
 
-import pytest
-
 from aea.crypto.cosmos import CosmosCrypto
 
 from ..conftest import ROOT_DIR
@@ -50,14 +48,17 @@ def test_initialization():
     ), "After creation the public key must no be None"
 
 
-@pytest.mark.unstable
 def test_sign_and_recover_message():
     """Test the signing and the recovery function for the eth_crypto."""
     account = CosmosCrypto(PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
-    assert recovered_addr == account.address, "Failed to recover the correct address."
+    recovered_addresses = account.recover_message(
+        message=b"hello", signature=sign_bytes
+    )
+    assert (
+        account.address in recovered_addresses
+    ), "Failed to recover the correct address."
 
 
 def test_dump_positive():

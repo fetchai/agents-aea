@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, Tuple, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -139,14 +139,14 @@ class EthereumCrypto(Crypto):
 
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Address:
+    ) -> Tuple[Address, ...]:
         """
-        Recover the address from the hash.
+        Recover the addresses from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
         :param is_deprecated_mode: if the deprecated signing was used
-        :return: the recovered address
+        :return: the recovered addresses
         """
         if is_deprecated_mode:
             assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
@@ -156,7 +156,7 @@ class EthereumCrypto(Crypto):
             address = Account.recover_message(
                 signable_message=signable_message, signature=signature
             )
-        return address
+        return (address,)
 
     @classmethod
     def _generate_private_key(cls) -> Account:

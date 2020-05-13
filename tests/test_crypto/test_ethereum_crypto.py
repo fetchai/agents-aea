@@ -55,8 +55,13 @@ def test_sign_and_recover_message():
     account = EthereumCrypto(PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
-    assert recovered_addr == account.address, "Failed to recover the correct address."
+    recovered_addresses = account.recover_message(
+        message=b"hello", signature=sign_bytes
+    )
+    assert len(recovered_addresses) == 1, "Wrong number of addresses recovered."
+    assert (
+        recovered_addresses[0] == account.address
+    ), "Failed to recover the correct address."
 
 
 def test_sign_and_recover_message_deprecated():
@@ -66,10 +71,13 @@ def test_sign_and_recover_message_deprecated():
     message_hash = hashlib.sha256(message).digest()
     sign_bytes = account.sign_message(message=message_hash, is_deprecated_mode=True)
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_message(
+    recovered_addresses = account.recover_message(
         message=message_hash, signature=sign_bytes, is_deprecated_mode=True
     )
-    assert recovered_addr == account.address, "Failed to recover the correct address."
+    assert len(recovered_addresses) == 1, "Wrong number of addresses recovered."
+    assert (
+        recovered_addresses[0] == account.address
+    ), "Failed to recover the correct address."
 
 
 def test_dump_positive():
