@@ -67,7 +67,9 @@ def get_all_extras() -> Dict:
 
     ethereum_ledger_deps = ["web3==5.2.2", "eth-account==0.4.0"]
 
-    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps]
+    cosmos_ledger_deps = ["ecdsa==0.15", "bech32==1.2.0"]
+
+    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
 
     cli_deps = [
         "click",
@@ -84,6 +86,7 @@ def get_all_extras() -> Dict:
         "cli_gui": cli_gui,
         "fetch": fetch_ledger_deps,
         "ethereum": ethereum_ledger_deps,
+        "cosmos": cosmos_ledger_deps,
         "crypto": crypto_deps,
     }
     extras.update(get_aea_extras())

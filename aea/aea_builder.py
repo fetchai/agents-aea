@@ -56,15 +56,10 @@ from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
+    IDENTIFIER_TO_KEY_FILES,
+    _create_private_key,
+    _try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
@@ -1084,45 +1079,27 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
-    fetchai_private_key_path = agent_configuration.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_path is None:
-        _create_fetchai_private_key(
-            private_key_file=str(aea_project_path / FETCHAI_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_fet_private_key_path(
-                str(aea_project_path / fetchai_private_key_path), exit_on_error=False
+    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
+        config_private_key_path = agent_configuration.private_key_paths.read(identifier)
+        if config_private_key_path is None:
+            _create_private_key(
+                identifier, private_key_file=str(aea_project_path / private_key_path)
             )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_path), FETCHAI,
+            agent_configuration.private_key_paths.update(identifier, private_key_path)
+        else:
+            try:
+                _try_validate_private_key_path(
+                    identifier,
+                    str(aea_project_path / private_key_path),
+                    exit_on_error=False,
                 )
-            )
-            raise
-
-    ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_path is None:
-        _create_ethereum_private_key(
-            private_key_file=str(aea_project_path / ETHEREUM_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(
-            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
-        )
-    else:
-        try:
-            _try_validate_ethereum_private_key_path(
-                str(aea_project_path / ethereum_private_key_path), exit_on_error=False
-            )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_path), ETHEREUM,
+            except FileNotFoundError:  # pragma: no cover
+                logger.error(
+                    "File {} for private key {} not found.".format(
+                        repr(private_key_path), identifier,
+                    )
                 )
-            )
-            raise
+                raise
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)

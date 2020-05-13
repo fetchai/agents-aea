@@ -177,7 +177,7 @@ class GetAddressCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._validate_private_key_path")
+@mock.patch("aea.cli.core._try_validate_private_key_path")
 @mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):
     """Test case for CLI add_key command."""
