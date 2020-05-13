@@ -31,17 +31,13 @@ import pytest
 
 from aea.configurations.loader import make_jsonschema_base_uri
 
-
-from tests.common.pexpect_popen import PexpectSpawn
+from tests.common.pexpect_popen import PexpectWrapper
 
 from ..conftest import (
     AGENT_CONFIGURATION_SCHEMA,
     CONFIGURATION_SCHEMA_DIR,
     tcpping,
 )
-
-if os.name == "nt":
-    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 @pytest.mark.unstable
@@ -65,9 +61,8 @@ class TestGui:
 
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
-        self.proc = PexpectSpawn(  # nosec
-            sys.executable,
-            ["-m", "aea.cli", "-v", "DEBUG", "gui"],
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "gui"],
             encoding="utf-8",
             logfile=sys.stdout,
         )

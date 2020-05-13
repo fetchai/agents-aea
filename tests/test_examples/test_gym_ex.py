@@ -16,27 +16,29 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """The tests module contains the tests of the gym example."""
 
 import os
 import sys
 from pathlib import Path
 
-from tests.common.pexpect_popen import PexpectSpawn
+from tests.common.pexpect_popen import PexpectWrapper
 from tests.common.utils import run_in_root_dir
-from tests.conftest import skip_test_windows
 
 
-@skip_test_windows()
 @run_in_root_dir
 def test_gym_ex():
     """Run the gym ex sequence."""
     try:
-        process = PexpectSpawn(  # nosec
-            sys.executable,
-            [str(Path("examples/gym_ex/train.py").resolve()), "--nb-steps", "50"],
+        process = PexpectWrapper(  # nosec
+            [
+                sys.executable,
+                str(Path("examples/gym_ex/train.py").resolve()),
+                "--nb-steps",
+                "50",
+            ],
             env=os.environ.copy(),
+            maxread=1,
             encoding="utf-8",
             logfile=sys.stdout,
         )

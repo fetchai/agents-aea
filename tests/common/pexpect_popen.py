@@ -18,95 +18,95 @@
 # ------------------------------------------------------------------------------
 """Wrapper for Pexpect to use in tests."""
 import os
+import platform
 import sys
 import time
+from signal import SIGINT, SIGTERM
 from typing import List, Optional, Union
 
-if os.name == "nt":
-
-    class PexpectSpawn:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def __getattr__(self, item):  # type: ignore
-            return item
+from pexpect.exceptions import TIMEOUT  # type: ignore
+from pexpect.popen_spawn import PopenSpawn  # type: ignore
 
 
-else:
-    from pexpect import spawn  # type: ignore
-    from pexpect.exceptions import TIMEOUT  # type: ignore
+class PexpectWrapper(PopenSpawn):
+    """Utility class to make aea cli test easier."""
 
-    class PexpectSpawn(spawn):  # type: ignore
-        """Utility class to make aea cli test easier."""
+    def __init__(self, *args, **kwargs):
+        """Init pexpect.spawn."""
+        if platform.system() != "Windows":
+            kwargs["preexec_fn"] = os.setsid
 
-        def __init__(self, *args, **kwargs):
-            """Init pexpect.spawn."""
-            kwargs["use_poll"] = True
-            super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        def control_c(self) -> None:
-            """Send control c to process started."""
-            self.sendcontrol("c")
+    def control_c(self) -> None:
+        """Send control c to process started."""
+        if platform.system() == "Windows":
+            self.kill(SIGINT)
+        else:
+            pgid = os.getpgid(self.proc.pid)
+            os.killpg(pgid, SIGINT)
 
-        @property
-        def returncode(self) -> Optional[Union[int, str]]:
-            """Get return code of finished process."""
-            return self.exitstatus  # type: ignore
+    @property
+    def returncode(self) -> Optional[Union[int, str]]:
+        """Get return code of finished process."""
+        return self.proc.poll()  # type: ignore
 
-        def wait_to_complete(self, timeout: float = 5) -> None:
-            """Wait process to complete.
+    def wait_to_complete(self, timeout: float = 5) -> None:
+        """Wait process to complete.
 
-            Terminate automatically after timeout.
-            Set returncode to terminated if terminated.
+        Terminate automatically after timeout.
+        Set returncode to terminated if terminated.
 
-            :param timeout: how many seconds wait process to finish before kill.
-            """
-            if self.exitstatus is not None:  # type: ignore
-                return
+        :param timeout: how many seconds wait process to finish before kill.
+        """
+        if self.proc.poll() is not None:  # type: ignore
+            return
 
-            start_time = time.time()
+        start_time = time.time()
 
-            while start_time + timeout > time.time() and self.isalive():
-                time.sleep(0.001)
+        while start_time + timeout > time.time() and self.proc.poll() is None:  # type: ignore
+            time.sleep(0.001)
 
-            if self.isalive():
-                self.terminate(force=True)
-                self.wait()
-                self.exitstatus = "Terminated!"
-            else:
-                self.wait()
+        if self.proc.poll() is None:  # type: ignore
+            self.terminate(force=True)
+            self.wait()
+            self.exitstatus = "Terminated!"  # type: ignore
 
-        @classmethod
-        def aea_cli(cls, args) -> "PexpectSpawn":
-            """Start aea.cli.
+    @classmethod
+    def aea_cli(cls, args) -> "PexpectWrapper":
+        """Start aea.cli.
 
-            :param args: list of arguments for aea.cli.
+        :param args: list of arguments for aea.cli.
 
-            :return: PexpectSpawn
-            """
-            return cls(
-                "python",
-                ["-m", "aea.cli", "-v", "DEBUG", *args],
-                env=os.environ.copy(),
-                encoding="utf-8",
-                logfile=sys.stdout,
-            )
+        :return: PexpectWrapper
+        """
+        return cls(
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", *args],
+            env=os.environ.copy(),
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
 
-        def expect_all(self, pattern_list: List[str], timeout: float = 10) -> None:
-            """
-            Wait for all patterns appear in process output.
+    def expect_all(self, pattern_list: List[str], timeout: float = 10) -> None:
+        """
+        Wait for all patterns appear in process output.
 
-            :param pattern_list: list of string to expect
-            :param timeout: timeout in seconds
+        :param pattern_list: list of string to expect
+        :param timeout: timeout in seconds
 
-            :return: None
-            """
-            pattern_list = list(pattern_list)
+        :return: None
+        """
+        pattern_list = list(pattern_list)
 
-            start_time = time.time()
-            while pattern_list:
-                time_spent = time.time() - start_time
-                if time_spent > timeout:
-                    raise TIMEOUT(timeout)
-                idx = self.expect_exact(pattern_list, timeout - time_spent)
-                pattern_list.pop(idx)
+        start_time = time.time()
+        while pattern_list:
+            time_spent = time.time() - start_time
+            if time_spent > timeout:
+                raise TIMEOUT(timeout)
+            idx = self.expect_exact(pattern_list, timeout - time_spent)
+            pattern_list.pop(idx)
+
+    def terminate(self, *args, **kwargs) -> None:
+        """Terminate process."""
+        if self.proc.poll() is None:
+            self.kill(SIGTERM)
