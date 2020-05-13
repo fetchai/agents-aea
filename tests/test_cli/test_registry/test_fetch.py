@@ -117,7 +117,6 @@ class TestFetchAgent(TestCase):
             "skills": [],
         },
     )
-    @mock.patch("aea.cli.registry.fetch.rmtree")
     def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
         """Test for fetch_agent method unable to fetch."""
         ctx_mock = ContextMock(
