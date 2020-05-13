@@ -66,7 +66,7 @@ class TestFetchAgent(TestCase):
     ):
         """Test for fetch_agent method positive result."""
         public_id_mock = PublicIdMock()
-        fetch_agent(ContextMock(), public_id_mock, ContextMock(), alias="alias")
+        fetch_agent(ContextMock(), public_id_mock, alias="alias")
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -95,7 +95,7 @@ class TestFetchAgent(TestCase):
         ctx_mock = ContextMock(
             connections=["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)]
         )
-        fetch_agent(ctx_mock, public_id_mock, ContextMock())
+        fetch_agent(ctx_mock, public_id_mock)
         request_api_mock.assert_called_with(
             "GET",
             "/agents/{}/{}/{}".format(
@@ -117,14 +117,13 @@ class TestFetchAgent(TestCase):
             "skills": [],
         },
     )
-    @mock.patch("aea.cli.registry.fetch.rmtree")
     def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
         """Test for fetch_agent method unable to fetch."""
         ctx_mock = ContextMock(
             connections=["public/id:{}".format(PublicIdMock.DEFAULT_VERSION)]
         )
         with self.assertRaises(ClickException):
-            fetch_agent(ctx_mock, PublicIdMock(), ContextMock())
+            fetch_agent(ctx_mock, PublicIdMock())
 
     @classmethod
     def teardown_class(cls):
