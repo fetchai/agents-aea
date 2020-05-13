@@ -129,12 +129,15 @@ class FetchAICrypto(Crypto):
         """
         raise NotImplementedError
 
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(
+        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Address:
         """
         Recover the address from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered address
         """
         raise NotImplementedError  # praggma: no cover

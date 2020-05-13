@@ -31,12 +31,13 @@ import requests
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
+    _create_cosmos_private_key,
     _create_ethereum_private_key,
     _create_fetchai_private_key,
     _try_generate_testnet_wealth,
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
-    _validate_private_key_path,
+    _try_validate_private_key_path,
 )
 
 from ..conftest import CUR_PATH
@@ -110,10 +111,10 @@ class TestHelperFile:
 
     @patch("aea.crypto.helpers._try_validate_fet_private_key_path")
     @patch("aea.crypto.helpers._try_validate_ethereum_private_key_path")
-    def test__validate_private_key_path_positive(self, *mocks):
+    def test__try_validate_private_key_path_positive(self, *mocks):
         """Test _validate_private_key_path positive result."""
-        _validate_private_key_path("path", FETCHAI)
-        _validate_private_key_path("path", ETHEREUM)
+        _try_validate_private_key_path(FETCHAI, "path")
+        _try_validate_private_key_path(ETHEREUM, "path")
 
     @patch("builtins.open", mock_open())
     def test__create_fetchai_private_key_positive(self, *mocks):
@@ -124,3 +125,8 @@ class TestHelperFile:
     def test__create_ethereum_private_key_positive(self, *mocks):
         """Test _create_ethereum_private_key positive result."""
         _create_ethereum_private_key()
+
+    @patch("builtins.open", mock_open())
+    def test__create_cosmos_private_key_positive(self, *mocks):
+        """Test _create_cosmos_private_key positive result."""
+        _create_cosmos_private_key()

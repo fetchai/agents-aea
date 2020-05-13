@@ -22,6 +22,9 @@
 import json
 import logging
 import sys
+from typing import Optional
+
+from ecdsa import SECP256k1, SigningKey
 
 from eth_account import Account  # type: ignore
 
@@ -29,14 +32,21 @@ from fetchai.ledger.crypto import Entity  # type: ignore
 
 import requests
 
+from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
+COSMOS_PRIVATE_KEY_FILE = "cosmos_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
 ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
-TESTNETS = {FETCHAI: "testnet", ETHEREUM: "ropsten"}
+TESTNETS = {FETCHAI: "testnet", ETHEREUM: "ropsten", COSMOS: "testnet"}
+IDENTIFIER_TO_KEY_FILES = {
+    COSMOS: COSMOS_PRIVATE_KEY_FILE,
+    ETHEREUM: ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI: FETCHAI_PRIVATE_KEY_FILE,
+}
 
 logger = logging.getLogger(__name__)
 
@@ -93,23 +103,92 @@ def _try_validate_ethereum_private_key_path(
             raise
 
 
-def _validate_private_key_path(private_key_path: str, ledger_id: str):
+def _try_validate_cosmos_private_key_path(
+    private_key_path: str, exit_on_error: bool = True
+) -> None:
     """
-    Validate a private key path.
+    Try to validate a private key.
 
     :param private_key_path: the path to the private key.
-    :param ledger_id: one of 'fetchai', 'ethereum'
     :return: None
-    :raises: ValueError if the private key is invalid.
+    :raises: an exception if the private key is invalid.
     """
-    if ledger_id == "fetchai":
-        _try_validate_fet_private_key_path(private_key_path)
-    elif ledger_id == "ethereum":
-        _try_validate_ethereum_private_key_path(private_key_path)
+    try:
+        with open(private_key_path, "r") as key:
+            data = key.read()
+            SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+    except Exception as e:
+        logger.error(
+            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                private_key_path, e
+            )
+        )
+        if exit_on_error:
+            sys.exit(1)
+        else:
+            raise
+
+
+def _try_validate_private_key_path(
+    ledger_id: str, private_key_path: str, exit_on_error: bool = True
+) -> None:
+    """
+    Try alidate a private key path.
+
+    :param ledger_id: one of 'fetchai', 'ethereum'
+    :param private_key_path: the path to the private key.
+    :return: None
+    :raises: ValueError if the identifier is invalid.
+    """
+    if ledger_id == FETCHAI:
+        _try_validate_fet_private_key_path(private_key_path, exit_on_error)
+    elif ledger_id == ETHEREUM:
+        _try_validate_ethereum_private_key_path(private_key_path, exit_on_error)
+    elif ledger_id == COSMOS:
+        _try_validate_cosmos_private_key_path(private_key_path, exit_on_error)
     else:
         raise ValueError(
             "Ledger id {} is not valid.".format(repr(ledger_id))
         )  # pragma: no cover
+
+
+def _create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None:
+    """
+    Create a private key for the specified ledger identifier.
+
+    :param ledger_id: the ledger identifier.
+    :return: None
+    :raises: ValueError if the identifier is invalid.
+    """
+    if ledger_id == FETCHAI:
+        if private_key_file is None:
+            private_key_file = FETCHAI_PRIVATE_KEY_FILE
+        _create_fetchai_private_key(private_key_file)
+    elif ledger_id == ETHEREUM:
+        if private_key_file is None:
+            private_key_file = ETHEREUM_PRIVATE_KEY_FILE
+        _create_ethereum_private_key(private_key_file)
+    elif ledger_id == COSMOS:
+        if private_key_file is None:
+            private_key_file = COSMOS_PRIVATE_KEY_FILE
+        _create_cosmos_private_key(private_key_file)
+    else:
+        raise ValueError(
+            "Ledger id {} is not valid.".format(repr(ledger_id))
+        )  # pragma: no cover
+
+
+def _create_cosmos_private_key(
+    private_key_file: str = COSMOS_PRIVATE_KEY_FILE,
+) -> None:
+    """
+    Create a cosmos private key.
+
+    :return: None
+    """
+    signing_key = SigningKey.generate(curve=SECP256k1)
+    with open(private_key_file, "w+") as file:
+        file.write(signing_key.to_string().hex())
 
 
 def _create_fetchai_private_key(

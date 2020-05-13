@@ -64,6 +64,7 @@ class EthereumCrypto(Crypto):
         )
         bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
+        self._address = str(self._account.address)
 
     @property
     def entity(self) -> Account:
@@ -86,7 +87,7 @@ class EthereumCrypto(Crypto):
 
         :return: a display_address str
         """
-        return str(self._account.address)
+        return self._address
 
     def _load_private_key_from_path(self, file_name) -> Account:
         """
@@ -116,6 +117,7 @@ class EthereumCrypto(Crypto):
         :return: signature of the message in string form
         """
         if is_deprecated_mode:
+            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
             signature_dict = self.entity.signHash(message)
             signed_msg = signature_dict["signature"].hex()
         else:
@@ -135,19 +137,26 @@ class EthereumCrypto(Crypto):
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
         return signed_transaction
 
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(
+        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Address:
         """
         Recover the address from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
+        :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered address
         """
-        signable_message = encode_defunct(primitive=message)
-        addr = Account.recover_message(
-            signable_message=signable_message, signature=signature
-        )
-        return addr
+        if is_deprecated_mode:
+            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
+            address = Account.recoverHash(message_hash=message, signature=signature)
+        else:
+            signable_message = encode_defunct(primitive=message)
+            address = Account.recover_message(
+                signable_message=signable_message, signature=signature
+            )
+        return address
 
     @classmethod
     def _generate_private_key(cls) -> Account:
@@ -163,7 +172,9 @@ class EthereumCrypto(Crypto):
         :param public_key: the public key
         :return: str
         """
-        raise NotImplementedError  # pragma: no cover
+        keccak_hash = Web3.keccak(hexstr=public_key)
+        address = keccak_hash[-20:].hex()
+        return address
 
     @classmethod
     def load(cls, fp: BinaryIO):
