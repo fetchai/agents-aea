@@ -20,20 +20,22 @@
 """This module contains the tests of the ethereum module."""
 
 import os
+import time
 from unittest.mock import MagicMock
 
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 
 from ..conftest import ROOT_DIR
 
-PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/cosmos_private_key.txt")
+PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/cosmos_private_key.txt")
+TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
 
 
 def test_creation():
     """Test the creation of the crypto_objects."""
-    assert CosmosCrypto(), "Managed to initialise the eth_account"
-    assert CosmosCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
-    assert CosmosCrypto("./"), "Managed to create a new eth private key"
+    assert CosmosCrypto(), "Managed to initialise the crypto module"
+    assert CosmosCrypto(PRIVATE_KEY_PATH), "Managed to load the cosmos private key"
+    assert CosmosCrypto("./"), "Managed to create a new cosmos private key"
 
 
 def test_initialization():
@@ -65,3 +67,25 @@ def test_dump_positive():
     """Test dump."""
     account = CosmosCrypto(PRIVATE_KEY_PATH)
     account.dump(MagicMock())
+
+
+def test_api_creation():
+    """Test api instantiation."""
+    assert CosmosApi(**TESTNET_CONFIG), "Managed to initialise the api"
+
+
+def test_transfer():
+    """Test transfer of wealth."""
+    cosmos_api = CosmosApi(**TESTNET_CONFIG)
+    cc1 = CosmosCrypto(private_key_path=PRIVATE_KEY_PATH)
+    cc2 = CosmosCrypto()
+    amount = 10000
+    fee = 1000
+    tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
+    assert tx_digest is not None, "Failed to submit transfer!"
+    time.sleep(2.0)
+    # TODO remove requirement for "" tx nonce stub
+    is_valid = cosmos_api.is_transaction_valid(
+        tx_digest, cc2.address, cc1.address, "", amount
+    )
+    assert is_valid, "Failed to complete tx!"

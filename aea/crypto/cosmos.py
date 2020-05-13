@@ -128,9 +128,9 @@ class CosmosCrypto(Crypto):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        message_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
-        message_bytes = message_str.encode("utf-8")
-        signed_transaction = self.sign_message(message_bytes)
+        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
+        transaction_bytes = transaction_str.encode("utf-8")
+        signed_transaction = self.sign_message(transaction_bytes)
         return signed_transaction
 
     def recover_message(
@@ -231,10 +231,10 @@ class CosmosApi(LedgerApi):
             url = self.network_address + f"/bank/balances/{address}"
             response = requests.get(url=url)
             if response.status_code == 200:
-                import pdb
-
-                pdb.set_trace()
-                balance = 0
+                logger.debug("Response: {}".format(response.json()))
+                balance = int(response.json()["result"][0]["amount"])
+            else:
+                raise
         except Exception as e:
             logger.warning(
                 "Encountered exception when trying get balance: {}".format(e)
@@ -247,11 +247,11 @@ class CosmosApi(LedgerApi):
         destination_address: Address,
         amount: int,
         tx_fee: int,
-        tx_nonce: str,
-        denom: str = "test-fet",
+        tx_nonce: str = "",
+        denom: str = "testfet",
         account_number: int = 0,
         sequence: int = 0,
-        gas: int = 70000,
+        gas: int = 80000,
         memo: str = "",
         sync_mode: str = "sync",
         chain_id: str = "aea-testnet",
@@ -268,6 +268,9 @@ class CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: tx digest if present, otherwise None
         """
+        result = self._try_get_account_number_and_sequence(crypto.address)
+        if result is not None:
+            account_number, sequence = result
         transfer = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
@@ -277,19 +280,18 @@ class CosmosApi(LedgerApi):
             },
         }
         tx = {
-            "chain_id": chain_id,
             "account_number": str(account_number),
+            "sequence": str(sequence),
+            "chain_id": chain_id,
             "fee": {
                 "gas": str(gas),
                 "amount": [{"denom": denom, "amount": str(tx_fee)}],
             },
             "memo": memo,
-            "sequence": str(sequence),
             "msgs": [transfer],
         }
-        tx_str = json.dumps(tx, separators=(",", ":"), sort_keys=True)
-        tx_bytes = tx_str.encode("utf-8")
-        signature = crypto.sign_message(tx_bytes)
+        signature = crypto.sign_transaction(tx)
+        base64_pbk = base64.b64encode(bytes.fromhex(crypto.public_key)).decode("utf-8")
         pushable_tx = {
             "tx": {
                 "msg": [transfer],
@@ -303,7 +305,7 @@ class CosmosApi(LedgerApi):
                         "signature": signature,
                         "pub_key": {
                             "type": "tendermint/PubKeySecp256k1",
-                            "value": crypto.public_key,
+                            "value": base64_pbk,
                         },
                         "account_number": str(account_number),
                         "sequence": str(sequence),
@@ -312,7 +314,7 @@ class CosmosApi(LedgerApi):
             },
             "mode": sync_mode,
         }
-        # TODO retrieve, gas, sequence dynamically
+        # TODO retrieve, gas dynamically
 
         tx_digest = self.send_signed_transaction(tx_signed=pushable_tx)
 
@@ -333,15 +335,33 @@ class CosmosApi(LedgerApi):
         tx_digest = None  # type: Optional[str]
         try:
             url = self.network_address + "/txs"
-            response = requests.post(url=url, data=tx_signed)
+            response = requests.post(url=url, json=tx_signed)
             if response.status_code == 200:
-                import pdb
-
-                pdb.set_trace()
-                tx_digest = "STUB"
+                tx_digest = response.json()["txhash"]
         except Exception as e:
             logger.warning("Encountered exception when trying to send tx: {}".format(e))
         return tx_digest
+
+    def _try_get_account_number_and_sequence(
+        self, address: Address
+    ) -> Optional[Tuple[int, int]]:
+        """Try send the signed transaction."""
+        result = None  # type: Optional[Tuple[int, int]]
+        try:
+            url = self.network_address + f"/auth/accounts/{address}"
+            response = requests.get(url=url)
+            if response.status_code == 200:
+                result = (
+                    int(response.json()["result"]["value"]["account_number"]),
+                    int(response.json()["result"]["value"]["sequence"]),
+                )
+        except Exception as e:
+            logger.warning(
+                "Encountered exception when trying to get account number and sequence: {}".format(
+                    e
+                )
+            )
+        return result
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """
@@ -350,7 +370,12 @@ class CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
-        raise NotImplementedError
+        is_successful = False
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        if tx_receipt is not None:
+            # TODO: quick fix only, not sure this is reliable
+            is_successful = "code" not in tx_receipt
+        return is_successful
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
         """
@@ -359,7 +384,29 @@ class CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        raise NotImplementedError
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        return tx_receipt
+
+    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+        """
+        Try get the transaction receipt for a transaction digest (non-blocking).
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the tx receipt, if present
+        """
+        result = None  # type: Optional[Any]
+        try:
+            url = self.network_address + f"/txs/{tx_digest}"
+            response = requests.get(url=url)
+            if response.status_code == 200:
+                result = response.json()
+        except Exception as e:
+            logger.warning(
+                "Encountered exception when trying to get transaction receipt: {}".format(
+                    e
+                )
+            )
+        return result
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -389,4 +436,16 @@ class CosmosApi(LedgerApi):
         :param amount: the amount we expect to get from the transaction.
         :return: True if the random_message is equals to tx['input']
         """
-        raise NotImplementedError
+        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        try:
+            assert tx_receipt is not None
+            tx = tx_receipt.get("tx").get("value").get("msg")[0]
+            recovered_amount = int(tx.get("value").get("amount")[0].get("amount"))
+            sender = tx.get("value").get("from_address")
+            recipient = tx.get("value").get("to_address")
+            is_valid = (
+                recovered_amount == amount and sender == client and recipient == seller
+            )
+        except Exception:
+            is_valid = False
+        return is_valid
