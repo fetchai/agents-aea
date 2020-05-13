@@ -22,6 +22,8 @@
 import os
 from unittest.mock import MagicMock
 
+import pytest
+
 from aea.crypto.cosmos import CosmosCrypto
 
 from ..conftest import ROOT_DIR
@@ -48,6 +50,7 @@ def test_initialization():
     ), "After creation the public key must no be None"
 
 
+@pytest.mark.unstable
 def test_sign_and_recover_message():
     """Test the signing and the recovery function for the eth_crypto."""
     account = CosmosCrypto(PRIVATE_KEY_PATH)
