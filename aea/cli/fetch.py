@@ -74,7 +74,7 @@ def _fetch_agent_locally(
     """
     Fetch Agent from local packages.
 
-    :param ctx: Context
+    :param click_context: click context object.
     :param public_id: public ID of agent to be fetched.
     :param click_context: the click context.
     :param alias: an optional alias.
