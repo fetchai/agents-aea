@@ -133,6 +133,7 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
+@pytest.mark.unstable
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     """Test aea launch when there is a failing agent.."""
 
