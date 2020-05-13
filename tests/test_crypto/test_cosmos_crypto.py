@@ -23,6 +23,8 @@ import os
 import time
 from unittest.mock import MagicMock
 
+import pytest
+
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 
 from ..conftest import ROOT_DIR
@@ -74,6 +76,7 @@ def test_api_creation():
     assert CosmosApi(**TESTNET_CONFIG), "Managed to initialise the api"
 
 
+@pytest.mark.integration
 def test_transfer():
     """Test transfer of wealth."""
     cosmos_api = CosmosApi(**TESTNET_CONFIG)
@@ -83,7 +86,7 @@ def test_transfer():
     fee = 1000
     tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
     assert tx_digest is not None, "Failed to submit transfer!"
-    time.sleep(2.0)
+    time.sleep(10.0)
     # TODO remove requirement for "" tx nonce stub
     is_valid = cosmos_api.is_transaction_valid(
         tx_digest, cc2.address, cc1.address, "", amount

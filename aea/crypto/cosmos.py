@@ -231,10 +231,7 @@ class CosmosApi(LedgerApi):
             url = self.network_address + f"/bank/balances/{address}"
             response = requests.get(url=url)
             if response.status_code == 200:
-                logger.debug("Response: {}".format(response.json()))
                 balance = int(response.json()["result"][0]["amount"])
-            else:
-                raise
         except Exception as e:
             logger.warning(
                 "Encountered exception when trying get balance: {}".format(e)
