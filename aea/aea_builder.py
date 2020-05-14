@@ -58,7 +58,7 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _create_private_key,
+    create_private_key,
     _try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
@@ -1116,7 +1116,7 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
         config_private_key_path = agent_configuration.private_key_paths.read(identifier)
         if config_private_key_path is None:
-            _create_private_key(
+            create_private_key(
                 identifier, private_key_file=str(aea_project_path / private_key_path)
             )
             agent_configuration.private_key_paths.update(identifier, private_key_path)

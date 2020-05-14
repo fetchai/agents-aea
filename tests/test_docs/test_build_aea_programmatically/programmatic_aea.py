@@ -25,8 +25,8 @@ from threading import Thread
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
+from aea.crypto.fetchai import FETCHAI, FetchAICrypto
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.skills.base import Skill
 
 ROOT_DIR = "./"
@@ -36,7 +36,7 @@ OUTPUT_FILE = "output_file"
 
 def run():
     # Create a private key
-    _create_fetchai_private_key()
+    FetchAICrypto().dump(open("fet_private_key.txt", mode="wb"))
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):

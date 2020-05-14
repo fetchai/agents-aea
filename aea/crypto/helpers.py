@@ -24,14 +24,9 @@ import logging
 import sys
 from typing import Optional
 
-from ecdsa import SECP256k1, SigningKey
-
-from eth_account import Account  # type: ignore
-
-from fetchai.ledger.crypto import Entity  # type: ignore
-
 import requests
 
+import aea.crypto
 from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -51,108 +46,34 @@ IDENTIFIER_TO_KEY_FILES = {
 logger = logging.getLogger(__name__)
 
 
-def _try_validate_fet_private_key_path(
-    private_key_path: str, exit_on_error: bool = True
-) -> None:
-    """
-    Try to validate a private key.
-
-    :param private_key_path: the path to the private key.
-    :return: None
-    :raises: an exception if the private key is invalid.
-    """
-    try:
-        with open(private_key_path, "r") as key:
-            data = key.read()
-            Entity.from_hex(data)
-    except Exception as e:
-        logger.error(
-            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
-                private_key_path, e
-            )
-        )
-        if exit_on_error:
-            sys.exit(1)
-        else:
-            raise
-
-
-def _try_validate_ethereum_private_key_path(
-    private_key_path: str, exit_on_error: bool = True
-) -> None:
-    """
-    Try to validate a private key.
-
-    :param private_key_path: the path to the private key.
-    :return: None
-    :raises: an exception if the private key is invalid.
-    """
-    try:
-        with open(private_key_path, "r") as key:
-            data = key.read()
-            Account.from_key(data)
-    except Exception as e:
-        logger.error(
-            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
-                private_key_path, e
-            )
-        )
-        if exit_on_error:
-            sys.exit(1)
-        else:
-            raise
-
-
-def _try_validate_cosmos_private_key_path(
-    private_key_path: str, exit_on_error: bool = True
-) -> None:
-    """
-    Try to validate a private key.
-
-    :param private_key_path: the path to the private key.
-    :return: None
-    :raises: an exception if the private key is invalid.
-    """
-    try:
-        with open(private_key_path, "r") as key:
-            data = key.read()
-            SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
-    except Exception as e:
-        logger.error(
-            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
-                private_key_path, e
-            )
-        )
-        if exit_on_error:
-            sys.exit(1)
-        else:
-            raise
-
-
 def _try_validate_private_key_path(
     ledger_id: str, private_key_path: str, exit_on_error: bool = True
 ) -> None:
     """
-    Try alidate a private key path.
+    Try validate a private key path.
 
     :param ledger_id: one of 'fetchai', 'ethereum'
     :param private_key_path: the path to the private key.
     :return: None
     :raises: ValueError if the identifier is invalid.
     """
-    if ledger_id == FETCHAI:
-        _try_validate_fet_private_key_path(private_key_path, exit_on_error)
-    elif ledger_id == ETHEREUM:
-        _try_validate_ethereum_private_key_path(private_key_path, exit_on_error)
-    elif ledger_id == COSMOS:
-        _try_validate_cosmos_private_key_path(private_key_path, exit_on_error)
-    else:
-        raise ValueError(
-            "Ledger id {} is not valid.".format(repr(ledger_id))
-        )  # pragma: no cover
+    try:
+        # to validate the file, we just try to create a crypto object
+        # with private_key_path as parameter
+        aea.crypto.make(ledger_id, private_key_path=private_key_path)
+    except Exception as e:
+        logger.error(
+            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                private_key_path, e
+            )
+        )
+        if exit_on_error:
+            sys.exit(1)
+        else:
+            raise
 
 
-def _create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None:
+def create_private_key(ledger_id: str, private_key_file: Optional[str] = None) -> None:
     """
     Create a private key for the specified ledger identifier.
 
@@ -160,63 +81,13 @@ def _create_private_key(ledger_id: str, private_key_file: Optional[str] = None) 
     :return: None
     :raises: ValueError if the identifier is invalid.
     """
-    if ledger_id == FETCHAI:
-        if private_key_file is None:
-            private_key_file = FETCHAI_PRIVATE_KEY_FILE
-        _create_fetchai_private_key(private_key_file)
-    elif ledger_id == ETHEREUM:
-        if private_key_file is None:
-            private_key_file = ETHEREUM_PRIVATE_KEY_FILE
-        _create_ethereum_private_key(private_key_file)
-    elif ledger_id == COSMOS:
-        if private_key_file is None:
-            private_key_file = COSMOS_PRIVATE_KEY_FILE
-        _create_cosmos_private_key(private_key_file)
-    else:
-        raise ValueError(
-            "Ledger id {} is not valid.".format(repr(ledger_id))
-        )  # pragma: no cover
+    if private_key_file is None:
+        private_key_file = IDENTIFIER_TO_KEY_FILES[ledger_id]
+    crypto = aea.crypto.make(ledger_id)
+    crypto.dump(open(private_key_file, "wb"))
 
 
-def _create_cosmos_private_key(
-    private_key_file: str = COSMOS_PRIVATE_KEY_FILE,
-) -> None:
-    """
-    Create a cosmos private key.
-
-    :return: None
-    """
-    signing_key = SigningKey.generate(curve=SECP256k1)
-    with open(private_key_file, "w+") as file:
-        file.write(signing_key.to_string().hex())
-
-
-def _create_fetchai_private_key(
-    private_key_file: str = FETCHAI_PRIVATE_KEY_FILE,
-) -> None:
-    """
-    Create a fetchai private key.
-
-    :return: None
-    """
-    entity = Entity()
-    with open(private_key_file, "w+") as file:
-        file.write(entity.private_key_hex)
-
-
-def _create_ethereum_private_key(
-    private_key_file: str = ETHEREUM_PRIVATE_KEY_FILE,
-) -> None:
-    """
-    Create an ethereum private key.
-
-    :return: None
-    """
-    account = Account.create()
-    with open(private_key_file, "w+") as file:
-        file.write(account.key.hex())
-
-
+# TODO replace the If-This-Then-That paradigm
 def _try_generate_testnet_wealth(identifier: str, address: str) -> None:
     """
     Generate wealth on a testnet.

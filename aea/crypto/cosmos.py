@@ -179,16 +179,6 @@ class CosmosCrypto(Crypto):
         address = bech32_encode("cosmos", five_bit_r)
         return address
 
-    @classmethod
-    def load(cls, fp: BinaryIO):
-        """
-        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
     def dump(self, fp: BinaryIO) -> None:
         """
         Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).

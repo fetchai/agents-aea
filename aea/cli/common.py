@@ -50,7 +50,7 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _create_private_key,
+    create_private_key,
     _try_validate_private_key_path,
 )
 from aea.crypto.wallet import SUPPORTED_CRYPTOS
@@ -224,7 +224,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
         config_private_key_path = aea_conf.private_key_paths.read(identifier)
         if config_private_key_path is None:
-            _create_private_key(identifier)
+            create_private_key(identifier)
             aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
             try:

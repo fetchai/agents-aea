@@ -27,16 +27,12 @@ import pytest
 
 import requests
 
-
+from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    _create_cosmos_private_key,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
+    create_private_key,
     _try_generate_testnet_wealth,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
     _try_validate_private_key_path,
 )
 
@@ -59,20 +55,20 @@ class TestHelperFile:
     def tests_private_keys(self):
         """Test the private keys."""
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        _try_validate_fet_private_key_path(private_key_path)
+        _try_validate_private_key_path(FETCHAI, private_key_path)
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
-            _try_validate_fet_private_key_path(private_key_path)
+            _try_validate_private_key_path(FETCHAI, private_key_path)
 
         private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        _try_validate_ethereum_private_key_path(private_key_path)
+        _try_validate_private_key_path(ETHEREUM, private_key_path)
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
-            _try_validate_ethereum_private_key_path(private_key_path)
+            _try_validate_private_key_path(ETHEREUM, private_key_path)
 
     @patch("aea.crypto.helpers.logger")
     def tests_generate_wealth_fetchai(self, mock_logging):
@@ -109,24 +105,18 @@ class TestHelperFile:
         _try_generate_testnet_wealth(FETCHAI, "address")
         _try_generate_testnet_wealth(ETHEREUM, "address")
 
-    @patch("aea.crypto.helpers._try_validate_fet_private_key_path")
-    @patch("aea.crypto.helpers._try_validate_ethereum_private_key_path")
+    @patch("builtins.open", mock_open())
     def test__try_validate_private_key_path_positive(self, *mocks):
         """Test _validate_private_key_path positive result."""
         _try_validate_private_key_path(FETCHAI, "path")
         _try_validate_private_key_path(ETHEREUM, "path")
 
     @patch("builtins.open", mock_open())
-    def test__create_fetchai_private_key_positive(self, *mocks):
-        """Test _create_ethereum_private_key positive result."""
-        _create_fetchai_private_key()
-
-    @patch("builtins.open", mock_open())
     def test__create_ethereum_private_key_positive(self, *mocks):
         """Test _create_ethereum_private_key positive result."""
-        _create_ethereum_private_key()
+        create_private_key(ETHEREUM)
 
     @patch("builtins.open", mock_open())
     def test__create_cosmos_private_key_positive(self, *mocks):
         """Test _create_cosmos_private_key positive result."""
-        _create_cosmos_private_key()
+        create_private_key(COSMOS)

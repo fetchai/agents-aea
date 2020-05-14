@@ -7,7 +7,7 @@ First, import the python and application specific libraries and set the static v
 import logging
 
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
+from aea.crypto.helpers import create_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
@@ -23,8 +23,8 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 ``` python
     # Create a private keys
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 ```
 
 ## Create the wallets
@@ -81,7 +81,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 import logging
 
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
+from aea.crypto.helpers import create_private_key, _try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
@@ -95,8 +95,8 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 def run():
     # Create a private keys
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 
     # Set up the wallets
     wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_1})

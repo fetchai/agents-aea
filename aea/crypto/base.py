@@ -106,16 +106,6 @@ class Crypto(ABC):
         :return: the recovered addresses
         """
 
-    @classmethod
-    @abstractmethod
-    def load(cls, fp: BinaryIO) -> "Crypto":
-        """
-        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
-        :return: None
-        """
-
     @abstractmethod
     def dump(self, fp: BinaryIO) -> None:
         """

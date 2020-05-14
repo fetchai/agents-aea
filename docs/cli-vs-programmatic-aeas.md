@@ -67,7 +67,7 @@ from typing import cast
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -88,7 +88,7 @@ logging.basicConfig(level=logging.INFO)
 
 def run():
     # Create a private key
-    _create_fetchai_private_key()
+    create_private_key(FETCHAI)
 
     # Set up the wallet, identity, oef connection, ledger and (empty) resources
     wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
