@@ -138,7 +138,7 @@ def test_transfer():
     assert tx_digest is not None, "Failed to submit transfer!"
     not_settled = True
     elapsed_time = 0
-    while not_settled and elapsed_time < 60:
+    while not_settled and elapsed_time < 180:
         elapsed_time += 2
         time.sleep(2)
         is_settled = ethereum_api.is_transaction_settled(tx_digest)
