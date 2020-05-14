@@ -99,6 +99,7 @@ class GenerateItemTestCase(TestCase):
         with self.assertRaises(ClickException) as cm:
             _generate_item(ctx_mock, "protocol", "path")
         expected_msg = (
-            "A protocol with this name already exists. Please choose a different name and try again."
+            "A protocol with this name already exists. "
+            "Please choose a different name and try again."
         )
         self.assertEqual(expected_msg, cm.exception.message)
