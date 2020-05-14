@@ -85,10 +85,10 @@ def skill(click_context, skill_name: str):
 
 
 @scaffold.command()
-@pass_ctx
-def decision_maker(ctx: Context):
+@click.pass_context
+def decision_maker(click_context):
     """Add a decision maker scaffolding to the configuration file and agent."""
-    _scaffold_dm(ctx)
+    _scaffold_dm(click_context)
 
 
 @clean_after
@@ -165,9 +165,10 @@ def _scaffold_item(click_context, item_type, item_name):
         raise click.ClickException(str(e))
 
 
-def _scaffold_dm(ctx: Context):
+def _scaffold_dm(click_context):
     """Add a scaffolded decision maker to the project and configuration."""
 
+    ctx = cast(Context, click_context.obj)
     existing_dm_path = getattr(ctx.agent_config, "decision_maker_path")
 
     # check if we already have a decision maker in the project
