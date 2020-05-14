@@ -19,17 +19,13 @@
 
 """This module contains the tests of the ethereum module."""
 
-import os
 from unittest.mock import MagicMock
 
 import pytest
 
 from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 
-from ..conftest import ROOT_DIR
-
-PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests", "data", "fet_private_key.txt")
-TESTNET_CONFIG = {"network": "testnet"}
+from ..conftest import FETCHAI_PRIVATE_KEY_PATH, FETCHAI_TESTNET_CONFIG
 
 
 def test_initialisation():
@@ -42,7 +38,7 @@ def test_initialisation():
         fet_crypto.address is not None
     ), "Address must not be None after Initialisation"
     assert FetchAICrypto(
-        PRIVATE_KEY_PATH
+        FETCHAI_PRIVATE_KEY_PATH
     ), "Couldn't load the fet private_key from the path!"
     assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
@@ -79,18 +75,18 @@ def test_recover_message():
 
 def test_dump_positive():
     """Test dump."""
-    account = FetchAICrypto(PRIVATE_KEY_PATH)
+    account = FetchAICrypto(FETCHAI_PRIVATE_KEY_PATH)
     account.dump(MagicMock())
 
 
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
-    fetch_api = FetchAIApi(**TESTNET_CONFIG)
+    fetch_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     fc = FetchAICrypto()
     balance = fetch_api.get_balance(fc.address)
     assert balance == 0, "New account has a positive balance."
-    fc = FetchAICrypto(private_key_path=PRIVATE_KEY_PATH)
+    fc = FetchAICrypto(private_key_path=FETCHAI_PRIVATE_KEY_PATH)
     balance = fetch_api.get_balance(fc.address)
     # TODO
     # assert balance > 0, "Existing account has no balance."
@@ -99,8 +95,8 @@ def test_get_balance():
 @pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
-    fetchai_api = FetchAIApi(**TESTNET_CONFIG)
-    fc1 = FetchAICrypto(private_key_path=PRIVATE_KEY_PATH)
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    fc1 = FetchAICrypto(private_key_path=FETCHAI_PRIVATE_KEY_PATH)
     fc2 = FetchAICrypto()
     amount = 40000
     fee = 30000

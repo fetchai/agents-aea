@@ -37,22 +37,16 @@ from aea.crypto.ethereum import ETHEREUM, EthereumApi, EthereumCrypto
 from aea.crypto.fetchai import FETCHAI, FetchAIApi, FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 
-from ..conftest import CUR_PATH
+from ..conftest import (
+    COSMOS_TESTNET_CONFIG,
+    CUR_PATH,
+    ETHEREUM_ADDRESS_ONE,
+    ETHEREUM_TESTNET_CONFIG,
+    FETCHAI_ADDRESS_ONE,
+    FETCHAI_TESTNET_CONFIG,
+)
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_COSMOS_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
-DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
-DEFAULT_ETHEREUM_CONFIG = {
-    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-    "chain_id": 3,
-    "gas_price": 20,
-}
-ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
-fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
-eth_address = "0x21795D753752ccC1AC728002D23Ba33cbF13b8b0"
-GAS_PRICE = "50"
-GAS_ID = "gwei"
 
 
 def _raise_exception(*args, **kwargs):
@@ -66,13 +60,13 @@ class TestLedgerApis:
         """Test the initialisation of the ledger APIs."""
         ledger_apis = LedgerApis(
             {
-                ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
-                FETCHAI: DEFAULT_FETCHAI_CONFIG,
-                COSMOS: DEFAULT_COSMOS_CONFIG,
+                ETHEREUM: ETHEREUM_TESTNET_CONFIG,
+                FETCHAI: FETCHAI_TESTNET_CONFIG,
+                COSMOS: COSMOS_TESTNET_CONFIG,
             },
             FETCHAI,
         )
-        assert ledger_apis.configs.get(ETHEREUM) == DEFAULT_ETHEREUM_CONFIG
+        assert ledger_apis.configs.get(ETHEREUM) == ETHEREUM_TESTNET_CONFIG
         assert ledger_apis.has_fetchai
         assert type(ledger_apis.fetchai_api) == FetchAIApi
         assert ledger_apis.has_ethereum
@@ -87,47 +81,47 @@ class TestLedgerApis:
     def test_eth_token_balance(self):
         """Test the token_balance for the eth tokens."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
 
         api = ledger_apis.apis[ETHEREUM]
         with mock.patch.object(api.api.eth, "getBalance", return_value=10):
-            balance = ledger_apis.token_balance(ETHEREUM, eth_address)
+            balance = ledger_apis.token_balance(ETHEREUM, ETHEREUM_ADDRESS_ONE)
             assert balance == 10
 
         with mock.patch.object(
             api.api.eth, "getBalance", return_value=-1, side_effect=Exception
         ):
-            balance = ledger_apis.token_balance(ETHEREUM, fet_address)
+            balance = ledger_apis.token_balance(ETHEREUM, FETCHAI_ADDRESS_ONE)
             assert balance == -1, "This must be -1 since the address is wrong"
 
     def test_unknown_token_balance(self):
         """Test the token_balance for the unknown tokens."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         with pytest.raises(AssertionError):
-            balance = ledger_apis.token_balance("UNKNOWN", fet_address)
+            balance = ledger_apis.token_balance("UNKNOWN", FETCHAI_ADDRESS_ONE)
             assert balance == 0, "Unknown identifier so it will return 0"
 
     def test_fet_token_balance(self):
         """Test the token_balance for the fet tokens."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
 
         api = ledger_apis.apis[FETCHAI]
         with mock.patch.object(api.api.tokens, "balance", return_value=10):
-            balance = ledger_apis.token_balance(FETCHAI, fet_address)
+            balance = ledger_apis.token_balance(FETCHAI, FETCHAI_ADDRESS_ONE)
             assert balance == 10
 
         with mock.patch.object(
             api.api.tokens, "balance", return_value=-1, side_effect=Exception
         ):
-            balance = ledger_apis.token_balance(FETCHAI, eth_address)
+            balance = ledger_apis.token_balance(FETCHAI, ETHEREUM_ADDRESS_ONE)
             assert balance == -1, "This must be -1 since the address is wrong"
 
     def test_transfer_fetchai(self):
@@ -135,7 +129,7 @@ class TestLedgerApis:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         fet_obj = FetchAICrypto(private_key_path=private_key_path)
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
 
@@ -147,7 +141,7 @@ class TestLedgerApis:
             with mock.patch.object(ledger_apis.apis.get(FETCHAI).api, "sync"):
                 tx_digest = ledger_apis.transfer(
                     fet_obj,
-                    fet_address,
+                    FETCHAI_ADDRESS_ONE,
                     amount=10,
                     tx_fee=10,
                     tx_nonce="transaction nonce",
@@ -159,7 +153,7 @@ class TestLedgerApis:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         fet_obj = FetchAICrypto(private_key_path=private_key_path)
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
 
@@ -168,7 +162,7 @@ class TestLedgerApis:
         ):
             tx_digest = ledger_apis.transfer(
                 fet_obj,
-                fet_address,
+                FETCHAI_ADDRESS_ONE,
                 amount=10,
                 tx_fee=10,
                 tx_nonce="transaction nonce",
@@ -180,7 +174,7 @@ class TestLedgerApis:
     #     private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
     #     eth_obj = EthereumCrypto(private_key_path=private_key_path)
     #     ledger_apis = LedgerApis(
-    #         {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+    #         {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
     #         FETCHAI,
     #     )
     #     with mock.patch.object(
@@ -213,7 +207,7 @@ class TestLedgerApis:
     #                     ):
     #                         tx_digest = ledger_apis.transfer(
     #                             eth_obj,
-    #                             eth_address,
+    #                             ETHEREUM_ADDRESS_ONE,
     #                             amount=10,
     #                             tx_fee=200000,
     #                             tx_nonce="transaction nonce",
@@ -225,7 +219,7 @@ class TestLedgerApis:
         private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
         eth_obj = EthereumCrypto(private_key_path=private_key_path)
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         with mock.patch.object(
@@ -236,7 +230,7 @@ class TestLedgerApis:
         ):
             tx_digest = ledger_apis.transfer(
                 eth_obj,
-                eth_address,
+                ETHEREUM_ADDRESS_ONE,
                 amount=10,
                 tx_fee=200000,
                 tx_nonce="transaction nonce",
@@ -246,7 +240,7 @@ class TestLedgerApis:
     def test_is_tx_settled_fetchai(self):
         """Test if the transaction is settled for fetchai."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
@@ -269,7 +263,7 @@ class TestLedgerApis:
     def test_is_tx_settled_ethereum(self):
         """Test if the transaction is settled for eth."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
@@ -294,7 +288,7 @@ class TestLedgerApis:
         seller = EthereumCrypto()
         client = EthereumCrypto()
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         tx_nonce = ledger_apis.generate_tx_nonce(
@@ -347,7 +341,7 @@ class TestLedgerApis:
         seller_crypto = FetchAICrypto()
         client_crypto = FetchAICrypto()
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         seller_address = seller_crypto.address
@@ -363,7 +357,7 @@ class TestLedgerApis:
         seller_crypto = FetchAICrypto()
         client_crypto = FetchAICrypto()
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
 
@@ -406,7 +400,7 @@ class TestLedgerApis:
     def test_generate_tx_nonce_positive(self, *mocks):
         """Test generate_tx_nonce positive result."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         result = ledger_apis.generate_tx_nonce(FETCHAI, "seller", "client")
@@ -415,7 +409,7 @@ class TestLedgerApis:
     def test_is_tx_valid_negative(self, *mocks):
         """Test is_tx_valid init negative result."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         with mock.patch.object(
@@ -429,7 +423,7 @@ class TestLedgerApis:
     def test_has_default_ledger_positive(self):
         """Test has_default_ledger init positive result."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {ETHEREUM: ETHEREUM_TESTNET_CONFIG, FETCHAI: FETCHAI_TESTNET_CONFIG},
             FETCHAI,
         )
         assert ledger_apis.has_default_ledger

@@ -20,7 +20,6 @@
 """This module contains the tests of the ethereum module."""
 
 import hashlib
-import os
 import time
 from unittest.mock import MagicMock
 
@@ -28,19 +27,15 @@ import pytest
 
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 
-from ..conftest import ROOT_DIR
-
-PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/eth_private_key.txt")
-TESTNET_CONFIG = {
-    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-    "gas_price": 50,
-}
+from ..conftest import ETHEREUM_PRIVATE_KEY_PATH, ETHEREUM_TESTNET_CONFIG
 
 
 def test_creation():
     """Test the creation of the crypto_objects."""
     assert EthereumCrypto(), "Managed to initialise the eth_account"
-    assert EthereumCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
+    assert EthereumCrypto(
+        ETHEREUM_PRIVATE_KEY_PATH
+    ), "Managed to load the eth private key"
     assert EthereumCrypto("./"), "Managed to create a new eth private key"
 
 
@@ -66,7 +61,7 @@ def test_derive_address():
 
 def test_sign_and_recover_message():
     """Test the signing and the recovery function for the eth_crypto."""
-    account = EthereumCrypto(PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addresses = account.recover_message(
@@ -80,7 +75,7 @@ def test_sign_and_recover_message():
 
 def test_sign_and_recover_message_deprecated():
     """Test the signing and the recovery function for the eth_crypto."""
-    account = EthereumCrypto(PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
     message = b"hello"
     message_hash = hashlib.sha256(message).digest()
     sign_bytes = account.sign_message(message=message_hash, is_deprecated_mode=True)
@@ -96,29 +91,29 @@ def test_sign_and_recover_message_deprecated():
 
 def test_dump_positive():
     """Test dump."""
-    account = EthereumCrypto(PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
     account.dump(MagicMock())
 
 
 def test_api_creation():
     """Test api instantiation."""
-    assert EthereumApi(**TESTNET_CONFIG), "Failed to initialise the api"
+    assert EthereumApi(**ETHEREUM_TESTNET_CONFIG), "Failed to initialise the api"
 
 
 def test_api_none():
     """Test the "api" of the cryptoApi is none."""
-    eth_api = EthereumApi(**TESTNET_CONFIG)
+    eth_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
     assert eth_api.api is not None, "The api property is None."
 
 
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
-    ethereum_api = EthereumApi(**TESTNET_CONFIG)
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
     ec = EthereumCrypto()
     balance = ethereum_api.get_balance(ec.address)
     assert balance == 0, "New account has a positive balance."
-    ec = EthereumCrypto(private_key_path=PRIVATE_KEY_PATH)
+    ec = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     balance = ethereum_api.get_balance(ec.address)
     assert balance > 0, "Existing account has no balance."
 
@@ -126,8 +121,8 @@ def test_get_balance():
 @pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
-    ethereum_api = EthereumApi(**TESTNET_CONFIG)
-    ec1 = EthereumCrypto(private_key_path=PRIVATE_KEY_PATH)
+    ethereum_api = EthereumApi(**ETHEREUM_TESTNET_CONFIG)
+    ec1 = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     ec2 = EthereumCrypto()
     amount = 40000
     fee = 30000

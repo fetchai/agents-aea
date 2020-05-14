@@ -19,7 +19,6 @@
 
 """This module contains the tests of the ethereum module."""
 
-import os
 import time
 from unittest.mock import MagicMock
 
@@ -27,17 +26,14 @@ import pytest
 
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 
-from ..conftest import ROOT_DIR
-
-PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/cosmos_private_key.txt")
-TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
+from ..conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
 
 
 def test_creation():
     """Test the creation of the crypto_objects."""
     assert CosmosCrypto(), "Did not manage to initialise the crypto module"
     assert CosmosCrypto(
-        PRIVATE_KEY_PATH
+        COSMOS_PRIVATE_KEY_PATH
     ), "Did not manage to load the cosmos private key"
     assert CosmosCrypto(
         "./"
@@ -58,7 +54,7 @@ def test_initialization():
 
 def test_sign_and_recover_message():
     """Test the signing and the recovery function for the eth_crypto."""
-    account = CosmosCrypto(PRIVATE_KEY_PATH)
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addresses = account.recover_message(
@@ -71,29 +67,29 @@ def test_sign_and_recover_message():
 
 def test_dump_positive():
     """Test dump."""
-    account = CosmosCrypto(PRIVATE_KEY_PATH)
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
     account.dump(MagicMock())
 
 
 def test_api_creation():
     """Test api instantiation."""
-    assert CosmosApi(**TESTNET_CONFIG), "Failed to initialise the api"
+    assert CosmosApi(**COSMOS_TESTNET_CONFIG), "Failed to initialise the api"
 
 
 def test_api_none():
     """Test the "api" of the cryptoApi is none."""
-    cosmos_api = CosmosApi(**TESTNET_CONFIG)
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
     assert cosmos_api.api is None, "The api property is not None."
 
 
 @pytest.mark.network
 def test_get_balance():
     """Test the balance is zero for a new account."""
-    cosmos_api = CosmosApi(**TESTNET_CONFIG)
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
     cc = CosmosCrypto()
     balance = cosmos_api.get_balance(cc.address)
     assert balance == 0, "New account has a positive balance."
-    cc = CosmosCrypto(private_key_path=PRIVATE_KEY_PATH)
+    cc = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
     balance = cosmos_api.get_balance(cc.address)
     assert balance > 0, "Existing account has no balance."
 
@@ -101,8 +97,8 @@ def test_get_balance():
 @pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
-    cosmos_api = CosmosApi(**TESTNET_CONFIG)
-    cc1 = CosmosCrypto(private_key_path=PRIVATE_KEY_PATH)
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    cc1 = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
     cc2 = CosmosCrypto()
     amount = 10000
     fee = 1000
