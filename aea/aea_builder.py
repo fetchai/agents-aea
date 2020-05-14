@@ -635,15 +635,21 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
+    def build(
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        ledger_apis: Optional[LedgerApis] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param ledger_api: the api ledger that we want to use.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
+        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
@@ -652,7 +658,7 @@ class AEABuilder:
             identity,
             connections,
             wallet,
-            LedgerApis(self.ledger_apis_config, self._default_ledger),
+            ledger_apis,
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
@@ -663,6 +669,34 @@ class AEABuilder:
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
+        """
+        Load the ledger apis.
+
+        :param ledger_apis: the ledger apis provided
+        :return: ledger apis
+        """
+        if ledger_apis is not None:
+            self._check_consistent(ledger_apis)
+        else:
+            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
+        return ledger_apis
+
+    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
+        """
+        Check the ledger apis are consistent with the configs
+
+        :param ledger_apis: the ledger apis provided
+        :return: None
+        """
+        if self.ledger_apis_config != {}:
+            assert (
+                ledger_apis.configs == self.ledger_apis_config
+            ), "Config of LedgerApis does not match provided configs."
+        assert (
+            ledger_apis.default_ledger_id == self._default_ledger
+        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
     def _update_identity(

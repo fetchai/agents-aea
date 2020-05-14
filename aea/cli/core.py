@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """Core definitions for the AEA command-line tool."""
 
 import os
@@ -70,7 +71,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-
+from aea.helpers.win32 import enable_ctrl_c_support
 
 FUNDS_RELEASE_TIMEOUT = 10
 
@@ -92,6 +93,9 @@ def cli(click_context, skip_consistency_check: bool) -> None:
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
+
+    # enables CTRL+C support on windows!
+    enable_ctrl_c_support()
 
 
 @cli.command()
@@ -238,10 +242,13 @@ def get_address(click_context, type_):
 
 def _try_get_balance(agent_config, wallet, type_):
     try:
+        if type_ not in agent_config.ledger_apis_dict:
+            raise ValueError(
+                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
+            )
         ledger_apis = LedgerApis(
             agent_config.ledger_apis_dict, agent_config.default_ledger
         )
-
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
