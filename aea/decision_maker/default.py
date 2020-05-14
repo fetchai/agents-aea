@@ -22,12 +22,13 @@
 import copy
 import logging
 import math
+from enum import Enum
 from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
-from aea.decision_maker.base import DecisionMaker as BaseDecisionMaker
-from aea.decision_maker.base import GoalPursuitReadiness
+from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.base import LedgerStateProxy as BaseLedgerStateProxy
 from aea.decision_maker.base import OwnershipState as BaseOwnershipState
 from aea.decision_maker.base import Preferences as BasePreferences
@@ -38,6 +39,7 @@ from aea.helpers.preference_representations.base import (
     linear_utility,
     logarithmic_utility,
 )
+from aea.identity.base import Identity
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -49,6 +51,41 @@ QUANTITY_SHIFT = 100
 OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
+
+
+class GoalPursuitReadiness:
+    """The goal pursuit readiness."""
+
+    class Status(Enum):
+        """
+        The enum of the readiness status.
+
+        In particular, it can be one of the following:
+
+        - Status.READY: when the agent is ready to pursuit its goal
+        - Status.NOT_READY: when the agent is not ready to pursuit its goal
+        """
+
+        READY = "ready"
+        NOT_READY = "not_ready"
+
+    def __init__(self):
+        """Instantiate the goal pursuit readiness."""
+        self._status = GoalPursuitReadiness.Status.NOT_READY
+
+    @property
+    def is_ready(self) -> bool:
+        """Get the readiness."""
+        return self._status.value == GoalPursuitReadiness.Status.READY.value
+
+    def update(self, new_status: Status) -> None:
+        """
+        Update the goal pursuit readiness.
+
+        :param new_status: the new status
+        :return: None
+        """
+        self._status = new_status
 
 
 class OwnershipState(BaseOwnershipState):
@@ -493,10 +530,10 @@ class Preferences(BasePreferences):
         return preferences
 
 
-class DecisionMaker(BaseDecisionMaker):
+class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis):
         """
         Initialize the decision maker.
 
@@ -504,19 +541,16 @@ class DecisionMaker(BaseDecisionMaker):
         :param wallet: the wallet
         :param ledger_apis: the ledger apis
         """
-        ledger_apis = cast(Optional[LedgerApis], kwargs.pop("ledger_apis", None))
-        assert ledger_apis is not None, "Ledger apis not set!"
-        ownership_state = OwnershipState()
-        ledger_state_proxy = LedgerStateProxy(ledger_apis)
-        preferences = Preferences()
+        # TODO: remove ledger_api from constructor
+        kwargs = {
+            "goal_pursuit_readiness": GoalPursuitReadiness(),
+            "ownership_state": OwnershipState(),
+            "ledger_state_proxy": LedgerStateProxy(ledger_apis),
+            "preferences": Preferences(),
+        }
         super().__init__(
-            ownership_state=ownership_state,
-            ledger_state_proxy=ledger_state_proxy,
-            preferences=preferences,
-            **kwargs,
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis, **kwargs,
         )
-        # TODO: remove ledger apis
-        self.ledger_apis = ledger_apis
 
     def handle(self, message: InternalMessage) -> None:
         """
@@ -540,15 +574,15 @@ class DecisionMaker(BaseDecisionMaker):
         if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:
             logger.error(
                 "[{}]: ledger_id={} is not supported".format(
-                    self._agent_name, tx_message.ledger_id
+                    self.agent_name, tx_message.ledger_id
                 )
             )
             return
 
-        if not self.goal_pursuit_readiness.is_ready:
+        if not self.context.goal_pursuit_readiness.is_ready:
             logger.debug(
                 "[{}]: Preferences and ownership state not initialized!".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )
 
@@ -566,7 +600,7 @@ class DecisionMaker(BaseDecisionMaker):
         else:
             logger.error(
                 "[{}]: Unexpected transaction message performative".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )  # pragma: no cover
 
@@ -628,17 +662,20 @@ class DecisionMaker(BaseDecisionMaker):
         :param tx_message: the transaction message
         :return: whether the transaction is utility enhancing or not
         """
-        if self.preferences.is_initialized and self.ownership_state.is_initialized:
+        if (
+            self.context.preferences.is_initialized
+            and self.context.ownership_state.is_initialized
+        ):
             is_utility_enhancing = (
-                self.preferences.utility_diff_from_transaction(
-                    self.ownership_state, tx_message
+                self.context.preferences.utility_diff_from_transaction(
+                    self.context.ownership_state, tx_message
                 )
                 >= 0.0
             )
         else:
             logger.warning(
                 "[{}]: Cannot verify whether transaction improves utility. Assuming it does!".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )
             is_utility_enhancing = True
@@ -652,22 +689,26 @@ class DecisionMaker(BaseDecisionMaker):
         :return: whether the transaction is affordable or not
         """
         is_affordable = True
-        if self.ownership_state.is_initialized:
-            is_affordable = self.ownership_state.is_affordable_transaction(tx_message)
-        if self.ledger_state_proxy.is_initialized and (
+        if self.context.ownership_state.is_initialized:
+            is_affordable = self.context.ownership_state.is_affordable_transaction(
+                tx_message
+            )
+        if self.context.ledger_state_proxy.is_initialized and (
             tx_message.ledger_id != OFF_CHAIN
         ):
             is_affordable = (
                 is_affordable
-                and self.ledger_state_proxy.is_affordable_transaction(tx_message)
+                and self.context.ledger_state_proxy.is_affordable_transaction(
+                    tx_message
+                )
             )
-        if not self.ownership_state.is_initialized and not (
-            self.ledger_state_proxy.is_initialized
+        if not self.context.ownership_state.is_initialized and not (
+            self.context.ledger_state_proxy.is_initialized
             and (tx_message.ledger_id != OFF_CHAIN)
         ):
             logger.warning(
                 "[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )
             is_affordable = True
@@ -683,14 +724,14 @@ class DecisionMaker(BaseDecisionMaker):
         if tx_message.ledger_id == OFF_CHAIN:
             logger.info(
                 "[{}]: Cannot settle transaction, settlement happens off chain!".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )
             tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
         else:
-            logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
+            logger.info("[{}]: Settling transaction on chain!".format(self.agent_name))
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
-            tx_digest = self.ledger_apis.transfer(
+            tx_digest = self.context.ledger_apis.transfer(
                 crypto_object,
                 tx_message.tx_counterparty_addr,
                 tx_message.counterparty_amount,
@@ -816,22 +857,24 @@ class DecisionMaker(BaseDecisionMaker):
         ):
             logger.warning(
                 "[{}]: Applying ownership_state and preferences initialization!".format(
-                    self._agent_name
+                    self.agent_name
                 )
             )
-            self._ownership_state.set(
+            self.context.ownership_state.set(
                 amount_by_currency_id=state_update_message.amount_by_currency_id,
                 quantities_by_good_id=state_update_message.quantities_by_good_id,
             )
-            self._preferences.set(
+            self.context.preferences.set(
                 exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
                 utility_params_by_good_id=state_update_message.utility_params_by_good_id,
                 tx_fee=state_update_message.tx_fee,
             )
-            self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
+            self.context.goal_pursuit_readiness.update(
+                GoalPursuitReadiness.Status.READY
+            )
         elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:
-            logger.info("[{}]: Applying state update!".format(self._agent_name))
-            self._ownership_state.apply_delta(
+            logger.info("[{}]: Applying state update!".format(self.agent_name))
+            self.context.ownership_state.apply_delta(
                 delta_amount_by_currency_id=state_update_message.amount_by_currency_id,
                 delta_quantities_by_good_id=state_update_message.quantities_by_good_id,
             )

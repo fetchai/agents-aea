@@ -43,7 +43,6 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.active import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address, OutBox
 from aea.protocols.base import Message
@@ -165,20 +164,10 @@ class SkillContext:
         return self._get_agent_context().decision_maker_message_queue
 
     @property
-    def agent_ownership_state(self) -> OwnershipState:
-        """Get ownership state."""
-        return cast(OwnershipState, self._get_agent_context().ownership_state)
-
-    @property
-    def agent_preferences(self) -> Preferences:
-        """Get preferences."""
-        return cast(Preferences, self._get_agent_context().preferences)
-
-    @property
-    def agent_goal_pursuit_readiness(self) -> GoalPursuitReadiness:
-        """Get the goal pursuit readiness."""
+    def decision_maker_handler_context(self) -> SimpleNamespace:
+        """Get decision maker handler context."""
         return cast(
-            GoalPursuitReadiness, self._get_agent_context().goal_pursuit_readiness
+            SimpleNamespace, self._get_agent_context().decision_maker_handler_context
         )
 
     @property

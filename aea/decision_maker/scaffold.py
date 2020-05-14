@@ -19,169 +19,34 @@
 
 """This module contains a scaffold of the decision maker class and auxilliary classes."""
 
-from typing import List
+from typing import Any, Dict
 
-from aea.decision_maker.base import DecisionMaker as BaseDecisionMaker
-from aea.decision_maker.base import LedgerStateProxy as BaseLedgerStateProxy
-from aea.decision_maker.base import OwnershipState as BaseOwnershipState
-from aea.decision_maker.base import Preferences as BasePreferences
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
 from aea.decision_maker.messages.base import InternalMessage
-from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.identity.base import Identity
 
 
-class OwnershipState(BaseOwnershipState):
-    """Represent the ownership state of an agent."""
-
-    def __init__(self):
-        """
-        Instantiate an ownership state object.
-
-        :param decision_maker: the decision maker
-        """
-        raise NotImplementedError
-
-    def set(self, **kwargs) -> None:
-        """
-        Set values on the ownership state.
-
-        This method is used to initialize the ownership state with raw values.
-
-        :param kwargs: the keyword arguments required to set the ownership state.
-        """
-        raise NotImplementedError
-
-    def apply_delta(self, **kwargs) -> None:
-        """
-        Apply a state update to the ownership state.
-
-        This method is used to apply a raw state update without a transaction.
-
-        :param kwargs: the keyword arguments required to apply an update the ownership state.
-        :return: None
-        """
-        raise NotImplementedError
-
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction is affordable (and consistent).
-
-        :param tx_message: the transaction message
-        :return: True if the transaction is legal wrt the current state, false otherwise.
-        """
-        raise NotImplementedError
-
-    def apply_transactions(
-        self, transactions: List[TransactionMessage]
-    ) -> "OwnershipState":
-        """
-        Apply a list of transactions to (a copy of) the current state.
-
-        :param transactions: the sequence of transaction messages.
-        :return: the final state.
-        """
-        raise NotImplementedError
-
-    def __copy__(self) -> "OwnershipState":
-        """Copy the object."""
-        raise NotImplementedError
-
-
-class LedgerStateProxy(BaseLedgerStateProxy):
-    """Class to represent a proxy to a ledger state."""
-
-    def __init__(self):
-        """Instantiate a ledger state proxy."""
-        raise NotImplementedError
-
-    @property
-    def is_initialized(self) -> bool:
-        """Get the initialization status."""
-        raise NotImplementedError
-
-    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the transaction is affordable on the default ledger.
-
-        :param tx_message: the transaction message
-        :return: whether the transaction is affordable on the ledger
-        """
-        raise NotImplementedError
-
-
-class Preferences(BasePreferences):
-    """Class to represent the preferences."""
-
-    def __init__(self):
-        """
-        Instantiate an agent preference object.
-        """
-        raise NotImplementedError
-
-    def set(self, **kwargs) -> None:
-        """
-        Set values on the preferences.
-
-        This method is used to initialize the preferences with raw values.
-
-        :param kwargs: the keyword arguments required to apply an update the preferences.
-        """
-        raise NotImplementedError
-
-    @property
-    def is_initialized(self) -> bool:
-        """
-        Get the initialization status.
-
-        Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
-        """
-        raise NotImplementedError
-
-    def marginal_utility(self, ownership_state: BaseOwnershipState, **kwargs) -> float:
-        """
-        Compute the marginal utility.
-
-        :param ownership_state: the ownership state against which to compute the marginal utility.
-        :param kwargs: additional key word arguments
-        :return: the marginal utility score
-        """
-        raise NotImplementedError
-
-    def utility_diff_from_transaction(
-        self,
-        ownership_state: BaseOwnershipState,
-        tx_message: TransactionMessage,
-        **kwargs
-    ) -> float:
-        """
-        Simulate a transaction and get the resulting utility difference (taking into account the fee).
-
-        :param ownership_state: the ownership state against which to apply the transaction.
-        :param tx_message: a transaction message.
-        :param kwargs: additional key word arguments
-        :return: the score.
-        """
-        raise NotImplementedError
-
-    def __copy__(self) -> "Preferences":
-        """Copy the object."""
-        raise NotImplementedError
-
-
-class DecisionMaker(BaseDecisionMaker):
+class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, identity: Identity, wallet: Wallet, ledger_apis: LedgerApis):
         """
         Initialize the decision maker.
+
+        :param identity: the identity
+        :param wallet: the wallet
+        :param ledger_apis: the ledger apis
         """
-        ownership_state = OwnershipState()
-        ledger_state_proxy = LedgerStateProxy()
-        preferences = Preferences()
+        # TODO: remove ledger_api from constructor
+        kwargs = {
+            # Add your objects here, they will be accessible in the `handle` method via `self.context`.
+            # They will also be accessible from the skill context.
+        }  # type: Dict[str, Any]
+        # You MUST NOT modify the constructor below:
         super().__init__(
-            ownership_state=ownership_state,
-            ledger_state_proxy=ledger_state_proxy,
-            preferences=preferences,
-            **kwargs,
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis, **kwargs,
         )
 
     def handle(self, message: InternalMessage) -> None:

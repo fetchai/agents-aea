@@ -24,9 +24,9 @@ import logging
 import threading
 import uuid
 from abc import ABC, abstractmethod
-from enum import Enum
 from queue import Queue
 from threading import Thread
+from types import SimpleNamespace
 from typing import List, Optional
 
 from aea.crypto.wallet import Wallet
@@ -47,41 +47,6 @@ def _hash(access_code: str) -> str:
     """
     result = hashlib.sha224(access_code.encode("utf-8")).hexdigest()
     return result
-
-
-class GoalPursuitReadiness:
-    """The goal pursuit readiness."""
-
-    class Status(Enum):
-        """
-        The enum of the readiness status.
-
-        In particular, it can be one of the following:
-
-        - Status.READY: when the agent is ready to pursuit its goal
-        - Status.NOT_READY: when the agent is not ready to pursuit its goal
-        """
-
-        READY = "ready"
-        NOT_READY = "not_ready"
-
-    def __init__(self):
-        """Instantiate the goal pursuit readiness."""
-        self._status = GoalPursuitReadiness.Status.NOT_READY
-
-    @property
-    def is_ready(self) -> bool:
-        """Get the readiness."""
-        return self._status.value == GoalPursuitReadiness.Status.READY.value
-
-    def update(self, new_status: Status) -> None:
-        """
-        Update the goal pursuit readiness.
-
-        :param new_status: the new status
-        :return: None
-        """
-        self._status = new_status
 
 
 class OwnershipState(ABC):
@@ -137,7 +102,7 @@ class OwnershipState(ABC):
         """Copy the object."""
 
 
-class LedgerStateProxy:
+class LedgerStateProxy(ABC):
     """Class to represent a proxy to a ledger state."""
 
     @property
@@ -155,7 +120,7 @@ class LedgerStateProxy:
         """
 
 
-class Preferences:
+class Preferences(ABC):
     """Class to represent the preferences."""
 
     @abstractmethod
@@ -296,39 +261,77 @@ class ProtectedQueue(Queue):
         return internal_message
 
 
+class DecisionMakerHandler(ABC):
+    """This class implements the decision maker."""
+
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs):
+        """
+        Initialize the decision maker handler.
+
+        :param identity: the identity
+        :param wallet: the wallet
+        :param kwargs: the key word arguments
+        """
+        self._identity = identity
+        self._wallet = wallet
+        self._context = SimpleNamespace(**kwargs)
+        self._message_out_queue = Queue()  # type: Queue
+
+    @property
+    def agent_name(self) -> str:
+        return self.identity.name
+
+    @property
+    def identity(self) -> Identity:
+        """The identity of the agent."""
+        return self._identity
+
+    @property
+    def wallet(self) -> Wallet:
+        """The wallet of the agent."""
+        return self._wallet
+
+    @property
+    def context(self) -> SimpleNamespace:
+        """Get the context."""
+        return self._context
+
+    @property
+    def message_out_queue(self) -> Queue:
+        """Get (out) queue."""
+        return self._message_out_queue
+
+    @abstractmethod
+    def handle(self, message: InternalMessage) -> None:
+        """
+        Handle an internal message from the skills.
+
+        :param message: the internal message
+        :return: None
+        """
+
+
 class DecisionMaker:
     """This class implements the decision maker."""
 
     def __init__(
-        self,
-        identity: Identity,
-        wallet: Wallet,
-        ownership_state: OwnershipState,
-        ledger_state_proxy: LedgerStateProxy,
-        preferences: Preferences,
-        **kwargs,
+        self, decision_maker_handler: DecisionMakerHandler,
     ):
         """
         Initialize the decision maker.
 
-        :param identity: the identity
-        :param wallet: the wallet
-        :param ledger_apis: the ledger apis
+        :param agent_name: the agent name
+        :param decision_maker_handler: the decision maker handler
         """
-        self._kwargs = kwargs
-        self._agent_name = identity.name
-        self._wallet = wallet
+        self._agent_name = decision_maker_handler.identity.name
         self._queue_access_code = uuid.uuid4().hex
         self._message_in_queue = ProtectedQueue(
             self._queue_access_code
         )  # type: ProtectedQueue
-        self._message_out_queue = Queue()  # type: Queue
-        self._ownership_state = ownership_state
-        self._ledger_state_proxy = ledger_state_proxy
-        self._preferences = preferences
-        self._goal_pursuit_readiness = GoalPursuitReadiness()
+        self._decision_maker_handler = decision_maker_handler
         self._thread = None  # type: Optional[Thread]
         self._lock = threading.Lock()
+        self._message_out_queue = decision_maker_handler.message_out_queue
         self._stopped = True
 
     @property
@@ -342,29 +345,9 @@ class DecisionMaker:
         return self._message_out_queue
 
     @property
-    def wallet(self) -> Wallet:
-        """Get wallet."""
-        return self._wallet
-
-    @property
-    def ownership_state(self) -> OwnershipState:
-        """Get ownership state."""
-        return self._ownership_state
-
-    @property
-    def ledger_state_proxy(self) -> LedgerStateProxy:
-        """Get ledger state proxy."""
-        return self._ledger_state_proxy
-
-    @property
-    def preferences(self) -> Preferences:
-        """Get preferences."""
-        return self._preferences
-
-    @property
-    def goal_pursuit_readiness(self) -> GoalPursuitReadiness:
-        """Get readiness of agent to pursuit its goals."""
-        return self._goal_pursuit_readiness
+    def decision_maker_handler(self) -> DecisionMakerHandler:
+        """Get the decision maker handler."""
+        return self._decision_maker_handler
 
     def start(self) -> None:
         """Start the decision maker."""
@@ -421,7 +404,6 @@ class DecisionMaker:
                     )
                 )
 
-    @abstractmethod
     def handle(self, message: InternalMessage) -> None:
         """
         Handle an internal message from the skills.
@@ -429,3 +411,4 @@ class DecisionMaker:
         :param message: the internal message
         :return: None
         """
+        self.decision_maker_handler.handle(message)
