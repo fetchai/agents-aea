@@ -20,6 +20,8 @@
 from pathlib import Path
 from unittest import TestCase, mock
 
+import pytest
+
 from aea.cli import cli
 from aea.cli.core import (
     _try_add_key,
@@ -31,6 +33,8 @@ from aea.cli.core import (
 )
 from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.exceptions import AEATestingException
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
@@ -53,9 +57,8 @@ class TryGetBalanceTestCase(TestCase):
     def test__try_get_balance_positive(self):
         """Test for _try_get_balance method positive result."""
         agent_config = mock.Mock()
-        ledger_apis = mock.Mock()
-        ledger_apis.read_all = lambda: [["id", "config"], ["id", "config"]]
-        agent_config.ledger_apis = ledger_apis
+        ledger_apis = {"type_": {"address": "some-adress"}}
+        agent_config.ledger_apis_dict = ledger_apis
 
         wallet_mock = mock.Mock()
         wallet_mock.addresses = {"type_": "some-adress"}
@@ -177,7 +180,7 @@ class GetAddressCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._validate_private_key_path")
+@mock.patch("aea.cli.core._try_validate_private_key_path")
 @mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):
     """Test case for CLI add_key command."""
@@ -197,3 +200,28 @@ class AddKeyCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+class TestWealthCommands(AEATestCaseMany):
+    """Test case for CLI wealth commands."""
+
+    def test_wealth_commands(self):
+        """Test wealth commands."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+
+        self.generate_private_key()
+        self.add_private_key()
+
+        self.generate_wealth()
+
+        settings = {"unsupported_crypto": "path"}
+        self.force_set_config("agent.private_key_paths", settings)
+        with pytest.raises(AEATestingException) as excinfo:
+            self.generate_wealth()
+
+        assert "Unsupported identifier in private key paths." in str(excinfo.value)

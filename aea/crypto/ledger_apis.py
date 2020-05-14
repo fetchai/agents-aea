@@ -25,13 +25,18 @@ import time
 from typing import Any, Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
-from aea.crypto.ethereum import ETHEREUM, EthereumApi
-from aea.crypto.fetchai import FETCHAI, FetchAIApi
+from aea.crypto.cosmos import COSMOS, COSMOS_CURRENCY, CosmosApi
+from aea.crypto.ethereum import ETHEREUM, ETHEREUM_CURRENCY, EthereumApi
+from aea.crypto.fetchai import FETCHAI, FETCHAI_CURRENCY, FetchAIApi
 from aea.mail.base import Address
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
-SUPPORTED_CURRENCIES = {ETHEREUM: "ETH", FETCHAI: "FET"}
+SUPPORTED_LEDGER_APIS = [COSMOS, ETHEREUM, FETCHAI]
+SUPPORTED_CURRENCIES = {
+    COSMOS: COSMOS_CURRENCY,
+    ETHEREUM: ETHEREUM_CURRENCY,
+    FETCHAI: FETCHAI_CURRENCY,
+}
 IDENTIFIER_FOR_UNAVAILABLE_BALANCE = -1
 
 logger = logging.getLogger(__name__)
@@ -40,6 +45,50 @@ MAX_CONNECTION_RETRY = 3
 GAS_PRICE = "50"
 GAS_ID = "gwei"
 LEDGER_STATUS_UNKNOWN = "UNKNOWN"
+
+
+def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> LedgerApi:
+    """
+    Instantiate a ledger api.
+
+    :param identifier: the ledger identifier
+    :param config: the config of the api
+    :return: the ledger api
+    """
+    retry = 0
+    is_connected = False
+    while retry < MAX_CONNECTION_RETRY:
+        if identifier not in SUPPORTED_LEDGER_APIS:
+            raise ValueError(
+                "Unsupported identifier {} in ledger apis.".format(identifier)
+            )
+        try:
+            if identifier == FETCHAI:
+                api = FetchAIApi(**config)  # type: LedgerApi
+            elif identifier == ETHEREUM:
+                api = EthereumApi(
+                    cast(str, config["address"]), cast(str, config["gas_price"])
+                )
+            elif identifier == COSMOS:
+                api = CosmosApi(**config)
+            is_connected = True
+            break
+        except Exception:  # pragma: no cover
+            retry += 1
+            logger.debug(
+                "Connection attempt {} to {} ledger with provided config {} failed.".format(
+                    retry, identifier, config
+                )
+            )
+            time.sleep(0.5)
+    if not is_connected:  # pragma: no cover
+        logger.error(
+            "Cannot connect to {} ledger with provided config {} after {} attemps. Giving up!".format(
+                identifier, config, MAX_CONNECTION_RETRY
+            )
+        )
+        sys.exit(1)
+    return api
 
 
 class LedgerApis:
@@ -57,60 +106,11 @@ class LedgerApis:
         :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, LedgerApi]
-        configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         for identifier, config in ledger_api_configs.items():
-            retry = 0
-            is_connected = False
-            if identifier == FETCHAI:
-                while retry < MAX_CONNECTION_RETRY:
-                    try:
-                        api = FetchAIApi(**config)  # type: LedgerApi
-                        is_connected = True
-                        break
-                    except Exception:
-                        retry += 1
-                        logger.debug(
-                            "Connection attempt {} to fetchai ledger with provided config failed.".format(
-                                retry
-                            )
-                        )
-                        time.sleep(0.5)
-                if not is_connected:
-                    logger.error(
-                        "Cannot connect to fetchai ledger with provided config after {} attemps. Giving up!".format(
-                            MAX_CONNECTION_RETRY
-                        )
-                    )
-                    sys.exit(1)
-            elif identifier == ETHEREUM:
-                while retry < MAX_CONNECTION_RETRY:
-                    try:
-                        api = EthereumApi(
-                            cast(str, config["address"]), cast(str, config["gas_price"])
-                        )
-                        is_connected = True
-                        break
-                    except Exception:
-                        retry += 1
-                        logger.debug(
-                            "Connection attempt {} to ethereum ledger with provided config failed.".format(
-                                retry
-                            )
-                        )
-                        time.sleep(0.5)
-                if not is_connected:
-                    logger.error(
-                        "Cannot connect to ethereum ledger with provided config after {} attemps. Giving up!".format(
-                            MAX_CONNECTION_RETRY
-                        )
-                    )
-                    sys.exit(1)
-            else:
-                raise ValueError("Unsupported identifier in ledger apis.")
+            api = _instantiate_api(identifier, config)
             apis[identifier] = api
-            configs[identifier] = config
         self._apis = apis
-        self._configs = configs
+        self._configs = ledger_api_configs
         self._default_ledger_id = default_ledger_id
 
     @property
@@ -144,6 +144,17 @@ class LedgerApis:
         """Get the Ethereum API."""
         assert self.has_ethereum, "Ethereum API not instantiated!"
         return cast(EthereumApi, self.apis[ETHEREUM])
+
+    @property
+    def has_cosmos(self) -> bool:
+        """Check if it has the cosmos API."""
+        return COSMOS in self.apis.keys()
+
+    @property
+    def cosmos_api(self) -> CosmosApi:
+        """Get the Cosmos API."""
+        assert self.has_cosmos, "Cosmos API not instantiated!"
+        return cast(CosmosApi, self.apis[COSMOS])
 
     @property
     def has_default_ledger(self) -> bool:

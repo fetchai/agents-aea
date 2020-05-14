@@ -19,13 +19,10 @@
 
 """Implementation of the 'aea create' subcommand."""
 import os
-import shutil
 from pathlib import Path
 from typing import cast
 
 import click
-
-from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import _add_item
@@ -33,6 +30,7 @@ from aea.cli.common import (
     AUTHOR_KEY,
     Context,
     _get_or_create_cli_config,
+    clean_after,
     logger,
 )
 from aea.cli.init import do_init
@@ -76,6 +74,58 @@ def _setup_package_folder(path: Path):
     Path(init_module).touch(exist_ok=False)
 
 
+@clean_after
+def _create_aea(click_context, agent_name: str, set_author: str, local: bool) -> None:
+    ctx = cast(Context, click_context.obj)
+    path = Path(agent_name)
+    ctx.clean_paths.append(str(path))
+
+    try:
+        path.mkdir(exist_ok=False)
+    except OSError:
+        raise click.ClickException("Directory already exist. Aborting...")
+
+    try:
+        # set up packages directories.
+        _setup_package_folder(Path(agent_name, "protocols"))
+        _setup_package_folder(Path(agent_name, "contracts"))
+        _setup_package_folder(Path(agent_name, "connections"))
+        _setup_package_folder(Path(agent_name, "skills"))
+
+        # set up a vendor directory
+        Path(agent_name, "vendor").mkdir(exist_ok=False)
+        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
+
+        # create a config file inside it
+        click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
+        agent_config = AgentConfig(
+            agent_name=agent_name,
+            aea_version=aea.__version__,
+            author=set_author,
+            version=DEFAULT_VERSION,
+            license=DEFAULT_LICENSE,
+            registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
+            description="",
+        )
+        agent_config.default_connection = DEFAULT_CONNECTION  # type: ignore
+        agent_config.default_ledger = DEFAULT_LEDGER
+        ctx.agent_loader.dump(agent_config, config_file)
+
+        # next commands must be done from the agent's directory -> overwrite ctx.cwd
+        ctx.agent_config = agent_config
+        ctx.cwd = agent_config.agent_name
+
+        click.echo("Adding default packages ...")
+        if local:
+            ctx.set_config("is_local", True)
+        _add_item(click_context, "connection", DEFAULT_CONNECTION)
+        _add_item(click_context, "skill", DEFAULT_SKILL)
+
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+
 @click.command()
 @click.argument("agent_name", type=str, required=True)
 @click.option(
@@ -110,57 +160,6 @@ def create(click_context, agent_name, author, local):
             "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
         )
 
-    ctx = cast(Context, click_context.obj)
-    path = Path(agent_name)
-
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))
-
-    # create the agent's directory
-    try:
-        path.mkdir(exist_ok=False)
-
-        # set up packages directories.
-        _setup_package_folder(Path(agent_name, "protocols"))
-        _setup_package_folder(Path(agent_name, "contracts"))
-        _setup_package_folder(Path(agent_name, "connections"))
-        _setup_package_folder(Path(agent_name, "skills"))
-
-        # set up a vendor directory
-        Path(agent_name, "vendor").mkdir(exist_ok=False)
-        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
-
-        # create a config file inside it
-        click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
-        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(
-            agent_name=agent_name,
-            aea_version=aea.__version__,
-            author=set_author,
-            version=DEFAULT_VERSION,
-            license=DEFAULT_LICENSE,
-            registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
-            description="",
-        )
-        agent_config.default_connection = DEFAULT_CONNECTION
-        agent_config.default_ledger = DEFAULT_LEDGER
-        ctx.agent_loader.dump(agent_config, config_file)
-
-        # next commands must be done from the agent's directory -> overwrite ctx.cwd
-        ctx.agent_config = agent_config
-        ctx.cwd = agent_config.agent_name
-
-        click.echo("Adding default packages ...")
-        if local:
-            ctx.set_config("is_local", True)
-        _add_item(click_context, "connection", DEFAULT_CONNECTION)
-        _add_item(click_context, "skill", DEFAULT_SKILL)
-
-    except OSError:
-        raise click.ClickException("Directory already exist. Aborting...")
-    except ValidationError as e:
-        shutil.rmtree(agent_name, ignore_errors=True)
-        raise click.ClickException(str(e))
-    except Exception as e:
-        shutil.rmtree(agent_name, ignore_errors=True)
-        raise click.ClickException(str(e))
+    _create_aea(click_context, agent_name, set_author, local)

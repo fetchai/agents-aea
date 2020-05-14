@@ -27,7 +27,7 @@ from typing import cast
 
 import click
 
-from aea.cli.common import Context, check_aea_project, logger
+from aea.cli.common import Context, check_aea_project, clean_after, logger
 from aea.cli.fingerprint import _fingerprint_item
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -47,6 +47,7 @@ def generate(click_context):
     """Generate a resource for the agent."""
 
 
+@clean_after
 def _generate_item(click_context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
     # check protocol buffer compiler is installed
@@ -105,6 +106,7 @@ def _generate_item(click_context, item_type, specification_path):
             )
         )
 
+    ctx.clean_paths.append(protocol_directory_path)
     try:
         agent_name = ctx.agent_config.agent_name
         click.echo(
@@ -132,17 +134,11 @@ def _generate_item(click_context, item_type, specification_path):
             )
         )
     except ProtocolSpecificationParseError as e:
-        shutil.rmtree(
-            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
-        )
         raise click.ClickException(
             "The following error happened while parsing the protocol specification: "
             + str(e)
         )
     except Exception as e:
-        shutil.rmtree(
-            os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True
-        )
         raise click.ClickException(
             "There was an error while generating the protocol. The protocol is NOT generated. Exception: "
             + str(e)

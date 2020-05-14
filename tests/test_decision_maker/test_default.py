@@ -31,7 +31,6 @@ import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
 from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import FETCHAI, Wallet
 from aea.decision_maker.default import (
@@ -53,6 +52,7 @@ from ..conftest import (
 )
 
 MAX_REACTIONS = 10
+DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 
 
 def test_preferences_properties():

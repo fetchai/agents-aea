@@ -23,7 +23,6 @@ import os
 import shutil
 import sys
 import tempfile
-import time
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
@@ -39,15 +38,11 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.test_tools.click_testing import CliRunner
 
-from tests.common.pexpect_popen import PexpectSpawn
+from tests.common.pexpect_popen import PexpectWrapper
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, skip_test_windows
+from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 
 logger = logging.getLogger(__name__)
-
-
-if os.name == "nt":
-    pytest.skip("pexpect non available on Windows.", allow_module_level=True)
 
 
 class BaseLaunchTestCase:
@@ -63,11 +58,11 @@ class BaseLaunchTestCase:
         :param agents: list of agent names to run
         :param options: list of string options to pass to aea launch.
 
-        :return: PexpectSpawn
+        :return: PexpectWrapper
         """
-        proc = PexpectSpawn(  # nosec
-            sys.executable,
+        proc = PexpectWrapper(  # nosec
             [
+                sys.executable,
                 "-m",
                 "aea.cli",
                 "-v",
@@ -77,14 +72,13 @@ class BaseLaunchTestCase:
                 *(agents or []),
             ],
             env=os.environ,
-            maxread=1,
+            maxread=10000,
             encoding="utf-8",
             logfile=sys.stdout,
         )
         try:
             yield proc
         finally:
-            proc.terminate(force=True)
             proc.wait_to_complete(10)
 
     @classmethod
@@ -161,7 +155,6 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
-    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
@@ -178,7 +171,8 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
                 [
                     f"Agent {self.agent_name_1} terminated with exit code 0",
                     f"Agent {self.agent_name_2} terminated with exit code ",
-                ]
+                ],
+                timeout=20,
             )
             process_launch.expect(
                 EOF, timeout=20,
@@ -212,7 +206,6 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
 class TestLaunchMultithreaded(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_names> --multithreaded' works as expected."""
 
-    @skip_test_windows(is_test_class=True)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch(
@@ -240,7 +233,6 @@ class TestLaunchOneAgent(BaseLaunchTestCase):
             process_launch.expect_all(
                 [f"[{self.agent_name_1}]: Start processing messages..."], timeout=20
             )
-            time.sleep(0.1)
             process_launch.control_c()
             process_launch.expect_all(
                 [f"Agent {self.agent_name_1} terminated with exit code 0"], timeout=20

@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """Core definitions for the AEA command-line tool."""
 
 import os
@@ -57,18 +58,20 @@ from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
+    COSMOS_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
     TESTNETS,
     _try_generate_testnet_wealth,
-    _validate_private_key_path,
+    _try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-
+from aea.helpers.win32 import enable_ctrl_c_support
 
 FUNDS_RELEASE_TIMEOUT = 10
 
@@ -90,6 +93,9 @@ def cli(click_context, skip_consistency_check: bool) -> None:
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
+
+    # enables CTRL+C support on windows!
+    enable_ctrl_c_support()
 
 
 @cli.command()
@@ -137,7 +143,14 @@ def gui(click_context, port):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all"]),
+    type=click.Choice(
+        [
+            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
+            CosmosCrypto.identifier,
+            "all",
+        ]
+    ),
     required=True,
 )
 @click.pass_context
@@ -160,6 +173,9 @@ def generate_key(click_context, type_):
     if type_ in (EthereumCrypto.identifier, "all"):
         if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
             EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
+    if type_ in (CosmosCrypto.identifier, "all"):
+        if _can_write(COSMOS_PRIVATE_KEY_FILE):
+            CosmosCrypto().dump(open(COSMOS_PRIVATE_KEY_FILE, "wb"))
 
 
 def _try_add_key(ctx, type_, filepath):
@@ -190,7 +206,7 @@ def _try_add_key(ctx, type_, filepath):
 def add_key(click_context, type_, file):
     """Add a private key to the wallet."""
     ctx = cast(Context, click_context.obj)
-    _validate_private_key_path(file, type_)
+    _try_validate_private_key_path(type_, file)
     _try_add_key(ctx, type_, file)
 
 
@@ -226,10 +242,13 @@ def get_address(click_context, type_):
 
 def _try_get_balance(agent_config, wallet, type_):
     try:
+        if type_ not in agent_config.ledger_apis_dict:
+            raise ValueError(
+                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
+            )
         ledger_apis = LedgerApis(
             agent_config.ledger_apis_dict, agent_config.default_ledger
         )
-
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
