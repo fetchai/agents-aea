@@ -118,6 +118,7 @@ def test_get_balance():
     assert balance > 0, "Existing account has no balance."
 
 
+@pytest.mark.unstable
 @pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
