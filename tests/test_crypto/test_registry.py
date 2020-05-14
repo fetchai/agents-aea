@@ -22,6 +22,7 @@
 import logging
 
 import aea.crypto
+from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registry import EntryPoint
@@ -53,6 +54,18 @@ def test_make_ethereum():
     ethereum_crypto_1 = aea.crypto.make("ethereum")
     assert type(ethereum_crypto) == type(ethereum_crypto_1)
     assert ethereum_crypto.address != ethereum_crypto_1.address
+
+
+def test_make_cosmos():
+    """Test the 'make' method for 'cosmos' crypto."""
+    cosmos_crypto = aea.crypto.make("cosmos")
+
+    assert type(cosmos_crypto) == CosmosCrypto
+
+    # calling 'make' again will give a different object.
+    cosmos_crypto_1 = aea.crypto.make("cosmos")
+    assert type(cosmos_crypto) == type(cosmos_crypto_1)
+    assert cosmos_crypto.address != cosmos_crypto_1.address
 
 
 def test_register_custom_crypto():

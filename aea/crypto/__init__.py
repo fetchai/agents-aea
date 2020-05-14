@@ -24,3 +24,5 @@ from .registry import register, make  # noqa
 register(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 
 register(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+
+register(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")
