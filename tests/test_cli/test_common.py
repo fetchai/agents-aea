@@ -31,7 +31,6 @@ from yaml import YAMLError
 
 from aea.cli.common import (
     # AEAConfigException,
-    AgentDirectory,
     Context,
     PublicIdParameter,
     _find_item_in_distribution,
@@ -45,10 +44,16 @@ from aea.cli.common import (
     _validate_config_consistency,
     _validate_package_name,
     clean_after,
-    validate_author_name
+    validate_author_name,
 )
 
-from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock, StopTest, raise_stoptest
+from tests.test_cli.tools_for_testing import (
+    ConfigLoaderMock,
+    ContextMock,
+    PublicIdMock,
+    StopTest,
+    raise_stoptest,
+)
 
 AUTHOR = "author"
 
@@ -259,7 +264,9 @@ class FindItemLocallyTestCase(TestCase):
     """Test case for _find_item_locally method."""
 
     @mock.patch("aea.cli.common.Path.exists", return_value=True)
-    @mock.patch("aea.cli.common.ConfigLoader.from_configuration_type", _raise_validation_error)
+    @mock.patch(
+        "aea.cli.common.ConfigLoader.from_configuration_type", _raise_validation_error
+    )
     def test__find_item_locally_bad_config(self, *mocks):
         """Test _find_item_locally for bad config result."""
         public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
@@ -270,21 +277,28 @@ class FindItemLocallyTestCase(TestCase):
 
     @mock.patch("aea.cli.common.Path.exists", return_value=True)
     @mock.patch("aea.cli.common.Path.open", mock.mock_open())
-    @mock.patch("aea.cli.common.ConfigLoader.from_configuration_type", return_value=ConfigLoaderMock())
+    @mock.patch(
+        "aea.cli.common.ConfigLoader.from_configuration_type",
+        return_value=ConfigLoaderMock(),
+    )
     def test__find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test _find_item_locally for can't find result."""
         public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
         with self.assertRaises(ClickException) as cm:
             _find_item_locally(ContextMock(), "skill", public_id)
 
-        self.assertEqual(cm.exception.message, "Cannot find skill with author and version specified.")
+        self.assertEqual(
+            cm.exception.message, "Cannot find skill with author and version specified."
+        )
 
 
 class FindItemInDistributionTestCase(TestCase):
     """Test case for _find_item_in_distribution method."""
 
     @mock.patch("aea.cli.common.Path.exists", return_value=True)
-    @mock.patch("aea.cli.common.ConfigLoader.from_configuration_type", _raise_validation_error)
+    @mock.patch(
+        "aea.cli.common.ConfigLoader.from_configuration_type", _raise_validation_error
+    )
     def test__find_item_in_distribution_bad_config(self, *mocks):
         """Test _find_item_in_distribution for bad config result."""
         public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
@@ -304,14 +318,19 @@ class FindItemInDistributionTestCase(TestCase):
 
     @mock.patch("aea.cli.common.Path.exists", return_value=True)
     @mock.patch("aea.cli.common.Path.open", mock.mock_open())
-    @mock.patch("aea.cli.common.ConfigLoader.from_configuration_type", return_value=ConfigLoaderMock())
+    @mock.patch(
+        "aea.cli.common.ConfigLoader.from_configuration_type",
+        return_value=ConfigLoaderMock(),
+    )
     def test__find_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test _find_item_locally for can't find result."""
         public_id = PublicIdMock.from_str("fetchai/echo:0.1.0")
         with self.assertRaises(ClickException) as cm:
             _find_item_in_distribution(ContextMock(), "skill", public_id)
 
-        self.assertEqual(cm.exception.message, "Cannot find skill with author and version specified.")
+        self.assertEqual(
+            cm.exception.message, "Cannot find skill with author and version specified."
+        )
 
 
 class ValidateConfigConsistencyTestCase(TestCase):

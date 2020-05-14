@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.core module."""
-import os
 from pathlib import Path
 from unittest import TestCase, mock
 

@@ -487,7 +487,10 @@ class CreateCommandTestCase(TestCase):
             [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
             standalone_mode=False,
         )
-        self.assertEqual(result.exception.message, "Author is not set up. Please use 'aea init' to initialize.")
+        self.assertEqual(
+            result.exception.message,
+            "Author is not set up. Please use 'aea init' to initialize.",
+        )
 
     @patch("aea.cli.create._get_or_create_cli_config", return_value={})
     def test_create_no_author_local(self, *mocks):
