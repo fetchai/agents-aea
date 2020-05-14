@@ -32,14 +32,17 @@ from hexbytes import HexBytes
 
 import pytest
 
-from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
-from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
+from aea.crypto.cosmos import COSMOS, CosmosApi
+from aea.crypto.ethereum import ETHEREUM, EthereumApi, EthereumCrypto
+from aea.crypto.fetchai import FETCHAI, FetchAIApi, FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 
 from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_COSMOS_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
+DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 DEFAULT_ETHEREUM_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "chain_id": 3,
@@ -62,12 +65,20 @@ class TestLedgerApis:
     def test_initialisation(self):
         """Test the initialisation of the ledger APIs."""
         ledger_apis = LedgerApis(
-            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            {
+                ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                FETCHAI: DEFAULT_FETCHAI_CONFIG,
+                COSMOS: DEFAULT_COSMOS_CONFIG,
+            },
             FETCHAI,
         )
         assert ledger_apis.configs.get(ETHEREUM) == DEFAULT_ETHEREUM_CONFIG
         assert ledger_apis.has_fetchai
+        assert type(ledger_apis.fetchai_api) == FetchAIApi
         assert ledger_apis.has_ethereum
+        assert type(ledger_apis.ethereum_api) == EthereumApi
+        assert ledger_apis.has_cosmos
+        assert type(ledger_apis.cosmos_api) == CosmosApi
         assert isinstance(ledger_apis.last_tx_statuses, Dict)
         unknown_config = ("UknownPath", 8080)
         with pytest.raises(ValueError):
@@ -153,21 +164,16 @@ class TestLedgerApis:
         )
 
         with mock.patch.object(
-            ledger_apis.apis.get(FETCHAI).api.tokens,
-            "transfer",
-            return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35",
+            ledger_apis.apis.get(FETCHAI).api.tokens, "transfer", side_effect=Exception,
         ):
-            with mock.patch.object(
-                ledger_apis.apis.get(FETCHAI).api, "sync", side_effect=Exception
-            ):
-                tx_digest = ledger_apis.transfer(
-                    fet_obj,
-                    fet_address,
-                    amount=10,
-                    tx_fee=10,
-                    tx_nonce="transaction nonce",
-                )
-                assert tx_digest is None
+            tx_digest = ledger_apis.transfer(
+                fet_obj,
+                fet_address,
+                amount=10,
+                tx_fee=10,
+                tx_nonce="transaction nonce",
+            )
+            assert tx_digest is None
 
     # def test_transfer_ethereum(self):
     #     """Test the transfer function for ethereum token."""

@@ -35,9 +35,13 @@ TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
 
 def test_creation():
     """Test the creation of the crypto_objects."""
-    assert CosmosCrypto(), "Managed to initialise the crypto module"
-    assert CosmosCrypto(PRIVATE_KEY_PATH), "Managed to load the cosmos private key"
-    assert CosmosCrypto("./"), "Managed to create a new cosmos private key"
+    assert CosmosCrypto(), "Did not manage to initialise the crypto module"
+    assert CosmosCrypto(
+        PRIVATE_KEY_PATH
+    ), "Did not manage to load the cosmos private key"
+    assert CosmosCrypto(
+        "./"
+    ), "Did not manage to create a new cosmos private key with wrong path"
 
 
 def test_initialization():
@@ -73,10 +77,28 @@ def test_dump_positive():
 
 def test_api_creation():
     """Test api instantiation."""
-    assert CosmosApi(**TESTNET_CONFIG), "Managed to initialise the api"
+    assert CosmosApi(**TESTNET_CONFIG), "Failed to initialise the api"
 
 
-@pytest.mark.integration
+def test_api_none():
+    """Test the "api" of the cryptoApi is none."""
+    cosmos_api = CosmosApi(**TESTNET_CONFIG)
+    assert cosmos_api.api is None, "The api property is not None."
+
+
+@pytest.mark.network
+def test_get_balance():
+    """Test the balance is zero for a new account."""
+    cosmos_api = CosmosApi(**TESTNET_CONFIG)
+    cc = CosmosCrypto()
+    balance = cosmos_api.get_balance(cc.address)
+    assert balance == 0, "New account has a positive balance."
+    cc = CosmosCrypto(private_key_path=PRIVATE_KEY_PATH)
+    balance = cosmos_api.get_balance(cc.address)
+    assert balance > 0, "Existing account has no balance."
+
+
+@pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
     cosmos_api = CosmosApi(**TESTNET_CONFIG)
@@ -86,9 +108,11 @@ def test_transfer():
     fee = 1000
     tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
     assert tx_digest is not None, "Failed to submit transfer!"
-    time.sleep(10.0)
+    time.sleep(5.0)
+    is_settled = cosmos_api.is_transaction_settled(tx_digest)
+    assert is_settled, "Failed to complete tx!"
     # TODO remove requirement for "" tx nonce stub
     is_valid = cosmos_api.is_transaction_valid(
         tx_digest, cc2.address, cc1.address, "", amount
     )
-    assert is_valid, "Failed to complete tx!"
+    assert is_valid, "Failed to settle tx correctly!"

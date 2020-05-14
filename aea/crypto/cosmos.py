@@ -231,8 +231,12 @@ class CosmosApi(LedgerApi):
             url = self.network_address + f"/bank/balances/{address}"
             response = requests.get(url=url)
             if response.status_code == 200:
-                balance = int(response.json()["result"][0]["amount"])
-        except Exception as e:
+                result = response.json()["result"]
+                if len(result) == 0:
+                    balance = 0
+                else:
+                    balance = int(result[0]["amount"])
+        except Exception as e:  # pragma: no cover
             logger.warning(
                 "Encountered exception when trying get balance: {}".format(e)
             )
@@ -312,9 +316,7 @@ class CosmosApi(LedgerApi):
             "mode": sync_mode,
         }
         # TODO retrieve, gas dynamically
-
         tx_digest = self.send_signed_transaction(tx_signed=pushable_tx)
-
         return tx_digest
 
     def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
@@ -335,7 +337,7 @@ class CosmosApi(LedgerApi):
             response = requests.post(url=url, json=tx_signed)
             if response.status_code == 200:
                 tx_digest = response.json()["txhash"]
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Encountered exception when trying to send tx: {}".format(e))
         return tx_digest
 
@@ -352,7 +354,7 @@ class CosmosApi(LedgerApi):
                     int(response.json()["result"]["value"]["account_number"]),
                     int(response.json()["result"]["value"]["sequence"]),
                 )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning(
                 "Encountered exception when trying to get account number and sequence: {}".format(
                     e
@@ -397,7 +399,7 @@ class CosmosApi(LedgerApi):
             response = requests.get(url=url)
             if response.status_code == 200:
                 result = response.json()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning(
                 "Encountered exception when trying to get transaction receipt: {}".format(
                     e
@@ -413,7 +415,7 @@ class CosmosApi(LedgerApi):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def is_transaction_valid(
         self,
@@ -433,7 +435,7 @@ class CosmosApi(LedgerApi):
         :param amount: the amount we expect to get from the transaction.
         :return: True if the random_message is equals to tx['input']
         """
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        tx_receipt = self.get_transaction_receipt(tx_digest)
         try:
             assert tx_receipt is not None
             tx = tx_receipt.get("tx").get("value").get("msg")[0]
@@ -443,6 +445,6 @@ class CosmosApi(LedgerApi):
             is_valid = (
                 recovered_amount == amount and sender == client and recipient == seller
             )
-        except Exception:
+        except Exception:  # pragma: no cover
             is_valid = False
         return is_valid

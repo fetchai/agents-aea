@@ -42,8 +42,6 @@ ETHEREUM = "ethereum"
 ETHEREUM_CURRENCY = "ETH"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
-CONFIRMATION_RETRY_TIMEOUT = 1.0
-MAX_SEND_API_CALL_RETRIES = 60
 
 
 class EthereumCrypto(Crypto):
@@ -63,7 +61,7 @@ class EthereumCrypto(Crypto):
             else self._load_private_key_from_path(private_key_path)
         )
         bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
-        self._public_key = keys.PrivateKey(bytes_representation).public_key
+        self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
         self._address = str(self._account.address)
 
     @property
@@ -173,7 +171,8 @@ class EthereumCrypto(Crypto):
         :return: str
         """
         keccak_hash = Web3.keccak(hexstr=public_key)
-        address = keccak_hash[-20:].hex()
+        raw_address = keccak_hash[-20:].hex().upper()
+        address = Web3.toChecksumAddress(raw_address)
         return address
 
     @classmethod
@@ -265,7 +264,7 @@ class EthereumApi(LedgerApi):
         }
 
         gas_estimate = self._try_get_gas_estimate(transaction)
-        if gas_estimate is None or tx_fee >= gas_estimate:
+        if gas_estimate is None or tx_fee <= gas_estimate:  # pragma: no cover
             logger.warning(
                 "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
                     gas_estimate
@@ -285,7 +284,7 @@ class EthereumApi(LedgerApi):
             nonce = self._api.eth.getTransactionCount(
                 self._api.toChecksumAddress(address)
             )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
             nonce = None
         return nonce
@@ -294,7 +293,7 @@ class EthereumApi(LedgerApi):
         """Try get the gas estimate."""
         try:
             gas_estimate = self._api.eth.estimateGas(transaction=transaction)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
             gas_estimate = None
         return gas_estimate
@@ -318,7 +317,7 @@ class EthereumApi(LedgerApi):
             logger.debug(
                 "Successfully sent transaction with digest: {}".format(tx_digest)
             )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to send transaction: {}".format(str(e)))
             tx_digest = None
         return tx_digest
@@ -331,7 +330,7 @@ class EthereumApi(LedgerApi):
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        tx_receipt = self.get_transaction_receipt(tx_digest)
         if tx_receipt is not None:
             is_successful = tx_receipt.status == 1
         return is_successful
@@ -412,7 +411,7 @@ class EthereumApi(LedgerApi):
         """
         try:
             tx = self._api.eth.getTransaction(tx_digest)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx
