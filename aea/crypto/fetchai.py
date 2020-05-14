@@ -51,7 +51,6 @@ class FetchAICrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        super().__init__(private_key_path=private_key_path)
         self._entity = (
             self._generate_private_key()
             if private_key_path is None
