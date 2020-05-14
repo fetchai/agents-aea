@@ -106,13 +106,11 @@ class LedgerApis:
         :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, LedgerApi]
-        configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         for identifier, config in ledger_api_configs.items():
             api = _instantiate_api(identifier, config)
             apis[identifier] = api
-            configs[identifier] = config
         self._apis = apis
-        self._configs = configs
+        self._configs = ledger_api_configs
         self._default_ledger_id = default_ledger_id
 
     @property
