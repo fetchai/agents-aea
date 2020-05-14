@@ -73,7 +73,7 @@ def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> Led
                 api = CosmosApi(**config)
             is_connected = True
             break
-        except Exception:
+        except Exception:  # pragma: no cover
             retry += 1
             logger.debug(
                 "Connection attempt {} to {} ledger with provided config {} failed.".format(
@@ -81,7 +81,7 @@ def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> Led
                 )
             )
             time.sleep(0.5)
-    if not is_connected:
+    if not is_connected:  # pragma: no cover
         logger.error(
             "Cannot connect to {} ledger with provided config {} after {} attemps. Giving up!".format(
                 identifier, config, MAX_CONNECTION_RETRY
@@ -106,13 +106,11 @@ class LedgerApis:
         :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, LedgerApi]
-        configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         for identifier, config in ledger_api_configs.items():
             api = _instantiate_api(identifier, config)
             apis[identifier] = api
-            configs[identifier] = config
         self._apis = apis
-        self._configs = configs
+        self._configs = ledger_api_configs
         self._default_ledger_id = default_ledger_id
 
     @property

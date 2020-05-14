@@ -23,6 +23,7 @@ from unittest import TestCase, mock
 
 import pytest
 
+from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.wallet import Wallet
@@ -34,6 +35,7 @@ def test_wallet_initialisation_error():
         Wallet({"Test": "test"})
 
 
+@mock.patch("aea.crypto.wallet.CosmosCrypto")
 @mock.patch("aea.crypto.wallet.EthereumCrypto")
 @mock.patch("aea.crypto.wallet.FetchAICrypto")
 class WalletTestCase(TestCase):
@@ -41,7 +43,7 @@ class WalletTestCase(TestCase):
 
     def test_wallet_init_positive(self, *mocks):
         """Test Wallet init positive result."""
-        private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2"}
+        private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2", COSMOS: "path3"}
         Wallet(private_key_paths)
 
     def test_wallet_init_bad_id(self, *mocks):

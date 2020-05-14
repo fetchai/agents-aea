@@ -208,7 +208,7 @@ If both of these checks return True we consider the transaction as valid.
     ) -> Optional[str]:
         """
         Submit a transfer transaction to the ledger.
-    
+
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
@@ -221,7 +221,7 @@ If both of these checks return True we consider the transaction as valid.
         nonce = self._try_get_transaction_count(crypto.address)
         if nonce is None:
             return tx_digest
-    
+
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
@@ -231,20 +231,20 @@ If both of these checks return True we consider the transaction as valid.
             "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
             "data": tx_nonce,
         }
-    
+
         gas_estimate = self._try_get_gas_estimate(transaction)
-        if gas_estimate is None or tx_fee >= gas_estimate:
+        if gas_estimate is None or tx_fee <= gas_estimate:  # pragma: no cover
             logger.warning(
                 "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
                     gas_estimate
                 )
             )
             return tx_digest
-    
+
         signed_transaction = crypto.sign_transaction(transaction)
-    
+
         tx_digest = self.send_signed_transaction(tx_signed=signed_transaction,)
-    
+
         return tx_digest
 ```
 On contrary to the Fetch.ai implementation of the `send_transaction` function, the Ethereum implementation is more complicated. This happens because we must create 
@@ -265,12 +265,12 @@ we return the transaction digest.
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """
         Check whether a transaction is settled or not.
-    
+
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        tx_receipt = self.get_transaction_receipt(tx_digest)
         if tx_receipt is not None:
             is_successful = tx_receipt.status == 1
         return is_successful

@@ -25,9 +25,7 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-FUNDED_ETH_PRIVATE_KEY_1 = (
-    "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
-)
+from ...conftest import FUNDED_ETH_PRIVATE_KEY_1
 
 
 class TestTacSkills(AEATestCaseMany, UseOef):
