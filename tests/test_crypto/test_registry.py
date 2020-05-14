@@ -20,12 +20,17 @@
 """This module contains the tests for the crypto/registry module."""
 
 import logging
+import string
+from unittest import mock
+
+import pytest
 
 import aea.crypto
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registry import EntryPoint
+from aea.exceptions import AEAException
 
 from ..data.custom_crypto import CustomCrypto
 
@@ -92,3 +97,99 @@ def test_register_custom_crypto():
     my_crypto_1 = aea.crypto.make("my_custom_crypto")
     assert type(my_crypto) == type(my_crypto_1)
     assert my_crypto != my_crypto_1
+
+    aea.crypto.registry.registry.specs.pop("my_custom_crypto")
+
+
+def test_cannot_register_crypto_twice():
+    """Test we cannot register a crytpo twice."""
+    aea.crypto.register(
+        "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
+    )
+
+    with pytest.raises(AEAException, match="Cannot re-register id: 'my_custom_crypto'"):
+        aea.crypto.register(
+            "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
+        )
+
+    aea.crypto.registry.registry.specs.pop("my_custom_crypto")
+
+
+@mock.patch("importlib.import_module", side_effect=ImportError)
+def test_import_error(*mocks):
+    """Test import errors."""
+    aea.crypto.register("some_crypto", entry_point="path.to.module:SomeCrypto")
+    with pytest.raises(
+        AEAException,
+        match="A module (.*) was specified for the crypto but was not found",
+    ):
+        aea.crypto.make("some_crypto", module="some.module")
+    aea.crypto.registry.registry.specs.pop("some_crypto")
+
+
+class TestRegisterWithMalformedId:
+    """Test the error message when we try to register a crypto whose identifier is malformed."""
+
+    MESSAGE_REGEX = "Malformed .*: '.*'. It must be of the form '.*'."
+
+    def test_wrong_spaces(self):
+        """Spaces not allowed in a Crypto ID."""
+        # beginning space
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register(" malformed_id", "path.to.module:CryptoClass")
+
+        # trailing space
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("malformed_id ", "path.to.module:CryptoClass")
+
+        # in between
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("malformed id", "path.to.module:CryptoClass")
+
+    @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
+    def test_special_characters(self, special_character):
+        """Special characters are not allowed (only underscore)."""
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register(
+                "malformed_id" + special_character, "path.to.module:CryptoClass"
+            )
+
+    @pytest.mark.parametrize("digit", string.digits)
+    def test_beginning_digit(self, digit):
+        """Digits in the beginning are not allowed."""
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register(digit + "malformed_id", "path.to.module:CryptoClass")
+
+
+class TestRegisterWithMalformedEntryPoint:
+    """Test the error message when we try to register a crypto with a wrong entry point."""
+
+    MESSAGE_REGEX = "Malformed .*: '.*'. It must be of the form '.*'."
+
+    def test_wrong_spaces(self):
+        """Spaces not allowed in a Crypto ID."""
+        # beginning space
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("crypto_id", " path.to.module:CryptoClass")
+
+        # trailing space
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("crypto_id", "path.to.module :CryptoClass")
+
+        # in between
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("crypto_id", "path.to .module:CryptoClass")
+
+    @pytest.mark.parametrize("special_character", string.punctuation.replace("_", ""))
+    def test_special_characters(self, special_character):
+        """Special characters are not allowed (only underscore)."""
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register(
+                "crypto_id", "path" + special_character + ".to.module:CryptoClass"
+            )
+
+    @pytest.mark.parametrize("digit", string.digits)
+    def test_beginning_digit(self, digit):
+        """Digits in the beginning are not allowed."""
+        with pytest.raises(AEAException, match=self.MESSAGE_REGEX):
+            aea.crypto.register("crypto_id", "path." + digit + "to.module:CryptoClass")

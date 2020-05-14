@@ -31,6 +31,14 @@ from aea.helpers.base import RegexConstrainedString
 PY_ID_REGEX = r"[^\d\W]\w*"
 
 
+def _handle_malformed_string(class_name: str, malformed_id: str):
+    raise AEAException(
+        "Malformed {}: '{}'. It must be of the form '{}'.".format(
+            class_name, malformed_id, CryptoId.REGEX.pattern
+        )
+    )
+
+
 class CryptoId(RegexConstrainedString):
     """The identifier of a crypto class."""
 
@@ -46,11 +54,7 @@ class CryptoId(RegexConstrainedString):
         return self.data
 
     def _handle_no_match(self):
-        raise AEAException(
-            "Attempted to register malformed Crypto ID: {}. (Currently all IDs must be of the form {}.)".format(
-                self.data, self.REGEX.pattern
-            )
-        )
+        _handle_malformed_string(CryptoId.__name__, self.data)
 
 
 class EntryPoint(RegexConstrainedString):
@@ -83,11 +87,7 @@ class EntryPoint(RegexConstrainedString):
         return self._class_name
 
     def _handle_no_match(self):
-        raise AEAException(
-            "Attempted to register malformed Crypto ID: {}. (Currently all IDs must be of the form {}.)".format(
-                self.data, self.REGEX.pattern
-            )
-        )
+        _handle_malformed_string(EntryPoint.__name__, self.data)
 
     def load(self) -> Type[Crypto]:
         """
@@ -143,7 +143,7 @@ class CryptoRegistry(object):
         :return: None
         """
         if id in self.specs:
-            raise AEAException("Cannot re-register id: {}".format(id))
+            raise AEAException("Cannot re-register id: '{}'".format(id))
         self.specs[id] = CryptoSpec(id, entry_point, **kwargs)
 
     def make(self, id: CryptoId, module: Optional[str] = None, **kwargs) -> Crypto:
@@ -175,7 +175,7 @@ class CryptoRegistry(object):
                 importlib.import_module(module)
             except ImportError:
                 raise AEAException(
-                    "A module ({}) was specified for the environment but was not found, "
+                    "A module ({}) was specified for the crypto but was not found, "
                     "make sure the package is installed with `pip install` before calling `aea.crypto.make()`".format(
                         module
                     )
