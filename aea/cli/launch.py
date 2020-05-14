@@ -102,8 +102,12 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
         t.start()
 
     try:
-        for t in threads:
-            t.join()
+        while sum([t.is_alive() for t in threads]) != 0:
+            # exit when all threads are not alive.
+            # done to avoid block on joins
+            for t in threads:
+                t.join(0.1)
+
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:

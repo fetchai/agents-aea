@@ -48,15 +48,10 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
+    IDENTIFIER_TO_KEY_FILES,
+    _create_private_key,
+    _try_validate_private_key_path,
 )
 from aea.crypto.wallet import SUPPORTED_CRYPTOS
 
@@ -226,33 +221,20 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
-    fetchai_private_key_path = aea_conf.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_path is None:
-        _create_fetchai_private_key()
-        aea_conf.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_fet_private_key_path(fetchai_private_key_path)
-        except FileNotFoundError:  # pragma: no cover
-            raise click.ClickException(
-                "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_path), FETCHAI,
+    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
+        config_private_key_path = aea_conf.private_key_paths.read(identifier)
+        if config_private_key_path is None:
+            _create_private_key(identifier)
+            aea_conf.private_key_paths.update(identifier, private_key_path)
+        else:
+            try:
+                _try_validate_private_key_path(identifier, private_key_path)
+            except FileNotFoundError:  # pragma: no cover
+                raise click.ClickException(
+                    "File {} for private key {} not found.".format(
+                        repr(private_key_path), identifier,
+                    )
                 )
-            )
-
-    ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_path is None:
-        _create_ethereum_private_key()
-        aea_conf.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_ethereum_private_key_path(ethereum_private_key_path)
-        except FileNotFoundError:  # pragma: no cover
-            raise click.ClickException(
-                "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_path), ETHEREUM,
-                )
-            )
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
@@ -370,7 +352,7 @@ class AgentDirectory(click.Path):
 
     def get_metavar(self, param):
         """Return the metavar default for this param if it provides one."""
-        return "AGENT_DIRECTORY"
+        return "AGENT_DIRECTORY"  # pragma: no cover
 
     def convert(self, value, param, ctx):
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""

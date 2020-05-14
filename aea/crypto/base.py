@@ -20,7 +20,7 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Optional
+from typing import Any, BinaryIO, Optional, Tuple
 
 from aea.mail.base import Address
 
@@ -87,13 +87,16 @@ class Crypto(ABC):
         """
 
     @abstractmethod
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(
+        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
         """
-        Recover the address from the hash.
+        Recover the addresses from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
-        :return: the recovered address
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
         """
 
     @classmethod

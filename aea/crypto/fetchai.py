@@ -22,7 +22,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Optional, Tuple, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxContents, TxStatus
@@ -38,7 +38,6 @@ logger = logging.getLogger(__name__)
 FETCHAI = "fetchai"
 FETCHAI_CURRENCY = "FET"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 
 
 class FetchAICrypto(Crypto):
@@ -127,15 +126,18 @@ class FetchAICrypto(Crypto):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(
+        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
         """
-        Recover the address from the hash.
+        Recover the addresses from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
-        :return: the recovered address
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
         """
         raise NotImplementedError  # praggma: no cover
 
@@ -203,7 +205,7 @@ class FetchAIApi(LedgerApi):
         """Try get the balance."""
         try:
             balance = self._api.tokens.balance(FetchaiAddress(address))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.debug("Unable to retrieve balance: {}".format(str(e)))
             balance = None
         return balance
@@ -232,8 +234,8 @@ class FetchAIApi(LedgerApi):
             tx_digest = self._api.tokens.transfer(
                 crypto.entity, FetchaiAddress(destination_address), amount, tx_fee
             )
-            self._api.sync(tx_digest)
-        except Exception as e:
+            # self._api.sync(tx_digest)
+        except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting transfering tokens: {}".format(str(e)))
             tx_digest = None
         return tx_digest
@@ -244,7 +246,7 @@ class FetchAIApi(LedgerApi):
 
         :param tx_signed: the signed transaction
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""
@@ -273,7 +275,7 @@ class FetchAIApi(LedgerApi):
         """
         try:
             tx_receipt = self._api.tx.status(tx_digest)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting getting tx receipt: {}".format(str(e)))
             tx_receipt = None
         return tx_receipt
@@ -332,7 +334,7 @@ class FetchAIApi(LedgerApi):
         """
         try:
             tx = cast(TxContents, self._api.tx.contents(tx_digest))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx

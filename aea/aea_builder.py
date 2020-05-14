@@ -56,15 +56,10 @@ from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
+    IDENTIFIER_TO_KEY_FILES,
+    _create_private_key,
+    _try_validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
@@ -640,15 +635,21 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
+    def build(
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        ledger_apis: Optional[LedgerApis] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param ledger_api: the api ledger that we want to use.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
+        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
@@ -657,7 +658,7 @@ class AEABuilder:
             identity,
             connections,
             wallet,
-            LedgerApis(self.ledger_apis_config, self._default_ledger),
+            ledger_apis,
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
@@ -668,6 +669,34 @@ class AEABuilder:
         )
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
+        """
+        Load the ledger apis.
+
+        :param ledger_apis: the ledger apis provided
+        :return: ledger apis
+        """
+        if ledger_apis is not None:
+            self._check_consistent(ledger_apis)
+        else:
+            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
+        return ledger_apis
+
+    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
+        """
+        Check the ledger apis are consistent with the configs
+
+        :param ledger_apis: the ledger apis provided
+        :return: None
+        """
+        if self.ledger_apis_config != {}:
+            assert (
+                ledger_apis.configs == self.ledger_apis_config
+            ), "Config of LedgerApis does not match provided configs."
+        assert (
+            ledger_apis.default_ledger_id == self._default_ledger
+        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
     def _update_identity(
@@ -1084,45 +1113,27 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
-    fetchai_private_key_path = agent_configuration.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_path is None:
-        _create_fetchai_private_key(
-            private_key_file=str(aea_project_path / FETCHAI_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_fet_private_key_path(
-                str(aea_project_path / fetchai_private_key_path), exit_on_error=False
+    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
+        config_private_key_path = agent_configuration.private_key_paths.read(identifier)
+        if config_private_key_path is None:
+            _create_private_key(
+                identifier, private_key_file=str(aea_project_path / private_key_path)
             )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_path), FETCHAI,
+            agent_configuration.private_key_paths.update(identifier, private_key_path)
+        else:
+            try:
+                _try_validate_private_key_path(
+                    identifier,
+                    str(aea_project_path / private_key_path),
+                    exit_on_error=False,
                 )
-            )
-            raise
-
-    ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_path is None:
-        _create_ethereum_private_key(
-            private_key_file=str(aea_project_path / ETHEREUM_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(
-            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
-        )
-    else:
-        try:
-            _try_validate_ethereum_private_key_path(
-                str(aea_project_path / ethereum_private_key_path), exit_on_error=False
-            )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_path), ETHEREUM,
+            except FileNotFoundError:  # pragma: no cover
+                logger.error(
+                    "File {} for private key {} not found.".format(
+                        repr(private_key_path), identifier,
+                    )
                 )
-            )
-            raise
+                raise
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)

@@ -74,6 +74,11 @@ test:
 	pytest --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections tests/ --cov-report=html --cov-report=xml --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections
 	rm -fr .coverage*
 
+.PHONY: test-sub
+test-sub:
+	pytest --doctest-modules $(dir) $(tdir) --cov-report=html --cov-report=xml --cov-report=term --cov=$(dir)
+	rm -fr .coverage*
+
 .PHONY: test-all
 test-all:
 	tox

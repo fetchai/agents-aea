@@ -363,7 +363,7 @@ def test_run_unknown_ledger():
         standalone_mode=False,
     )
 
-    s = "Unsupported identifier in ledger apis."
+    s = "Unsupported identifier unknown in ledger apis."
     assert result.exception.message == s
 
     os.chdir(cwd)
