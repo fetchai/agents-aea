@@ -58,7 +58,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         strategy = cast(Strategy, self.context.strategy)
 
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             fet_balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -76,7 +76,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
                 self.context.is_active = False
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             eth_balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
@@ -98,17 +98,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         if strategy.contract_address is None:
             self.context.logger.info("Preparing contract deployment transaction")
-            contract.set_instance(self.context.ledger_apis.ethereum_api)
+            contract.set_instance(self.context.ledger_apis.get_api(ETHEREUM))  # type: ignore
             dm_message_for_deploy = contract.get_deploy_transaction_msg(
                 deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
         else:
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_address(
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),  # type: ignore
                 contract_address=str(strategy.contract_address),
             )
 
@@ -128,7 +128,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             creation_message = contract.get_create_batch_transaction_msg(
                 deployer_address=self.context.agent_address,
                 token_ids=self.token_ids,
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
@@ -139,7 +139,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 recipient_address=self.context.agent_address,
                 token_ids=self.token_ids,
                 mint_quantities=strategy.mint_stock,
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(mint_message)
@@ -153,7 +153,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -163,7 +163,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
             )
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )

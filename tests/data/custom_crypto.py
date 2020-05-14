@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a custom crypto class for testing purposes."""
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Tuple
 
 from aea.crypto.base import Crypto
 from aea.mail.base import Address
@@ -51,7 +51,7 @@ class CustomCrypto(Crypto):
 
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
-    ) -> Address:
+    ) -> Tuple[Address, ...]:
         pass
 
     @classmethod

@@ -123,38 +123,14 @@ class LedgerApis:
         """Get the apis."""
         return self._apis
 
-    @property
-    def has_fetchai(self) -> bool:
-        """Check if it has the fetchai API."""
-        return FETCHAI in self.apis.keys()
+    def has_ledger(self, identifier: str) -> bool:
+        """Check if it has a ."""
+        return identifier in self.apis
 
-    @property
-    def fetchai_api(self) -> FetchAIApi:
-        """Get the Fetchai API."""
-        assert self.has_fetchai, "Fetchai API not instantiated!"
-        return cast(FetchAIApi, self.apis[FETCHAI])
-
-    @property
-    def has_ethereum(self) -> bool:
-        """Check if it has the ethereum API."""
-        return ETHEREUM in self.apis.keys()
-
-    @property
-    def ethereum_api(self) -> EthereumApi:
-        """Get the Ethereum API."""
-        assert self.has_ethereum, "Ethereum API not instantiated!"
-        return cast(EthereumApi, self.apis[ETHEREUM])
-
-    @property
-    def has_cosmos(self) -> bool:
-        """Check if it has the cosmos API."""
-        return COSMOS in self.apis.keys()
-
-    @property
-    def cosmos_api(self) -> CosmosApi:
-        """Get the Cosmos API."""
-        assert self.has_cosmos, "Cosmos API not instantiated!"
-        return cast(CosmosApi, self.apis[COSMOS])
+    def get_api(self, identifier: str) -> LedgerApi:
+        """Get the ledger API."""
+        assert self.has_ledger(identifier), "Ledger API not instantiated!"
+        return self.apis[identifier]
 
     @property
     def has_default_ledger(self) -> bool:

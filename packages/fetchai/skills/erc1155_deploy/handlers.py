@@ -23,6 +23,7 @@ import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
+from aea.crypto.ethereum import ETHEREUM
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
@@ -199,7 +200,7 @@ class FIPAHandler(Handler):
                 to_supply=int(dialogue.proposal.values["to_supply"]),
                 value=int(dialogue.proposal.values["value"]),
                 trade_nonce=int(dialogue.proposal.values["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
                 skill_callback_id=self.context.skill_id,
                 signature=tx_signature,
             )
@@ -237,18 +238,18 @@ class TransactionHandler(Handler):
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+            while not self.context.ledger_apis.get_api(ETHEREUM).is_transaction_settled(
                 tx_digest
             ):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -265,7 +266,7 @@ class TransactionHandler(Handler):
                 )
             else:
                 contract.set_address(
-                    self.context.ledger_apis.ethereum_api, tx_receipt.contractAddress
+                    self.context.ledger_apis.get_api(ETHEREUM), tx_receipt.contractAddress  # type: ignore
                 )
                 self.context.logger.info(
                     "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
@@ -275,18 +276,18 @@ class TransactionHandler(Handler):
 
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+            while not self.context.ledger_apis.get_api(ETHEREUM).is_transaction_settled(
                 tx_digest
             ):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -310,18 +311,18 @@ class TransactionHandler(Handler):
                 )
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+            while not self.context.ledger_apis.get_api(ETHEREUM).is_transaction_settled(
                 tx_digest
             ):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -355,16 +356,16 @@ class TransactionHandler(Handler):
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
         ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                ETHEREUM
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
+            while not self.context.ledger_apis.get_api(ETHEREUM).is_transaction_settled(
                 tx_digest
             ):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(  # type: ignore
+            tx_receipt = self.context.ledger_apis.get_api(ETHEREUM).get_transaction_receipt(  # type: ignore
                 tx_digest=tx_digest
             )
             if tx_receipt is None:

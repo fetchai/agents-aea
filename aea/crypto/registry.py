@@ -159,6 +159,15 @@ class CryptoRegistry(object):
         crypto = spec.make(**kwargs)
         return crypto
 
+    def has_spec(self, id: CryptoId) -> bool:
+        """
+        Check whether there exist a spec associated with a crypto id.
+
+        :param id: the crypto identifier.
+        :return: True if it is registered, False otherwise.
+        """
+        return id in self.specs.keys()
+
     def _get_spec(self, id: CryptoId, module: Optional[str] = None):
         """Get the crypto spec."""
         if module is not None:

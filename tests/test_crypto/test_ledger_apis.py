@@ -67,12 +67,12 @@ class TestLedgerApis:
             FETCHAI,
         )
         assert ledger_apis.configs.get(ETHEREUM) == ETHEREUM_TESTNET_CONFIG
-        assert ledger_apis.has_fetchai
-        assert type(ledger_apis.fetchai_api) == FetchAIApi
-        assert ledger_apis.has_ethereum
-        assert type(ledger_apis.ethereum_api) == EthereumApi
-        assert ledger_apis.has_cosmos
-        assert type(ledger_apis.cosmos_api) == CosmosApi
+        assert ledger_apis.has_ledger(FETCHAI)
+        assert type(ledger_apis.get_api(FETCHAI)) == FetchAIApi
+        assert ledger_apis.has_ledger(ETHEREUM)
+        assert type(ledger_apis.get_api(ETHEREUM)) == EthereumApi
+        assert ledger_apis.has_ledger(COSMOS)
+        assert type(ledger_apis.get_api(COSMOS)) == CosmosApi
         assert isinstance(ledger_apis.last_tx_statuses, Dict)
         unknown_config = ("UknownPath", 8080)
         with pytest.raises(ValueError):

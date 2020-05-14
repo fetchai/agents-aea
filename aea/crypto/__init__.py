@@ -19,7 +19,7 @@
 
 """This module contains the crypto modules."""
 
-from .registry import register, make  # noqa
+from .registry import make, register  # noqa
 
 register(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
 

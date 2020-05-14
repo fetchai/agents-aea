@@ -44,7 +44,7 @@ class MySearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             fet_balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -62,7 +62,7 @@ class MySearchBehaviour(TickerBehaviour):
                 )
                 self.context.is_active = False
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             eth_balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
@@ -108,7 +108,7 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -118,7 +118,7 @@ class MySearchBehaviour(TickerBehaviour):
                 )
             )
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )

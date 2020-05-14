@@ -50,7 +50,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             fet_balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -67,7 +67,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                     )
                 )
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             eth_balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
@@ -101,7 +101,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_fetchai:
+        if self.context.ledger_apis.has_ledger(FETCHAI):
             balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
@@ -111,7 +111,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 )
             )
 
-        if self.context.ledger_apis.has_ethereum:
+        if self.context.ledger_apis.has_ledger(ETHEREUM):
             balance = self.context.ledger_apis.token_balance(
                 ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
