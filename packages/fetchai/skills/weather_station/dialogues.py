@@ -28,6 +28,7 @@ from typing import Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -49,6 +50,15 @@ class Dialogue(FipaDialogue):
         self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
 
+    @staticmethod
+    def role_from_first_message(message: Message) -> Optional[FipaDialogue.AgentRole]:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.SELLER
+
 
 class Dialogues(Model, FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
@@ -60,4 +70,4 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)

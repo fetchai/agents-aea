@@ -58,6 +58,7 @@ class Message:
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
+        self._is_incoming = False
         try:
             self._is_consistent()
         except Exception as e:
@@ -77,6 +78,21 @@ class Message:
     def counterparty(self, counterparty: Address) -> None:
         """Set the counterparty of the message."""
         self._counterparty = counterparty
+
+    @property
+    def is_incoming(self) -> bool:
+        """
+        Get the is_incoming value of the message.
+
+        :return whether the message is incoming or is out going
+        """
+        assert self._is_incoming is not None, "is_incoming must not be None."
+        return self._is_incoming
+
+    @is_incoming.setter
+    def is_incoming(self, is_incoming: bool) -> None:
+        """Set the is_incoming of the message."""
+        self._is_incoming = is_incoming
 
     @property
     def body(self) -> Dict:
@@ -143,6 +159,10 @@ class Message:
             )
             + ")"
         )
+
+    @is_incoming.setter
+    def is_incoming(self, value):
+        self._is_incoming = value
 
 
 class Encoder(ABC):
