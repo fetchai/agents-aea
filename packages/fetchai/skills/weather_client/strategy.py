@@ -24,6 +24,8 @@ from typing import cast
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.fipa.dialogues import DEMAND_DATAMODEL_NAME
+
 DEFAULT_COUNTRY = "UK"
 SEARCH_TERM = "country"
 DEFAULT_MAX_ROW_PRICE = 5
@@ -70,6 +72,7 @@ class Strategy(Model):
         query = Query(
             [Constraint(SEARCH_TERM, ConstraintType("==", self._country))], model=None
         )
+        query.model.name = DEMAND_DATAMODEL_NAME
         return query
 
     def is_acceptable_proposal(self, proposal: Description) -> bool:

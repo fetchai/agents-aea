@@ -153,7 +153,7 @@ class Dialogue(ABC):
             """Get the string representation."""
             return self.value
 
-    def __init__(self, dialogue_label: DialogueLabel, role: Role = None) -> None:
+    def __init__(self, dialogue_label: DialogueLabel, role: Role) -> None:
         """
         Initialize a dialogue.
 
@@ -192,7 +192,7 @@ class Dialogue(ABC):
         return self._is_self_initiated
 
     @property
-    def role(self) -> Role:
+    def role(self) -> "Role":
         """Get the agent's role in the dialogue.
 
         :return: the agent's role
@@ -200,7 +200,7 @@ class Dialogue(ABC):
         return self._role
 
     @role.setter
-    def role(self, role: Role) -> None:
+    def role(self, role: "Role") -> None:
         """Set the agent's role in the dialogue.
 
         :param role: the agent's role
@@ -210,7 +210,7 @@ class Dialogue(ABC):
 
     @staticmethod
     @abstractmethod
-    def role_from_first_message(message: Message) -> Optional[Role]:
+    def role_from_first_message(message: Message) -> Optional["Role"]:
         """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message
@@ -305,29 +305,6 @@ class Dialogues:
         """Get the address of the agent for whom dialogues are maintained."""
         return self._agent_address
 
-    # @abstractmethod
-    # def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
-    #     """
-    #     Check whether an agent message is permitted for a new dialogue.
-    #
-    #     :param msg: the agent message
-    #
-    #     :return: a boolean indicating whether the message is permitted for a new dialogue
-    #     """
-    #
-    # @abstractmethod
-    # def is_belonging_to_registered_dialogue(
-    #     self, msg: Message, agent_addr: Address
-    # ) -> bool:
-    #     """
-    #     Check whether an agent message is part of a registered dialogue.
-    #
-    #     :param msg: the agent message
-    #     :param agent_addr: the address of the agent
-    #
-    #     :return: boolean indicating whether the message belongs to a registered dialogue
-    #     """
-
     @abstractmethod
     def get_dialogue(self, message: Message) -> Optional[Dialogue]:
         """
@@ -337,29 +314,7 @@ class Dialogues:
         :return: the dialogue if such a dialogue is found, None otherwise
         """
 
-    @staticmethod
-    def empty_dialogue(
-        opponent_address: Address = "", starter_address: Address = ""
-    ) -> Dialogue:
-        """
-        Create an empty dialogue, optionally with the supplied opponent address and dialogue starter address.
-
-        :param opponent_address: the address of the opponent in the dialogue
-        :param starter_address: the address of whoever starts the dialogue
-
-        :return: a new empty dialogue
-        """
-        dialogue_reference = ("", "")
-        dialogue_label = DialogueLabel(
-            dialogue_reference, opponent_address, starter_address
-        )
-        dialogue = Dialogue(dialogue_label)
-        return dialogue
-
-    def update(
-        self,
-        message: Message,
-    ) -> Optional[Dialogue]:
+    def update(self, message: Message,) -> Optional[Dialogue]:
         """
         Update the state of dialogues with a new message.
 

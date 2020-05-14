@@ -75,7 +75,9 @@ class FIPAHandler(Handler):
                 self._handle_propose(fipa_msg, dialogue)
             elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
                 self._handle_decline(fipa_msg, dialogue)
-            elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            elif (
+                fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
+            ):
                 self._handle_match_accept(fipa_msg, dialogue)
             elif fipa_msg.performative == FipaMessage.Performative.INFORM:
                 self._handle_inform(fipa_msg, dialogue)
@@ -358,6 +360,7 @@ class OEFSearchHandler(Handler):
                 target=Dialogue.STARTING_TARGET,
                 query=query,
             )
+            cfp_msg.counterparty = opponent_addr
             dialogues.update(cfp_msg)
             self.context.outbox.put_message(
                 to=opponent_addr,

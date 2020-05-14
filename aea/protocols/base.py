@@ -160,10 +160,6 @@ class Message:
             + ")"
         )
 
-    @is_incoming.setter
-    def is_incoming(self, value):
-        self._is_incoming = value
-
 
 class Encoder(ABC):
     """Encoder interface."""

@@ -28,7 +28,6 @@ from typing import Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
-from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -37,27 +36,16 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
+    def __init__(self, dialogue_label: DialogueLabel) -> None:
         """
         Initialize a dialogue label.
 
         :param dialogue_label: the identifier of the dialogue
-        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
-
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(self, dialogue_label, FipaDialogue.AgentRole.SELLER)
         self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> Optional[FipaDialogue.AgentRole]:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.AgentRole.SELLER
 
 
 class Dialogues(Model, FipaDialogues):
