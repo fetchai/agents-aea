@@ -352,7 +352,7 @@ class AgentDirectory(click.Path):
 
     def get_metavar(self, param):
         """Return the metavar default for this param if it provides one."""
-        return "AGENT_DIRECTORY"
+        return "AGENT_DIRECTORY"  # pragma: no cover
 
     def convert(self, value, param, ctx):
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""

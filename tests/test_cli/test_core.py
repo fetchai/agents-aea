@@ -20,6 +20,8 @@
 from pathlib import Path
 from unittest import TestCase, mock
 
+import pytest
+
 from aea.cli import cli
 from aea.cli.core import (
     _try_add_key,
@@ -31,6 +33,8 @@ from aea.cli.core import (
 )
 from aea.crypto.fetchai import FETCHAI
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.exceptions import AEATestingException
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
@@ -196,3 +200,28 @@ class AddKeyCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+class TestWealthCommands(AEATestCaseMany):
+    """Test case for CLI wealth commands."""
+
+    def test_wealth_commands(self):
+        """Test wealth commands."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+
+        self.generate_private_key()
+        self.add_private_key()
+
+        self.generate_wealth()
+
+        settings = {"unsupported_crypto": "path"}
+        self.force_set_config("agent.private_key_paths", settings)
+        with pytest.raises(AEATestingException) as excinfo:
+            self.generate_wealth()
+
+        assert "Unsupported identifier in private key paths." in str(excinfo.value)
