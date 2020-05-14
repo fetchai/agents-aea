@@ -26,8 +26,8 @@ from aea.cli import cli
 from aea.cli.fingerprint import _fingerprint_item
 from aea.test_tools.click_testing import CliRunner
 
-from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 from tests.conftest import CLI_LOG_OPTION
+from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
 
 
 @mock.patch("aea.cli.fingerprint._fingerprint_item")
