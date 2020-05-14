@@ -47,7 +47,6 @@ def _raise_psperror(*args, **kwargs):
 @mock.patch("builtins.open", mock.mock_open())
 @mock.patch("aea.cli.generate.ConfigLoader")
 @mock.patch("aea.cli.generate.os.path.join", return_value="joined-path")
-@mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_file_exists)
 class GenerateItemTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
@@ -71,13 +70,9 @@ class GenerateItemTestCase(TestCase):
 
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.cli.generate.shutil.which", return_value="some")
-    @mock.patch("aea.cli.generate.ProtocolGenerator")
-    def test__generate_item_parsing_specs_fail(self, p_generator_class_mock, *mocks):
+    @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)
+    def test__generate_item_parsing_specs_fail(self, *mocks):
         """Test for fetch_agent_locally method parsing specs fail."""
-        p_gen_mock = mock.Mock()
-        p_gen_mock.generate = _raise_psperror
-        p_generator_class_mock.return_value = p_gen_mock
-
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
             _generate_item(ctx_mock, "protocol", "path")
@@ -88,13 +83,9 @@ class GenerateItemTestCase(TestCase):
 
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.cli.generate.shutil.which", return_value="some")
-    @mock.patch("aea.cli.generate.ProtocolGenerator")
-    def test__generate_item_protocol_exists(self, p_generator_class_mock, *mocks):
+    @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_file_exists)
+    def test__generate_item_protocol_exists(self, *mocks):
         """Test for fetch_agent_locally method protocol exists result."""
-        p_gen_mock = mock.Mock()
-        p_gen_mock.generate = _raise_file_exists
-        p_generator_class_mock.return_value = p_gen_mock
-
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
             _generate_item(ctx_mock, "protocol", "path")
