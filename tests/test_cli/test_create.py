@@ -26,6 +26,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Dict
+from unittest import TestCase
 from unittest.mock import patch
 
 import jsonschema
@@ -470,3 +471,34 @@ class TestCreateFailsWhenAlreadyInAEAProject:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class CreateCommandTestCase(TestCase):
+    """Test case for CLI create command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_create_no_init(self):
+        """Test for CLI create no init result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exception.message, "Author is not set up. Please use 'aea init' to initialize.")
+
+    @patch("aea.cli.create._get_or_create_cli_config", return_value={})
+    def test_create_no_author_local(self, *mocks):
+        """Test for CLI create no author local result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", "agent_name"],
+            standalone_mode=False,
+        )
+        expected_message = (
+            "The AEA configurations are not initialized. "
+            "Uses `aea init` before continuing or provide optional argument `--author`."
+        )
+        self.assertEqual(result.exception.message, expected_message)
