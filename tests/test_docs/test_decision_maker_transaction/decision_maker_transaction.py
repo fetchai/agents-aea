@@ -26,8 +26,8 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
-from aea.crypto.helpers import _try_generate_testnet_wealth
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import _try_generate_testnet_wealth, create_private_key
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
@@ -43,7 +43,7 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 def run():
     # Create a private key
-    FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE_1, mode="wb"))
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
 
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -73,7 +73,7 @@ def run():
     my_aea.resources.add_skill(simple_skill)
 
     # create a second identity
-    FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE_2, mode="wb"))
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 
     counterparty_wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
 

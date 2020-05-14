@@ -105,29 +105,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
             "vendor.fetchai.skills.generic_seller.models",
             seller_skill_config_replacement["models"],
         )
-        self.run_install()
-
-        # Setup Buyer
-        self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.force_set_config("agent.ledger_apis", ledger_apis)
-        buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
         self.force_set_config(
-            "vendor.fetchai.skills.generic_buyer.models",
-            buyer_skill_config_replacement["models"],
+            "vendor.fetchai.skills.generic_seller.dependencies",
+            seller_skill_config_replacement["dependencies"],
         )
-
-        self.run_install()
-
-        # Generate and add private keys
-        self.generate_private_key()
-        self.add_private_key()
-
-        # Add some funds to the buyer
-        self.generate_wealth()
-
         # Replace the seller strategy
         seller_stategy_path = Path(
             seller_aea_name,
@@ -144,6 +125,27 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
             "fetchai/generic_seller:0.1.0",
             cwd=str(Path(seller_aea_name, "vendor", "fetchai")),
         )
+        self.run_install()
+
+        # Setup Buyer
+        self.set_agent_context(buyer_aea_name)
+        self.add_item("connection", "fetchai/oef:0.2.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.2.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+        buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
+        self.force_set_config(
+            "vendor.fetchai.skills.generic_buyer.models",
+            buyer_skill_config_replacement["models"],
+        )
+        self.run_install()
+
+        # Generate and add private keys
+        self.generate_private_key()
+        self.add_private_key()
+
+        # Add some funds to the buyer
+        self.generate_wealth()
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)

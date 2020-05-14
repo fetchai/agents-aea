@@ -21,8 +21,8 @@
 
 import logging
 
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
-from aea.crypto.helpers import _try_generate_testnet_wealth
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import _try_generate_testnet_wealth, create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
@@ -36,8 +36,8 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 def run():
     # Create a private keys
-    FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE_1, mode="wb"))
-    FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE_2, mode="wb"))
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
 
     # Set up the wallets
     wallet_1 = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_1})

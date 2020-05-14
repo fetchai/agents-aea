@@ -58,8 +58,8 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    create_private_key,
     _try_validate_private_key_path,
+    create_private_key,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet

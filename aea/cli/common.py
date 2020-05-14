@@ -50,8 +50,8 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    create_private_key,
     _try_validate_private_key_path,
+    create_private_key,
 )
 from aea.crypto.wallet import SUPPORTED_CRYPTOS
 

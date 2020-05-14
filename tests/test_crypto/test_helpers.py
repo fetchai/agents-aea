@@ -31,9 +31,9 @@ from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    create_private_key,
     _try_generate_testnet_wealth,
     _try_validate_private_key_path,
+    create_private_key,
 )
 
 from ..conftest import CUR_PATH
