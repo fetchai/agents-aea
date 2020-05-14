@@ -19,23 +19,25 @@
 
 """This module contains the tests of the ethereum module."""
 
-import os
+import time
 from unittest.mock import MagicMock
 
 import pytest
 
-from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.cosmos import CosmosApi, CosmosCrypto
 
-from ..conftest import ROOT_DIR
-
-PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/cosmos_private_key.txt")
+from ..conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG
 
 
 def test_creation():
     """Test the creation of the crypto_objects."""
-    assert CosmosCrypto(), "Managed to initialise the eth_account"
-    assert CosmosCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
-    assert CosmosCrypto("./"), "Managed to create a new eth private key"
+    assert CosmosCrypto(), "Did not manage to initialise the crypto module"
+    assert CosmosCrypto(
+        COSMOS_PRIVATE_KEY_PATH
+    ), "Did not manage to load the cosmos private key"
+    assert CosmosCrypto(
+        "./"
+    ), "Did not manage to create a new cosmos private key with wrong path"
 
 
 def test_initialization():
@@ -50,17 +52,63 @@ def test_initialization():
     ), "After creation the public key must no be None"
 
 
-@pytest.mark.unstable
 def test_sign_and_recover_message():
     """Test the signing and the recovery function for the eth_crypto."""
-    account = CosmosCrypto(PRIVATE_KEY_PATH)
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
-    assert recovered_addr == account.address, "Failed to recover the correct address."
+    recovered_addresses = account.recover_message(
+        message=b"hello", signature=sign_bytes
+    )
+    assert (
+        account.address in recovered_addresses
+    ), "Failed to recover the correct address."
 
 
 def test_dump_positive():
     """Test dump."""
-    account = CosmosCrypto(PRIVATE_KEY_PATH)
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
     account.dump(MagicMock())
+
+
+def test_api_creation():
+    """Test api instantiation."""
+    assert CosmosApi(**COSMOS_TESTNET_CONFIG), "Failed to initialise the api"
+
+
+def test_api_none():
+    """Test the "api" of the cryptoApi is none."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    assert cosmos_api.api is None, "The api property is not None."
+
+
+@pytest.mark.network
+def test_get_balance():
+    """Test the balance is zero for a new account."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    cc = CosmosCrypto()
+    balance = cosmos_api.get_balance(cc.address)
+    assert balance == 0, "New account has a positive balance."
+    cc = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
+    balance = cosmos_api.get_balance(cc.address)
+    assert balance > 0, "Existing account has no balance."
+
+
+@pytest.mark.network
+def test_transfer():
+    """Test transfer of wealth."""
+    cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
+    cc1 = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
+    cc2 = CosmosCrypto()
+    amount = 10000
+    fee = 1000
+    tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
+    assert tx_digest is not None, "Failed to submit transfer!"
+    time.sleep(5.0)
+    is_settled = cosmos_api.is_transaction_settled(tx_digest)
+    assert is_settled, "Failed to complete tx!"
+    # TODO remove requirement for "" tx nonce stub
+    is_valid = cosmos_api.is_transaction_valid(
+        tx_digest, cc2.address, cc1.address, "", amount
+    )
+    assert is_valid, "Failed to settle tx correctly!"

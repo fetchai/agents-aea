@@ -242,10 +242,13 @@ def get_address(click_context, type_):
 
 def _try_get_balance(agent_config, wallet, type_):
     try:
+        if type_ not in agent_config.ledger_apis_dict:
+            raise ValueError(
+                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
+            )
         ledger_apis = LedgerApis(
             agent_config.ledger_apis_dict, agent_config.default_ledger
         )
-
         address = wallet.addresses[type_]
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
