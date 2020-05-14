@@ -19,7 +19,7 @@
 
 """This module contains the tests of the wallet module."""
 
-from unittest import TestCase, mock
+from unittest import TestCase
 
 import pytest
 
@@ -27,46 +27,44 @@ from aea.crypto.cosmos import COSMOS
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.wallet import Wallet
+from aea.exceptions import AEAException
 
 
 def test_wallet_initialisation_error():
     """Test the value error when we initialise the wallet."""
-    with pytest.raises(ValueError):
+    with pytest.raises(AEAException):
         Wallet({"Test": "test"})
 
 
-@mock.patch("aea.crypto.wallet.CosmosCrypto")
-@mock.patch("aea.crypto.wallet.EthereumCrypto")
-@mock.patch("aea.crypto.wallet.FetchAICrypto")
 class WalletTestCase(TestCase):
     """Test case for Wallet class."""
 
-    def test_wallet_init_positive(self, *mocks):
+    def test_wallet_init_positive(self):
         """Test Wallet init positive result."""
         private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2", COSMOS: "path3"}
         Wallet(private_key_paths)
 
-    def test_wallet_init_bad_id(self, *mocks):
+    def test_wallet_init_bad_id(self):
         """Test Wallet init unsupported private key paths identifier."""
-        private_key_paths = {"unknown-id": "path1"}
-        with self.assertRaises(ValueError):
+        private_key_paths = {"unknown_id": "path1"}
+        with self.assertRaises(AEAException):
             Wallet(private_key_paths)
 
-    def test_wallet_crypto_objects_positive(self, *mocks):
+    def test_wallet_crypto_objects_positive(self):
         """Test Wallet.crypto_objects init positive result."""
         private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2"}
         wallet = Wallet(private_key_paths)
         crypto_objects = wallet.crypto_objects
         self.assertTupleEqual(tuple(crypto_objects), (ETHEREUM, FETCHAI))
 
-    def test_wallet_public_keys_positive(self, *mocks):
+    def test_wallet_public_keys_positive(self):
         """Test Wallet.public_keys init positive result."""
         private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2"}
         wallet = Wallet(private_key_paths)
         public_keys = wallet.public_keys
         self.assertTupleEqual(tuple(public_keys), (ETHEREUM, FETCHAI))
 
-    def test_wallet_addresses_positive(self, *mocks):
+    def test_wallet_addresses_positive(self):
         """Test Wallet.addresses init positive result."""
         private_key_paths = {ETHEREUM: "path1", FETCHAI: "path2"}
         wallet = Wallet(private_key_paths)

@@ -44,7 +44,7 @@ class Wallet:
         addresses = {}  # type: Dict[str, str]
 
         for identifier, path in private_key_paths.items():
-            crypto = aea.crypto.make(identifier)
+            crypto = aea.crypto.make(identifier, private_key_path=path)
             crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)

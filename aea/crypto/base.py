@@ -30,6 +30,13 @@ class Crypto(ABC):
 
     identifier = "base"
 
+    def __init__(self, **kwargs):
+        """
+        Initialize the crypto object.
+
+        :param kwargs: keyword arguments.
+        """
+
     @property
     @abstractmethod
     def entity(self) -> Any:

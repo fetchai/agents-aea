@@ -123,7 +123,7 @@ class CryptoSpec(object):
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
         cls = self.entry_point.load()
-        crypto = cls()
+        crypto = cls(**kwargs)
         return crypto
 
 
@@ -182,7 +182,7 @@ class CryptoRegistry(object):
                 )
 
         if id not in self.specs:
-            raise AEAException("Crypto not registered with id {}.".format(id))
+            raise AEAException("Crypto not registered with id '{}'.".format(id))
         return self.specs[id]
 
 

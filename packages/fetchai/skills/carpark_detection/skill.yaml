@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmfGepbkknTZ4VGeQKuUBVMmNMkMWf4EwMKxbsPqAqhDdN
+  behaviours.py: QmP8iUDZD7Q2vK3zB96eDBb2rGUmVh2b3wV3Hj8mDVwQoY
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
