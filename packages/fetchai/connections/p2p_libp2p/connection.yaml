@@ -2,16 +2,16 @@ name: p2p_libp2p
 author: fetchai
 version: 0.1.0
 description: The p2p go-libp2p connection implements an interface to standalone golang
-  go-libp2p node that can exchange aea envelopes with other agents participating in the
-  same p2p network.
+  go-libp2p node that can exchange aea envelopes with other agents participating in
+  the same p2p network.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
-  __init__.py: QmbPzrjd27coFfS2vN9xDL4uARKZWCCmtWvmEuzGKSjxf7
-  aea/api.go: QmXso6AWRbhHWCjRDN5wD9qGagBVQCeQfniZ6RVB4N9KUH
-  connection.py: QmTyAJX1MHahctL8nsmBJseqYHZDUasroTyiAnNnn3QgHA
-  go.mod: QmVSRYVqSMRDvWTbMuEFj53gN64LhTRZyrAuvrQSRu2LVH
-  noise_node.go: QmZJ5rKsZpaP9MXEb7CFFRuXpc6R5oXxjvL3MenfAf1F81
+  __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
+  aea/api.go: QmQXwairEwX7ACaFGdEkbeZcxBh6NtpPiGC4ycqWmgGGwd
+  connection.py: QmUzBznwAStV8ksn9sf9reFk6M8VLXekw3CwrcUswmxKsG
+  go.mod: QmRPvuAFB5riWthFCSwD4A13MEETvDDPZZZ4sLWBg7LjJi
+  libp2p_node.go: Qmc7171uzPcgcRJ9ew2Cgtry5ZrHUBym4rsnbqHsMSegN1
 fingerprint_ignore_patterns:
 - go.sum
 - libp2p_node

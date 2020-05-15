@@ -59,7 +59,11 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.1.0")
 
 MultiAddr = str
 
-LIBP2P_IPFS_BOOTSTRAP_NODES=[MultiAddr("/ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ")]
+LIBP2P_IPFS_BOOTSTRAP_NODES = [
+    MultiAddr(
+        "/ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"
+    )
+]
 
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
@@ -271,7 +275,8 @@ class Libp2pNode:
                         [
                             str(maddr)
                             for maddr in self.entry_peers
-                            if str(maddr) != str(self.uri) # TOFIX(LR) won't exclude self
+                            if str(maddr)
+                            != str(self.uri)  # TOFIX(LR) won't exclude self
                         ]
                     )
                 )
