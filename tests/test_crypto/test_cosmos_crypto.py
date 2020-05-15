@@ -104,7 +104,7 @@ def test_transfer():
     fee = 1000
     tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
     assert tx_digest is not None, "Failed to submit transfer!"
-    time.sleep(5.0)
+    time.sleep(10.0)
     is_settled = cosmos_api.is_transaction_settled(tx_digest)
     assert is_settled, "Failed to complete tx!"
     # TODO remove requirement for "" tx nonce stub
