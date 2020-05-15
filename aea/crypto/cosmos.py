@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Ethereum module wrapping the public and private key cryptography and ledger api."""
+"""Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
 import hashlib
