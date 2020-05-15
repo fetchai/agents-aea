@@ -55,6 +55,11 @@ class Strategy(Model):
         self._search_id = 0
         self.is_searching = True
 
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
     def get_next_search_id(self) -> int:
         """
         Get the next search id and set the search time.

@@ -8,8 +8,8 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcVpVrbV54Aogmowu6AomDiVMrVMo9BUvwKt9V1bJpBwp
   behaviours.py: QmTi5FPgKu1NfFBDbacesUP9sxJq3YhVFp3i4JT8n8PdJp
-  game.py: QmYcWiECZ4MTXJiH9yrHa4ipJHYVVfERNLw39KCcxR7MfE
-  handlers.py: QmdibLBqczW9MDPvksYdqse5pMRHhoCaXyDv2XqTE4Ne3b
+  game.py: QmNxw6Ca7iTQTCU2fZ6ftJfDQpwTBtCCwMPRL1WvT5CzW9
+  handlers.py: QmUnaWS8wR26babJtyzEM2fhQ3LCheemuvP5XDQh3nU69a
   search.py: QmYsFDh6BY8ENi3dPiZs1DSvkrCw2wgjBQjNfJXxRQf9us
 fingerprint_ignore_patterns: []
 contracts:
@@ -37,6 +37,7 @@ models:
     args:
       expected_version_id: v1
       is_using_contract: false
+      ledger_id: ethereum
     class_name: Game
   search:
     args: {}

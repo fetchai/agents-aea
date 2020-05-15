@@ -1,16 +1,16 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmbm3ZtGpfdvvzqykfRqbaReAK9a16mcyK7qweSfeN5pq1
-  behaviours.py: Qmby3bL1qRD3d9zRZ8fahbBbpqryKDBuuV1RTawSwbfRbE
+  behaviours.py: QmehaMYqsicGPy5PxUvYSHfeuPFaUHHh3EMW7MzV2v2r8a
   dialogues.py: QmeVn1B82tMUqH4mJkKUn28eZHUQHVWn6idtDv4xbWVE66
-  handlers.py: QmWzFXmcqYhuyXXnTCkF1eWuK386eMCBefD78apkZMvcxf
-  strategy.py: QmPUs2LGKJeCrMqeZsv9X1WBuoKDUkbMhAWoxsD6LtfyiG
+  handlers.py: QmQqasdQ8jNf9GrKG1YpgtTWKGN28VxcMpHdJFM84893u1
+  strategy.py: QmXUq6w8w5NX9ryVr4uJyNgFL3KPzD6EbWNYbfXXqWAxGK
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.2.0
@@ -44,6 +44,7 @@ models:
       data_model_name: erc1155_deploy
       from_supply: 10
       ft: 2
+      ledger_id: ethereum
       mint_stock:
       - 100
       - 100

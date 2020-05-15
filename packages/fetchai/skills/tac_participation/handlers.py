@@ -22,7 +22,6 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
@@ -302,11 +301,9 @@ class TACHandler(Handler):
             )
 
             if contract_address is not None:
-                ethereum_api = cast(
-                    EthereumApi, self.context.ledger_apis.apis[ETHEREUM]
-                )
+                ledger_api = self.context.ledger_apis.get_api(game.ledger_id)
                 contract.set_deployed_instance(
-                    ethereum_api, contract_address,
+                    ledger_api, contract_address,
                 )
                 self.context.logger.info(
                     "[{}]: Received a contract address: {}".format(

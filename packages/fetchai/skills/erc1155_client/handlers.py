@@ -22,7 +22,6 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.ethereum import ETHEREUM
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
@@ -150,8 +149,9 @@ class FIPAHandler(Handler):
                 )
             )
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            strategy = cast(Strategy, self.context.strategy)
             contract.set_address(
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),  # type: ignore
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),  # type: ignore
                 contract_address=data["contract_address"],
             )
             tx_msg = contract.get_hash_single_transaction_msg(
@@ -162,7 +162,7 @@ class FIPAHandler(Handler):
                 to_supply=int(data["to_supply"]),
                 value=int(data["value"]),
                 trade_nonce=int(data["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )

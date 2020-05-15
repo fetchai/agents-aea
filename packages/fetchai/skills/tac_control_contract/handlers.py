@@ -21,7 +21,6 @@
 
 from typing import cast
 
-from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -271,9 +270,7 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
-        ledger_api = cast(
-            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
-        )
+        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
         if tx_msg_response.tx_id == "contract_deploy":
             game.phase = Phase.CONTRACT_DEPLOYING
             self.context.logger.info(
