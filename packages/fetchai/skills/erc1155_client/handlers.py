@@ -151,7 +151,7 @@ class FIPAHandler(Handler):
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
             strategy = cast(Strategy, self.context.strategy)
             contract.set_address(
-                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),  # type: ignore
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 contract_address=data["contract_address"],
             )
             tx_msg = contract.get_hash_single_transaction_msg(

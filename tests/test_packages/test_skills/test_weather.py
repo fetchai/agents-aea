@@ -34,7 +34,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/weather_station:0.2.0")
+        self.add_item("skill", "fetchai/weather_station:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
@@ -45,7 +45,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/weather_client:0.1.0")
+        self.add_item("skill", "fetchai/weather_client:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
@@ -114,7 +114,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(weather_station_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/weather_station:0.2.0")
+        self.add_item("skill", "fetchai/weather_station:0.3.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 
@@ -122,7 +122,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(weather_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/weather_client:0.1.0")
+        self.add_item("skill", "fetchai/weather_client:0.2.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.run_install()
 

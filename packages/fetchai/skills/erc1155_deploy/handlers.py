@@ -267,7 +267,8 @@ class TransactionHandler(Handler):
                 )
             else:
                 contract.set_address(
-                    self.context.ledger_apis.get_api(strategy.ledger_id), tx_receipt.contractAddress  # type: ignore
+                    self.context.ledger_apis.get_api(strategy.ledger_id),
+                    tx_receipt.contractAddress,
                 )
                 self.context.logger.info(
                     "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
@@ -366,9 +367,9 @@ class TransactionHandler(Handler):
                 strategy.ledger_id
             ).is_transaction_settled(tx_digest):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.get_api(strategy.ledger_id).get_transaction_receipt(  # type: ignore
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(

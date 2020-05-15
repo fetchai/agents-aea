@@ -34,7 +34,9 @@ If you want to create the weather station AEA step by step you can follow this g
 
 Fetch the weather station AEA with the following command :
 
-`aea fetch fetchai/weather_station:0.3.0`
+``` bash
+aea fetch fetchai/weather_station:0.4.0
+```
 
 ### Update the AEA configs
 

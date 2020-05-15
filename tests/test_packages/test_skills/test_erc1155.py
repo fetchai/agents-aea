@@ -53,7 +53,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_deploy:0.3.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.4.0")
         self.generate_private_key("ethereum")
         self.add_private_key("ethereum", "eth_private_key.txt")
         self.replace_private_key_in_file(
@@ -70,7 +70,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.add_item("connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
-        self.add_item("skill", "fetchai/erc1155_client:0.2.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.3.0")
         self.generate_private_key("ethereum")
         self.add_private_key("ethereum", "eth_private_key.txt")
         self.replace_private_key_in_file(
