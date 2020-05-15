@@ -384,7 +384,7 @@ class P2PLibp2pConnection(Connection):
         self,
         key: FetchAICrypto,
         uri: Optional[Uri] = None,
-        entry_peers: Sequence[MultiAddr] = None,
+        entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
         **kwargs
@@ -403,13 +403,15 @@ class P2PLibp2pConnection(Connection):
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         # use ipfs public dht to bootstrap
-        entry_peers.extend(LIBP2P_IPFS_BOOTSTRAP_NODES)
+        bootstrap_peers = LIBP2P_IPFS_BOOTSTRAP_NODES
+        if entry_peers is not None:
+            bootstrap_peers.extend(entry_peers)
         self.node = Libp2pNode(
             key,
             LIBP2P_NODE_MODULE,
             LIBP2P_NODE_CLARGS,
             uri,
-            entry_peers,
+            bootstrap_peers,
             log_file,
             env_file,
         )
