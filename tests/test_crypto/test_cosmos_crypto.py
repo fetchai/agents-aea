@@ -35,9 +35,6 @@ def test_creation():
     assert CosmosCrypto(
         COSMOS_PRIVATE_KEY_PATH
     ), "Did not manage to load the cosmos private key"
-    assert CosmosCrypto(
-        "./"
-    ), "Did not manage to create a new cosmos private key with wrong path"
 
 
 def test_initialization():

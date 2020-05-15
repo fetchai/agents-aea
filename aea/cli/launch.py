@@ -34,6 +34,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
+from aea.helpers.base import cd
 
 
 def _run_agent(click_context, agent_directory: str):
@@ -95,7 +96,8 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
     """
     aeas = []  # type: List[AEA]
     for agent_directory in agents:
-        aeas.append(AEABuilder.from_aea_project(agent_directory).build())
+        with cd(agent_directory):
+            aeas.append(AEABuilder.from_aea_project(".").build())
 
     threads = [Thread(target=agent.start) for agent in aeas]
     for t in threads:

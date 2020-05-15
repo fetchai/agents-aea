@@ -65,7 +65,7 @@ class AEATestWrapper:
         builder = AEABuilder()
 
         builder.set_name(self.name)
-        builder.add_private_key(FETCHAI, "")
+        builder._private_key_paths[FETCHAI] = None
 
         for component in components:
             builder.add_component_instance(component)

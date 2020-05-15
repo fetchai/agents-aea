@@ -49,7 +49,6 @@ Get the apis.
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_fetchai"></a>
 #### has`_`fetchai
 
-TODO to remove!
 
 ```python
  | @property

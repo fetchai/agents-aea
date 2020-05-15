@@ -40,7 +40,7 @@ FETCHAI_CURRENCY = "FET"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 
 
-class FetchAICrypto(Crypto):
+class FetchAICrypto(Crypto[Entity]):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     identifier = FETCHAI
@@ -51,17 +51,8 @@ class FetchAICrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._entity = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
+        super().__init__(private_key_path=private_key_path)
         self._address = str(FetchaiAddress(Identity.from_hex(self.public_key)))
-
-    @property
-    def entity(self) -> Entity:
-        """Get the entity."""
-        return self._entity
 
     @property
     def public_key(self) -> str:
@@ -70,7 +61,7 @@ class FetchAICrypto(Crypto):
 
         :return: a public key string in hex format
         """
-        return self._entity.public_key_hex
+        return self.entity.public_key_hex
 
     @property
     def address(self) -> str:
@@ -81,7 +72,8 @@ class FetchAICrypto(Crypto):
         """
         return self._address
 
-    def _load_private_key_from_path(self, file_name) -> Entity:
+    @classmethod
+    def load_private_key_from_path(cls, file_name: str) -> Entity:
         """
         Load a private key in hex format from a file.
 
@@ -90,21 +82,13 @@ class FetchAICrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    entity = Entity.from_hex(data)
-
-            else:
-                entity = self._generate_private_key()
-
-            return entity
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with path.open() as key:
+            data = key.read()
+            entity = Entity.from_hex(data)
+        return entity
 
     @classmethod
-    def _generate_private_key(cls) -> Entity:
+    def generate_private_key(cls) -> Entity:
         entity = Entity()
         return entity
 

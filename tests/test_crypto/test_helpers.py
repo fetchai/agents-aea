@@ -36,8 +36,7 @@ from aea.crypto.helpers import (
     create_private_key,
 )
 
-from ..conftest import CUR_PATH
-
+from ..conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_PATH, FETCHAI_PRIVATE_KEY_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -105,11 +104,10 @@ class TestHelperFile:
         _try_generate_testnet_wealth(FETCHAI, "address")
         _try_generate_testnet_wealth(ETHEREUM, "address")
 
-    @patch("builtins.open", mock_open())
-    def test__try_validate_private_key_path_positive(self, *mocks):
+    def test__try_validate_private_key_path_positive(self):
         """Test _validate_private_key_path positive result."""
-        _try_validate_private_key_path(FETCHAI, "path")
-        _try_validate_private_key_path(ETHEREUM, "path")
+        _try_validate_private_key_path(FETCHAI, FETCHAI_PRIVATE_KEY_PATH)
+        _try_validate_private_key_path(ETHEREUM, ETHEREUM_PRIVATE_KEY_PATH)
 
     @patch("builtins.open", mock_open())
     def test__create_ethereum_private_key_positive(self, *mocks):
