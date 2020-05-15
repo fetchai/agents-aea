@@ -29,7 +29,6 @@ import subprocess  # nosec
 import sys
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
-from pathlib import Path
 from random import randint
 from typing import IO, List, Optional, Sequence, cast
 
@@ -135,7 +134,9 @@ def _golang_module_run(
             shell=False,
         )
     except Exception as e:
-        logger.error("While executing go run {} {} : {}".format(src, args, str(e)))
+        logger.error(
+            "While executing go run . {} at {} : {}".format(path, args, str(e))
+        )
         raise e
 
     return proc
