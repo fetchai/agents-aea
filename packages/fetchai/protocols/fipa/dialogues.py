@@ -393,7 +393,7 @@ class FipaDialogues(Dialogues):
         return result
 
     def _create(
-        self, dialogue_label: DialogueLabel, role: FipaDialogue.AgentRole = None
+        self, dialogue_label: DialogueLabel, role: FipaDialogue.AgentRole
     ) -> FipaDialogue:
         """
         Create a dialogue.
@@ -404,7 +404,7 @@ class FipaDialogues(Dialogues):
         :return: the created dialogue
         """
         assert dialogue_label not in self.dialogues
-        dialogue = FipaDialogue(dialogue_label, role=None)
+        dialogue = FipaDialogue(dialogue_label, role=role)
         if role == FipaDialogue.AgentRole.SELLER:
             assert dialogue_label not in self.dialogues_as_seller
             self._dialogues_as_seller.update({dialogue_label: dialogue})

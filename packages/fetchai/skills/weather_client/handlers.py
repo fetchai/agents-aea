@@ -65,7 +65,8 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        dialogue = dialogues.update(fipa_msg)
+        fipa_dialogue = dialogues.update(fipa_msg)
+        dialogue = cast(Dialogue, fipa_dialogue)
         if dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
@@ -149,6 +150,7 @@ class FIPAHandler(Handler):
                 target=new_target_id,
                 performative=FipaMessage.Performative.ACCEPT,
             )
+            accept_msg.counterparty = msg.counterparty
             dialogues.update(accept_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
@@ -168,6 +170,7 @@ class FIPAHandler(Handler):
                 target=new_target_id,
                 performative=FipaMessage.Performative.DECLINE,
             )
+            decline_msg.counterparty = msg.counterparty
             dialogues.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
@@ -253,6 +256,7 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info={"Done": "Sending payment via bank transfer"},
             )
+            inform_msg.counterparty = msg.counterparty
             dialogues.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,

@@ -210,7 +210,7 @@ class Dialogue(ABC):
 
     @staticmethod
     @abstractmethod
-    def role_from_first_message(message: Message) -> Optional["Role"]:
+    def role_from_first_message(message: Message) -> "Role":
         """Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message

@@ -27,7 +27,9 @@ This module contains the classes required for dialogue management.
 from typing import Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.search.models import Description
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -46,6 +48,15 @@ class Dialogue(FipaDialogue):
         FipaDialogue.__init__(self, dialogue_label, FipaDialogue.AgentRole.SELLER)
         self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.SELLER
 
 
 class Dialogues(Model, FipaDialogues):
