@@ -25,7 +25,6 @@ import math
 from enum import Enum
 from typing import Any, Dict, List, Optional, cast
 
-from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
@@ -817,7 +816,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
+            crypto_object = self.wallet.crypto_objects.get("ethereum")
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
@@ -834,7 +833,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :return: None
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
+            crypto_object = self.wallet.crypto_objects.get("ethereum")
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)

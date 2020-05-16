@@ -22,7 +22,7 @@
 import datetime
 from typing import List, Optional, cast
 
-from aea.crypto.ethereum import EthereumApi
+from aea.crypto.base import LedgerApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
@@ -69,16 +69,14 @@ class TACBehaviour(SimpleBehaviour):
         """
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        ledger_api = cast(
-            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
-        )
+        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
         if parameters.is_contract_deployed:
             self._set_contract(parameters, ledger_api, contract)
         else:
             self._deploy_contract(ledger_api, contract)
 
     def _set_contract(
-        self, parameters: Parameters, ledger_api: EthereumApi, contract: ERC1155Contract
+        self, parameters: Parameters, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Set the contract and configuration based on provided parameters."""
         game = cast(Game, self.context.game)
@@ -96,7 +94,7 @@ class TACBehaviour(SimpleBehaviour):
         game.conf = configuration
 
     def _deploy_contract(
-        self, ledger_api: EthereumApi, contract: ERC1155Contract
+        self, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send deploy contract tx msg to decision maker."""
         game = cast(Game, self.context.game)
@@ -124,9 +122,7 @@ class TACBehaviour(SimpleBehaviour):
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        ledger_api = cast(
-            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
-        )
+        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
         if (
             game.phase.value == Phase.CONTRACT_DEPLOYED.value
             and parameters.registration_start_time
@@ -243,7 +239,7 @@ class TACBehaviour(SimpleBehaviour):
         self._registered_desc = None
 
     def _create_items(
-        self, game: Game, ledger_api: EthereumApi, contract: ERC1155Contract
+        self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send create items transaction to decision maker."""
         self.context.logger.info(
@@ -255,7 +251,7 @@ class TACBehaviour(SimpleBehaviour):
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
 
     def _mint_items(
-        self, game: Game, ledger_api: EthereumApi, contract: ERC1155Contract
+        self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
     ) -> None:
         """Send mint items transactions to decision maker."""
         self.context.logger.info(
@@ -343,7 +339,7 @@ class TACBehaviour(SimpleBehaviour):
     def _get_create_items_tx_msg(
         self,
         configuration: Configuration,
-        ledger_api: EthereumApi,
+        ledger_api: LedgerApi,
         contract: ERC1155Contract,
     ) -> TransactionMessage:
         token_ids = [
@@ -360,10 +356,7 @@ class TACBehaviour(SimpleBehaviour):
         return tx_msg
 
     def _get_mint_goods_and_currency_tx_msg(
-        self,
-        agent_state: AgentState,
-        ledger_api: EthereumApi,
-        contract: ERC1155Contract,
+        self, agent_state: AgentState, ledger_api: LedgerApi, contract: ERC1155Contract,
     ) -> TransactionMessage:
         token_ids = []  # type: List[int]
         mint_quantities = []  # type: List[int]
@@ -396,9 +389,7 @@ class ContractBehaviour(TickerBehaviour):
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
-        ledger_api = cast(
-            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
-        )
+        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
         if game.phase.value == Phase.CONTRACT_DEPLOYING.value:
             tx_receipt = ledger_api.get_transaction_receipt(
                 tx_digest=game.contract_manager.deploy_tx_digest

@@ -88,8 +88,12 @@ PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
 DUMMY_ENV = gym.GoalEnv
 
 # private keys with value on testnet
-COSMOS_PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/cosmos_private_key.txt")
-ETHEREUM_PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/eth_private_key.txt")
+COSMOS_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+)
+ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+)
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", "fet_private_key.txt"
 )
@@ -98,6 +102,9 @@ FUNDED_ETH_PRIVATE_KEY_1 = (
 )
 FUNDED_ETH_PRIVATE_KEY_2 = (
     "0x04b4cecf78288f2ab09d1b4c60219556928f86220f0fb2dcfc05e6a1c1149dbf"
+)
+FUNDED_FET_PRIVATE_KEY_1 = (
+    "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
 )
 
 # addresses with no value on testnet

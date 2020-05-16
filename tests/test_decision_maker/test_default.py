@@ -30,9 +30,10 @@ from web3.auto import Web3
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
-from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import FETCHAI, Wallet
+from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import (
     DecisionMakerHandler,
@@ -236,12 +237,19 @@ class TestDecisionMaker:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {FETCHAI: private_key_pem_path, ETHEREUM: eth_private_key_pem_path}
+            {
+                FetchAICrypto.identifier: private_key_pem_path,
+                EthereumCrypto.identifier: eth_private_key_pem_path,
+            }
         )
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        cls.ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
+        )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI
+            cls.agent_name,
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()
@@ -795,7 +803,9 @@ class TestLedgerStateProxy:
     @classmethod
     def setup_class(cls):
         """Set up the test."""
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        cls.ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
+        )
         cls.ledger_state_proxy = LedgerStateProxy(ledger_apis=cls.ledger_apis)
 
     def test_ledger_apis(self):
@@ -864,10 +874,10 @@ class DecisionMakerTestCase(TestCase):
     # def test__handle_tx_message_for_signing_positive(self, *mocks):
     #     """Test for _handle_tx_message_for_signing positive result."""
     #     private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-    #     wallet = Wallet({FETCHAI: private_key_pem_path})
-    #     ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+    #     wallet = Wallet({FetchAICrypto.identifier: private_key_pem_path})
+    #     ledger_apis = LedgerApis({FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier)
     #     identity = Identity(
-    #         "agent_name", addresses=wallet.addresses, default_address_key=FETCHAI
+    #         "agent_name", addresses=wallet.addresses, default_address_key=FetchAICrypto.identifier
     #     )
     #     dm = DecisionMaker(identity, wallet, ledger_apis)
     #     dm._handle_tx_message_for_signing("tx_message")
@@ -875,10 +885,14 @@ class DecisionMakerTestCase(TestCase):
     def test__is_affordable_positive(self, *mocks):
         """Test for _is_affordable positive result."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_pem_path})
-        ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        wallet = Wallet({FetchAICrypto.identifier: private_key_pem_path})
+        ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
+        )
         identity = Identity(
-            "agent_name", addresses=wallet.addresses, default_address_key=FETCHAI
+            "agent_name",
+            addresses=wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         dmh = DecisionMakerHandler(
             identity=identity, wallet=wallet, ledger_apis=ledger_apis

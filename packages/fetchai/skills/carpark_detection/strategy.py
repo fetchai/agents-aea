@@ -66,7 +66,7 @@ class Strategy(Model):
 
         self.data_price = kwargs.pop("data_price", DEFAULT_PRICE)
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
-        self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
 
@@ -88,6 +88,11 @@ class Strategy(Model):
             )
             self.record_balance(balance)
         self.other_carpark_processes_running = False
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id used."""
+        return self._ledger_id
 
     def record_balance(self, balance):
         """Record current balance to database."""

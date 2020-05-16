@@ -77,12 +77,12 @@ Now take a look at the following method. This is where the demo resides. It firs
     @pytest.mark.asyncio
     async def test_end_to_end_aea_aca(self):
         # AEA components
-        ledger_apis = LedgerApis({}, FETCHAI)
-        wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
+        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
+        wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
         identity = Identity(
             name="my_aea_1",
-            address=wallet.addresses.get(FETCHAI),
-            default_address_key=FETCHAI,
+            address=wallet.addresses.get(FetchAICrypto.identifier),
+            default_address_key=FetchAICrypto.identifier,
         )
         http_client_connection = HTTPClientConnection(
             address=self.aea_address,

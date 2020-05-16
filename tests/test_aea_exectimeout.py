@@ -27,7 +27,7 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.skills.base import Skill, SkillContext
 
 
@@ -37,6 +37,8 @@ from tests.common.utils import (
     make_handler_cls_from_funcion,
     timeit_context,
 )
+
+from .conftest import FETCHAI_PRIVATE_KEY_PATH
 
 if os.name == "nt":
     pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
@@ -77,7 +79,7 @@ class BaseTimeExecutionCase(TestCase):
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, "")
+        builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH)
 
         self.function_finished = False
 

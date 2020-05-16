@@ -25,17 +25,21 @@ import time
 from typing import Any, Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
-from aea.crypto.cosmos import COSMOS, COSMOS_CURRENCY, CosmosApi
-from aea.crypto.ethereum import ETHEREUM, ETHEREUM_CURRENCY, EthereumApi
-from aea.crypto.fetchai import FETCHAI, FETCHAI_CURRENCY, FetchAIApi
+from aea.crypto.cosmos import COSMOS_CURRENCY, CosmosApi
+from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumApi
+from aea.crypto.fetchai import FETCHAI_CURRENCY, FetchAIApi
 from aea.mail.base import Address
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-SUPPORTED_LEDGER_APIS = [COSMOS, ETHEREUM, FETCHAI]
+SUPPORTED_LEDGER_APIS = [
+    CosmosApi.identifier,
+    EthereumApi.identifier,
+    FetchAIApi.identifier,
+]
 SUPPORTED_CURRENCIES = {
-    COSMOS: COSMOS_CURRENCY,
-    ETHEREUM: ETHEREUM_CURRENCY,
-    FETCHAI: FETCHAI_CURRENCY,
+    CosmosApi.identifier: COSMOS_CURRENCY,
+    EthereumApi.identifier: ETHEREUM_CURRENCY,
+    FetchAIApi.identifier: FETCHAI_CURRENCY,
 }
 IDENTIFIER_FOR_UNAVAILABLE_BALANCE = -1
 
@@ -63,13 +67,13 @@ def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> Led
                 "Unsupported identifier {} in ledger apis.".format(identifier)
             )
         try:
-            if identifier == FETCHAI:
+            if identifier == FetchAIApi.identifier:
                 api = FetchAIApi(**config)  # type: LedgerApi
-            elif identifier == ETHEREUM:
+            elif identifier == EthereumApi.identifier:
                 api = EthereumApi(
                     cast(str, config["address"]), cast(str, config["gas_price"])
                 )
-            elif identifier == COSMOS:
+            elif identifier == CosmosApi.identifier:
                 api = CosmosApi(**config)
             is_connected = True
             break
@@ -123,38 +127,14 @@ class LedgerApis:
         """Get the apis."""
         return self._apis
 
-    @property
-    def has_fetchai(self) -> bool:
-        """Check if it has the fetchai API."""
-        return FETCHAI in self.apis.keys()
+    def has_ledger(self, identifier: str) -> bool:
+        """Check if it has a ."""
+        return identifier in self.apis
 
-    @property
-    def fetchai_api(self) -> FetchAIApi:
-        """Get the Fetchai API."""
-        assert self.has_fetchai, "Fetchai API not instantiated!"
-        return cast(FetchAIApi, self.apis[FETCHAI])
-
-    @property
-    def has_ethereum(self) -> bool:
-        """Check if it has the ethereum API."""
-        return ETHEREUM in self.apis.keys()
-
-    @property
-    def ethereum_api(self) -> EthereumApi:
-        """Get the Ethereum API."""
-        assert self.has_ethereum, "Ethereum API not instantiated!"
-        return cast(EthereumApi, self.apis[ETHEREUM])
-
-    @property
-    def has_cosmos(self) -> bool:
-        """Check if it has the cosmos API."""
-        return COSMOS in self.apis.keys()
-
-    @property
-    def cosmos_api(self) -> CosmosApi:
-        """Get the Cosmos API."""
-        assert self.has_cosmos, "Cosmos API not instantiated!"
-        return cast(CosmosApi, self.apis[COSMOS])
+    def get_api(self, identifier: str) -> LedgerApi:
+        """Get the ledger API."""
+        assert self.has_ledger(identifier), "Ledger API not instantiated!"
+        return self.apis[identifier]
 
     @property
     def has_default_ledger(self) -> bool:

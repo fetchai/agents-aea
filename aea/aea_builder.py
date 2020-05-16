@@ -58,11 +58,12 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _create_private_key,
     _try_validate_private_key_path,
+    create_private_key,
 )
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.crypto.registry import registry
+from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
@@ -1110,13 +1111,13 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_configuration = agent_loader.load(fp_read)
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in SUPPORTED_CRYPTOS:
+        if identifier not in registry.supported_crypto_ids:
             ValueError("Unsupported identifier in private key paths.")
 
     for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
         config_private_key_path = agent_configuration.private_key_paths.read(identifier)
         if config_private_key_path is None:
-            _create_private_key(
+            create_private_key(
                 identifier, private_key_file=str(aea_project_path / private_key_path)
             )
             agent_configuration.private_key_paths.update(identifier, private_key_path)
