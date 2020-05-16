@@ -40,7 +40,6 @@ def test_initialisation():
     assert FetchAICrypto(
         FETCHAI_PRIVATE_KEY_PATH
     ), "Couldn't load the fet private_key from the path!"
-    assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
 
 def test_get_address():

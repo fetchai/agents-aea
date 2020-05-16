@@ -38,6 +38,8 @@ from tests.common.utils import (
     timeit_context,
 )
 
+from .conftest import FETCHAI_PRIVATE_KEY_PATH
+
 if os.name == "nt":
     pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
 
@@ -77,7 +79,7 @@ class BaseTimeExecutionCase(TestCase):
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FetchAICrypto.identifier, "")
+        builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH)
 
         self.function_finished = False
 

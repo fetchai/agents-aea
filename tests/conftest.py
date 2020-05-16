@@ -88,8 +88,12 @@ PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
 DUMMY_ENV = gym.GoalEnv
 
 # private keys with value on testnet
-COSMOS_PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/cosmos_private_key.txt")
-ETHEREUM_PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "tests/data/eth_private_key.txt")
+COSMOS_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+)
+ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+)
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", "fet_private_key.txt"
 )

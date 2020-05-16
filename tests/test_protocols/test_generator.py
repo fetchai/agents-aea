@@ -44,7 +44,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
+from aea.crypto.helpers import create_private_key
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.generator import (
@@ -84,6 +84,10 @@ class TestEndToEndGenerator(UseOef):
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.private_key_path_1 = os.path.join(cls.t, FETCHAI + "1")
+        cls.private_key_path_2 = os.path.join(cls.t, FETCHAI + "2")
+        create_private_key("fetchai", cls.private_key_path_1)
+        create_private_key("fetchai", cls.private_key_path_2)
 
     def test_compare_latest_generator_output_with_test_protocol(self):
         """Test that the "t_protocol" test protocol matches with what the latest generator generates based on the specification."""
@@ -255,9 +259,11 @@ class TestEndToEndGenerator(UseOef):
 
     def test_generated_protocol_end_to_end(self):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
+        agent_name_1 = "my_aea_1"
+        agent_name_2 = "my_aea_2"
         builder_1 = AEABuilder()
-        builder_1.set_name("my_aea_1")
-        builder_1.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+        builder_1.set_name(agent_name_1)
+        builder_1.add_private_key(FetchAICrypto.identifier, self.private_key_path_1)
         builder_1.set_default_ledger(FetchAICrypto.identifier)
         builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_1.add_protocol(
@@ -276,8 +282,8 @@ class TestEndToEndGenerator(UseOef):
         )
 
         builder_2 = AEABuilder()
-        builder_2.set_name("my_aea_2")
-        builder_2.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+        builder_2.set_name(agent_name_2)
+        builder_2.add_private_key(FetchAICrypto.identifier, self.private_key_path_2)
         builder_2.set_default_ledger(FetchAICrypto.identifier)
         builder_2.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")

@@ -48,7 +48,7 @@ GAS_ID = "gwei"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 
 
-class EthereumCrypto(Crypto):
+class EthereumCrypto(Crypto[Account]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _ETHEREUM
@@ -59,19 +59,10 @@ class EthereumCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._account = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
-        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
+        super().__init__(private_key_path=private_key_path)
+        bytes_representation = Web3.toBytes(hexstr=self.entity.key.hex())
         self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
-        self._address = str(self._account.address)
-
-    @property
-    def entity(self) -> Account:
-        """Get the entity."""
-        return self._account
+        self._address = str(self.entity.address)
 
     @property
     def public_key(self) -> str:
@@ -91,7 +82,8 @@ class EthereumCrypto(Crypto):
         """
         return self._address
 
-    def _load_private_key_from_path(self, file_name) -> Account:
+    @classmethod
+    def load_private_key_from_path(cls, file_name) -> Account:
         """
         Load a private key in hex format from a file.
 
@@ -99,16 +91,10 @@ class EthereumCrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    account = Account.from_key(data)
-            else:
-                account = self._generate_private_key()
-            return account
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with open(path, "r") as key:
+            data = key.read()
+            account = Account.from_key(data)
+        return account
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -161,7 +147,7 @@ class EthereumCrypto(Crypto):
         return (address,)
 
     @classmethod
-    def _generate_private_key(cls) -> Account:
+    def generate_private_key(cls) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account
@@ -186,7 +172,7 @@ class EthereumCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._account.key.hex().encode("utf-8"))
+        fp.write(self.entity.key.hex().encode("utf-8"))
 
 
 class EthereumApi(LedgerApi):

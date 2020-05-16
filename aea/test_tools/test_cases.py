@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
-import contextlib
 import os
 import random
 import shutil
@@ -46,7 +45,7 @@ from aea.connections.stub.connection import (
 )
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
-from aea.helpers.base import sigint_crossplatform
+from aea.helpers.base import cd, sigint_crossplatform
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.exceptions import AEATestingException
@@ -64,17 +63,6 @@ PROJECT_ROOT_DIR = "."
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
 LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
-
-
-@contextlib.contextmanager
-def cd(path):
-    """Change working directory temporarily."""
-    old_path = os.getcwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(old_path)
 
 
 class BaseAEATestCase(ABC):

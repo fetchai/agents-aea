@@ -20,6 +20,7 @@
 """Miscellaneous helpers."""
 
 import builtins
+import contextlib
 import importlib.util
 import logging
 import os
@@ -331,3 +332,14 @@ class RegexConstrainedString(UserString):
                 data=self.data, regex=self.REGEX
             )
         )
+
+
+@contextlib.contextmanager
+def cd(path):
+    """Change working directory temporarily."""
+    old_path = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_path)

@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Ethereum module wrapping the public and private key cryptography and ledger api."""
+"""Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
 import hashlib
@@ -43,7 +43,7 @@ COSMOS_CURRENCY = "ATOM"
 COSMOS_TESTNET_FAUCET_URL = ""
 
 
-class CosmosCrypto(Crypto):
+class CosmosCrypto(Crypto[SigningKey]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _COSMOS
@@ -54,20 +54,9 @@ class CosmosCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._signing_key = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
-        self._public_key = (
-            self._signing_key.get_verifying_key().to_string("compressed").hex()
-        )
+        super().__init__(private_key_path=private_key_path)
+        self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.get_address_from_public_key(self.public_key)
-
-    @property
-    def entity(self) -> SigningKey:
-        """Get the entity."""
-        return self._signing_key
 
     @property
     def public_key(self) -> str:
@@ -87,7 +76,8 @@ class CosmosCrypto(Crypto):
         """
         return self._address
 
-    def _load_private_key_from_path(self, file_name) -> SigningKey:
+    @classmethod
+    def load_private_key_from_path(cls, file_name) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
@@ -95,18 +85,10 @@ class CosmosCrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    signing_key = SigningKey.from_string(
-                        bytes.fromhex(data), curve=SECP256k1
-                    )
-            else:
-                signing_key = self._generate_private_key()
-            return signing_key
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with open(path, "r") as key:
+            data = key.read()
+            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        return signing_key
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -159,7 +141,7 @@ class CosmosCrypto(Crypto):
         return tuple(addresses)
 
     @classmethod
-    def _generate_private_key(cls) -> SigningKey:
+    def generate_private_key(cls) -> SigningKey:
         """Generate a key pair for cosmos network."""
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
@@ -187,7 +169,7 @@ class CosmosCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._signing_key.to_string().hex().encode("utf-8"))
+        fp.write(self.entity.to_string().hex().encode("utf-8"))
 
 
 class CosmosApi(LedgerApi):

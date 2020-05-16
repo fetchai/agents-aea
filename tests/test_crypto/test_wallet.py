@@ -29,6 +29,12 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
 
+from ..conftest import (
+    COSMOS_PRIVATE_KEY_PATH,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    FETCHAI_PRIVATE_KEY_PATH,
+)
+
 
 def test_wallet_initialisation_error():
     """Test the value error when we initialise the wallet."""
@@ -42,9 +48,9 @@ class WalletTestCase(TestCase):
     def test_wallet_init_positive(self):
         """Test Wallet init positive result."""
         private_key_paths = {
-            EthereumCrypto.identifier: "path1",
-            FetchAICrypto.identifier: "path2",
-            CosmosCrypto.identifier: "path3",
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+            CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_PATH,
         }
         Wallet(private_key_paths)
 
@@ -54,11 +60,17 @@ class WalletTestCase(TestCase):
         with self.assertRaises(AEAException):
             Wallet(private_key_paths)
 
+    def test_wallet_init_bad_paths(self):
+        """Test Wallet init with bad paths to private keys"""
+        private_key_paths = {FETCHAI: "this_path_does_not_exists"}
+        with self.assertRaises(FileNotFoundError):
+            Wallet(private_key_paths)
+
     def test_wallet_crypto_objects_positive(self):
         """Test Wallet.crypto_objects init positive result."""
         private_key_paths = {
-            EthereumCrypto.identifier: "path1",
-            FetchAICrypto.identifier: "path2",
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         crypto_objects = wallet.crypto_objects
@@ -69,8 +81,8 @@ class WalletTestCase(TestCase):
     def test_wallet_public_keys_positive(self):
         """Test Wallet.public_keys init positive result."""
         private_key_paths = {
-            EthereumCrypto.identifier: "path1",
-            FetchAICrypto.identifier: "path2",
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         public_keys = wallet.public_keys
@@ -81,8 +93,8 @@ class WalletTestCase(TestCase):
     def test_wallet_addresses_positive(self):
         """Test Wallet.addresses init positive result."""
         private_key_paths = {
-            EthereumCrypto.identifier: "path1",
-            FetchAICrypto.identifier: "path2",
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         addresses = wallet.addresses

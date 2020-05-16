@@ -20,15 +20,19 @@
 """This module contains a custom crypto class for testing purposes."""
 from typing import Any, BinaryIO, Tuple
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import Crypto, EntityClass
 from aea.mail.base import Address
 
 
 class CustomCrypto(Crypto):
     """This is a custom crypto class for testing purposes.."""
 
-    @property
-    def entity(self) -> Any:
+    @classmethod
+    def generate_private_key(cls) -> EntityClass:
+        pass
+
+    @classmethod
+    def load_private_key_from_path(cls, file_name: str) -> EntityClass:
         pass
 
     @property
@@ -52,10 +56,6 @@ class CustomCrypto(Crypto):
     def recover_message(
         self, message: bytes, signature: str, is_deprecated_mode: bool = False
     ) -> Tuple[Address, ...]:
-        pass
-
-    @classmethod
-    def load(cls, fp: BinaryIO) -> "Crypto":
         pass
 
     def dump(self, fp: BinaryIO) -> None:

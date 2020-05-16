@@ -36,7 +36,6 @@ def test_creation():
     assert EthereumCrypto(
         ETHEREUM_PRIVATE_KEY_PATH
     ), "Managed to load the eth private key"
-    assert EthereumCrypto("./"), "Managed to create a new eth private key"
 
 
 def test_initialization():

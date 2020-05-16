@@ -65,7 +65,9 @@ class AEATestWrapper:
         builder = AEABuilder()
 
         builder.set_name(self.name)
-        builder.add_private_key(FetchAICrypto.identifier, "")
+
+        # See https://github.com/fetchai/agents-aea/issues/1237
+        builder._private_key_paths[FetchAICrypto.identifier] = None  # type: ignore
 
         for component in components:
             builder.add_component_instance(component)
