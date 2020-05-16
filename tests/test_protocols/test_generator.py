@@ -84,8 +84,8 @@ class TestEndToEndGenerator(UseOef):
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.private_key_path_1 = os.path.join(cls.t, FETCHAI + "1")
-        cls.private_key_path_2 = os.path.join(cls.t, FETCHAI + "2")
+        cls.private_key_path_1 = os.path.join(cls.t, FetchAICrypto.identifier + "1")
+        cls.private_key_path_2 = os.path.join(cls.t, FetchAICrypto.identifier + "2")
         create_private_key("fetchai", cls.private_key_path_1)
         create_private_key("fetchai", cls.private_key_path_2)
 

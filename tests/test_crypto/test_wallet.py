@@ -62,7 +62,7 @@ class WalletTestCase(TestCase):
 
     def test_wallet_init_bad_paths(self):
         """Test Wallet init with bad paths to private keys"""
-        private_key_paths = {FETCHAI: "this_path_does_not_exists"}
+        private_key_paths = {FetchAICrypto.identifier: "this_path_does_not_exists"}
         with self.assertRaises(FileNotFoundError):
             Wallet(private_key_paths)
 
