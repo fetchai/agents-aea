@@ -20,6 +20,7 @@
 import json
 import unittest.mock
 
+import pytest
 
 from tests.common.utils import run_in_root_dir
 
