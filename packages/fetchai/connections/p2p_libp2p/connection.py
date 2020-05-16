@@ -289,7 +289,9 @@ class Libp2pNode:
 
         # run node
         logger.info("Starting libp2p node...")
-        self.proc = _golang_module_run(self.source, LIBP2P_NODE_MODULE_NAME, self.clargs, self._log_file_desc)
+        self.proc = _golang_module_run(
+            self.source, LIBP2P_NODE_MODULE_NAME, self.clargs, self._log_file_desc
+        )
 
         logger.info("Connecting to libp2p node...")
         await self._connect()
@@ -372,7 +374,9 @@ class Libp2pNode:
         if self.proc is not None:
             logger.debug("Terminating node process {}...".format(self.proc.pid))
             self.proc.terminate()
-            logger.debug("Waiting for node process {} to terminate...".format(self.proc.pid))
+            logger.debug(
+                "Waiting for node process {} to terminate...".format(self.proc.pid)
+            )
             self.proc.wait()
         else:
             logger.debug("Called stop when process not set!")
