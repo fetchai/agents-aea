@@ -1,0 +1,7 @@
+
+> currency ids should be the native currencies, not tokens
+
+> generate tx message on contract side?
+
+
+need to be able to define dependency on dm from skills
