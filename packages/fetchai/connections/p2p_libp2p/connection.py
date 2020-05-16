@@ -44,6 +44,8 @@ WORK_DIR = os.getcwd()
 
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
+LIBP2P_NODE_MODULE_NAME = "libp2p_node"
+
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
 LIBP2P_NODE_ENV_FILE = ".env.libp2p"
@@ -112,12 +114,12 @@ def _golang_module_build(path: str, log_file_desc: IO[str]) -> subprocess.Popen:
 
 
 def _golang_module_run(
-    path: str, args: Sequence[str], log_file_desc: IO[str]
+    path: str, name: str, args: Sequence[str], log_file_desc: IO[str]
 ) -> subprocess.Popen:
     """
     Runs a built module located at `path`
     """
-    cmd = ["go", "run", "."]
+    cmd = [os.path.join(path, name)]
 
     cmd.extend(args)
 
@@ -218,7 +220,7 @@ class Libp2pNode:
         self.entry_peers = entry_peers if entry_peers is not None else []
 
         # node startup
-        self.source = module_path
+        self.source = os.path.abspath(module_path)
         self.clargs = clargs if clargs is not None else []
 
         # log file
@@ -287,7 +289,7 @@ class Libp2pNode:
 
         # run node
         logger.info("Starting libp2p node...")
-        self.proc = _golang_module_run(self.source, self.clargs, self._log_file_desc)
+        self.proc = _golang_module_run(self.source, LIBP2P_NODE_MODULE_NAME, self.clargs, self._log_file_desc)
 
         logger.info("Connecting to libp2p node...")
         await self._connect()
@@ -368,7 +370,9 @@ class Libp2pNode:
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
+            logger.debug("Terminating node process {}...".format(self.proc.pid))
             self.proc.terminate()
+            logger.debug("Waiting for node process {} to terminate...".format(self.proc.pid))
             self.proc.wait()
         else:
             logger.debug("Called stop when process not set!")
