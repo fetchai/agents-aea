@@ -19,6 +19,8 @@
 
 """This test module contains the integration test for the weather skills."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
@@ -98,6 +100,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 

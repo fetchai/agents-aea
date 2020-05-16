@@ -19,6 +19,8 @@
 
 """This test module contains the integration test for the thermometer skills."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
@@ -107,6 +109,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 

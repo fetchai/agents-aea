@@ -91,6 +91,7 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that ml skills work."""
 

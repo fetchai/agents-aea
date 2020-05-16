@@ -19,6 +19,8 @@
 
 """This test module contains the integration test for the generic buyer and seller skills."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
@@ -93,6 +95,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
