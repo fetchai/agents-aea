@@ -19,6 +19,7 @@
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 
+import json
 import logging
 import time
 from pathlib import Path
@@ -30,24 +31,27 @@ from eth_account.messages import encode_defunct
 
 from eth_keys import keys
 
+import requests
+
 import web3
 from web3 import HTTPProvider, Web3
 
-from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-ETHEREUM = "ethereum"
+_ETHEREUM = "ethereum"
 ETHEREUM_CURRENCY = "ETH"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
+ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 
 
 class EthereumCrypto(Crypto[Account]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
-    identifier = ETHEREUM
+    identifier = _ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -174,7 +178,7 @@ class EthereumCrypto(Crypto[Account]):
 class EthereumApi(LedgerApi):
     """Class to interact with the Ethereum Web3 APIs."""
 
-    identifier = ETHEREUM
+    identifier = _ETHEREUM
 
     def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
         """
@@ -391,3 +395,48 @@ class EthereumApi(LedgerApi):
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx
+
+
+class EthereumFaucetApi(FaucetApi):
+    """Ethereum testnet faucet API."""
+
+    identifier = _ETHEREUM
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        try:
+            response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            elif response.status_code // 100 in [3, 4]:
+                response_dict = json.loads(response.text)
+                logger.warning(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )
+            elif response.status_code // 100 == 2:
+                response_dict = json.loads(response.text)
+                logger.info(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )  # pragma: no cover
+        except Exception as e:
+            logger.warning(
+                "An error occured while attempting to generate wealth:\n{}".format(e)
+            )

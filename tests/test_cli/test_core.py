@@ -31,7 +31,7 @@ from aea.cli.core import (
     _try_get_wealth,
     _wait_funds_release,
 )
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseMany
@@ -71,7 +71,7 @@ class GenerateWealthTestCase(TestCase):
     @mock.patch("aea.cli.core.Wallet")
     @mock.patch("aea.cli.core.TESTNETS", {"type": "value"})
     @mock.patch("aea.cli.core.click.echo")
-    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
     @mock.patch("aea.cli.core._wait_funds_release")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
@@ -83,7 +83,7 @@ class GetWealthTestCase(TestCase):
     """Test case for _get_wealth method."""
 
     @mock.patch("aea.cli.core.Wallet")
-    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
     @mock.patch("aea.cli.core._try_get_balance")
     def test__get_wealth_positive(self, *mocks):
         """Test for _get_wealth method positive result."""
@@ -130,7 +130,7 @@ class GenerateWealthCommandTestCase(TestCase):
                 "--skip-consistency-check",
                 "generate-wealth",
                 "--sync",
-                FETCHAI,
+                FetchAICrypto.identifier,
             ],
             standalone_mode=False,
         )
@@ -152,7 +152,12 @@ class GetWealthCommandTestCase(TestCase):
         """Test for CLI get_wealth positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-wealth", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-wealth",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
@@ -173,7 +178,12 @@ class GetAddressCommandTestCase(TestCase):
         """Test for CLI get_address positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-address", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-address",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
@@ -196,7 +206,13 @@ class AddKeyCommandTestCase(TestCase):
         )  # some existing filepath to pass CLI argument check
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI, filepath],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "add-key",
+                FetchAICrypto.identifier,
+                filepath,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

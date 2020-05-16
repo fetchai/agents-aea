@@ -25,7 +25,7 @@ from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -51,13 +51,15 @@ class TestSkillError:
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: private_key_path})
-        cls.ledger_apis = LedgerApis({}, FETCHAI)
+        cls.wallet = Wallet({FetchAICrypto.identifier: private_key_path})
+        cls.ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         cls.agent_name = "Agent0"
 
         cls.connection = _make_dummy_connection()
         cls.connections = [cls.connection]
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
+        cls.identity = Identity(
+            cls.agent_name, address=cls.wallet.addresses[FetchAICrypto.identifier]
+        )
         cls.address = cls.identity.address
         cls.my_aea = AEA(
             cls.identity,

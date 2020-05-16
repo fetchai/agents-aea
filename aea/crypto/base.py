@@ -258,3 +258,18 @@ class LedgerApi(ABC):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
+
+
+class FaucetApi(ABC):
+    """Interface for testnet faucet APIs."""
+
+    identifier = "base"  # type: str
+
+    @abstractmethod
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """

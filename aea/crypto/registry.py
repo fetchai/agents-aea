@@ -21,7 +21,7 @@ This module implements the crypto registry.
 """
 import importlib
 import re
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Set, Type, Union
 
 from aea.crypto.base import Crypto
 from aea.exceptions import AEAException
@@ -133,6 +133,11 @@ class CryptoRegistry(object):
     def __init__(self):
         """Initialize the Crypto registry."""
         self.specs = {}  # type: Dict[CryptoId, CryptoSpec]
+
+    @property
+    def supported_crypto_ids(self) -> Set[str]:
+        """Get the supported crypto ids."""
+        return set([str(id_) for id_ in self.specs.keys()])
 
     def register(self, id: CryptoId, entry_point: EntryPoint, **kwargs):
         """

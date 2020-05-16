@@ -41,7 +41,6 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -490,11 +489,9 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.2.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.3.0")
 
-        contracts_path = os.path.join(
-            self.agent_name, "vendor", FETCHAI_NAME, "contracts"
-        )
+        contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
         contract_dependency_name = "erc1155"
         assert contract_dependency_name in contracts_folders

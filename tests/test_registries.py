@@ -34,7 +34,7 @@ from aea.aea import AEA
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_PROTOCOL, DEFAULT_SKILL
 from aea.contracts.base import Contract
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -73,7 +73,7 @@ class TestContractRegistry:
             contract.configuration.public_id, cast(Contract, contract)
         )
         cls.expected_contract_ids = {
-            PublicId.from_str("fetchai/erc1155:0.2.0"),
+            PublicId.from_str("fetchai/erc1155:0.3.0"),
         }
 
     def test_fetch_all(self):
@@ -84,14 +84,14 @@ class TestContractRegistry:
 
     def test_fetch(self):
         """ Test that the `fetch` method works as expected."""
-        contract_id = PublicId.from_str("fetchai/erc1155:0.2.0")
+        contract_id = PublicId.from_str("fetchai/erc1155:0.3.0")
         contract = self.registry.fetch(contract_id)
         assert isinstance(contract, Contract)
         assert contract.id == contract_id
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.2.0")
+        contract_id_removed = PublicId.from_str("fetchai/erc1155:0.3.0")
         contract_removed = self.registry.fetch(contract_id_removed)
         self.registry.unregister(contract_id_removed)
         expected_contract_ids = set(self.expected_contract_ids)
@@ -415,9 +415,11 @@ class TestFilter:
 
         connections = [_make_dummy_connection()]
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
+        wallet = Wallet({FetchAICrypto.identifier: private_key_path})
+        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
+        identity = Identity(
+            cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
+        )
         resources = Resources(cls.agent_folder)
 
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))

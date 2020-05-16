@@ -23,9 +23,9 @@ from unittest import TestCase
 
 import pytest
 
-from aea.crypto.cosmos import COSMOS
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.cosmos import CosmosCrypto
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
 
@@ -48,9 +48,9 @@ class WalletTestCase(TestCase):
     def test_wallet_init_positive(self):
         """Test Wallet init positive result."""
         private_key_paths = {
-            ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-            FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
-            COSMOS: COSMOS_PRIVATE_KEY_PATH,
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+            CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_PATH,
         }
         Wallet(private_key_paths)
 
@@ -62,36 +62,42 @@ class WalletTestCase(TestCase):
 
     def test_wallet_init_bad_paths(self):
         """Test Wallet init with bad paths to private keys"""
-        private_key_paths = {FETCHAI: "this_path_does_not_exists"}
+        private_key_paths = {FetchAICrypto.identifier: "this_path_does_not_exists"}
         with self.assertRaises(FileNotFoundError):
             Wallet(private_key_paths)
 
     def test_wallet_crypto_objects_positive(self):
         """Test Wallet.crypto_objects init positive result."""
         private_key_paths = {
-            ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-            FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         crypto_objects = wallet.crypto_objects
-        self.assertTupleEqual(tuple(crypto_objects), (ETHEREUM, FETCHAI))
+        self.assertTupleEqual(
+            tuple(crypto_objects), (EthereumCrypto.identifier, FetchAICrypto.identifier)
+        )
 
     def test_wallet_public_keys_positive(self):
         """Test Wallet.public_keys init positive result."""
         private_key_paths = {
-            ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-            FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         public_keys = wallet.public_keys
-        self.assertTupleEqual(tuple(public_keys), (ETHEREUM, FETCHAI))
+        self.assertTupleEqual(
+            tuple(public_keys), (EthereumCrypto.identifier, FetchAICrypto.identifier)
+        )
 
     def test_wallet_addresses_positive(self):
         """Test Wallet.addresses init positive result."""
         private_key_paths = {
-            ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-            FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+            EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
         }
         wallet = Wallet(private_key_paths)
         addresses = wallet.addresses
-        self.assertTupleEqual(tuple(addresses), (ETHEREUM, FETCHAI))
+        self.assertTupleEqual(
+            tuple(addresses), (EthereumCrypto.identifier, FetchAICrypto.identifier)
+        )

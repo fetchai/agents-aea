@@ -42,6 +42,7 @@ DEFAULT_DATA_MODEL = {
     },
 }  # type: Optional[Dict[str, Any]]
 DEFAULT_SERVICE_DATA = {"has_erc1155_contract": True}
+DEFAULT_LEDGER_ID = "ethereum"
 
 
 class Strategy(Model):
@@ -63,8 +64,14 @@ class Strategy(Model):
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self._oef_msg_id = 0
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
 
     def get_next_oef_msg_id(self) -> int:
         """

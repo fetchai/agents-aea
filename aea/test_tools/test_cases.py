@@ -43,7 +43,7 @@ from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
 )
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.helpers.base import cd, sigint_crossplatform
 from aea.mail.base import Envelope
@@ -54,6 +54,8 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
+
+FETCHAI_NAME = FetchAICrypto.identifier
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 PROJECT_ROOT_DIR = "."

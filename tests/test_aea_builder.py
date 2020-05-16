@@ -25,7 +25,7 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 
 from tests.common.utils import timeit_context
@@ -43,7 +43,7 @@ def test_default_timeout_for_agent():
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
 
     """ Default timeout == 0.05 """
@@ -59,7 +59,7 @@ def test_default_timeout_for_agent():
     """ Timeout == 0.001 """
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.001
 
     aea = builder.build()
@@ -74,7 +74,7 @@ def test_default_timeout_for_agent():
     """ Timeout == 0.0 """
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
     builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.0
 
     aea = builder.build()

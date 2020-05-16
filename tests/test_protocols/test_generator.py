@@ -43,7 +43,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -84,8 +84,8 @@ class TestEndToEndGenerator(UseOef):
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.private_key_path_1 = os.path.join(cls.t, FETCHAI + "1")
-        cls.private_key_path_2 = os.path.join(cls.t, FETCHAI + "2")
+        cls.private_key_path_1 = os.path.join(cls.t, FetchAICrypto.identifier + "1")
+        cls.private_key_path_2 = os.path.join(cls.t, FetchAICrypto.identifier + "2")
         create_private_key("fetchai", cls.private_key_path_1)
         create_private_key("fetchai", cls.private_key_path_2)
 
@@ -263,8 +263,8 @@ class TestEndToEndGenerator(UseOef):
         agent_name_2 = "my_aea_2"
         builder_1 = AEABuilder()
         builder_1.set_name(agent_name_1)
-        builder_1.add_private_key(FETCHAI, self.private_key_path_1)
-        builder_1.set_default_ledger(FETCHAI)
+        builder_1.add_private_key(FetchAICrypto.identifier, self.private_key_path_1)
+        builder_1.set_default_ledger(FetchAICrypto.identifier)
         builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_1.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
@@ -283,8 +283,8 @@ class TestEndToEndGenerator(UseOef):
 
         builder_2 = AEABuilder()
         builder_2.set_name(agent_name_2)
-        builder_2.add_private_key(FETCHAI, self.private_key_path_2)
-        builder_2.set_default_ledger(FETCHAI)
+        builder_2.add_private_key(FetchAICrypto.identifier, self.private_key_path_2)
+        builder_2.set_default_ledger(FetchAICrypto.identifier)
         builder_2.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
         )

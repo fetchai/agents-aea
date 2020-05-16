@@ -21,8 +21,6 @@
 
 from typing import Optional, cast
 
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
@@ -58,38 +56,21 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         strategy = cast(Strategy, self.context.strategy)
 
-        if self.context.ledger_apis.has_ledger(FETCHAI):
-            fet_balance = self.context.ledger_apis.token_balance(
-                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
+        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
+            balance = self.context.ledger_apis.token_balance(
+                strategy.ledger_id,
+                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
-            if fet_balance > 0:
+            if balance > 0:
                 self.context.logger.info(
-                    "[{}]: starting balance on fetchai ledger={}.".format(
-                        self.context.agent_name, fet_balance
+                    "[{}]: starting balance on {} ledger={}.".format(
+                        self.context.agent_name, strategy.ledger_id, balance
                     )
                 )
             else:
                 self.context.logger.warning(
-                    "[{}]: you have no starting balance on fetchai ledger! Inactivating this skill now!".format(
-                        self.context.agent_name
-                    )
-                )
-                self.context.is_active = False
-
-        if self.context.ledger_apis.has_ledger(ETHEREUM):
-            eth_balance = self.context.ledger_apis.token_balance(
-                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
-            )
-            if eth_balance > 0:
-                self.context.logger.info(
-                    "[{}]: starting balance on ethereum ledger={}.".format(
-                        self.context.agent_name, eth_balance
-                    )
-                )
-            else:
-                self.context.logger.warning(
-                    "[{}]: you have no starting balance on ethereum ledger! Inactivating this skill now!".format(
-                        self.context.agent_name
+                    "[{}]: you have no starting balance on {} ledger!".format(
+                        self.context.agent_name, strategy.ledger_id
                     )
                 )
                 self.context.is_active = False
@@ -98,17 +79,17 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
         if strategy.contract_address is None:
             self.context.logger.info("Preparing contract deployment transaction")
-            contract.set_instance(self.context.ledger_apis.get_api(ETHEREUM))  # type: ignore
+            contract.set_instance(self.context.ledger_apis.get_api(strategy.ledger_id))  # type: ignore
             dm_message_for_deploy = contract.get_deploy_transaction_msg(
                 deployer_address=self.context.agent_address,
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(dm_message_for_deploy)
         else:
             self.context.logger.info("Setting the address of the deployed contract")
             contract.set_address(
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),  # type: ignore
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),  # type: ignore
                 contract_address=str(strategy.contract_address),
             )
 
@@ -128,7 +109,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             creation_message = contract.get_create_batch_transaction_msg(
                 deployer_address=self.context.agent_address,
                 token_ids=self.token_ids,
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(creation_message)
@@ -139,7 +120,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 recipient_address=self.context.agent_address,
                 token_ids=self.token_ids,
                 mint_quantities=strategy.mint_stock,
-                ledger_api=self.context.ledger_apis.get_api(ETHEREUM),
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
             )
             self.context.decision_maker_message_queue.put_nowait(mint_message)
@@ -153,23 +134,15 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_ledger(FETCHAI):
+        strategy = cast(Strategy, self.context.strategy)
+        if self.context.ledger_apis.has_ledger(strategy.ledger_id):
             balance = self.context.ledger_apis.token_balance(
-                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
+                strategy.ledger_id,
+                cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
             )
             self.context.logger.info(
-                "[{}]: ending balance on fetchai ledger={}.".format(
-                    self.context.agent_name, balance
-                )
-            )
-
-        if self.context.ledger_apis.has_ledger(ETHEREUM):
-            balance = self.context.ledger_apis.token_balance(
-                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
-            )
-            self.context.logger.info(
-                "[{}]: ending balance on ethereum ledger={}.".format(
-                    self.context.agent_name, balance
+                "[{}]: ending balance on {} ledger={}.".format(
+                    self.context.agent_name, strategy.ledger_id, balance
                 )
             )
 

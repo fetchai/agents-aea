@@ -49,7 +49,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.3.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.4.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
