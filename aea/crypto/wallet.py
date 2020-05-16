@@ -21,12 +21,8 @@
 
 from typing import Dict, cast
 
+import aea.crypto
 from aea.crypto.base import Crypto
-from aea.crypto.cosmos import COSMOS, CosmosCrypto
-from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
-
-SUPPORTED_CRYPTOS = [COSMOS, ETHEREUM, FETCHAI]
 
 
 class Wallet:
@@ -43,15 +39,8 @@ class Wallet:
         addresses = {}  # type: Dict[str, str]
 
         for identifier, path in private_key_paths.items():
-            if identifier == FETCHAI:
-                crypto_objects[identifier] = FetchAICrypto(path)
-            elif identifier == ETHEREUM:
-                crypto_objects[identifier] = EthereumCrypto(path)
-            elif identifier == COSMOS:
-                crypto_objects[identifier] = CosmosCrypto(path)
-            else:
-                raise ValueError("Unsupported identifier in private key paths.")
-            crypto = cast(Crypto, crypto_objects.get(identifier))
+            crypto = aea.crypto.make(identifier, private_key_path=path)
+            crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)
 

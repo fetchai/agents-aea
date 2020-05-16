@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Ethereum module wrapping the public and private key cryptography and ledger api."""
+"""Cosmos module wrapping the public and private key cryptography and ledger api."""
 
 import base64
 import hashlib
@@ -33,19 +33,20 @@ from ecdsa.util import sigencode_string_canonize
 
 import requests
 
-from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-COSMOS = "cosmos"
+_COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
+COSMOS_TESTNET_FAUCET_URL = ""
 
 
-class CosmosCrypto(Crypto):
+class CosmosCrypto(Crypto[SigningKey]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
-    identifier = COSMOS
+    identifier = _COSMOS
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -53,20 +54,9 @@ class CosmosCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._signing_key = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
-        self._public_key = (
-            self._signing_key.get_verifying_key().to_string("compressed").hex()
-        )
+        super().__init__(private_key_path=private_key_path)
+        self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.get_address_from_public_key(self.public_key)
-
-    @property
-    def entity(self) -> SigningKey:
-        """Get the entity."""
-        return self._signing_key
 
     @property
     def public_key(self) -> str:
@@ -86,7 +76,8 @@ class CosmosCrypto(Crypto):
         """
         return self._address
 
-    def _load_private_key_from_path(self, file_name) -> SigningKey:
+    @classmethod
+    def load_private_key_from_path(cls, file_name) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
@@ -94,18 +85,10 @@ class CosmosCrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    signing_key = SigningKey.from_string(
-                        bytes.fromhex(data), curve=SECP256k1
-                    )
-            else:
-                signing_key = self._generate_private_key()
-            return signing_key
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with open(path, "r") as key:
+            data = key.read()
+            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        return signing_key
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -158,7 +141,7 @@ class CosmosCrypto(Crypto):
         return tuple(addresses)
 
     @classmethod
-    def _generate_private_key(cls) -> SigningKey:
+    def generate_private_key(cls) -> SigningKey:
         """Generate a key pair for cosmos network."""
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
@@ -179,16 +162,6 @@ class CosmosCrypto(Crypto):
         address = bech32_encode("cosmos", five_bit_r)
         return address
 
-    @classmethod
-    def load(cls, fp: BinaryIO):
-        """
-        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
     def dump(self, fp: BinaryIO) -> None:
         """
         Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
@@ -196,13 +169,13 @@ class CosmosCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._signing_key.to_string().hex().encode("utf-8"))
+        fp.write(self.entity.to_string().hex().encode("utf-8"))
 
 
 class CosmosApi(LedgerApi):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
-    identifier = COSMOS
+    identifier = _COSMOS
 
     def __init__(self, **kwargs):
         """
@@ -448,3 +421,27 @@ class CosmosApi(LedgerApi):
         except Exception:  # pragma: no cover
             is_valid = False
         return is_valid
+
+
+class CosmosFaucetApi(FaucetApi):
+    """Cosmos testnet faucet API."""
+
+    identifier = _COSMOS
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        raise NotImplementedError

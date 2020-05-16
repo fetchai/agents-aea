@@ -67,6 +67,11 @@ class Strategy(Model):
 
         self.is_searching = True
 
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id used."""
+        return self._ledger_id
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.

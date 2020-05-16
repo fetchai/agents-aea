@@ -66,6 +66,11 @@ class Strategy(Model):
         self.db = DBCommunication()
         self._oef_msg_id = 0
 
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
     def get_next_oef_msg_id(self) -> int:
         """
         Get the next oef msg id.

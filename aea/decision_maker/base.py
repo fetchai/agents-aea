@@ -30,7 +30,6 @@ from queue import Queue
 from threading import Thread
 from typing import Any, Dict, List, Optional, cast
 
-from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.base import InternalMessage
@@ -970,8 +969,8 @@ class DecisionMaker:
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
-            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
+            crypto_object = self.wallet.crypto_objects.get("ethereum")
+            # TODO: replace with default_ledger when recover_hash function is available for fetchai (also add crypto id to tx)
         else:
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get("tx_hash")
@@ -987,8 +986,8 @@ class DecisionMaker:
         :return: None
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
-            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
+            crypto_object = self.wallet.crypto_objects.get("ethereum")
+            # TODO: replace with default_ledger when recover_hash function is available for fetchai
         else:
             crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
         tx = tx_message.signing_payload.get("tx")

@@ -84,6 +84,11 @@ class Strategy(Model):
         else:
             self._data_for_sale = data_for_sale
 
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
     def get_next_oef_msg_id(self) -> int:
         """
         Get the next oef msg id.

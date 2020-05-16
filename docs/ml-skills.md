@@ -39,7 +39,7 @@ Create the AEA that will provide the data.
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_data_provider:0.2.0
+aea add skill fetchai/ml_data_provider:0.3.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
@@ -47,7 +47,7 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_data_provider:0.3.0
+aea fetch fetchai/ml_data_provider:0.4.0
 cd ml_data_provider
 ```
 The `aea fetch` command creates the entire AEA, including its dependencies for you.
@@ -73,7 +73,7 @@ In a separate terminal, in the root directory, create the model trainer AEA.
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_train:0.2.0
+aea add skill fetchai/ml_train:0.3.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 
@@ -81,7 +81,7 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.3.0
+aea fetch fetchai/ml_model_trainer:0.4.0
 cd ml_model_trainer
 ```
 
@@ -114,7 +114,7 @@ Create the AEA that will provide the data.
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_data_provider:0.2.0
+aea add skill fetchai/ml_data_provider:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -127,7 +127,7 @@ In a separate terminal, in the root directory, create the model trainer AEA.
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_train:0.2.0
+aea add skill fetchai/ml_train:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```

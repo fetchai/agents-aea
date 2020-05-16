@@ -19,6 +19,7 @@
 
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
+import json
 import logging
 import time
 from pathlib import Path
@@ -30,20 +31,23 @@ from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity  # type: ignore
 from fetchai.ledger.serialisation import sha256_hash
 
-from aea.crypto.base import Crypto, LedgerApi
+import requests
+
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-FETCHAI = "fetchai"
+_FETCHAI = "fetchai"
 FETCHAI_CURRENCY = "FET"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
+FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 
 
-class FetchAICrypto(Crypto):
+class FetchAICrypto(Crypto[Entity]):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
-    identifier = FETCHAI
+    identifier = _FETCHAI
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -51,17 +55,8 @@ class FetchAICrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._entity = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
+        super().__init__(private_key_path=private_key_path)
         self._address = str(FetchaiAddress(Identity.from_hex(self.public_key)))
-
-    @property
-    def entity(self) -> Entity:
-        """Get the entity."""
-        return self._entity
 
     @property
     def public_key(self) -> str:
@@ -70,7 +65,7 @@ class FetchAICrypto(Crypto):
 
         :return: a public key string in hex format
         """
-        return self._entity.public_key_hex
+        return self.entity.public_key_hex
 
     @property
     def address(self) -> str:
@@ -81,7 +76,8 @@ class FetchAICrypto(Crypto):
         """
         return self._address
 
-    def _load_private_key_from_path(self, file_name) -> Entity:
+    @classmethod
+    def load_private_key_from_path(cls, file_name: str) -> Entity:
         """
         Load a private key in hex format from a file.
 
@@ -90,21 +86,13 @@ class FetchAICrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    entity = Entity.from_hex(data)
-
-            else:
-                entity = self._generate_private_key()
-
-            return entity
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with path.open() as key:
+            data = key.read()
+            entity = Entity.from_hex(data)
+        return entity
 
     @classmethod
-    def _generate_private_key(cls) -> Entity:
+    def generate_private_key(cls) -> Entity:
         entity = Entity()
         return entity
 
@@ -153,16 +141,6 @@ class FetchAICrypto(Crypto):
         address = str(FetchaiAddress(identity))
         return address
 
-    @classmethod
-    def load(cls, fp: BinaryIO):
-        """
-        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
     def dump(self, fp: BinaryIO) -> None:
         """
         Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
@@ -176,7 +154,7 @@ class FetchAICrypto(Crypto):
 class FetchAIApi(LedgerApi):
     """Class to interact with the Fetch ledger APIs."""
 
-    identifier = FETCHAI
+    identifier = _FETCHAI
 
     def __init__(self, **kwargs):
         """
@@ -338,3 +316,51 @@ class FetchAIApi(LedgerApi):
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx
+
+
+class FetchAIFaucetApi(FaucetApi):
+    """Fetchai testnet faucet API."""
+
+    identifier = _FETCHAI
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        try:
+            payload = json.dumps({"address": address})
+            response = requests.post(FETCHAI_TESTNET_FAUCET_URL, data=payload)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            else:
+                response_dict = json.loads(response.text)
+                if response_dict.get("error_message") is not None:
+                    logger.warning(
+                        "Response: {}\nMessage: {}".format(
+                            response.status_code, response_dict.get("error_message")
+                        )
+                    )
+                else:
+                    logger.info(
+                        "Response: {}\nMessage: {}\nDigest: {}".format(
+                            response.status_code,
+                            response_dict.get("message"),
+                            response_dict.get("digest"),
+                        )
+                    )  # pragma: no cover
+        except Exception as e:
+            logger.warning(
+                "An error occured while attempting to generate wealth:\n{}".format(e)
+            )

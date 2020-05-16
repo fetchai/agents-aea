@@ -49,6 +49,7 @@ Get the apis.
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_fetchai"></a>
 #### has`_`fetchai
 
+
 ```python
  | @property
  | has_fetchai() -> bool

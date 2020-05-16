@@ -58,18 +58,16 @@ from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
-    COSMOS_PRIVATE_KEY_FILE,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
+    IDENTIFIER_TO_FAUCET_APIS,
+    IDENTIFIER_TO_KEY_FILES,
     TESTNETS,
-    _try_generate_testnet_wealth,
     _try_validate_private_key_path,
+    create_private_key,
+    try_generate_testnet_wealth,
 )
-from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
+from aea.crypto.registry import registry
 from aea.crypto.wallet import Wallet
 from aea.helpers.win32 import enable_ctrl_c_support
 
@@ -143,14 +141,7 @@ def gui(click_context, port):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [
-            FetchAICrypto.identifier,
-            EthereumCrypto.identifier,
-            CosmosCrypto.identifier,
-            "all",
-        ]
-    ),
+    type=click.Choice([*list(registry.supported_crypto_ids), "all"]),
     required=True,
 )
 @click.pass_context
@@ -167,15 +158,11 @@ def generate_key(click_context, type_):
         else:
             return True
 
-    if type_ in (FetchAICrypto.identifier, "all"):
-        if _can_write(FETCHAI_PRIVATE_KEY_FILE):
-            FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
-    if type_ in (EthereumCrypto.identifier, "all"):
-        if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
-            EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
-    if type_ in (CosmosCrypto.identifier, "all"):
-        if _can_write(COSMOS_PRIVATE_KEY_FILE):
-            CosmosCrypto().dump(open(COSMOS_PRIVATE_KEY_FILE, "wb"))
+    types = list(IDENTIFIER_TO_KEY_FILES.keys()) if type_ == "all" else [type_]
+    for type_ in types:
+        private_key_file = IDENTIFIER_TO_KEY_FILES[type_]
+        if _can_write(private_key_file):
+            create_private_key(type_)
 
 
 def _try_add_key(ctx, type_, filepath):
@@ -192,7 +179,7 @@ def _try_add_key(ctx, type_, filepath):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    type=click.Choice(list(registry.supported_crypto_ids)),
     required=True,
 )
 @click.argument(
@@ -227,7 +214,7 @@ def _try_get_address(ctx, type_):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    type=click.Choice(list(registry.supported_crypto_ids)),
     required=True,
 )
 @click.pass_context
@@ -266,10 +253,7 @@ def _try_get_wealth(ctx, type_):
 
 @cli.command()
 @click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
-    required=True,
+    "type_", metavar="TYPE", type=click.Choice(SUPPORTED_LEDGER_APIS), required=True,
 )
 @click.pass_context
 @check_aea_project
@@ -304,7 +288,7 @@ def _try_generate_wealth(ctx, type_, sync):
                 address, testnet
             )
         )
-        _try_generate_testnet_wealth(type_, address)
+        try_generate_testnet_wealth(type_, address)
         if sync:
             _wait_funds_release(ctx.agent_config, wallet, type_)
 
@@ -316,7 +300,7 @@ def _try_generate_wealth(ctx, type_, sync):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    type=click.Choice(list(IDENTIFIER_TO_FAUCET_APIS.keys())),
     required=True,
 )
 @click.option(

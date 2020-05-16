@@ -29,6 +29,7 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
+from aea.configurations.loader import make_jsonschema_base_uri
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import (
@@ -47,7 +48,7 @@ class TestFreeze:
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
-            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR)), cls.schema
         )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 

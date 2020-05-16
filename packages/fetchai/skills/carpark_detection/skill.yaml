@@ -1,18 +1,18 @@
 name: carpark_detection
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmfGepbkknTZ4VGeQKuUBVMmNMkMWf4EwMKxbsPqAqhDdN
+  behaviours.py: QmRxD2wN5sDs7cNJoKKAmznyLXCGQMcTNnBQXuZfgqkPcM
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
   handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
-  strategy.py: QmbMfUkBN4poBxBFqseDGcxSbUCauHKM5kNHn6WwfZu4Qf
+  strategy.py: QmfPrx5Z4Bi9cD54qqBvRC3E89yReqUHbVztLNAXXM3fM7
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
