@@ -19,6 +19,7 @@
 
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
+import json
 import logging
 import time
 from pathlib import Path
@@ -30,20 +31,23 @@ from fetchai.ledger.crypto import Address as FetchaiAddress
 from fetchai.ledger.crypto import Entity, Identity  # type: ignore
 from fetchai.ledger.serialisation import sha256_hash
 
-from aea.crypto.base import Crypto, LedgerApi
+import requests
+
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-FETCHAI = "fetchai"
+_FETCHAI = "fetchai"
 FETCHAI_CURRENCY = "FET"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
+FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 
 
 class FetchAICrypto(Crypto):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
-    identifier = FETCHAI
+    identifier = _FETCHAI
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -166,7 +170,7 @@ class FetchAICrypto(Crypto):
 class FetchAIApi(LedgerApi):
     """Class to interact with the Fetch ledger APIs."""
 
-    identifier = FETCHAI
+    identifier = _FETCHAI
 
     def __init__(self, **kwargs):
         """
@@ -328,3 +332,51 @@ class FetchAIApi(LedgerApi):
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx
+
+
+class FetchAIFaucetApi(FaucetApi):
+    """Fetchai testnet faucet API."""
+
+    identifier = _FETCHAI
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        try:
+            payload = json.dumps({"address": address})
+            response = requests.post(FETCHAI_TESTNET_FAUCET_URL, data=payload)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            else:
+                response_dict = json.loads(response.text)
+                if response_dict.get("error_message") is not None:
+                    logger.warning(
+                        "Response: {}\nMessage: {}".format(
+                            response.status_code, response_dict.get("error_message")
+                        )
+                    )
+                else:
+                    logger.info(
+                        "Response: {}\nMessage: {}\nDigest: {}".format(
+                            response.status_code,
+                            response_dict.get("message"),
+                            response_dict.get("digest"),
+                        )
+                    )  # pragma: no cover
+        except Exception as e:
+            logger.warning(
+                "An error occured while attempting to generate wealth:\n{}".format(e)
+            )

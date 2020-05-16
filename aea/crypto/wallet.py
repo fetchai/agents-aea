@@ -23,11 +23,6 @@ from typing import Dict, cast
 
 import aea.crypto
 from aea.crypto.base import Crypto
-from aea.crypto.cosmos import COSMOS
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
-
-SUPPORTED_CRYPTOS = [COSMOS, ETHEREUM, FETCHAI]
 
 
 class Wallet:

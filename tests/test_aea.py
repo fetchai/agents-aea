@@ -28,7 +28,7 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -59,7 +59,9 @@ def test_initialise_aea():
     """Tests the initialisation of the AEA."""
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
-    builder.set_name("my_name").add_private_key(FETCHAI, private_key_path)
+    builder.set_name("my_name").add_private_key(
+        FetchAICrypto.identifier, private_key_path
+    )
     my_AEA = builder.build()
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     assert (
@@ -83,7 +85,7 @@ def test_act():
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
     builder = AEABuilder()
     builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_private_key(FetchAICrypto.identifier, private_key_path)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -100,7 +102,7 @@ def test_react():
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(FetchAICrypto.identifier, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -161,7 +163,7 @@ async def test_handle():
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(FetchAICrypto.identifier, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -257,7 +259,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, private_key_path)
+        builder.add_private_key(FetchAICrypto.identifier, private_key_path)
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
@@ -335,9 +337,11 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.node.start()
         cls.agent_name = "MyAgent"
         cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
-        cls.ledger_apis = LedgerApis({}, FETCHAI)
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
+        cls.wallet = Wallet({FetchAICrypto.identifier: cls.private_key_path})
+        cls.ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
+        cls.identity = Identity(
+            cls.agent_name, address=cls.wallet.addresses[FetchAICrypto.identifier]
+        )
         cls.connection = _make_local_connection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
@@ -433,11 +437,13 @@ class TestAddBehaviourDynamically:
         """Set the test up."""
         agent_name = "MyAgent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
+        wallet = Wallet({FetchAICrypto.identifier: private_key_path})
+        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         resources = Resources()
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
-        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        identity = Identity(
+            agent_name, address=wallet.addresses[FetchAICrypto.identifier]
+        )
         cls.agent = AEA(
             identity,
             [_make_local_connection(identity.address, LocalNode())],
@@ -490,11 +496,13 @@ class TestContextNamespace:
         """Set the test up."""
         agent_name = "my_agent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
+        wallet = Wallet({FetchAICrypto.identifier: private_key_path})
+        ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
         resources = Resources()
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
-        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        identity = Identity(
+            agent_name, address=wallet.addresses[FetchAICrypto.identifier]
+        )
         cls.context_namespace = {"key1": 1, "key2": 2}
         cls.agent = AEA(
             identity,

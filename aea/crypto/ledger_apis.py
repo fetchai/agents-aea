@@ -25,17 +25,21 @@ import time
 from typing import Any, Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
-from aea.crypto.cosmos import COSMOS, COSMOS_CURRENCY, CosmosApi
-from aea.crypto.ethereum import ETHEREUM, ETHEREUM_CURRENCY, EthereumApi
-from aea.crypto.fetchai import FETCHAI, FETCHAI_CURRENCY, FetchAIApi
+from aea.crypto.cosmos import COSMOS_CURRENCY, CosmosApi
+from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumApi
+from aea.crypto.fetchai import FETCHAI_CURRENCY, FetchAIApi
 from aea.mail.base import Address
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-SUPPORTED_LEDGER_APIS = [COSMOS, ETHEREUM, FETCHAI]
+SUPPORTED_LEDGER_APIS = [
+    CosmosApi.identifier,
+    EthereumApi.identifier,
+    FetchAIApi.identifier,
+]
 SUPPORTED_CURRENCIES = {
-    COSMOS: COSMOS_CURRENCY,
-    ETHEREUM: ETHEREUM_CURRENCY,
-    FETCHAI: FETCHAI_CURRENCY,
+    CosmosApi.identifier: COSMOS_CURRENCY,
+    EthereumApi.identifier: ETHEREUM_CURRENCY,
+    FetchAIApi.identifier: FETCHAI_CURRENCY,
 }
 IDENTIFIER_FOR_UNAVAILABLE_BALANCE = -1
 
@@ -63,13 +67,13 @@ def _instantiate_api(identifier: str, config: Dict[str, Union[str, int]]) -> Led
                 "Unsupported identifier {} in ledger apis.".format(identifier)
             )
         try:
-            if identifier == FETCHAI:
+            if identifier == FetchAIApi.identifier:
                 api = FetchAIApi(**config)  # type: LedgerApi
-            elif identifier == ETHEREUM:
+            elif identifier == EthereumApi.identifier:
                 api = EthereumApi(
                     cast(str, config["address"]), cast(str, config["gas_price"])
                 )
-            elif identifier == COSMOS:
+            elif identifier == CosmosApi.identifier:
                 api = CosmosApi(**config)
             is_connected = True
             break

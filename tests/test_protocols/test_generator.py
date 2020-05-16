@@ -43,7 +43,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.loader import ConfigLoader
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -257,8 +257,8 @@ class TestEndToEndGenerator(UseOef):
         """Test that a generated protocol could be used in exchanging messages between two agents."""
         builder_1 = AEABuilder()
         builder_1.set_name("my_aea_1")
-        builder_1.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-        builder_1.set_default_ledger(FETCHAI)
+        builder_1.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+        builder_1.set_default_ledger(FetchAICrypto.identifier)
         builder_1.set_default_connection(PublicId.from_str("fetchai/oef:0.2.0"))
         builder_1.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
@@ -277,8 +277,8 @@ class TestEndToEndGenerator(UseOef):
 
         builder_2 = AEABuilder()
         builder_2.set_name("my_aea_2")
-        builder_2.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-        builder_2.set_default_ledger(FETCHAI)
+        builder_2.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+        builder_2.set_default_ledger(FetchAICrypto.identifier)
         builder_2.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa")
         )

@@ -33,19 +33,20 @@ from ecdsa.util import sigencode_string_canonize
 
 import requests
 
-from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-COSMOS = "cosmos"
+_COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
+COSMOS_TESTNET_FAUCET_URL = ""
 
 
 class CosmosCrypto(Crypto):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
-    identifier = COSMOS
+    identifier = _COSMOS
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -192,7 +193,7 @@ class CosmosCrypto(Crypto):
 class CosmosApi(LedgerApi):
     """Class to interact with the Cosmos SDK via a HTTP APIs."""
 
-    identifier = COSMOS
+    identifier = _COSMOS
 
     def __init__(self, **kwargs):
         """
@@ -438,3 +439,27 @@ class CosmosApi(LedgerApi):
         except Exception:  # pragma: no cover
             is_valid = False
         return is_valid
+
+
+class CosmosFaucetApi(FaucetApi):
+    """Cosmos testnet faucet API."""
+
+    identifier = _COSMOS
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        raise NotImplementedError

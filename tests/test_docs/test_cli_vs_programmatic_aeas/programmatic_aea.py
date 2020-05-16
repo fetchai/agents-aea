@@ -27,7 +27,7 @@ from typing import cast
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -49,15 +49,17 @@ logging.basicConfig(level=logging.INFO)
 
 def run():
     # Create a private key
-    create_private_key(FETCHAI)
+    create_private_key(FetchAICrypto.identifier)
 
     # Set up the wallet, identity, oef connection, ledger and (empty) resources
-    wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
-    identity = Identity("my_aea", address=wallet.addresses.get(FETCHAI))
+    wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE})
+    identity = Identity(
+        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
+    )
     oef_connection = OEFConnection(
         address=identity.address, oef_addr=HOST, oef_port=PORT
     )
-    ledger_apis = LedgerApis({}, FETCHAI)
+    ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
     resources = Resources()
 
     # create the AEA
@@ -108,7 +110,7 @@ def run():
         t.start()
 
         # Let it run long enough to interact with the weather station
-        time.sleep(25)
+        time.sleep(60)
     finally:
         # Shut down the AEA
         logger.info("STOPPING AEA NOW!")

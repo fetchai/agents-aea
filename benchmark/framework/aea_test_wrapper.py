@@ -28,7 +28,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.components import Component
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -65,7 +65,7 @@ class AEATestWrapper:
         builder = AEABuilder()
 
         builder.set_name(self.name)
-        builder.add_private_key(FETCHAI, "")
+        builder.add_private_key(FetchAICrypto.identifier, "")
 
         for component in components:
             builder.add_component_instance(component)

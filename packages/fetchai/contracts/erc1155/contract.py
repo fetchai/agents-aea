@@ -29,7 +29,7 @@ from vyper.utils import keccak256
 from aea.configurations.base import ContractConfig, ContractId
 from aea.contracts.ethereum import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import ETHEREUM, ETHEREUM_CURRENCY
+from aea.crypto.ethereum import ETHEREUM_CURRENCY, EthereumCrypto
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 
@@ -130,7 +130,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -204,7 +204,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -274,7 +274,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -357,7 +357,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
 
@@ -452,7 +452,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={str(token_id): mint_quantity},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -572,7 +572,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -715,7 +715,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx": tx},
         )
         return tx_message
@@ -835,7 +835,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id={str(token_id): -from_supply + to_supply},
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
         )
         return tx_message
@@ -957,7 +957,7 @@ class ERC1155Contract(Contract):
             tx_counterparty_fee=0,
             tx_quantities_by_good_id=tx_quantities_by_good_id,
             info=info if info is not None else {},
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             signing_payload={"tx_hash": tx_hash, "is_deprecated_mode": True},
         )
         return tx_message
