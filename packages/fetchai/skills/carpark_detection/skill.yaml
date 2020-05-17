@@ -43,7 +43,7 @@ models:
     args:
       currency_id: FET
       data_price: 200000000
-      db_is_rel_to_cwd: true
+      db_is_rel_to_cwd: false
       db_rel_dir: ../temp_files
       is_ledger_tx: true
       ledger_id: fetchai
