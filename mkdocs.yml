@@ -31,8 +31,8 @@ nav:
       - ML skills: 'ml-skills.md'
       - TAC skills: 'tac-skills.md'
       - TAC external app: 'tac.md'
-      - Weather skills: 'weather-skills.md'
       - Thermometer skills: 'thermometer-skills.md'
+      - Weather skills: 'weather-skills.md'
     - Development:
       - Getting started:
         - Ways to build an AEA: 'steps.md'
