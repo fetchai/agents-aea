@@ -24,4 +24,4 @@ config:
   libp2p_port: 9000
 excluded_protocols: []
 restricted_to_protocols: []
-dependencies: []
+dependencies: {}

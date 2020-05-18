@@ -20,8 +20,6 @@
 import json
 import unittest.mock
 
-import pytest
-
 from tests.common.utils import run_in_root_dir
 
 from .test_base import DummyPID, create_app
@@ -132,7 +130,6 @@ def test_list_skills():
     _test_search_items_with_query("skill", "test")
 
 
-@pytest.mark.unstable
 @run_in_root_dir
 def test_real_search():
     """Call at least one function that actually calls call_aea_async."""
@@ -144,7 +141,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 12, data
+    assert len(data) == 13, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
