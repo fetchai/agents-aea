@@ -34,7 +34,7 @@ import yaml
 import aea
 import aea.cli.common
 from aea.cli import cli
-from aea.cli.add import _validate_fingerprint
+from aea.cli.add import _is_fingerprint_correct
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -498,26 +498,26 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
 
 @mock.patch("aea.cli.add._compute_fingerprint", return_value={"correct": "fingerprint"})
-class ValidateFingerprintTestCase(TestCase):
+class IsFingerprintCorrectTestCase(TestCase):
     """Test case for adding skill with invalid fingerprint."""
 
-    def test__validate_fingerprint_positive(self, *mocks):
-        """Test _validate_fingerprint method for positive result."""
+    def test__is_fingerprint_correct_positive(self, *mocks):
+        """Test _is_fingerprint_correct method for positive result."""
         item_config = mock.Mock()
         item_config.fingerprint = {"correct": "fingerprint"}
         item_config.fingerprint_ignore_patterns = []
-        _validate_fingerprint("package_path", item_config)
+        _is_fingerprint_correct("package_path", item_config)
 
     @mock.patch("aea.cli.add.rmtree")
-    def test__validate_fingerprint_negative(
+    def test__is_fingerprint_correct_negative(
         self, rmtree_mock, _compute_fingerprint_mock
     ):
-        """Test _validate_fingerprint method for negative result."""
+        """Test _is_fingerprint_correct method for negative result."""
         item_config = mock.Mock()
         item_config.fingerprint = {"incorrect": "fingerprint"}
         item_config.fingerprint_ignore_patterns = []
         package_path = "package_dir"
         with self.assertRaises(ClickException):
-            _validate_fingerprint(package_path, item_config)
+            _is_fingerprint_correct(package_path, item_config)
 
         rmtree_mock.assert_called_once_with(package_path)
