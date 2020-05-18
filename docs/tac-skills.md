@@ -106,7 +106,7 @@ Keep it running for all the following demos.
 
 ### Create TAC controller AEA
 
-In the root directory, fetch the car detector AEA:
+In the root directory, fetch the controller AEA:
 ``` bash
 aea fetch fetchai/tac_controller:0.1.0
 cd tac_controller
@@ -135,9 +135,6 @@ aea config set agent.default_ledger ethereum
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
 aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
-cd tac_participant_one
-aea install
-cd ..
 aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
@@ -196,6 +193,10 @@ can launch all the TAC agents as follows from the root directory:
 ``` bash
 aea launch tac_controller tac_participant_one tac_participant_two
 ```
+
+You may want to try `--multithreaded`
+option in order to run the agents
+in the same process.
 
 ### Cleaning up
 
