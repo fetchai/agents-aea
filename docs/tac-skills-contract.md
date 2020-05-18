@@ -7,7 +7,7 @@ There are two types of AEAs:
 
 ## Discussion
 
-The scope of this specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. Another AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid. Transactions are settled with the controller agent rather than against a public ledger.
+The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. Another AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid.
 
 ## Communication
 
@@ -16,7 +16,6 @@ There are two types of interactions:
 - between the participants, the negotiation
 
 ### Registration communication
-
 This diagram shows the communication between the various entities during the registration phase. 
 
 <div class="mermaid">
@@ -38,7 +37,6 @@ This diagram shows the communication between the various entities during the reg
         Agent_2->>Search: search
         Search-->>Agent_2: controller
         Agent_2->>Controller: register
-        Controller->>Controller: start_game
         Controller->>Agent_1: game_data
         Controller->>Agent_2: game_data
         
@@ -49,8 +47,7 @@ This diagram shows the communication between the various entities during the reg
 </div>
 
 ### Transaction communication
-
-This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as Seller_Agent. We also have an AEA in the role of the biyer, referred to as Buyer_Agent. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
+This diagram shows the communication between the two AEAs and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -102,109 +99,100 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo instructions:
+## Demo instructions 2: ledger transactions
 
-### Create TAC controller AEA
+This demo uses another AEA - a controller AEA - to take the role of running the competition. Transactions are validated on an ERC1155 smart contract.
 
-In the root directory, fetch the car detector AEA:
+### Create the TAC controller AEA
+In the root directory, create the tac controller AEA and enter the project.
 ``` bash
-aea fetch fetchai/tac_controller:0.1.0
-cd tac_controller
-aea install
+aea create tac_controller_contract
+cd tac_controller_contract
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
+### Add the tac control skill
 
-The following steps create the controller from scratch:
 ``` bash
-aea create tac_controller
-cd tac_controller
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/tac_control:0.1.0
+aea add skill fetchai/tac_control_contract:0.1.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
+```
+
+Add the following configs to the aea config:
+``` yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 20
+```
+
+Set the default ledger to ethereum:
+``` bash
 aea config set agent.default_ledger ethereum
 ```
 
-</p>
-</details>
+### Update the game parameters
+You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
-### Create the TAC participant AEAs
+You must set the start time to a point in the future `start_time: 01 01 2020  00:01`.
 
-In a separate terminal, in the root directory, fetch at least two participants:
+Alternatively, use the command line to get and set the start time:
+
+``` bash
+aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time
+aea config set vendor.fetchai.skills.tac_control_contract.models.parameters.args.start_time '01 01 2020  00:01'
+```
+
+### Fund the controller AEA
+
+We first generate a private key.
+``` bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+
+To create some wealth for your AEAs for the Ethereum `ropsten` network. Note that this needs to be executed from each AEA folder:
+
+``` bash
+aea generate-wealth ethereum
+```
+
+To check the wealth use (after some time for the wealth creation to be mined on Ropsten):
+
+``` bash
+aea get-wealth ethereum
+```
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>If no wealth appears after a while, then try funding the private key directly using a web faucet.</p>
+</div>
+
+
+### Create TAC participant AEAs
+
 ``` bash
 aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_one
-cd tac_participant_one
-aea install
-cd ..
 aea fetch fetchai/tac_participant:0.1.0 --alias tac_participant_two
-cd tac_participant_two
-aea install
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
-<p>
-
-In a separate terminal, in the root directory, create at least two tac participant AEAs:
+Then, cd into each project and set the usage to contract:
 ``` bash
-aea create tac_participant_one
-aea create tac_participant_two
+aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using_contract 'True' --type bool
 ```
 
-Build participant one:
-``` bash
-cd tac_participant_one
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
-aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea config set agent.default_ledger ethereum
-```
-
-Then, build participant two:
-``` bash
-cd tac_participant_two
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
-aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea config set agent.default_ledger ethereum
-```
-
-</p>
-</details>
-
-### Update the game parameters in the controller
-
-Navigate to the tac controller project, then use the command line to get and set the start time (set it to at least two minutes in the future):
+### Run all AEAs
 
 ``` bash
-aea config get vendor.fetchai.skills.tac_control.models.parameters.args.start_time
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.start_time '01 01 2020  00:01'
+aea launch tac_controller_contract tac_participant_one tac_participant_two
 ```
 
-### Run the AEAs
+You may want to try `--multithreaded`
+option in order to run the agents
+in the same process.
 
-The CLI tool supports the launch of several agents
-at once.
-
-For example, assuming you followed the tutorial, you
-can launch all the TAC agents as follows from the root directory:
-``` bash
-aea launch tac_controller tac_participant_one tac_participant_two
-```
-
-### Cleaning up
-
-When you're finished, delete your AEAs:
-``` bash
-aea delete tac_controller
-aea delete tac_participant_one
-aea delete tac_participant_two
-```
 
 <!-- ## Negotiation skill - deep dive
 
