@@ -22,8 +22,13 @@
 
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
+from aea.protocols.base import Message
 
 
 Description = BaseDescription
 
 Query = BaseQuery
+
+
+def role_from_first_message(message: Message):
+    pass

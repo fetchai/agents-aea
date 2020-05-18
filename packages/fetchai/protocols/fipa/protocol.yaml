@@ -6,8 +6,8 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmVvJPY2M46VXxtFsXda4NHfYQFZ8LYi29fE9fJBqvASvG
-  custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
-  dialogues.py: QmbHno79EQeWBfPdpHZKmvzLQTc5jvqNBJdAS7zc1SurFd
+  custom_types.py: QmXnGBjU8vAgovhd6ZKSpc8L7N8nDJVt9eHrswQRznFT5N
+  dialogues.py: QmUxran7oK4yBkSqabpdXe7A86e35Zt5GPGEXVsw9HnpPn
   fipa.proto: QmP7JqnuQSQ9BDcKkscrTydKEX4wFBoyFaY1bkzGkamcit
   fipa_pb2.py: QmbpiPYsK5oAqaZbvRWRZ155ZqgQUQoagLUoakDnxjYEGW
   message.py: QmeTECGN3JgjzyhxU4rQF8eySiurJGHGJtTxN4KDFJieVj

@@ -46,7 +46,7 @@ class Dialogue(FipaDialogue):
 
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label, FipaDialogue.AgentRole.BUYER)
+        FipaDialogue.__init__(self, dialogue_label)
         self.proposal = None  # type: Optional[Description]
 
     @staticmethod

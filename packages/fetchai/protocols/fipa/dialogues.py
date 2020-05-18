@@ -31,6 +31,7 @@ from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
+from packages.fetchai.protocols.fipa.custom_types import role_from_first_message
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 VALID_PREVIOUS_PERFORMATIVES = {
@@ -59,9 +60,6 @@ VALID_PREVIOUS_PERFORMATIVES = {
     ],
 }  # type: Dict[FipaMessage.Performative, List[Union[None, FipaMessage.Performative]]]
 
-SUPPLY_DATAMODEL_NAME = "supply"
-DEMAND_DATAMODEL_NAME = "demand"
-
 
 class FipaDialogue(Dialogue):
     """The FIPA dialogue class maintains state of a dialogue and manages it."""
@@ -80,19 +78,6 @@ class FipaDialogue(Dialogue):
         SELLER = "seller"
         BUYER = "buyer"
 
-    def __init__(
-        self, dialogue_label: DialogueLabel, role: AgentRole, **kwargs
-    ) -> None:
-        """
-        Initialize a fipa dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        Dialogue.__init__(self, dialogue_label=dialogue_label, role=role)
-
     @staticmethod
     def role_from_first_message(message: Message) -> Dialogue.Role:
         """Infer the role of the agent from an incoming/outgoing first message
@@ -100,7 +85,8 @@ class FipaDialogue(Dialogue):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        pass
+        fipa_message = cast(FipaMessage, message)
+        return role_from_first_message(fipa_message)
 
     def is_valid_next_message(self, fipa_msg: Message) -> bool:
         """
@@ -113,7 +99,7 @@ class FipaDialogue(Dialogue):
         this_target = fipa_msg.target
         this_performative = fipa_msg.performative
         last_message = cast(FipaMessage, self.last_message)
-        if self.is_empty():
+        if self.is_empty:
             result = (
                 this_message_id == FipaDialogue.STARTING_MESSAGE_ID
                 and this_target == FipaDialogue.STARTING_TARGET
@@ -208,7 +194,7 @@ class FipaDialogues(Dialogues):
 
         :return: None
         """
-        Dialogues.__init__(self, agent_address)
+        Dialogues.__init__(self, agent_address=agent_address)
         self._dialogue_stats = FipaDialogueStats()
 
     @property
@@ -224,25 +210,29 @@ class FipaDialogues(Dialogues):
 
         :return: the dialogue, or None in case such a dialogue does not exist
         """
-        result = None
         fipa_msg = cast(FipaMessage, fipa_msg)
         dialogue_reference = fipa_msg.dialogue_reference
+
         self_initiated_dialogue_label = DialogueLabel(
             dialogue_reference, fipa_msg.counterparty, self.agent_address
         )
         other_initiated_dialogue_label = DialogueLabel(
             dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty
         )
+
         if other_initiated_dialogue_label in self.dialogues:
             other_initiated_dialogue = cast(
                 FipaDialogue, self.dialogues[other_initiated_dialogue_label]
             )
             result = other_initiated_dialogue
-        if self_initiated_dialogue_label in self.dialogues:
+        elif self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(
                 FipaDialogue, self.dialogues[self_initiated_dialogue_label]
             )
             result = self_initiated_dialogue
+        else:
+            result = None
+
         return result
 
     def update_self_initiated_dialogue_label_on_second_message(
@@ -260,6 +250,7 @@ class FipaDialogues(Dialogues):
             second_message.counterparty,
             self.agent_address,
         )
+
         if self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(
                 FipaDialogue, self.dialogues[self_initiated_dialogue_label]

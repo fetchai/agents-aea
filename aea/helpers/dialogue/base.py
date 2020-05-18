@@ -154,7 +154,7 @@ class Dialogue(ABC):
             """Get the string representation."""
             return self.value
 
-    def __init__(self, dialogue_label: DialogueLabel, role: Role) -> None:
+    def __init__(self, dialogue_label: DialogueLabel, role: Role = None) -> None:
         """
         Initialize a dialogue.
 
@@ -190,6 +190,7 @@ class Dialogue(ABC):
 
         :return: the agent's role
         """
+        assert self._role is not None, "Role is not set."
         return self._role
 
     @role.setter
@@ -246,7 +247,7 @@ class Dialogue(ABC):
             last_outgoing_message_id = cast(
                 int, self.last_outgoing_message.get("message_id")
             )
-            return (
+            last_message = (
                 self.last_outgoing_message
                 if last_outgoing_message_id > last_incoming_message_id
                 else self.last_incoming_message
@@ -255,21 +256,18 @@ class Dialogue(ABC):
             self.last_incoming_message is not None
             and self.last_outgoing_message is None
         ):
-            last_incoming_message_id = cast(
-                int, self.last_incoming_message.get("message_id")
-            )
-            return self.last_incoming_message if last_incoming_message_id == 1 else None
+            last_message = self.last_incoming_message
         elif (
             self.last_incoming_message is None
             and self.last_outgoing_message is not None
         ):
-            last_outgoing_message_id = cast(
-                int, self.last_outgoing_message.get("message_id")
-            )
-            return self.last_outgoing_message if last_outgoing_message_id == 1 else None
+            last_message = self.last_outgoing_message
         else:
-            return None
+            last_message = None
 
+        return last_message
+
+    @property
     def is_empty(self) -> bool:
         """
         Check whether the dialogue is empty
@@ -303,11 +301,10 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if self.is_valid_next_message(message):
+        is_extendable = self.is_valid_next_message(message)
+        if is_extendable:
             self.outgoing_extend(message)
-            return True
-        else:
-            return False
+        return is_extendable
 
     def incoming_safe_extend(self, message: "Message") -> bool:
         """
@@ -316,11 +313,10 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if self.is_valid_next_message(message):
+        is_extendable = self.is_valid_next_message(message)
+        if is_extendable:
             self.incoming_extend(message)
-            return True
-        else:
-            return False
+        return is_extendable
 
     def update(self, message: "Message") -> bool:
         """
@@ -329,14 +325,11 @@ class Dialogue(ABC):
         :param message: a message to be added
         :return: True if message successfully added, false otherwise
         """
-        if self.is_valid_next_message(message):
-            if message.is_incoming:
-                self.incoming_extend(message)
-            else:
-                self.outgoing_extend(message)
-            return True
+        if message.is_incoming:
+            is_successful = self.incoming_safe_extend(message)
         else:
-            return False
+            is_successful = self.outgoing_safe_extend(message)
+        return is_successful
 
     @abstractmethod
     def is_valid_next_message(self, message: "Message") -> bool:
@@ -357,46 +350,44 @@ class Dialogue(ABC):
         :return: The role of the agent
         """
 
+    @staticmethod
+    def _interleave(list_1, list_2) -> List:
+        all_elements = [
+            element
+            for element in itertools.chain(*itertools.zip_longest(list_1, list_2))
+            if element is not None
+        ]
+
+        return all_elements
+
     def __str__(self) -> str:
         """
         Get the string representation.
 
         :return: The string representation of the dialogue
         """
-        rep = "Dialogue Label: " + str(self.dialogue_label) + "\n"
+        representation = "Dialogue Label: " + str(self.dialogue_label) + "\n"
 
         if self.is_self_initiated:
-            all_messages = [
-                msg
-                for msg in itertools.chain(
-                    *itertools.zip_longest(
-                        self._outgoing_messages, self._incoming_messages
-                    )
-                )
-                if msg is not None
-            ]
+            all_messages = self._interleave(
+                self._outgoing_messages, self._incoming_messages
+            )
         else:
-            all_messages = [
-                msg
-                for msg in itertools.chain(
-                    *itertools.zip_longest(
-                        self._incoming_messages, self._outgoing_messages
-                    )
-                )
-                if msg is not None
-            ]
+            all_messages = self._interleave(
+                self._incoming_messages, self._outgoing_messages
+            )
 
         for msg in all_messages:
-            rep += str(msg.get("performative")) + "( )\n"
+            representation += str(msg.get("performative")) + "( )\n"
 
-        rep = rep[:-1]
-        return rep
+        representation = representation[:-1]
+        return representation
 
 
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
-    def __init__(self, agent_address: Address) -> None:
+    def __init__(self, agent_address: Address = "") -> None:
         """
         Initialize dialogues.
 
@@ -415,6 +406,7 @@ class Dialogues:
     @property
     def agent_address(self) -> Address:
         """Get the address of the agent for whom dialogues are maintained."""
+        assert self._agent_address != "", "agent_address is not set."
         return self._agent_address
 
     @abstractmethod
@@ -455,3 +447,30 @@ class Dialogues:
         :return: the next nonce
         """
         return str(self._dialogue_nonce + 1), ""
+
+    # ToDo the following methods are left for backwards compatibility reasons and will be removed in the future
+    def is_belonging_to_registered_dialogue(
+        self, msg: Message, agent_addr: Address
+    ) -> bool:
+        """
+        DEPRECATED
+
+        Check whether an agent message is part of a registered dialogue.
+
+        :param msg: the agent message
+        :param agent_addr: the address of the agent
+
+        :return: boolean indicating whether the message belongs to a registered dialogue
+        """
+        pass
+
+    def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
+        """
+        DEPRECATED
+
+        Check whether an agent message is permitted for a new dialogue.
+
+        :param msg: the agent message
+        :return: a boolean indicating whether the message is permitted for a new dialogue
+        """
+        pass

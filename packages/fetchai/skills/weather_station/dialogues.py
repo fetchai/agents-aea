@@ -45,7 +45,7 @@ class Dialogue(FipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label, FipaDialogue.AgentRole.SELLER)
+        FipaDialogue.__init__(self, dialogue_label)
         self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
 
