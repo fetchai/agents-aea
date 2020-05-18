@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the gym connection module."""
+"""This module contains the tests of the HTTP Server connection module."""
 
 import asyncio
 import concurrent.futures
