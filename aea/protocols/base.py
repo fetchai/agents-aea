@@ -86,7 +86,6 @@ class Message:
 
         :return whether the message is incoming or is out going
         """
-        assert self._is_incoming is not None, "is_incoming must not be None."
         return self._is_incoming
 
     @is_incoming.setter

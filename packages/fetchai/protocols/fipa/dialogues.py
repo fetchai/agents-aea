@@ -141,17 +141,17 @@ class FipaDialogue(Dialogue):
         this_message_id = fipa_msg.message_id
         this_target = fipa_msg.target
         this_performative = fipa_msg.performative
-        last_outgoing_message = cast(FipaMessage, self.last_outgoing_message)
-        if last_outgoing_message is None:
+        last_message = cast(FipaMessage, self.last_message())
+        if self.is_empty():
             result = (
                 this_message_id == FipaDialogue.STARTING_MESSAGE_ID
                 and this_target == FipaDialogue.STARTING_TARGET
                 and this_performative == FipaMessage.Performative.CFP
             )
         else:
-            last_message_id = last_outgoing_message.message_id
-            last_target = last_outgoing_message.target
-            last_performative = last_outgoing_message.performative
+            last_message_id = last_message.message_id
+            last_target = last_message.target
+            last_performative = last_message.performative
             result = (
                 this_message_id == last_message_id + 1
                 and this_target == last_target + 1
@@ -239,19 +239,19 @@ class FipaDialogues(Dialogues):
         """
         Dialogues.__init__(self, agent_address)
         self._initiated_dialogues = {}  # type: Dict[DialogueLabel, FipaDialogue]
-        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
-        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        # self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, FipaDialogue]
+        # self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, FipaDialogue]
         self._dialogue_stats = FipaDialogueStats()
 
-    @property
-    def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
-        """Get dictionary of dialogues in which the agent acts as a seller."""
-        return self._dialogues_as_seller
-
-    @property
-    def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
-        """Get dictionary of dialogues in which the agent acts as a buyer."""
-        return self._dialogues_as_buyer
+    # @property
+    # def dialogues_as_seller(self) -> Dict[DialogueLabel, FipaDialogue]:
+    #     """Get dictionary of dialogues in which the agent acts as a seller."""
+    #     return self._dialogues_as_seller
+    #
+    # @property
+    # def dialogues_as_buyer(self) -> Dict[DialogueLabel, FipaDialogue]:
+    #     """Get dictionary of dialogues in which the agent acts as a buyer."""
+    #     return self._dialogues_as_buyer
 
     @property
     def dialogue_stats(self) -> FipaDialogueStats:
@@ -286,6 +286,37 @@ class FipaDialogues(Dialogues):
             )
             result = self_initiated_dialogue
         return result
+
+    def update_self_initiated_dialogue_label_on_second_message(self, second_message: FipaMessage) -> None:
+        """
+        Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message
+
+        :param second_message: The second message in the dialogue (the first message by the counterparty in a self initiated dialogue)
+        :return: None
+        """
+        self_initiated_dialogue_label = (second_message.dialogue_reference[0], "")
+        self_initiated_dialogue_label = DialogueLabel(
+            self_initiated_dialogue_label, second_message.counterparty, self.agent_address
+        )
+        if self_initiated_dialogue_label in self._dialogues:
+            self_initiated_dialogue = cast(FipaDialogue, self.dialogues[self_initiated_dialogue_label])
+            self.dialogues.pop(self_initiated_dialogue_label)
+            final_dialogue_label = DialogueLabel(
+                second_message.dialogue_reference,
+                self_initiated_dialogue_label.dialogue_opponent_addr,
+                self_initiated_dialogue_label.dialogue_starter_addr,
+            )
+            self_initiated_dialogue.assign_final_dialogue_label(
+                final_dialogue_label
+            )
+            assert self_initiated_dialogue.dialogue_label not in self.dialogues
+            # if self_initiated_dialogue.is_seller:
+            #     assert dialogue.dialogue_label not in self.dialogues_as_seller
+            #     self._dialogues_as_seller.update({dialogue.dialogue_label: dialogue})
+            # else:
+            #     assert dialogue.dialogue_label not in self.dialogues_as_buyer
+            #     self._dialogues_as_buyer.update({dialogue.dialogue_label: dialogue})
+            self.dialogues.update({self_initiated_dialogue.dialogue_label: self_initiated_dialogue})
 
     def update(self, message: Message,) -> Optional[Dialogue]:
         """
@@ -324,13 +355,14 @@ class FipaDialogues(Dialogues):
                 message.counterparty is not None
             ), "The message counter-party field is not set {}".format(message)
             dialogue = self.create_self_initiated(
-                message.counterparty,
-                self.agent_address,
-                Dialogue.role_from_first_message(fipa_msg),
+                dialogue_opponent_addr=message.counterparty,
+                dialogue_starter_addr=self.agent_address,
+                role=Dialogue.role_from_first_message(fipa_msg),
             )
             dialogue.outgoing_safe_extend(message)
             result = dialogue
         else:  # existing dialogue
+            self.update_self_initiated_dialogue_label_on_second_message(fipa_msg)
             dialogue = self.get_dialogue(message)
             if dialogue is not None:
                 if message.is_incoming:
@@ -362,7 +394,8 @@ class FipaDialogues(Dialogues):
             dialogue_reference, dialogue_opponent_addr, dialogue_starter_addr
         )
         dialogue = FipaDialogue(dialogue_label, role=role)
-        self._initiated_dialogues.update({dialogue_label: dialogue})
+        # self._initiated_dialogues.update({dialogue_label: dialogue})
+        self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
     def create_opponent_initiated(
@@ -389,8 +422,19 @@ class FipaDialogues(Dialogues):
         dialogue_label = DialogueLabel(
             new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr
         )
-        result = self._create(dialogue_label, role=role)
-        return result
+        # result = self._create(dialogue_label, role=role)
+
+        assert dialogue_label not in self.dialogues
+        dialogue = FipaDialogue(dialogue_label, role=role)
+        # if role == FipaDialogue.AgentRole.SELLER:
+        #     assert dialogue_label not in self.dialogues_as_seller
+        #     self._dialogues_as_seller.update({dialogue_label: dialogue})
+        # else:
+        #     assert dialogue_label not in self.dialogues_as_buyer
+        #     self._dialogues_as_buyer.update({dialogue_label: dialogue})
+        self.dialogues.update({dialogue_label: dialogue})
+
+        return dialogue
 
     def _create(
         self, dialogue_label: DialogueLabel, role: FipaDialogue.AgentRole
@@ -403,13 +447,5 @@ class FipaDialogues(Dialogues):
 
         :return: the created dialogue
         """
-        assert dialogue_label not in self.dialogues
-        dialogue = FipaDialogue(dialogue_label, role=role)
-        if role == FipaDialogue.AgentRole.SELLER:
-            assert dialogue_label not in self.dialogues_as_seller
-            self._dialogues_as_seller.update({dialogue_label: dialogue})
-        else:
-            assert dialogue_label not in self.dialogues_as_buyer
-            self._dialogues_as_buyer.update({dialogue_label: dialogue})
-        self.dialogues.update({dialogue_label: dialogue})
-        return dialogue
+        pass
+

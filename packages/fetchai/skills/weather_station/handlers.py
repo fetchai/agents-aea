@@ -59,17 +59,17 @@ class FIPAHandler(Handler):
         if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
-        else:
-            # handle message
-            dialogue = cast(Dialogue, fipa_dialogue)
-            if fipa_msg.performative == FipaMessage.Performative.CFP:
-                self._handle_cfp(fipa_msg, dialogue)
-            elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-                self._handle_decline(fipa_msg, dialogue)
-            elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
-                self._handle_accept(fipa_msg, dialogue)
-            elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-                self._handle_inform(fipa_msg, dialogue)
+
+        # handle message
+        dialogue = cast(Dialogue, fipa_dialogue)
+        if fipa_msg.performative == FipaMessage.Performative.CFP:
+            self._handle_cfp(fipa_msg, dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
+            self._handle_decline(fipa_msg, dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
+            self._handle_accept(fipa_msg, dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
+            self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """

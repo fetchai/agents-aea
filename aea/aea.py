@@ -216,6 +216,7 @@ class AEA(Agent):
         try:
             msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
+            msg.is_incoming = True
         except Exception as e:
             error_handler.send_decoding_error(envelope)
             logger.warning("Decoding error. Exception: {}".format(str(e)))

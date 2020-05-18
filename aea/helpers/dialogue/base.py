@@ -25,6 +25,8 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
+import itertools
+
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, cast
@@ -193,7 +195,8 @@ class Dialogue(ABC):
 
     @property
     def role(self) -> "Role":
-        """Get the agent's role in the dialogue.
+        """
+        Get the agent's role in the dialogue.
 
         :return: the agent's role
         """
@@ -201,7 +204,8 @@ class Dialogue(ABC):
 
     @role.setter
     def role(self, role: "Role") -> None:
-        """Set the agent's role in the dialogue.
+        """
+        Set the agent's role in the dialogue.
 
         :param role: the agent's role
         :return: None
@@ -211,11 +215,20 @@ class Dialogue(ABC):
     @staticmethod
     @abstractmethod
     def role_from_first_message(message: Message) -> "Role":
-        """Infer the role of the agent from an incoming/outgoing first message
+        """
+        Infer the role of the agent from an incoming/outgoing first message
 
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
+
+    def is_empty(self) -> bool:
+        """
+        Check whether the dialogue is empty
+
+        :return: True if empty, False otherwise
+        """
+        return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
 
     @property
     def last_incoming_message(self) -> Optional[Message]:
@@ -226,6 +239,22 @@ class Dialogue(ABC):
     def last_outgoing_message(self) -> Optional[Message]:
         """Get the last outgoing message."""
         return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
+
+    def last_message(self) -> Optional[Message]:
+        """Get the last outgoing message."""
+        if self.last_incoming_message is not None and self.last_outgoing_message is not None:
+            last_incoming_message_id = cast(int, self.last_incoming_message.get("message_id"))
+            last_outgoing_message_id = cast(int, self.last_outgoing_message.get("message_id"))
+            return self.last_outgoing_message if last_outgoing_message_id > last_incoming_message_id else self.last_incoming_message
+        elif self.last_incoming_message is not None and self.last_outgoing_message is None:
+            last_incoming_message_id = cast(int, self.last_incoming_message.get("message_id"))
+            return self.last_incoming_message if last_incoming_message_id == 1 else None
+        elif self.last_incoming_message is None and self.last_outgoing_message is not None:
+            last_outgoing_message_id = cast(int, self.last_outgoing_message.get("message_id"))
+            return self.last_outgoing_message if last_outgoing_message_id == 1 else None
+        else:
+            return None
+
 
     def outgoing_extend(self, message: "Message") -> None:
         """
@@ -253,7 +282,7 @@ class Dialogue(ABC):
         :return: True if message successfully added, false otherwise
         """
         if self.is_valid_next_message(message):
-            self._outgoing_messages.extend([message])
+            self.outgoing_extend(message)
             return True
         else:
             return False
@@ -266,7 +295,23 @@ class Dialogue(ABC):
         :return: True if message successfully added, false otherwise
         """
         if self.is_valid_next_message(message):
-            self._incoming_messages.extend([message])
+            self.incoming_extend(message)
+            return True
+        else:
+            return False
+
+    def update(self, message: "Message") -> bool:
+        """
+        Extend the list of incoming/outgoing messages with 'message', if 'message' is valid
+
+        :param message: a message to be added
+        :return: True if message successfully added, false otherwise
+        """
+        if self.is_valid_next_message(message):
+            if message.is_incoming:
+                self.incoming_extend(message)
+            else:
+                self.outgoing_extend(message)
             return True
         else:
             return False
@@ -279,6 +324,22 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if yes, False otherwise.
         """
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        rep = "\n============="
+        rep += "\nDialogue Label: " + str(self.dialogue_label) + "\n"
+
+        if self.is_self_initiated:
+            all_messages = [x for x in itertools.chain(*itertools.zip_longest(self._outgoing_messages, self._incoming_messages)) if x is not None]
+        else:
+            all_messages = [x for x in itertools.chain(*itertools.zip_longest(self._incoming_messages, self._outgoing_messages)) if x is not None]
+
+        for msg in all_messages:
+            rep += str(msg.get("performative")) + "( )\n"
+
+        rep += "=============\n"
+        return rep
 
 
 class Dialogues:
@@ -314,6 +375,7 @@ class Dialogues:
         :return: the dialogue if such a dialogue is found, None otherwise
         """
 
+    @abstractmethod
     def update(self, message: Message,) -> Optional[Dialogue]:
         """
         Update the state of dialogues with a new message.
@@ -336,4 +398,4 @@ class Dialogues:
         return self._dialogue_nonce
 
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
-        return str(self._next_dialogue_nonce()), ""
+        return str(self._dialogue_nonce+1), ""
