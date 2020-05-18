@@ -21,7 +21,7 @@
 
 import os
 from pathlib import Path
-from typing import Callable, Collection, Union, cast
+from typing import Collection, cast
 
 import click
 from click.core import Context as ClickContext
@@ -239,9 +239,7 @@ def _load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
     return item_config
 
 
-def _add_item_deps(
-    click_context: ClickContext, item_type: str, item_config
-) -> None:
+def _add_item_deps(click_context: ClickContext, item_type: str, item_config) -> None:
     """
     Add item dependencies. Calls _add_item recursively.
 
