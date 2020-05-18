@@ -100,36 +100,7 @@ class FipaDialogue(Dialogue):
         :param message: an incoming/outgoing first message
         :return: The role of the agent
         """
-        fipa_message = cast(FipaMessage, message)
-        if (
-            fipa_message.performative == FipaMessage.Performative.CFP
-            and fipa_message.is_incoming
-        ):  # cfp from other agent
-            query = cast(FipaMessage.Query, fipa_message.query)
-            if query.model is not None:
-                is_seller = (
-                    query.model.name == DEMAND_DATAMODEL_NAME
-                )  # the counterparty is querying for supply
-            else:
-                raise ValueError("Query.model is None")
-        elif (
-            fipa_message.performative == FipaMessage.Performative.CFP
-            and not fipa_message.is_incoming
-        ):  # cfp from self
-            query = cast(FipaMessage.Query, fipa_message.query)
-            if query.model is not None:
-                is_seller = (
-                    query.model.name == SUPPLY_DATAMODEL_NAME
-                )  # this agent is querying for supply
-            else:
-                raise ValueError("Query.model is None")
-        else:
-            raise ValueError("message must be a cfp")
-
-        if is_seller:
-            return FipaDialogue.AgentRole.SELLER
-        else:
-            return FipaDialogue.AgentRole.BUYER
+        pass
 
     def is_valid_next_message(self, fipa_msg: Message) -> bool:
         """
@@ -329,7 +300,9 @@ class FipaDialogues(Dialogues):
             dialogue = self.create_opponent_initiated(
                 dialogue_opponent_addr=fipa_msg.counterparty,
                 dialogue_reference=fipa_msg.dialogue_reference,
-                role=cast(FipaDialogue.AgentRole, Dialogue.role_from_first_message(fipa_msg)),
+                role=cast(
+                    FipaDialogue.AgentRole, Dialogue.role_from_first_message(fipa_msg)
+                ),
             )
             dialogue.incoming_safe_extend(fipa_msg)
             result = dialogue
@@ -343,7 +316,9 @@ class FipaDialogues(Dialogues):
             ), "The message counter-party field is not set {}".format(fipa_msg)
             dialogue = self.create_self_initiated(
                 dialogue_opponent_addr=fipa_msg.counterparty,
-                role=cast(FipaDialogue.AgentRole, Dialogue.role_from_first_message(fipa_msg)),
+                role=cast(
+                    FipaDialogue.AgentRole, Dialogue.role_from_first_message(fipa_msg)
+                ),
             )
             dialogue.outgoing_safe_extend(fipa_msg)
             result = dialogue
@@ -361,9 +336,7 @@ class FipaDialogues(Dialogues):
         return result
 
     def create_self_initiated(
-        self,
-        dialogue_opponent_addr: Address,
-        role: FipaDialogue.AgentRole,
+        self, dialogue_opponent_addr: Address, role: FipaDialogue.AgentRole,
     ) -> Dialogue:
         """
         Create a self initiated dialogue.
