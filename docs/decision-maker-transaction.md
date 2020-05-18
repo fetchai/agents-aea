@@ -11,8 +11,8 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
+from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
@@ -32,7 +32,9 @@ To have access to the decision-maker, which is responsible for signing transacti
 
 ``` python
     # Create a private key
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
+    )
 
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -40,9 +42,9 @@ To have access to the decision-maker, which is responsible for signing transacti
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
-    builder.add_ledger_api_config(FETCHAI, {"network": "testnet"})
+    builder.add_ledger_api_config(FetchAICrypto.identifier, {"network": "testnet"})
 
     # Create our AEA
     my_aea = builder.build()
@@ -54,7 +56,7 @@ Since we want to send funds from our AEA's `wallet`, we need to generate some we
 
 ``` python
     # Generate some wealth for the default address
-    _try_generate_testnet_wealth(FETCHAI, my_aea.identity.address)
+    try_generate_testnet_wealth(FetchAICrypto.identifier, my_aea.identity.address)
 ```
 
 ## Add a simple skill
@@ -76,14 +78,16 @@ Add a simple skill with a transaction handler.
 
 ## Create a second identity
 ``` python
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
+    )
 
-    counterparty_wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=FETCHAI,
+        default_address_key=FetchAICrypto.identifier,
     )
 ```
 
@@ -92,7 +96,7 @@ Add a simple skill with a transaction handler.
 Next, we are creating the transaction message and we send it to the decision-maker.
 ``` python
     # create tx message for decision maker to process
-    fetchai_ledger_api = my_aea.context.ledger_apis.apis[FETCHAI]
+    fetchai_ledger_api = my_aea.context.ledger_apis.apis[FetchAICrypto.identifier]
     tx_nonce = fetchai_ledger_api.generate_tx_nonce(
         my_aea.identity.address, counterparty_identity.address
     )
@@ -107,7 +111,7 @@ Next, we are creating the transaction message and we send it to the decision-mak
         tx_sender_fee=1,
         tx_counterparty_fee=0,
         tx_quantities_by_good_id={},
-        ledger_id=FETCHAI,
+        ledger_id=FetchAICrypto.identifier,
         info={"some_info_key": "some_info_value"},
         tx_nonce=tx_nonce,
     )
@@ -186,8 +190,8 @@ from typing import Optional, cast
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ProtocolId, SkillConfig
-from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_fetchai_private_key, _try_generate_testnet_wealth
+from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.identity.base import Identity
@@ -203,7 +207,9 @@ FETCHAI_PRIVATE_KEY_FILE_2 = "fet_private_key_2.txt"
 
 def run():
     # Create a private key
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
+    )
 
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -211,15 +217,15 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
-    builder.add_ledger_api_config(FETCHAI, {"network": "testnet"})
+    builder.add_ledger_api_config(FetchAICrypto.identifier, {"network": "testnet"})
 
     # Create our AEA
     my_aea = builder.build()
 
     # Generate some wealth for the default address
-    _try_generate_testnet_wealth(FETCHAI, my_aea.identity.address)
+    try_generate_testnet_wealth(FetchAICrypto.identifier, my_aea.identity.address)
 
     # add a simple skill with handler
     skill_context = SkillContext(my_aea.context)
@@ -233,18 +239,20 @@ def run():
     my_aea.resources.add_skill(simple_skill)
 
     # create a second identity
-    _create_fetchai_private_key(private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
+    )
 
-    counterparty_wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=FETCHAI,
+        default_address_key=FetchAICrypto.identifier,
     )
 
     # create tx message for decision maker to process
-    fetchai_ledger_api = my_aea.context.ledger_apis.apis[FETCHAI]
+    fetchai_ledger_api = my_aea.context.ledger_apis.apis[FetchAICrypto.identifier]
     tx_nonce = fetchai_ledger_api.generate_tx_nonce(
         my_aea.identity.address, counterparty_identity.address
     )
@@ -259,7 +267,7 @@ def run():
         tx_sender_fee=1,
         tx_counterparty_fee=0,
         tx_quantities_by_good_id={},
-        ledger_id=FETCHAI,
+        ledger_id=FetchAICrypto.identifier,
         info={"some_info_key": "some_info_value"},
         tx_nonce=tx_nonce,
     )

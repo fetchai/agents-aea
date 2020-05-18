@@ -19,6 +19,8 @@
 
 """This test module contains the integration test for the weather skills."""
 
+import pytest
+
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
 
@@ -34,7 +36,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.2.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
         self.set_config(setting_path, False, "bool")
@@ -47,7 +49,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         # Setup Agent two
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/carpark_client:0.2.0")
+        self.add_item("skill", "fetchai/carpark_client:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
@@ -103,6 +105,7 @@ class TestCarPark(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
+@pytest.mark.unstable
 class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that carpark skills work."""
 
@@ -118,7 +121,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.2.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         setting_path = "vendor.fetchai.skills.carpark_detection.models.strategy.args.db_is_rel_to_cwd"
         self.set_config(setting_path, False, "bool")
@@ -128,7 +131,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(carpark_client_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/carpark_client:0.2.0")
+        self.add_item("skill", "fetchai/carpark_client:0.3.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.run_install()
 

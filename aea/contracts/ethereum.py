@@ -19,12 +19,13 @@
 
 """The base ethereum contract."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from web3.contract import Contract as EthereumContract
 
 from aea.configurations.base import ContractConfig
 from aea.contracts.base import Contract as BaseContract
+from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 
 
@@ -62,40 +63,46 @@ class Contract(BaseContract):
     def is_deployed(self) -> bool:
         return self.instance.address is not None
 
-    def set_instance(self, ledger_api: EthereumApi) -> None:
+    def set_instance(self, ledger_api: LedgerApi) -> None:
         """
         Set the instance.
 
-        :param ledger_api: the ethereum ledger api
+        :param ledger_api: the ledger api we are using.
+        :return: None
         """
         assert self._instance is None, "Instance already set!"
+        ledger_api = cast(EthereumApi, ledger_api)
         self._instance = ledger_api.api.eth.contract(
             abi=self.abi, bytecode=self.bytecode
         )
 
-    def set_address(self, ledger_api: EthereumApi, contract_address: str) -> None:
+    def set_address(self, ledger_api: LedgerApi, contract_address: str) -> None:
         """
         Set the contract address.
 
         :param ledger_api: the ledger_api we are using.
         :param contract_address: the contract address
+        :return: None
         """
         if self._instance is not None:
             assert self.instance.address is None, "Address already set!"
+        ledger_api = cast(EthereumApi, ledger_api)
         self._instance = ledger_api.api.eth.contract(
             address=contract_address, abi=self.abi
         )
 
     def set_deployed_instance(
-        self, ledger_api: EthereumApi, contract_address: str
+        self, ledger_api: LedgerApi, contract_address: str
     ) -> None:
         """
         Set the contract address.
 
         :param ledger_api: the ledger_api we are using.
         :param contract_address: the contract address
+        :return: None
         """
         assert self._instance is None, "Instance already set!"
+        ledger_api = cast(EthereumApi, ledger_api)
         self._instance = ledger_api.api.eth.contract(
             address=contract_address, abi=self._abi, bytecode=self.bytecode
         )

@@ -5,11 +5,11 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_data_provider:0.2.0
+aea add skill fetchai/ml_data_provider:0.3.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_data_provider:0.3.0
+aea fetch fetchai/ml_data_provider:0.4.0
 cd ml_data_provider
 ```
 ``` bash
@@ -22,11 +22,11 @@ aea run --connections fetchai/oef:0.2.0
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_train:0.2.0
+aea add skill fetchai/ml_train:0.3.0
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.3.0
+aea fetch fetchai/ml_model_trainer:0.4.0
 cd ml_model_trainer
 ```
 ``` bash
@@ -39,7 +39,7 @@ aea run --connections fetchai/oef:0.2.0
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_data_provider:0.2.0
+aea add skill fetchai/ml_data_provider:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
@@ -47,7 +47,7 @@ aea config set agent.default_connection fetchai/oef:0.2.0
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/ml_train:0.2.0
+aea add skill fetchai/ml_train:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```

@@ -35,9 +35,6 @@ def test_creation():
     assert CosmosCrypto(
         COSMOS_PRIVATE_KEY_PATH
     ), "Did not manage to load the cosmos private key"
-    assert CosmosCrypto(
-        "./"
-    ), "Did not manage to create a new cosmos private key with wrong path"
 
 
 def test_initialization():
@@ -104,7 +101,13 @@ def test_transfer():
     fee = 1000
     tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
     assert tx_digest is not None, "Failed to submit transfer!"
-    time.sleep(5.0)
+    not_settled = True
+    elapsed_time = 0
+    while not_settled and elapsed_time < 180:
+        elapsed_time += 2
+        time.sleep(2)
+        is_settled = cosmos_api.is_transaction_settled(tx_digest)
+        not_settled = not is_settled
     is_settled = cosmos_api.is_transaction_settled(tx_digest)
     assert is_settled, "Failed to complete tx!"
     # TODO remove requirement for "" tx nonce stub

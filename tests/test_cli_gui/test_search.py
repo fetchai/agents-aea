@@ -20,6 +20,7 @@
 import json
 import unittest.mock
 
+import pytest
 
 from tests.common.utils import run_in_root_dir
 
@@ -131,6 +132,7 @@ def test_list_skills():
     _test_search_items_with_query("skill", "test")
 
 
+@pytest.mark.unstable
 @run_in_root_dir
 def test_real_search():
     """Call at least one function that actually calls call_aea_async."""
@@ -142,7 +144,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 11, data
+    assert len(data) == 12, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -176,6 +178,12 @@ def test_real_search():
     assert (
         data[i]["description"]
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/p2p_libp2p:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."
     )
     i += 1
     assert data[i]["id"] == "fetchai/p2p_noise:0.2.0"

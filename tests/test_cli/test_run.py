@@ -269,7 +269,7 @@ def test_run_unknown_private_key():
 
     find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-        fetchai-not: fet_private_key.txt"""
+        fetchai_not: fet_private_key.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -289,7 +289,7 @@ def test_run_unknown_private_key():
         standalone_mode=False,
     )
 
-    s = "Unsupported identifier in private key paths."
+    s = "Crypto not registered with id 'fetchai_not'."
     assert result.exception.message == s
 
     os.chdir(cwd)

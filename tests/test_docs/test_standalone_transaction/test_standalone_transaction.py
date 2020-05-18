@@ -79,7 +79,7 @@ class TestStandaloneTransaction(BaseAEATestCase):
     #     """Run the transaction from the file."""
     #     try:
     #         with patch(
-    #             "aea.crypto.helpers._try_generate_testnet_wealth", return_value=Mock()
+    #             "aea.crypto.helpers.try_generate_testnet_wealth", return_value=Mock()
     #         ):
     #             with patch(
     #                 "aea.crypto.fetchai.FetchAIApi.send_transaction",
