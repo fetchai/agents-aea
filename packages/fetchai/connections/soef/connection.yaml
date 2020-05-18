@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmNaTUZFsC84TdQhUU9L6V8MEtT7kVwvF4xGE9QS1vubZE
+  connection.py: QmTn2iLpiAkPY5PSHqKUWZ2jnsjhjUv3P5AdiCkGXPr5xH
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/fipa:0.1.0
@@ -16,12 +16,13 @@ class_name: SOEFConnection
 config:
   oef_addr: ${OEF_ADDR:127.0.0.1}
   oef_port: ${OEF_PORT:10000}
-  soef_addr: 109.74.197.82
+  soef_addr: soef.fetch.ai
   soef_port: 9002
 excluded_protocols:
 - fetchai/gym:0.1.0
 restricted_to_protocols: []
 dependencies:
   colorlog: {}
+  defusedxml: {}
   oef:
     version: ==0.8.1

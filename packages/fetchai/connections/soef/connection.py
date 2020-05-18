@@ -22,9 +22,10 @@
 import asyncio
 import logging
 import pickle  # nosec
-import xml.etree.ElementTree as ET
 from asyncio import AbstractEventLoop, CancelledError
 from typing import Dict, List, Optional, Set, Tuple, cast
+
+from defusedxml import ElementTree as ET
 
 import oef
 from oef.agents import OEFAgent
@@ -792,7 +793,7 @@ class SOEFChannel:
             root = ET.fromstring(response.text)
             logger.debug("Root tag: {}".format(root.tag))
             unique_page_address = ""
-            unique_token = ""
+            unique_token = ""  # nosec
             for child in root:
                 logger.debug(
                     "Child tag={}, child attrib={}, child text={}".format(
@@ -1073,7 +1074,7 @@ class SOEFConnection(Connection):
         oef_addr: str,
         oef_port: int = 10000,
         soef_addr: str = "127.0.0.1",
-        soef_port: int = 10000,
+        soef_port: int = 10001,
         **kwargs
     ):
         """
