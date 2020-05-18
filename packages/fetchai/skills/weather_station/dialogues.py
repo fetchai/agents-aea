@@ -26,8 +26,8 @@ This module contains the classes required for dialogue management.
 
 from typing import Dict, Optional
 
-from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.skills.base import Model

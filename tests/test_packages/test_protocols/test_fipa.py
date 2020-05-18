@@ -343,7 +343,7 @@ class TestDialogues:
         result = self.buyer_dialogues.create_self_initiated(
             dialogue_starter_addr=self.buyer_addr,
             dialogue_opponent_addr=self.seller_addr,
-            role=FipaDialogue.AgentRole.SELLER
+            role=FipaDialogue.AgentRole.SELLER,
         )
         assert isinstance(result, FipaDialogue)
         assert result.role == FipaDialogue.AgentRole.SELLER, "The role must be seller."
@@ -649,4 +649,3 @@ class TestDialogues:
 
         print(buyer_dialogue)
         print(seller_dialogue)
-

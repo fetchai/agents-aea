@@ -26,7 +26,6 @@ This module contains the classes required for dialogue management.
 """
 
 import itertools
-
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, cast
@@ -142,7 +141,7 @@ class Dialogue(ABC):
     STARTING_TARGET = 0
 
     class Role(Enum):
-        """This class defines the agent's role in the dialogue."""
+        """This class defines the agent's role in a dialogue."""
 
         def __str__(self):
             """Get the string representation."""
@@ -160,7 +159,7 @@ class Dialogue(ABC):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param role: the role of the agent in this dialogue
+        :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
@@ -185,15 +184,6 @@ class Dialogue(ABC):
         return self._dialogue_label
 
     @property
-    def is_self_initiated(self) -> bool:
-        """
-        Check whether the agent initiated the dialogue.
-
-        :return: True if the agent initiated the dialogue, False otherwise
-        """
-        return self._is_self_initiated
-
-    @property
     def role(self) -> "Role":
         """
         Get the agent's role in the dialogue.
@@ -212,15 +202,73 @@ class Dialogue(ABC):
         """
         self._role = role
 
-    @staticmethod
-    @abstractmethod
-    def role_from_first_message(message: Message) -> "Role":
+    @property
+    def is_self_initiated(self) -> bool:
         """
-        Infer the role of the agent from an incoming/outgoing first message
+        Check whether the agent initiated the dialogue.
 
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
+        :return: True if the agent initiated the dialogue, False otherwise
         """
+        return self._is_self_initiated
+
+    @property
+    def last_incoming_message(self) -> Optional[Message]:
+        """
+        Get the last incoming message.
+
+        :return: the last incoming message if it exists, None otherwise
+        """
+        return self._incoming_messages[-1] if len(self._incoming_messages) > 0 else None
+
+    @property
+    def last_outgoing_message(self) -> Optional[Message]:
+        """
+        Get the last outgoing message.
+
+        :return: the last outgoing message if it exists, None otherwise
+        """
+        return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """
+        Get the last message.
+
+        :return: the last message if it exists, None otherwise
+        """
+        if (
+            self.last_incoming_message is not None
+            and self.last_outgoing_message is not None
+        ):
+            last_incoming_message_id = cast(
+                int, self.last_incoming_message.get("message_id")
+            )
+            last_outgoing_message_id = cast(
+                int, self.last_outgoing_message.get("message_id")
+            )
+            return (
+                self.last_outgoing_message
+                if last_outgoing_message_id > last_incoming_message_id
+                else self.last_incoming_message
+            )
+        elif (
+            self.last_incoming_message is not None
+            and self.last_outgoing_message is None
+        ):
+            last_incoming_message_id = cast(
+                int, self.last_incoming_message.get("message_id")
+            )
+            return self.last_incoming_message if last_incoming_message_id == 1 else None
+        elif (
+            self.last_incoming_message is None
+            and self.last_outgoing_message is not None
+        ):
+            last_outgoing_message_id = cast(
+                int, self.last_outgoing_message.get("message_id")
+            )
+            return self.last_outgoing_message if last_outgoing_message_id == 1 else None
+        else:
+            return None
 
     def is_empty(self) -> bool:
         """
@@ -229,32 +277,6 @@ class Dialogue(ABC):
         :return: True if empty, False otherwise
         """
         return len(self._outgoing_messages) == 0 and len(self._incoming_messages) == 0
-
-    @property
-    def last_incoming_message(self) -> Optional[Message]:
-        """Get the last incoming message."""
-        return self._incoming_messages[-1] if len(self._incoming_messages) > 0 else None
-
-    @property
-    def last_outgoing_message(self) -> Optional[Message]:
-        """Get the last outgoing message."""
-        return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
-
-    def last_message(self) -> Optional[Message]:
-        """Get the last outgoing message."""
-        if self.last_incoming_message is not None and self.last_outgoing_message is not None:
-            last_incoming_message_id = cast(int, self.last_incoming_message.get("message_id"))
-            last_outgoing_message_id = cast(int, self.last_outgoing_message.get("message_id"))
-            return self.last_outgoing_message if last_outgoing_message_id > last_incoming_message_id else self.last_incoming_message
-        elif self.last_incoming_message is not None and self.last_outgoing_message is None:
-            last_incoming_message_id = cast(int, self.last_incoming_message.get("message_id"))
-            return self.last_incoming_message if last_incoming_message_id == 1 else None
-        elif self.last_incoming_message is None and self.last_outgoing_message is not None:
-            last_outgoing_message_id = cast(int, self.last_outgoing_message.get("message_id"))
-            return self.last_outgoing_message if last_outgoing_message_id == 1 else None
-        else:
-            return None
-
 
     def outgoing_extend(self, message: "Message") -> None:
         """
@@ -325,20 +347,49 @@ class Dialogue(ABC):
         :return: True if yes, False otherwise.
         """
 
+    @staticmethod
+    @abstractmethod
+    def role_from_first_message(message: Message) -> "Role":
+        """
+        Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+
     def __str__(self) -> str:
-        """Get the string representation."""
-        rep = "\n============="
-        rep += "\nDialogue Label: " + str(self.dialogue_label) + "\n"
+        """
+        Get the string representation.
+
+        :return: The string representation of the dialogue
+        """
+        rep = "Dialogue Label: " + str(self.dialogue_label) + "\n"
 
         if self.is_self_initiated:
-            all_messages = [x for x in itertools.chain(*itertools.zip_longest(self._outgoing_messages, self._incoming_messages)) if x is not None]
+            all_messages = [
+                msg
+                for msg in itertools.chain(
+                    *itertools.zip_longest(
+                        self._outgoing_messages, self._incoming_messages
+                    )
+                )
+                if msg is not None
+            ]
         else:
-            all_messages = [x for x in itertools.chain(*itertools.zip_longest(self._incoming_messages, self._outgoing_messages)) if x is not None]
+            all_messages = [
+                msg
+                for msg in itertools.chain(
+                    *itertools.zip_longest(
+                        self._incoming_messages, self._outgoing_messages
+                    )
+                )
+                if msg is not None
+            ]
 
         for msg in all_messages:
             rep += str(msg.get("performative")) + "( )\n"
 
-        rep += "=============\n"
+        rep = rep[:-1]
         return rep
 
 
@@ -371,18 +422,18 @@ class Dialogues:
         """
         Retrieve the dialogue 'message' belongs to
 
-        :param message: the agent message
+        :param message: a message
         :return: the dialogue if such a dialogue is found, None otherwise
         """
 
     @abstractmethod
-    def update(self, message: Message,) -> Optional[Dialogue]:
+    def update(self, message: Message) -> Optional[Dialogue]:
         """
         Update the state of dialogues with a new message.
 
         If the message is for a new dialogue, a new dialogue is created with 'message' as its first message and returned.
         If the message is addressed to an existing dialogue, the dialogue is retrieved, extended with this message and returned.
-        If there are any errors, e.g. the message dialogue reference does not exists, the message is invalid w.r.t. the dialogue, return None.
+        If there are any errors, e.g. the message dialogue reference does not exists or the message is invalid w.r.t. the dialogue, return None.
 
         :param message: a new message
         :return: the new or existing dialogue the message is intended for, or None in case of any errors.
@@ -390,7 +441,7 @@ class Dialogues:
 
     def _next_dialogue_nonce(self) -> int:
         """
-        Increment the nonce and returns it.
+        Increment the nonce and return it.
 
         :return: the next nonce
         """
@@ -398,4 +449,9 @@ class Dialogues:
         return self._dialogue_nonce
 
     def new_self_initiated_dialogue_reference(self) -> Tuple[str, str]:
-        return str(self._dialogue_nonce+1), ""
+        """
+        Return a dialogue label for a new self initiated dialogue
+
+        :return: the next nonce
+        """
+        return str(self._dialogue_nonce + 1), ""
