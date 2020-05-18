@@ -506,18 +506,14 @@ class IsFingerprintCorrectTestCase(TestCase):
         item_config = mock.Mock()
         item_config.fingerprint = {"correct": "fingerprint"}
         item_config.fingerprint_ignore_patterns = []
-        _is_fingerprint_correct("package_path", item_config)
+        result = _is_fingerprint_correct("package_path", item_config)
+        self.assertTrue(result)
 
-    @mock.patch("aea.cli.add.rmtree")
-    def test__is_fingerprint_correct_negative(
-        self, rmtree_mock, _compute_fingerprint_mock
-    ):
+    def test__is_fingerprint_correct_negative(self, *mocks):
         """Test _is_fingerprint_correct method for negative result."""
         item_config = mock.Mock()
         item_config.fingerprint = {"incorrect": "fingerprint"}
         item_config.fingerprint_ignore_patterns = []
         package_path = "package_dir"
-        with self.assertRaises(ClickException):
-            _is_fingerprint_correct(package_path, item_config)
-
-        rmtree_mock.assert_called_once_with(package_path)
+        result = _is_fingerprint_correct(package_path, item_config)
+        self.assertFalse(result)
