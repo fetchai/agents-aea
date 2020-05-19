@@ -24,6 +24,8 @@ from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
 from aea.protocols.base import Message
 
+# from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
+
 
 Description = BaseDescription
 
@@ -31,4 +33,23 @@ Query = BaseQuery
 
 
 def role_from_first_message(message: Message):
-    pass
+    """
+    Infer the role of the agent from an incoming or outgoing first message
+
+    :param message: an incoming/outgoing first message
+    :return: the agent's role
+    """
+    raise NotImplementedError
+    # return FipaDialogue.AgentRole.BUYER
+
+
+def is_valid(message: Message) -> bool:
+    """
+    Check whether 'message' is a valid next message in the dialogue.
+
+    These rules capture specific constraints designed for dialogues which are instance of a concrete sub-class of this class.
+
+    :param message: the message to be validated
+    :return: True if valid, False otherwise.
+    """
+    return True

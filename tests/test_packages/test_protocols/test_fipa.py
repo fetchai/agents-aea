@@ -585,3 +585,40 @@ class TestDialogues:
         seller_dialogue.outgoing_extend(accept_msg)
         # Adds the message to the seller incoming message list.
         client_dialogue.incoming_extend(accept_msg)
+
+    def test_update(self):
+        pytest.skip("This is a temporary test environment.")
+        cfp_msg = FipaMessage(
+            message_id=1,
+            dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
+            target=0,
+            performative=FipaMessage.Performative.CFP,
+            query=Query([Constraint("something", ConstraintType(">", 1))]),
+        )
+        cfp_msg.counterparty = self.seller_addr
+
+        buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
+
+        cfp_msg.is_incoming = True
+        cfp_msg.counterparty = self.buyer_addr
+        seller_dialogue = self.seller_dialogues.update(cfp_msg)
+
+        print(buyer_dialogue)
+        print(seller_dialogue)
+
+        proposal_msg = FipaMessage(
+            message_id=2,
+            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
+            target=1,
+            performative=FipaMessage.Performative.PROPOSE,
+            proposal=Description({"foo1": 1, "bar1": 2}),
+        )
+        proposal_msg.counterparty = self.buyer_addr
+
+        self.seller_dialogues.update(proposal_msg)
+        proposal_msg.counterparty = self.seller_addr
+        proposal_msg.is_incoming = True
+        self.buyer_dialogues.update(proposal_msg)
+
+        print(buyer_dialogue)
+        print(seller_dialogue)

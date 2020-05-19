@@ -134,16 +134,6 @@ class FIPAHandler(Handler):
             )
             dialogue.weather_data = weather_data
             dialogue.proposal = proposal
-            # self.context.logger.info(
-            #     "dialogue type: {}".format(
-            #         type(dialogue)
-            #     )
-            # )
-            # self.context.logger.info(
-            #     "dialogue.proposal: {}".format(
-            #         dialogue.proposal
-            #     )
-            # )
             self.context.logger.info(
                 "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
                     self.context.agent_name, proposal.values, msg.counterparty[-5:],
@@ -156,9 +146,7 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            # proposal_msg.counterparty = msg.counterparty
-            # dialogues.update(proposal_msg)
-            dialogue.outgoing_safe_extend(proposal_msg)
+            dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -177,9 +165,7 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            # decline_msg.counterparty = msg.counterparty
-            # dialogues.update(decline_msg)
-            dialogue.outgoing_safe_extend(decline_msg)
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
