@@ -24,7 +24,7 @@ from collections import defaultdict
 from typing import Dict, Set, cast
 
 from packaging.specifiers import Specifier, SpecifierSet
-from packaging.version import parse
+from packaging.version import InvalidVersion, Version
 
 
 def and_(s1: SpecifierSet, s2: SpecifierSet):
@@ -73,14 +73,26 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     >>> _is_satisfiable(SpecifierSet("<=1.0,>1.0"))
     False
 
+    We ignore legacy versions:
+
+    >>> _is_satisfiable(SpecifierSet("==1.0,==1.*"))
+    True
+
     :param specifier_set: the specifier set.
     :return: False if the constraints are surely non-satisfiable, True if we don't know.
     """
     # group single specifiers by operator
-    all_specifiers = list(specifier_set)
+    all_specifiers = []
     operator_to_specifiers: Dict[str, Set[Specifier]] = defaultdict(lambda: set())
-    for specifier in all_specifiers:
+    for specifier in list(specifier_set):
         specifier = cast(Specifier, specifier)
+        try:
+            # if we can't parse the version number, ignore that specifier.
+            # Even if it follows a legacy version format (e.g. "2.*")
+            Version(specifier.version)
+        except InvalidVersion:
+            continue
+        all_specifiers.append(specifier)
         operator_to_specifiers[specifier.operator].add(specifier)
 
     # if there are two different "==" specifier, return False
@@ -98,7 +110,7 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     less_than_strict_specs = operator_to_specifiers["<"]
     less_than_equal_specs = operator_to_specifiers["<="]
     less_than_specs = set.union(less_than_equal_specs, less_than_strict_specs)
-    sorted_less_than_specs = sorted(less_than_specs, key=lambda x: parse(x.version))
+    sorted_less_than_specs = sorted(less_than_specs, key=lambda x: Version(x.version))
     lowest_less_than = (
         sorted_less_than_specs[0] if len(sorted_less_than_specs) > 0 else None
     )
@@ -109,7 +121,7 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     greater_than_equal_specs = operator_to_specifiers[">="]
     greater_than_specs = set.union(greater_than_strict_specs, greater_than_equal_specs)
     sorted_greater_than_specs = sorted(
-        greater_than_specs, key=lambda x: parse(x.version)
+        greater_than_specs, key=lambda x: Version(x.version)
     )
     greatest_greater_than = (
         sorted_greater_than_specs[-1] if len(sorted_greater_than_specs) > 0 else None
@@ -148,8 +160,8 @@ def _handle_range_constraints(
     :param greatest_greater_than: the greater than constraint.
     :return: False if we are sure the two constraints are not satisfiable, True if we don't know.
     """
-    version_less_than = parse(lowest_less_than.version)
-    version_greater_than = parse(greatest_greater_than.version)
+    version_less_than = Version(lowest_less_than.version)
+    version_greater_than = Version(greatest_greater_than.version)
     if version_less_than < version_greater_than:
         return False
     elif version_greater_than == version_less_than:
