@@ -301,13 +301,3 @@ class AEA(Agent):
         self.task_manager.stop()
         self.resources.teardown()
         ExecTimeoutThreadGuard.stop()
-
-    def _run_main_loop(self) -> None:
-        """
-        Run the main loop of the agent.
-
-        :return: None
-        """
-        logger.info("[{}]: Start processing messages...".format(self.name))
-        self._main_loop.start()  # type: ignore
-        logger.debug("[{}]: Exiting main loop...".format(self.name))
