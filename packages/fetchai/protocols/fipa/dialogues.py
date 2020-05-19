@@ -25,7 +25,7 @@ This module contains the classes required for FIPA dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Dict, FrozenSet, List, Optional, Union, cast
+from typing import Dict, FrozenSet, Optional, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
@@ -33,32 +33,6 @@ from aea.protocols.base import Message
 
 from packages.fetchai.protocols.fipa.custom_types import is_valid
 from packages.fetchai.protocols.fipa.message import FipaMessage
-
-VALID_PREVIOUS_PERFORMATIVES = {
-    FipaMessage.Performative.CFP: [None],
-    FipaMessage.Performative.PROPOSE: [FipaMessage.Performative.CFP],
-    FipaMessage.Performative.ACCEPT: [FipaMessage.Performative.PROPOSE],
-    FipaMessage.Performative.ACCEPT_W_INFORM: [FipaMessage.Performative.PROPOSE],
-    FipaMessage.Performative.MATCH_ACCEPT: [
-        FipaMessage.Performative.ACCEPT,
-        FipaMessage.Performative.ACCEPT_W_INFORM,
-    ],
-    FipaMessage.Performative.MATCH_ACCEPT_W_INFORM: [
-        FipaMessage.Performative.ACCEPT,
-        FipaMessage.Performative.ACCEPT_W_INFORM,
-    ],
-    FipaMessage.Performative.INFORM: [
-        FipaMessage.Performative.MATCH_ACCEPT,
-        FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-        FipaMessage.Performative.INFORM,
-    ],
-    FipaMessage.Performative.DECLINE: [
-        FipaMessage.Performative.CFP,
-        FipaMessage.Performative.PROPOSE,
-        FipaMessage.Performative.ACCEPT,
-        FipaMessage.Performative.ACCEPT_W_INFORM,
-    ],
-}  # type: Dict[FipaMessage.Performative, List[Union[None, FipaMessage.Performative]]]
 
 REPLIES = {
     FipaMessage.Performative.CFP: frozenset(
