@@ -28,6 +28,7 @@ from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 from ...conftest import FUNDED_ETH_PRIVATE_KEY_1
 
 
+@pytest.mark.unstable
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 

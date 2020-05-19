@@ -183,7 +183,10 @@ class BaseAEATestCase(ABC):
 
         :return: subprocess object.
         """
-        return cls._run_python_subprocess(*args, cwd=cwd)
+        process = cls._run_python_subprocess(*args, cwd=cwd)
+        cls._start_output_read_thread(process)
+        cls._start_error_read_thread(process)
+        return process
 
     @classmethod
     def start_thread(cls, target: Callable, **kwargs) -> None:

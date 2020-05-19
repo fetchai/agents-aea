@@ -21,6 +21,7 @@
 
 import logging
 import os
+import sys
 from typing import cast
 
 from aea import AEA_DIR
@@ -42,7 +43,7 @@ PORT = 10000
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
@@ -95,8 +96,6 @@ def run():
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
-    strategy.max_buyer_tx_fee = 100
-    strategy.max_row_price = 40
 
     for skill in [error_skill, weather_skill]:
         resources.add_skill(skill)
