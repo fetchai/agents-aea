@@ -107,7 +107,7 @@ class Agent(ABC):
         self._timeout = timeout
 
         self._tick = 0
-        self._main_loop: BaseAgentLoop = None  # type: ignore
+        self._main_loop: Optional[BaseAgentLoop] = None
 
         self.is_debug = is_debug
 
@@ -228,7 +228,7 @@ class Agent(ABC):
 
     def _start_setup(self) -> None:
         """
-        Setup Agent on start:
+        Set up Agent on start:
         - connect Multiplexer
         - call agent.setup
         - set liveness to started
@@ -250,6 +250,7 @@ class Agent(ABC):
         :return: None
         """
         logger.info("[{}]: Start processing messages...".format(self.name))
+        assert self._main_loop is not None, "Agent loop was not set"
         self._main_loop.start()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
 
@@ -266,7 +267,7 @@ class Agent(ABC):
         :return: None
         """
         self.liveness.stop()
-        if self._main_loop:
+        if self._main_loop is not None:
             self._main_loop.stop()
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()

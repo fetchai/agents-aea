@@ -93,7 +93,7 @@ async def test_async_state():
 
     task = create_task(async_state.wait(target_state))
     await asyncio.sleep(0)
-    async_state.set(target_state)
+    async_state.state = target_state
     assert await asyncio.wait_for(task, timeout=1) == (initial, target_state)
 
 

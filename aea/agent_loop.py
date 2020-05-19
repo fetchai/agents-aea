@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
@@ -27,6 +28,7 @@ from asyncio.futures import Future
 from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
+from aea.exceptions import AEAException
 from aea.mail.base import InBox
 from aea.skills.base import Behaviour
 
@@ -70,7 +72,8 @@ class AsyncState:
         """Return current state."""
         return self._state
 
-    def set(self, state: Any) -> None:
+    @state.setter
+    def state(self, state: Any) -> None:
         """Set state."""
         if self._state == state:
             return
@@ -190,7 +193,7 @@ class BaseAgentLoop(ABC):
         raise NotImplementedError
 
 
-class AgentLoopException(Exception):
+class AgentLoopException(AEAException):
     """Exception for agent loop runtime errors."""
 
 
@@ -223,12 +226,12 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def start(self):
         """Start agent loop."""
-        self._state.set("started")
+        self._state.state = "started"
         self._loop.run_until_complete(self._run())
 
     def stop(self):
         """Stop agent loop."""
-        self._state.set("stopping")
+        self._state.state = "stopping"
 
     def _behaviour_exception_callback(self, fn: Callable, exc: Exception) -> None:
         """
@@ -241,7 +244,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         """
         logger.exception(f"Exception: `{exc}` occured during `{fn}` processing")
         self._exceptions.append(exc)
-        self._state.set("error")
+        self._state.state = "error"
 
     def _register_behaviour(self, behaviour: Behaviour) -> None:
         """
@@ -325,7 +328,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             # check exception raised during run
             raise AgentLoopException(self._exceptions)
 
-        self._state.set("stopped")
+        self._state.state = "stopped"
 
     def _create_processing_tasks(self) -> List[Task]:
         """
