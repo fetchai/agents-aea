@@ -113,7 +113,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name, strategy.ledger_id
                     )
                 )
-                self.context.is_active = False
 
         self._register_service()
 
@@ -248,6 +247,7 @@ In the context of our thermometer use-case, the `my_thermometer` AEA is the sell
 Let us now implement a handler to deal with the incoming messages. Open the `handlers.py` file (`my_thermometer/skills/thermometer/handlers.py`) and add the following code:
 
 ``` python
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -535,14 +535,22 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
             )
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
-            is_valid = self.context.ledger_apis.is_tx_valid(
-                ledger_id,
-                tx_digest,
-                self.context.agent_addresses[ledger_id],
-                msg.counterparty,
-                cast(str, proposal.values.get("tx_nonce")),
-                cast(int, proposal.values.get("price")),
-            )
+            not_settled = True
+            time_elapsed = 0
+            # TODO: fix blocking code; move into behaviour!
+            while not_settled and time_elapsed < 60:
+                is_valid = self.context.ledger_apis.is_tx_valid(
+                    ledger_id,
+                    tx_digest,
+                    self.context.agent_addresses[ledger_id],
+                    msg.counterparty,
+                    cast(str, proposal.values.get("tx_nonce")),
+                    cast(int, proposal.values.get("price")),
+                )
+                not_settled = not is_valid
+                if not_settled:
+                    time.sleep(2)
+                    time_elapsed += 2
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
@@ -1011,7 +1019,7 @@ This script contains the logic to negotiate with another AEA based on the strate
 import pprint
 from typing import Any, Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
@@ -1222,7 +1230,7 @@ The above code terminates each dialogue with the specific aea and stores the ste
             proposal = cast(Description, dialogue.proposal)
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=[PublicId("fetchai", "thermometer_client", "0.1.0")],
+                skill_callback_ids=[self.context.skill_id],
                 tx_id="transaction0",
                 tx_sender_addr=self.context.agent_addresses[
                     proposal.values["ledger_id"]
@@ -1236,7 +1244,7 @@ The above code terminates each dialogue with the specific aea and stores the ste
                 tx_quantities_by_good_id={},
                 ledger_id=proposal.values["ledger_id"],
                 info={"dialogue_label": dialogue.dialogue_label.json},
-                tx_nonce=proposal.values.get("tx_nonce"),
+                tx_nonce=proposal.values["tx_nonce"],
             )
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             self.context.logger.info(

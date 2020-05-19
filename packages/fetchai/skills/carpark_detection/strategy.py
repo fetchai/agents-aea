@@ -22,7 +22,7 @@
 import os
 import time
 import uuid
-from typing import Any, Dict, List, Tuple, cast
+from typing import Dict, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
@@ -149,7 +149,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
@@ -189,11 +189,12 @@ class Strategy(Model):
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
                 "max_spaces": max_spaces,
-                "tx_nonce": tx_nonce if tx_nonce is not None else "",
+                "tx_nonce": tx_nonce,
             }
         )
 
         data[0]["price_fet"] = self.data_price
         data[0]["message_type"] = "car_park_data"
+        data_dict = {str(key): str(value) for key, value in data[0].items()}
 
-        return proposal, data[0]
+        return proposal, data_dict

@@ -42,7 +42,7 @@ models:
     args:
       currency_id: FET
       dataset_id: fmnist
-      is_ledger_tx: false
+      is_ledger_tx: true
       ledger_id: fetchai
       max_buyer_tx_fee: 20
       max_unit_price: 70
