@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
@@ -26,7 +25,19 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from enum import Enum
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from aea.exceptions import AEAException
 from aea.mail.base import InBox
@@ -48,10 +59,10 @@ if False:  # MYPY compatible for types definitions
 
 
 def ensure_list(value: Any) -> List:
-    """Return [value] or value if value is a list."""
-    if not isinstance(value, list):
+    """Return [value] or list(value) if value is a sequence."""
+    if not isinstance(value, (list, tuple)):
         value = [value]
-    return value
+    return list(value)
 
 
 class AsyncState:
@@ -88,7 +99,7 @@ class AsyncState:
                     watcher.set_result, (self._state, state)
                 )
 
-    async def wait(self, state_or_states: Union[Any, List[Any]]) -> Tuple[Any, Any]:
+    async def wait(self, state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]:
         """Wait state to be set.
 
         :params state_or_states: state or list of states.
@@ -116,7 +127,7 @@ class PeriodicCaller:
         callback: Callable,
         period: float,
         start_at: Optional[datetime.datetime] = None,
-        exception_callback: Optional[Callable] = None,
+        exception_callback: Optional[Callable[[Callable, Exception], None]] = None,
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
@@ -136,7 +147,7 @@ class PeriodicCaller:
         self._exception_callback = exception_callback
 
     def _callback(self) -> None:
-        """Call on each schduled call."""
+        """Call on each scheduled call."""
         self._schedule_call()
         try:
             self._periodic_callable()
@@ -147,9 +158,6 @@ class PeriodicCaller:
 
     def _schedule_call(self) -> None:
         """Set schedule for call."""
-        if self._period is None:
-            return
-
         if self._timerhandle is None:
             ts = time.mktime(self._start_at.timetuple())
             delay = max(0, ts - time.time())
@@ -158,7 +166,7 @@ class PeriodicCaller:
             self._timerhandle = self._loop.call_later(self._period, self._callback)
 
     def start(self) -> None:
-        """Activate periodi calls."""
+        """Activate period calls."""
         if self._timerhandle:
             return
         self._schedule_call()
@@ -197,6 +205,16 @@ class AgentLoopException(AEAException):
     """Exception for agent loop runtime errors."""
 
 
+class AgentLoopStates(Enum):
+    """Internal agent loop states."""
+
+    initial = None
+    started = "started"
+    stopped = "stopped"
+    stopping = "stopping"
+    error = "error"
+
+
 class AsyncAgentLoop(BaseAgentLoop):
     """Asyncio based agent loop suitable only for AEA."""
 
@@ -226,12 +244,12 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def start(self):
         """Start agent loop."""
-        self._state.state = "started"
+        self._state.state = AgentLoopStates.started
         self._loop.run_until_complete(self._run())
 
     def stop(self):
         """Stop agent loop."""
-        self._state.state = "stopping"
+        self._state.state = AgentLoopStates.stopping
 
     def _behaviour_exception_callback(self, fn: Callable, exc: Exception) -> None:
         """
@@ -244,7 +262,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         """
         logger.exception(f"Exception: `{exc}` occured during `{fn}` processing")
         self._exceptions.append(exc)
-        self._state.state = "error"
+        self._state.state = AgentLoopStates.error
 
     def _register_behaviour(self, behaviour: Behaviour) -> None:
         """
@@ -294,7 +312,9 @@ class AsyncAgentLoop(BaseAgentLoop):
     def _create_tasks(self):
         """Create tasks to execute and wait."""
         tasks = self._create_processing_tasks()
-        stopping_task = create_task(self._state.wait(["stopping", "error"]))
+        stopping_task = create_task(
+            self._state.wait([AgentLoopStates.stopping, AgentLoopStates.error])
+        )
 
         tasks.append(stopping_task)
         return tasks
@@ -328,7 +348,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             # check exception raised during run
             raise AgentLoopException(self._exceptions)
 
-        self._state.state = "stopped"
+        self._state.state = AgentLoopStates.stopped
 
     def _create_processing_tasks(self) -> List[Task]:
         """
@@ -346,7 +366,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     @property
     def is_running(self) -> bool:
         """Get running state of the loop."""
-        return self._state.state == "started"
+        return self._state.state == AgentLoopStates.started
 
     async def _task_process_inbox(self) -> None:
         """Process incoming messages."""
