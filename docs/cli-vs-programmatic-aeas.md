@@ -62,6 +62,7 @@ Create a new python file and name it `weather_client.py` and add the following c
 ``` python
 import logging
 import os
+import sys
 from typing import cast
 
 from aea import AEA_DIR

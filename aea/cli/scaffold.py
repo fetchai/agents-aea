@@ -86,9 +86,9 @@ def skill(click_context, skill_name: str):
 
 @scaffold.command()
 @click.pass_context
-def decision_maker(click_context):
+def decision_maker_handler(click_context):
     """Add a decision maker scaffolding to the configuration file and agent."""
-    _scaffold_dm(click_context)
+    _scaffold_dm_handler(click_context)
 
 
 @clean_after
@@ -165,15 +165,17 @@ def _scaffold_item(click_context, item_type, item_name):
         raise click.ClickException(str(e))
 
 
-def _scaffold_dm(click_context):
-    """Add a scaffolded decision maker to the project and configuration."""
+def _scaffold_dm_handler(click_context):
+    """Add a scaffolded decision maker handler to the project and configuration."""
 
     ctx = cast(Context, click_context.obj)
-    existing_dm_path = getattr(ctx.agent_config, "decision_maker_path")
+    existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
 
     # check if we already have a decision maker in the project
-    if existing_dm_path is not None:
-        raise click.ClickException("A decision maker file already exists. Aborting...")
+    if existing_dm_handler != {}:
+        raise click.ClickException(
+            "A decision maker handler specification already exists. Aborting..."
+        )
 
     try:
         agent_name = ctx.agent_config.agent_name
@@ -183,6 +185,8 @@ def _scaffold_dm(click_context):
 
         # create the file name
         dest = Path("decision_maker.py")
+        dotted_path = ".decision_maker"
+        class_name = "DecisonMakerHandler"
 
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
@@ -193,10 +197,11 @@ def _scaffold_dm(click_context):
         logger.debug(
             "Registering the decision_maker into {}".format(DEFAULT_AEA_CONFIG_FILE)
         )
-        import pdb
-
-        pdb.set_trace()
-        ctx.agent_config.decision_maker_path = str(dest)
+        ctx.agent_config.decision_maker_handler = {
+            "dotted_path": str(dotted_path),
+            "file_path": str(os.path.join(".", dest)),
+            "class_name": class_name,
+        }
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )
