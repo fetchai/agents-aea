@@ -369,18 +369,18 @@ class Libp2pNode:
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[str]:
-        LIST_START = "MULTIADDRS_LIST_START" 
-        LIST_END   = "MULTIADDRS_LIST_END"
-        
+        LIST_START = "MULTIADDRS_LIST_START"
+        LIST_END = "MULTIADDRS_LIST_END"
+
         multiaddrs = []
-        
+
         lines = []
         with open(self.log_file, "r") as f:
             lines = f.readlines()
-        
+
         found = False
         for line in lines:
-            if  LIST_START in line:
+            if LIST_START in line:
                 found = True
                 multiaddrs = []
                 continue
@@ -388,10 +388,9 @@ class Libp2pNode:
                 elem = line.strip()
                 if elem != LIST_END:
                     multiaddrs.append(elem)
-                else :
+                else:
                     found = False
         return multiaddrs
-
 
     def stop(self) -> None:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
@@ -596,9 +595,8 @@ class P2PLibp2pConnection(Connection):
 
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
-
         return P2PLibp2pConnection(
-            address, # TOFIX(LR) need to generate signature as well
+            address,  # TOFIX(LR) need to generate signature as well
             key,
             uri,
             entry_peers_maddrs,
