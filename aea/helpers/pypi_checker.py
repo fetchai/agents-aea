@@ -41,8 +41,6 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     noticing that it doesn't mean that that version
     number with that package actually exists.
 
-    We currently deal with '==', ">", ">=", "<", "<=".
-
     >>> from packaging.specifiers import SpecifierSet
 
     The specifier set ">0.9, ==1.0" is satisfiable:
@@ -72,11 +70,29 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     True
     >>> _is_satisfiable(SpecifierSet("<=1.0,>1.0"))
     False
+    >>> _is_satisfiable(SpecifierSet("~=1.1,==2.0"))  # fails because of major number 2
+    False
+    >>> _is_satisfiable(SpecifierSet("~=1.1,==1.0"))  # fails because minor is 0
+    False
+    >>> _is_satisfiable(SpecifierSet("~=1.1,<=1.1"))  # satisfiable: "1.1"
+    True
+    >>> _is_satisfiable(SpecifierSet("~=1.1,<1.1"))
+    False
+    >>> _is_satisfiable(SpecifierSet("~=1.0,<1.0"))
+    False
+    >>> _is_satisfiable(SpecifierSet("~=1.1,==1.2"))
+    True
+    >>> _is_satisfiable(SpecifierSet("~=1.1,>1.2"))
+    True
 
     We ignore legacy versions:
 
     >>> _is_satisfiable(SpecifierSet("==1.0,==1.*"))
     True
+
+    For other details, please refer to PEP440:
+
+        https://www.python.org/dev/peps/pep-0440
 
     :param specifier_set: the specifier set.
     :return: False if the constraints are surely non-satisfiable, True if we don't know.
@@ -92,8 +108,24 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
             Version(specifier.version)
         except InvalidVersion:
             continue
-        all_specifiers.append(specifier)
-        operator_to_specifiers[specifier.operator].add(specifier)
+
+        # split specifier "~=<major.minor>" in two specifiers:
+        # - >= <major.minor>
+        # - < <major+1>
+        # TODO this is not the full story. we should check the version number
+        #   up to the last zero, which might be the micro number.
+        #   e.g. see last examples of https://www.python.org/dev/peps/pep-0440/#compatible-release
+        if specifier.operator == "~=":
+            spec_version = Version(specifier.version)
+            upper_major_version = Version(str(spec_version.major + 1))
+            spec_1 = Specifier(">=" + str(spec_version))
+            spec_2 = Specifier("<" + str(upper_major_version))
+            all_specifiers.extend([spec_1, spec_2])
+            operator_to_specifiers[spec_1.operator].add(spec_1)
+            operator_to_specifiers[spec_2.operator].add(spec_2)
+        else:
+            all_specifiers.append(specifier)
+            operator_to_specifiers[specifier.operator].add(specifier)
 
     # if there are two different "==" specifier, return False
     if len(operator_to_specifiers["=="]) >= 2:
