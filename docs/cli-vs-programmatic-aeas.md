@@ -62,8 +62,6 @@ Create a new python file and name it `weather_client.py` and add the following c
 ``` python
 import logging
 import os
-import time
-from threading import Thread
 from typing import cast
 
 from aea import AEA_DIR
@@ -144,19 +142,12 @@ def run():
     for skill in [error_skill, weather_skill]:
         resources.add_skill(skill)
 
-    # Set the AEA running in a different thread
     try:
         logger.info("STARTING AEA NOW!")
-        t = Thread(target=my_aea.start)
-        t.start()
-
-        # Let it run long enough to interact with the weather station
-        time.sleep(60)
-    finally:
-        # Shut down the AEA
+        my_aea.start()
+    except KeyboardInterrupt:
         logger.info("STOPPING AEA NOW!")
         my_aea.stop()
-        t.join()
 
 
 if __name__ == "__main__":

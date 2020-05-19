@@ -23,7 +23,6 @@ import os
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import (
     CUR_PATH,
@@ -59,7 +58,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
 
         weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        self.start_thread(target=run)
+        weather_client_process = self.start_subprocess(PY_FILE, cwd=ROOT_DIR)
 
         check_strings = (
             "updating weather station services on OEF service directory.",
@@ -71,11 +70,27 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "unregistering weather station services from OEF service directory.",
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings
+            weather_station_process, check_strings, is_terminating=False
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
+
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following weather data=",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
 
         assert (
             self.is_successfully_terminated()

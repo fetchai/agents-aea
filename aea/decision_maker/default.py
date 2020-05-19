@@ -736,7 +736,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 tx_message.counterparty_amount,
                 tx_message.fees,
                 info=tx_message.info,
-                tx_nonce=cast(str, tx_message.get("tx_nonce")),
+                tx_nonce=tx_message.tx_nonce,
             )
         return tx_digest
 

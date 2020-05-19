@@ -1,7 +1,8 @@
 agent_name: generic_seller
 author: fetchai
 version: 0.1.0
-description: The seller AEA sells the services specified in the `skill.yaml` file and delivers them upon payment to the buyer.
+description: The seller AEA sells the services specified in the `skill.yaml` file
+  and delivers them upon payment to the buyer.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint: {}

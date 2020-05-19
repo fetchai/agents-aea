@@ -333,7 +333,7 @@ class PublicId(JSONSerializable):
 
     def _process_version(self, version_like: PackageVersionLike) -> Tuple[Any, Any]:
         if isinstance(version_like, str):
-            return version_like, semver.parse_version_info(version_like)
+            return version_like, semver.VersionInfo.parse(version_like)
         elif isinstance(version_like, semver.VersionInfo):
             return str(version_like), version_like
         else:

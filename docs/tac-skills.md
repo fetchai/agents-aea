@@ -100,7 +100,7 @@ In a separate terminal, launch a local [OEF search and communication node](../oe
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
-Keep it running for all the following demos.
+Keep it running for the following demo.
 
 ## Demo instructions:
 
