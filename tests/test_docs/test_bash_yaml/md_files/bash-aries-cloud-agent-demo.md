@@ -32,7 +32,7 @@ aea config set --type int vendor.fetchai.skills.aries_alice.handlers.aries_demo_
 ``` bash
 aea add connection fetchai/http_client:0.2.0
 aea add connection fetchai/webhook:0.1.0
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8032
@@ -41,7 +41,7 @@ aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port
 aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webhooks/topic/{topic}/
 ```
 ``` bash
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 ``` bash
 aea fetch fetchai/aries_alice:0.1.0 
@@ -99,7 +99,7 @@ aea config set vendor.fetchai.skills.aries_faber.handlers.aries_demo_http.args.a
 ``` bash
 aea add connection fetchai/http_client:0.2.0
 aea add connection fetchai/webhook:0.1.0
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 ```
 ``` bash
 aea config set --type int vendor.fetchai.connections.webhook.config.webhook_port 8022

@@ -873,7 +873,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.2.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}
@@ -1664,7 +1664,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
+protocols: ['fetchai/fipa:0.2.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
 ledgers: ['fetchai']
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
@@ -1726,10 +1726,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea run --connections fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.3.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
@@ -1784,10 +1784,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea run --connections fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Ethereum testnet.
