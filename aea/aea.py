@@ -61,7 +61,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         is_debug: bool = False,
         max_reactions: int = 20,
-        decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_class: Type[
+            DecisionMakerHandler
+        ] = DefaultDecisionMakerHandler,
         **kwargs,
     ) -> None:
         """
@@ -92,11 +94,6 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
-        decision_maker_handler_class = (
-            DefaultDecisionMakerHandler
-            if decision_maker_handler_class is None
-            else decision_maker_handler_class
-        )
         decision_maker_handler = decision_maker_handler_class(
             identity=identity, wallet=wallet, ledger_apis=ledger_apis
         )

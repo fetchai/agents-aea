@@ -311,7 +311,6 @@ class AEABuilder:
         dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
         module = load_module(dotted_path, file_path)
         try:
-            import pdb; pdb.set_trace()
             _class = getattr(module, class_name)
             self._decision_maker_handler_class = _class
         except Exception as e:
@@ -922,13 +921,9 @@ class AEABuilder:
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
         if agent_configuration.decision_maker_handler != {}:
-            dotted_path_full = (
-                agent_configuration.decision_maker_handler["dotted_path"]
-                + ":"
-                + agent_configuration.decision_maker_handler["class_name"]
-            )
+            dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            self.set_decision_maker_handler(dotted_path_full, file_path)
+            self.set_decision_maker_handler(dotted_path, file_path)
 
         # load private keys
         for (

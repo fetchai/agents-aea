@@ -185,8 +185,7 @@ def _scaffold_dm_handler(click_context):
 
         # create the file name
         dest = Path("decision_maker.py")
-        dotted_path = ".decision_maker"
-        class_name = "DecisonMakerHandler"
+        dotted_path = ".decision_maker::DecisionMakerHandler"
 
         # copy the item package into the agent project.
         src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
@@ -200,7 +199,6 @@ def _scaffold_dm_handler(click_context):
         ctx.agent_config.decision_maker_handler = {
             "dotted_path": str(dotted_path),
             "file_path": str(os.path.join(".", dest)),
-            "class_name": class_name,
         }
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
