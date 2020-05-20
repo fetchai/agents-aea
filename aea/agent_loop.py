@@ -305,9 +305,8 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def _stop_all_behaviours(self) -> None:
         """Unregister periodic execution of all registered behaviours."""
-        for periodic_caller in self._behaviours_registry.values():
-            periodic_caller.stop()
-        self._behaviours_registry = {}
+        for behaviour in self._behaviours_registry.keys():
+            self._unregister_behaviour(behaviour)
 
     def _create_tasks(self):
         """Create tasks to execute and wait."""
