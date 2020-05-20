@@ -60,42 +60,6 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
     >>> is_satisfiable(s1)
     False
 
-    Other examples:
-
-    >>> is_satisfiable(SpecifierSet("<=1.0,>1.1, >0.9"))
-    False
-    >>> is_satisfiable(SpecifierSet("==1.0,!=1.0"))
-    False
-    >>> is_satisfiable(SpecifierSet("!=0.9,!=1.0"))
-    True
-    >>> is_satisfiable(SpecifierSet("<=1.0,>=1.0"))
-    True
-    >>> is_satisfiable(SpecifierSet("<=1.0,>1.0"))
-    False
-    >>> is_satisfiable(SpecifierSet("<1.0,<=1.0,>1.0"))
-    False
-    >>> is_satisfiable(SpecifierSet(">1.0,>=1.0,<1.0"))
-    False
-    >>> is_satisfiable(SpecifierSet("~=1.1,==2.0"))  # fails because of major number 2
-    False
-    >>> is_satisfiable(SpecifierSet("~=1.1,==1.0"))  # fails because minor is 0
-    False
-    >>> is_satisfiable(SpecifierSet("~=1.1,<=1.1"))  # satisfiable: "1.1"
-    True
-    >>> is_satisfiable(SpecifierSet("~=1.1,<1.1"))
-    False
-    >>> is_satisfiable(SpecifierSet("~=1.0,<1.0"))
-    False
-    >>> is_satisfiable(SpecifierSet("~=1.1,==1.2"))
-    True
-    >>> is_satisfiable(SpecifierSet("~=1.1,>1.2"))
-    True
-
-    We ignore legacy versions:
-
-    >>> is_satisfiable(SpecifierSet("==1.0,==1.*"))
-    True
-
     For other details, please refer to PEP440:
 
         https://www.python.org/dev/peps/pep-0440
@@ -159,7 +123,7 @@ def is_satisfiable(specifier_set: SpecifierSet) -> bool:
         sorted_less_than_specs[0] if len(sorted_less_than_specs) > 0 else None
     )
 
-    # group all the ">" or ">=" together
+    # group all the ">" or ">=" together. They are interpreted as conjunction.
     # simplify: the spec with the greatest version number is the strictest constraint
     greater_than_strict_specs = operator_to_specifiers[">"]
     greater_than_equal_specs = operator_to_specifiers[">="]
@@ -251,7 +215,7 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
             continue
         new_specifier = SpecifierSet(info.get("version", ""))
         old_specifier = SpecifierSet(result.get(pkg_name, {}).get("version", ""))
-        combined_specifier = operator.and_(new_specifier, old_specifier)
+        combined_specifier = and_(new_specifier, old_specifier)
         result[pkg_name] = {"version": str(combined_specifier)}
 
     return result
