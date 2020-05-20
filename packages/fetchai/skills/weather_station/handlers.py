@@ -62,15 +62,14 @@ class FIPAHandler(Handler):
             return
 
         # handle message
-        dialogue = cast(Dialogue, fipa_dialogue)
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, dialogue)
+            self._handle_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -147,6 +146,7 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
+            proposal_msg.counterparty = msg.counterparty
             dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
@@ -166,6 +166,7 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
+            decline_msg.counterparty = msg.counterparty
             dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
@@ -204,7 +205,6 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        self.context.logger.info("type of dialogue is {}".format(type(dialogue)))
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
         self.context.logger.info(
@@ -246,7 +246,6 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        dialogues = cast(Dialogues, self.context.dialogues)
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
         self.context.logger.info(
@@ -257,6 +256,7 @@ class FIPAHandler(Handler):
 
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
+            is_valid = False
             tx_digest = msg.info["transaction_digest"]
             self.context.logger.info(
                 "[{}]: checking whether transaction={} has been received ...".format(

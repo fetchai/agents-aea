@@ -37,8 +37,6 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.weather_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.weather_client.strategy import Strategy
 
-MY_DIALOGUE_ROLE = Dialogue.AgentRole.BUYER
-
 
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
@@ -298,7 +296,7 @@ class FIPAHandler(Handler):
 
 
 class OEFSearchHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class handles OEF search responses."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

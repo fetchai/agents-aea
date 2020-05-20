@@ -32,6 +32,15 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
+
+from typing import Optional
+
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
+from aea.protocols.base import Message
+from aea.skills.base import Model
+from aea.mail.base import Address
+
 logger = logging.getLogger(__name__)
 
 
@@ -335,8 +344,8 @@ class TestDialogues:
         """Set up the test."""
         cls.buyer_addr = "buyer address"
         cls.seller_addr = "seller address"
-        cls.buyer_dialogues = FipaDialogues(cls.buyer_addr)
-        cls.seller_dialogues = FipaDialogues(cls.seller_addr)
+        cls.buyer_dialogues = BuyerDialogues(cls.buyer_addr)
+        cls.seller_dialogues = SellerDialogues(cls.seller_addr)
 
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
@@ -587,7 +596,7 @@ class TestDialogues:
         client_dialogue.incoming_extend(accept_msg)
 
     def test_update(self):
-        pytest.skip("This is a temporary test environment.")
+        # pytest.skip("This is a temporary test environment.")
         cfp_msg = FipaMessage(
             message_id=1,
             dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
@@ -622,3 +631,131 @@ class TestDialogues:
 
         print(buyer_dialogue)
         print(seller_dialogue)
+
+
+class BuyerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.BUYER
+
+
+class BuyerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> BuyerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = BuyerDialogue(
+            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        return dialogue
+
+
+class SellerDialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.SELLER
+
+
+class SellerDialogues(FipaDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, agent_address) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        FipaDialogues.__init__(self, agent_address)
+
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> SellerDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = SellerDialogue(
+            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        return dialogue

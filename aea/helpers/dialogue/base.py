@@ -408,7 +408,7 @@ class Dialogue(ABC):
                 result = (
                     message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
-                    and performative in self.reply(target_performative)
+                    and performative in self.get_replies(target_performative)
                 )
             else:
                 result = False
@@ -443,7 +443,7 @@ class Dialogue(ABC):
         """
 
     @abstractmethod
-    def reply(self, performative) -> FrozenSet:
+    def get_replies(self, performative) -> FrozenSet:
         """
         Given a `performative`, return the list of performatives which are its valid replies in a dialogue
 
@@ -684,7 +684,9 @@ class Dialogues:
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
-        dialogue = self._create_dialogue(dialogue_label=dialogue_label, role=role)
+        dialogue = self._create_dialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -715,20 +717,26 @@ class Dialogues:
         )
 
         assert dialogue_label not in self.dialogues
-        dialogue = self._create_dialogue(dialogue_label=dialogue_label, role=role)
+        dialogue = self._create_dialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
 
     @abstractmethod
     def _create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: Dialogue.Role,
     ) -> Dialogue:
         """
-        Create a dialogue.
+        Create a dialogue instance.
 
-        :param dialogue: the address of the agent with which the dialogue is kept.
-        :param role: the agent's role
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
 
         :return: the created dialogue
         """
@@ -742,7 +750,7 @@ class Dialogues:
         self._dialogue_nonce += 1
         return self._dialogue_nonce
 
-    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
+    # TODO the following methods are left for backwards compatibility reasons and will be removed in the future
     def is_belonging_to_registered_dialogue(
         self, msg: Message, agent_addr: Address
     ) -> bool:
@@ -758,7 +766,6 @@ class Dialogues:
         """
         pass
 
-    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
         """
         DEPRECATED
@@ -770,18 +777,18 @@ class Dialogues:
         """
         pass
 
-    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def get_dialogue(self, msg: Message, address: Address) -> Dialogue:
         """
-        TODO
+        DEPRECATED
         """
         pass
 
-    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def create_self_initiated(
         self, dialogue_opponent_addr: Address, role: Dialogue.Role,
     ) -> Dialogue:
         """
+        DEPRECATED
+
         Create a self initiated dialogue.
 
         :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
@@ -791,7 +798,6 @@ class Dialogues:
         """
         pass  # TODO
 
-    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def create_opponent_initiated(
         self,
         dialogue_opponent_addr: Address,
@@ -799,6 +805,8 @@ class Dialogues:
         role: Dialogue.Role,
     ) -> Dialogue:
         """
+        DEPRECATED
+
         Create an opponent initiated dialogue.
 
         :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.

@@ -25,13 +25,13 @@ This module contains the classes required for FIPA dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Dict, FrozenSet, cast
+from abc import ABC
+from typing import Dict, FrozenSet
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
+from aea.helpers.dialogue.base import Dialogue, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.fipa.custom_types import is_valid
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 REPLIES = {
@@ -68,7 +68,7 @@ REPLIES = {
 }  # type: Dict[FipaMessage.Performative, FrozenSet[FipaMessage.Performative]]
 
 
-class FipaDialogue(Dialogue):
+class FipaDialogue(Dialogue, ABC):
     """The FIPA dialogue class maintains state of a dialogue and manages it."""
 
     class EndState(Dialogue.EndState):
@@ -89,13 +89,13 @@ class FipaDialogue(Dialogue):
         """
         Check whether 'message' is a valid next message in the dialogue.
 
-        These rules capture specific constraints designed for dialogues which are instance of a concrete sub-class of this class.
+        These rules capture specific constraints designed for dialogues which are instances of a concrete sub-class of this class.
+        Override this method with your additional dialogue rules.
 
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
-        fipa_message = cast(FipaMessage, message)
-        return is_valid(fipa_message)
+        return True
 
     def initial_performative(self) -> FipaMessage.Performative:
         """
@@ -105,7 +105,7 @@ class FipaDialogue(Dialogue):
         """
         return FipaMessage.Performative.CFP
 
-    def reply(self, performative) -> FrozenSet:
+    def get_replies(self, performative) -> FrozenSet:
         """
         Given a `performative`, return the list of performatives which are its valid replies in a fipa dialogue
 
@@ -163,7 +163,7 @@ class FipaDialogueStats(object):
             self._other_initiated[end_state] += 1
 
 
-class FipaDialogues(Dialogues):
+class FipaDialogues(Dialogues, ABC):
     """The FIPA dialogues class keeps track of all dialogues."""
 
     def __init__(self, agent_address: Address) -> None:
@@ -179,19 +179,3 @@ class FipaDialogues(Dialogues):
     def dialogue_stats(self) -> FipaDialogueStats:
         """Get the dialogue statistics."""
         return self._dialogue_stats
-
-    def _create_dialogue(
-        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        Create a dialogue.
-
-        :param dialogue: the address of the agent with which the dialogue is kept.
-        :param role: the agent's role
-
-        :return: the created dialogue
-        """
-        dialogue = FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
-        return dialogue

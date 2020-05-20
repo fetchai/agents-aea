@@ -7,8 +7,8 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmViRmMqhXUZymShpuK1sS683rTS8jf89pmmzeLNQt4fbp
-  dialogues.py: QmaUUzZJJJyC8zRDvHjdrNXbeaJ15Le7qNsZfe5BKoAkq1
-  handlers.py: QmZd1ajxM5Nn79BbycKRemcZ9HaCnq2hiCk8pZRtZKTwcV
+  dialogues.py: QmU5NquANLMJQnjaxkTMpenaHUfEMRjZaq5TnuZiywEqgh
+  handlers.py: QmbzybqJnGD5KZkj1UTc8Mv6gB6aaY9ywoq4QEoquPMfT8
   strategy.py: QmeoxCowVvHowrggqwYEmywVhx9JGK9Ef7wwaVrQHT5CQt
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 fingerprint_ignore_patterns: []

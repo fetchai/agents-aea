@@ -22,20 +22,7 @@
 
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
-from aea.protocols.base import Message
 
 Description = BaseDescription
 
 Query = BaseQuery
-
-
-def is_valid(message: Message) -> bool:
-    """
-    Check whether 'message' is a valid next message in the dialogue.
-
-    These rules capture specific constraints designed for dialogues which are instance of a concrete sub-class of this class.
-
-    :param message: the message to be validated
-    :return: True if valid, False otherwise.
-    """
-    return True
