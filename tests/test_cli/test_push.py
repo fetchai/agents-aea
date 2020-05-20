@@ -113,10 +113,10 @@ class TestPushLocalFailsArgumentNotPublicId:
         """Tear the tests down."""
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.config.try_to_load_agent_config")
 @mock.patch("aea.cli.push._save_item_locally")
 @mock.patch("aea.cli.push.push_item")
-@mock.patch("aea.cli.common._check_aea_project")
+@mock.patch("aea.cli.utils.decorators._check_aea_project")
 class PushCommandTestCase(TestCase):
     """Test case for CLI push command."""
 
@@ -170,7 +170,7 @@ class PushCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 class PushContractCommandTestCase(TestCase):
     """Test that the command 'aea push contract' works as expected."""
 
