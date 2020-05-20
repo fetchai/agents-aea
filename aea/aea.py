@@ -19,7 +19,7 @@
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import logging
 from asyncio import AbstractEventLoop
-from typing import Dict, List, Optional, Type, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
@@ -32,14 +32,16 @@ from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
+from aea.exceptions import AEAException
+from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler
+from aea.skills.base import Behaviour, Handler, SkillComponent
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
@@ -119,6 +121,8 @@ class AEA(Agent):
         self._execution_timeout = execution_timeout
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+
+        self._skills_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -255,15 +259,7 @@ class AEA(Agent):
         :param message: message to be handled.
         :param handler: handler suitable for this message protocol.
         """
-        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
-            handler.handle(message)
-
-        if timeout_result.is_cancelled_by_timeout():
-            logger.warning(
-                "Handler `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    handler, self._execution_timeout
-                )
-            )
+        self._execution_control(handler.handle, handler, [message])
 
     def _behaviour_act(self, behaviour: Behaviour) -> None:
         """
@@ -272,15 +268,55 @@ class AEA(Agent):
         :param behaviour: behaviour already defined
         :return: None
         """
-        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
-            behaviour.act_wrapper()
+        self._execution_control(behaviour.act_wrapper, behaviour)
 
-        if timeout_result.is_cancelled_by_timeout():
+    def _execution_control(
+        self,
+        fn: Callable,
+        component: SkillComponent,
+        args: Optional[Sequence] = None,
+        kwargs: Optional[Dict] = None,
+    ) -> Any:
+        """
+        Execute skill function in exception handling environment.
+
+        Logs error, stop agent or propagate excepion depends on policy defined.
+
+        :param fn: function to call
+        :param component: skill component function belongs to
+        :param args: optional sequence of arguments to pass to function on call
+        :param kwargs: optional dict of keyword arguments to pass to function on call
+
+        :return: same as function
+        """
+        # docstyle: ignore
+        def log_exception(e, fn, component):
+            logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
+
+        try:
+            with ExecTimeoutThreadGuard(self._execution_timeout):
+                return fn(*(args or []), **(kwargs or {}))
+        except TimeoutException:
             logger.warning(
-                "Act of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    behaviour, self._execution_timeout
+                "`{}` of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    fn, component, self._execution_timeout
                 )
             )
+        except Exception as e:
+            if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+                raise
+            elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
+                log_exception(e, fn, component)
+            elif self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
+                log_exception(e, fn, component)
+                self.stop()
+                raise AEAException(
+                    f"AEA was terminated cause exception `{e}` in skills {component} {fn}! Please check logs."
+                )
+            else:
+                raise AEAException(
+                    f"Unsupported exception policy: {self._skills_exception_policy}"
+                )
 
     def _get_active_behaviours(self) -> List[Behaviour]:
         """Get all active behaviours to use in act."""
