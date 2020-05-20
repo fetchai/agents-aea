@@ -111,7 +111,7 @@ class AddKeyTestCase(TestCase):
         _try_add_key(ctx, "type", "filepath")
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
@@ -137,7 +137,7 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_wealth")
 @mock.patch("aea.cli.core.click.echo")
@@ -163,7 +163,7 @@ class GetWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 @mock.patch("aea.cli.core._verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_address")
 @mock.patch("aea.cli.core.click.echo")
@@ -189,7 +189,7 @@ class GetAddressCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
 @mock.patch("aea.cli.core._try_validate_private_key_path")
 @mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):

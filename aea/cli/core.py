@@ -31,13 +31,6 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import (
-    AgentDirectory,
-    Context,
-    _verify_or_create_private_keys,
-    check_aea_project,
-    logger,
-)
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -57,6 +50,11 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import _verify_or_create_private_keys
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.helpers import (
     IDENTIFIER_TO_FAUCET_APIS,
