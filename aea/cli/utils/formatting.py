@@ -25,7 +25,7 @@ from aea.configurations.base import AgentConfig
 from aea.configurations.loader import ConfigLoader
 
 
-def format_items(items):
+def _format_items(items):
     """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ""
     for item in items:
@@ -48,7 +48,7 @@ def format_items(items):
     return list_str
 
 
-def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
+def _retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
