@@ -59,7 +59,7 @@ class TestDoInit:
         os.chdir(self.t)
         self.cli_config_file = f"{self.t}/cli_config.yaml"
         self.cli_config_patch = patch(
-            "aea.cli.common.CLI_CONFIG_PATH", self.cli_config_file
+            "aea.cli.utils.config.CLI_CONFIG_PATH", self.cli_config_file
         )
         self.cli_config_patch.start()
 
