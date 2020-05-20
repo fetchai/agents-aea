@@ -24,21 +24,24 @@ from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
 from aea.protocols.base import Message
 
-# from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
-
-
 Description = BaseDescription
 
 Query = BaseQuery
 
 
-def role_from_first_message(message: Message):
+def role_from_first_message(message: Message) -> str:
     """
     Infer the role of the agent from an incoming or outgoing first message
 
     :param message: an incoming/outgoing first message
-    :return: the agent's role
+    :return: the agent's role in str format
     """
+    if message.is_set("query"):
+        query = cast(Query, message.query)  # type: ignore
+        if query.model is not None:
+            is_seller = (
+                query.model.name == SUPPLY_DATAMODEL_NAME
+            )  # the counterparty is querying for supply
     raise NotImplementedError
     # return FipaDialogue.AgentRole.BUYER
 

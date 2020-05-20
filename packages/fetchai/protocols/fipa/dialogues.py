@@ -31,7 +31,7 @@ from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.fipa.custom_types import is_valid
+from packages.fetchai.protocols.fipa.custom_types import is_valid, role_from_first_message
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 REPLIES = {
@@ -94,11 +94,9 @@ class FipaDialogue(Dialogue):
         :return: the agent's role
         """
         fipa_message = cast(FipaMessage, message)
-        if fipa_message.is_incoming:
-            return FipaDialogue.AgentRole.SELLER
-        else:
-            return FipaDialogue.AgentRole.BUYER
-        # return role_from_first_message(fipa_message)
+        role_str = role_from_first_message(fipa_message)
+        role = FipaDialogue.AgentRole(role_str)
+        return role
 
     def is_valid(self, message: Message) -> bool:
         """

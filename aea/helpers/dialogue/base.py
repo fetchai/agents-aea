@@ -770,7 +770,6 @@ class Dialogues:
         """
         pass
 
-
     # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
         """
