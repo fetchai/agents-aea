@@ -19,6 +19,7 @@
 
 """This module contains the base classes for the skills."""
 
+import datetime
 import inspect
 import logging
 import queue
@@ -299,7 +300,19 @@ class SkillComponent(ABC):
         """Parse the component module."""
 
 
-class Behaviour(SkillComponent, ABC):
+class AbstractBehaviour(SkillComponent, ABC):
+    """
+    Abstract behaviour for periodical calls.
+
+    tick_interval: float, interval to call behaviour's act.
+    start_at: optional datetime, when to start periodical calls.
+    """
+
+    _tick_interval: float = 0.001
+    _start_at: Optional[datetime.datetime] = None
+
+
+class Behaviour(AbstractBehaviour, ABC):
     """This class implements an abstract behaviour."""
 
     @abstractmethod

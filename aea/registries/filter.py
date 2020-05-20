@@ -113,25 +113,36 @@ class Filter:
 
         :return: None
         """
+        self._handle_decision_maker_out_queue()
+        # get new behaviours from the agent skills
+        self._handle_new_behaviours()
+
+    def _handle_decision_maker_out_queue(self) -> None:
+        """Process descision maker's messages."""
         while not self.decision_maker_out_queue.empty():
             try:
                 internal_message = (
                     self.decision_maker_out_queue.get_nowait()
                 )  # type: Optional[InternalMessage]
+                self._process_internal_message(internal_message)
             except queue.Empty:
                 logger.warning("The decision maker out queue is unexpectedly empty.")
                 continue
-            if internal_message is None:
-                logger.warning("Got 'None' while processing internal messages.")
-            elif isinstance(internal_message, TransactionMessage):
-                internal_message = cast(TransactionMessage, internal_message)
-                self._handle_tx_message(internal_message)
-            else:
-                logger.warning(
-                    "Cannot handle a {} message.".format(type(internal_message))
-                )
 
-        # get new behaviours from the agent skills
+    def _process_internal_message(
+        self, internal_message: Optional[InternalMessage]
+    ) -> None:
+        if internal_message is None:
+            logger.warning("Got 'None' while processing internal messages.")
+        elif isinstance(internal_message, TransactionMessage):
+            internal_message = cast(TransactionMessage, internal_message)
+            self._handle_tx_message(internal_message)
+        else:
+            # TODO: is it expected unknown data type here?
+            logger.warning("Cannot handle a {} message.".format(type(internal_message)))
+
+    def _handle_new_behaviours(self) -> None:
+        """Register new behaviours added to skills."""
         for skill in self.resources.get_all_skills():
             while not skill.skill_context.new_behaviours.empty():
                 new_behaviour = skill.skill_context.new_behaviours.get()

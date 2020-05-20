@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the decision maker class."""
-
 import hashlib
 import logging
 import threading
@@ -33,6 +31,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.identity.base import Identity
 
 logger = logging.getLogger(__name__)
@@ -275,7 +274,7 @@ class DecisionMakerHandler(ABC):
         self._identity = identity
         self._wallet = wallet
         self._context = SimpleNamespace(**kwargs)
-        self._message_out_queue = Queue()  # type: Queue
+        self._message_out_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
 
     @property
     def agent_name(self) -> str:
@@ -297,7 +296,7 @@ class DecisionMakerHandler(ABC):
         return self._context
 
     @property
-    def message_out_queue(self) -> Queue:
+    def message_out_queue(self) -> AsyncFriendlyQueue:
         """Get (out) queue."""
         return self._message_out_queue
 
@@ -340,7 +339,7 @@ class DecisionMaker:
         return self._message_in_queue
 
     @property
-    def message_out_queue(self) -> Queue:
+    def message_out_queue(self) -> AsyncFriendlyQueue:
         """Get (out) queue."""
         return self._message_out_queue
 
