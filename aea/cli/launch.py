@@ -32,8 +32,10 @@ import click
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
+from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
+from aea.cli.utils.loggers import logger
 from aea.helpers.base import cd
 
 
