@@ -473,23 +473,6 @@ class Dialogue(ABC):
         """
 
     @staticmethod
-    @abstractmethod
-    def from_args(
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: Optional[Role] = None,
-    ) -> "Dialogue":
-        """
-        Instantiate an object of this class from the above arguments
-
-        :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: The role of the agent
-        """
-
-    @staticmethod
     def _interleave(list_1, list_2) -> List:
         all_elements = [
             element
@@ -786,3 +769,42 @@ class Dialogues:
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
         pass
+
+    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
+    def get_dialogue(self, msg: Message, address: Address) -> Dialogue:
+        """
+        TODO
+        """
+        pass
+
+    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
+    def create_self_initiated(
+        self, dialogue_opponent_addr: Address, role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create a self initiated dialogue.
+
+        :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
+        :param role: the agent's role
+
+        :return: the created dialogue.
+        """
+        pass  # TODO
+
+    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
+    def create_opponent_initiated(
+        self,
+        dialogue_opponent_addr: Address,
+        dialogue_reference: Tuple[str, str],
+        role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create an opponent initiated dialogue.
+
+        :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
+        :param dialogue_reference: the reference of the dialogue.
+        :param role: the agent's role
+
+        :return: the created dialogue
+        """
+        pass  # TODO

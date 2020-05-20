@@ -25,16 +25,13 @@ This module contains the classes required for FIPA dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Dict, FrozenSet, Optional, cast
+from typing import Dict, FrozenSet, cast
 
 from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.fipa.custom_types import (
-    is_valid,
-    role_from_first_message,
-)
+from packages.fetchai.protocols.fipa.custom_types import is_valid
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 REPLIES = {
@@ -88,19 +85,6 @@ class FipaDialogue(Dialogue):
         SELLER = "seller"
         BUYER = "buyer"
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> Dialogue.Role:
-        """
-        Infer the role of the agent from an incoming or outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-        fipa_message = cast(FipaMessage, message)
-        role_str = role_from_first_message(fipa_message)
-        role = FipaDialogue.AgentRole(role_str)
-        return role
-
     def is_valid(self, message: Message) -> bool:
         """
         Check whether 'message' is a valid next message in the dialogue.
@@ -132,25 +116,6 @@ class FipaDialogue(Dialogue):
             performative in REPLIES
         ), "this performative '{}' is not supported".format(performative)
         return REPLIES[performative]
-
-    @staticmethod
-    def from_args(
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: Optional[Dialogue.Role] = None,
-    ) -> "FipaDialogue":
-        """
-        Instantiate an object of this class from the above arguments
-
-        :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: The role of the agent
-        """
-        return FipaDialogue(
-            dialogue_label=dialogue_label, agent_address=agent_address, role=role
-        )
 
 
 class FipaDialogueStats(object):
