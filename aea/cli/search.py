@@ -37,7 +37,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE
+    DEFAULT_SKILL_CONFIG_FILE,
 )
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.configurations.loader import ConfigLoader

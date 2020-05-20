@@ -32,7 +32,6 @@ from jsonschema import Draft4Validator, ValidationError
 
 import yaml
 
-import aea.configurations.base
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE

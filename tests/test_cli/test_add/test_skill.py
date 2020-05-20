@@ -32,7 +32,6 @@ from jsonschema import ValidationError
 import yaml
 
 import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.cli.add import _validate_fingerprint
 from aea.configurations.base import (

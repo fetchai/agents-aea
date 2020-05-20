@@ -28,7 +28,6 @@ from pathlib import Path
 import yaml
 
 import aea
-import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
@@ -51,8 +50,6 @@ class TestRemoveProtocolWithPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -169,8 +166,6 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.protocol_id = "fetchai/gym:0.1.0"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

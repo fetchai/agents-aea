@@ -30,7 +30,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
+from aea.cli.utils.decorators import check_aea_project, clean_after
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import _validate_package_name
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId

@@ -25,7 +25,6 @@ from click import ClickException
 
 from requests.exceptions import ConnectionError
 
-from aea.cli.common import AEAConfigException
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
     _rm_tarfiles,
@@ -38,6 +37,7 @@ from aea.cli.registry.utils import (
     registry_logout,
     request_api,
 )
+from aea.cli.utils.exceptions import AEAConfigException
 from aea.configurations.base import PublicId
 
 
