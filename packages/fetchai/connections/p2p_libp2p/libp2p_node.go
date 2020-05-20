@@ -64,12 +64,6 @@ func check(err error) {
 	}
 }
 
-// TOFIX(LR) temp
-const (
-	AEA_ADDRESS_SIZE = 49 // TOFIX(LR) can 50 bytes long as well!
-	NODE_PUBKEY_SIZE = 37
-)
-
 func main() {
 
 	var err error
@@ -85,7 +79,6 @@ func main() {
 	aeaAddr := agent.AeaAddress()
 
 	// node address (ip and port)
-	// TOFIX(LR) ignoring the host(ip)
 	nodeHost, nodePort := agent.Address()
 
 	// node private key

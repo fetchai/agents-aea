@@ -253,6 +253,8 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
+        if proc.returncode != 0:
+            raise Exception("Error while downloading golang dependencies and building it: {}".format(proc.returncode))
         logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
