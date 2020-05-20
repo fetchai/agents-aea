@@ -20,7 +20,9 @@ skills:
 - fetchai/ml_train:0.3.0
 default_connection: fetchai/oef:0.2.0
 default_ledger: fetchai
-ledger_apis: {}
+ledger_apis:
+  fetchai:
+    network: testnet
 logging_config:
   disable_existing_loggers: false
   version: 1

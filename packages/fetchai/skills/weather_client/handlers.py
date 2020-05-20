@@ -22,7 +22,7 @@
 import pprint
 from typing import Any, Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
@@ -221,7 +221,7 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=[PublicId("fetchai", "weather_client", "0.1.0")],
+                skill_callback_ids=[self.context.skill_id],
                 tx_id="transaction0",
                 tx_sender_addr=self.context.agent_addresses[
                     proposal.values["ledger_id"]
@@ -235,7 +235,7 @@ class FIPAHandler(Handler):
                 tx_quantities_by_good_id={},
                 ledger_id=proposal.values["ledger_id"],
                 info={"dialogue_label": dialogue.dialogue_label.json},
-                tx_nonce=proposal.values.get("tx_nonce"),
+                tx_nonce=proposal.values["tx_nonce"],
             )
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             self.context.logger.info(

@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -277,14 +278,22 @@ class FIPAHandler(Handler):
             )
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
-            is_valid = self.context.ledger_apis.is_tx_valid(
-                ledger_id,
-                tx_digest,
-                self.context.agent_addresses[ledger_id],
-                msg.counterparty,
-                cast(str, proposal.values.get("tx_nonce")),
-                cast(int, proposal.values.get("price")),
-            )
+            not_settled = True
+            time_elapsed = 0
+            # TODO: fix blocking code; move into behaviour!
+            while not_settled and time_elapsed < 60:
+                is_valid = self.context.ledger_apis.is_tx_valid(
+                    ledger_id,
+                    tx_digest,
+                    self.context.agent_addresses[ledger_id],
+                    msg.counterparty,
+                    cast(str, proposal.values.get("tx_nonce")),
+                    cast(int, proposal.values.get("price")),
+                )
+                not_settled = not is_valid
+                if not_settled:
+                    time.sleep(2)
+                    time_elapsed += 2
             # TODO: check the tx_digest references a transaction with the correct terms
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(

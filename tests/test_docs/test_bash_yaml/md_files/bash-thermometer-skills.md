@@ -1,6 +1,11 @@
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
+``` bash 
+aea fetch fetchai/thermometer_aea:0.2.0 --alias my_thermometer_aea
+cd thermometer_aea
+aea install
+```
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
@@ -10,7 +15,9 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/thermometer_aea:0.2.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_client:0.2.0 --alias my_thermometer_client
+cd my_thermometer_client
+aea install
 ```
 ``` bash
 aea create my_thermometer_client
@@ -21,35 +28,43 @@ aea install
 aea config set agent.default_connection fetchai/oef:0.2.0
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.2.0 --alias my_thermometer_client
-```
-``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
+```
+``` bash
+aea generate-wealth fetchai
 ```
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash
-aea generate-wealth fetchai
+aea generate-wealth ethereum
 ```
 ``` bash
-aea generate-wealth ethereum
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+```
+``` bash
+aea generate-wealth cosmos
 ```
 ``` bash
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 ``` bash
-aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ATOM
+aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id cosmos
+```
+``` bash
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
 ```
 ``` bash
-aea add connection fetchai/oef:0.2.0
-aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ATOM
+aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id cosmos
+```
+``` bash
 aea run --connections fetchai/oef:0.2.0
 ```
 ``` bash
@@ -64,43 +79,18 @@ ledger_apis:
 ```
 ``` yaml
 ledger_apis:
+  fetchai:
+    network: testnet
+```
+``` yaml
+ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
 ```
 ``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
-|  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
-|    args:                          |    args:                         |
-|      price_per_row: 1             |      price_per_row: 1            |
-|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      has_sensor: True             |      has_sensor: True            |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|----------------------------------------------------------------------| 
-```
-``` yaml
-|----------------------------------------------------------------------|
-|         FETCHAI                   |           ETHEREUM               |
-|-----------------------------------|----------------------------------|
-|models:                            |models:                           |              
-|  strategy:                        |  strategy:                       |
-|     class_name: Strategy          |     class_name: Strategy         |
-|    args:                          |    args:                         |
-|      max_price: 4                 |      max_price: 40               |
-|      max_buyer_tx_fee: 1          |      max_buyer_tx_fee: 200000    |
-|      currency_id: 'FET'           |      currency_id: 'ETH'          |
-|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
-|      is_ledger_tx: True           |      is_ledger_tx: True          |
-|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------| 
-```
-``` yaml
-addr: ${OEF_ADDR: 127.0.0.1}
+ledger_apis:
+  cosmos:
+    address: http://aea-testnet.sandbox.fetch-ai.com:1317
 ```
