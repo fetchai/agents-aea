@@ -547,17 +547,13 @@ class Dialogue(ABC):
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
 
-    def __init__(self, concrete_dialogue_class, agent_address: Address = "") -> None:
+    def __init__(self, agent_address: Address = "") -> None:
         """
         Initialize dialogues.
 
         :param agent_address: the address of the agent for whom dialogues are maintained
         :return: None
         """
-        assert issubclass(
-            concrete_dialogue_class, Dialogue
-        ), "child_class must be a concrete subclass of Dialogue"
-        self.concrete_dialogue_class = concrete_dialogue_class
         self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
         self._agent_address = agent_address
         self._dialogue_nonce = 0
@@ -705,9 +701,7 @@ class Dialogues:
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
-        dialogue = self.concrete_dialogue_class.from_args(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
+        dialogue = self._create_dialogue(dialogue_label=dialogue_label, role=role)
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -738,12 +732,23 @@ class Dialogues:
         )
 
         assert dialogue_label not in self.dialogues
-        dialogue = self.concrete_dialogue_class.from_args(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
+        dialogue = self._create_dialogue(dialogue_label=dialogue_label, role=role)
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
+
+    @abstractmethod
+    def _create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create a dialogue.
+
+        :param dialogue: the address of the agent with which the dialogue is kept.
+        :param role: the agent's role
+
+        :return: the created dialogue
+        """
 
     def _next_dialogue_nonce(self) -> int:
         """

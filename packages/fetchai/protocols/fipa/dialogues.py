@@ -31,7 +31,10 @@ from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.fipa.custom_types import is_valid, role_from_first_message
+from packages.fetchai.protocols.fipa.custom_types import (
+    is_valid,
+    role_from_first_message,
+)
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 REPLIES = {
@@ -204,12 +207,26 @@ class FipaDialogues(Dialogues):
 
         :return: None
         """
-        Dialogues.__init__(
-            self, concrete_dialogue_class=FipaDialogue, agent_address=agent_address
-        )
+        Dialogues.__init__(self, agent_address=agent_address)
         self._dialogue_stats = FipaDialogueStats()
 
     @property
     def dialogue_stats(self) -> FipaDialogueStats:
         """Get the dialogue statistics."""
         return self._dialogue_stats
+
+    def _create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create a dialogue.
+
+        :param dialogue: the address of the agent with which the dialogue is kept.
+        :param role: the agent's role
+
+        :return: the created dialogue
+        """
+        dialogue = FipaDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue

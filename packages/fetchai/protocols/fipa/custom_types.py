@@ -36,12 +36,12 @@ def role_from_first_message(message: Message) -> str:
     :param message: an incoming/outgoing first message
     :return: the agent's role in str format
     """
-    if message.is_set("query"):
-        query = cast(Query, message.query)  # type: ignore
-        if query.model is not None:
-            is_seller = (
-                query.model.name == SUPPLY_DATAMODEL_NAME
-            )  # the counterparty is querying for supply
+    # if message.is_set("query"):
+    #     query = cast(Query, message.query)  # type: ignore
+    #     if query.model is not None:
+    #         is_seller = (
+    #             query.model.name == SUPPLY_DATAMODEL_NAME
+    #         )  # the counterparty is querying for supply
     raise NotImplementedError
     # return FipaDialogue.AgentRole.BUYER
 
