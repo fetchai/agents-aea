@@ -25,15 +25,6 @@ from typing import cast
 
 import click
 
-# from aea.cli.common import (
-#     Context,
-#     PublicIdParameter,
-#     _load_yaml,
-#     _try_get_item_source_path,
-#     _try_get_item_target_path,
-#     check_aea_project,
-#     pass_ctx,
-# )
 from aea.cli.registry.push import push_item
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
