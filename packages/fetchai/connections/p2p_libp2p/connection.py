@@ -219,6 +219,9 @@ class Libp2pNode:
         self.source = os.path.abspath(module_path)
         self.clargs = clargs if clargs is not None else []
 
+        # node libp2p multiaddrs
+        self.multiaddrs = [] # type: List[MultiAddr] 
+
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
 
@@ -243,6 +246,7 @@ class Libp2pNode:
 
         # open log file
         self._log_file_desc = open(self.log_file, "a", 1)
+        
 
         # build the node
         # TOFIX(LR) fix async version
@@ -336,7 +340,8 @@ class Libp2pNode:
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
 
         logger.info("Successfully connected to libp2p node!")
-        logger.info("My libp2p addresses: {}".format(self.get_libp2p_node_multiaddrs()))
+        self.multiaddrs = self.get_libp2p_node_multiaddrs()
+        logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -368,7 +373,7 @@ class Libp2pNode:
             return None
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
-    def get_libp2p_node_multiaddrs(self) -> Sequence[str]:
+    def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
         LIST_START = "MULTIADDRS_LIST_START"
         LIST_END = "MULTIADDRS_LIST_END"
 
@@ -387,7 +392,7 @@ class Libp2pNode:
             if found:
                 elem = line.strip()
                 if elem != LIST_END:
-                    multiaddrs.append(elem)
+                    multiaddrs.append(MultiAddr(elem))
                 else:
                     found = False
         return multiaddrs
@@ -444,8 +449,6 @@ class P2PLibp2pConnection(Connection):
             log_file,
             env_file,
         )
-        # replace address in kwargs
-        kwargs["address"] = self.node.pub
         super().__init__(**kwargs)
 
         if uri is None and (entry_peers is None or len(entry_peers) == 0):
