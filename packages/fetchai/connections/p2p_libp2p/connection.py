@@ -261,7 +261,7 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
-        logger.info("go libp2p log file *********************************************************************")
+        print("go libp2p log file *********************************************************************")
         with open(self.log_file, "r") as f:
             logger.info(f.read())
         if proc.returncode != 0:
@@ -351,7 +351,7 @@ class Libp2pNode:
         )
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
-        logger.info("go libp2p log file *********************************************************************")
+        print("go libp2p log file *********************************************************************")
         with open(self.log_file, "r") as f:
             logger.info(f.read())
 
