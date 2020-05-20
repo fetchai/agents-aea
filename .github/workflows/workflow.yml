@@ -27,7 +27,7 @@ jobs:
     - name: Unit tests and coverage
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
-        
+
   sync_aea_loop_integrational_tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -74,8 +74,8 @@ jobs:
         run: tox -e bandit
       - name: Safety Check
         run: tox -e safety
-      #- name: License Check
-      #  run: tox -e liccheck
+      - name: License Check
+        run: tox -e liccheck
       - name: Copyright Check
         run: tox -e copyright_check
       - name: AEA Package Hashes Check
