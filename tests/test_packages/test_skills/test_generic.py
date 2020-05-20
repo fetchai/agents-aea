@@ -19,9 +19,9 @@
 
 """This test module contains the integration test for the generic buyer and seller skills."""
 
-import pytest
-
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
+
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
@@ -67,7 +67,9 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
             "unregistering generic seller services from OEF service directory.",
             "received CFP from sender=",
             "sending sender=",
-            "received DECLINE from sender=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
         )
         missing_strings = self.missing_from_output(
             seller_aea_process, check_strings, is_terminating=False
@@ -80,7 +82,10 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
             "found agents=",
             "sending CFP to agent=",
             "received proposal=",
-            "declining the proposal from sender=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following data=",
         )
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False
@@ -95,7 +100,6 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         ), "Agents weren't successfully terminated."
 
 
-@pytest.mark.unstable
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
@@ -115,6 +119,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
         self.run_install()
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/generic_seller:0.1.0", seller_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
@@ -123,6 +134,19 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
         self.run_install()
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/generic_buyer:0.1.0", buyer_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
+        self.generate_private_key("fetchai")
+        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.replace_private_key_in_file(
+            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+        )
+
         # run AEAs
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
@@ -130,13 +154,17 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(buyer_aea_name)
         buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
 
-        # TODO: finish test
+        # TODO: finish test once testnet is reliable
         check_strings = (
             "updating generic seller services on OEF service directory.",
-            # "unregistering generic seller services from OEF service directory.",
-            # "received CFP from sender=",
-            # "sending sender=",
-            # "received DECLINE from sender=",
+            "unregistering generic seller services from OEF service directory.",
+            "received CFP from sender=",
+            "sending sender=",
+            "received ACCEPT from sender=",
+            "sending MATCH_ACCEPT_W_INFORM to sender=",
+            "received INFORM from sender=",
+            "checking whether transaction=",
+            # "transaction=",
         )
         missing_strings = self.missing_from_output(
             seller_aea_process, check_strings, is_terminating=False
@@ -146,10 +174,16 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         ), "Strings {} didn't appear in seller_aea output.".format(missing_strings)
 
         check_strings = (
-            # "found agents=",
-            # "sending CFP to agent=",
-            # "received proposal=",
-            # "declining the proposal from sender=",
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "received MATCH_ACCEPT_W_INFORM from sender=",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "Settling transaction on chain!",
+            "transaction was successful.",
+            "informing counterparty="
+            # "received INFORM from sender=",
         )
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False

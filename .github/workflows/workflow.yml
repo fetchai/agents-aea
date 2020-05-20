@@ -8,6 +8,45 @@ on:
   pull_request:
 
 jobs:
+  sync_aea_loop_unit_tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install pipenv
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Unit tests and coverage
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
+
+  sync_aea_loop_integrational_tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+    - name: Install dependencies (ubuntu-latest)
+      run: |
+        sudo apt-get update --fix-missing
+        sudo apt-get autoremove
+        sudo apt-get autoclean
+        pip install pipenv
+        pip install tox
+        sudo apt-get install -y protobuf-compiler
+    - name: Integrational tests and coverage
+      run: |
+        tox -e py3.8 -- --aea-loop sync -m 'integration and not unstable'
   common_checks:
     runs-on: ubuntu-latest
 

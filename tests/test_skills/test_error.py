@@ -20,7 +20,6 @@
 
 import logging
 import os
-import time
 from pathlib import Path
 from threading import Thread
 
@@ -29,7 +28,7 @@ from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
@@ -40,15 +39,32 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
+from tests.common.utils import wait_for_condition
+
 from ..conftest import CUR_PATH, _make_dummy_connection
+
+
+class InboxWithHistory(InBox):
+    """Inbox with history of all messages every fetched."""
+
+    def __init__(self, multiplexer: Multiplexer):
+        """Inin inbox."""
+        super().__init__(multiplexer)
+        self._history = []  # type: ignore
+
+    def get(self, *args, **kwargs) -> Envelope:
+        """Get envelope."""
+        item = super().get(*args, **kwargs)
+        self._history.append(item)
+        return item
 
 
 class TestSkillError:
     """Test the skill: Error."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Test the initialisation of the AEA."""
+        cls = self
         cls.node = LocalNode()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FetchAICrypto.identifier: private_key_path})
@@ -69,6 +85,7 @@ class TestSkillError:
             timeout=2.0,
             resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))),
         )
+        cls.my_aea._inbox = InboxWithHistory(cls.my_aea.multiplexer)
         cls.skill_context = SkillContext(cls.my_aea._context)
         logger_name = "aea.{}.skills.{}.{}".format(
             cls.my_aea._context.agent_name, "fetchai", "error"
@@ -79,7 +96,9 @@ class TestSkillError:
         )
         cls.t = Thread(target=cls.my_aea.start)
         cls.t.start()
-        time.sleep(0.5)
+        wait_for_condition(
+            lambda: cls.my_aea._main_loop and cls.my_aea._main_loop.is_running, 10
+        )
 
     def test_error_handler_handle(self):
         """Test the handle function."""
@@ -94,6 +113,7 @@ class TestSkillError:
 
     def test_error_skill_unsupported_protocol(self):
         """Test the unsupported error message."""
+        self.my_aea._inbox._history = []
         msg = FipaMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -110,13 +130,15 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
-        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
+        wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
+        envelope = self.my_aea._inbox._history[-1]
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL
 
     def test_error_decoding_error(self):
         """Test the decoding error."""
+        self.my_aea._inbox._history = []
         msg = FipaMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -132,8 +154,9 @@ class TestSkillError:
         )
 
         self.my_error_handler.send_decoding_error(envelope)
+        wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
+        envelope = self.my_aea._inbox._history[-1]
 
-        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.DECODING_ERROR
@@ -156,13 +179,14 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
-        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
+        wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
+        envelope = self.my_aea._inbox._history[-1]
+
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Teardown method."""
-        cls.my_aea.stop()
-        cls.t.join()
+        self.my_aea.stop()
+        self.t.join()

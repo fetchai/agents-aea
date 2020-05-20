@@ -23,6 +23,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
@@ -158,14 +159,15 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
-
             process_launch.expect_all(
                 [
                     f"[{self.agent_name_1}]: Start processing messages...",
                     f"Expected exception!",
+                    f"Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
                 ],
                 timeout=20,
             )
+            time.sleep(0.1)  # cause race condition in termination and ctrl+c handling.
             process_launch.control_c()
             process_launch.expect_all(
                 [

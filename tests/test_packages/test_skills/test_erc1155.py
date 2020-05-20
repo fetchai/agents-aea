@@ -54,6 +54,14 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.add_item("skill", "fetchai/erc1155_deploy:0.4.0")
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/erc1155_deployer:0.4.0", deploy_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         self.generate_private_key("ethereum")
         self.add_private_key("ethereum", "eth_private_key.txt")
         self.replace_private_key_in_file(
@@ -71,6 +79,14 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
         self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
         self.set_config("agent.default_ledger", "ethereum")
         self.add_item("skill", "fetchai/erc1155_client:0.3.0")
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/erc1155_client:0.4.0", client_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         self.generate_private_key("ethereum")
         self.add_private_key("ethereum", "eth_private_key.txt")
         self.replace_private_key_in_file(
@@ -93,7 +109,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             "Successfully minted items. Transaction digest:",
         )
         missing_strings = self.missing_from_output(
-            deploy_aea_process, check_strings, timeout=360, is_terminating=False
+            deploy_aea_process, check_strings, timeout=420, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -108,7 +124,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
             "Successfully conducted atomic swap. Transaction digest:",
         )
         missing_strings = self.missing_from_output(
-            deploy_aea_process, check_strings, is_terminating=False
+            deploy_aea_process, check_strings, timeout=360, is_terminating=False
         )
         assert (
             missing_strings == []

@@ -17,18 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
-
 import logging
 from asyncio import AbstractEventLoop
-from typing import List, Optional, cast
+from typing import Dict, List, Optional, Type, cast
 
 from aea.agent import Agent
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMaker
+from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
+from aea.decision_maker.default import (
+    DecisionMakerHandler as DefaultDecisionMakerHandler,
+)
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -46,6 +49,12 @@ logger = logging.getLogger(__name__)
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
+    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
+        "sync": SyncAgentLoop,
+        "async": AsyncAgentLoop,
+    }
+    DEFAULT_RUN_LOOP: str = "async"
+
     def __init__(
         self,
         identity: Identity,
@@ -58,6 +67,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         is_debug: bool = False,
         max_reactions: int = 20,
+        decision_maker_handler_class: Type[
+            DecisionMakerHandler
+        ] = DefaultDecisionMakerHandler,
         **kwargs,
     ) -> None:
         """
@@ -73,6 +85,7 @@ class AEA(Agent):
         :param exeution_timeout: amount of time to limit single act/handle to execute.
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -87,16 +100,19 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
-        self._decision_maker = DecisionMaker(identity, wallet, ledger_apis)
+        decision_maker_handler = decision_maker_handler_class(
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis
+        )
+        self._decision_maker = DecisionMaker(
+            decision_maker_handler=decision_maker_handler
+        )
         self._context = AgentContext(
             self.identity,
             ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
             self.decision_maker.message_in_queue,
-            self.decision_maker.ownership_state,
-            self.decision_maker.preferences,
-            self.decision_maker.goal_pursuit_readiness,
+            decision_maker_handler.context,
             self.task_manager,
             **kwargs,
         )
@@ -155,7 +171,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._filter.get_active_behaviours():
+        for behaviour in self._get_active_behaviours():
             self._behaviour_act(behaviour)
 
     def react(self) -> None:
@@ -264,6 +280,10 @@ class AEA(Agent):
                     behaviour, self._execution_timeout
                 )
             )
+
+    def _get_active_behaviours(self) -> List[Behaviour]:
+        """Get all active behaviours to use in act."""
+        return self._filter.get_active_behaviours()
 
     def update(self) -> None:
         """

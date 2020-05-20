@@ -26,7 +26,7 @@ import pprint
 import re
 import sys
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
 
@@ -66,6 +66,10 @@ from aea.crypto.helpers import (
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler
+from aea.decision_maker.default import (
+    DecisionMakerHandler as DefaultDecisionMakerHandler,
+)
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.helpers.pypi import is_satisfiable
@@ -236,6 +240,9 @@ class AEABuilder:
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
+    DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
+        DecisionMakerHandler
+    ] = DefaultDecisionMakerHandler
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -257,6 +264,7 @@ class AEABuilder:
         self._timeout: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
+        self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -275,7 +283,7 @@ class AEABuilder:
 
         :param timeout: timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._timeout = timeout
         return self
@@ -286,7 +294,7 @@ class AEABuilder:
 
         :param execution_timeout: execution_timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._execution_timeout = execution_timeout
         return self
@@ -297,9 +305,33 @@ class AEABuilder:
 
         :param max_reactions: int
 
-        :return: None
+        :return: self
         """
         self._max_reactions = max_reactions
+        return self
+
+    def set_decision_maker_handler(
+        self, decision_maker_handler_dotted_path: str, file_path: Path
+    ) -> "AEABuilder":
+        """
+        Set decision maker handler class.
+
+        :param decision_maker_handler_dotted_path: the dotted path to the decision maker handler
+        :param file_path: the file path to the file which contains the decision maker handler
+
+        :return: self
+        """
+        dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
+        module = load_module(dotted_path, file_path)
+        try:
+            _class = getattr(module, class_name)
+            self._decision_maker_handler_class = _class
+        except Exception as e:
+            logger.error(
+                "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, file_path, e
+                )
+            )
         return self
 
     def _add_default_packages(self) -> None:
@@ -680,6 +712,7 @@ class AEABuilder:
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
+            decision_maker_handler_class=self._get_decision_maker_handler_class(),
             **self._context_namespace,
         )
         self._load_and_add_skills(aea.context)
@@ -781,6 +814,18 @@ class AEABuilder:
             self._max_reactions
             if self._max_reactions is not None
             else self.DEFAULT_MAX_REACTIONS
+        )
+
+    def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
+        """
+        Return the decision maker handler class
+
+        :return: decision maker handler class
+        """
+        return (
+            self._decision_maker_handler_class
+            if self._decision_maker_handler_class is not None
+            else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
         )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
@@ -909,6 +954,10 @@ class AEABuilder:
         self.set_timeout(agent_configuration.timeout)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
+        if agent_configuration.decision_maker_handler != {}:
+            dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
+            file_path = agent_configuration.decision_maker_handler["file_path"]
+            self.set_decision_maker_handler(dotted_path, file_path)
 
         # load private keys
         for (

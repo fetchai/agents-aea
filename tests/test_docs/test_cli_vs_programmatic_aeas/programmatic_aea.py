@@ -21,8 +21,7 @@
 
 import logging
 import os
-import time
-from threading import Thread
+import sys
 from typing import cast
 
 from aea import AEA_DIR
@@ -44,7 +43,7 @@ PORT = 10000
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
@@ -97,25 +96,16 @@ def run():
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
-    strategy.max_buyer_tx_fee = 100
-    strategy.max_row_price = 40
 
     for skill in [error_skill, weather_skill]:
         resources.add_skill(skill)
 
-    # Set the AEA running in a different thread
     try:
         logger.info("STARTING AEA NOW!")
-        t = Thread(target=my_aea.start)
-        t.start()
-
-        # Let it run long enough to interact with the weather station
-        time.sleep(60)
-    finally:
-        # Shut down the AEA
+        my_aea.start()
+    except KeyboardInterrupt:
         logger.info("STOPPING AEA NOW!")
         my_aea.stop()
-        t.join()
 
 
 if __name__ == "__main__":

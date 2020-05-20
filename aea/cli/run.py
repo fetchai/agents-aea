@@ -85,6 +85,7 @@ def _run_aea(aea: AEA) -> None:
     finally:
         click.echo("Stopping AEA '{}' ...".format(aea.name))
         aea.stop()
+        click.echo("AEA '{}' stopped.".format(aea.name))
 
 
 @click.command()

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Mail module abstract base classes."""
 
 import asyncio
@@ -31,6 +30,7 @@ from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId, SkillId
 from aea.connections.base import Connection, ConnectionStatus
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail import base_pb2
 
 logger = logging.getLogger(__name__)
@@ -433,7 +433,7 @@ class Multiplexer:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = queue.Queue()  # type: queue.Queue
+        self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._connect_all_task = None  # type: Optional[Future]
@@ -442,7 +442,7 @@ class Multiplexer:
         self._send_loop_task = None  # type: Optional[Future]
 
     @property
-    def in_queue(self) -> queue.Queue:
+    def in_queue(self) -> AsyncFriendlyQueue:
         """Get the in queue."""
         return self._in_queue
 
@@ -762,6 +762,25 @@ class Multiplexer:
         except queue.Empty:
             raise Empty
 
+    async def async_get(self) -> Envelope:
+        """
+        Get an envelope async way.
+
+        :return: the envelope
+        """
+        try:
+            return await self.in_queue.async_get()
+        except queue.Empty:
+            raise Empty
+
+    async def async_wait(self) -> None:
+        """
+        Get an envelope async way.
+
+        :return: the envelope
+        """
+        return await self.in_queue.async_wait()
+
     def put(self, envelope: Envelope) -> None:
         """
         Schedule an envelope for sending it.
@@ -828,6 +847,32 @@ class InBox:
         except Empty:
             return None
         return envelope
+
+    async def async_get(self) -> Envelope:
+        """
+        Check for a envelope on the in queue.
+
+        :return: the envelope object.
+        """
+        logger.debug("Checks for envelope from the in queue async way...")
+        envelope = await self._multiplexer.async_get()
+        if envelope is None:
+            raise Empty()
+        logger.debug(
+            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
+                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            )
+        )
+        return envelope
+
+    async def async_wait(self) -> None:
+        """
+        Check for a envelope on the in queue.
+
+        :return: the envelope object.
+        """
+        logger.debug("Checks for envelope presents in queue async way...")
+        await self._multiplexer.async_wait()
 
 
 class OutBox:
