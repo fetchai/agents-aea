@@ -70,6 +70,10 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     True
     >>> _is_satisfiable(SpecifierSet("<=1.0,>1.0"))
     False
+    >>> _is_satisfiable(SpecifierSet("<1.0,<=1.0,>1.0"))
+    False
+    >>> _is_satisfiable(SpecifierSet(">1.0,>=1.0,<1.0"))
+    False
     >>> _is_satisfiable(SpecifierSet("~=1.1,==2.0"))  # fails because of major number 2
     False
     >>> _is_satisfiable(SpecifierSet("~=1.1,==1.0"))  # fails because minor is 0
@@ -100,6 +104,7 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     # group single specifiers by operator
     all_specifiers = []
     operator_to_specifiers: Dict[str, Set[Specifier]] = defaultdict(lambda: set())
+    # pre-processing
     for specifier in list(specifier_set):
         specifier = cast(Specifier, specifier)
         try:
@@ -127,6 +132,7 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
             all_specifiers.append(specifier)
             operator_to_specifiers[specifier.operator].add(specifier)
 
+    # end of pre-processing. Start evaluation
     # if there are two different "==" specifier, return False
     if len(operator_to_specifiers["=="]) >= 2:
         return False
@@ -142,7 +148,11 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     less_than_strict_specs = operator_to_specifiers["<"]
     less_than_equal_specs = operator_to_specifiers["<="]
     less_than_specs = set.union(less_than_equal_specs, less_than_strict_specs)
-    sorted_less_than_specs = sorted(less_than_specs, key=lambda x: Version(x.version))
+    # sort less-than constraints in the following way: ["<1.0", "<=1.0", "<2.0", "<=2.0"]
+    # the first element is the strictest constraint.
+    sorted_less_than_specs = sorted(
+        less_than_specs, key=lambda x: (Version(x.version), len(x.operator))
+    )
     lowest_less_than = (
         sorted_less_than_specs[0] if len(sorted_less_than_specs) > 0 else None
     )
@@ -152,8 +162,10 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     greater_than_strict_specs = operator_to_specifiers[">"]
     greater_than_equal_specs = operator_to_specifiers[">="]
     greater_than_specs = set.union(greater_than_strict_specs, greater_than_equal_specs)
+    # sort greater-than constraints in the following way: [">=1.0", ">1.0", ">=2.0", ">2.0"]
+    # the last element is the strictest constraint.
     sorted_greater_than_specs = sorted(
-        greater_than_specs, key=lambda x: Version(x.version)
+        greater_than_specs, key=lambda x: (Version(x.version), -len(x.operator))
     )
     greatest_greater_than = (
         sorted_greater_than_specs[-1] if len(sorted_greater_than_specs) > 0 else None
