@@ -26,13 +26,15 @@ from typing import Dict, Set, cast
 from packaging.specifiers import Specifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
+from aea.configurations.base import Dependencies, Dependency
+
 
 def and_(s1: SpecifierSet, s2: SpecifierSet):
     """Do the and between two specifier sets."""
     return operator.and_(s1, s2)
 
 
-def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
+def is_satisfiable(specifier_set: SpecifierSet) -> bool:
     """
     Check if the specifier set is satisfiable.
 
@@ -49,49 +51,49 @@ def _is_satisfiable(specifier_set: SpecifierSet) -> bool:
     >>> s1 = SpecifierSet(">0.9,==1.0")
     >>> "1.0" in s1
     True
-    >>> _is_satisfiable(s1)
+    >>> is_satisfiable(s1)
     True
 
     The specifier set "==1.0, >1.1" is not satisfiable:
 
     >>> s1 = SpecifierSet("==1.0,>1.1")
-    >>> _is_satisfiable(s1)
+    >>> is_satisfiable(s1)
     False
 
     Other examples:
 
-    >>> _is_satisfiable(SpecifierSet("<=1.0,>1.1, >0.9"))
+    >>> is_satisfiable(SpecifierSet("<=1.0,>1.1, >0.9"))
     False
-    >>> _is_satisfiable(SpecifierSet("==1.0,!=1.0"))
+    >>> is_satisfiable(SpecifierSet("==1.0,!=1.0"))
     False
-    >>> _is_satisfiable(SpecifierSet("!=0.9,!=1.0"))
+    >>> is_satisfiable(SpecifierSet("!=0.9,!=1.0"))
     True
-    >>> _is_satisfiable(SpecifierSet("<=1.0,>=1.0"))
+    >>> is_satisfiable(SpecifierSet("<=1.0,>=1.0"))
     True
-    >>> _is_satisfiable(SpecifierSet("<=1.0,>1.0"))
+    >>> is_satisfiable(SpecifierSet("<=1.0,>1.0"))
     False
-    >>> _is_satisfiable(SpecifierSet("<1.0,<=1.0,>1.0"))
+    >>> is_satisfiable(SpecifierSet("<1.0,<=1.0,>1.0"))
     False
-    >>> _is_satisfiable(SpecifierSet(">1.0,>=1.0,<1.0"))
+    >>> is_satisfiable(SpecifierSet(">1.0,>=1.0,<1.0"))
     False
-    >>> _is_satisfiable(SpecifierSet("~=1.1,==2.0"))  # fails because of major number 2
+    >>> is_satisfiable(SpecifierSet("~=1.1,==2.0"))  # fails because of major number 2
     False
-    >>> _is_satisfiable(SpecifierSet("~=1.1,==1.0"))  # fails because minor is 0
+    >>> is_satisfiable(SpecifierSet("~=1.1,==1.0"))  # fails because minor is 0
     False
-    >>> _is_satisfiable(SpecifierSet("~=1.1,<=1.1"))  # satisfiable: "1.1"
+    >>> is_satisfiable(SpecifierSet("~=1.1,<=1.1"))  # satisfiable: "1.1"
     True
-    >>> _is_satisfiable(SpecifierSet("~=1.1,<1.1"))
+    >>> is_satisfiable(SpecifierSet("~=1.1,<1.1"))
     False
-    >>> _is_satisfiable(SpecifierSet("~=1.0,<1.0"))
+    >>> is_satisfiable(SpecifierSet("~=1.0,<1.0"))
     False
-    >>> _is_satisfiable(SpecifierSet("~=1.1,==1.2"))
+    >>> is_satisfiable(SpecifierSet("~=1.1,==1.2"))
     True
-    >>> _is_satisfiable(SpecifierSet("~=1.1,>1.2"))
+    >>> is_satisfiable(SpecifierSet("~=1.1,>1.2"))
     True
 
     We ignore legacy versions:
 
-    >>> _is_satisfiable(SpecifierSet("==1.0,==1.*"))
+    >>> is_satisfiable(SpecifierSet("==1.0,==1.*"))
     True
 
     For other details, please refer to PEP440:
@@ -183,7 +185,7 @@ def _handle_range_constraints(
     lowest_less_than: Specifier, greatest_greater_than: Specifier
 ) -> bool:
     """
-    Helper method for the _is_satisfiable function.
+    Helper method for the is_satisfiable function.
 
     It checks whether two specifiers of the following type are compatible:
     - "<=<some-version-number>"
@@ -218,80 +220,38 @@ def _handle_range_constraints(
         return True
 
 
-class PyPIChecker:
+def is_simple_dep(dep: Dependency) -> bool:
     """
-    Find out if PyPI version specifiers are unsatisfiable.
-
-    Its usage is incremental: you keep an instance of the
-    checker and you populate with new constraints.
+    Check if it is a simple dependency. Namely,
+    if it has no field specified, or only the 'version' field set.
     """
+    return len(dep) == 0 or len(dep) == 1 and "version" in dep
 
-    def __init__(self):
-        """Initialize the checker."""
-        # mapping from package name to specifier set.
-        self._pypi_dependencies = {}  # type: Dict[str, SpecifierSet]
 
-    def add(self, package_name: str, specifier_set: SpecifierSet):
-        """
-        Add a specifier set for a package in the checker.
+def to_set_specifier(dep: Dependency) -> SpecifierSet:
+    """Get the set specifier. It assumes to be a simple dependency (see above)."""
+    return dep["version"]
 
-        :param package_name: the package name
-        :param specifier_set: the set of specifiers.
-        :return: None
-        :raises ValueError: if the set of specifier plus the one already present
-            is surely unsatisfiable.
-        """
-        specifier = self._merge_with_existing_specifier_set_if_any(
-            package_name, specifier_set
-        )
 
-        try:
-            result = _is_satisfiable(specifier)
-        except Exception:
-            # we ignore possible errors. There might be some corner cases that make
-            # our checks to raise exception, e.g. requirements like git+https://...
-            result = True
+def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
+    """
+    Merge two groups of dependencies.
 
-        if result is False:
-            raise ValueError(
-                "Specifier set {} for package {} not satisfiable.".format(
-                    specifier_set, package_name
-                )
-            )
-        self._pypi_dependencies[package_name] = specifier_set
+    If some of them are not "simple" (see above), we just filter them out.
 
-    def _add_or_merge_with_existing_specifier_set(
-        self, package_name: str, specifier_set: SpecifierSet
-    ) -> None:
-        """
-        Add a new package/specifier set pair, or, if one already exists, merge
-        the new specifier with the old one.
+    :param dep1: the first operand
+    :param dep2: the second operand.
+    :return: the merged dependencies.
+    """
+    result: Dependencies
+    result = {pkg_name: info for pkg_name, info in dep1.items() if is_simple_dep(info)}
 
-        :param package_name: the package name
-        :param specifier_set: the specifier set
-        :return: None
-        """
-        if package_name in self._pypi_dependencies:
-            previous_spec = self._pypi_dependencies[package_name]
-            new_spec = operator.and_(previous_spec, specifier_set)
-            self._pypi_dependencies[package_name] = new_spec
-        else:
-            self._pypi_dependencies[package_name] = specifier_set
+    for pkg_name, info in dep2.items():
+        if not is_simple_dep(info):
+            continue
+        new_specifier = SpecifierSet(info.get("version", ""))
+        old_specifier = SpecifierSet(result.get(pkg_name, {}).get("version", ""))
+        combined_specifier = operator.and_(new_specifier, old_specifier)
+        result[pkg_name] = {"version": str(combined_specifier)}
 
-    def _merge_with_existing_specifier_set_if_any(
-        self, package_name: str, new_specifier_set: SpecifierSet
-    ) -> SpecifierSet:
-        """
-        If a package name is already registered, take the associated specifier set
-        and merge with the new one.
-        Otherwise, return the new one.
-
-        :param package_name: the package name
-        :param new_specifier_set: the new specifier set.
-        :return: the merged specifier set, or only the new one.
-        """
-        if package_name in self._pypi_dependencies:
-            old_set = self._pypi_dependencies[package_name]
-            return and_(old_set, new_specifier_set)
-        else:
-            return new_specifier_set
+    return result

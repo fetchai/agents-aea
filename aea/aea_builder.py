@@ -30,6 +30,8 @@ from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cas
 
 import jsonschema
 
+from packaging.specifiers import SpecifierSet
+
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import (
@@ -66,6 +68,8 @@ from aea.crypto.registry import registry
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.pypi import is_satisfiable
+from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
@@ -196,11 +200,20 @@ class _DependenciesManager:
 
     @property
     def pypi_dependencies(self) -> Dependencies:
-        """Get all the PyPI dependencies."""
+        """
+        Get all the PyPI dependencies.
+
+        We currently consider only dependency that have the
+        default PyPI index url and that specify only the
+        version field.
+
+        :return: the merged PyPI dependencies
+        """
         all_pypi_dependencies = {}  # type: Dependencies
         for configuration in self._dependencies.values():
-            # TODO implement merging of two PyPI dependencies.
-            all_pypi_dependencies.update(configuration.pypi_dependencies)
+            all_pypi_dependencies = merge_dependencies(
+                all_pypi_dependencies, configuration.pypi_dependencies
+            )
         return all_pypi_dependencies
 
     @staticmethod
@@ -322,6 +335,7 @@ class AEABuilder:
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
+        self._check_pypi_dependencies(configuration)
 
     def set_name(self, name: str) -> "AEABuilder":
         """
@@ -645,7 +659,7 @@ class AEABuilder:
         Build the AEA.
 
         :param connection_ids: select only these connections to run the AEA.
-        :param ledger_api: the api ledger that we want to use.
+        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
@@ -666,7 +680,7 @@ class AEABuilder:
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
-            **self._context_namespace
+            **self._context_namespace,
         )
         self._load_and_add_skills(aea.context)
         return aea
@@ -801,6 +815,26 @@ class AEABuilder:
                     pprint.pformat(sorted(map(str, not_supported_packages))),
                 )
             )
+
+    def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
+        """
+        Check that PyPI dependencies of a package don't conflict with
+        the existing ones.
+
+        :param configuration: the component configuration.
+        :return: None
+        :raises AEAException: if some PyPI dependency is conflicting.
+        """
+        all_pypi_dependencies = self._package_dependency_manager.pypi_dependencies
+        all_pypi_dependencies = merge_dependencies(
+            all_pypi_dependencies, configuration.pypi_dependencies
+        )
+        for pkg_name, dep_info in all_pypi_dependencies.items():
+            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            if not is_satisfiable(set_specifier):
+                raise AEAException(
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                )
 
     @staticmethod
     def _find_component_directory_from_component_id(
