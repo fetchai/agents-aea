@@ -21,9 +21,9 @@
 
 import click
 
-from aea.cli.common import _update_cli_config
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import registry_logout
+from aea.cli.utils.config import _update_cli_config
 
 
 @click.command(name="logout", help="Logout from Registry account.")
