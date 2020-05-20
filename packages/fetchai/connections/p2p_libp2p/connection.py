@@ -203,6 +203,7 @@ class Libp2pNode:
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
         """
+
         self.agent_addr = agent_addr
 
         # node id in the p2p network
@@ -241,6 +242,13 @@ class Libp2pNode:
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
 
     async def start(self) -> None:
+        
+        which = shutil.which("go")
+        if which is None:
+            raise Exception("Libp2p Go should me installed")
+        else:
+            raise Exception("Libp2 Go is installed")
+        
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -375,11 +383,11 @@ class Libp2pNode:
             return None
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
-    def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
+    def get_libp2p_node_multiaddrs(self) -> List[MultiAddr]:
         LIST_START = "MULTIADDRS_LIST_START"
         LIST_END = "MULTIADDRS_LIST_END"
 
-        multiaddrs = []
+        multiaddrs = [] # type: List[MultiAddr]
 
         lines = []
         with open(self.log_file, "r") as f:
