@@ -784,6 +784,12 @@ class Query:
         :return ``None``
         :raises ValueError: if the query does not satisfy some sanity requirements.
         """
+        if type(self.constraints) != list:
+            raise ValueError(
+                "Constraints must be a list (`List[Constraint]`). Instead is of type '{}'.".format(
+                    type(self.constraints).__name__
+                )
+            )
         if len(self.constraints) < 1:
             logger.warning(
                 "DEPRECATION WARNING: "

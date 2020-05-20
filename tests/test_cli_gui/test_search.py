@@ -20,8 +20,6 @@
 import json
 import unittest.mock
 
-import pytest
-
 from tests.common.utils import run_in_root_dir
 
 from .test_base import DummyPID, create_app
@@ -132,7 +130,6 @@ def test_list_skills():
     _test_search_items_with_query("skill", "test")
 
 
-@pytest.mark.unstable
 @run_in_root_dir
 def test_real_search():
     """Call at least one function that actually calls call_aea_async."""
@@ -144,7 +141,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 12, data
+    assert len(data) == 13, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -168,7 +165,7 @@ def test_real_search():
         == "The local connection provides a stub for an OEF node."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/oef:0.2.0"
+    assert data[i]["id"] == "fetchai/oef:0.3.0"
     assert (
         data[i]["description"]
         == "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
@@ -196,6 +193,12 @@ def test_real_search():
     assert (
         data[i]["description"]
         == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/soef:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The soef connection provides a wrapper around the simple OEF and OEF SDK for connection with the simple OEF and OEF search and communication node."
     )
     i += 1
     assert data[i]["id"] == "fetchai/stub:0.3.0"

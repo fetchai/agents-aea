@@ -22,7 +22,7 @@
 import pytest
 
 from aea.configurations.base import PublicId
-from aea.decision_maker.base import OwnershipState
+from aea.decision_maker.default import OwnershipState
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 
@@ -45,7 +45,7 @@ def test_initialisation():
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 2}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id is not None
@@ -77,7 +77,7 @@ def test_transaction_is_affordable_agent_is_buyer():
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 20}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -105,7 +105,7 @@ def test_transaction_is_affordable_there_is_no_wealth():
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -133,7 +133,7 @@ def tests_transaction_is_affordable_agent_is_the_seller():
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -161,7 +161,7 @@ def tests_transaction_is_affordable_else_statement():
     currency_endowment = {"FET": 0}
     good_endowment = {"good_id": 0}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -189,7 +189,7 @@ def test_apply():
     currency_endowment = {"FET": 100}
     good_endowment = {"good_id": 2}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     tx_message = TransactionMessage(
@@ -220,7 +220,7 @@ def test_transaction_update():
     good_endowment = {"good_id": 20}
 
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id == currency_endowment
@@ -251,7 +251,7 @@ def test_transaction_update_receive():
     currency_endowment = {"FET": 75}
     good_endowment = {"good_id": 30}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id == currency_endowment

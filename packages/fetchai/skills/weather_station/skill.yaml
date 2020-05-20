@@ -7,24 +7,24 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmYQPCxG3ibdsozbwbSat6451LdVAAqVzfaNbLdE6hVJXQ
+  behaviours.py: QmX4fh9PLTW3uZ6q6Biac3FYR8A3Cxj5fHiPQCBCrkUxwH
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
   dialogues.py: QmQYf7SCZXyLjPkpXfT3nVsgdWpazSWNYBEJYpFVeBr9DL
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
-  handlers.py: QmVxL7wu6wcBAm5fXBmgVHXEKgbiJ6Cz3erM8JhqSoPs41
-  strategy.py: QmPDZfAgFPGWBNDeTrAArTuz3JsGBRRrSrk9Zkm7L1cUzL
+  handlers.py: QmXLTKjqZHL3Jbxei1d4nWCVVT3ugcdWcRt84vrj33KyYP
+  strategy.py: Qmeh8PVR6sukZiaGsCWacZz5u9kwd6FKZocoGqg3LW3ZCQ
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:
 - '*.db'
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
     args:
-      services_interval: 60
+      services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
   fipa:

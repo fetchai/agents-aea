@@ -8,13 +8,13 @@ fingerprint:
   __init__.py: QmaEDrNJBeHCJpbdFckRUhLSBqCXQ6umdipTMpYhqSKxSG
   behaviours.py: QmSm22RFwG4D74mT1CNDSMpzKgTNqAjRkeBHKk6J8AuaUd
   dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
-  handlers.py: QmPP1iVgpbJi9twV6qjua92tEsP2JDMWqjM2bYJdr3vd9z
+  handlers.py: QmZAZSPfNK5VFzQ9reYxTa7GShrehPBNGwbdPSBsYtW5qq
   strategy.py: QmQF5YhSM4BbadrfggAeaoLDYPkSDscEPKj5agPWcuBTwH
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   search:
@@ -41,7 +41,7 @@ models:
       is_ledger_tx: true
       ledger_id: fetchai
       max_buyer_tx_fee: 1
-      max_price: 4
+      max_price: 20
       search_query:
         constraint_type: ==
         search_term: country

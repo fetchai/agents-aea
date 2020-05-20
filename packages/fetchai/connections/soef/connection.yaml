@@ -1,0 +1,28 @@
+name: soef
+author: fetchai
+version: 0.1.0
+description: The soef connection provides a wrapper around the simple OEF and OEF
+  SDK for connection with the simple OEF and OEF search and communication node.
+license: Apache-2.0
+aea_version: '>=0.3.0, <0.4.0'
+fingerprint:
+  __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
+  connection.py: QmbKbrnfZ45A4HruppyPBs8HWAc5pcLFdMzboDDT3NeCoh
+fingerprint_ignore_patterns: []
+protocols:
+- fetchai/fipa:0.2.0
+- fetchai/oef_search:0.1.0
+class_name: SOEFConnection
+config:
+  oef_addr: ${OEF_ADDR:127.0.0.1}
+  oef_port: ${OEF_PORT:10000}
+  soef_addr: soef.fetch.ai
+  soef_port: 9002
+excluded_protocols:
+- fetchai/gym:0.1.0
+restricted_to_protocols: []
+dependencies:
+  colorlog: {}
+  defusedxml: {}
+  oef:
+    version: ==0.8.1

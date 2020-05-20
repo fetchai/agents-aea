@@ -7,18 +7,18 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmRxD2wN5sDs7cNJoKKAmznyLXCGQMcTNnBQXuZfgqkPcM
+  behaviours.py: QmZqWhS3LRUs83Vx9LjoeLoWPBziA7Bf11DcPu97YuhQ6M
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmPqm8bpGGiRDvBE12L2ayLZiUX1LQasZgWTCVrEdbbiyv
-  handlers.py: QmY5nTGu5aP6pmD4iByCBSNe4Ep2YafswH9UoFyRpYcoKF
-  strategy.py: QmfPrx5Z4Bi9cD54qqBvRC3E89yReqUHbVztLNAXXM3fM7
+  handlers.py: QmVwiNnLhpTXfiz6QC1TWpChG4K1vYdUDfLR6KqaYgTK7S
+  strategy.py: QmcFQ9QymhW2SRczxiicsgJbUt2PyqZdb3rmQ3ueqWUmzq
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   car_park_detection:
@@ -43,7 +43,7 @@ models:
     args:
       currency_id: FET
       data_price: 200000000
-      db_is_rel_to_cwd: true
+      db_is_rel_to_cwd: false
       db_rel_dir: ../temp_files
       is_ledger_tx: true
       ledger_id: fetchai

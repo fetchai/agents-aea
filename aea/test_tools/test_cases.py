@@ -28,12 +28,15 @@ import sys
 import tempfile
 import time
 from abc import ABC
+from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
+
+import yaml
 
 from aea.cli import cli
 from aea.cli_gui import DEFAULT_AUTHOR
@@ -74,6 +77,7 @@ class BaseAEATestCase(ABC):
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path("packages")
+    package_registry_src: Path = Path()
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -171,6 +175,20 @@ class BaseAEATestCase(ABC):
         return process
 
     @classmethod
+    def start_subprocess(cls, *args: str, cwd: str = ".") -> subprocess.Popen:
+        """
+        Run python with args as subprocess.
+
+        :param args: CLI args
+
+        :return: subprocess object.
+        """
+        process = cls._run_python_subprocess(*args, cwd=cwd)
+        cls._start_output_read_thread(process)
+        cls._start_error_read_thread(process)
+        return process
+
+    @classmethod
     def start_thread(cls, target: Callable, **kwargs) -> None:
         """
         Start python Thread.
@@ -212,6 +230,55 @@ class BaseAEATestCase(ABC):
         """
         cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
         cls.agents.add(agent_name)
+
+    @classmethod
+    def difference_to_fetched_agent(cls, public_id: str, agent_name: str) -> List[str]:
+        """
+        Compare agent against the one fetched from public id.
+
+        :param public_id: str public id
+        :param agents_name: str agent name.
+
+        :return: list of files differing in the projects
+        """
+
+        def is_allowed_diff_in_agent_config(
+            path_to_fetched_aea, path_to_manually_created_aea
+        ) -> bool:
+            with open(
+                os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
+            ) as file:
+                content1 = yaml.full_load(file)
+            with open(
+                os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
+            ) as file:
+                content2 = yaml.full_load(file)
+            diff_count = 0
+            for key, value in content1.items():
+                if content2[key] != value:
+                    diff_count += 1
+            # allow diff in aea_version, author, description and version
+            return diff_count <= 4
+
+        path_to_manually_created_aea = os.path.join(cls.t, agent_name)
+        new_cwd = os.path.join(cls.t, "fetch_dir")
+        os.mkdir(new_cwd)
+        path_to_fetched_aea = os.path.join(new_cwd, agent_name)
+        registry_tmp_dir = os.path.join(new_cwd, cls.packages_dir_path)
+        shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
+        with cd(new_cwd):
+            cls.run_cli_command("fetch", "--local", public_id, "--alias", agent_name)
+        comp = dircmp(path_to_manually_created_aea, path_to_fetched_aea)
+        file_diff = comp.diff_files
+        if is_allowed_diff_in_agent_config(
+            path_to_fetched_aea, path_to_manually_created_aea
+        ):
+            file_diff.remove("aea-config.yaml")  # won't match!
+        try:
+            shutil.rmtree(new_cwd)
+        except (OSError, IOError):
+            pass
+        return file_diff
 
     @classmethod
     def delete_agents(cls, *agents_names: str) -> None:
@@ -563,9 +630,9 @@ class BaseAEATestCase(ABC):
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
-        registry_tmp_dir = cls.t / "packages"
-        package_registry_src = cls.old_cwd / cls.packages_dir_path
-        shutil.copytree(str(package_registry_src), str(registry_tmp_dir))
+        registry_tmp_dir = cls.t / cls.packages_dir_path
+        cls.package_registry_src = cls.old_cwd / cls.packages_dir_path
+        shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
         cls.stdout = {}
@@ -582,6 +649,7 @@ class BaseAEATestCase(ABC):
         cls.packages_dir_path = Path("packages")
         cls.agents = set()
         cls.current_agent_context = ""
+        cls.package_registry_src = None
         cls.stdout = {}
         cls.stderr = {}
         try:

@@ -15,12 +15,12 @@ fingerprint:
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
   strategy.py: QmZnhxVMzig7CWfixG1JcBjv7eC182ZUi5uq8nvGvUQ69o
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
-  transactions.py: Qmd2FmbsjLKnRpgmJFmKKZjH1CNSw1kemHwftndPXYN6ny
+  transactions.py: QmeJLjPpsPFYj7q12hts56G5MRckn4fHPsWQXY9vqZ686x
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.3.0
 protocols:
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   clean_up:

@@ -16,12 +16,12 @@ contracts:
 - fetchai/erc1155:0.3.0
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   service_registration:
     args:
-      services_interval: 60
+      services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
   default:

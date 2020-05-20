@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -55,7 +56,7 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        fipa_dialogue = dialogues.update(fipa_msg)
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
         if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
@@ -134,16 +135,6 @@ class FIPAHandler(Handler):
             )
             dialogue.weather_data = weather_data
             dialogue.proposal = proposal
-            # self.context.logger.info(
-            #     "dialogue type: {}".format(
-            #         type(dialogue)
-            #     )
-            # )
-            # self.context.logger.info(
-            #     "dialogue.proposal: {}".format(
-            #         dialogue.proposal
-            #     )
-            # )
             self.context.logger.info(
                 "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
                     self.context.agent_name, proposal.values, msg.counterparty[-5:],
@@ -156,9 +147,7 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            # proposal_msg.counterparty = msg.counterparty
-            # dialogues.update(proposal_msg)
-            dialogue.outgoing_safe_extend(proposal_msg)
+            dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -177,9 +166,7 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            # decline_msg.counterparty = msg.counterparty
-            # dialogues.update(decline_msg)
-            dialogue.outgoing_safe_extend(decline_msg)
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -218,7 +205,6 @@ class FIPAHandler(Handler):
         :return: None
         """
         self.context.logger.info("type of dialogue is {}".format(type(dialogue)))
-        dialogues = cast(Dialogues, self.context.dialogues)
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
         self.context.logger.info(
@@ -241,7 +227,7 @@ class FIPAHandler(Handler):
             info={"address": self.context.agent_addresses[identifier]},
         )
         match_accept_msg.counterparty = msg.counterparty
-        dialogues.update(match_accept_msg)
+        dialogue.update(match_accept_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -279,14 +265,22 @@ class FIPAHandler(Handler):
             )
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
-            is_valid = self.context.ledger_apis.is_tx_valid(
-                ledger_id,
-                tx_digest,
-                self.context.agent_addresses[ledger_id],
-                msg.counterparty,
-                cast(str, proposal.values.get("tx_nonce")),
-                cast(int, proposal.values.get("price")),
-            )
+            not_settled = True
+            time_elapsed = 0
+            # TODO: fix blocking code; move into behaviour!
+            while not_settled and time_elapsed < 60:
+                is_valid = self.context.ledger_apis.is_tx_valid(
+                    ledger_id,
+                    tx_digest,
+                    self.context.agent_addresses[ledger_id],
+                    msg.counterparty,
+                    cast(str, proposal.values.get("tx_nonce")),
+                    cast(int, proposal.values.get("price")),
+                )
+                not_settled = not is_valid
+                if not_settled:
+                    time.sleep(2)
+                    time_elapsed += 2
             # TODO: check the tx_digest references a transaction with the correct terms
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
@@ -308,7 +302,7 @@ class FIPAHandler(Handler):
                     info=dialogue.weather_data,
                 )
                 inform_msg.counterparty = msg.counterparty
-                dialogues.update(inform_msg)
+                dialogue.update(inform_msg)
                 self.context.outbox.put_message(
                     to=msg.counterparty,
                     sender=self.context.agent_address,
@@ -334,7 +328,7 @@ class FIPAHandler(Handler):
                 info=dialogue.weather_data,
             )
             inform_msg.counterparty = msg.counterparty
-            dialogues.update(inform_msg)
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,

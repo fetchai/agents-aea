@@ -31,7 +31,7 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 from aea.skills.base import SkillComponent, SkillContext
@@ -113,16 +113,22 @@ class TestSkillContext:
 
     def test_agent_ownership_state(self):
         """Test the ownership state."""
-        assert isinstance(self.skill_context.agent_ownership_state, OwnershipState)
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.ownership_state,
+            OwnershipState,
+        )
 
     def test_agent_preferences(self):
         """Test the agents_preferences."""
-        assert isinstance(self.skill_context.agent_preferences, Preferences)
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.preferences, Preferences
+        )
 
     def test_agent_is_ready_to_pursuit_goals(self):
         """Test if the agent is ready to pursuit his goals."""
         assert isinstance(
-            self.skill_context.agent_goal_pursuit_readiness, GoalPursuitReadiness
+            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
+            GoalPursuitReadiness,
         )
 
     def test_message_in_queue(self):
