@@ -26,14 +26,12 @@ from typing import Optional, cast
 import click
 
 from aea.cli.add import _add_item
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
-    _try_get_item_source_path,
-    clean_after,
-    try_to_load_agent_config,
-)
 from aea.cli.registry.fetch import fetch_agent
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.package_utils import _try_get_item_source_path
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 

@@ -167,7 +167,7 @@ class Context:
         return dependencies
 
 
-pass_ctx = click.make_pass_decorator(Context)
+from aea.cli.utils.decorators import pass_ctx
 
 
 def try_to_load_agent_config(
