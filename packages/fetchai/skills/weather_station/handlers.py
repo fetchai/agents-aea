@@ -246,6 +246,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        dialogues = cast(Dialogues, self.context.dialogues)
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
         self.context.logger.info(

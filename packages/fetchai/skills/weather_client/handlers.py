@@ -121,6 +121,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        dialogues = cast(Dialogues, self.context.dialogues)
         new_message_id = msg.message_id + 1
         new_target_id = msg.message_id
         proposal = msg.proposal
@@ -207,6 +208,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        dialogues = cast(Dialogues, self.context.dialogues)
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx:
             self.context.logger.info(

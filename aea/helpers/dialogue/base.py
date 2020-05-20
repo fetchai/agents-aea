@@ -288,6 +288,7 @@ class Dialogue(ABC):
         :param message_id_to_find: the id of the message
         :return: the message if it exists, None otherwise
         """
+
         result = None  # type: Optional[Message]
         list_of_all_messages = self._outgoing_messages + self._incoming_messages
         for message in list_of_all_messages:
@@ -768,6 +769,7 @@ class Dialogues:
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
         pass
+
 
     # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
