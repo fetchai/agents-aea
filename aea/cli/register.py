@@ -21,10 +21,10 @@
 
 import click
 
-from aea.cli.utils.config import _update_cli_config
-from aea.cli.utils.package_utils import validate_author_name
 from aea.cli.registry.registration import register as register_new_account
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.utils.config import _update_cli_config
+from aea.cli.utils.package_utils import validate_author_name
 
 
 def do_register(

@@ -22,15 +22,6 @@
 import click
 
 from aea import __version__
-# from aea.cli.common import (
-#     AEA_LOGO,
-#     AUTHOR_KEY,
-#     Context,
-#     _get_or_create_cli_config,
-#     _update_cli_config,
-#     pass_ctx,
-#     validate_author_name,
-# )
 from aea.cli.login import do_login
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
