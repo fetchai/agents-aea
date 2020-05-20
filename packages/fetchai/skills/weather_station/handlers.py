@@ -56,7 +56,7 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        fipa_dialogue = dialogues.update(fipa_msg)
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
         if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
@@ -205,7 +205,6 @@ class FIPAHandler(Handler):
         :return: None
         """
         self.context.logger.info("type of dialogue is {}".format(type(dialogue)))
-        dialogues = cast(Dialogues, self.context.dialogues)
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
         self.context.logger.info(
@@ -228,7 +227,7 @@ class FIPAHandler(Handler):
             info={"address": self.context.agent_addresses[identifier]},
         )
         match_accept_msg.counterparty = msg.counterparty
-        dialogues.update(match_accept_msg)
+        dialogue.update(match_accept_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -303,7 +302,7 @@ class FIPAHandler(Handler):
                     info=dialogue.weather_data,
                 )
                 inform_msg.counterparty = msg.counterparty
-                dialogues.update(inform_msg)
+                dialogue.update(inform_msg)
                 self.context.outbox.put_message(
                     to=msg.counterparty,
                     sender=self.context.agent_address,
@@ -329,7 +328,7 @@ class FIPAHandler(Handler):
                 info=dialogue.weather_data,
             )
             inform_msg.counterparty = msg.counterparty
-            dialogues.update(inform_msg)
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,

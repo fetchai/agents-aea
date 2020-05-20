@@ -112,6 +112,12 @@ class Message:
         """
         self._body = body
 
+    @property
+    def message_id(self) -> int:
+        """Get the message id."""
+        assert self.is_set("message_id"), "message_id is not set!"
+        return cast(int, self.get("message_id"))
+
     def set(self, key: str, value: Any) -> None:
         """
         Set key and value pair.

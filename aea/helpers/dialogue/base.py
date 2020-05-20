@@ -157,8 +157,8 @@ class Dialogue(ABC):
     def __init__(
         self,
         dialogue_label: DialogueLabel,
-        agent_address: Address = None,
-        role: Role = None,
+        agent_address: Optional[Address] = None,
+        role: Optional[Role] = None,
     ) -> None:
         """
         Initialize a dialogue.
@@ -263,33 +263,21 @@ class Dialogue(ABC):
 
         :return: the last message if it exists, None otherwise
         """
+        last_message = None  # type: Optional[Message]
         if (
             self.last_incoming_message is not None
             and self.last_outgoing_message is not None
         ):
-            last_outgoing_message_message_id = cast(
-                int, self.last_outgoing_message.get("message_id")
-            )
-            last_incoming_message_message_id = cast(
-                int, self.last_incoming_message.get("message_id")
-            )
             last_message = (
                 self.last_outgoing_message
-                if last_outgoing_message_message_id > last_incoming_message_message_id
+                if self.last_outgoing_message.message_id
+                > self.last_incoming_message.message_id
                 else self.last_incoming_message
-            )  # type: Optional[Message]
-        elif (
-            self.last_incoming_message is not None
-            and self.last_outgoing_message is None
-        ):
+            )
+        elif self.last_incoming_message is not None:
             last_message = self.last_incoming_message
-        elif (
-            self.last_incoming_message is None
-            and self.last_outgoing_message is not None
-        ):
+        elif self.last_outgoing_message is not None:
             last_message = self.last_outgoing_message
-        else:
-            last_message = None
 
         return last_message
 
@@ -300,22 +288,13 @@ class Dialogue(ABC):
         :param message_id_to_find: the id of the message
         :return: the message if it exists, None otherwise
         """
-        result = None
-        if self._outgoing_messages is not None and self._incoming_messages is not None:
-            list_of_all_messages = self._outgoing_messages + self._incoming_messages
-        elif self._outgoing_messages is None and self._incoming_messages is not None:
-            list_of_all_messages = self._incoming_messages
-        elif self._outgoing_messages is not None and self._incoming_messages is None:
-            list_of_all_messages = self._outgoing_messages
-        else:
-            list_of_all_messages = None
 
-        if list_of_all_messages is not None:
-            for message in list_of_all_messages:
-                message_id = cast(int, message.get("message_id"))
-                if message_id == message_id_to_find:
-                    result = message
-                    break
+        result = None  # type: Optional[Message]
+        list_of_all_messages = self._outgoing_messages + self._incoming_messages
+        for message in list_of_all_messages:
+            if message.message_id == message_id_to_find:
+                result = message
+                break
 
         return result
 
@@ -364,7 +343,7 @@ class Dialogue(ABC):
         )
 
         if not self.is_empty:
-            message_id = cast(int, second_message.get("message_id"))
+            message_id = second_message.message_id
 
             if (
                 self.dialogue_label == self_initiated_dialogue_label
@@ -411,7 +390,7 @@ class Dialogue(ABC):
         :param message: the message to be validated
         :return: True if valid, False otherwise.
         """
-        message_id = cast(int, message.get("message_id"))
+        message_id = message.message_id
         target = cast(int, message.get("target"))
         performative = message.get("performative")
 
@@ -775,7 +754,7 @@ class Dialogues:
         self._dialogue_nonce += 1
         return self._dialogue_nonce
 
-    # ToDo the following methods are left for backwards compatibility reasons and will be removed in the future
+    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def is_belonging_to_registered_dialogue(
         self, msg: Message, agent_addr: Address
     ) -> bool:
@@ -791,6 +770,8 @@ class Dialogues:
         """
         pass
 
+
+    # TODO the following method is left for backwards compatibility reasons and will be removed in the future
     def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
         """
         DEPRECATED
