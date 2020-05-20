@@ -26,7 +26,7 @@ from typing import Dict, List, cast
 
 import click
 
-from aea.cli.loggers import default_logging_config
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
     Dependencies,
@@ -35,10 +35,6 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
-
-
-logger = logging.getLogger("aea")
-logger = default_logging_config(logger)
 
 
 class Context:
