@@ -26,12 +26,9 @@ import click
 
 import yaml
 
-from aea.cli.common import (
-    Context,
-    check_aea_project,
-    from_string_to_type,
-    pass_ctx,
-)
+from aea.cli.utils.constants import from_string_to_type
+from aea.cli.utils.context import Context, pass_ctx
+from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
