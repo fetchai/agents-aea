@@ -246,8 +246,8 @@ class Libp2pNode:
         which = shutil.which("go")
         if which is None:
             raise Exception("Libp2p Go should me installed")
-        else:
-            raise Exception("Libp2 Go is installed")
+        #else:
+        #    raise Exception("Libp2 Go is installed")
         
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -261,6 +261,9 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
+        logger.info("go libp2p log file *********************************************************************")
+        with open(self.log_file, "r") as f:
+            logger.info(f.read())
         if proc.returncode != 0:
             raise Exception("Error while downloading golang dependencies and building it: {}".format(proc.returncode))
         logger.info("Finished downloading golang dependencies.")
@@ -348,6 +351,9 @@ class Libp2pNode:
         )
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
+        logger.info("go libp2p log file *********************************************************************")
+        with open(self.log_file, "r") as f:
+            logger.info(f.read())
 
         logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
