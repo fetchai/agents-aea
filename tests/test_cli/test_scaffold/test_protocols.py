@@ -32,7 +32,6 @@ from jsonschema import Draft4Validator, ValidationError
 
 import yaml
 
-import aea.cli.common
 import aea.configurations.base
 from aea import AEA_DIR
 from aea.cli import cli
@@ -59,8 +58,6 @@ class TestScaffoldProtocol:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
