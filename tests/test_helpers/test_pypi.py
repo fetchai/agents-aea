@@ -22,9 +22,8 @@ from packaging.specifiers import SpecifierSet
 from aea.helpers.pypi import is_satisfiable
 
 
-def test_is_satisfiable():
-    """Test the 'is_satisfiable' function."""
-
+def test_is_satisfiable_common_cases():
+    """Test the 'is_satisfiable' function with common cases."""
     assert is_satisfiable(SpecifierSet("<=1.0,>1.1, >0.9")) is False
     assert is_satisfiable(SpecifierSet("==1.0,!=1.0")) is False
     assert is_satisfiable(SpecifierSet("!=0.9,!=1.0")) is True
@@ -32,6 +31,10 @@ def test_is_satisfiable():
     assert is_satisfiable(SpecifierSet("<=1.0,>1.0")) is False
     assert is_satisfiable(SpecifierSet("<1.0,<=1.0,>1.0")) is False
     assert is_satisfiable(SpecifierSet(">1.0,>=1.0,<1.0")) is False
+
+
+def test_is_satisfiable_with_compatibility_constraints():
+    """Test the 'is_satisfiable' function with ~= constraints."""
     assert is_satisfiable(SpecifierSet("~=1.1,==2.0")) is False
     assert is_satisfiable(SpecifierSet("~=1.1,==1.0")) is False
     assert is_satisfiable(SpecifierSet("~=1.1,<=1.1")) is True
@@ -40,5 +43,7 @@ def test_is_satisfiable():
     assert is_satisfiable(SpecifierSet("~=1.1,==1.2")) is True
     assert is_satisfiable(SpecifierSet("~=1.1,>1.2")) is True
 
-    # We ignore legacy versions:
+
+def test_is_satisfiable_with_legacy_version():
+    """Test the 'is_satisfiable' function with legacy versions."""
     assert is_satisfiable(SpecifierSet("==1.0,==1.*")) is True
