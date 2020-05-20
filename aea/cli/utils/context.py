@@ -19,12 +19,8 @@
 
 """A module with context tools of the aea cli."""
 
-import logging
-import logging.config
 from pathlib import Path
 from typing import Dict, List, cast
-
-import click
 
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
@@ -127,6 +123,3 @@ class Context:
             dependencies.update(self._get_item_dependencies("contract", contract_id))
 
         return dependencies
-
-
-pass_ctx = click.make_pass_decorator(Context)

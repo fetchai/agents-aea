@@ -32,7 +32,7 @@ from jsonschema import ValidationError
 import yaml
 
 from aea import AEA_DIR
-from aea.cli.utils.constants import CLI_CONFIG_PATH, NOT_PERMITTED_AUTHORS
+from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
@@ -316,46 +316,6 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
         )
 
     return package_path
-
-
-def _init_cli_config() -> None:
-    """
-    Create cli config folder and file.
-
-    :return: None
-    """
-    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
-    if not os.path.exists(conf_dir):
-        os.makedirs(conf_dir)
-    with open(CLI_CONFIG_PATH, "w+") as f:
-        yaml.dump({}, f, default_flow_style=False)
-
-
-def _update_cli_config(dict_conf: Dict) -> None:
-    """
-    Update CLI config and write to yaml file.
-
-    :param dict_conf: dict config to write.
-
-    :return: None
-    """
-    config = _get_or_create_cli_config()
-    config.update(dict_conf)
-    with open(CLI_CONFIG_PATH, "w") as f:
-        yaml.dump(config, f, default_flow_style=False)
-
-
-def _get_or_create_cli_config() -> Dict:
-    """
-    Read or create CLI config from yaml file.
-
-    :return: dict CLI config.
-    """
-    try:
-        return _load_yaml(CLI_CONFIG_PATH)
-    except FileNotFoundError:
-        _init_cli_config()
-    return _load_yaml(CLI_CONFIG_PATH)
 
 
 def _load_yaml(filepath: str) -> Dict:

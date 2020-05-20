@@ -41,6 +41,9 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoaders
 
 
+pass_ctx = click.make_pass_decorator(Context)
+
+
 def _validate_config_consistency(ctx: Context):
     """
     Validate fingerprints for every agent component.

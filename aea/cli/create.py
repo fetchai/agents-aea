@@ -26,14 +26,12 @@ import click
 
 import aea
 from aea.cli.add import _add_item
-from aea.cli.common import (
-    AUTHOR_KEY,
-    Context,
-    _get_or_create_cli_config,
-    clean_after,
-    logger,
-)
 from aea.cli.init import do_init
+from aea.cli.utils.config import _get_or_create_cli_config
+from aea.cli.utils.constants import AUTHOR_KEY
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
