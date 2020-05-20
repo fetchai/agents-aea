@@ -26,24 +26,21 @@ from typing import Dict, List, cast
 import click
 
 from aea import AEA_DIR
-from aea.cli.common import (
-    ConfigLoader,
-    Context,
-    _format_items,
-    _retrieve_details,
-    logger,
-    pass_ctx,
-    try_to_load_agent_config,
-)
 from aea.cli.registry.utils import request_api
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import pass_ctx
+from aea.cli.utils.formatting import _format_items, _retrieve_details
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE
 )
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
