@@ -40,7 +40,6 @@ from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.launch import launch
 from aea.cli.list import list as _list
-from aea.cli.loggers import simple_verbosity_option
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish
@@ -53,7 +52,7 @@ from aea.cli.search import search
 from aea.cli.utils.click_utils import AgentDirectory
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.loggers import logger
+from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.cli.utils.package_utils import _verify_or_create_private_keys
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.helpers import (
