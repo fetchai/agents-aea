@@ -264,8 +264,11 @@ class Libp2pNode:
         print("go libp2p log file *********************************************************************")
         with open(self.log_file, "r") as f:
             logger.info(f.read())
+        node_log = ""
+        with open(self.log_file, "r") as f:
+            node_log = f.read()
         if proc.returncode != 0:
-            raise Exception("Error while downloading golang dependencies and building it: {}".format(proc.returncode))
+            raise Exception("Error while downloading golang dependencies and building it: {}, {}".format(proc.returncode, node_log))
         logger.info("Finished downloading golang dependencies.")
 
         # setup fifos

@@ -29,12 +29,17 @@ from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.p2p_libp2p.connection import MultiAddr, P2PLibp2pConnection, Uri
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    MultiAddr,
+    P2PLibp2pConnection,
+    Uri,
+)
 
 DEFAULT_PORT = 10234
 DEFAULT_HOST = "127.0.0.1"
 
 DEFAULT_NET_SIZE = 4
+
 
 def _make_libp2p_connection(
     port: Optional[int] = DEFAULT_PORT,
@@ -45,7 +50,11 @@ def _make_libp2p_connection(
     if os.path.exists(log_file):
         os.remove(log_file)
     return P2PLibp2pConnection(
-        FetchAICrypto().address, FetchAICrypto(), Uri("{}:{}".format(host, port)), entry_peers, log_file
+        FetchAICrypto().address,
+        FetchAICrypto(),
+        Uri("{}:{}".format(host, port)),
+        entry_peers,
+        log_file,
     )
 
 
@@ -88,14 +97,16 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer1.connect()
-        
-        time.sleep(2) 
+
+        time.sleep(2)
         genesis_peer = cls.connection1.node.multiaddrs
-        
-        cls.connection2 = _make_libp2p_connection(port=DEFAULT_PORT + 2, entry_peers=genesis_peer)
+
+        cls.connection2 = _make_libp2p_connection(
+            port=DEFAULT_PORT + 2, entry_peers=genesis_peer
+        )
         cls.multiplexer2 = Multiplexer([cls.connection2])
         cls.multiplexer2.connect()
-    
+
     def skip_test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
@@ -167,6 +178,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.multiplexer1.disconnect()
         cls.multiplexer2.disconnect()
 
+
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
@@ -177,20 +189,22 @@ class TestP2PLibp2pConnectionRouting:
         cls.connection_genesis = _make_libp2p_connection(port_genesis)
         cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
         cls.multiplexer_genesis.connect()
-        
-        time.sleep(2) 
+
+        time.sleep(2)
         genesis_peer = cls.connection_genesis.node.multiaddrs
-        
+
         cls.connections = []
         cls.multiplexers = []
 
         port = port_genesis
         for i in range(DEFAULT_NET_SIZE):
             port += 1
-            cls.connections.append(_make_libp2p_connection(port=port, entry_peers=genesis_peer))
+            cls.connections.append(
+                _make_libp2p_connection(port=port, entry_peers=genesis_peer)
+            )
             cls.multiplexers.append(Multiplexer([cls.connections[i]]))
             cls.multiplexers[i].connect()
-    
+
     def skip_test_connection_is_established(self):
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
@@ -205,7 +219,7 @@ class TestP2PLibp2pConnectionRouting:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        
+
         for source in range(len(self.multiplexers)):
             for destination in range(len(self.multiplexers)):
                 if destination == source:
@@ -218,7 +232,9 @@ class TestP2PLibp2pConnectionRouting:
                 )
 
                 self.multiplexers[source].put(envelope)
-                delivered_envelope = self.multiplexers[destination].get(block=True, timeout=10)
+                delivered_envelope = self.multiplexers[destination].get(
+                    block=True, timeout=10
+                )
 
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
@@ -232,4 +248,3 @@ class TestP2PLibp2pConnectionRouting:
         for multiplexer in cls.multiplexers:
             multiplexer.disconnect()
         cls.multiplexer_genesis.disconnect()
-
