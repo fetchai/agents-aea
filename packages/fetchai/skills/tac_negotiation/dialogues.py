@@ -23,9 +23,64 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
+from typing import cast
+
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.search.models import Query
+from aea.mail.base import Address
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.skills.tac_negotiation.helpers import (
+    SUPPLY_DATAMODEL_NAME,
+)
+
+
+class Dialogue(FipaDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        fipa_message = cast(FipaMessage, message)
+        query = cast(Query, fipa_message.query)
+        if query.model is not None:
+            is_seller = (
+                query.model.name == SUPPLY_DATAMODEL_NAME
+            )  # the counterparty is querying for supply
+            if is_seller:
+                return FipaDialogue.AgentRole.SELLER
+            else:
+                return FipaDialogue.AgentRole.BUYER
+        else:
+            raise ValueError("Query has no data model!")
 
 
 class Dialogues(Model, FipaDialogues):
@@ -38,4 +93,24 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)
+
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> Dialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = Dialogue(
+            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        return dialogue

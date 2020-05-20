@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains the handlers of a thermometer AEA."""
 
 import time
 from typing import Optional, cast
@@ -36,7 +36,7 @@ from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -51,7 +51,6 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
 
         # recover dialogue
@@ -100,7 +99,7 @@ class FIPAHandler(Handler):
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": b""},
-        )
+        )  # TODO: send FipaSerializer().encode(msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -136,7 +135,7 @@ class FIPAHandler(Handler):
             dialogue.proposal = proposal
             self.context.logger.info(
                 "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
-                    self.context.agent_name, msg.counterparty[-5:], proposal.values
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:]
                 )
             )
             proposal_msg = FipaMessage(
@@ -240,7 +239,7 @@ class FIPAHandler(Handler):
         Handle the INFORM.
 
         If the INFORM message contains the transaction_digest then verify that it is settled, otherwise do nothing.
-        If the transaction is settled send the temperature data, otherwise do nothing.
+        If the transaction is settled, send the temperature data, otherwise do nothing.
 
         :param msg: the message
         :param dialogue: the dialogue object
@@ -281,6 +280,7 @@ class FIPAHandler(Handler):
                 if not_settled:
                     time.sleep(2)
                     time_elapsed += 2
+            # TODO: check the tx_digest references a transaction with the correct terms
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))

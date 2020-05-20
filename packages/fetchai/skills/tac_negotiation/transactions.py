@@ -36,6 +36,7 @@ from aea.helpers.search.models import Description
 from aea.mail.base import Address
 from aea.skills.base import Model
 
+from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
 from packages.fetchai.skills.tac_negotiation.helpers import tx_hash_from_values
 
 MessageId = int
@@ -96,7 +97,7 @@ class Transactions(Model):
         performative: TransactionMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
-        is_seller: bool,
+        role: Dialogue.AgentRole,
         agent_addr: Address,
     ) -> TransactionMessage:
         """
@@ -104,10 +105,15 @@ class Transactions(Model):
 
         :param proposal_description: the description of the proposal
         :param dialogue_label: the dialogue label
-        :param is_seller: the agent is a seller
+        :param role: the role of the agent (seller or buyer)
         :param agent_addr: the address of the agent
         :return: a transaction message
         """
+        if role == Dialogue.AgentRole.SELLER:
+            is_seller = True
+        else:
+            is_seller = False
+
         sender_tx_fee = (
             proposal_description.values["seller_tx_fee"]
             if is_seller
@@ -307,17 +313,22 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: TransactionMessage, as_seller: bool
+        self, transaction_msg: TransactionMessage, role: Dialogue.AgentRole
     ) -> None:
         """
         Add a lock (in the form of a transaction).
 
         :param transaction_msg: the transaction message
-        :param as_seller: whether the agent is a seller or not
+        :param role: the role of the agent (seller or buyer)
         :raise AssertionError: if the transaction is already present.
 
         :return: None
         """
+        if role == Dialogue.AgentRole.SELLER:
+            as_seller = True
+        else:
+            as_seller = False
+
         transaction_id = transaction_msg.tx_id
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)

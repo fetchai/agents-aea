@@ -29,9 +29,10 @@ from typing import Optional
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Model
-from aea.mail.base import Address
+
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 

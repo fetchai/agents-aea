@@ -25,21 +25,15 @@ from unittest import mock
 
 import pytest
 
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.mail.base import Envelope
+from aea.mail.base import Address, Envelope
+from aea.protocols.base import Message
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
-
-
-from typing import Optional
-
-from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import DialogueLabel
-from aea.protocols.base import Message
-from aea.skills.base import Model
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 

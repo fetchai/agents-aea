@@ -39,7 +39,7 @@ from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -58,7 +58,6 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
 
         # recover dialogue
@@ -103,7 +102,7 @@ class FIPAHandler(Handler):
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": b""},
-        )
+        )  # TODO: send back FipaSerializer().encode(msg))
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -296,7 +295,7 @@ class FIPAHandler(Handler):
 
 
 class OEFSearchHandler(Handler):
-    """This class handles OEF search responses."""
+    """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 

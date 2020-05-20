@@ -28,6 +28,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import Model
 
+from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
     build_goods_query,
@@ -209,16 +210,21 @@ class Strategy(Model):
             return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
-        self, query: Query, is_seller: bool
+        self, query: Query, role: Dialogue.AgentRole
     ) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
         :param query: the query for which to build the proposal
-        :is_seller: whether the agent making the proposal is a seller or not
+        :param role: the role of the agent making the proposal (seller or buyer)
 
         :return: a description
         """
+        if role == Dialogue.AgentRole.SELLER:
+            is_seller = True
+        else:
+            is_seller = False
+
         own_service_description = self.get_own_service_description(
             is_supply=is_seller, is_search_description=False
         )
@@ -311,7 +317,7 @@ class Strategy(Model):
         return proposals
 
     def is_profitable_transaction(
-        self, transaction_msg: TransactionMessage, is_seller: bool
+        self, transaction_msg: TransactionMessage, role: Dialogue.AgentRole
     ) -> bool:
         """
         Check if a transaction is profitable.
@@ -322,10 +328,15 @@ class Strategy(Model):
         - check that we gain score.
 
         :param transaction_msg: the transaction_msg
-        :param is_seller: the bool indicating whether the agent is a seller.
+        :param role: the role of the agent (seller or buyer)
 
         :return: True if the transaction is good (as stated above), False otherwise.
         """
+        if role == Dialogue.AgentRole.SELLER:
+            is_seller = True
+        else:
+            is_seller = False
+
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
