@@ -25,15 +25,11 @@ from typing import cast
 
 import click
 
-from aea.cli.common import (
-    Context,
-    DEFAULT_AEA_CONFIG_FILE,
-    _try_get_item_source_path,
-    _try_get_item_target_path,
-    check_aea_project,
-)
 from aea.cli.registry.publish import publish_agent
-from aea.configurations.base import CRUDCollection, PublicId
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.package_utils import _try_get_item_source_path, _try_get_item_target_path
+from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
