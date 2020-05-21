@@ -809,7 +809,7 @@ class SOEFChannel:
                 url = self.base_url + "/" + unique_page_address
                 params = {"token": unique_token, "command": "acknowledge"}
                 response = requests.get(url=url, params=params)
-                if response.text == "<response><success>1</success></response>":
+                if "<response><success>1</success></response>" in response.text:
                     logger.debug("Service registration SUCCESS")
                     self.service_name_to_page_address[
                         service_name
@@ -850,7 +850,7 @@ class SOEFChannel:
                 "command": "set_position",
             }
             response = requests.get(url=url, params=params)
-            if response.text == "<response><success>1</success></response>":
+            if "<response><success>1</success></response>" in response.text:
                 logger.debug("Location registration SUCCESS")
             else:
                 raise ValueError("Location registration error.")
