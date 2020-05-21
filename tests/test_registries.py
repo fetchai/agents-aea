@@ -55,7 +55,7 @@ class TestContractRegistry:
     def setup_class(cls):
         """Set the tests up."""
         cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
-        cls.mocked_logger = cls.patch.__enter__()
+        cls.mocked_logger = cls.patch.start()
 
         cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
@@ -83,7 +83,7 @@ class TestContractRegistry:
         assert set(c.id for c in contracts) == self.expected_contract_ids
 
     def test_fetch(self):
-        """ Test that the `fetch` method works as expected."""
+        """Test that the `fetch` method works as expected."""
         contract_id = PublicId.from_str("fetchai/erc1155:0.3.0")
         contract = self.registry.fetch(contract_id)
         assert isinstance(contract, Contract)
@@ -120,7 +120,7 @@ class TestProtocolRegistry:
     def setup_class(cls):
         """Set the tests up."""
         cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
-        cls.mocked_logger = cls.patch.__enter__()
+        cls.mocked_logger = cls.patch.start()
 
         cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
