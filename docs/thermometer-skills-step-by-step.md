@@ -264,7 +264,7 @@ from packages.fetchai.skills.thermometer.strategy import Strategy
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -279,42 +279,24 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    message.counterparty,
-                    dialogue_reference=dialogue_reference,
-                    is_seller=True,
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         # handle message
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, dialogue)
+            self._handle_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -352,7 +334,7 @@ Below the `teardown` function, we continue by adding the following code:
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": b""},
-        )
+        )  # TODO: send FipaSerializer().encode(msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -394,7 +376,7 @@ The next code block handles the CFP message, paste the code below the `_handle_u
             dialogue.proposal = proposal
             self.context.logger.info(
                 "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
-                    self.context.agent_name, proposal.values, msg.counterparty[-5:],
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:]
                 )
             )
             proposal_msg = FipaMessage(
@@ -404,7 +386,8 @@ The next code block handles the CFP message, paste the code below the `_handle_u
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            dialogue.outgoing_extend(proposal_msg)
+            proposal_msg.counterparty = msg.counterparty
+            dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -423,7 +406,8 @@ The next code block handles the CFP message, paste the code below the `_handle_u
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            dialogue.outgoing_extend(decline_msg)
+            decline_msg.counterparty = msg.counterparty
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -493,7 +477,8 @@ Alternatively, we might receive an `Accept` message. Inorder to handle this opti
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"address": self.context.agent_addresses[identifier]},
         )
-        dialogue.outgoing_extend(match_accept_msg)
+        match_accept_msg.counterparty = msg.counterparty
+        dialogue.update(match_accept_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -511,7 +496,7 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
         Handle the INFORM.
 
         If the INFORM message contains the transaction_digest then verify that it is settled, otherwise do nothing.
-        If the transaction is settled send the temperature data, otherwise do nothing.
+        If the transaction is settled, send the temperature data, otherwise do nothing.
 
         :param msg: the message
         :param dialogue: the dialogue object
@@ -527,6 +512,7 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
 
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
+            is_valid = False
             tx_digest = msg.info["transaction_digest"]
             self.context.logger.info(
                 "[{}]: checking whether transaction={} has been received ...".format(
@@ -551,6 +537,7 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
                 if not_settled:
                     time.sleep(2)
                     time_elapsed += 2
+            # TODO: check the tx_digest references a transaction with the correct terms
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
@@ -570,7 +557,8 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
                     performative=FipaMessage.Performative.INFORM,
                     info=dialogue.temp_data,
                 )
-                dialogue.outgoing_extend(inform_msg)
+                inform_msg.counterparty = msg.counterparty
+                dialogue.update(inform_msg)
                 self.context.outbox.put_message(
                     to=msg.counterparty,
                     sender=self.context.agent_address,
@@ -595,7 +583,8 @@ Lastly, when we receive the `Inform` message it means that the client has sent t
                 performative=FipaMessage.Performative.INFORM,
                 info=dialogue.temp_data,
             )
-            dialogue.outgoing_extend(inform_msg)
+            inform_msg.counterparty = msg.counterparty
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -772,8 +761,11 @@ So create a new file and name it dialogues.py. Inside this file add the followin
 ``` python
 from typing import Dict, Optional
 
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.mail.base import Address
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -782,18 +774,36 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
         """
-        Initialize a dialogue label.
+        Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
         self.temp_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        return FipaDialogue.AgentRole.SELLER
 
 
 class Dialogues(Model, FipaDialogues):
@@ -806,7 +816,27 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)
+
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> Dialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = Dialogue(
+            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        return dialogue
 ```
 
 The dialogues class stores dialogue with each `client_aea` in a list so we can have access to previous messages and 
@@ -873,7 +903,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.2.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}
@@ -1036,7 +1066,7 @@ from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -1055,31 +1085,24 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         # handle message
         if fipa_msg.performative == FipaMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, dialogue)
+            self._handle_propose(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            self._handle_match_accept(fipa_msg, dialogue)
+            self._handle_match_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -1109,7 +1132,7 @@ You will see that we are following similar logic when we develop the client’s 
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": b""},
-        )
+        )  # TODO: send back FipaSerializer().encode(msg))
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -1129,7 +1152,7 @@ The above code handles the unidentified dialogues. And responds with an error me
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target_id = msg.message_id
+        new_target = msg.message_id
         proposal = msg.proposal
         self.context.logger.info(
             "[{}]: received proposal={} from sender={}".format(
@@ -1150,10 +1173,11 @@ The above code handles the unidentified dialogues. And responds with an error me
             accept_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                target=new_target_id,
+                target=new_target,
                 performative=FipaMessage.Performative.ACCEPT,
             )
-            dialogue.outgoing_extend(accept_msg)
+            accept_msg.counterparty = msg.counterparty
+            dialogue.update(accept_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -1169,10 +1193,11 @@ The above code handles the unidentified dialogues. And responds with an error me
             decline_msg = FipaMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                target=new_target_id,
+                target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            dialogue.outgoing_extend(decline_msg)
+            decline_msg.counterparty = msg.counterparty
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -1262,7 +1287,8 @@ The above code terminates each dialogue with the specific aea and stores the ste
                 performative=FipaMessage.Performative.INFORM,
                 info={"Done": "Sending payment via bank transfer"},
             )
-            dialogue.outgoing_extend(inform_msg)
+            inform_msg.counterparty = msg.counterparty
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -1317,7 +1343,7 @@ To handle the [OEF search node](../oef-ledger) response on our search request ad
 
 ``` python 
 class OEFSearchHandler(Handler):
-    """This class handles OEF search responses."""
+    """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -1365,9 +1391,6 @@ class OEFSearchHandler(Handler):
             # pick first agent found
             opponent_addr = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(
-                opponent_addr, self.context.agent_address, is_seller=False
-            )
             query = strategy.get_service_query()
             self.context.logger.info(
                 "[{}]: sending CFP to agent={}".format(
@@ -1376,12 +1399,13 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg = FipaMessage(
                 message_id=Dialogue.STARTING_MESSAGE_ID,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
                 performative=FipaMessage.Performative.CFP,
                 target=Dialogue.STARTING_TARGET,
                 query=query,
             )
-            dialogue.outgoing_extend(cfp_msg)
+            cfp_msg.counterparty = opponent_addr
+            dialogues.update(cfp_msg)
             self.context.outbox.put_message(
                 to=opponent_addr,
                 sender=self.context.agent_address,
@@ -1584,8 +1608,11 @@ When we are negotiating with other AEA we would like to keep track of these nego
 ``` python
 from typing import Optional
 
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
+from aea.mail.base import Address
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -1594,17 +1621,35 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
+    def __init__(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
         """
-        Initialize a dialogue label.
+        Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
         self.proposal = None  # type: Optional[Description]
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        return FipaDialogue.AgentRole.BUYER
 
 
 class Dialogues(Model, FipaDialogues):
@@ -1617,7 +1662,27 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)
+
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> Dialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = Dialogue(
+            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
+        return dialogue
 ```
 
 The dialogues class stores dialogue with each `my_thermometer` AEA in a list so we can have access to previous messages and enable us to identify possible communications problems between the `my_thermometer` AEA and the `my_client` AEA.
@@ -1664,7 +1729,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
+protocols: ['fetchai/fipa:0.2.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
 ledgers: ['fetchai']
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
@@ -1726,10 +1791,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea run --connections fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.3.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
@@ -1784,10 +1849,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea run --connections fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Ethereum testnet.

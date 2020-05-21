@@ -70,7 +70,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.1.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.2.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -83,12 +83,12 @@ def test_when_package_has_missing_dependency():
     """
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.2.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/fipa:0.1.0)', '(protocol, fetchai/oef_search:0.1.0)']"
+        "Package 'fetchai/oef:0.3.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/fipa:0.2.0)', '(protocol, fetchai/oef_search:0.1.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
         # connection "fetchai/oef:0.1.0" requires
-        # "fetchai/oef_search:0.1.0" and "fetchai/fipa:0.1.0" protocols.
+        # "fetchai/oef_search:0.1.0" and "fetchai/fipa:0.2.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",

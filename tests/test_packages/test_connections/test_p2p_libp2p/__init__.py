@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,12 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains class representations corresponding to every custom type in the protocol specification."""
-
-
-from aea.helpers.search.models import Description as BaseDescription
-from aea.helpers.search.models import Query as BaseQuery
-
-Description = BaseDescription
-
-Query = BaseQuery
+"""This module contains the tests of the Libp2p-based DHT connection."""
