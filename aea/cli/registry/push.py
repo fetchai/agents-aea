@@ -31,7 +31,7 @@ from aea.cli.registry.utils import (
 )
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import _load_yaml
+from aea.cli.utils.package_utils import load_yaml
 from aea.configurations.base import PublicId
 
 
@@ -64,7 +64,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     item_config_filepath = os.path.join(item_path, "{}.yaml".format(item_type))
     logger.debug("Reading {} {} config ...".format(item_id.name, item_type))
-    item_config = _load_yaml(item_config_filepath)
+    item_config = load_yaml(item_config_filepath)
     check_is_author_logged_in(item_config["author"])
 
     logger.debug(

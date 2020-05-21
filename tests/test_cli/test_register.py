@@ -60,7 +60,7 @@ class RegisterTestCase(TestCase):
 
 @mock.patch("aea.cli.register.validate_author_name", lambda x: x)
 @mock.patch("aea.cli.register.register_new_account", return_value="token")
-@mock.patch("aea.cli.register._update_cli_config")
+@mock.patch("aea.cli.register.update_cli_config")
 class DoRegisterTestCase(TestCase):
     """Test case for do_register method."""
 

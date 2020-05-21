@@ -491,7 +491,7 @@ class CreateCommandTestCase(TestCase):
             "Author is not set up. Please use 'aea init' to initialize.",
         )
 
-    @patch("aea.cli.create._get_or_create_cli_config", return_value={})
+    @patch("aea.cli.create.get_or_create_cli_config", return_value={})
     def test_create_no_author_local(self, *mocks):
         """Test for CLI create no author local result."""
         result = self.runner.invoke(
