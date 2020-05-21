@@ -24,6 +24,8 @@ from enum import Enum
 class ExceptionPolicyEnum(Enum):
     """AEA Exception policies."""
 
-    propagate = "propagate"
-    just_log = "just_log"
-    stop_and_exit = "stop_and_exit"
+    propagate = "propagate"  # just bubble up exception raised. run loop interrupted.
+    just_log = (
+        "just_log"  # write details in log file, skip exception. continue running.
+    )
+    stop_and_exit = "stop_and_exit"  # log exception and stop agent with raising AEAException to show it was terminated
