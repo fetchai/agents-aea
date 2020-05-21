@@ -70,6 +70,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
+# TODO implement a proper class to represent this type.
 Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
