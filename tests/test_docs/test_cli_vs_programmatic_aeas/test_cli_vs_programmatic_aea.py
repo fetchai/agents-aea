@@ -56,7 +56,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "bool",
         )
         self.run_install()
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         file_path = os.path.join("tests", PY_FILE)
         weather_client_process = self.start_subprocess(file_path, cwd=ROOT_DIR)

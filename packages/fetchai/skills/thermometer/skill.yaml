@@ -7,15 +7,15 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmViRmMqhXUZymShpuK1sS683rTS8jf89pmmzeLNQt4fbp
-  dialogues.py: QmaUUzZJJJyC8zRDvHjdrNXbeaJ15Le7qNsZfe5BKoAkq1
-  handlers.py: QmZd1ajxM5Nn79BbycKRemcZ9HaCnq2hiCk8pZRtZKTwcV
+  dialogues.py: QmU5NquANLMJQnjaxkTMpenaHUfEMRjZaq5TnuZiywEqgh
+  handlers.py: QmXno6K8EJpsz6hRMRTqZ7eFanqzupL5d7uD3x468YevwN
   strategy.py: QmeoxCowVvHowrggqwYEmywVhx9JGK9Ef7wwaVrQHT5CQt
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   service_registration:

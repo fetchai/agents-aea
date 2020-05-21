@@ -35,8 +35,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
@@ -46,8 +46,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
@@ -57,16 +57,16 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         check_strings = (
             "updating generic seller services on OEF service directory.",
             "unregistering generic seller services from OEF service directory.",
             "received CFP from sender=",
-            "sending sender=",
+            "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
@@ -114,8 +114,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
         self.run_install()
 
@@ -129,8 +129,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
         self.run_install()
 
@@ -149,17 +149,17 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         # TODO: finish test once testnet is reliable
         check_strings = (
             "updating generic seller services on OEF service directory.",
             "unregistering generic seller services from OEF service directory.",
             "received CFP from sender=",
-            "sending sender=",
+            "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",

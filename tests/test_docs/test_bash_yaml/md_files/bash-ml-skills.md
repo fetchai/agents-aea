@@ -9,9 +9,9 @@ aea install
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/ml_data_provider:0.3.0
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 aea install
 ```
 ``` bash
@@ -22,9 +22,9 @@ aea install
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/ml_train:0.3.0
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 aea install
 ```
 ``` bash
@@ -65,7 +65,7 @@ aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id A
 aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 ``` bash
 cd ..
