@@ -82,10 +82,10 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/weather_station:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
 In `weather_station/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect. To connect to Fetchai:
@@ -115,10 +115,10 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/weather_client:0.2.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
 In `my_weather_client/aea-config.yaml` replace `ledger_apis: {}` with the following based on the network you want to connect.
@@ -253,7 +253,7 @@ This updates the weather client skill config (`my_weather_client/vendor/fetchai/
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 You will see that the AEAs negotiate and then transact using the selected ledger.

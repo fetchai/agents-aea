@@ -288,7 +288,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         cls.patch = unittest.mock.patch(
             "yaml.dump", side_effect=ValidationError("test error message"),
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -319,7 +319,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -354,7 +354,7 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
         cls.patch = unittest.mock.patch(
             "shutil.copytree", side_effect=Exception("unknwon exception")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -377,7 +377,7 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

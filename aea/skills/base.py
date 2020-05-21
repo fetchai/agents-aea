@@ -625,11 +625,14 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(cls, directory: str) -> "Skill":
+    def from_dir(
+        cls, directory: str, skill_context: Optional[SkillContext] = None
+    ) -> "Skill":
         """
         Load the skill from a directory.
 
         :param directory: the directory to the skill package.
+        :param skill_context: the skill context
         :return: the skill object.
         """
         configuration = cast(
@@ -637,7 +640,7 @@ class Skill(Component):
             ComponentConfiguration.load(ComponentType.SKILL, Path(directory)),
         )
         configuration._directory = Path(directory)
-        return Skill.from_config(configuration)
+        return Skill.from_config(configuration, skill_context)
 
     @classmethod
     def from_config(

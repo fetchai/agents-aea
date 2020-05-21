@@ -201,7 +201,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.patch = unittest.mock.patch(
             "shutil.rmtree", side_effect=BaseException("an exception")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.result = cls.runner.invoke(
             cli,
@@ -216,7 +216,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

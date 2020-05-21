@@ -330,7 +330,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.patch = patch.object(
             aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"}
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -360,7 +360,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -379,7 +379,7 @@ class TestCreateFailsWhenExceptionOccurs:
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
         cls.patch = patch.object(ConfigLoader, "dump", side_effect=Exception)
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -408,7 +408,7 @@ class TestCreateFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

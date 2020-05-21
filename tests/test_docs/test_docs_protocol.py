@@ -106,7 +106,7 @@ class TestProtocolDocs:
         compare_enum_classes(ExpectedOefErrorOperation, ActualOefErrorOperation)
 
     def test_fipa_protocol(self):
-        """Test the fetchai/fipa:0.1.0 documentation."""
+        """Test the fetchai/fipa:0.2.0 documentation."""
         offset = 15
         locals_dict = {"Enum": Enum}
         compile_and_exec(self.code_blocks[offset]["text"], locals_dict=locals_dict)
