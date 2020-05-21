@@ -317,7 +317,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch = unittest.mock.patch(
             "yaml.dump", side_effect=ValidationError("test error message")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         # generate protocol
         os.chdir(cls.agent_name)
@@ -354,7 +354,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
@@ -390,7 +390,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         cls.patch = unittest.mock.patch(
             "shutil.copytree", side_effect=Exception("unknwon exception")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         # generate protocol
         os.chdir(cls.agent_name)
@@ -419,7 +419,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):

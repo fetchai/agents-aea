@@ -27,6 +27,7 @@ import (
 type AeaApi struct {
 	msgin_path  string
 	msgout_path string
+	agent_addr  string
 	id          string
 	entry_peers []string
 	host        string
@@ -36,6 +37,10 @@ type AeaApi struct {
 	out_queue   chan *Envelope
 	closing     bool
 	sandbox     bool
+}
+
+func (aea AeaApi) AeaAddress() string {
+	return aea.agent_addr
 }
 
 func (aea AeaApi) PrivateKey() string {
@@ -82,12 +87,14 @@ func (aea *AeaApi) Init() error {
 	}
 	aea.msgin_path = os.Getenv("AEA_TO_NODE")
 	aea.msgout_path = os.Getenv("NODE_TO_AEA")
+	aea.agent_addr = os.Getenv("AEA_AGENT_ADDR")
 	aea.id = os.Getenv("AEA_P2P_ID")
 	entry_peers := os.Getenv("AEA_P2P_ENTRY_URIS")
 	uri := os.Getenv("AEA_P2P_URI")
 	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
 	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
 	fmt.Println("[aea-api  ][debug] id:", aea.id)
+	fmt.Println("[aea-api  ][debug] addr:", aea.agent_addr)
 	fmt.Println("[aea-api  ][debug] entry_peers:", entry_peers)
 	fmt.Println("[aea-api  ][debug] uri:", uri)
 

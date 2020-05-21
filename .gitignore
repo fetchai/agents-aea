@@ -120,4 +120,5 @@ input_file
 output_file
 
 !packages/fetchai/contracts/erc1155/build
+packages/fetchai/connections/p2p_libp2p/libp2p_node
 

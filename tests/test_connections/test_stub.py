@@ -91,7 +91,7 @@ class TestStubConnectionReception:
     def test_reception_fails(self):
         """Test the case when an error occurs during the processing of a line."""
         patch = mock.patch.object(aea.connections.stub.connection.logger, "error")
-        mocked_logger_error = patch.__enter__()
+        mocked_logger_error = patch.start()
         with mock.patch(
             "aea.connections.stub.connection._decode",
             side_effect=Exception("an error."),
@@ -101,7 +101,7 @@ class TestStubConnectionReception:
                 "Error when processing a line. Message: an error."
             )
 
-        patch.__exit__()
+        patch.stop()
 
     @classmethod
     def teardown_class(cls):
