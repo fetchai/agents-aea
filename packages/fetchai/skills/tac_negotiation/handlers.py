@@ -234,13 +234,17 @@ class FIPANegotiationHandler(Handler):
             self.context.agent_address,
         )
 
-        if strategy.is_profitable_transaction(transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)):
+        if strategy.is_profitable_transaction(
+            transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+        ):
             self.context.logger.info(
                 "[{}]: Accepting propose (as {}).".format(
                     self.context.agent_name, dialogue.role
                 )
             )
-            transactions.add_locked_tx(transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role))
+            transactions.add_locked_tx(
+                transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+            )
             transactions.add_pending_initial_acceptance(
                 dialogue.dialogue_label, new_msg_id, transaction_msg
             )
@@ -341,13 +345,17 @@ class FIPANegotiationHandler(Handler):
         )
         strategy = cast(Strategy, self.context.strategy)
 
-        if strategy.is_profitable_transaction(transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)):
+        if strategy.is_profitable_transaction(
+            transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+        ):
             self.context.logger.info(
                 "[{}]: locking the current state (as {}).".format(
                     self.context.agent_name, dialogue.role
                 )
             )
-            transactions.add_locked_tx(transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role))
+            transactions.add_locked_tx(
+                transaction_msg, role=cast(Dialogue.AgentRole, dialogue.role)
+            )
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             self.context.logger.debug(

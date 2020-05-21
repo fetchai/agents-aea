@@ -34,9 +34,7 @@ from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.skills.tac_negotiation.helpers import (
-    SUPPLY_DATAMODEL_NAME,
-)
+from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
 
 
 class Dialogue(FipaDialogue):

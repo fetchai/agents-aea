@@ -109,10 +109,7 @@ class Transactions(Model):
         :param agent_addr: the address of the agent
         :return: a transaction message
         """
-        if role == Dialogue.AgentRole.SELLER:
-            is_seller = True
-        else:
-            is_seller = False
+        is_seller = role == Dialogue.AgentRole.SELLER
 
         sender_tx_fee = (
             proposal_description.values["seller_tx_fee"]
@@ -324,10 +321,7 @@ class Transactions(Model):
 
         :return: None
         """
-        if role == Dialogue.AgentRole.SELLER:
-            as_seller = True
-        else:
-            as_seller = False
+        as_seller = role == Dialogue.AgentRole.SELLER
 
         transaction_id = transaction_msg.tx_id
         assert transaction_id not in self._locked_txs

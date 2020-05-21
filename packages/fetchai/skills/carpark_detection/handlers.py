@@ -134,7 +134,7 @@ class FIPAHandler(Handler):
             dialogue.proposal = proposal
             self.context.logger.info(
                 "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
-                    self.context.agent_name, msg.counterparty[-5:], proposal.values
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:]
                 )
             )
             proposal_msg = FipaMessage(

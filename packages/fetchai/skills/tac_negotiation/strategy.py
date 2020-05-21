@@ -220,10 +220,7 @@ class Strategy(Model):
 
         :return: a description
         """
-        if role == Dialogue.AgentRole.SELLER:
-            is_seller = True
-        else:
-            is_seller = False
+        is_seller = role == Dialogue.AgentRole.SELLER
 
         own_service_description = self.get_own_service_description(
             is_supply=is_seller, is_search_description=False
@@ -332,10 +329,7 @@ class Strategy(Model):
 
         :return: True if the transaction is good (as stated above), False otherwise.
         """
-        if role == Dialogue.AgentRole.SELLER:
-            is_seller = True
-        else:
-            is_seller = False
+        is_seller = role == Dialogue.AgentRole.SELLER
 
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(

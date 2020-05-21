@@ -26,7 +26,8 @@ This module contains the classes required for FIPA dialogue management.
 """
 
 from abc import ABC
-from typing import Dict, FrozenSet
+from enum import Enum
+from typing import Dict, FrozenSet, cast
 
 from aea.helpers.dialogue.base import Dialogue, Dialogues
 from aea.mail.base import Address
@@ -105,13 +106,14 @@ class FipaDialogue(Dialogue, ABC):
         """
         return FipaMessage.Performative.CFP
 
-    def get_replies(self, performative) -> FrozenSet:
+    def get_replies(self, performative: Enum) -> FrozenSet:
         """
         Given a `performative`, return the list of performatives which are its valid replies in a fipa dialogue
 
         :param performative: the performative in a message
         :return: list of valid performative replies
         """
+        performative = cast(FipaMessage.Performative, performative)
         assert (
             performative in REPLIES
         ), "this performative '{}' is not supported".format(performative)

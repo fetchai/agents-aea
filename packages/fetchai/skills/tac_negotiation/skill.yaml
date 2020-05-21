@@ -8,14 +8,14 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmcgZLvHebdfocqBmbu6gJp35khs6nbdbC649jzUyS86wy
   behaviours.py: QmezjkFXso21vV7SDSxKDTFyNKN1Sek3xi5y8uCzJrj6S1
-  dialogues.py: QmXFAYLLx3LCLHdx2YYvDg5BSUvPPWt2yS88soinzmAVFA
-  handlers.py: QmT7CNe9htn4GLABXfsd4UZigRMfVvFHUv5vJtZ13t6FF1
+  dialogues.py: QmW2H2FMLFD3cFMdPBrxL3ufMFwzb5sPpWP7ZQGUZmUrYJ
+  handlers.py: QmQHGiEoKGezdgVBiYU69UfFh93PnehF59VB6LvS49cC7k
   helpers.py: QmXYbZYtLdJLrc7pCmmkHfEzBUeqm1sYQGEY2UNKsFKb8A
   registration.py: QmexnkCCmyiFpzM9bvXNj5uQuxQ2KfBTUeMomuGN9ccP7g
   search.py: QmSTtMm4sHUUhUFsQzufHjKihCEVe5CaU5MGjhzSdPUzDT
-  strategy.py: QmbeqsDRHQSsrncNxHu1oNLdZxaxxh1k3y3vNX5ZD356F1
+  strategy.py: QmcftQFs17qqxts49FQfBTBAjsVifCTrBB7iPNPUqPYQbw
   tasks.py: QmbAUngTeyH1agsHpzryRQRFMwoWDmymaQqeKeC3TZCPFi
-  transactions.py: QmRbdeuyNYXPiehLDrgbLhrTNoiEAvuvUgsUa6d4t5dZHU
+  transactions.py: QmQfavM487Y7MXmAdFU7kSVFgpUHsogcNfmXs5C2ArK3fS
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/erc1155:0.3.0

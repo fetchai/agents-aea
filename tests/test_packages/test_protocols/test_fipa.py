@@ -343,7 +343,7 @@ class TestDialogues:
 
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
-        result = self.buyer_dialogues.create_self_initiated(
+        result = self.buyer_dialogues._create_self_initiated(
             dialogue_opponent_addr=self.seller_addr, role=FipaDialogue.AgentRole.SELLER,
         )
         assert isinstance(result, FipaDialogue)
@@ -351,13 +351,13 @@ class TestDialogues:
 
     def test_create_opponent_initiated(self):
         """Test the opponent initialisation of a dialogue."""
-        result = self.buyer_dialogues.create_opponent_initiated(
+        result = self.buyer_dialogues._create_opponent_initiated(
             dialogue_opponent_addr=self.seller_addr,
             dialogue_reference=(str(0), ""),
             role=FipaDialogue.AgentRole.BUYER,
         )
         assert isinstance(result, FipaDialogue)
-        assert result.role == FipaDialogue.AgentRole.BUYER
+        assert result.role == FipaDialogue.AgentRole.BUYER, "The role must be buyer."
 
     def test_dialogue_endstates(self):
         """Test the end states of a dialogue."""
@@ -383,9 +383,9 @@ class TestDialogues:
 
     def test_dialogues_self_initiated_no_seller(self):
         """Test an end to end scenario of client-seller dialogue."""
-        pytest.skip("This test is being skipped since it tests the old dialogue api")
+
         # Initialise a dialogue
-        buyer_dialogue = self.buyer_dialogues.create_self_initiated(
+        buyer_dialogue = self.buyer_dialogues._create_self_initiated(
             dialogue_opponent_addr=self.seller_addr, role=FipaDialogue.AgentRole.BUYER,
         )
 
@@ -404,19 +404,18 @@ class TestDialogues:
         )
         cfp_msg.counterparty = self.seller_addr
 
-        # Checking that I cannot retrieve the dialogue.
-        retrieved_dialogue = self.buyer_dialogues.get_dialogue(cfp_msg,)
-        assert not retrieved_dialogue, "Should not have found any dialogues"
-
-        # Checking the value error when we are trying to retrieve an un-existing dialogue.
-        with pytest.raises(ValueError, match="Should have found dialogue."):
-            self.buyer_dialogues.get_dialogue(cfp_msg)
+        # Checking that I can retrieve the dialogue.
+        retrieved_dialogue = self.buyer_dialogues._get_dialogue(cfp_msg,)
+        assert retrieved_dialogue, "Should have found dialogue"
+        assert (
+            retrieved_dialogue == buyer_dialogue
+        ), "Should have found correct dialogue"
 
         # Extends the outgoing list of messages.
         buyer_dialogue.outgoing_extend(cfp_msg)
 
         # Creates a new dialogue for the seller side based on the income message.
-        seller_dialogue = self.seller_dialogues.create_opponent_initiated(
+        seller_dialogue = self.seller_dialogues._create_opponent_initiated(
             dialogue_opponent_addr=cfp_msg.counterparty,
             dialogue_reference=cfp_msg.dialogue_reference,
             role=FipaDialogue.AgentRole.SELLER,
@@ -482,8 +481,8 @@ class TestDialogues:
         ), "The dialogue_reference is not setup properly."
 
         # Retrieve the dialogue based on the received message.
-        retrieved_dialogue = self.buyer_dialogues.get_dialogue(proposal_msg,)
-        assert retrieved_dialogue.dialogue_label is not None
+        retrieved_dialogue = self.buyer_dialogues._get_dialogue(proposal_msg)
+        assert not retrieved_dialogue, "Should not have found dialogue"
 
         # Create an accept_w_inform message to send seller.
         message_id = proposal_msg.message_id + 1
@@ -509,15 +508,13 @@ class TestDialogues:
         # Adds the message to the seller incoming message list.
         seller_dialogue.incoming_extend(accept_msg)
 
-        retrieved_dialogue = self.seller_dialogues.get_dialogue(accept_msg,)
-        assert retrieved_dialogue.dialogue_label in self.seller_dialogues.dialogues
+        retrieved_dialogue = self.seller_dialogues._get_dialogue(accept_msg)
+        assert not retrieved_dialogue, "Should not have found dialogue"
 
     def test_dialogues_self_initiated_is_seller(self):
-        """Test an end to end scenario of seller-client dialogue."""
-        pytest.skip("This test is being skipped since it tests the old dialogue api")
-
+        """Test an end to end scenario of seller-client dialogue. OLD API"""
         # Initialise a dialogue
-        seller_dialogue = self.seller_dialogues.create_self_initiated(
+        seller_dialogue = self.seller_dialogues._create_self_initiated(
             dialogue_opponent_addr=self.buyer_addr, role=FipaDialogue.AgentRole.SELLER,
         )
 
@@ -538,20 +535,47 @@ class TestDialogues:
 
         seller_dialogue.outgoing_extend(cfp_msg)
 
+        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing message."
+        assert len(seller_dialogue._incoming_messages) == 0, "Some incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message == cfp_msg
+        ), "Wrong outgoing message."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[1] == ""
+        ), "Dialogue reference incorrect."
+        dialogue_reference_left_part = seller_dialogue.dialogue_label.dialogue_reference[
+            0
+        ]
+
         # Creates a new dialogue for the client side based on the income message.
-        client_dialogue = self.buyer_dialogues.create_opponent_initiated(
+        buyer_dialogue = self.buyer_dialogues._create_opponent_initiated(
             dialogue_opponent_addr=cfp_msg.counterparty,
             dialogue_reference=cfp_msg.dialogue_reference,
             role=FipaDialogue.AgentRole.BUYER,
         )
 
         # Register the dialogue to the dictionary of dialogues.
-        self.buyer_dialogues.dialogues[client_dialogue.dialogue_label] = cast(
-            FipaDialogue, client_dialogue
+        self.buyer_dialogues.dialogues[buyer_dialogue.dialogue_label] = cast(
+            FipaDialogue, buyer_dialogue
         )
 
         # Extend the incoming list of messages.
-        client_dialogue.incoming_extend(cfp_msg)
+        buyer_dialogue.incoming_extend(cfp_msg)
+
+        assert len(buyer_dialogue._outgoing_messages) == 0, "Some outgoing messages."
+        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming message."
+        assert (
+            buyer_dialogue.last_incoming_message == cfp_msg
+        ), "Wrong outgoing message."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue reference incorrect."
 
         # Generate a proposal message to send to the seller.
         proposal = Description({"foo1": 1, "bar1": 2})
@@ -559,7 +583,7 @@ class TestDialogues:
         target = cfp_msg.message_id
         proposal_msg = FipaMessage(
             message_id=message_id,
-            dialogue_reference=client_dialogue.dialogue_label.dialogue_reference,
+            dialogue_reference=buyer_dialogue.dialogue_label.dialogue_reference,
             target=target,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=proposal,
@@ -567,30 +591,38 @@ class TestDialogues:
         proposal_msg.counterparty = self.buyer_addr
 
         # Extends the outgoing list of messages.
-        client_dialogue.outgoing_extend(proposal_msg)
+        buyer_dialogue.outgoing_extend(proposal_msg)
+
+        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message == proposal_msg
+        ), "Wrong outgoing message."
 
         # Seller received the message and we extend the incoming messages list.
         seller_dialogue.incoming_extend(proposal_msg)
 
-        # Test the self_initiated_dialogue explicitly
-        message_id = proposal_msg.message_id + 1
-        target = proposal_msg.message_id
-        accept_msg = FipaMessage(
-            message_id=message_id,
-            dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=target,
-            performative=FipaMessage.Performative.ACCEPT_W_INFORM,
-            info={"address": "dummy_address"},
-        )
-        accept_msg.counterparty = self.buyer_addr
-
-        # Adds the message to the client outgoing list.
-        seller_dialogue.outgoing_extend(accept_msg)
-        # Adds the message to the seller incoming message list.
-        client_dialogue.incoming_extend(accept_msg)
+        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message == cfp_msg
+        ), "Wrong outgoing message."
+        assert (
+            seller_dialogue.last_incoming_message == proposal_msg
+        ), "Wrong incoming message."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[1] == ""
+        ), "Dialogue reference incorrect."
+        assert (
+            dialogue_reference_left_part
+            == seller_dialogue.dialogue_label.dialogue_reference[0]
+        ), "Dialogue refernce changed unexpectedly."
 
     def test_update(self):
-        # pytest.skip("This is a temporary test environment.")
+        """Test the `update` functionality."""
         cfp_msg = FipaMessage(
             message_id=1,
             dialogue_reference=self.buyer_dialogues.new_self_initiated_dialogue_reference(),
@@ -599,32 +631,81 @@ class TestDialogues:
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
         cfp_msg.counterparty = self.seller_addr
-
         buyer_dialogue = self.buyer_dialogues.update(cfp_msg)
 
+        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing message."
+        assert len(buyer_dialogue._incoming_messages) == 0, "Some incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message == cfp_msg
+        ), "Wrong outgoing message."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[1] == ""
+        ), "Dialogue reference incorrect."
+        dialogue_reference_left_part = buyer_dialogue.dialogue_label.dialogue_reference[
+            0
+        ]
+
+        # message arrives at counterparty
         cfp_msg.is_incoming = True
         cfp_msg.counterparty = self.buyer_addr
         seller_dialogue = self.seller_dialogues.update(cfp_msg)
 
-        print(buyer_dialogue)
-        print(seller_dialogue)
+        assert len(seller_dialogue._outgoing_messages) == 0, "Some outgoing message."
+        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            seller_dialogue.last_incoming_message == cfp_msg
+        ), "Wrong incoming message."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            seller_dialogue.dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue reference incorrect."
 
+        # seller creates response message
         proposal_msg = FipaMessage(
-            message_id=2,
+            message_id=cfp_msg.message_id + 1,
             dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
-            target=1,
+            target=cfp_msg.message_id,
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo1": 1, "bar1": 2}),
         )
         proposal_msg.counterparty = self.buyer_addr
 
         self.seller_dialogues.update(proposal_msg)
+
+        assert len(seller_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(seller_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            seller_dialogue.last_outgoing_message == proposal_msg
+        ), "Wrong outgoing message."
+
+        # message arrives at counterparty
         proposal_msg.counterparty = self.seller_addr
         proposal_msg.is_incoming = True
         self.buyer_dialogues.update(proposal_msg)
 
-        print(buyer_dialogue)
-        print(seller_dialogue)
+        assert len(buyer_dialogue._outgoing_messages) == 1, "No outgoing messages."
+        assert len(buyer_dialogue._incoming_messages) == 1, "No incoming messages."
+        assert (
+            buyer_dialogue.last_outgoing_message == cfp_msg
+        ), "Wrong outgoing message."
+        assert (
+            buyer_dialogue.last_incoming_message == proposal_msg
+        ), "Wrong incoming message."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[0] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            buyer_dialogue.dialogue_label.dialogue_reference[1] != ""
+        ), "Dialogue reference incorrect."
+        assert (
+            dialogue_reference_left_part
+            == buyer_dialogue.dialogue_label.dialogue_reference[0]
+        ), "Dialogue refernce changed unexpectedly."
 
 
 class BuyerDialogue(FipaDialogue):

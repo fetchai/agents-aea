@@ -392,7 +392,7 @@ class Dialogue(ABC):
         """
         message_id = message.message_id
         target = cast(int, message.get("target"))
-        performative = message.get("performative")
+        performative = cast(Enum, message.get("performative"))
 
         if self.is_empty:
             result = (
@@ -404,7 +404,7 @@ class Dialogue(ABC):
             last_message_id = self.last_message.message_id  # type: ignore
             target_message = self.get_message(target)
             if target_message is not None:
-                target_performative = target_message.get("performative")
+                target_performative = cast(Enum, target_message.get("performative"))
                 result = (
                     message_id == last_message_id + 1
                     and 1 <= target <= last_message_id
@@ -435,7 +435,7 @@ class Dialogue(ABC):
         return result
 
     @abstractmethod
-    def initial_performative(self):
+    def initial_performative(self) -> Enum:
         """
         Get the performative which the initial message in the dialogue must have
 
@@ -443,7 +443,7 @@ class Dialogue(ABC):
         """
 
     @abstractmethod
-    def get_replies(self, performative) -> FrozenSet:
+    def get_replies(self, performative: Enum) -> FrozenSet:
         """
         Given a `performative`, return the list of performatives which are its valid replies in a dialogue
 
@@ -527,7 +527,7 @@ class Dialogue(ABC):
         self._incoming_messages.extend([message])
 
 
-class Dialogues:
+class Dialogues(ABC):
     """The dialogues class keeps track of all dialogues for an agent."""
 
     def __init__(self, agent_address: Address = "") -> None:
@@ -780,6 +780,12 @@ class Dialogues:
     def get_dialogue(self, msg: Message, address: Address) -> Dialogue:
         """
         DEPRECATED
+
+        Retrieve dialogue.
+
+        :param fipa_msg: the fipa message
+        :param agent_addr: the address of the agent
+        :return: the dialogue
         """
         pass
 
@@ -796,7 +802,7 @@ class Dialogues:
 
         :return: the created dialogue.
         """
-        pass  # TODO
+        pass
 
     def create_opponent_initiated(
         self,
@@ -815,4 +821,4 @@ class Dialogues:
 
         :return: the created dialogue
         """
-        pass  # TODO
+        pass
