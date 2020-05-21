@@ -19,6 +19,8 @@
 
 """Module with exceptions of the aea cli."""
 
+from aea.exceptions import AEAException
 
-class AEAConfigException(Exception):
+
+class AEAConfigException(AEAException):
     """Exception about AEA configuration."""
