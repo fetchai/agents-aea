@@ -38,6 +38,8 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     Uri,
 )
 
+from ....conftest import skip_test_windows
+
 DEFAULT_PORT = 10234
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_NET_SIZE = 4
@@ -60,6 +62,7 @@ def _make_libp2p_connection(
     )
 
 
+@skip_test_windows()
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection will route envelope to destination"""
@@ -95,6 +98,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
             pass
 
 
+@skip_test_windows()
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
@@ -194,6 +198,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             pass
 
 
+@skip_test_windows()
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
