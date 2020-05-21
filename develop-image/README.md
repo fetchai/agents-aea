@@ -42,3 +42,43 @@ And then, the `aea-develop:latest` image:
 - Run the publish command again: 
 
       ./develop-image/scripts/docker-publish-img.sh
+
+# Publish to k8s
+
+Switch the context:
+```
+kubectx sandbox
+```
+
+List pods in cluster:
+```
+kubectl get pods
+```
+
+Optionally, create new namespace:
+```
+kubectl create namespace aea-research
+```
+
+Ensure right namespace is used:
+```
+kubens aea-research
+```
+Choose namespace in cluster:
+```
+kubens aea-research
+```
+To enter selected namespace:
+```
+kubens
+```
+
+From the `develop-image` folder run:
+```
+skaffold run -p sandbox
+```
+
+SSH into a new image:
+```
+kubectl run --generator=run-pod/v1 -it debian --image=debian -- bash
+```

@@ -17,9 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests of the implementation of an agent loop using asyncio."""
+
 import asyncio
 from queue import Empty
-from typing import Any, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type
 from unittest.mock import MagicMock
 
 import pytest
@@ -28,11 +29,10 @@ from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentL
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.skills.base import Behaviour, Handler, SkillContext
+from aea.skills.base import Behaviour, Handler, SkillComponent, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
 from tests.common.utils import run_in_thread, wait_for_condition
-
 
 try:
     from asyncio import create_task
@@ -101,7 +101,7 @@ class AsyncFakeAgent:
     """Fake agent form testing."""
 
     def __init__(self, handlers=None, behaviours=None):
-        """Inin agent."""
+        """Init agent."""
         self.handlers = handlers or []
         self.behaviours = behaviours or []
         self._inbox = AsyncFriendlyQueue()
@@ -154,6 +154,27 @@ class AsyncFakeAgent:
         """Call internal messages handle and add behaviours handler."""
         self._filter._process_internal_message()
         self._filter._handle_new_behaviours()
+
+    def _execution_control(
+        self,
+        fn: Callable,
+        component: SkillComponent,
+        args: Optional[Sequence] = None,
+        kwargs: Optional[Dict] = None,
+    ) -> Any:
+        """
+        Execute skill function in exception handling environment.
+
+        Logs error, stop agent or propagate excepion depends on policy defined.
+
+        :param fn: function to call
+        :param component: skill component function belongs to
+        :param args: optional sequence of arguments to pass to function on call
+        :param kwargs: optional dict of keyword arguments to pass to function on call
+
+        :return: same as function
+        """
+        return fn(*(args or []), **(kwargs or {}))
 
 
 class SyncFakeAgent(AsyncFakeAgent):

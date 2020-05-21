@@ -1,0 +1,54 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: aea-develop-image
+  namespace: aea-research
+  labels:
+    app: aea-develop-image
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: aea-develop-image
+    spec:
+      containers:
+      - image: gcr.io/fetch-ai-sandbox/aea-develop-image
+        name: aea-develop-image
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      restartPolicy: Always
+...
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: aea-deploy-image
+  namespace: aea-research
+  labels:
+    app: aea-deploy-image
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: aea-deploy-image
+    spec:
+      containers:
+      - image: gcr.io/fetch-ai-sandbox/aea-deploy-image
+        name: aea-deploy-image
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      restartPolicy: Always
+...
