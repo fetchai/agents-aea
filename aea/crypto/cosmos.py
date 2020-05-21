@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 _COSMOS = "cosmos"
 COSMOS_CURRENCY = "ATOM"
-COSMOS_TESTNET_FAUCET_URL = ""
+COSMOS_TESTNET_FAUCET_URL = "http://aea-testnet.sandbox.fetch-ai.com:8888/claim"
 
 
 class CosmosCrypto(Crypto[SigningKey]):
@@ -444,4 +444,19 @@ class CosmosFaucetApi(FaucetApi):
         :param address: the address.
         :return: None
         """
-        raise NotImplementedError
+        try:
+            response = requests.post(
+                url=COSMOS_TESTNET_FAUCET_URL, data={"Address": address}
+            )
+            if response.status_code == 200:
+                tx_hash = response.text.split("\n")[1]
+                tx_hash = tx_hash[8:]
+                logger.info("Wealth generated, tx_hash: {}".format(tx_hash))
+            else:
+                logger.warning(
+                    "Response: {}, Text: {}".format(response.status_code, response.text)
+                )
+        except Exception as e:
+            logger.warning(
+                "An error occured while attempting to generate wealth:\n{}".format(e)
+            )
