@@ -74,7 +74,7 @@ class TestListProtocols:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -118,7 +118,7 @@ class TestListConnections:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -162,7 +162,7 @@ class TestListSkills:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
