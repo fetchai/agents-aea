@@ -9,10 +9,10 @@ aea install
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/tac_control:0.1.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
@@ -27,20 +27,20 @@ aea create tac_participant_two
 ```
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 aea config set agent.default_ledger ethereum
 ```
 ``` bash
@@ -101,5 +101,5 @@ models:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.1.0']
+protocols: ['fetchai/oef_search:0.1.0', 'fetchai/fipa:0.2.0']
 ```

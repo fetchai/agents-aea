@@ -51,42 +51,24 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    message.counterparty,
-                    dialogue_reference=dialogue_reference,
-                    is_seller=True,
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         # handle message
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, dialogue)
+            self._handle_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -163,7 +145,8 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            dialogue.outgoing_extend(proposal_msg)
+            proposal_msg.counterparty = msg.counterparty
+            dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -182,7 +165,8 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            dialogue.outgoing_extend(decline_msg)
+            decline_msg.counterparty = msg.counterparty
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -241,7 +225,8 @@ class FIPAHandler(Handler):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"address": self.context.agent_addresses[identifier]},
         )
-        dialogue.outgoing_extend(match_accept_msg)
+        match_accept_msg.counterparty = msg.counterparty
+        dialogue.update(match_accept_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -270,6 +255,7 @@ class FIPAHandler(Handler):
 
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
+            is_valid = False
             tx_digest = msg.info["transaction_digest"]
             self.context.logger.info(
                 "[{}]: checking whether transaction={} has been received ...".format(
@@ -314,7 +300,8 @@ class FIPAHandler(Handler):
                     performative=FipaMessage.Performative.INFORM,
                     info=dialogue.weather_data,
                 )
-                dialogue.outgoing_extend(inform_msg)
+                inform_msg.counterparty = msg.counterparty
+                dialogue.update(inform_msg)
                 self.context.outbox.put_message(
                     to=msg.counterparty,
                     sender=self.context.agent_address,
@@ -339,7 +326,8 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info=dialogue.weather_data,
             )
-            dialogue.outgoing_extend(inform_msg)
+            inform_msg.counterparty = msg.counterparty
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,

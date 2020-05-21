@@ -140,7 +140,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.1.0"),
+            PublicId.from_str("fetchai/fipa:0.2.0"),
         }
 
     def test_fetch_all(self):

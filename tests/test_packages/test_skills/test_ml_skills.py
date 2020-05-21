@@ -43,15 +43,15 @@ class TestMLSkills(AEATestCaseMany, UseOef):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
         self.run_install()
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/ml_train:0.3.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
@@ -60,10 +60,10 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.run_install()
 
         self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         check_strings = (
             "updating ml data provider service on OEF service directory.",
@@ -122,8 +122,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
@@ -138,8 +138,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
         self.add_item("skill", "fetchai/ml_train:0.3.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
@@ -159,10 +159,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         )
 
         self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         check_strings = (
             "updating ml data provider service on OEF service directory.",

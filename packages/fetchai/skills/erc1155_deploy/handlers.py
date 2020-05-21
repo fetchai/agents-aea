@@ -54,32 +54,18 @@ class FIPAHandler(Handler):
         :return: None
         """
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
+        # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    fipa_msg.counterparty, dialogue_reference, is_seller=True
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT_W_INFORM:
-            self._handle_accept_w_inform(fipa_msg, dialogue)
+            self._handle_accept_w_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -109,7 +95,7 @@ class FIPAHandler(Handler):
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": b""},
-        )
+        )  # TODO: send FipaSerializer().encode(msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -158,7 +144,8 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            dialogue.outgoing_extend(proposal_msg)
+            proposal_msg.counterparty = msg.counterparty
+            dialogue.update(proposal_msg)
             self.context.logger.info(
                 "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
                     self.context.agent_name, msg.counterparty[-5:], proposal.values
