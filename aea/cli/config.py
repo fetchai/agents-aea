@@ -26,7 +26,7 @@ import click
 
 import yaml
 
-from aea.cli.utils.constants import from_string_to_type
+from aea.cli.utils.constants import FROM_STRING_TO_TYPE
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.configurations.base import (
@@ -237,7 +237,7 @@ def get(ctx: Context, json_path: List[str]):
 @pass_ctx
 def set(ctx: Context, json_path: List[str], value, type):
     """Set a field."""
-    type_ = from_string_to_type[type]
+    type_ = FROM_STRING_TO_TYPE[type]
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 

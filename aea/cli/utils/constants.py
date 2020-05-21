@@ -36,4 +36,4 @@ NOT_PERMITTED_AUTHORS = [
 ]
 
 
-from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
+FROM_STRING_TO_TYPE = dict(str=str, int=int, bool=bool, float=float)
