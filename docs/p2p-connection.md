@@ -3,7 +3,7 @@
   <p>This section is highly experimental. We will update it soon.</p>
 </div>
 
-The `fetchai/p2p_noise:0.2.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `fetchai/p2p_libp2p:0.2.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local Demo
 
@@ -14,9 +14,9 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_noise:0.2.0
-aea config set agent.default_connection fetchai/p2p_noise:0.2.0
-aea run --connections fetchai/p2p_noise:0.2.0
+aea add connection fetchai/p2p_libp2p:0.1.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.1.0
+aea run --connections fetchai/p2p_libp2p:0.1.0
 ```
 
 ### Create and run another AEA
@@ -26,27 +26,28 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_noise:0.2.0
-aea config set agent.default_connection fetchai/p2p_noise:0.2.0
+aea add connection fetchai/p2p_libp2p:0.1.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.1.0
 ```
 
-Provide the AEA with the information it needs to find the genesis by adding the following block to `vendor/fetchai/connnections/p2p_noise/connection.yaml`:
+Provide the AEA with the information it needs to find the genesis by adding the following block to `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
 
 ``` yaml
 config:
-  noise_entry_peers: ["127.0.0.1:9000"]
-  noise_host: 127.0.0.1
-  noise_log_file: noise_node.log
-  noise_port: 9001
+  libp2p_entry_peers: [{MULTI_ADDRESSES}]
+  libp2p_host: 0.0.0.0
+  libp2p_log_file: libp2p_node.log
+  libp2p_port: 9001
 ```
+Here `{MULTI_ADDRESSES}` needs to be replaced with the list of multi addresses displayed in the log output of the genesis AEA.
 
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_noise:0.2.0
+aea run --connections fetchai/p2p_libp2p:0.1.0
 ```
 
-You can inspect the `noise_node.log` log files of the AEA to see how they discover each other.
+You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
 
 ## Deployed Test Network
 
