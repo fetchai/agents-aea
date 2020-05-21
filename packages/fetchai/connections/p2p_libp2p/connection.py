@@ -89,6 +89,7 @@ def _golang_module_build(path: str, log_file_desc: IO[str]) -> subprocess.Popen:
     cmd = "go build"
 
     env = os.environ
+    import pdb; pdb.set_trace()
 
     try:
         logger.debug(cmd)
