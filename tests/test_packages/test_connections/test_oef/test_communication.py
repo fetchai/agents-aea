@@ -1039,7 +1039,7 @@ class TestSendWithOEF(UseOef):
         patch = unittest.mock.patch.object(
             packages.fetchai.connections.oef.connection.logger, "debug"
         )
-        mocked_logger_debug = patch.__enter__()
+        mocked_logger_debug = patch.start()
 
         async def receive():
             await oef_connection.receive()
@@ -1100,7 +1100,7 @@ async def test_cannot_connect_to_oef():
     patch = unittest.mock.patch.object(
         packages.fetchai.connections.oef.connection.logger, "warning"
     )
-    mocked_logger_warning = patch.__enter__()
+    mocked_logger_warning = patch.start()
 
     async def try_to_connect():
         await oef_connection.connect()

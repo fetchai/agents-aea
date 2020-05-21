@@ -60,7 +60,7 @@ class TestScaffoldConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
+        cls.mocked_logger_error = cls.patch.start()
 
         cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(
@@ -286,7 +286,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
         cls.patch = unittest.mock.patch(
             "yaml.dump", side_effect=ValidationError("test error message")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -319,7 +319,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -355,7 +355,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
         cls.patch = unittest.mock.patch(
             "shutil.copytree", side_effect=Exception("unknwon exception")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -380,7 +380,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
