@@ -35,9 +35,9 @@ ct:Description: |
 ---
 reply:
   cfp: [propose, decline]
-  propose: [propose, accept, accept_w_inform, decline]
-  accept: [match_accept, match_accept_w_inform, decline]
-  accept_w_inform: [match_accept, match_accept_w_inform, decline]
+  propose: [accept, accept_w_inform, decline, propose]
+  accept: [decline, match_accept, match_accept_w_inform]
+  accept_w_inform: [decline, match_accept, match_accept_w_inform]
   decline: []
   match_accept: [inform]
   match_accept_w_inform: [inform]
