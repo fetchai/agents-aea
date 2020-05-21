@@ -86,10 +86,9 @@ def _golang_module_build(path: str, log_file_desc: IO[str]) -> subprocess.Popen:
     """
     Builds go module located at `path`, downloads necessary dependencies
     """
-    cmd = "go build"
+    cmd = ["go", "build"]
 
     env = os.environ
-    import pdb; pdb.set_trace()
 
     try:
         logger.debug(cmd)
@@ -99,7 +98,7 @@ def _golang_module_build(path: str, log_file_desc: IO[str]) -> subprocess.Popen:
             cwd=path,
             stdout=log_file_desc,
             stderr=log_file_desc,
-            shell=True,
+            shell=False,
         )
     except Exception as e:
         logger.error("While executing go build {} : {}".format(path, str(e)))

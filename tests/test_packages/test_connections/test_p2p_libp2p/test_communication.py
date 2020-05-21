@@ -20,6 +20,8 @@
 """This test module contains tests for P2PLibp2p connection."""
 
 import os
+import shutil
+import tempfile
 import time
 from typing import Optional, Sequence
 
@@ -59,33 +61,38 @@ def _make_libp2p_connection(
 
 
 @pytest.mark.asyncio
-async def test_p2plibp2pconnection_connect():
-    conn = _make_libp2p_connection()
+class TestP2PLibp2pConnectionConnectDisconnect:
+    """Test that connection will route envelope to destination"""
 
-    assert conn.connection_status.is_connected is False
-    try:
-        await conn.connect()
-        assert conn.connection_status.is_connected is True
-    except Exception as e:
-        raise e
-    finally:
-        await conn.disconnect()
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # os.chdir(cls.t)
+        cls.connection = _make_libp2p_connection()
 
+    @pytest.mark.asyncio
+    async def test_p2plibp2pconnection_connect_disconnect(self):
+        assert self.connection.connection_status.is_connected is False
+        try:
+            await self.connection.connect()
+            assert self.connection.connection_status.is_connected is True
+        except Exception as e:
+            await self.connection.disconnect()
+            raise e
 
-@pytest.mark.asyncio
-async def skip_test_p2plibp2pconnection_disconnect():
-    connection = _make_libp2p_connection()
+        await self.connection.disconnect()
+        assert self.connection.connection_status.is_connected is False
 
-    assert connection.connection_status.is_connected is False
-    try:
-        await connection.connect()
-        assert connection.connection_status.is_connected is True
-    except Exception as e:
-        await connection.disconnect()
-        raise e
-
-    await connection.disconnect()
-    assert connection.connection_status.is_connected is False
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestP2PLibp2pConnectionEchoEnvelope:
@@ -94,6 +101,9 @@ class TestP2PLibp2pConnectionEchoEnvelope:
     @classmethod
     def setup_class(cls):
         """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # os.chdir(cls.t)
         cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer1.connect()
@@ -107,11 +117,11 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.multiplexer2 = Multiplexer([cls.connection2])
         cls.multiplexer2.connect()
 
-    def skip_test_connection_is_established(self):
+    def test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
-    def skip_test_envelope_routed(self):
+    def test_envelope_routed(self):
         addr_1 = self.connection1.node.agent_addr
         addr_2 = self.connection2.node.agent_addr
 
@@ -138,7 +148,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
-    def skip_test_envelope_echoed_back(self):
+    def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.agent_addr
         addr_2 = self.connection2.node.agent_addr
 
@@ -177,6 +187,11 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         """Tear down the test"""
         cls.multiplexer1.disconnect()
         cls.multiplexer2.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 class TestP2PLibp2pConnectionRouting:
@@ -185,6 +200,9 @@ class TestP2PLibp2pConnectionRouting:
     @classmethod
     def setup_class(cls):
         """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # os.chdir(cls.t)
         port_genesis = DEFAULT_PORT + 10
         cls.connection_genesis = _make_libp2p_connection(port_genesis)
         cls.multiplexer_genesis = Multiplexer([cls.connection_genesis])
@@ -205,11 +223,11 @@ class TestP2PLibp2pConnectionRouting:
             cls.multiplexers.append(Multiplexer([cls.connections[i]]))
             cls.multiplexers[i].connect()
 
-    def skip_test_connection_is_established(self):
+    def test_connection_is_established(self):
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
-    def skip_test_star_routing_connectivity(self):
+    def test_star_routing_connectivity(self):
         addrs = [conn.node.agent_addr for conn in self.connections]
 
         msg = DefaultMessage(
@@ -248,3 +266,8 @@ class TestP2PLibp2pConnectionRouting:
         for multiplexer in cls.multiplexers:
             multiplexer.disconnect()
         cls.multiplexer_genesis.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
