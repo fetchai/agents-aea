@@ -42,3 +42,10 @@ And then, the `aea-develop:latest` image:
 - Run the publish command again: 
 
       ./develop-image/scripts/docker-publish-img.sh
+
+# Publish to k8s
+
+From the `develop-image` folder run:
+```
+skaffold run -p sandbox
+```

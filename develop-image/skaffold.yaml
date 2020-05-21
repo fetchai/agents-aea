@@ -1,0 +1,23 @@
+apiVersion: skaffold/v1beta13
+kind: Config
+build:
+  artifacts:
+  local: {}
+profiles:
+- name: sandbox
+  build:
+    artifacts:
+    - image: gcr.io/fetch-ai-sandbox/aea-develop-image
+      context: ..
+      docker:
+        dockerfile: develop-image/Dockerfile
+    - image: gcr.io/fetch-ai-sandbox/aea-deploy-image
+      context: ..
+      docker:
+        dockerfile: deploy-image/Dockerfile
+  deploy:
+    kubectl:
+      manifests:
+        - "k8s/deployment.yaml"
+  activation:
+  - kubeContext: sandbox
