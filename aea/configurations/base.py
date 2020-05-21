@@ -1182,6 +1182,8 @@ class AgentConfig(PackageConfiguration):
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
         decision_maker_handler: Optional[Dict] = None,
+        skill_exception_policy: Optional[str] = None,
+        default_routing: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1214,10 +1216,20 @@ class AgentConfig(PackageConfiguration):
         self.timeout: Optional[float] = timeout
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
+        self.skill_exception_policy: Optional[str] = skill_exception_policy
 
         self.decision_maker_handler = (
             decision_maker_handler if decision_maker_handler is not None else {}
         )
+
+        self.default_routing = (
+            {
+                PublicId.from_str(key): PublicId.from_str(value)
+                for key, value in default_routing.items()
+            }
+            if default_routing is not None
+            else {}
+        )  # type: Dict[PublicId, PublicId]
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1324,6 +1336,10 @@ class AgentConfig(PackageConfiguration):
             config["max_reactions"] = self.max_reactions
         if self.decision_maker_handler != {}:
             config["decision_maker_handler"] = self.decision_maker_handler
+        if self.skill_exception_policy is not None:
+            config["skill_exception_policy"] = self.skill_exception_policy
+        if self.default_routing != {}:
+            config["default_routing"] = self.default_routing
         return config
 
     @classmethod
@@ -1346,6 +1362,8 @@ class AgentConfig(PackageConfiguration):
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
             decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
+            skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
+            default_routing=cast(Dict, obj.get("default_routing", {})),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore

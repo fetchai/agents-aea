@@ -331,25 +331,26 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=self._registered_service_description,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
-        self.context.logger.info(
-            "[{}]: unregistering services from OEF service directory.".format(
-                self.context.agent_name
+        if self._registered_service_description is not None:
+            strategy = cast(Strategy, self.context.strategy)
+            oef_msg_id = strategy.get_next_oef_msg_id()
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(oef_msg_id), ""),
+                service_description=self._registered_service_description,
             )
-        )
-        self._registered_service_description = None
+            self.context.outbox.put_message(
+                to=self.context.search_service_address,
+                sender=self.context.agent_address,
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(msg),
+            )
+            self.context.logger.info(
+                "[{}]: unregistering services from OEF service directory.".format(
+                    self.context.agent_name
+                )
+            )
+            self._registered_service_description = None
 ```
 
 We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
@@ -378,11 +379,11 @@ class Strategy(Model):
 
         :return: None
         """
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        super().__init__(**kwargs)
+        self._oef_msg_id = 0
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -411,14 +412,14 @@ The associated `skill.yaml` is:
 ``` yaml
 name: simple_service_registration
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWKGwRe8VGJ9VxutL8Ghy866pBKFhfo7k6Wrvab89tVQZ
-  strategy.py: QmRodUmyDFC9282pGnZ54nJfNCQYcLTJTETq8SBHKPf3to
+  behaviours.py: QmT4nDbtEz5BDtSbw34fXzdZg4HfbYgV3dfMfsGe9R61n4
+  strategy.py: QmWwPzDvmeuVutPwxL5taU1tBGA6aiMDRwo6bTTtLxxHRn
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:

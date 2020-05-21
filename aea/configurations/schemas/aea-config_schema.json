@@ -110,6 +110,12 @@
     },
     "decision_maker_handler": {
       "type": "object"
+    },
+    "skill_exception_policy": {
+      "$ref": "definitions.json#/definitions/skill_exception_policy"
+    },
+    "default_routing": {
+      "type": "object"
     }
   }
 }

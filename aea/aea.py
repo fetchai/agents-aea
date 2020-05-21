@@ -72,6 +72,7 @@ class AEA(Agent):
         decision_maker_handler_class: Type[
             DecisionMakerHandler
         ] = DefaultDecisionMakerHandler,
+        skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         **kwargs,
     ) -> None:
         """
@@ -88,6 +89,7 @@ class AEA(Agent):
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
+        :param skill_exception_policy: the skill exception policy enum
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -122,7 +124,7 @@ class AEA(Agent):
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
-        self._skills_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate
+        self._skills_exception_policy = skill_exception_policy
 
     @property
     def decision_maker(self) -> DecisionMaker:

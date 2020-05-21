@@ -113,6 +113,10 @@
     "execution_timeout": {
       "type": ["number", "null"],
       "minimum": 0
+    },
+    "skill_exception_policy": {
+      "type": ["string", "null"],
+      "minimum": 0
     }
   }
 }
