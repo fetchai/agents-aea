@@ -426,7 +426,7 @@ class TestP2PLibp2pConnectionRelayRouting:
         cls.multiplexers = []
 
         port = port_relay_1
-        for i in range(int(DEFAULT_NET_SIZE / 2)):
+        for _ in range(int(DEFAULT_NET_SIZE / 2)):
             port += 1
             conn = _make_libp2p_connection(
                 port=port, relay=False, entry_peers=relay_peer_1
@@ -437,7 +437,7 @@ class TestP2PLibp2pConnectionRelayRouting:
             mux.connect()
 
         port = port_relay_2
-        for i in range(int(DEFAULT_NET_SIZE / 2)):
+        for _ in range(int(DEFAULT_NET_SIZE / 2)):
             port += 1
             conn = _make_libp2p_connection(
                 port=port, relay=False, entry_peers=relay_peer_2
