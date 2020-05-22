@@ -987,7 +987,7 @@ class AEABuilder:
         """
         aea_project_path = Path(aea_project_path)
         cls._try_to_load_agent_configuration_file(aea_project_path)
-        verify_or_create_private_keys(aea_project_path)
+        _verify_or_create_private_keys(aea_project_path)
         builder = AEABuilder(with_default_packages=False)
 
         # TODO isolate environment
@@ -1152,7 +1152,7 @@ class AEABuilder:
         assert False  # noqa: B011
 
 
-def verify_or_create_private_keys(aea_project_path: Path) -> None:
+def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     """Verify or create private keys."""
     path_to_configuration = aea_project_path / DEFAULT_AEA_CONFIG_FILE
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
