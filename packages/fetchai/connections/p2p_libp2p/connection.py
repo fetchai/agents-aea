@@ -204,7 +204,7 @@ class Libp2pNode:
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
         """
-        
+
         self.agent_addr = agent_addr
 
         # node id in the p2p network
@@ -225,7 +225,7 @@ class Libp2pNode:
         self.clargs = clargs if clargs is not None else []
 
         # node libp2p multiaddrs
-        self.multiaddrs = [] # type: List[MultiAddr] 
+        self.multiaddrs = []  # type: Sequence[MultiAddr]
 
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
@@ -246,36 +246,35 @@ class Libp2pNode:
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
 
     async def start(self) -> None:
-        """	
-        Start the node.	
-        
-        :return: None	
-        """	
-        which = shutil.which("go")	
-        if which is None:	
-            raise Exception("Libp2p Go should me installed")	
+        """
+        Start the node.
+
+        :return: None
+        """
+        which = shutil.which("go")
+        if which is None:
+            raise Exception("Libp2p Go should me installed")
 
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
         # open log file
         self._log_file_desc = open(self.log_file, "a", 1)
-        
 
         # build the node
         # TOFIX(LR) fix async version
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
-        with open(self.log_file, "r") as f:	
-            logger.debug(f.read())	
-        node_log = ""	
-        with open(self.log_file, "r") as f:	
-            node_log = f.read()	
-        if proc.returncode != 0:	
-            raise Exception(	
-                "Error while downloading golang dependencies and building it: {}, {}".format(	
-                    proc.returncode, node_log	
+        with open(self.log_file, "r") as f:
+            logger.debug(f.read())
+        node_log = ""
+        with open(self.log_file, "r") as f:
+            node_log = f.read()
+        if proc.returncode != 0:
+            raise Exception(
+                "Error while downloading golang dependencies and building it: {}, {}".format(
+                    proc.returncode, node_log
                 )
             )
         logger.info("Finished downloading golang dependencies.")
@@ -312,7 +311,8 @@ class Libp2pNode:
             )
             env_file.write("NODE_TO_AEA={}\n".format(in_path))
             env_file.write("AEA_TO_NODE={}\n".format(out_path))
-            env_file.write("AEA_P2P_URI_PUBLIC={}\n".format(
+            env_file.write(
+                "AEA_P2P_URI_PUBLIC={}\n".format(
                     str(self.public_uri) if self.public_uri is not None else ""
                 )
             )
@@ -327,10 +327,10 @@ class Libp2pNode:
         await self._connect()
 
     async def _connect(self) -> None:
-        """	
-        Connnect to the peer node.	
+        """
+        Connnect to the peer node.
 
-        :return: None	
+        :return: None
         """
         if self._connection_attempts == 1:
             raise Exception("Couldn't connect to libp2p p2p process")
@@ -385,10 +385,10 @@ class Libp2pNode:
         # TOFIX(LR) can use asyncio.connect_write_pipe
 
     async def read(self) -> Optional[bytes]:
-        """	
-        Read from the reader stream.	
+        """
+        Read from the reader stream.
 
-        :return: bytes	
+        :return: bytes
         """
         assert (
             self._stream_reader is not None
@@ -413,10 +413,10 @@ class Libp2pNode:
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
-        """	
-        Get the node's multiaddresses.	
+        """
+        Get the node's multiaddresses.
 
-        :return: a list of multiaddresses	
+        :return: a list of multiaddresses
         """
         LIST_START = "MULTIADDRS_LIST_START"
         LIST_END = "MULTIADDRS_LIST_END"
@@ -442,10 +442,10 @@ class Libp2pNode:
         return multiaddrs
 
     def stop(self) -> None:
-        """	
-        Stop the node.	
+        """
+        Stop the node.
 
-        :return: None	
+        :return: None
         """
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
@@ -631,8 +631,12 @@ class P2PLibp2pConnection(Connection):
         libp2p_key_file = configuration.config.get("libp2p_key_file")  # Optional[str]
         libp2p_host = configuration.config.get("libp2p_host")  # Optional[str]
         libp2p_port = configuration.config.get("libp2p_port")  # Optional[int]
-        libp2p_host_public = configuration.config.get("libp2p_public_host")  # Optional[str]
-        libp2p_port_public = configuration.config.get("libp2p_public_port")  # Optional[int]
+        libp2p_host_public = configuration.config.get(
+            "libp2p_public_host"
+        )  # Optional[str]
+        libp2p_port_public = configuration.config.get(
+            "libp2p_public_port"
+        )  # Optional[int]
         entry_peers = list(cast(List, configuration.config.get("libp2p_entry_peers")))
         log_file = configuration.config.get("libp2p_log_file")  # Optional[str]
         env_file = configuration.config.get("libp2p_env_file")  # Optional[str]
@@ -648,10 +652,10 @@ class P2PLibp2pConnection(Connection):
                 uri = Uri(host=libp2p_host, port=libp2p_port)
             else:
                 uri = Uri(host="127.0.0.1", port=libp2p_port)
-        
+
         public_uri = None
         if libp2p_port_public is not None and libp2p_host_public is not None:
-                public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+            public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
 
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 

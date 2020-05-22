@@ -57,8 +57,8 @@ def _make_libp2p_connection(
         FetchAICrypto().address,
         FetchAICrypto(),
         Uri("{}:{}".format(host, port)),
-        entry_peers,
-        log_file,
+        entry_peers=entry_peers,
+        log_file=log_file,
     )
 
 
