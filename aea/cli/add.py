@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea add' subcommand."""
 
-import os
 from pathlib import Path
 from typing import Collection, cast
 
@@ -36,12 +35,13 @@ from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
     get_package_dest_path,
+    is_fingerprint_correct,
+    is_item_present,
+    register_item,
 )
 from aea.configurations.base import (
-    DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     PublicId,
-    _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.constants import (
@@ -116,7 +116,7 @@ def _add_item(
             item_type, item_public_id, agent_name
         )
     )
-    if _is_item_present(ctx, item_type, item_public_id):
+    if is_item_present(ctx, item_type, item_public_id):
         raise click.ClickException(
             "A {} with id '{}/{}' already exists. Aborting...".format(
                 item_type, item_public_id.author, item_public_id.name
@@ -156,35 +156,11 @@ def _add_item(
 
     item_config = _load_item_config(item_type, package_path)
 
-    if not _is_fingerprint_correct(package_path, item_config):
+    if not is_fingerprint_correct(package_path, item_config):
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
     _add_item_deps(click_context, item_type, item_config)
-    _register_item(ctx, item_type, item_public_id)
-
-
-def _is_item_present(ctx: Context, item_type: str, item_public_id: PublicId) -> bool:
-    """
-    Check if item is already present in AEA.
-
-    :param ctx: context object.
-    :param item_type: type of an item.
-    :param item_public_id: PublicId of an item.
-
-    :return: boolean is item present.
-    """
-    item_type_plural = item_type + "s"
-    dest_path = Path(
-        ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name
-    )
-    # check item presence only by author/package_name pair, without version.
-    items_in_config = set(
-        map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
-    )
-    return (
-        item_public_id.author,
-        item_public_id.name,
-    ) in items_in_config and dest_path.exists()
+    register_item(ctx, item_type, item_public_id)
 
 
 def _add_protocols(
@@ -205,21 +181,6 @@ def _add_protocols(
                 "Adding protocol '{}' to the agent...".format(protocol_public_id)
             )
             _add_item(click_context, "protocol", protocol_public_id)
-
-
-def _is_fingerprint_correct(package_path: Path, item_config) -> bool:
-    """
-    Validate fingerprint of item before adding.
-
-    :param package_path: path to a package folder.
-    :param item_config: item configuration.
-
-    :return: None.
-    """
-    fingerprint = _compute_fingerprint(
-        package_path, ignore_patterns=item_config.fingerprint_ignore_patterns
-    )
-    return item_config.fingerprint == fingerprint
 
 
 def _load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
@@ -254,24 +215,3 @@ def _add_item_deps(click_context: ClickContext, item_type: str, item_config) -> 
     if item_type == "skill":
         for contract_public_id in item_config.contracts:
             _add_item(click_context, "contract", contract_public_id)
-
-
-def _register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
-    """
-    Register item in agent configuration.
-
-    :param ctx: click context object.
-    :param item_type: type of item.
-    :param item_public_id: PublicId of item.
-
-    :return: None.
-    """
-    logger.debug(
-        "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
-    )
-    item_type_plural = item_type + "s"
-    supported_items = getattr(ctx.agent_config, item_type_plural)
-    supported_items.add(item_public_id)
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )

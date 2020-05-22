@@ -23,9 +23,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
-
-from click import ClickException
+from unittest import mock
 
 from jsonschema import ValidationError
 
@@ -33,7 +31,6 @@ import yaml
 
 import aea
 from aea.cli import cli
-from aea.cli.add import _is_fingerprint_correct
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -494,25 +491,3 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         contracts_folders = os.listdir(contracts_path)
         contract_dependency_name = "erc1155"
         assert contract_dependency_name in contracts_folders
-
-
-@mock.patch("aea.cli.add._compute_fingerprint", return_value={"correct": "fingerprint"})
-class IsFingerprintCorrectTestCase(TestCase):
-    """Test case for adding skill with invalid fingerprint."""
-
-    def test__is_fingerprint_correct_positive(self, *mocks):
-        """Test _is_fingerprint_correct method for positive result."""
-        item_config = mock.Mock()
-        item_config.fingerprint = {"correct": "fingerprint"}
-        item_config.fingerprint_ignore_patterns = []
-        result = _is_fingerprint_correct("package_path", item_config)
-        self.assertTrue(result)
-
-    def test__is_fingerprint_correct_negative(self, *mocks):
-        """Test _is_fingerprint_correct method for negative result."""
-        item_config = mock.Mock()
-        item_config.fingerprint = {"incorrect": "fingerprint"}
-        item_config.fingerprint_ignore_patterns = []
-        package_path = "package_dir"
-        result = _is_fingerprint_correct(package_path, item_config)
-        self.assertFalse(result)

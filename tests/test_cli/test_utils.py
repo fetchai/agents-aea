@@ -41,6 +41,7 @@ from aea.cli.utils.formatting import format_items
 from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
+    is_fingerprint_correct,
     try_get_item_source_path,
     try_get_item_target_path,
     validate_author_name,
@@ -345,3 +346,28 @@ class ValidateConfigConsistencyTestCase(TestCase):
             _validate_config_consistency(ContextMock(protocols=["some"]))
 
         self.assertIn("Cannot find", str(cm.exception))
+
+
+@mock.patch(
+    "aea.cli.utils.package_utils._compute_fingerprint",
+    return_value={"correct": "fingerprint"},
+)
+class IsFingerprintCorrectTestCase(TestCase):
+    """Test case for adding skill with invalid fingerprint."""
+
+    def test_is_fingerprint_correct_positive(self, *mocks):
+        """Test is_fingerprint_correct method for positive result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"correct": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        result = is_fingerprint_correct("package_path", item_config)
+        self.assertTrue(result)
+
+    def test_is_fingerprint_correct_negative(self, *mocks):
+        """Test is_fingerprint_correct method for negative result."""
+        item_config = mock.Mock()
+        item_config.fingerprint = {"incorrect": "fingerprint"}
+        item_config.fingerprint_ignore_patterns = []
+        package_path = "package_dir"
+        result = is_fingerprint_correct(package_path, item_config)
+        self.assertFalse(result)
