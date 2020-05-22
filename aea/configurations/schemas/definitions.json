@@ -120,11 +120,11 @@
     },
     "skill_exception_policy": {
       "type": "string",
-      "enum": ["propagate", "just_log", "stop_and_exit"],
+      "enum": ["propagate", "just_log", "stop_and_exit"]
     },
     "loop_mode": {
       "type": "string",
-      "enum": ["sync", "async"],
+      "enum": ["sync", "async"]
     }
   }
 }

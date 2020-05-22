@@ -21,7 +21,7 @@
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "agent_name": {
-      "type": "definitions.json#/definitions/resource_name"
+      "$ref": "definitions.json#/definitions/resource_name"
     },
     "author": {
       "$ref": "definitions.json#/definitions/author"

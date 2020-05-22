@@ -1041,6 +1041,7 @@ class AEABuilder:
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
             )
         self.set_default_routing(agent_configuration.default_routing)
+        self.set_loop_mode(agent_configuration.loop_mode)
 
         # load private keys
         for (

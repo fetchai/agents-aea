@@ -75,7 +75,9 @@ def _build_aea(
 
 def _run_aea(aea: AEA) -> None:
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    click.echo("Starting AEA '{}' ...".format(aea.name))
+    click.echo(
+        "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.DEFAULT_RUN_LOOP)
+    )
     try:
         aea.start()
     except KeyboardInterrupt:
