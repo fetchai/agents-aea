@@ -105,7 +105,8 @@ func main() {
 	log.Println(bootstrapPeers)
 
 	// Configure node's multiaddr
-	nodeMultiaddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", nodeHost, nodePort))
+	nodeMultiaddr, err := multiaddr.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", nodeHost, nodePort))
+	check(err)
 
 	// Run as a peer or just as a client
 	// TOFIX(LR) global vars, will be refatoring very soon
@@ -125,6 +126,8 @@ func main() {
 
 	// Make a host that listens on the given multiaddress
 	routedHost, hdht, err := setupRoutedHost(nodeMultiaddr, prvKey, bootstrapPeers, aeaAddr, nodeHostPublic, nodePortPublic)
+	check(err)
+
 	log.Println("successfully created libp2p node!")
 
 	if !cfg_client {
@@ -743,7 +746,10 @@ func setupRoutedHost(
 	//if nodePortPublic != 0 {
 	if !cfg_client {
 
-		publicMultiaddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/dns4/%s/tcp/%d", nodeHostPublic, nodePortPublic))
+		publicMultiaddr, err := multiaddr.NewMultiaddr(fmt.Sprintf("/dns4/%s/tcp/%d", nodeHostPublic, nodePortPublic))
+		if err != nil {
+			return nil, nil, err
+		}
 		addressFactory = func(addrs []multiaddr.Multiaddr) []multiaddr.Multiaddr {
 			return []multiaddr.Multiaddr{publicMultiaddr}
 		}
