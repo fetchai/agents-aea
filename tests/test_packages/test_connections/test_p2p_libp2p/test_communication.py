@@ -48,18 +48,31 @@ DEFAULT_NET_SIZE = 4
 def _make_libp2p_connection(
     port: Optional[int] = DEFAULT_PORT,
     host: Optional[str] = DEFAULT_HOST,
+    relay: Optional[bool] = True,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
     if os.path.exists(log_file):
         os.remove(log_file)
-    return P2PLibp2pConnection(
-        FetchAICrypto().address,
-        FetchAICrypto(),
-        Uri("{}:{}".format(host, port)),
-        entry_peers=entry_peers,
-        log_file=log_file,
-    )
+    if relay:
+        return P2PLibp2pConnection(
+            FetchAICrypto().address,
+            FetchAICrypto(),
+            Uri("{}:{}".format(host, port)),
+            Uri("{}:{}".format(host, port)),
+            entry_peers=entry_peers,
+            log_file=log_file,
+        )
+    else:
+        return P2PLibp2pConnection(
+            FetchAICrypto().address,
+            FetchAICrypto(),
+            Uri("{}:{}".format(host, port)),
+            entry_peers=entry_peers,
+            log_file=log_file,
+        )
+
+
 
 
 @skip_test_windows
