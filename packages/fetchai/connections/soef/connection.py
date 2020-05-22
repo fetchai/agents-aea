@@ -905,21 +905,60 @@ class SOEFChannel:
             root = ET.fromstring(response.text)
             agents = {}  # type: Dict[str, Dict[str, str]]
             agents_l = []  # type: List[str]
+
             for child in root:
+                logger.debug(
+                    "child: {}, child.tag: {}, child.text: {}".format(
+                        child, child.tag, child.text
+                    )
+                )
                 for child_ in child:
+                    # child_ : <Element 'agent'
                     data = {}
+                    logger.debug(
+                        "child_: {}, child_.tag: {}, child_.text: {}".format(
+                            child_, child_.tag, child_.text
+                        )
+                    )
                     for child__ in child_:
-                        if child__.text is not None:
-                            data[child__.tag] = child__.text
-                        for child___ in child__:
-                            if child___.text is not None:
-                                data[child___.tag] = child___.text
-                    if data["chain_identifier"] not in agents:
-                        agents[data["chain_identifier"]] = {}
-                    agents[data["chain_identifier"]][data["address"]] = data[
-                        "range_in_km"
-                    ]
-                    agents_l.append(data["address"])
+                        # child__ : <Element 'identities'/'range_in_km'
+                        logger.debug(
+                            "child__: {}, child__.tag: {}, child__.text: {}".format(
+                                child__, child__.tag, child__.text
+                            )
+                        )
+                        if child__.tag == "identities":
+                            for child___ in child__:
+                                # child__ : <Element 'identity'
+                                logger.debug(
+                                    "child___: {}, child___.tag: {}, child___.text: {}".format(
+                                        child___, child___.tag, child___.text
+                                    )
+                                )
+                                for child____ in child___:
+                                    # child___ : Element 'chain_identifier'/'address'
+                                    logger.debug(
+                                        "child____: {}, child____.tag: {}, child____.text: {}".format(
+                                            child____, child____.tag, child____.text
+                                        )
+                                    )
+                                    if (
+                                        child____.tag == "chain_identifier"
+                                        and child____.text is not None
+                                    ):
+                                        data[child____.tag] = child____.text
+                                        if data["chain_identifier"] not in agents:
+                                            agents[child____.text] = {}
+                                    if (
+                                        child____.tag == "address"
+                                        and child____.text is not None
+                                    ):
+                                        data[child____.tag] = child____.text
+                                        agents_l.append(child____.text)
+                        elif child__.tag == "range_in_km" and child__.text is not None:
+                            agents[data["chain_identifier"]][
+                                data["address"]
+                            ] = child__.text
             if root.tag == "response":
                 logger.debug("Search SUCCESS")
                 message = OefSearchMessage(
