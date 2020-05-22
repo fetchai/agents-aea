@@ -35,7 +35,7 @@ from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 FETCHAI = FetchAICrypto.identifier
 
 
-@skip_test_windows()
+@skip_test_windows
 def test_default_timeout_for_agent():
     """
     Tests agents loop sleep timeout
