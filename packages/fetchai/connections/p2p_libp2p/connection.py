@@ -204,6 +204,7 @@ class Libp2pNode:
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
         """
+        
         self.agent_addr = agent_addr
 
         # node id in the p2p network
@@ -245,6 +246,15 @@ class Libp2pNode:
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
 
     async def start(self) -> None:
+        """	
+        Start the node.	
+        
+        :return: None	
+        """	
+        which = shutil.which("go")	
+        if which is None:	
+            raise Exception("Libp2p Go should me installed")	
+
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -257,6 +267,17 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
+        with open(self.log_file, "r") as f:	
+            logger.debug(f.read())	
+        node_log = ""	
+        with open(self.log_file, "r") as f:	
+            node_log = f.read()	
+        if proc.returncode != 0:	
+            raise Exception(	
+                "Error while downloading golang dependencies and building it: {}, {}".format(	
+                    proc.returncode, node_log	
+                )	
+            )
         logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
@@ -306,6 +327,11 @@ class Libp2pNode:
         await self._connect()
 
     async def _connect(self) -> None:
+        """	
+        Connnect to the peer node.	
+
+        :return: None	
+        """
         if self._connection_attempts == 1:
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
@@ -350,7 +376,6 @@ class Libp2pNode:
         logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         logger.info("My libp2p addresses: {}".format(self.multiaddrs))
-        print("My libp2p addresses: {}".format(self.multiaddrs))
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -360,6 +385,11 @@ class Libp2pNode:
         # TOFIX(LR) can use asyncio.connect_write_pipe
 
     async def read(self) -> Optional[bytes]:
+        """	
+        Read from the reader stream.	
+
+        :return: bytes	
+        """
         assert (
             self._stream_reader is not None
         ), "StreamReader not set, call connect first!"
@@ -383,10 +413,15 @@ class Libp2pNode:
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
     def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
+        """	
+        Get the node's multiaddresses.	
+
+        :return: a list of multiaddresses	
+        """
         LIST_START = "MULTIADDRS_LIST_START"
         LIST_END = "MULTIADDRS_LIST_END"
 
-        multiaddrs = []
+        multiaddrs = []  # type: List[MultiAddr]
 
         lines = []
         with open(self.log_file, "r") as f:
@@ -407,6 +442,11 @@ class Libp2pNode:
         return multiaddrs
 
     def stop(self) -> None:
+        """	
+        Stop the node.	
+
+        :return: None	
+        """
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
             logger.debug("Terminating node process {}...".format(self.proc.pid))
