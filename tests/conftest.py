@@ -39,7 +39,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.cli.common import _init_cli_config
+from aea.cli.utils.config import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,

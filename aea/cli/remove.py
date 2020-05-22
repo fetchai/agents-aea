@@ -24,13 +24,10 @@ from pathlib import Path
 
 import click
 
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
-    check_aea_project,
-    logger,
-    pass_ctx,
-)
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, pass_ctx
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 

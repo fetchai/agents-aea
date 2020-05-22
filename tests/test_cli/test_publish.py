@@ -92,7 +92,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
             _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
 
 
-@mock.patch("aea.cli.common._check_aea_project")
+@mock.patch("aea.cli.utils.decorators._check_aea_project")
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 @mock.patch("aea.cli.publish._validate_pkp")

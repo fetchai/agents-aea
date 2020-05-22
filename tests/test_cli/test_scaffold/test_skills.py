@@ -32,8 +32,6 @@ from jsonschema import Draft4Validator, ValidationError
 
 import yaml
 
-import aea.cli.common
-import aea.configurations.base
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
@@ -59,8 +57,6 @@ class TestScaffoldSkill:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.start()
 
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver(

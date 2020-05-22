@@ -37,7 +37,6 @@ import pytest
 import yaml
 
 import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.constants import (

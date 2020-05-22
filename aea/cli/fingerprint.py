@@ -23,7 +23,8 @@ from typing import Dict, cast
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.context import Context
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,

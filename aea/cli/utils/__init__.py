@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,21 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for commands in aea.cli.utils.loggers module."""
-
-from unittest import TestCase, mock
-
-from aea.cli.utils.loggers import ColorFormatter
-
-
-class ColorFormatterTestCase(TestCase):
-    """Test case for ColorFormatter class."""
-
-    def test_format_positive(self):
-        """Test for format method positive result."""
-        record = mock.Mock()
-        record.exc_info = None
-        record.levelname = "DEBUG"
-        record.getMessage = mock.Mock(return_value="Message")
-        color_formatter = ColorFormatter()
-        color_formatter.format(record)
+"""A module with utils of the aea cli."""

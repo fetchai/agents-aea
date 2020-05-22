@@ -25,13 +25,9 @@ from typing import Dict, List
 
 import click
 
-from aea.cli.common import (
-    Context,
-    _format_items,
-    _retrieve_details,
-    check_aea_project,
-    pass_ctx,
-)
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, pass_ctx
+from aea.cli.utils.formatting import _format_items, _retrieve_details
 from aea.configurations.base import (
     PackageType,
     PublicId,
