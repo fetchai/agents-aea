@@ -1342,9 +1342,10 @@ class AgentConfig(PackageConfiguration):
         if self.skill_exception_policy is not None:
             config["skill_exception_policy"] = self.skill_exception_policy
         if self.default_routing != {}:
-            config["default_routing"] = self.default_routing
+            config["default_routing"] = {str(key): str(value) for key, value in self.default_routing.items()}
         if self.loop_mode is not None:
             config["loop_mode"] = self.loop_mode
+
         return config
 
     @classmethod

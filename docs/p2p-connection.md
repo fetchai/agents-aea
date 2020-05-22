@@ -49,6 +49,57 @@ aea run --connections fetchai/p2p_libp2p:0.1.0
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
 
+
+## Local Demo with skills
+
+### Fetch the weather station and client
+
+Create one AEA as follows:
+
+``` bash
+aea fetch fetchai/weather_station:0.4.0
+aea fetch fetchai/weather_client:0.4.0
+```
+
+Then enter each project individually and execute the following:
+``` bash
+aea add connection fetchai/p2p_libp2p:0.1.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.1.0
+```
+
+Then extend the `aea-config.yaml` of each project as follows:
+``` yaml
+default_routing:
+  ? "fetchai/oef_search:0.1.0"
+  : "fetchai/oef:0.3.0"
+```
+
+Run the oef for search and discovery:
+``` bash
+python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+```
+
+Run the weather station first:
+``` bash
+aea run --connections fetchai/p2p_libp2p:0.1.0
+```
+
+Provide the weather client AEA with the information it needs to find the genesis by adding the following block to `vendor/fetchai/connnections/p2p_libp2p/connection.yaml`:
+``` yaml
+config:
+  libp2p_entry_peers: [{MULTI_ADDRESSES}]
+  libp2p_host: 0.0.0.0
+  libp2p_log_file: libp2p_node.log
+  libp2p_port: 9001
+```
+Here `{MULTI_ADDRESSES}` needs to be replaced with the list of multi addresses displayed in the log output of the weather station AEA.
+
+Then fund your
+Now run the weather client:
+``` bash
+aea run --connections fetchai/p2p_libp2p:0.1.0
+```
+
 ## Deployed Test Network
 
 <div class="admonition note">
