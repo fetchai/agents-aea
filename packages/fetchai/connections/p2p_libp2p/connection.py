@@ -263,7 +263,7 @@ class Libp2pNode:
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
         with open(self.log_file, "r") as f:
-            logger.info(f.read())
+            logger.debug(f.read())
         node_log = ""
         with open(self.log_file, "r") as f:
             node_log = f.read()
@@ -364,7 +364,7 @@ class Libp2pNode:
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
         with open(self.log_file, "r") as f:
-            logger.info(f.read())
+            logger.debug(f.read())
 
         logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
