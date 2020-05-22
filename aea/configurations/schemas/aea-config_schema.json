@@ -21,7 +21,7 @@
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "agent_name": {
-      "type": "string"
+      "type": "definitions.json#/definitions/resource_name"
     },
     "author": {
       "$ref": "definitions.json#/definitions/author"
@@ -60,7 +60,7 @@
       }
     },
     "default_ledger": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/ledger_id"
     },
     "connections": {
       "type": "array",
@@ -115,7 +115,16 @@
       "$ref": "definitions.json#/definitions/skill_exception_policy"
     },
     "default_routing": {
-      "type": "object"
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$": {
+          "$ref": "definitions.json#/definitions/public_id"
+        }
+      }
+    },
+    "loop_mode": {
+      "$ref": "definitions.json#/definitions/loop_mode"
     }
   }
 }

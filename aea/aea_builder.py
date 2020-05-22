@@ -231,7 +231,8 @@ class AEABuilder:
     DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
-    SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
+    DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
+    DEFAULT_LOOP_MODE = "async"
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -256,6 +257,7 @@ class AEABuilder:
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
+        self._loop_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -351,6 +353,16 @@ class AEABuilder:
         :return: self
         """
         self._default_routing = default_routing
+        return self
+
+    def set_loop_mode(self, loop_mode: Optional[str]) -> "AEABuilder":
+        """
+        Set the loop mode.
+
+        :param loop_mode: the agent loop mode
+        :return: self
+        """
+        self._loop_mode = loop_mode
         return self
 
     def _add_default_packages(self) -> None:
@@ -735,6 +747,7 @@ class AEABuilder:
             default_routing=self._get_default_routing(),
             **self._context_namespace,
         )
+        aea.DEFAULT_RUN_LOOP = self._get_loop_mode()
         aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context)
         return aea
@@ -858,7 +871,7 @@ class AEABuilder:
         return (
             self._skill_exception_policy
             if self._skill_exception_policy is not None
-            else self.SKILL_EXCEPTION_POLICY
+            else self.DEFAULT_SKILL_EXCEPTION_POLICY
         )
 
     def _get_default_routing(self) -> Dict[PublicId, PublicId]:
@@ -868,6 +881,16 @@ class AEABuilder:
         :return: the policy
         """
         return self._default_routing
+
+    def _get_loop_mode(self) -> str:
+        """
+        Return the loop mode
+
+        :return: the loop mode
+        """
+        return (
+            self._loop_mode if self._loop_mode is not None else self.DEFAULT_LOOP_MODE
+        )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
