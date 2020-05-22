@@ -21,9 +21,9 @@
 
 import click
 
-from aea.cli.common import _update_cli_config
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import registry_login
+from aea.cli.utils.config import update_cli_config
 
 
 def do_login(username: str, password: str):
@@ -37,7 +37,7 @@ def do_login(username: str, password: str):
     """
     click.echo("Signing in as {}...".format(username))
     token = registry_login(username, password)
-    _update_cli_config({AUTH_TOKEN_KEY: token})
+    update_cli_config({AUTH_TOKEN_KEY: token})
     click.echo("Successfully signed in: {}.".format(username))
 
 

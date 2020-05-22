@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,19 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea logout' subcommand."""
-
-import click
-
-from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.registry.utils import registry_logout
-from aea.cli.utils.config import update_cli_config
-
-
-@click.command(name="logout", help="Logout from Registry account.")
-def logout():
-    """Logout from Registry account."""
-    click.echo("Logging out...")
-    registry_logout()
-    update_cli_config({AUTH_TOKEN_KEY: None})
-    click.echo("Successfully logged out.")
+"""A module with utils of the aea cli."""

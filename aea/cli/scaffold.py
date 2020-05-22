@@ -29,13 +29,10 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.cli.common import (
-    Context,
-    _validate_package_name,
-    check_aea_project,
-    clean_after,
-    logger,
-)
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import validate_package_name
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -95,7 +92,7 @@ def decision_maker_handler(click_context):
 def _scaffold_item(click_context, item_type, item_name):
 
     """Add an item scaffolding to the configuration file and agent."""
-    _validate_package_name(item_name)
+    validate_package_name(item_name)
 
     ctx = cast(Context, click_context.obj)
     author_name = ctx.agent_config.author

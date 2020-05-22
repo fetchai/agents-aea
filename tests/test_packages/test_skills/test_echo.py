@@ -32,7 +32,7 @@ from ...conftest import skip_test_windows
 class TestEchoSkill(AEATestCaseEmpty):
     """Test that echo skill works."""
 
-    @skip_test_windows(is_test_class=True)
+    @skip_test_windows
     def test_echo(self):
         """Run the echo skill sequence."""
         self.add_item("skill", "fetchai/echo:0.1.0")

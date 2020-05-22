@@ -26,8 +26,8 @@ from aea.test_tools.click_testing import CliRunner
 from tests.conftest import CLI_LOG_OPTION
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.common._validate_config_consistency")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators._validate_config_consistency")
 class AddContractCommandTestCase(TestCase):
     """Test that the command 'aea add contract' works as expected."""
 

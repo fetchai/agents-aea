@@ -1634,7 +1634,7 @@ class ContractConfig(ComponentConfiguration):
         )
 
 
-"""The following functions are called from aea.cli.common."""
+"""The following functions are called from aea.cli.utils."""
 
 
 def _compute_fingerprint(

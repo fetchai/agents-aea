@@ -28,7 +28,6 @@ from pathlib import Path
 import yaml
 
 import aea
-import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
@@ -49,8 +48,6 @@ class TestRemoveSkillWithPublicId:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/gym:0.2.0"
         cls.skill_name = "gym"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.start()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -174,8 +171,6 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/gym:0.2.0"
         cls.skill_name = "gym"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.start()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

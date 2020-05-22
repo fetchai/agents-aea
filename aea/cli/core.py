@@ -31,13 +31,6 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import (
-    AgentDirectory,
-    Context,
-    _verify_or_create_private_keys,
-    check_aea_project,
-    logger,
-)
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -47,7 +40,6 @@ from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.launch import launch
 from aea.cli.list import list as _list
-from aea.cli.loggers import simple_verbosity_option
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish
@@ -57,6 +49,11 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.loggers import logger, simple_verbosity_option
+from aea.cli.utils.package_utils import verify_or_create_private_keys
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.helpers import (
     IDENTIFIER_TO_FAUCET_APIS,
@@ -222,7 +219,7 @@ def _try_get_address(ctx, type_):
 def get_address(click_context, type_):
     """Get the address associated with the private key."""
     ctx = cast(Context, click_context.obj)
-    _verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx)
     address = _try_get_address(ctx, type_)
     click.echo(address)
 
@@ -259,7 +256,7 @@ def _try_get_wealth(ctx, type_):
 @check_aea_project
 def get_wealth(ctx: Context, type_):
     """Get the wealth associated with the private key."""
-    _verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx)
     wealth = _try_get_wealth(ctx, type_)
     click.echo(wealth)
 
@@ -311,7 +308,7 @@ def _try_generate_wealth(ctx, type_, sync):
 def generate_wealth(click_context, sync, type_):
     """Generate wealth for address on test network."""
     ctx = cast(Context, click_context.obj)
-    _verify_or_create_private_keys(ctx)
+    verify_or_create_private_keys(ctx)
     _try_generate_wealth(ctx, type_, sync)
 
 

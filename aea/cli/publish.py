@@ -25,15 +25,14 @@ from typing import cast
 
 import click
 
-from aea.cli.common import (
-    Context,
-    DEFAULT_AEA_CONFIG_FILE,
-    _try_get_item_source_path,
-    _try_get_item_target_path,
-    check_aea_project,
-)
 from aea.cli.registry.publish import publish_agent
-from aea.configurations.base import CRUDCollection, PublicId
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.package_utils import (
+    try_get_item_source_path,
+    try_get_item_target_path,
+)
+from aea.configurations.base import CRUDCollection, DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
@@ -72,7 +71,7 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
 
 def _check_is_item_in_local_registry(public_id, item_type_plural, registry_path):
     try:
-        _try_get_item_source_path(
+        try_get_item_source_path(
             registry_path, public_id.author, item_type_plural, public_id.name
         )
     except click.ClickException as e:
@@ -103,7 +102,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     item_type_plural = "agents"
 
-    target_dir = _try_get_item_target_path(
+    target_dir = try_get_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,

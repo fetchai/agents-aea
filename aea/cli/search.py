@@ -26,16 +26,12 @@ from typing import Dict, List, cast
 import click
 
 from aea import AEA_DIR
-from aea.cli.common import (
-    ConfigLoader,
-    Context,
-    _format_items,
-    _retrieve_details,
-    logger,
-    pass_ctx,
-    try_to_load_agent_config,
-)
 from aea.cli.registry.utils import request_api
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import pass_ctx
+from aea.cli.utils.formatting import format_items, retrieve_details
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -44,6 +40,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
@@ -99,7 +96,7 @@ def _get_details_from_dir(
         if _is_invalid_item(dir_path.name, dir_path, config_path):
             continue
 
-        details = _retrieve_details(dir_path.name, loader, str(config_path))
+        details = retrieve_details(dir_path.name, loader, str(config_path))
         results.append(details)
 
 
@@ -162,7 +159,7 @@ def connections(ctx: Context, query):
         click.echo("No connections found.")  # pragma: no cover
     else:
         click.echo("Connections found:\n")
-        click.echo(_format_items(results))
+        click.echo(format_items(results))
 
 
 @search.command()
@@ -180,7 +177,7 @@ def contracts(ctx: Context, query):
         click.echo("No contracts found.")  # pragma: no cover
     else:
         click.echo("Contracts found:\n")
-        click.echo(_format_items(results))
+        click.echo(format_items(results))
 
 
 @search.command()
@@ -198,7 +195,7 @@ def protocols(ctx: Context, query):
         click.echo("No protocols found.")  # pragma: no cover
     else:
         click.echo("Protocols found:\n")
-        click.echo(_format_items(results))
+        click.echo(format_items(results))
 
 
 @search.command()
@@ -216,7 +213,7 @@ def skills(ctx: Context, query):
         click.echo("No skills found.")  # pragma: no cover
     else:
         click.echo("Skills found:\n")
-        click.echo(_format_items(results))
+        click.echo(format_items(results))
 
 
 @search.command()
@@ -234,4 +231,4 @@ def agents(ctx: Context, query):
         click.echo("No agents found.")  # pragma: no cover
     else:
         click.echo("Agents found:\n")
-        click.echo(_format_items(results))
+        click.echo(format_items(results))

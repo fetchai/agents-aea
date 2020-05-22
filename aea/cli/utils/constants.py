@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,19 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea logout' subcommand."""
+"""Module with constants of the aea cli."""
 
-import click
-
-from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.registry.utils import registry_logout
-from aea.cli.utils.config import update_cli_config
+import os
 
 
-@click.command(name="logout", help="Logout from Registry account.")
-def logout():
-    """Logout from Registry account."""
-    click.echo("Logging out...")
-    registry_logout()
-    update_cli_config({AUTH_TOKEN_KEY: None})
-    click.echo("Successfully logged out.")
+AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
+AUTHOR_KEY = "author"
+CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
+NOT_PERMITTED_AUTHORS = [
+    "skills",
+    "connections",
+    "protocols",
+    "contracts",
+    "vendor",
+    "packages",
+    "aea",
+]
+
+
+FROM_STRING_TO_TYPE = dict(str=str, int=int, bool=bool, float=float)

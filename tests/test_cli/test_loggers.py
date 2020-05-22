@@ -17,11 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for commands in aea.cli.loggers module."""
+"""This test module contains the tests for commands in aea.cli.utils.loggers module."""
 
 from unittest import TestCase, mock
 
-from aea.cli.loggers import ColorFormatter
+from aea.cli.utils.loggers import ColorFormatter
 
 
 class ColorFormatterTestCase(TestCase):

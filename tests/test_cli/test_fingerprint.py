@@ -80,7 +80,7 @@ class FingerprintItemTestCase(TestCase):
 
     @mock.patch("aea.cli.fingerprint.Path.exists", return_value=False)
     @mock.patch(
-        "aea.cli.common.ConfigLoader.from_configuration_type",
+        "aea.cli.fingerprint.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
     )
     def test__fingerprint_item_package_not_found(self, *mocks):
@@ -90,7 +90,9 @@ class FingerprintItemTestCase(TestCase):
             _fingerprint_item(ContextMock(), "skill", public_id)
         self.assertIn("Package not found at path", cm.exception.message)
 
-    @mock.patch("aea.cli.common.ConfigLoader.from_configuration_type", _raise_exception)
+    @mock.patch(
+        "aea.cli.fingerprint.ConfigLoader.from_configuration_type", _raise_exception
+    )
     def test__fingerprint_item_exception(self, *mocks):
         """Test for _fingerprint_item exception raised."""
         public_id = PublicIdMock()

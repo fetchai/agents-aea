@@ -24,8 +24,10 @@ from typing import Optional, cast
 import click
 
 from aea.cli.add import _add_item
-from aea.cli.common import Context, clean_after, try_to_load_agent_config
 from aea.cli.registry.utils import download_file, extract, request_api
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 

@@ -16,15 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import sys
-import time
 import unittest.mock
 
 from aea.test_tools.test_cases import UseOef
+
+from tests.common.utils import wait_for_condition
 
 from .test_base import DummyPID, create_app
 from ..common.mocks import ctx_mock_Popen
@@ -53,23 +52,31 @@ class TestCreateWithOEF(UseOef):
                 )
         assert response_start.status_code == 200
 
-        # Wait for key message to appear
-        start_time = time.time()
-        # wait for a bit to ensure polling
-        oef_startup_timeout = 180
-        oef_started = False
-        while time.time() - start_time < oef_startup_timeout and not oef_started:
+        def wait_oef_ready_condition():
             response_status = app.get(
                 "api/oef", data=None, content_type="application/json",
             )
-            assert response_status.status_code == 200
-            data = json.loads(response_status.get_data(as_text=True))
-            assert "RUNNING" in data["status"]
-            if "A thing of beauty is a joy forever" in data["tty"]:
-                assert "Testing Error" in data["error"]
-                oef_started = True
+            if response_status.status_code != 200:
+                return False
 
-        assert oef_started
+            data = json.loads(response_status.get_data(as_text=True))
+
+            if "RUNNING" not in data["status"]:
+                return False
+
+            if (
+                "A thing of beauty is a joy forever" in data["tty"]
+                and "Testing Error" in data["error"]
+            ):
+                return True
+
+            return False
+
+        wait_for_condition(
+            wait_oef_ready_condition,
+            timeout=20,
+            error_msg="OEF not ready but we waited for it!",
+        )
 
         # get the status if failed
         pid.return_code = 1
