@@ -27,6 +27,7 @@ import sys
 import time
 from threading import Timer
 from typing import Callable, Optional
+from unittest.mock import patch
 
 import docker as docker
 from docker.models.containers import Container
@@ -516,6 +517,31 @@ def pytest_addoption(parser) -> None:
         default="async",
         help="aea loop to use: async[default] or sync",
     )
+    # disable inernet connection
+    parser.addoption(
+        "--no-inet",
+        action="store_true",
+        default=False,
+        help="block socket connect outside of 127.x.x.x",
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def inet_disable(request) -> None:
+    """Disable internet access via socket."""
+    if not request.config.getoption("--no-inet"):
+        return
+
+    orig_connect = socket.socket.connect
+
+    def socket_connect(*args):
+        host = args[1][0]
+        if host == "localhost" or host.startswith("127."):
+            return orig_connect(*args)
+        raise socket.error("Internet disabled by pytest option --no-inet")
+
+    p = patch.object(socket.socket, "connect", new=socket_connect)
+    p.start()
 
 
 @pytest.fixture(scope="session", autouse=True)

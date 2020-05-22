@@ -61,42 +61,46 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         )
 
 
-def _try_install(install_command: List[str]) -> int:
+def _try_install(install_command: List[str], install_timeout: float = 300) -> int:
     """
     Try executing install command.
 
-    :param return_code: the return code of the subprocess
+    :param install_command: list strings of the command
+    :param install_timeout: timeout to wait pip to install
+    :return: the return code of the subprocess
     """
     try:
         subp = subprocess.Popen(install_command)  # nosec
-        subp.wait(120.0)
+        subp.wait(install_timeout)
         return_code = subp.returncode
     finally:
         poll = subp.poll()
         if poll is None:  # pragma: no cover
             subp.terminate()
-            subp.wait(2)
+            subp.wait(30)
     return return_code
 
 
-def _install_from_requirement(file: str):
+def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
+    """
+    Install from requirements.
+
+    :param file: requirement.txt file path
+    :param install_timeout: timeout to wait pip to install
+
+    :return: None
+    """
     try:
-        subp = subprocess.Popen(  # nosec
-            [sys.executable, "-m", "pip", "install", "-r", file]
-        )  # nosec
-        subp.wait(30.0)
-        assert subp.returncode == 0, "Return code != 0."
+        returncode = _try_install(
+            [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
+        )
+        assert returncode == 0, "Return code != 0."
     except Exception:
         raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(
                 file
             )
         )
-    finally:
-        poll = subp.poll()
-        if poll is None:  # pragma: no cover
-            subp.terminate()
-            subp.wait(2)
 
 
 @click.command()

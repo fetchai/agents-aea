@@ -50,6 +50,8 @@ class MyTask(Task):
 class TestTaskManager:
     """Test the features of the task manager."""
 
+    WAIT_TIMEOUT = 10.0
+
     def _return_a_constant(self, a: int, b: int = 10):
         return a + b
 
@@ -64,7 +66,7 @@ class TestTaskManager:
         task_id = self.task_manager.enqueue_task(self._return_a_constant, args=(32,))
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
-        result = task_result.get(2.0)
+        result = task_result.get(self.WAIT_TIMEOUT)
         assert result == 42
 
     def test_task_manager_function_with_keyword_arguments(self):
@@ -74,7 +76,7 @@ class TestTaskManager:
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
-        result = task_result.get(2.0)
+        result = task_result.get(self.WAIT_TIMEOUT)
         assert result == 42
 
     def test_task_manager_function_with_wrong_argument_number(self):
@@ -85,7 +87,7 @@ class TestTaskManager:
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
         with pytest.raises(TypeError, match="missing .+ required positional argument:"):
-            task_result.get(2.0)
+            task_result.get(self.WAIT_TIMEOUT)
 
     def test_task_manager_task_object(self):
         """Test task manager with task object."""
@@ -99,7 +101,7 @@ class TestTaskManager:
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
 
-        expected_task = task_result.get(2.0)
+        expected_task = task_result.get(self.WAIT_TIMEOUT)
         assert expected_task.result == expected_return_value
         assert expected_task.setup_called
         assert expected_task.execute_called
@@ -126,7 +128,7 @@ class TestTaskManager:
         assert isinstance(task_result, AsyncResult)
 
         with pytest.raises(AttributeError, match="Can't pickle local object"):
-            expected_task = task_result.get(2.0)  # noqa
+            expected_task = task_result.get(self.WAIT_TIMEOUT)  # noqa
 
     @classmethod
     def teardown_class(cls):
