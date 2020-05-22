@@ -26,6 +26,7 @@ from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
 from enum import Enum
+from functools import partial
 from typing import (
     Any,
     Callable,
@@ -46,7 +47,7 @@ from aea.skills.base import Behaviour
 
 try:
     from asyncio import create_task
-except ImportError:
+except ImportError:  # pragma: no cover
     # for python3.6!
     from asyncio import ensure_future as create_task  # type: ignore
 
@@ -54,8 +55,8 @@ except ImportError:
 logger = logging.getLogger(__file__)
 
 if False:  # MYPY compatible for types definitions
-    from aea.aea import AEA
-    from aea.agent import Agent
+    from aea.aea import AEA  # pragma: no cover
+    from aea.agent import Agent  # pragma: no cover
 
 
 def ensure_list(value: Any) -> List:
@@ -86,7 +87,7 @@ class AsyncState:
     @state.setter
     def state(self, state: Any) -> None:
         """Set state."""
-        if self._state == state:
+        if self._state == state:  # pragma: no cover
             return
         self._state_changed(state)
         self._state = state
@@ -260,7 +261,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        logger.exception(f"Exception: `{exc}` occured during `{fn}` processing")
+        logger.exception(f"Loop: Exception: `{exc}` occured during `{fn}` processing")
         self._exceptions.append(exc)
         self._state.state = AgentLoopStates.error
 
@@ -277,7 +278,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             return
 
         periodic_caller = PeriodicCaller(
-            behaviour.act,
+            partial(self._agent._execution_control, behaviour.act, behaviour),
             behaviour._tick_interval,
             behaviour._start_at,
             self._behaviour_exception_callback,
@@ -305,7 +306,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def _stop_all_behaviours(self) -> None:
         """Unregister periodic execution of all registered behaviours."""
-        for behaviour in self._behaviours_registry.keys():
+        for behaviour in list(self._behaviours_registry.keys()):
             self._unregister_behaviour(behaviour)
 
     def _create_tasks(self):
@@ -345,9 +346,19 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         if self._exceptions:
             # check exception raised during run
-            raise AgentLoopException(self._exceptions)
+            self._handle_exceptions()
 
         self._state.state = AgentLoopStates.stopped
+
+    def _handle_exceptions(self) -> None:
+        """Log and raise exception if occurs."""
+        if not self._exceptions:
+            return
+
+        for e in self._exceptions:
+            logger.exception(e)
+
+        raise self._exceptions[0]
 
     def _create_processing_tasks(self) -> List[Task]:
         """

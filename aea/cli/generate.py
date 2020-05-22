@@ -33,7 +33,6 @@ from aea.cli.utils.decorators import check_aea_project, clean_after
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_VERSION,
     ProtocolSpecification,
     ProtocolSpecificationParseError,
     PublicId,
@@ -125,7 +124,9 @@ def _generate_item(click_context, item_type, specification_path):
         logger.debug(
             "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
         )
-        existing_id_list.add(PublicId("fetchai", protocol_spec.name, DEFAULT_VERSION))
+        existing_id_list.add(
+            PublicId("fetchai", protocol_spec.name, protocol_spec.version)
+        )
         ctx.agent_loader.dump(
             ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
         )

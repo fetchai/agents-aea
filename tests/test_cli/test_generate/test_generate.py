@@ -81,16 +81,16 @@ class GenerateItemTestCase(TestCase):
         )
         self.assertIn(expected_msg, cm.exception.message)
 
-    @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
-    @mock.patch("aea.cli.generate.shutil.which", return_value="some")
-    @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_file_exists)
-    def test__generate_item_protocol_exists(self, *mocks):
-        """Test for fetch_agent_locally method protocol exists result."""
-        ctx_mock = ContextMock()
-        with self.assertRaises(ClickException) as cm:
-            _generate_item(ctx_mock, "protocol", "path")
-        expected_msg = (
-            "A protocol with this name already exists. "
-            "Please choose a different name and try again."
-        )
-        self.assertEqual(expected_msg, cm.exception.message)
+    # @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
+    # @mock.patch("aea.cli.generate.shutil.which", return_value="some")
+    # @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_file_exists)
+    # def test__generate_item_protocol_exists(self, *mocks):
+    #     """Test for fetch_agent_locally method protocol exists result."""
+    #     ctx_mock = ContextMock()
+    #     with self.assertRaises(ClickException) as cm:
+    #         _generate_item(ctx_mock, "protocol", "path")
+    #     expected_msg = (
+    #         "A protocol with this name already exists. "
+    #         "Please choose a different name and try again."
+    #     )
+    #     self.assertEqual(expected_msg, cm.exception.message)
