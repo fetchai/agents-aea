@@ -19,13 +19,14 @@
 
 """This module contains the tests of the agent module."""
 
-import time
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
 from aea.mail.base import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode
+
+from tests.common.utils import wait_for_condition
 
 from .conftest import _make_local_connection
 
@@ -83,13 +84,17 @@ def test_run_agent():
 
         agent_thread = Thread(target=agent.start)
         agent_thread.start()
-        time.sleep(1.0)
-
         try:
-            assert (
-                agent.agent_state == AgentState.RUNNING
-            ), "Agent state must be 'running'"
+            wait_for_condition(
+                lambda: agent._main_loop and agent._main_loop.is_running,
+                timeout=5,
+                error_msg="Agent loop not started!'",
+            )
+            wait_for_condition(
+                lambda: agent.agent_state == AgentState.RUNNING,
+                timeout=5,
+                error_msg="Agent state must be 'running'",
+            )
         finally:
             agent.stop()
-            agent.multiplexer.disconnect()
             agent_thread.join()

@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
@@ -43,6 +44,8 @@ from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import sigint_crossplatform
 from aea.test_tools.click_testing import CliRunner
+
+from tests.common.pexpect_popen import PexpectWrapper
 
 from ..conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
 
@@ -712,7 +715,7 @@ def test_run_with_install_deps():
     assert result.exit_code == 0
 
     try:
-        process = subprocess.Popen(  # nosec
+        process = PexpectWrapper(
             [
                 sys.executable,
                 "-m",
@@ -722,22 +725,20 @@ def test_run_with_install_deps():
                 "--connections",
                 "fetchai/local:0.1.0",
             ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
         )
-
-        time.sleep(10.0)
-        sigint_crossplatform(process)
-        process.communicate(timeout=20)
-
+        process.expect_all(["Start processing messages..."])
+        time.sleep(1.0)
+        process.control_c()
+        process.wait_to_complete(10)
         assert process.returncode == 0
 
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
-
+        process.terminate()
+        process.wait_to_complete(10)
         os.chdir(cwd)
         try:
             shutil.rmtree(t)
@@ -786,7 +787,7 @@ def test_run_with_install_deps_and_requirement_file():
     Path(t, agent_name, "requirements.txt").write_text(result.output)
 
     try:
-        process = subprocess.Popen(  # nosec
+        process = PexpectWrapper(
             [
                 sys.executable,
                 "-m",
@@ -796,22 +797,20 @@ def test_run_with_install_deps_and_requirement_file():
                 "--connections",
                 "fetchai/local:0.1.0",
             ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
         )
-
-        time.sleep(10.0)
-        sigint_crossplatform(process)
-        process.wait(timeout=20)
-
+        process.expect_all(["Start processing messages..."])
+        time.sleep(1.0)
+        process.control_c()
+        process.wait_to_complete(10)
         assert process.returncode == 0
 
     finally:
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(10)
-
+        process.terminate()
+        process.wait_to_complete(10)
         os.chdir(cwd)
         try:
             shutil.rmtree(t)
