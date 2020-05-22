@@ -53,7 +53,7 @@ class TestSearchProtocolsLocal:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
@@ -81,7 +81,7 @@ class TestSearchContractsLocal(TestCase):
         """Set the test up."""
         self.runner = CliRunner()
 
-    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     @mock.patch("aea.cli.search._search_items", return_value=["item1"])
     def test_search_contracts_positive(self, *mocks):
         """Test search contracts command positive result."""
@@ -96,7 +96,7 @@ class TestSearchContractsLocal(TestCase):
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
-    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     @mock.patch("aea.cli.search.request_api", return_value=["item1"])
     def test_search_contracts_registry_positive(self, *mocks):
         """Test search contracts in registry command positive result."""
@@ -119,7 +119,7 @@ class TestSearchConnectionsLocal:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
@@ -149,7 +149,7 @@ class TestSearchSkillsLocal:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
@@ -230,7 +230,7 @@ class TestSearchAgentsLocal:
 
 
 @mock.patch("aea.cli.search.request_api", return_value=["correct", "results"])
-@mock.patch("aea.cli.search._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+@mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
 class RegistrySearchTestCase(TestCase):
     """Test case for search --registry CLI command."""
 
@@ -238,7 +238,7 @@ class RegistrySearchTestCase(TestCase):
         """Set it up."""
         self.runner = CliRunner()
 
-    def test_search_connections_positive(self, _format_items_mock, request_api_mock):
+    def test_search_connections_positive(self, format_items_mock, request_api_mock):
         """Test for CLI search --registry connections positive result."""
         result = self.runner.invoke(
             cli,
@@ -254,9 +254,9 @@ class RegistrySearchTestCase(TestCase):
         request_api_mock.assert_called_once_with(
             "GET", "/connections", params={"search": "some"}
         )
-        _format_items_mock.assert_called_once_with(["correct", "results"])
+        format_items_mock.assert_called_once_with(["correct", "results"])
 
-    def test_search_agents_positive(self, _format_items_mock, request_api_mock):
+    def test_search_agents_positive(self, format_items_mock, request_api_mock):
         """Test for CLI search --registry agents positive result."""
         result = self.runner.invoke(
             cli,
@@ -272,9 +272,9 @@ class RegistrySearchTestCase(TestCase):
         request_api_mock.assert_called_once_with(
             "GET", "/agents", params={"search": "some"}
         )
-        _format_items_mock.assert_called_once_with(["correct", "results"])
+        format_items_mock.assert_called_once_with(["correct", "results"])
 
-    def test_search_protocols_positive(self, _format_items_mock, request_api_mock):
+    def test_search_protocols_positive(self, format_items_mock, request_api_mock):
         """Test for CLI search --registry protocols positive result."""
         result = self.runner.invoke(
             cli,
@@ -290,9 +290,9 @@ class RegistrySearchTestCase(TestCase):
         request_api_mock.assert_called_once_with(
             "GET", "/protocols", params={"search": "some"}
         )
-        _format_items_mock.assert_called_once_with(["correct", "results"])
+        format_items_mock.assert_called_once_with(["correct", "results"])
 
-    def test_search_skills_positive(self, _format_items_mock, request_api_mock):
+    def test_search_skills_positive(self, format_items_mock, request_api_mock):
         """Test for CLI search --registry skills positive result."""
         result = self.runner.invoke(
             cli,
@@ -308,7 +308,7 @@ class RegistrySearchTestCase(TestCase):
         request_api_mock.assert_called_once_with(
             "GET", "/skills", params={"search": "some"}
         )
-        _format_items_mock.assert_called_once_with(["correct", "results"])
+        format_items_mock.assert_called_once_with(["correct", "results"])
 
 
 class TestSearchWithRegistryInSubfolderLocal:

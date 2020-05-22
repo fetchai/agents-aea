@@ -27,7 +27,7 @@ from tests.conftest import CLI_LOG_OPTION
 
 
 @mock.patch("aea.cli.logout.registry_logout")
-@mock.patch("aea.cli.logout._update_cli_config")
+@mock.patch("aea.cli.logout.update_cli_config")
 class LogoutTestCase(TestCase):
     """Test case for CLI logout command."""
 
@@ -35,11 +35,11 @@ class LogoutTestCase(TestCase):
         """Set it up."""
         self.runner = CliRunner()
 
-    def test_logout_positive(self, _update_cli_config_mock, registry_logout_mock):
+    def test_logout_positive(self, update_cli_config_mock, registry_logout_mock):
         """Test for CLI logout positive result."""
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "logout"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         registry_logout_mock.assert_called_once()
-        _update_cli_config_mock.assert_called_once()
+        update_cli_config_mock.assert_called_once()
