@@ -759,9 +759,9 @@ class AEABuilder:
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
+            loop_mode=self._get_loop_mode(),
             **self._context_namespace,
         )
-        aea.DEFAULT_RUN_LOOP = self._get_loop_mode()
         aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context)
         return aea

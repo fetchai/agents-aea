@@ -85,6 +85,7 @@ class Agent(ABC):
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         is_debug: bool = False,
+        loop_mode: Optional[str] = None,
     ) -> None:
         """
         Instantiate the agent.
@@ -94,6 +95,7 @@ class Agent(ABC):
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
+        :param loop_mode: loop_mode to choose agent run loop.
 
         :return: None
         """
@@ -110,6 +112,7 @@ class Agent(ABC):
         self._main_loop: Optional[BaseAgentLoop] = None
 
         self.is_debug = is_debug
+        self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
 
     @property
     def identity(self) -> Identity:
@@ -185,7 +188,7 @@ class Agent(ABC):
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
 
-    def start(self, run_loop_name: str = None) -> None:
+    def start(self) -> None:
         """
         Start the agent.
 
@@ -204,13 +207,14 @@ class Agent(ABC):
         - call to react(),
         - call to update().
 
+        :param loop_mode: loop mode to choose  agent run loop. if not specified default one will be used
+
         :return: None
         """
         self._start_setup()
-        self._set_main_loop(run_loop_name or self.DEFAULT_RUN_LOOP)
         self._run_main_loop()
 
-    def _set_main_loop(self, loop_name: str) -> None:
+    def _set_main_loop(self) -> None:
         """
         Construct main loop from loop_name.
 
@@ -218,12 +222,12 @@ class Agent(ABC):
 
         :return: None
         """
-        if loop_name not in self.RUN_LOOPS:
+        if self._loop_mode not in self.RUN_LOOPS:
             raise ValueError(
-                f"Loop `{loop_name} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
+                f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
             )
 
-        loop_cls = self.RUN_LOOPS[loop_name]
+        loop_cls = self.RUN_LOOPS[self._loop_mode]
         self._main_loop = loop_cls(self)
 
     def _start_setup(self) -> None:
@@ -249,6 +253,7 @@ class Agent(ABC):
 
         :return: None
         """
+        self._set_main_loop()
         logger.info("[{}]: Start processing messages...".format(self.name))
         assert self._main_loop is not None, "Agent loop was not set"
         self._main_loop.start()
