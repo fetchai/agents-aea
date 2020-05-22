@@ -363,7 +363,7 @@ class Transactions(Model):
             if is_seller
             else list(self._locked_txs_as_buyer.values())
         )
-        ownership_state_after_locks = self.context.agent_ownership_state.apply_transactions(
+        ownership_state_after_locks = self.context.decision_maker_handler_context.ownership_state.apply_transactions(
             transaction_msgs
         )
         return ownership_state_after_locks

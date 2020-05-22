@@ -54,9 +54,7 @@ class AgentContext:
         :param connection_status: the connection status of the multiplexer
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
-        :param ownership_state: the ownership state of the agent
-        :param preferences: the preferences of the agent
-        :param goal_pursuit_readiness: if True, the agent is ready to pursuit its goals
+        :param decision_maker_handler_context: the decision maker's name space
         :param task_manager: the task manager
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """

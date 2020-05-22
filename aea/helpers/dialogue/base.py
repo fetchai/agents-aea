@@ -463,16 +463,6 @@ class Dialogue(ABC):
         """
 
     @staticmethod
-    @abstractmethod
-    def role_from_first_message(message: Message) -> "Role":
-        """
-        Infer the role of the agent from an incoming or outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: the agent's role
-        """
-
-    @staticmethod
     def _interleave(list_1, list_2) -> List:
         all_elements = [
             element
@@ -581,7 +571,7 @@ class Dialogues(ABC):
             dialogue = self._create_opponent_initiated(
                 dialogue_opponent_addr=message.counterparty,
                 dialogue_reference=dialogue_reference,
-                role=Dialogue.role_from_first_message(message),
+                role=self.role_from_first_message(message),
             )  # type: Optional[Dialogue]
         elif (  # new dialogue by self
             dialogue_reference[0] != ""
@@ -593,7 +583,7 @@ class Dialogues(ABC):
             ), "The message counter-party field is not set {}".format(message)
             dialogue = self._create_self_initiated(
                 dialogue_opponent_addr=message.counterparty,
-                role=Dialogue.role_from_first_message(message),
+                role=self.role_from_first_message(message),
             )
         else:  # existing dialogue
             self._update_self_initiated_dialogue_label_on_second_message(message)
@@ -684,9 +674,7 @@ class Dialogues(ABC):
         dialogue_label = DialogueLabel(
             dialogue_reference, dialogue_opponent_addr, self.agent_address
         )
-        dialogue = self._create_dialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
+        dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role)
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
 
@@ -717,28 +705,32 @@ class Dialogues(ABC):
         )
 
         assert dialogue_label not in self.dialogues
-        dialogue = self._create_dialogue(
-            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
-        )
+        dialogue = self.create_dialogue(dialogue_label=dialogue_label, role=role)
         self.dialogues.update({dialogue_label: dialogue})
 
         return dialogue
 
     @abstractmethod
-    def _create_dialogue(
-        self,
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: Dialogue.Role,
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
     ) -> Dialogue:
         """
         Create a dialogue instance.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: the created dialogue
+        """
+
+    @staticmethod
+    @abstractmethod
+    def role_from_first_message(message: Message) -> Dialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
         """
 
     def _next_dialogue_nonce(self) -> int:

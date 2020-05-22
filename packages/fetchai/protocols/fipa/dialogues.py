@@ -29,7 +29,7 @@ from abc import ABC
 from enum import Enum
 from typing import Dict, FrozenSet, cast
 
-from aea.helpers.dialogue.base import Dialogue, Dialogues
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
@@ -70,7 +70,7 @@ VALID_REPLIES = {
 }  # type: Dict[FipaMessage.Performative, FrozenSet[FipaMessage.Performative]]
 
 
-class FipaDialogue(Dialogue, ABC):
+class FipaDialogue(Dialogue):
     """The fipa dialogue class maintains state of a dialogue and manages it."""
 
     class AgentRole(Dialogue.Role):
@@ -187,3 +187,19 @@ class FipaDialogues(Dialogues, ABC):
         :return: dialogue stats object
         """
         return self._dialogue_stats
+
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> FipaDialogue:
+        """
+        Create an instance of fipa dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = FipaDialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue

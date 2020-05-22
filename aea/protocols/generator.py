@@ -1423,7 +1423,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "\n"
 
         # Class Header
-        cls_str += "\nclass {}Dialogue(Dialogue, ABC):\n".format(
+        cls_str += "\nclass {}Dialogue(Dialogue):\n".format(
             self.protocol_specification_in_camel_case
         )
         self._change_indent(1)
@@ -1646,7 +1646,39 @@ class ProtocolGenerator:
         cls_str += self.indent + "Get the dialogue statistics.\n\n"
         cls_str += self.indent + ":return: dialogue stats object\n"
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "return self._dialogue_stats\n"
+        cls_str += self.indent + "return self._dialogue_stats\n\n"
+        self._change_indent(-1)
+        cls_str += self.indent + "def create_dialogue(\n"
+        cls_str += (
+            self.indent
+            + self.indent
+            + "self, dialogue_label: DialogueLabel, role: Dialogue.Role,\n"
+        )
+        cls_str += self.indent + ") -> {}Dialogue:\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        self._change_indent(1)
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "Create an instance of fipa dialogue.\n\n"
+        cls_str += (
+            self.indent + ":param dialogue_label: the identifier of the dialogue\n"
+        )
+        cls_str += (
+            self.indent
+            + ":param role: the role of the agent this dialogue is maintained for\n\n"
+        )
+        cls_str += self.indent + ":return: the created dialogue\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "dialogue = {}Dialogue(\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        cls_str += (
+            self.indent
+            + self.indent
+            + "dialogue_label=dialogue_label, agent_address=self.agent_address, role=role\n"
+        )
+        cls_str += self.indent + ")\n"
+        cls_str += self.indent + "return dialogue\n"
         self._change_indent(-2)
         cls_str += self.indent + "\n"
 

@@ -265,10 +265,14 @@ class Strategy(Model):
             good_id: 0 for good_id in good_id_to_quantities.keys()
         }  # type: Dict[str, int]
         proposals = []
-        seller_tx_fee = self.context.agent_preferences.seller_transaction_fee
-        buyer_tx_fee = self.context.agent_preferences.buyer_transaction_fee
+        seller_tx_fee = (
+            self.context.decision_maker_handler_context.preferences.seller_transaction_fee
+        )
+        buyer_tx_fee = (
+            self.context.decision_maker_handler_context.preferences.buyer_transaction_fee
+        )
         currency_id = list(
-            self.context.agent_ownership_state.amount_by_currency_id.keys()
+            self.context.decision_maker_handler_context.ownership_state.amount_by_currency_id.keys()
         )[0]
         for good_id, quantity in good_id_to_quantities.items():
             if is_seller and quantity == 0:
@@ -288,7 +292,7 @@ class Strategy(Model):
                 }  # type: Dict[str, int]
             else:
                 delta_quantities_by_good_id = proposal_dict
-            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(
+            marginal_utility_from_delta_good_holdings = self.context.decision_maker_handler_context.preferences.marginal_utility(
                 ownership_state=ownership_state_after_locks,
                 delta_quantities_by_good_id=delta_quantities_by_good_id,
             )
@@ -337,7 +341,7 @@ class Strategy(Model):
         )
         if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
             return False
-        proposal_delta_score = self.context.agent_preferences.utility_diff_from_transaction(
+        proposal_delta_score = self.context.decision_maker_handler_context.preferences.utility_diff_from_transaction(
             ownership_state_after_locks, transaction_msg
         )
         if proposal_delta_score >= 0:

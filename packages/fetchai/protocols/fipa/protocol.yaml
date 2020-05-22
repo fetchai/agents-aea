@@ -7,7 +7,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmVvJPY2M46VXxtFsXda4NHfYQFZ8LYi29fE9fJBqvASvG
   custom_types.py: Qmb7bzEUAW74ZeSFqL7sTccNCjudStV63K4CFNZtibKUHB
-  dialogues.py: QmNmW6LUEC5u5tPQLEdT53M7EuHbVwvWHyEY5j6dpcr3ji
+  dialogues.py: QmT1t6SrCgEZYhowt7Phd1shFDC2fUy8siScrF2frvktpP
   fipa.proto: QmP7JqnuQSQ9BDcKkscrTydKEX4wFBoyFaY1bkzGkamcit
   fipa_pb2.py: QmZMkefJLrb3zJKoimb6a9tdpxDBhc8rR2ghimqg7gZ471
   message.py: QmNN4ZSqvaRPKQNLwAyzg3wYWtSosc7XLbcXQxpJ8drJGU
