@@ -8,6 +8,6 @@ fingerprint:
   __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
   contract.py: QmXvjkD7ZVEJDJspEz5YApe5bRUxvZHNi8vfyeVHPyQD5G
 fingerprint_ignore_patterns: []
-class_name: ''
+class_name: MyScaffoldContract
 path_to_contract_interface: ''
 dependencies: {}

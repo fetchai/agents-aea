@@ -440,6 +440,7 @@ class Multiplexer:
         self._disconnect_all_task = None  # type: Optional[Future]
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
     @property
     def in_queue(self) -> AsyncFriendlyQueue:
@@ -465,6 +466,16 @@ class Multiplexer:
         return self._loop.is_running() and all(
             c.connection_status.is_connected for c in self._connections
         )
+
+    @property
+    def default_routing(self) -> Dict[PublicId, PublicId]:
+        """Get the default routing."""
+        return self._default_routing
+
+    @default_routing.setter
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
+        """Set the default routing."""
+        self._default_routing = default_routing
 
     @property
     def connection_status(self) -> ConnectionStatus:
@@ -715,20 +726,27 @@ class Multiplexer:
         :raises ValueError: if the connection id provided is not valid.
         :raises AEAConnectionError: if the connection id provided is not valid.
         """
+        connection_id = None  # type: Optional[PublicId]
         envelope_context = envelope.context
-        connection_id = (
-            envelope_context.connection_id if envelope_context is not None else None
-        )
+        # first, try to route by context
+        if envelope_context is not None:
+            connection_id = envelope_context.connection_id
+
+        # second, try to route by default routing
+        if connection_id is None and envelope.protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope.protocol_id]
+            logger.debug("Using default routing: {}".format(connection_id))
 
         if connection_id is not None and connection_id not in self._id_to_connection:
             raise AEAConnectionError(
                 "No connection registered with id: {}.".format(connection_id)
             )
 
-        connection = self._id_to_connection.get(connection_id, None)  # type: ignore
         if connection_id is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
+        else:
+            connection = self._id_to_connection[connection_id]
 
         connection = cast(Connection, connection)
         if (

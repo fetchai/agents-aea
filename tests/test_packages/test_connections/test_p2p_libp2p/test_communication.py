@@ -62,7 +62,7 @@ def _make_libp2p_connection(
     )
 
 
-@skip_test_windows()
+@skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection will route envelope to destination"""
@@ -98,7 +98,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
             pass
 
 
-@skip_test_windows()
+@skip_test_windows
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
@@ -198,7 +198,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             pass
 
 
-@skip_test_windows()
+@skip_test_windows
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 

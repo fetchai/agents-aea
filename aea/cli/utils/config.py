@@ -33,7 +33,7 @@ import yaml
 
 from aea.cli.utils.constants import CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
-from aea.cli.utils.package_utils import _load_yaml
+from aea.cli.utils.package_utils import load_yaml
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 
@@ -86,7 +86,7 @@ def _init_cli_config() -> None:
         yaml.dump({}, f, default_flow_style=False)
 
 
-def _update_cli_config(dict_conf: Dict) -> None:
+def update_cli_config(dict_conf: Dict) -> None:
     """
     Update CLI config and write to yaml file.
 
@@ -94,20 +94,20 @@ def _update_cli_config(dict_conf: Dict) -> None:
 
     :return: None
     """
-    config = _get_or_create_cli_config()
+    config = get_or_create_cli_config()
     config.update(dict_conf)
     with open(CLI_CONFIG_PATH, "w") as f:
         yaml.dump(config, f, default_flow_style=False)
 
 
-def _get_or_create_cli_config() -> Dict:
+def get_or_create_cli_config() -> Dict:
     """
     Read or create CLI config from yaml file.
 
     :return: dict CLI config.
     """
     try:
-        return _load_yaml(CLI_CONFIG_PATH)
+        return load_yaml(CLI_CONFIG_PATH)
     except FileNotFoundError:
         _init_cli_config()
-    return _load_yaml(CLI_CONFIG_PATH)
+    return load_yaml(CLI_CONFIG_PATH)

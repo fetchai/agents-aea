@@ -28,7 +28,7 @@ import click
 import requests
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
-from aea.cli.utils.config import _get_or_create_cli_config
+from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import PublicId
 
@@ -39,7 +39,7 @@ def get_auth_token() -> str:
 
     :return: str auth token
     """
-    config = _get_or_create_cli_config()
+    config = get_or_create_cli_config()
     return config.get(AUTH_TOKEN_KEY, None)
 
 

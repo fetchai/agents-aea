@@ -17,16 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-
 import asyncio
 import inspect
 import logging
 import os
+import platform
 import socket
 import sys
 import time
+from functools import wraps
 from threading import Timer
 from typing import Callable, Optional
+from unittest.mock import patch
 
 import docker as docker
 from docker.models.containers import Container
@@ -315,31 +317,41 @@ agent_config_files = [
 ]
 
 
-def skip_test_windows(is_test_class=False) -> Callable:
+def skip_test_windows(fn: Callable) -> Callable:
     """
     Decorate a pytest method to skip a test in a case we are on Windows.
 
     :return: decorated method.
     """
+    return skip_for_platform("Windows")(fn)
+
+
+def skip_for_platform(platform_name: str) -> Callable:
+    """
+    Decorate a pytest class or method to skip on certain platform.
+
+    :param platform_name: check `platform.system()` for available platforms.
+
+    :return: decorated object
+    """
 
     def decorator(pytest_func):
-        def check_windows():
-            if os.name == "nt":
-                pytest.skip("Skipping the test since it doesn't work on Windows.")
-                return False
-            return True
+        if platform.system() != platform_name:
+            return pytest_func
 
-        if is_test_class:
+        def skip(*args, **kwargs):
+            pytest.skip("Skipping the test since it doesn't work on Windows.")
 
-            def wrapper(self, *args, **kwargs):  # type: ignore
-                if check_windows():
-                    pytest_func(self, *args, **kwargs)
+        if isinstance(pytest_func, type):
+            return type(
+                pytest_func.__name__,
+                (pytest_func,),
+                {"setup_class": skip, "setup": skip, "setUp": skip},
+            )
 
-        else:
-
-            def wrapper(*args, **kwargs):  # type: ignore
-                if check_windows():
-                    pytest_func(*args, **kwargs)
+        @wraps(pytest_func)
+        def wrapper(*args, **kwargs):  # type: ignore
+            pytest.skip("Skipping the test since it doesn't work on Windows.")
 
         return wrapper
 
@@ -516,6 +528,31 @@ def pytest_addoption(parser) -> None:
         default="async",
         help="aea loop to use: async[default] or sync",
     )
+    # disable inernet connection
+    parser.addoption(
+        "--no-inet",
+        action="store_true",
+        default=False,
+        help="block socket connect outside of 127.x.x.x",
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def inet_disable(request) -> None:
+    """Disable internet access via socket."""
+    if not request.config.getoption("--no-inet"):
+        return
+
+    orig_connect = socket.socket.connect
+
+    def socket_connect(*args):
+        host = args[1][0]
+        if host == "localhost" or host.startswith("127."):
+            return orig_connect(*args)
+        raise socket.error("Internet disabled by pytest option --no-inet")
+
+    p = patch.object(socket.socket, "connect", new=socket_connect)
+    p.start()
 
 
 @pytest.fixture(scope="session", autouse=True)

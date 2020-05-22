@@ -43,7 +43,7 @@ from tests.test_cli.tools_for_testing import (
 @mock.patch("aea.cli.publish.copyfile")
 @mock.patch("aea.cli.publish.os.makedirs")
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
-@mock.patch("aea.cli.publish._try_get_item_target_path", return_value="target-dir")
+@mock.patch("aea.cli.publish.try_get_item_target_path", return_value="target-dir")
 @mock.patch("aea.cli.publish.os.path.join", return_value="joined-path")
 @mock.patch("aea.cli.publish.DEFAULT_CONNECTION", "author/default_connection:version")
 class SaveAgentLocallyTestCase(TestCase):
@@ -52,7 +52,7 @@ class SaveAgentLocallyTestCase(TestCase):
     def test_save_agent_locally_positive(
         self,
         path_join_mock,
-        _try_get_item_target_path_mock,
+        try_get_item_target_path_mock,
         path_exists_mock,
         makedirs_mock,
         copyfile_mock,
@@ -71,7 +71,7 @@ class SaveAgentLocallyTestCase(TestCase):
 class CheckIsItemInLocalRegistryTestCase(TestCase):
     """Test case for _check_is_item_in_local_registry method."""
 
-    @mock.patch("aea.cli.publish._try_get_item_source_path")
+    @mock.patch("aea.cli.publish.try_get_item_source_path")
     def test__check_is_item_in_local_registry_positive(self, get_path_mock):
         """Test for _check_is_item_in_local_registry positive result."""
         public_id = PublicIdMock.from_str("author/name:version")
@@ -82,7 +82,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
             registry_path, public_id.author, item_type_plural, public_id.name
         )
 
-    @mock.patch("aea.cli.publish._try_get_item_source_path", raise_click_exception)
+    @mock.patch("aea.cli.publish.try_get_item_source_path", raise_click_exception)
     def test__check_is_item_in_local_registry_negative(self):
         """Test for _check_is_item_in_local_registry negative result."""
         public_id = PublicIdMock.from_str("author/name:version")

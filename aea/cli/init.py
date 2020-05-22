@@ -26,7 +26,7 @@ from aea.cli.login import do_login
 from aea.cli.register import do_register
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
-from aea.cli.utils.config import _get_or_create_cli_config, _update_cli_config
+from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
 from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
@@ -71,14 +71,14 @@ def do_init(author: str, reset: bool, registry: bool) -> None:
 
     :return: None.
     """
-    config = _get_or_create_cli_config()
+    config = get_or_create_cli_config()
     if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
         if registry:
             _registry_init(username=author)
 
-        _update_cli_config({AUTHOR_KEY: author})
-        config = _get_or_create_cli_config()
+        update_cli_config({AUTHOR_KEY: author})
+        config = get_or_create_cli_config()
         config.pop(AUTH_TOKEN_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:

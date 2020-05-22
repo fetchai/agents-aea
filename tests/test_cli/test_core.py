@@ -112,7 +112,7 @@ class AddKeyTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
@@ -138,7 +138,7 @@ class GenerateWealthCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_wealth")
 @mock.patch("aea.cli.core.click.echo")
 class GetWealthCommandTestCase(TestCase):
@@ -164,7 +164,7 @@ class GetWealthCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_address")
 @mock.patch("aea.cli.core.click.echo")
 class GetAddressCommandTestCase(TestCase):

@@ -352,7 +352,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         assert self.result.exit_code == 1
 
     # TODO fix this on Windows
-    @skip_test_windows(is_test_class=True)
+    @skip_test_windows
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
         assert not Path(self.agent_name).exists()
@@ -400,7 +400,7 @@ class TestCreateFailsWhenExceptionOccurs:
         assert self.result.exit_code == 1
 
     # TODO fix this on Windows
-    @skip_test_windows(is_test_class=True)
+    @skip_test_windows
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
         assert not Path(self.agent_name).exists()
@@ -491,7 +491,7 @@ class CreateCommandTestCase(TestCase):
             "Author is not set up. Please use 'aea init' to initialize.",
         )
 
-    @patch("aea.cli.create._get_or_create_cli_config", return_value={})
+    @patch("aea.cli.create.get_or_create_cli_config", return_value={})
     def test_create_no_author_local(self, *mocks):
         """Test for CLI create no author local result."""
         result = self.runner.invoke(

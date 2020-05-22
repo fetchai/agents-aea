@@ -61,7 +61,7 @@ class TestListProtocols:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False
@@ -74,7 +74,7 @@ class TestListProtocols:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -105,7 +105,7 @@ class TestListConnections:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False
@@ -118,7 +118,7 @@ class TestListConnections:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -149,7 +149,7 @@ class TestListSkills:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False
@@ -162,7 +162,7 @@ class TestListSkills:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -192,7 +192,7 @@ class ListContractsCommandTestCase(TestCase):
         os.chdir(Path(self.t, "dummy_aea"))
 
     @mock.patch("aea.cli.list._get_item_details")
-    @mock.patch("aea.cli.utils.formatting._format_items")
+    @mock.patch("aea.cli.utils.formatting.format_items")
     def test_list_contracts_positive(self, *mocks):
         """Test list contracts command positive result."""
         result = self.runner.invoke(

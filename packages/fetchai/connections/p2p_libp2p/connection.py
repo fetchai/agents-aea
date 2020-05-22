@@ -276,7 +276,7 @@ class Libp2pNode:
             raise Exception(	
                 "Error while downloading golang dependencies and building it: {}, {}".format(	
                     proc.returncode, node_log	
-                )	
+                )
             )
         logger.info("Finished downloading golang dependencies.")
 

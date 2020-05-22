@@ -72,6 +72,7 @@ from aea.decision_maker.default import (
 )
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
@@ -243,6 +244,8 @@ class AEABuilder:
     DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
         DecisionMakerHandler
     ] = DefaultDecisionMakerHandler
+    DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
+    DEFAULT_LOOP_MODE = "async"
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -265,6 +268,9 @@ class AEABuilder:
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
+        self._default_routing: Dict[PublicId, PublicId] = {}
+        self._loop_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -332,6 +338,44 @@ class AEABuilder:
                     dotted_path, class_name, file_path, e
                 )
             )
+        return self
+
+    def set_skill_exception_policy(
+        self, skill_exception_policy: Optional[ExceptionPolicyEnum]
+    ) -> "AEABuilder":
+        """
+        Set skill exception policy.
+
+        :param skill_exception_policy: the policy
+
+        :return: self
+        """
+        self._skill_exception_policy = skill_exception_policy
+        return self
+
+    def set_default_routing(
+        self, default_routing: Dict[PublicId, PublicId]
+    ) -> "AEABuilder":
+        """
+        Set default routing.
+
+        This is a map from public ids (protocols) to public ids (connections).
+
+        :param default_routing: the default routing mapping
+
+        :return: self
+        """
+        self._default_routing = default_routing
+        return self
+
+    def set_loop_mode(self, loop_mode: Optional[str]) -> "AEABuilder":
+        """
+        Set the loop mode.
+
+        :param loop_mode: the agent loop mode
+        :return: self
+        """
+        self._loop_mode = loop_mode
         return self
 
     def _add_default_packages(self) -> None:
@@ -713,8 +757,12 @@ class AEABuilder:
             is_debug=False,
             max_reactions=self._get_max_reactions(),
             decision_maker_handler_class=self._get_decision_maker_handler_class(),
+            skill_exception_policy=self._get_skill_exception_policy(),
+            default_routing=self._get_default_routing(),
+            loop_mode=self._get_loop_mode(),
             **self._context_namespace,
         )
+        aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context)
         return aea
 
@@ -826,6 +874,36 @@ class AEABuilder:
             self._decision_maker_handler_class
             if self._decision_maker_handler_class is not None
             else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
+        )
+
+    def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
+        """
+        Return the skill exception policy.
+
+        :return: the policy
+        """
+        return (
+            self._skill_exception_policy
+            if self._skill_exception_policy is not None
+            else self.DEFAULT_SKILL_EXCEPTION_POLICY
+        )
+
+    def _get_default_routing(self) -> Dict[PublicId, PublicId]:
+        """
+        Return the default routing
+
+        :return: the policy
+        """
+        return self._default_routing
+
+    def _get_loop_mode(self) -> str:
+        """
+        Return the loop mode
+
+        :return: the loop mode
+        """
+        return (
+            self._loop_mode if self._loop_mode is not None else self.DEFAULT_LOOP_MODE
         )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
@@ -958,6 +1036,12 @@ class AEABuilder:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
             self.set_decision_maker_handler(dotted_path, file_path)
+        if agent_configuration.skill_exception_policy is not None:
+            self.set_skill_exception_policy(
+                ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
+            )
+        self.set_default_routing(agent_configuration.default_routing)
+        self.set_loop_mode(agent_configuration.loop_mode)
 
         # load private keys
         for (
