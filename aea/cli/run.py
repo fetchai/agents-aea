@@ -27,12 +27,10 @@ import click
 from aea import __version__
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.common import (
-    AEA_LOGO,
-    ConnectionsOption,
-    check_aea_project,
-)
 from aea.cli.install import install
+from aea.cli.utils.click_utils import ConnectionsOption
+from aea.cli.utils.constants import AEA_LOGO
+from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import load_env_file
@@ -85,6 +83,7 @@ def _run_aea(aea: AEA) -> None:
     finally:
         click.echo("Stopping AEA '{}' ...".format(aea.name))
         aea.stop()
+        click.echo("AEA '{}' stopped.".format(aea.name))
 
 
 @click.command()

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Conftest module for Pytest."""
 
 import asyncio
@@ -39,7 +38,8 @@ from oef.agents import AsyncioCore, OEFAgent
 import pytest
 
 from aea import AEA_DIR
-from aea.cli.common import _init_cli_config
+from aea.aea import AEA
+from aea.cli.utils.config import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -506,6 +506,24 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
         volumes=volumes,
     )
     return c
+
+
+def pytest_addoption(parser) -> None:
+    """Add --aea-loop option."""
+    parser.addoption(
+        "--aea-loop",
+        action="store",
+        default="async",
+        help="aea loop to use: async[default] or sync",
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def apply_aea_loop(request) -> None:
+    """Patch AEA.DEFAULT_RUN_LOOP using pytest option `--aea-loop`."""
+    loop = request.config.getoption("--aea-loop")
+    assert loop in AEA.RUN_LOOPS
+    AEA.DEFAULT_RUN_LOOP = loop
 
 
 @pytest.fixture(scope="session")

@@ -28,7 +28,6 @@ from pathlib import Path
 import yaml
 
 import aea
-import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
@@ -51,8 +50,6 @@ class TestRemoveConnectionWithPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -170,8 +167,6 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
-        cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -195,7 +190,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         cls.patch = unittest.mock.patch(
             "shutil.rmtree", side_effect=BaseException("an exception")
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.result = cls.runner.invoke(
             cli,
@@ -210,7 +205,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

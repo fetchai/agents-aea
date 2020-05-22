@@ -32,7 +32,6 @@ from jsonschema import ValidationError
 import yaml
 
 import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.cli.add import _is_fingerprint_correct
 from aea.configurations.base import (
@@ -386,7 +385,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
             "from_json",
             side_effect=ValidationError("test error message"),
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.result = cls.runner.invoke(
             cli,
@@ -409,7 +408,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

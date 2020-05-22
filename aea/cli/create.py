@@ -26,14 +26,12 @@ import click
 
 import aea
 from aea.cli.add import _add_item
-from aea.cli.common import (
-    AUTHOR_KEY,
-    Context,
-    _get_or_create_cli_config,
-    clean_after,
-    logger,
-)
 from aea.cli.init import do_init
+from aea.cli.utils.config import _get_or_create_cli_config
+from aea.cli.utils.constants import AUTHOR_KEY
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -80,10 +78,8 @@ def _create_aea(click_context, agent_name: str, set_author: str, local: bool) ->
     path = Path(agent_name)
     ctx.clean_paths.append(str(path))
 
-    try:
-        path.mkdir(exist_ok=False)
-    except OSError:
-        raise click.ClickException("Directory already exist. Aborting...")
+    # we have already checked that the directory does not exist.
+    path.mkdir(exist_ok=False)
 
     try:
         # set up packages directories.
@@ -159,6 +155,9 @@ def create(click_context, agent_name, author, local):
         raise click.ClickException(
             "The AEA configurations are not initialized. Uses `aea init` before continuing or provide optional argument `--author`."
         )
+
+    if Path(agent_name).exists():
+        raise click.ClickException("Directory already exist. Aborting...")
 
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))

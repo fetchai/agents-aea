@@ -209,9 +209,9 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.1.0` protocol
+## `fetchai/fipa:0.2.0` protocol
 
-The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:0.2.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -244,9 +244,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.1.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.2.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.1.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.2.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
 
 

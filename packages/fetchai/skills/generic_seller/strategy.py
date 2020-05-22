@@ -63,7 +63,10 @@ class Strategy(Model):
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
-        data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
+        data_for_sale_ordered = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
+        data_for_sale = {
+            str(key): str(value) for key, value in data_for_sale_ordered.items()
+        }
 
         super().__init__(**kwargs)
 
@@ -138,7 +141,7 @@ class Strategy(Model):
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
                 "ledger_id": self._ledger_id,
-                "tx_nonce": tx_nonce if tx_nonce is not None else "",
+                "tx_nonce": tx_nonce,
             }
         )
         return proposal, self._data_for_sale

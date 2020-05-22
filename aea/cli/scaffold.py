@@ -29,13 +29,10 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.cli.common import (
-    Context,
-    _validate_package_name,
-    check_aea_project,
-    clean_after,
-    logger,
-)
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import _validate_package_name
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION, PublicId
 from aea.configurations.base import (  # noqa: F401
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -84,8 +81,16 @@ def skill(click_context, skill_name: str):
     _scaffold_item(click_context, "skill", skill_name)
 
 
+@scaffold.command()
+@click.pass_context
+def decision_maker_handler(click_context):
+    """Add a decision maker scaffolding to the configuration file and agent."""
+    _scaffold_dm_handler(click_context)
+
+
 @clean_after
 def _scaffold_item(click_context, item_type, item_name):
+
     """Add an item scaffolding to the configuration file and agent."""
     _validate_package_name(item_name)
 
@@ -154,4 +159,48 @@ def _scaffold_item(click_context, item_type, item_name):
             "Error when validating the {} configuration file.".format(item_type)
         )
     except Exception as e:
+        raise click.ClickException(str(e))
+
+
+def _scaffold_dm_handler(click_context):
+    """Add a scaffolded decision maker handler to the project and configuration."""
+
+    ctx = cast(Context, click_context.obj)
+    existing_dm_handler = getattr(ctx.agent_config, "decision_maker_handler")
+
+    # check if we already have a decision maker in the project
+    if existing_dm_handler != {}:
+        raise click.ClickException(
+            "A decision maker handler specification already exists. Aborting..."
+        )
+
+    try:
+        agent_name = ctx.agent_config.agent_name
+        click.echo(
+            "Adding decision maker scaffold to the agent '{}'...".format(agent_name)
+        )
+
+        # create the file name
+        dest = Path("decision_maker.py")
+        dotted_path = ".decision_maker::DecisionMakerHandler"
+
+        # copy the item package into the agent project.
+        src = Path(os.path.join(AEA_DIR, "decision_maker", "scaffold.py"))
+        logger.debug("Copying decision maker. src={} dst={}".format(src, dest))
+        shutil.copyfile(src, dest)
+
+        # add the item to the configurations.
+        logger.debug(
+            "Registering the decision_maker into {}".format(DEFAULT_AEA_CONFIG_FILE)
+        )
+        ctx.agent_config.decision_maker_handler = {
+            "dotted_path": str(dotted_path),
+            "file_path": str(os.path.join(".", dest)),
+        }
+        ctx.agent_loader.dump(
+            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        )
+
+    except Exception as e:
+        os.remove(dest)
         raise click.ClickException(str(e))

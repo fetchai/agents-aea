@@ -18,10 +18,74 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the helper module."""
-from typing import Dict
+from enum import Enum
+from typing import Dict, FrozenSet
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.dialogue.base import Dialogues as BaseDialogues
+from aea.mail.base import Address
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+
+
+class Dialogue(BaseDialogue):
+    def get_replies(self, performative: Enum) -> FrozenSet:
+        """
+        Given a `performative`, return the list of performatives which are its valid replies in a dialogue
+
+        :param performative: the performative in a message
+        :return: list of valid performative replies
+        """
+        pass
+
+    def initial_performative(self) -> Enum:
+        """
+        Get the performative which the initial message in the dialogue must have
+
+        :return: the performative of the initial message
+        """
+        pass
+
+    def is_valid(self, message: Message) -> bool:
+        """
+        Check whether 'message' is a valid next message in the dialogue.
+
+        These rules capture specific constraints designed for dialogues which are instance of a concrete sub-class of this class.
+
+        :param message: the message to be validated
+        :return: True if valid, False otherwise.
+        """
+        pass
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        pass
+
+
+class Dialogues(BaseDialogues):
+    def _create_dialogue(
+        self,
+        dialogue_label: DialogueLabel,
+        agent_address: Address,
+        role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create a dialogue instance.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        pass
 
 
 class TestDialogueBase:

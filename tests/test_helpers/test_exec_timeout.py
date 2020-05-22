@@ -27,7 +27,7 @@ from unittest.case import TestCase
 import pytest
 
 from aea.helpers.exec_timeout import BaseExecTimeout, ExecTimeoutSigAlarm
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
+from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 
 from tests.common.utils import timeit_context
 
@@ -55,8 +55,9 @@ class BaseTestExecTimeout(TestCase):
         assert timeout < slow_function_time
 
         with timeit_context() as timeit_result:
-            with self.EXEC_TIMEOUT_CLASS(timeout) as exec_timeout:
-                self.slow_function(slow_function_time)
+            with pytest.raises(TimeoutException):
+                with self.EXEC_TIMEOUT_CLASS(timeout) as exec_timeout:
+                    self.slow_function(slow_function_time)
 
             assert exec_timeout.is_cancelled_by_timeout()
 
@@ -136,8 +137,9 @@ class TestThreadGuard(BaseTestExecTimeout):
             assert timeout < slow_function_time
 
             with timeit_context() as timeit_result:
-                with self.EXEC_TIMEOUT_CLASS(timeout) as exec_limit:
-                    self.slow_function(slow_function_time)
+                with pytest.raises(TimeoutException):
+                    with self.EXEC_TIMEOUT_CLASS(timeout) as exec_limit:
+                        self.slow_function(slow_function_time)
 
             assert exec_limit.is_cancelled_by_timeout()
             assert (

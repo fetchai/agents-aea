@@ -22,7 +22,7 @@
 import pprint
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
@@ -64,32 +64,24 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
-        msg_performative = FipaMessage.Performative(message.get("performative"))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         # handle message
-        if msg_performative == FipaMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, dialogue)
-        elif msg_performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
-        elif msg_performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            self._handle_match_accept(fipa_msg, dialogue)
-        elif msg_performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+        if fipa_msg.performative == FipaMessage.Performative.PROPOSE:
+            self._handle_propose(fipa_msg, fipa_dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
+            self._handle_decline(fipa_msg, fipa_dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            self._handle_match_accept(fipa_msg, fipa_dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -141,7 +133,6 @@ class FIPAHandler(Handler):
             )
         )
         strategy = cast(Strategy, self.context.strategy)
-
         acceptable = strategy.is_acceptable_proposal(proposal)
         affordable = strategy.is_affordable_proposal(proposal)
         if acceptable and affordable:
@@ -157,7 +148,8 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.ACCEPT,
             )
-            dialogue.outgoing_extend(accept_msg)
+            accept_msg.counterparty = msg.counterparty
+            dialogue.update(accept_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -176,7 +168,8 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            dialogue.outgoing_extend(decline_msg)
+            decline_msg.counterparty = msg.counterparty
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -219,7 +212,7 @@ class FIPAHandler(Handler):
             strategy = cast(Strategy, self.context.strategy)
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=[PublicId("fetchai", "carpark_client", "0.1.0")],
+                skill_callback_ids=[self.context.skill_id],
                 tx_id="transaction0",
                 tx_sender_addr=self.context.agent_addresses["fetchai"],
                 tx_counterparty_addr=address,
@@ -229,6 +222,7 @@ class FIPAHandler(Handler):
                 tx_sender_fee=strategy.max_buyer_tx_fee,
                 tx_counterparty_fee=proposal.values["seller_tx_fee"],
                 tx_quantities_by_good_id={},
+                tx_nonce=proposal.values["tx_nonce"],
                 ledger_id=proposal.values["ledger_id"],
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )
@@ -248,7 +242,8 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info={"Done": "Sending payment via bank transfer"},
             )
-            dialogue.outgoing_extend(inform_msg)
+            inform_msg.counterparty = msg.counterparty
+            dialogue.update(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -344,9 +339,6 @@ class OEFSearchHandler(Handler):
             # pick first agent found
             opponent_addr = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(
-                opponent_addr, self.context.agent_address, is_seller=False
-            )
             query = strategy.get_service_query()
             self.context.logger.info(
                 "[{}]: sending CFP to agent={}".format(
@@ -355,12 +347,13 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg = FipaMessage(
                 message_id=Dialogue.STARTING_MESSAGE_ID,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
                 performative=FipaMessage.Performative.CFP,
                 target=Dialogue.STARTING_TARGET,
                 query=query,
             )
-            dialogue.outgoing_extend(cfp_msg)
+            cfp_msg.counterparty = opponent_addr
+            dialogues.update(cfp_msg)
             self.context.outbox.put_message(
                 to=opponent_addr,
                 sender=self.context.agent_address,
@@ -401,7 +394,6 @@ class MyTransactionHandler(Handler):
             self.context.logger.info(
                 "[{}]: transaction was successful.".format(self.context.agent_name)
             )
-
             json_data = {"transaction_digest": tx_msg_response.tx_digest}
             info = tx_msg_response.info
             dialogue_label = DialogueLabel.from_json(

@@ -17,15 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This module contains the implementation of a generic agent."""
 
 import logging
-import time
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional, Type
 
+from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.mail.base import InBox, Multiplexer, OutBox
@@ -72,6 +73,11 @@ class Liveness:
 class Agent(ABC):
     """This class provides an abstract base class for a generic agent."""
 
+    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
+        "sync": SyncAgentLoop,
+    }
+    DEFAULT_RUN_LOOP: str = "sync"
+
     def __init__(
         self,
         identity: Identity,
@@ -101,6 +107,7 @@ class Agent(ABC):
         self._timeout = timeout
 
         self._tick = 0
+        self._main_loop: Optional[BaseAgentLoop] = None
 
         self.is_debug = is_debug
 
@@ -178,7 +185,7 @@ class Agent(ABC):
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
 
-    def start(self) -> None:
+    def start(self, run_loop_name: str = None) -> None:
         """
         Start the agent.
 
@@ -200,11 +207,28 @@ class Agent(ABC):
         :return: None
         """
         self._start_setup()
+        self._set_main_loop(run_loop_name or self.DEFAULT_RUN_LOOP)
         self._run_main_loop()
+
+    def _set_main_loop(self, loop_name: str) -> None:
+        """
+        Construct main loop from loop_name.
+
+        :param loop_name: name of loop to use from list of supported loops.
+
+        :return: None
+        """
+        if loop_name not in self.RUN_LOOPS:
+            raise ValueError(
+                f"Loop `{loop_name} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
+            )
+
+        loop_cls = self.RUN_LOOPS[loop_name]
+        self._main_loop = loop_cls(self)
 
     def _start_setup(self) -> None:
         """
-        Setup Agent on start:
+        Set up Agent on start:
         - connect Multiplexer
         - call agent.setup
         - set liveness to started
@@ -226,21 +250,9 @@ class Agent(ABC):
         :return: None
         """
         logger.info("[{}]: Start processing messages...".format(self.name))
-        while not self.liveness.is_stopped:
-            self._tick += 1
-            self._spin_main_loop()
+        assert self._main_loop is not None, "Agent loop was not set"
+        self._main_loop.start()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
-
-    def _spin_main_loop(self) -> None:
-        """
-        Run one cycle of agent's main loop
-
-        :return: None
-        """
-        self.act()
-        time.sleep(self._timeout)
-        self.react()
-        self.update()
 
     def stop(self) -> None:
         """
@@ -255,11 +267,14 @@ class Agent(ABC):
         :return: None
         """
         self.liveness.stop()
+        if self._main_loop is not None:
+            self._main_loop.stop()
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()
 
         logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.multiplexer.disconnect()
+        logger.debug("[{}]: Stopped".format(self.name))
 
     @abstractmethod
     def setup(self) -> None:

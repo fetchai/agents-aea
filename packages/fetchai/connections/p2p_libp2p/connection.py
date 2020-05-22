@@ -60,12 +60,6 @@ PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.1.0")
 
 MultiAddr = str
 
-LIBP2P_IPFS_BOOTSTRAP_NODES = [
-    MultiAddr(
-        "/ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"
-    )
-]
-
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
 async def _async_golang_get_deps(
@@ -189,6 +183,7 @@ class Libp2pNode:
 
     def __init__(
         self,
+        agent_addr: Address,
         key: FetchAICrypto,
         module_path: str,
         clargs: Optional[List[str]] = None,
@@ -209,6 +204,8 @@ class Libp2pNode:
         :param env_file: the env file path for the exchange of environment variables
         """
 
+        self.agent_addr = agent_addr
+
         # node id in the p2p network
         self.key = key.entity.private_key_hex
         self.pub = key.public_key
@@ -216,12 +213,15 @@ class Libp2pNode:
         # node uri
         self.uri = uri if uri is not None else Uri()
 
-        # entry p
+        # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
 
         # node startup
         self.source = os.path.abspath(module_path)
         self.clargs = clargs if clargs is not None else []
+
+        # node libp2p multiaddrs
+        self.multiaddrs = []  # type: List[MultiAddr]
 
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
@@ -242,6 +242,15 @@ class Libp2pNode:
         self._stream_reader = None  # type: Optional[asyncio.StreamReader]
 
     async def start(self) -> None:
+        """
+        Start the node.
+
+        :return: None
+        """
+        which = shutil.which("go")
+        if which is None:
+            raise Exception("Libp2p Go should me installed")
+
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -253,6 +262,17 @@ class Libp2pNode:
         logger.info("Downloading golang dependencies. This may take a while...")
         proc = _golang_module_build(self.source, self._log_file_desc)
         proc.wait()
+        with open(self.log_file, "r") as f:
+            logger.info(f.read())
+        node_log = ""
+        with open(self.log_file, "r") as f:
+            node_log = f.read()
+        if proc.returncode != 0:
+            raise Exception(
+                "Error while downloading golang dependencies and building it: {}, {}".format(
+                    proc.returncode, node_log
+                )
+            )
         logger.info("Finished downloading golang dependencies.")
 
         # setup fifos
@@ -270,6 +290,7 @@ class Libp2pNode:
         if os.path.exists(LIBP2P_NODE_ENV_FILE):
             os.remove(LIBP2P_NODE_ENV_FILE)
         with open(LIBP2P_NODE_ENV_FILE, "a") as env_file:
+            env_file.write("AEA_AGENT_ADDR={}\n".format(self.agent_addr))
             env_file.write("AEA_P2P_ID={}\n".format(self.key))
             env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
             env_file.write(
@@ -297,6 +318,11 @@ class Libp2pNode:
         await self._connect()
 
     async def _connect(self) -> None:
+        """
+        Connnect to the peer node.
+
+        :return: None
+        """
         if self._connection_attempts == 1:
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
@@ -337,8 +363,12 @@ class Libp2pNode:
         )
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
+        with open(self.log_file, "r") as f:
+            logger.info(f.read())
 
         logger.info("Successfully connected to libp2p node!")
+        self.multiaddrs = self.get_libp2p_node_multiaddrs()
+        logger.info("My libp2p addresses: {}".format(self.multiaddrs))
 
     @asyncio.coroutine
     def write(self, data: bytes) -> None:
@@ -348,6 +378,11 @@ class Libp2pNode:
         # TOFIX(LR) can use asyncio.connect_write_pipe
 
     async def read(self) -> Optional[bytes]:
+        """
+        Read from the reader stream.
+
+        :return: bytes
+        """
         assert (
             self._stream_reader is not None
         ), "StreamReader not set, call connect first!"
@@ -369,7 +404,42 @@ class Libp2pNode:
             )
             return None
 
+    # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
+    def get_libp2p_node_multiaddrs(self) -> List[MultiAddr]:
+        """
+        Get the node's multiaddresses.
+
+        :return: a list of multiaddresses
+        """
+        LIST_START = "MULTIADDRS_LIST_START"
+        LIST_END = "MULTIADDRS_LIST_END"
+
+        multiaddrs = []  # type: List[MultiAddr]
+
+        lines = []
+        with open(self.log_file, "r") as f:
+            lines = f.readlines()
+
+        found = False
+        for line in lines:
+            if LIST_START in line:
+                found = True
+                multiaddrs = []
+                continue
+            if found:
+                elem = line.strip()
+                if elem != LIST_END:
+                    multiaddrs.append(MultiAddr(elem))
+                else:
+                    found = False
+        return multiaddrs
+
     def stop(self) -> None:
+        """
+        Stop the node.
+
+        :return: None
+        """
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
             logger.debug("Terminating node process {}...".format(self.proc.pid))
@@ -390,6 +460,7 @@ class P2PLibp2pConnection(Connection):
 
     def __init__(
         self,
+        agent_addr: Address,
         key: FetchAICrypto,
         uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
@@ -410,21 +481,16 @@ class P2PLibp2pConnection(Connection):
             kwargs["connection_id"] = PUBLIC_ID
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
-        # use ipfs public dht to bootstrap
-        bootstrap_peers = LIBP2P_IPFS_BOOTSTRAP_NODES
-        if entry_peers is not None:
-            bootstrap_peers.extend(entry_peers)
         self.node = Libp2pNode(
+            agent_addr,
             key,
             LIBP2P_NODE_MODULE,
             LIBP2P_NODE_CLARGS,
             uri,
-            bootstrap_peers,
+            entry_peers,
             log_file,
             env_file,
         )
-        # replace address in kwargs
-        kwargs["address"] = self.node.pub
         super().__init__(**kwargs)
 
         if uri is None and (entry_peers is None or len(entry_peers) == 0):
@@ -553,17 +619,17 @@ class P2PLibp2pConnection(Connection):
         :param configuration: the connection configuration object.
         :return: the connection object
         """
-        fet_key_file = configuration.config.get("fet_key_file")  # Optional[str]
+        libp2p_key_file = configuration.config.get("libp2p_key_file")  # Optional[str]
         libp2p_host = configuration.config.get("libp2p_host")  # Optional[str]
         libp2p_port = configuration.config.get("libp2p_port")  # Optional[int]
         entry_peers = list(cast(List, configuration.config.get("libp2p_entry_peers")))
         log_file = configuration.config.get("libp2p_log_file")  # Optional[str]
         env_file = configuration.config.get("libp2p_env_file")  # Optional[str]
 
-        if fet_key_file is None:
+        if libp2p_key_file is None:
             key = FetchAICrypto()
         else:
-            key = FetchAICrypto(fet_key_file)
+            key = FetchAICrypto(libp2p_key_file)
 
         uri = None
         if libp2p_port is not None:
@@ -575,6 +641,7 @@ class P2PLibp2pConnection(Connection):
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
         return P2PLibp2pConnection(
+            address,  # TOFIX(LR) need to generate signature as well
             key,
             uri,
             entry_peers_maddrs,

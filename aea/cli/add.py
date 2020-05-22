@@ -26,18 +26,17 @@ from typing import Collection, cast
 import click
 from click.core import Context as ClickContext
 
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
+from aea.cli.registry.utils import fetch_package
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import (
     _copy_package_directory,
     _find_item_in_distribution,
     _find_item_locally,
-    check_aea_project,
-    clean_after,
     get_package_dest_path,
-    logger,
 )
-from aea.cli.registry.utils import fetch_package
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,

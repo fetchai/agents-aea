@@ -132,7 +132,7 @@ class Strategy(Model):
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
                 "ledger_id": self._ledger_id,
-                "tx_nonce": tx_nonce if tx_nonce is not None else "",
+                "tx_nonce": tx_nonce,
             }
         )
         return proposal, weather_data

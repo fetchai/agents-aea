@@ -26,7 +26,9 @@ from typing import List, Optional, cast
 
 import click
 
-from aea.cli.common import Context, check_aea_project, logger
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import Dependency
 from aea.exceptions import AEAException
 

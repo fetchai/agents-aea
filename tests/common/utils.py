@@ -21,6 +21,7 @@ import os
 import time
 from contextlib import contextmanager
 from functools import wraps
+from threading import Thread
 from typing import Any, Callable, Tuple, Type, Union
 
 
@@ -84,17 +85,6 @@ class AeaTool:
     def setup(self) -> "AeaTool":
         """Call AEA._start_setup."""
         self.aea._start_setup()
-        return self
-
-    def spin_main_loop(self) -> "AeaTool":
-        """
-        Run one cycle of agent's main loop.
-
-        :return: AeaTool
-        """
-        old_timeout, self.aea._timeout = self.aea._timeout, 0
-        self.aea._spin_main_loop()
-        self.aea._timeout = old_timeout
         return self
 
     def wait_outbox_empty(
@@ -275,3 +265,27 @@ def run_in_root_dir(fn) -> Callable:
             os.chdir(cwd)
 
     return wrap
+
+
+@contextmanager
+def run_in_thread(fn, timeout=10, on_exit=None, **kwargs):
+    thread = Thread(target=fn, **kwargs)
+    thread.daemon = True
+    thread.start()
+    try:
+        yield
+    finally:
+        if on_exit:
+            on_exit()
+        thread.join(timeout)
+        if thread.is_alive():
+            raise Exception("Thread was not stopped!")
+
+
+def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout"):
+    start_time = time.time()
+
+    while not condition_checker():
+        time.sleep(0.0001)
+        if time.time() > start_time + timeout:
+            raise TimeoutError(error_msg)

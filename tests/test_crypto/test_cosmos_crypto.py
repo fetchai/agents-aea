@@ -94,22 +94,33 @@ def test_get_balance():
 @pytest.mark.network
 def test_transfer():
     """Test transfer of wealth."""
+
+    def try_transact(cc1, cc2, amount) -> str:
+        attempts = 0
+        while attempts < 3:
+            fee = 1000
+            tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
+            assert tx_digest is not None, "Failed to submit transfer!"
+            not_settled = True
+            elapsed_time = 0
+            while not_settled and elapsed_time < 20:
+                elapsed_time += 2
+                time.sleep(2)
+                is_settled = cosmos_api.is_transaction_settled(tx_digest)
+                not_settled = not is_settled
+            is_settled = cosmos_api.is_transaction_settled(tx_digest)
+            if is_settled:
+                attempts = 3
+            else:
+                attempts += 1
+        assert is_settled, "Failed to complete tx on 3 attempts!"
+        return tx_digest
+
     cosmos_api = CosmosApi(**COSMOS_TESTNET_CONFIG)
     cc1 = CosmosCrypto(private_key_path=COSMOS_PRIVATE_KEY_PATH)
     cc2 = CosmosCrypto()
     amount = 10000
-    fee = 1000
-    tx_digest = cosmos_api.transfer(cc1, cc2.address, amount, fee)
-    assert tx_digest is not None, "Failed to submit transfer!"
-    not_settled = True
-    elapsed_time = 0
-    while not_settled and elapsed_time < 180:
-        elapsed_time += 2
-        time.sleep(2)
-        is_settled = cosmos_api.is_transaction_settled(tx_digest)
-        not_settled = not is_settled
-    is_settled = cosmos_api.is_transaction_settled(tx_digest)
-    assert is_settled, "Failed to complete tx!"
+    tx_digest = try_transact(cc1, cc2, amount)
     # TODO remove requirement for "" tx nonce stub
     is_valid = cosmos_api.is_transaction_valid(
         tx_digest, cc2.address, cc1.address, "", amount

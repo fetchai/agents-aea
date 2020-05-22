@@ -375,7 +375,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
             "from_json",
             side_effect=ValidationError("test error message"),
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -399,7 +399,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

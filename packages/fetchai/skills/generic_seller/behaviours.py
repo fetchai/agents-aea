@@ -67,7 +67,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name, strategy.ledger_id
                     )
                 )
-                self.context.is_active = False
 
         self._register_service()
 

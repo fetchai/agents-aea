@@ -17,26 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
-
 import logging
 from asyncio import AbstractEventLoop
-from typing import List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.constants import DEFAULT_SKILL
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMaker
-from aea.helpers.exec_timeout import ExecTimeoutThreadGuard
+from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
+from aea.decision_maker.default import (
+    DecisionMakerHandler as DefaultDecisionMakerHandler,
+)
+from aea.exceptions import AEAException
+from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
-from aea.skills.base import Behaviour, Handler
+from aea.skills.base import Behaviour, Handler, SkillComponent
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
@@ -45,6 +50,12 @@ logger = logging.getLogger(__name__)
 
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
+
+    RUN_LOOPS: Dict[str, Type[BaseAgentLoop]] = {
+        "sync": SyncAgentLoop,
+        "async": AsyncAgentLoop,
+    }
+    DEFAULT_RUN_LOOP: str = "async"
 
     def __init__(
         self,
@@ -58,6 +69,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         is_debug: bool = False,
         max_reactions: int = 20,
+        decision_maker_handler_class: Type[
+            DecisionMakerHandler
+        ] = DefaultDecisionMakerHandler,
         **kwargs,
     ) -> None:
         """
@@ -73,6 +87,7 @@ class AEA(Agent):
         :param exeution_timeout: amount of time to limit single act/handle to execute.
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None
@@ -87,22 +102,27 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
-        self._decision_maker = DecisionMaker(identity, wallet, ledger_apis)
+        decision_maker_handler = decision_maker_handler_class(
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis
+        )
+        self._decision_maker = DecisionMaker(
+            decision_maker_handler=decision_maker_handler
+        )
         self._context = AgentContext(
             self.identity,
             ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
             self.decision_maker.message_in_queue,
-            self.decision_maker.ownership_state,
-            self.decision_maker.preferences,
-            self.decision_maker.goal_pursuit_readiness,
+            decision_maker_handler.context,
             self.task_manager,
             **kwargs,
         )
         self._execution_timeout = execution_timeout
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+
+        self._skills_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -155,7 +175,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._filter.get_active_behaviours():
+        for behaviour in self._get_active_behaviours():
             self._behaviour_act(behaviour)
 
     def react(self) -> None:
@@ -216,6 +236,7 @@ class AEA(Agent):
         try:
             msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
+            msg.is_incoming = True
         except Exception as e:
             error_handler.send_decoding_error(envelope)
             logger.warning("Decoding error. Exception: {}".format(str(e)))
@@ -238,15 +259,7 @@ class AEA(Agent):
         :param message: message to be handled.
         :param handler: handler suitable for this message protocol.
         """
-        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
-            handler.handle(message)
-
-        if timeout_result.is_cancelled_by_timeout():
-            logger.warning(
-                "Handler `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    handler, self._execution_timeout
-                )
-            )
+        self._execution_control(handler.handle, handler, [message])
 
     def _behaviour_act(self, behaviour: Behaviour) -> None:
         """
@@ -255,15 +268,59 @@ class AEA(Agent):
         :param behaviour: behaviour already defined
         :return: None
         """
-        with ExecTimeoutThreadGuard(self._execution_timeout) as timeout_result:
-            behaviour.act_wrapper()
+        self._execution_control(behaviour.act_wrapper, behaviour)
 
-        if timeout_result.is_cancelled_by_timeout():
+    def _execution_control(
+        self,
+        fn: Callable,
+        component: SkillComponent,
+        args: Optional[Sequence] = None,
+        kwargs: Optional[Dict] = None,
+    ) -> Any:
+        """
+        Execute skill function in exception handling environment.
+
+        Logs error, stop agent or propagate excepion depends on policy defined.
+
+        :param fn: function to call
+        :param component: skill component function belongs to
+        :param args: optional sequence of arguments to pass to function on call
+        :param kwargs: optional dict of keyword arguments to pass to function on call
+
+        :return: same as function
+        """
+        # docstyle: ignore
+        def log_exception(e, fn, component):
+            logger.exception(f"<{e}> raised during `{fn}` call of `{component}`")
+
+        try:
+            with ExecTimeoutThreadGuard(self._execution_timeout):
+                return fn(*(args or []), **(kwargs or {}))
+        except TimeoutException:
             logger.warning(
-                "Act of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
-                    behaviour, self._execution_timeout
+                "`{}` of `{}` was terminated as its execution exceeded the timeout of {} seconds. Please refactor your code!".format(
+                    fn, component, self._execution_timeout
                 )
             )
+        except Exception as e:
+            if self._skills_exception_policy == ExceptionPolicyEnum.propagate:
+                raise
+            elif self._skills_exception_policy == ExceptionPolicyEnum.just_log:
+                log_exception(e, fn, component)
+            elif self._skills_exception_policy == ExceptionPolicyEnum.stop_and_exit:
+                log_exception(e, fn, component)
+                self.stop()
+                raise AEAException(
+                    f"AEA was terminated cause exception `{e}` in skills {component} {fn}! Please check logs."
+                )
+            else:
+                raise AEAException(
+                    f"Unsupported exception policy: {self._skills_exception_policy}"
+                )
+
+    def _get_active_behaviours(self) -> List[Behaviour]:
+        """Get all active behaviours to use in act."""
+        return self._filter.get_active_behaviours()
 
     def update(self) -> None:
         """

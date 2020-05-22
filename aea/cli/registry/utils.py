@@ -27,8 +27,9 @@ import click
 
 import requests
 
-from aea.cli.common import _get_or_create_cli_config, logger
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
+from aea.cli.utils.config import _get_or_create_cli_config
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import PublicId
 
 

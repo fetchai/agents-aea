@@ -26,9 +26,11 @@ import pprint
 import re
 import sys
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
+
+from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -64,8 +66,14 @@ from aea.crypto.helpers import (
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler
+from aea.decision_maker.default import (
+    DecisionMakerHandler as DefaultDecisionMakerHandler,
+)
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.pypi import is_satisfiable
+from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
@@ -196,11 +204,20 @@ class _DependenciesManager:
 
     @property
     def pypi_dependencies(self) -> Dependencies:
-        """Get all the PyPI dependencies."""
+        """
+        Get all the PyPI dependencies.
+
+        We currently consider only dependency that have the
+        default PyPI index url and that specify only the
+        version field.
+
+        :return: the merged PyPI dependencies
+        """
         all_pypi_dependencies = {}  # type: Dependencies
         for configuration in self._dependencies.values():
-            # TODO implement merging of two PyPI dependencies.
-            all_pypi_dependencies.update(configuration.pypi_dependencies)
+            all_pypi_dependencies = merge_dependencies(
+                all_pypi_dependencies, configuration.pypi_dependencies
+            )
         return all_pypi_dependencies
 
     @staticmethod
@@ -223,6 +240,9 @@ class AEABuilder:
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
+    DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
+        DecisionMakerHandler
+    ] = DefaultDecisionMakerHandler
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -244,6 +264,7 @@ class AEABuilder:
         self._timeout: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
+        self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -262,7 +283,7 @@ class AEABuilder:
 
         :param timeout: timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._timeout = timeout
         return self
@@ -273,7 +294,7 @@ class AEABuilder:
 
         :param execution_timeout: execution_timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._execution_timeout = execution_timeout
         return self
@@ -284,9 +305,33 @@ class AEABuilder:
 
         :param max_reactions: int
 
-        :return: None
+        :return: self
         """
         self._max_reactions = max_reactions
+        return self
+
+    def set_decision_maker_handler(
+        self, decision_maker_handler_dotted_path: str, file_path: Path
+    ) -> "AEABuilder":
+        """
+        Set decision maker handler class.
+
+        :param decision_maker_handler_dotted_path: the dotted path to the decision maker handler
+        :param file_path: the file path to the file which contains the decision maker handler
+
+        :return: self
+        """
+        dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
+        module = load_module(dotted_path, file_path)
+        try:
+            _class = getattr(module, class_name)
+            self._decision_maker_handler_class = _class
+        except Exception as e:
+            logger.error(
+                "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, file_path, e
+                )
+            )
         return self
 
     def _add_default_packages(self) -> None:
@@ -322,6 +367,7 @@ class AEABuilder:
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
+        self._check_pypi_dependencies(configuration)
 
     def set_name(self, name: str) -> "AEABuilder":
         """
@@ -645,7 +691,7 @@ class AEABuilder:
         Build the AEA.
 
         :param connection_ids: select only these connections to run the AEA.
-        :param ledger_api: the api ledger that we want to use.
+        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
@@ -666,7 +712,8 @@ class AEABuilder:
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
-            **self._context_namespace
+            decision_maker_handler_class=self._get_decision_maker_handler_class(),
+            **self._context_namespace,
         )
         self._load_and_add_skills(aea.context)
         return aea
@@ -769,6 +816,18 @@ class AEABuilder:
             else self.DEFAULT_MAX_REACTIONS
         )
 
+    def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
+        """
+        Return the decision maker handler class
+
+        :return: decision maker handler class
+        """
+        return (
+            self._decision_maker_handler_class
+            if self._decision_maker_handler_class is not None
+            else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
+        )
+
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
             configuration.component_id
@@ -801,6 +860,26 @@ class AEABuilder:
                     pprint.pformat(sorted(map(str, not_supported_packages))),
                 )
             )
+
+    def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
+        """
+        Check that PyPI dependencies of a package don't conflict with
+        the existing ones.
+
+        :param configuration: the component configuration.
+        :return: None
+        :raises AEAException: if some PyPI dependency is conflicting.
+        """
+        all_pypi_dependencies = self._package_dependency_manager.pypi_dependencies
+        all_pypi_dependencies = merge_dependencies(
+            all_pypi_dependencies, configuration.pypi_dependencies
+        )
+        for pkg_name, dep_info in all_pypi_dependencies.items():
+            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            if not is_satisfiable(set_specifier):
+                raise AEAException(
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                )
 
     @staticmethod
     def _find_component_directory_from_component_id(
@@ -875,6 +954,10 @@ class AEABuilder:
         self.set_timeout(agent_configuration.timeout)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
+        if agent_configuration.decision_maker_handler != {}:
+            dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
+            file_path = agent_configuration.decision_maker_handler["file_path"]
+            self.set_decision_maker_handler(dotted_path, file_path)
 
         # load private keys
         for (

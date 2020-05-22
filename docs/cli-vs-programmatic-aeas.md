@@ -48,7 +48,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 ### Create the weather client AEA
@@ -62,8 +62,7 @@ Create a new python file and name it `weather_client.py` and add the following c
 ``` python
 import logging
 import os
-import time
-from threading import Thread
+import sys
 from typing import cast
 
 from aea import AEA_DIR
@@ -75,7 +74,7 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill
+from aea.skills.base import Skill, SkillContext
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.skills.weather_client.strategy import Strategy
@@ -85,7 +84,7 @@ PORT = 10000
 ROOT_DIR = os.getcwd()
 
 logger = logging.getLogger("aea")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def run():
@@ -125,38 +124,34 @@ def run():
     resources.add_protocol(fipa_protocol)
 
     # Add the error and weather_station skills
-    error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"))
-    error_skill.skill_context.set_agent_context(my_aea.context)
+    error_skill_context = SkillContext()
+    error_skill_context.set_agent_context(my_aea.context)
     logger_name = "aea.packages.fetchai.skills.error"
-    error_skill.skill_context.logger = logging.getLogger(logger_name)
-    weather_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client")
+    error_skill_context.logger = logging.getLogger(logger_name)
+    error_skill = Skill.from_dir(
+        os.path.join(AEA_DIR, "skills", "error"), skill_context=error_skill_context
     )
-    weather_skill.skill_context.set_agent_context(my_aea.context)
-    logger_name = "aea.packages.fetchai.skills.weather_client"
-    weather_skill.skill_context.logger = logging.getLogger(logger_name)
+    weather_skill_context = SkillContext()
+    weather_skill_context.set_agent_context(my_aea.context)
+    logger_name = "aea.packages.fetchai.skills.error"
+    weather_skill_context.logger = logging.getLogger(logger_name)
+    weather_skill = Skill.from_dir(
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),
+        skill_context=weather_skill_context,
+    )
 
     strategy = cast(Strategy, weather_skill.models.get("strategy"))
     strategy.is_ledger_tx = False
-    strategy.max_buyer_tx_fee = 100
-    strategy.max_row_price = 40
 
     for skill in [error_skill, weather_skill]:
         resources.add_skill(skill)
 
-    # Set the AEA running in a different thread
     try:
         logger.info("STARTING AEA NOW!")
-        t = Thread(target=my_aea.start)
-        t.start()
-
-        # Let it run long enough to interact with the weather station
-        time.sleep(60)
-    finally:
-        # Shut down the AEA
+        my_aea.start()
+    except KeyboardInterrupt:
         logger.info("STOPPING AEA NOW!")
         my_aea.stop()
-        t.join()
 
 
 if __name__ == "__main__":
