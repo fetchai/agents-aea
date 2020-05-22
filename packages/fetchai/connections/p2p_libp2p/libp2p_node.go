@@ -35,11 +35,13 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p"
+	circuit "github.com/libp2p/go-libp2p-circuit"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
+	basichost "github.com/libp2p/go-libp2p/p2p/host/basic"
 
 	//ds "github.com/ipfs/go-datastore"
 	//dsync "github.com/ipfs/go-datastore/sync"
@@ -64,6 +66,13 @@ func check(err error) {
 	}
 }
 
+// TOFIX(LR) temp, just the time to refactor
+var (
+	cfg_client        = false
+	cfg_relays        = []peer.ID{}
+	cfg_addresses_map = map[string]string{}
+)
+
 func main() {
 
 	var err error
@@ -81,6 +90,9 @@ func main() {
 	// node address (ip and port)
 	nodeHost, nodePort := agent.Address()
 
+	// node public address, if set
+	nodeHostPublic, nodePortPublic := agent.PublicAddress()
+
 	// node private key
 	key := agent.PrivateKey()
 	prvKey, pubKey, err := KeyPairFromFetchAIKey(key)
@@ -93,35 +105,95 @@ func main() {
 	log.Println(bootstrapPeers)
 
 	// Configure node's multiaddr
-	nodeMultiAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", nodeHost, nodePort))
+	nodeMultiaddr, err := multiaddr.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", nodeHost, nodePort))
+	check(err)
 
-	// Make a host that listens on the given multiaddress
-	routedHost, hdht, err := setupRoutedHost(nodeMultiAddr, prvKey, bootstrapPeers, aeaAddr)
-	log.Println("successfully created libp2p node!")
+	// Run as a peer or just as a client
+	// TOFIX(LR) global vars, will be refatoring very soon
+	if nodePortPublic == 0 {
+		// if no external address is provided, run as a client
+		cfg_client = true
 
-	// Publish (agent address, node public key) pair to the dht
-	annouced := false // TOFIX(LR) hack, need to define own NetworkManager otherwise
-	// TOFIX(LR) hack, as it seems that a peer cannot Provide when it is alone in the DHT
-	routedHost.SetStreamHandler("/aea-notif/0.1.0", func(s network.Stream) {
-		handleAeaNotifStream(s, hdht, aeaAddr, &annouced)
-	})
-
-	if len(bootstrapPeers) > 0 {
-		// TOFIX(LR) assumes that agent key and node key are the same
-		err = registerAgentAddress(hdht, aeaAddr)
-		check(err)
-		annouced = true
+		if len(bootstrapPeers) <= 0 {
+			check(errors.New("client should be provided with bootstrap peers"))
+		}
+		for _, addr := range bootstrapPeers {
+			cfg_relays = append(cfg_relays, addr.ID)
+		}
+	} else {
+		cfg_client = false
 	}
 
+	// Make a host that listens on the given multiaddress
+	routedHost, hdht, err := setupRoutedHost(nodeMultiaddr, prvKey, bootstrapPeers, aeaAddr, nodeHostPublic, nodePortPublic)
+	check(err)
+
+	log.Println("successfully created libp2p node!")
+
+	if !cfg_client {
+		// Allow clients to register their agents addresses
+		log.Println("DEBUG Setting /aea-register/0.1.0 stream...")
+		annouced := false // TOFIX(LR) hack, need to define own NetworkManager otherwise
+		routedHost.SetStreamHandler("/aea-register/0.1.0", func(s network.Stream) {
+			handleAeaRegisterStream(hdht, s, &annouced)
+		})
+
+		// For new peers in case I am the genesis peer, please notify me so that I can register my address and my clients' ones as well
+		// TOFIX(LR) hack, as it seems that a peer cannot Provide when it is alone in the DHT
+		routedHost.SetStreamHandler("/aea-notif/0.1.0", func(s network.Stream) {
+			handleAeaNotifStream(s, hdht, aeaAddr, &annouced)
+		})
+
+		// Notify bootstrap peer if any
+		for _, bpeer := range bootstrapPeers {
+			ctx := context.Background()
+			s, err := routedHost.NewStream(ctx, bpeer.ID, "/aea-notif/0.1.0")
+			if err != nil {
+				log.Println("ERROR failed to notify bootstrap peer:" + err.Error())
+				check(err)
+			}
+			s.Write([]byte("/aea-notif/0.1.0"))
+			s.Close()
+		}
+
+		// if I am joining an existing network, annouce my address
+		if len(bootstrapPeers) > 0 {
+			// TOFIX(LR) assumes that agent key and node key are the same
+			err = registerAgentAddress(hdht, aeaAddr)
+			check(err)
+			annouced = true
+		}
+
+	}
+
+	if cfg_client {
+		// ask the bootstrap peer to annouce my address for myself
+		// register my address to bootstrap peer
+		// TOFIX(LR) only to one bootsrap peer
+		err = registerAgentAddressClient(routedHost, aeaAddr, bootstrapPeers[0].ID)
+		check(err)
+	}
+
+	////	// Publish (agent address, node public key) pair to the dht
+	////
+	////
+	////	if len(bootstrapPeers) > 0 && false {
+	////		// TOFIX(LR) assumes that agent key and node key are the same
+	////		err = registerAgentAddress(hdht, aeaAddr)
+	////		check(err)
+	////		annouced = true
+	////	}
+
 	// Set a stream handler for aea addresses lookup
+	log.Println("DEBUG Setting /aea-address/0.1.0 stream...")
 	pubKeyBytes, err := crypto.MarshalPublicKey(pubKey)
 	check(err)
 	routedHost.SetStreamHandler("/aea-address/0.1.0", func(s network.Stream) {
-		handleAeaAddressStream(s, aeaAddr, pubKeyBytes)
+		handleAeaAddressStream(routedHost, hdht, s, aeaAddr, pubKeyBytes)
 	})
-	log.Println("DEBUG Setting /aea/0.1.0 stream...")
 
-	// Set a stream handler on host
+	// Set a stream handler for envelopes
+	log.Println("DEBUG Setting /aea/0.1.0 stream...")
 	routedHost.SetStreamHandler("/aea/0.1.0", func(s network.Stream) {
 		handleAeaStream(s, agent)
 	})
@@ -130,7 +202,11 @@ func main() {
 	check(agent.Connect())
 	log.Println("successfully connected to AEA!")
 
-	// Receive envelopes from agent and forward to peer
+	////// Receive envelopes from agent and forward to peer
+	////	var bootstrapID peer.ID
+	////	if nodePortPublic == 0 {
+	////		bootstrapID = bootstrapPeers[0].ID
+	////	}
 	go func() {
 		for envel := range agent.Queue() {
 			log.Println("INFO Received envelope from agent:", envel)
@@ -172,21 +248,104 @@ func aeaAddressCID(addr string) (cid.Cid, error) {
 func route(envel aea.Envelope, routedHost host.Host, hdht *dht.IpfsDHT) error {
 	target := envel.To
 
-	// Get peerID corresponding to aea Address
-	log.Println("DEBUG looking up peer ID for agent Address", target)
-	peerid, err := lookupAddress(routedHost, hdht, target)
-	check(err)
+	//// TOFIX
+	//envel.Sender = routedHost.ID().Pretty()
 
+	// Get peerID corresponding to aea Address
+	var err error
+	var peerid peer.ID
+
+	log.Println("DEBUG route - looking up peer ID for agent Address", target)
+	if cfg_client {
+		// client can get addresses only through bootstrap peer
+		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		s, err := routedHost.NewStream(ctx, cfg_relays[0], "/aea-address/0.1.0")
+		if err != nil {
+			log.Println("ERROR route - couldn't open stream to relay", cfg_relays[0].Pretty())
+			return err
+		}
+
+		log.Println("DEBUG route - requesting peer ID registred with addr from relay...")
+
+		err = writeBytes(s, []byte(target))
+		if err != nil {
+			log.Println("ERROR route - While sending address to relay:", err)
+			return errors.New("ERROR route - While sending address to relay:" + err.Error())
+		}
+
+		msg, err := readString(s)
+		if err != nil {
+			log.Println("ERROR route - While reading target peer id from relay:", err)
+			return errors.New("ERROR route - While reading target peer id from relay:" + err.Error())
+		}
+		s.Close()
+
+		peerid, err = peer.IDB58Decode(msg)
+		if err != nil {
+			log.Println("CRITICAL route - couldn't get peer ID from message:", err)
+			return errors.New("CRITICAL route - couldn't get peer ID from message:" + err.Error())
+		}
+
+	}
+
+	if !cfg_client {
+		// peers first check if the address is available locally, otherwise they query the DHT
+		// first check if I have the reqAddress locally
+		cpeerid, exists := cfg_addresses_map[target]
+		if exists {
+			log.Println("DEBUG route - found address on my local lookup table")
+			peerid, err = peer.IDB58Decode(cpeerid)
+			if err != nil {
+				log.Println("CRITICAL route - couldn't get peer ID from local addresses map:", err)
+				return err
+			}
+		} else {
+			log.Println("DEBUG route - did NOT found address on my local lookup table, looking for it on the DHT...")
+			peerid, err = lookupAddress(routedHost, hdht, target)
+			if err != nil {
+				log.Println("ERROR route - while looking up address on the DHT:", err)
+				return err
+			}
+		}
+
+	}
+
+	//peerid, err := peer.IDB58Decode(target)
+	log.Println("DEBUG route - got peer ID for agent Address", target, ":", peerid.Pretty())
+
+	if cfg_client {
+		// TOFIX(LR) using only the first bootstrap peer
+		relayID := cfg_relays[0]
+		relayaddr, err := multiaddr.NewMultiaddr("/p2p/" + relayID.Pretty() + "/p2p-circuit/p2p/" + peerid.Pretty())
+		if err != nil {
+			log.Println("ERROR route - while creating relay multiaddress", peerid)
+			return err
+		}
+
+		peerRelayInfo := peer.AddrInfo{
+			ID:    peerid,
+			Addrs: []multiaddr.Multiaddr{relayaddr},
+		}
+
+		log.Println("DEBUG route - connecting to taregt through relay:", relayaddr)
+		if err = routedHost.Connect(context.Background(), peerRelayInfo); err != nil {
+			log.Println("ERROR route - couldn't connect to target", peerid)
+			return err
+		}
+
+	}
 	//
-	log.Println("DEBUG opening stream to target ", peerid)
-	ctx := context.Background()
+	log.Println("DEBUG route - opening stream to target ", peerid)
+	//ctx := context.Background()
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s, err := routedHost.NewStream(ctx, peerid, "/aea/0.1.0")
 	if err != nil {
+		log.Println("ERROR route - timeout, couldn't open stream to target ", peerid)
 		return err
 	}
 
 	//
-	log.Println("DEBUG sending envelope to target...")
+	log.Println("DEBUG route - sending envelope to target...")
 	err = writeEnvelope(envel, s)
 	if err != nil {
 		s.Reset()
@@ -280,7 +439,7 @@ func registerAgentAddress(hdht *dht.IpfsDHT, address string) error {
 	// TOFIX(LR) tune timeout
 	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
-	log.Println("DEBUG Annoucing my address", address, "to the dht with cid key", addressCID.String())
+	log.Println("DEBUG Annoucing address", address, "to the dht with cid key", addressCID.String())
 	err = hdht.Provide(ctx, addressCID, true)
 	if err != context.DeadlineExceeded {
 		return err
@@ -288,6 +447,35 @@ func registerAgentAddress(hdht *dht.IpfsDHT, address string) error {
 		return nil
 	}
 
+}
+
+func registerAgentAddressClient(routedHost host.Host, aeaAddr string, bootstrapPeer peer.ID) error {
+	log.Println("DEBUG opening stream aea-register to bootsrap peer ", bootstrapPeer)
+	//ctx := context.Background()
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	s, err := routedHost.NewStream(ctx, bootstrapPeer, "/aea-register/0.1.0")
+	if err != nil {
+		log.Println("ERROR timeout, couldn't open stream to target ", bootstrapPeer)
+		return err
+	}
+
+	//
+	log.Println("DEBUG sending addr and peerID to bootstrap peer...")
+	err = writeBytes(s, []byte(aeaAddr))
+	if err != nil {
+		s.Reset()
+		return err
+	}
+	_, _ = readBytes(s)
+	err = writeBytes(s, []byte(routedHost.ID().Pretty()))
+	if err != nil {
+		s.Reset()
+		return err
+	}
+
+	_, _ = readBytes(s)
+	s.Close()
+	return nil
 }
 
 func computeCID(addr string) (cid.Cid, error) {
@@ -307,7 +495,7 @@ func computeCID(addr string) (cid.Cid, error) {
 	return c, nil
 }
 
-func handleAeaAddressStream(s network.Stream, address string, pubKey []byte) {
+func handleAeaAddressStream(routedHost host.Host, hdht *dht.IpfsDHT, s network.Stream, address string, pubKey []byte) {
 	log.Println("DEBUG Got a new aea address stream")
 	// TOFIX(LR) not needed, assuming this node is the only one advertising its own addr
 	reqAddress, err := readString(s)
@@ -319,31 +507,97 @@ func handleAeaAddressStream(s network.Stream, address string, pubKey []byte) {
 
 	log.Println("DEBUG Received query for addr:", reqAddress)
 	if reqAddress != address {
-		log.Println("ERROR requested address different from advertised one", reqAddress, address)
-		s.Close()
+		if cfg_client {
+			log.Println("ERROR requested address different from advertised one", reqAddress, address)
+			s.Close()
+			return
+		} else {
+			// first check if I have the reqAddress locally
+			cpeerid, exists := cfg_addresses_map[reqAddress]
+			if exists {
+				log.Println("DEBUG found address on my local lookup table")
+				err = writeBytes(s, []byte(cpeerid))
+				if err != nil {
+					log.Println("ERROR While sending peerID to peer:", err)
+				}
+				return
+			} else {
+				log.Println("DEBUG did NOT found address on my local lookup table, looking for it on the DHT...")
+				rpeerid, err := lookupAddress(routedHost, hdht, reqAddress)
+				if err != nil {
+					log.Println("ERROR while looking up address on the DHT:", err)
+					return
+				}
+
+				log.Println("DEBUG found peerID of address from DHT:", rpeerid)
+				err = writeBytes(s, []byte(rpeerid.Pretty()))
+				if err != nil {
+					log.Println("ERROR While sending peerID to peer:", err)
+
+				}
+				return
+			}
+
+			// request it from DHT
+		}
+	} else {
+		// TOFIX(LR) sending peerID instead of public key
+		/*
+			err = writeBytes(s, pubKey)
+			if err != nil {
+				log.Println("ERROR While sending public key to peer:", err)
+			}
+		*/
+
+		key, err := crypto.UnmarshalPublicKey(pubKey)
+		if err != nil {
+			log.Println("ERROR While preparing peerID to be sent to peer (TOFIX):", err)
+		}
+
+		peerid, err := peer.IDFromPublicKey(key)
+
+		err = writeBytes(s, []byte(peerid.Pretty()))
+		if err != nil {
+			log.Println("ERROR While sending peerID to peer:", err)
+		}
+	}
+
+}
+
+func handleAeaRegisterStream(hdht *dht.IpfsDHT, s network.Stream, annouced *bool) {
+	log.Println("DEBUG Got a new aea register stream")
+	client_addr, err := readBytes(s)
+	if err != nil {
+		log.Println("ERROR While reading client Address from stream:", err)
+		s.Reset()
 		return
 	}
 
-	// TOFIX(LR) sending peerID instead of public key
-	/*
-		err = writeBytes(s, pubKey)
+	err = writeBytes(s, []byte("doneAddress"))
+
+	client_peerid, err := readBytes(s)
+	if err != nil {
+		log.Println("ERROR While reading client peerID from stream:", err)
+		s.Reset()
+		return
+	}
+
+	err = writeBytes(s, []byte("donePeerID"))
+
+	log.Println("DEBUG Received address regitration request (addr, peerid):", client_addr, client_peerid)
+	cfg_addresses_map[string(client_addr)] = string(client_peerid)
+	if *annouced {
+		log.Println("DEBUG Annoucing client address", client_addr, client_peerid, "...")
+		err = registerAgentAddress(hdht, string(client_addr))
 		if err != nil {
-			log.Println("ERROR While sending public key to peer:", err)
+			log.Println("ERROR While annoucing client address to the dht:", err)
+			s.Reset()
+			return
 		}
-	*/
-
-	key, err := crypto.UnmarshalPublicKey(pubKey)
-	if err != nil {
-		log.Println("ERROR While preparing peerID to be sent to peer (TOFIX):", err)
 	}
 
-	peerid, err := peer.IDFromPublicKey(key)
-
-	err = writeBytes(s, []byte(peerid.Pretty()))
-	if err != nil {
-		log.Println("ERROR While sending peerID to peer:", err)
-	}
 }
+
 func handleAeaNotifStream(s network.Stream, hdht *dht.IpfsDHT, aeaAddr string, annouced *bool) {
 	log.Println("DEBUG Got a new notif stream")
 	if !*annouced {
@@ -351,6 +605,10 @@ func handleAeaNotifStream(s network.Stream, hdht *dht.IpfsDHT, aeaAddr string, a
 		if err != nil {
 			log.Println("ERROR while annoucing my address to dht:" + err.Error())
 			return
+		}
+		// annouce clients addresses
+		for a, _ := range cfg_addresses_map {
+			err = registerAgentAddress(hdht, a)
 		}
 		*annouced = true
 	}
@@ -475,21 +733,54 @@ func readEnvelope(s network.Stream) (*aea.Envelope, error) {
 
 */
 
-func setupRoutedHost(ma multiaddr.Multiaddr, key crypto.PrivKey, bootstrapPeers []peer.AddrInfo, aeaAddr string) (host.Host, *dht.IpfsDHT, error) {
+func setupRoutedHost(
+	ma multiaddr.Multiaddr, key crypto.PrivKey, bootstrapPeers []peer.AddrInfo, aeaAddr string,
+	nodeHostPublic string, nodePortPublic uint16) (host.Host, *dht.IpfsDHT, error) {
 
 	// Construct a datastore (needed by the DHT). This is just a simple, in-memory thread-safe datastore.
 	// TOFIX(LR) doesn't seem to be necessary
 	//dstore := dsync.MutexWrap(ds.NewMapDatastore())
 
+	// set external ip address
+	var addressFactory basichost.AddrsFactory
+	//if nodePortPublic != 0 {
+	if !cfg_client {
+
+		publicMultiaddr, err := multiaddr.NewMultiaddr(fmt.Sprintf("/dns4/%s/tcp/%d", nodeHostPublic, nodePortPublic))
+		if err != nil {
+			return nil, nil, err
+		}
+		addressFactory = func(addrs []multiaddr.Multiaddr) []multiaddr.Multiaddr {
+			return []multiaddr.Multiaddr{publicMultiaddr}
+		}
+	} else {
+		addressFactory = func(addrs []multiaddr.Multiaddr) []multiaddr.Multiaddr {
+			return addrs
+		}
+	}
+
 	ctx := context.Background()
 
 	opts := []libp2p.Option{
-		libp2p.ListenAddrs(ma),
+		//libp2p.ListenAddrs(ma),
+		libp2p.AddrsFactory(addressFactory),
 		libp2p.Identity(key),
 		libp2p.DefaultTransports,
 		libp2p.DefaultMuxers,
 		libp2p.DefaultSecurity,
 		libp2p.NATPortMap(), // TOFIX(LR) doesn't seem to have an impact
+		libp2p.EnableNATService(),
+		//libp2p.EnableAutoNAT()(), // TOFIX deprecated? https://github.com/libp2p/go-libp2p-autonat/blob/master/test/autonat_test.go
+	}
+
+	if !cfg_client {
+		//opts = append(opts, libp2p.EnableRelay(circuit.OptActive)) // TOFIX(LR) does it allow for multihops relays? or OptHop is already enough?
+		opts = append(opts, libp2p.EnableRelay(circuit.OptHop))
+		opts = append(opts, libp2p.ListenAddrs(ma))
+	} else {
+		opts = append(opts, libp2p.EnableRelay())
+		opts = append(opts, libp2p.ListenAddrs())
+		log.Println("DEBUG I shouldn't have any addres")
 	}
 
 	basicHost, err := libp2p.New(ctx, opts...)
@@ -500,15 +791,25 @@ func setupRoutedHost(ma multiaddr.Multiaddr, key crypto.PrivKey, bootstrapPeers 
 	// Make the DHT
 	// TOFIX(LR) not sure if explicitly passing a dstore is needed
 	//ndht := dht.NewDHT(ctx, basicHost, dstore)
-	ndht, err := dht.New(ctx, basicHost, dht.Mode(dht.ModeServer))
-	if err != nil {
-		return nil, nil, err
+	var ndht *dht.IpfsDHT
+	if !cfg_client {
+		ndht, err = dht.New(ctx, basicHost, dht.Mode(dht.ModeServer))
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		ndht, err = dht.New(ctx, basicHost, dht.Mode(dht.ModeClient))
+		if err != nil {
+			return nil, nil, err
+		}
+
 	}
 
 	// Make the routed host
 	routedHost := rhost.Wrap(basicHost, ndht)
 
-	// connect to the chosen ipfs nodes
+	// connect to the booststrap nodes
+	// For both peers and clients
 	if len(bootstrapPeers) > 0 {
 		err = bootstrapConnect(ctx, routedHost, bootstrapPeers)
 		if err != nil {
@@ -569,14 +870,6 @@ func bootstrapConnect(ctx context.Context, ph host.Host, peers []peer.AddrInfo) 
 				errs <- err
 				return
 			}
-			// TOFIX(LR) hack for genesis peer
-			s, err := ph.NewStream(ctx, p.ID, "/aea-notif/0.1.0")
-			if err != nil {
-				log.Println("ERROR failed to notify bootstrap peer:" + err.Error())
-				return
-			}
-			s.Write([]byte("/aea-notif/0.1.0"))
-			s.Close()
 
 			log.Println(ctx, "bootstrapDialSuccess", p.ID)
 			log.Printf("bootstrapped with %v", p.ID)
