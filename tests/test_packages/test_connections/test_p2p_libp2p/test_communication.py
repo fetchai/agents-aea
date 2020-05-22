@@ -62,8 +62,6 @@ def _make_libp2p_connection(
     )
 
 
-@skip_test_windows()
-@pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection will route envelope to destination"""
 
@@ -75,6 +73,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         # os.chdir(cls.t)
         cls.connection = _make_libp2p_connection()
 
+    @skip_test_windows(is_test_class=True)
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect(self):
         assert self.connection.connection_status.is_connected is False
@@ -98,7 +97,6 @@ class TestP2PLibp2pConnectionConnectDisconnect:
             pass
 
 
-@skip_test_windows()
 class TestP2PLibp2pConnectionEchoEnvelope:
     """Test that connection will route envelope to destination"""
 
@@ -121,10 +119,12 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.multiplexer2 = Multiplexer([cls.connection2])
         cls.multiplexer2.connect()
 
+    @skip_test_windows(is_test_class=True)
     def test_connection_is_established(self):
         assert self.connection1.connection_status.is_connected is True
         assert self.connection2.connection_status.is_connected is True
 
+    @skip_test_windows(is_test_class=True)
     def test_envelope_routed(self):
         addr_1 = self.connection1.node.agent_addr
         addr_2 = self.connection2.node.agent_addr
@@ -152,6 +152,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == envelope.protocol_id
         assert delivered_envelope.message == envelope.message
 
+    @skip_test_windows(is_test_class=True)
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.agent_addr
         addr_2 = self.connection2.node.agent_addr
@@ -198,7 +199,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             pass
 
 
-@skip_test_windows()
 class TestP2PLibp2pConnectionRouting:
     """Test that libp2p node will reliably route envelopes in a local network"""
 
@@ -228,10 +228,12 @@ class TestP2PLibp2pConnectionRouting:
             cls.multiplexers.append(Multiplexer([cls.connections[i]]))
             cls.multiplexers[i].connect()
 
+    @skip_test_windows(is_test_class=True)
     def test_connection_is_established(self):
         for conn in self.connections:
             assert conn.connection_status.is_connected is True
 
+    @skip_test_windows(is_test_class=True)
     def test_star_routing_connectivity(self):
         addrs = [conn.node.agent_addr for conn in self.connections]
 
