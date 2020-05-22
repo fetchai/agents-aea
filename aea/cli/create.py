@@ -27,7 +27,7 @@ import click
 import aea
 from aea.cli.add import _add_item
 from aea.cli.init import do_init
-from aea.cli.utils.config import _get_or_create_cli_config
+from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
@@ -149,7 +149,7 @@ def create(click_context, agent_name, author, local):
                 "Author is not set up. Please use 'aea init' to initialize."
             )
 
-    config = _get_or_create_cli_config()
+    config = get_or_create_cli_config()
     set_author = config.get(AUTHOR_KEY, None)
     if set_author is None:
         raise click.ClickException(

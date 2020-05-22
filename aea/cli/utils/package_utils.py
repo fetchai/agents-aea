@@ -51,7 +51,7 @@ from aea.crypto.helpers import (
 from aea.crypto.registry import registry
 
 
-def _verify_or_create_private_keys(ctx: Context) -> None:
+def verify_or_create_private_keys(ctx: Context) -> None:
     """
     Verify or create private keys.
 
@@ -88,11 +88,11 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     ctx.agent_config = aea_conf
 
 
-def _validate_package_name(package_name: str):
+def validate_package_name(package_name: str):
     """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
-    >>> _validate_package_name("this_is_a_good_package_name")
-    >>> _validate_package_name("this-is-not")
+    >>> validate_package_name("this_is_a_good_package_name")
+    >>> validate_package_name("this-is-not")
     Traceback (most recent call last):
     ...
     click.exceptions.BadParameter: this-is-not is not a valid package name.
@@ -128,7 +128,7 @@ def _is_permitted_author_handle(author: str) -> bool:
     return result
 
 
-def _try_get_item_source_path(
+def try_get_item_source_path(
     path: str, author_name: Optional[str], item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -152,7 +152,7 @@ def _try_get_item_source_path(
     return source_path
 
 
-def _try_get_item_target_path(
+def try_get_item_target_path(
     path: str, author_name: str, item_type_plural: str, item_name: str
 ) -> str:
     """
@@ -189,7 +189,7 @@ def get_package_dest_path(
     return os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
 
 
-def _copy_package_directory(
+def copy_package_directory(
     ctx: Context,
     package_path: Path,
     item_type: str,
@@ -222,7 +222,7 @@ def _copy_package_directory(
     return Path(dest)
 
 
-def _find_item_locally(ctx, item_type, item_public_id) -> Path:
+def find_item_locally(ctx, item_type, item_public_id) -> Path:
     """
     Find an item in the local registry.
 
@@ -271,7 +271,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
+def find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     """
     Find an item in the AEA directory.
 
@@ -318,7 +318,7 @@ def _find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
     return package_path
 
 
-def _load_yaml(filepath: str) -> Dict:
+def load_yaml(filepath: str) -> Dict:
     """
     Read content from yaml file.
 

@@ -32,9 +32,9 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import (
-    _copy_package_directory,
-    _find_item_in_distribution,
-    _find_item_locally,
+    copy_package_directory,
+    find_item_in_distribution,
+    find_item_locally,
     get_package_dest_path,
 )
 from aea.configurations.base import (
@@ -130,8 +130,8 @@ def _add_item(
 
     ctx.clean_paths.append(dest_path)
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
-        source_path = _find_item_in_distribution(ctx, item_type, item_public_id)
-        package_path = _copy_package_directory(
+        source_path = find_item_in_distribution(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(
             ctx,
             source_path,
             item_type,
@@ -140,8 +140,8 @@ def _add_item(
             dest_path,
         )
     elif is_local:
-        source_path = _find_item_locally(ctx, item_type, item_public_id)
-        package_path = _copy_package_directory(
+        source_path = find_item_locally(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(
             ctx,
             source_path,
             item_type,

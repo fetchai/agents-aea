@@ -27,7 +27,7 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
-from aea.cli.utils.formatting import _format_items, _retrieve_details
+from aea.cli.utils.formatting import format_items, retrieve_details
 from aea.configurations.base import (
     PackageType,
     PublicId,
@@ -67,7 +67,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
         configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        details = _retrieve_details(
+        details = retrieve_details(
             public_id.name, configuration_loader, str(configuration_filepath)
         )
         result.append(details)
@@ -79,7 +79,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
 def connections(ctx: Context):
     """List all the installed connections."""
     result = _get_item_details(ctx, "connection")
-    print(_format_items(sorted(result, key=lambda k: k["name"])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -87,7 +87,7 @@ def connections(ctx: Context):
 def contracts(ctx: Context):
     """List all the installed protocols."""
     result = _get_item_details(ctx, "contract")
-    print(_format_items(sorted(result, key=lambda k: k["name"])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -95,7 +95,7 @@ def contracts(ctx: Context):
 def protocols(ctx: Context):
     """List all the installed protocols."""
     result = _get_item_details(ctx, "protocol")
-    print(_format_items(sorted(result, key=lambda k: k["name"])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -103,4 +103,4 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the installed skills."""
     result = _get_item_details(ctx, "skill")
-    print(_format_items(sorted(result, key=lambda k: k["name"])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
