@@ -1,5 +1,23 @@
 # Release History
 
+## 0.3.3 (2020-05-22)
+
+- Adds option to pass ledger apis to aea builder
+- Refactors decision maker refactor: separates interface and implementation; adds loading mechanisms so framework users can provide their own implementation
+- Adds async and sync agent loop implementations; agent can be run in both sync and async mode
+- Completes transition to atomic cli commands (fetch, generate, scaffold)
+- Refactors dialogue api: adds much simplified api; updates generator accordingly; updates skills
+- Adds support for crypto module extensions: framework users can register their own crypto module
+- Adds crypto module and ledger support for cosmos
+- Adds simple-oef (soef) connection
+- Adds p2p_libp2p connection for true p2p connectivity via the internet
+- Adds pypi dependency consistency checks for aea projects
+- Refactors cli for improved programmatic usage of components
+- Adds skill exception handling policies and configuration options
+- Adds comprehensive documentation of configuration files
+- Multiple docs updates
+- Multiple test stability fixes
+
 ## 0.3.2 (2020-05-07)
 
 - Adds dialogue generation functionality to protocol generator
