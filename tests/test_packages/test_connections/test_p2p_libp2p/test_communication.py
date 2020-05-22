@@ -289,3 +289,209 @@ class TestP2PLibp2pConnectionRouting:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+@skip_test_windows
+class TestP2PLibp2pConnectionRelayEchoEnvelopeSameRelay:
+    """Test that connection will route envelope to destination using relay"""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # os.chdir(cls.t)
+        cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
+        cls.multiplexer = Multiplexer([cls.relay])
+        cls.multiplexer.connect()
+        
+        time.sleep(2)
+        relay_peer = cls.relay.node.multiaddrs
+        
+        cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 2, relay=False, entry_peers=relay_peer)
+        cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.multiplexer1.connect()
+
+
+        cls.connection2 = _make_libp2p_connection(
+            port=DEFAULT_PORT + 3, entry_peers=relay_peer
+        )
+        cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.multiplexer2.connect()
+
+    def test_connection_is_established(self):
+        assert self.relay.connection_status.is_connected is True
+        assert self.connection1.connection_status.is_connected is True
+        assert self.connection2.connection_status.is_connected is True
+
+    def test_envelope_routed(self):
+        addr_1 = self.connection1.node.agent_addr
+        addr_2 = self.connection2.node.agent_addr
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(
+            to=addr_2,
+            sender=addr_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        self.multiplexer1.put(envelope)
+        delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert delivered_envelope.message == envelope.message
+
+    def test_envelope_echoed_back(self):
+        addr_1 = self.connection1.node.agent_addr
+        addr_2 = self.connection2.node.agent_addr
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        original_envelope = Envelope(
+            to=addr_2,
+            sender=addr_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        self.multiplexer1.put(original_envelope)
+        delivered_envelope = self.multiplexer2.get(block=True, timeout=10)
+        assert delivered_envelope is not None
+
+        delivered_envelope.to = addr_1
+        delivered_envelope.sender = addr_2
+
+        self.multiplexer2.put(delivered_envelope)
+        echoed_envelope = self.multiplexer1.get(block=True, timeout=5)
+
+        assert echoed_envelope is not None
+        assert echoed_envelope.to == original_envelope.sender
+        assert delivered_envelope.sender == original_envelope.to
+        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert delivered_envelope.message == original_envelope.message
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.multiplexer1.disconnect()
+        cls.multiplexer2.disconnect()
+        cls.multiplexer.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+@skip_test_windows
+class TestP2PLibp2pConnectionRelayRouting:
+    """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # os.chdir(cls.t)
+
+        port_relay_1 = DEFAULT_PORT + 10
+        cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
+        cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
+        cls.multiplexer_relay_1.connect()
+
+        port_relay_2 = DEFAULT_PORT + 100
+        cls.connection_relay_2 = _make_libp2p_connection(port_relay_2)
+        cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
+        cls.multiplexer_relay_2.connect()
+
+        time.sleep(2)
+        relay_peer_1 = cls.connection_relay_1.node.multiaddrs
+        relay_peer_2 = cls.connection_relay_2.node.multiaddrs
+
+        cls.connections = []
+        cls.multiplexers = []
+
+        port = port_relay_1
+        for i in range(int(DEFAULT_NET_SIZE/2)):
+            port += 1
+            conn = _make_libp2p_connection(port=port, relay=False, entry_peers=relay_peer_1)
+            mux = Multiplexer([conn])
+            cls.connections.append(conn)
+            cls.multiplexers.append(mux)
+            mux.connect()
+        
+        port = port_relay_2
+        for i in range(int(DEFAULT_NET_SIZE/2)):
+            port += 1
+            conn = _make_libp2p_connection(port=port, relay=False, entry_peers=relay_peer_2)
+            mux = Multiplexer([conn])
+            cls.connections.append(conn)
+            cls.multiplexers.append(mux)
+            mux.connect()
+        
+        time.sleep(2)
+
+    def test_connection_is_established(self):
+        for conn in self.connections:
+            assert conn.connection_status.is_connected is True
+
+    def skip_test_star_routing_connectivity(self):
+        addrs = [conn.node.agent_addr for conn in self.connections]
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+
+        for source in range(len(self.multiplexers)):
+            for destination in range(len(self.multiplexers)):
+                if destination == source:
+                    continue
+                envelope = Envelope(
+                    to=addrs[destination],
+                    sender=addrs[source],
+                    protocol_id=DefaultMessage.protocol_id,
+                    message=DefaultSerializer().encode(msg),
+                )
+
+                self.multiplexers[source].put(envelope)
+                delivered_envelope = self.multiplexers[destination].get(
+                    block=True, timeout=10
+                )
+
+                assert delivered_envelope is not None
+                assert delivered_envelope.to == envelope.to
+                assert delivered_envelope.sender == envelope.sender
+                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert delivered_envelope.message == envelope.message
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        for multiplexer in cls.multiplexers:
+            multiplexer.disconnect()
+        cls.multiplexer_relay_1.disconnect()
+        cls.multiplexer_relay_2.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
