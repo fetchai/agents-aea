@@ -31,8 +31,8 @@ from yaml import YAMLError
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import (
-    get_or_create_cli_config,
     _init_cli_config,
+    get_or_create_cli_config,
     update_cli_config,
 )
 from aea.cli.utils.context import Context
@@ -43,8 +43,8 @@ from aea.cli.utils.package_utils import (
     find_item_locally,
     try_get_item_source_path,
     try_get_item_target_path,
-    validate_package_name,
     validate_author_name,
+    validate_package_name,
 )
 
 from tests.test_cli.tools_for_testing import (
