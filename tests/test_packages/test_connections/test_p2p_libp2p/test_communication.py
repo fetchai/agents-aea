@@ -73,8 +73,6 @@ def _make_libp2p_connection(
         )
 
 
-
-
 @skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
@@ -290,6 +288,7 @@ class TestP2PLibp2pConnectionRouting:
         except (OSError, IOError):
             pass
 
+
 @skip_test_windows
 class TestP2PLibp2pConnectionRelayEchoEnvelopeSameRelay:
     """Test that connection will route envelope to destination using relay"""
@@ -303,14 +302,15 @@ class TestP2PLibp2pConnectionRelayEchoEnvelopeSameRelay:
         cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
         cls.multiplexer = Multiplexer([cls.relay])
         cls.multiplexer.connect()
-        
+
         time.sleep(2)
         relay_peer = cls.relay.node.multiaddrs
-        
-        cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 2, relay=False, entry_peers=relay_peer)
+
+        cls.connection1 = _make_libp2p_connection(
+            DEFAULT_PORT + 2, relay=False, entry_peers=relay_peer
+        )
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer1.connect()
-
 
         cls.connection2 = _make_libp2p_connection(
             port=DEFAULT_PORT + 3, entry_peers=relay_peer
@@ -426,23 +426,27 @@ class TestP2PLibp2pConnectionRelayRouting:
         cls.multiplexers = []
 
         port = port_relay_1
-        for i in range(int(DEFAULT_NET_SIZE/2)):
+        for i in range(int(DEFAULT_NET_SIZE / 2)):
             port += 1
-            conn = _make_libp2p_connection(port=port, relay=False, entry_peers=relay_peer_1)
+            conn = _make_libp2p_connection(
+                port=port, relay=False, entry_peers=relay_peer_1
+            )
             mux = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(mux)
             mux.connect()
-        
+
         port = port_relay_2
-        for i in range(int(DEFAULT_NET_SIZE/2)):
+        for i in range(int(DEFAULT_NET_SIZE / 2)):
             port += 1
-            conn = _make_libp2p_connection(port=port, relay=False, entry_peers=relay_peer_2)
+            conn = _make_libp2p_connection(
+                port=port, relay=False, entry_peers=relay_peer_2
+            )
             mux = Multiplexer([conn])
             cls.connections.append(conn)
             cls.multiplexers.append(mux)
             mux.connect()
-        
+
         time.sleep(2)
 
     def test_connection_is_established(self):
@@ -494,4 +498,3 @@ class TestP2PLibp2pConnectionRelayRouting:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
