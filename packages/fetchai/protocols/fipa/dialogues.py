@@ -29,7 +29,7 @@ from abc import ABC
 from enum import Enum
 from typing import Dict, FrozenSet, cast
 
-from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
+from aea.helpers.dialogue.base import Dialogue, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
@@ -38,16 +38,16 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 VALID_REPLIES = {
     FipaMessage.Performative.ACCEPT: frozenset(
         [
+            FipaMessage.Performative.DECLINE,
             FipaMessage.Performative.MATCH_ACCEPT,
             FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            FipaMessage.Performative.DECLINE,
         ]
     ),
     FipaMessage.Performative.ACCEPT_W_INFORM: frozenset(
         [
+            FipaMessage.Performative.DECLINE,
             FipaMessage.Performative.MATCH_ACCEPT,
             FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            FipaMessage.Performative.DECLINE,
         ]
     ),
     FipaMessage.Performative.CFP: frozenset(
@@ -61,10 +61,10 @@ VALID_REPLIES = {
     ),
     FipaMessage.Performative.PROPOSE: frozenset(
         [
-            FipaMessage.Performative.PROPOSE,
             FipaMessage.Performative.ACCEPT,
             FipaMessage.Performative.ACCEPT_W_INFORM,
             FipaMessage.Performative.DECLINE,
+            FipaMessage.Performative.PROPOSE,
         ]
     ),
 }  # type: Dict[FipaMessage.Performative, FrozenSet[FipaMessage.Performative]]
