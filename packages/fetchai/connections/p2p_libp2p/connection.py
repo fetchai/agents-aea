@@ -611,7 +611,7 @@ class P2PLibp2pConnection(Connection):
         
         public_uri = None
         if libp2p_port_public is not None and libp2p_host_public is not None:
-                uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+                public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
 
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
