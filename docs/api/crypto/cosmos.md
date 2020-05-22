@@ -1,18 +1,18 @@
-<a name=".aea.crypto.ethereum"></a>
-## aea.crypto.ethereum
+<a name=".aea.crypto.cosmos"></a>
+## aea.crypto.cosmos
 
-Ethereum module wrapping the public and private key cryptography and ledger api.
+Cosmos module wrapping the public and private key cryptography and ledger api.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto"></a>
-### EthereumCrypto
+<a name=".aea.crypto.cosmos.CosmosCrypto"></a>
+### CosmosCrypto
 
 ```python
-class EthereumCrypto(Crypto[Account])
+class CosmosCrypto(Crypto[SigningKey])
 ```
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.__init__"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -25,7 +25,7 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.public_key"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.public_key"></a>
 #### public`_`key
 
 ```python
@@ -39,7 +39,7 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.address"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.address"></a>
 #### address
 
 ```python
@@ -53,12 +53,12 @@ Return the address for the key pair.
 
 a display_address str
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name) -> Account
+ | load_private_key_from_path(cls, file_name) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -71,7 +71,7 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.sign_message"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.sign_message"></a>
 #### sign`_`message
 
 ```python
@@ -89,7 +89,7 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.sign_transaction"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
@@ -106,7 +106,7 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.recover_message"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.recover_message"></a>
 #### recover`_`message
 
 ```python
@@ -125,17 +125,17 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
  | @classmethod
- | generate_private_key(cls) -> Account
+ | generate_private_key(cls) -> SigningKey
 ```
 
-Generate a key pair for ethereum network.
+Generate a key pair for cosmos network.
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.get_address_from_public_key"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
 
 ```python
@@ -153,7 +153,7 @@ Get the address from the public key.
 
 str
 
-<a name=".aea.crypto.ethereum.EthereumCrypto.dump"></a>
+<a name=".aea.crypto.cosmos.CosmosCrypto.dump"></a>
 #### dump
 
 ```python
@@ -170,20 +170,20 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
-<a name=".aea.crypto.ethereum.EthereumApi"></a>
-### EthereumApi
+<a name=".aea.crypto.cosmos.CosmosApi"></a>
+### CosmosApi
 
 ```python
-class EthereumApi(LedgerApi)
+class CosmosApi(LedgerApi)
 ```
 
-Class to interact with the Ethereum Web3 APIs.
+Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a name=".aea.crypto.ethereum.EthereumApi.__init__"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(address: str, gas_price: str = DEFAULT_GAS_PRICE)
+ | __init__(**kwargs)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -192,17 +192,17 @@ Initialize the Ethereum ledger APIs.
 
 - `address`: the endpoint for Web3 APIs.
 
-<a name=".aea.crypto.ethereum.EthereumApi.api"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.api"></a>
 #### api
 
 ```python
  | @property
- | api() -> Web3
+ | api() -> None
 ```
 
 Get the underlying API object.
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_balance"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -211,11 +211,11 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name=".aea.crypto.ethereum.EthereumApi.transfer"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.transfer"></a>
 #### transfer
 
 ```python
- | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: int = 1, **kwargs, ,) -> Optional[str]
+ | transfer(crypto: Crypto, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str = "", denom: str = "testfet", account_number: int = 0, sequence: int = 0, gas: int = 80000, memo: str = "", sync_mode: str = "sync", chain_id: str = "aea-testnet", **kwargs, ,) -> Optional[str]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -233,7 +233,7 @@ Submit a transfer transaction to the ledger.
 
 tx digest if present, otherwise None
 
-<a name=".aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -250,7 +250,7 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.is_transaction_settled"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
@@ -267,7 +267,7 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name=".aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -284,7 +284,7 @@ Get the transaction receipt for a transaction digest (non-blocking).
 
 the tx receipt, if present
 
-<a name=".aea.crypto.ethereum.EthereumApi.generate_tx_nonce"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
@@ -302,7 +302,7 @@ Generate a unique hash to distinguish txs with the same terms.
 
 return the hash in hex.
 
-<a name=".aea.crypto.ethereum.EthereumApi.is_transaction_valid"></a>
+<a name=".aea.crypto.cosmos.CosmosApi.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
@@ -323,16 +323,16 @@ Check whether a transaction is valid or not (non-blocking).
 
 True if the random_message is equals to tx['input']
 
-<a name=".aea.crypto.ethereum.EthereumFaucetApi"></a>
-### EthereumFaucetApi
+<a name=".aea.crypto.cosmos.CosmosFaucetApi"></a>
+### CosmosFaucetApi
 
 ```python
-class EthereumFaucetApi(FaucetApi)
+class CosmosFaucetApi(FaucetApi)
 ```
 
-Ethereum testnet faucet API.
+Cosmos testnet faucet API.
 
-<a name=".aea.crypto.ethereum.EthereumFaucetApi.get_wealth"></a>
+<a name=".aea.crypto.cosmos.CosmosFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
 ```python

@@ -46,46 +46,23 @@ Get the configs.
 
 Get the apis.
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.has_fetchai"></a>
-#### has`_`fetchai
-
-
-```python
- | @property
- | has_fetchai() -> bool
-```
-
-Check if it has the fetchai API.
-
-<a name=".aea.crypto.ledger_apis.LedgerApis.fetchai_api"></a>
-#### fetchai`_`api
+<a name=".aea.crypto.ledger_apis.LedgerApis.has_ledger"></a>
+#### has`_`ledger
 
 ```python
- | @property
- | fetchai_api() -> FetchAIApi
+ | has_ledger(identifier: str) -> bool
 ```
 
-Get the Fetchai API.
+Check if it has a .
 
-<a name=".aea.crypto.ledger_apis.LedgerApis.has_ethereum"></a>
-#### has`_`ethereum
+<a name=".aea.crypto.ledger_apis.LedgerApis.get_api"></a>
+#### get`_`api
 
 ```python
- | @property
- | has_ethereum() -> bool
+ | get_api(identifier: str) -> LedgerApi
 ```
 
-Check if it has the ethereum API.
-
-<a name=".aea.crypto.ledger_apis.LedgerApis.ethereum_api"></a>
-#### ethereum`_`api
-
-```python
- | @property
- | ethereum_api() -> EthereumApi
-```
-
-Get the Ethereum API.
+Get the ledger API.
 
 <a name=".aea.crypto.ledger_apis.LedgerApis.has_default_ledger"></a>
 #### has`_`default`_`ledger

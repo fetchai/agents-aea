@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, ownership_state: OwnershipState, preferences: Preferences, goal_pursuit_readiness: GoalPursuitReadiness, task_manager: TaskManager, **kwargs)
+ | __init__(identity: Identity, ledger_apis: LedgerApis, connection_status: ConnectionStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, **kwargs)
 ```
 
 Initialize an agent context.
@@ -118,35 +118,15 @@ Get outbox.
 
 Get decision maker queue.
 
-<a name=".aea.context.base.AgentContext.ownership_state"></a>
-#### ownership`_`state
+<a name=".aea.context.base.AgentContext.decision_maker_handler_context"></a>
+#### decision`_`maker`_`handler`_`context
 
 ```python
  | @property
- | ownership_state() -> OwnershipState
+ | decision_maker_handler_context() -> SimpleNamespace
 ```
 
-Get the ownership state of the agent.
-
-<a name=".aea.context.base.AgentContext.preferences"></a>
-#### preferences
-
-```python
- | @property
- | preferences() -> Preferences
-```
-
-Get the preferences of the agent.
-
-<a name=".aea.context.base.AgentContext.goal_pursuit_readiness"></a>
-#### goal`_`pursuit`_`readiness
-
-```python
- | @property
- | goal_pursuit_readiness() -> GoalPursuitReadiness
-```
-
-Get the goal pursuit readiness.
+Get the decision maker handler context.
 
 <a name=".aea.context.base.AgentContext.ledger_apis"></a>
 #### ledger`_`apis

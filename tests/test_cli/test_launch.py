@@ -162,8 +162,8 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
             process_launch.expect_all(
                 [
                     f"[{self.agent_name_1}]: Start processing messages...",
-                    f"Expected exception!",
-                    f"Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
+                    "Expected exception!",
+                    "Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
                 ],
                 timeout=20,
             )

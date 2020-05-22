@@ -145,35 +145,15 @@ Get message in queue.
 
 Get message queue of decision maker.
 
-<a name=".aea.skills.base.SkillContext.agent_ownership_state"></a>
-#### agent`_`ownership`_`state
+<a name=".aea.skills.base.SkillContext.decision_maker_handler_context"></a>
+#### decision`_`maker`_`handler`_`context
 
 ```python
  | @property
- | agent_ownership_state() -> OwnershipState
+ | decision_maker_handler_context() -> SimpleNamespace
 ```
 
-Get ownership state.
-
-<a name=".aea.skills.base.SkillContext.agent_preferences"></a>
-#### agent`_`preferences
-
-```python
- | @property
- | agent_preferences() -> Preferences
-```
-
-Get preferences.
-
-<a name=".aea.skills.base.SkillContext.agent_goal_pursuit_readiness"></a>
-#### agent`_`goal`_`pursuit`_`readiness
-
-```python
- | @property
- | agent_goal_pursuit_readiness() -> GoalPursuitReadiness
-```
-
-Get the goal pursuit readiness.
+Get decision maker handler context.
 
 <a name=".aea.skills.base.SkillContext.task_manager"></a>
 #### task`_`manager
@@ -367,11 +347,23 @@ None
 
 Parse the component module.
 
+<a name=".aea.skills.base.AbstractBehaviour"></a>
+### AbstractBehaviour
+
+```python
+class AbstractBehaviour(SkillComponent,  ABC)
+```
+
+Abstract behaviour for periodical calls.
+
+tick_interval: float, interval to call behaviour's act.
+start_at: optional datetime, when to start periodical calls.
+
 <a name=".aea.skills.base.Behaviour"></a>
 ### Behaviour
 
 ```python
-class Behaviour(SkillComponent,  ABC)
+class Behaviour(AbstractBehaviour,  ABC)
 ```
 
 This class implements an abstract behaviour.
@@ -608,7 +600,7 @@ Get the handlers.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str) -> "Skill"
+ | from_dir(cls, directory: str, skill_context: Optional[SkillContext] = None) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -616,6 +608,7 @@ Load the skill from a directory.
 **Arguments**:
 
 - `directory`: the directory to the skill package.
+- `skill_context`: the skill context
 
 **Returns**:
 

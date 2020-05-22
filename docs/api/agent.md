@@ -77,7 +77,7 @@ This class provides an abstract base class for a generic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, timeout: float = 1.0, is_debug: bool = False) -> None
+ | __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, timeout: float = 1.0, is_debug: bool = False, loop_mode: Optional[str] = None) -> None
 ```
 
 Instantiate the agent.
@@ -89,6 +89,7 @@ Instantiate the agent.
 - `loop`: the event loop to run the connections.
 - `timeout`: the time in (fractions of) seconds to time out an agent between act and react
 - `is_debug`: if True, run the agent in debug mode (does not connect the multiplexer).
+- `loop_mode`: loop_mode to choose agent run loop.
 
 **Returns**:
 
@@ -213,6 +214,10 @@ While the liveness of the agent is not stopped it continues to loop over:
 - sleep for specified timeout,
 - call to react(),
 - call to update().
+
+**Arguments**:
+
+- `loop_mode`: loop mode to choose  agent run loop. if not specified default one will be used
 
 **Returns**:
 

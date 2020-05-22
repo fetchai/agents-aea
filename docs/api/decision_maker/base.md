@@ -3,128 +3,73 @@
 
 This module contains the decision maker class.
 
-<a name=".aea.decision_maker.base.GoalPursuitReadiness"></a>
-### GoalPursuitReadiness
+<a name=".aea.decision_maker.base.OwnershipState"></a>
+### OwnershipState
 
 ```python
-class GoalPursuitReadiness()
+class OwnershipState(ABC)
 ```
 
-The goal pursuit readiness.
+Represent the ownership state of an agent.
 
-<a name=".aea.decision_maker.base.GoalPursuitReadiness.Status"></a>
-### Status
+<a name=".aea.decision_maker.base.OwnershipState.set"></a>
+#### set
 
 ```python
-class Status(Enum)
+ | @abstractmethod
+ | set(**kwargs) -> None
 ```
 
-The enum of the readiness status.
-
-In particular, it can be one of the following:
-
-- Status.READY: when the agent is ready to pursuit its goal
-- Status.NOT_READY: when the agent is not ready to pursuit its goal
-
-<a name=".aea.decision_maker.base.GoalPursuitReadiness.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__()
-```
-
-Instantiate the goal pursuit readiness.
-
-<a name=".aea.decision_maker.base.GoalPursuitReadiness.is_ready"></a>
-#### is`_`ready
-
-```python
- | @property
- | is_ready() -> bool
-```
-
-Get the readiness.
-
-<a name=".aea.decision_maker.base.GoalPursuitReadiness.update"></a>
-#### update
-
-```python
- | update(new_status: Status) -> None
-```
-
-Update the goal pursuit readiness.
+Set values on the ownership state.
 
 **Arguments**:
 
-- `new_status`: the new status
+- `kwargs`: the relevant keyword arguments
 
 **Returns**:
 
 None
 
-<a name=".aea.decision_maker.base.OwnershipState"></a>
-### OwnershipState
+<a name=".aea.decision_maker.base.OwnershipState.apply_delta"></a>
+#### apply`_`delta
 
 ```python
-class OwnershipState()
+ | @abstractmethod
+ | apply_delta(**kwargs) -> None
 ```
 
-Represent the ownership state of an agent.
+Apply a state update to the ownership state.
 
-<a name=".aea.decision_maker.base.OwnershipState.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__()
-```
-
-Instantiate an ownership state object.
+This method is used to apply a raw state update without a transaction.
 
 **Arguments**:
 
-- `decision_maker`: the decision maker
+- `kwargs`: the relevant keyword arguments
+
+**Returns**:
+
+None
 
 <a name=".aea.decision_maker.base.OwnershipState.is_initialized"></a>
 #### is`_`initialized
 
 ```python
  | @property
+ | @abstractmethod
  | is_initialized() -> bool
 ```
 
 Get the initialization status.
 
-<a name=".aea.decision_maker.base.OwnershipState.amount_by_currency_id"></a>
-#### amount`_`by`_`currency`_`id
-
-```python
- | @property
- | amount_by_currency_id() -> CurrencyHoldings
-```
-
-Get currency holdings in this state.
-
-<a name=".aea.decision_maker.base.OwnershipState.quantities_by_good_id"></a>
-#### quantities`_`by`_`good`_`id
-
-```python
- | @property
- | quantities_by_good_id() -> GoodHoldings
-```
-
-Get good holdings in this state.
-
 <a name=".aea.decision_maker.base.OwnershipState.is_affordable_transaction"></a>
 #### is`_`affordable`_`transaction
 
 ```python
+ | @abstractmethod
  | is_affordable_transaction(tx_message: TransactionMessage) -> bool
 ```
 
 Check if the transaction is affordable (and consistent).
-
-E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
-Note, the agent is the sender of the transaction message by design.
 
 **Arguments**:
 
@@ -138,6 +83,7 @@ True if the transaction is legal wrt the current state, false otherwise.
 #### apply`_`transactions
 
 ```python
+ | @abstractmethod
  | apply_transactions(transactions: List[TransactionMessage]) -> "OwnershipState"
 ```
 
@@ -155,6 +101,7 @@ the final state.
 #### `__`copy`__`
 
 ```python
+ | @abstractmethod
  | __copy__() -> "OwnershipState"
 ```
 
@@ -164,35 +111,17 @@ Copy the object.
 ### LedgerStateProxy
 
 ```python
-class LedgerStateProxy()
+class LedgerStateProxy(ABC)
 ```
 
 Class to represent a proxy to a ledger state.
-
-<a name=".aea.decision_maker.base.LedgerStateProxy.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(ledger_apis: LedgerApis)
-```
-
-Instantiate a ledger state proxy.
-
-<a name=".aea.decision_maker.base.LedgerStateProxy.ledger_apis"></a>
-#### ledger`_`apis
-
-```python
- | @property
- | ledger_apis() -> LedgerApis
-```
-
-Get the ledger_apis.
 
 <a name=".aea.decision_maker.base.LedgerStateProxy.is_initialized"></a>
 #### is`_`initialized
 
 ```python
  | @property
+ | @abstractmethod
  | is_initialized() -> bool
 ```
 
@@ -202,6 +131,7 @@ Get the initialization status.
 #### is`_`affordable`_`transaction
 
 ```python
+ | @abstractmethod
  | is_affordable_transaction(tx_message: TransactionMessage) -> bool
 ```
 
@@ -219,25 +149,31 @@ whether the transaction is affordable on the ledger
 ### Preferences
 
 ```python
-class Preferences()
+class Preferences(ABC)
 ```
 
 Class to represent the preferences.
 
-<a name=".aea.decision_maker.base.Preferences.__init__"></a>
-#### `__`init`__`
+<a name=".aea.decision_maker.base.Preferences.set"></a>
+#### set
 
 ```python
- | __init__()
+ | @abstractmethod
+ | set(**kwargs, ,) -> None
 ```
 
-Instantiate an agent preference object.
+Set values on the preferences.
+
+**Arguments**:
+
+- `kwargs`: the relevant key word arguments
 
 <a name=".aea.decision_maker.base.Preferences.is_initialized"></a>
 #### is`_`initialized
 
 ```python
  | @property
+ | @abstractmethod
  | is_initialized() -> bool
 ```
 
@@ -245,103 +181,12 @@ Get the initialization status.
 
 Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
 
-<a name=".aea.decision_maker.base.Preferences.exchange_params_by_currency_id"></a>
-#### exchange`_`params`_`by`_`currency`_`id
-
-```python
- | @property
- | exchange_params_by_currency_id() -> ExchangeParams
-```
-
-Get exchange parameter for each currency.
-
-<a name=".aea.decision_maker.base.Preferences.utility_params_by_good_id"></a>
-#### utility`_`params`_`by`_`good`_`id
-
-```python
- | @property
- | utility_params_by_good_id() -> UtilityParams
-```
-
-Get utility parameter for each good.
-
-<a name=".aea.decision_maker.base.Preferences.seller_transaction_fee"></a>
-#### seller`_`transaction`_`fee
-
-```python
- | @property
- | seller_transaction_fee() -> int
-```
-
-Get the transaction fee.
-
-<a name=".aea.decision_maker.base.Preferences.buyer_transaction_fee"></a>
-#### buyer`_`transaction`_`fee
-
-```python
- | @property
- | buyer_transaction_fee() -> int
-```
-
-Get the transaction fee.
-
-<a name=".aea.decision_maker.base.Preferences.logarithmic_utility"></a>
-#### logarithmic`_`utility
-
-```python
- | logarithmic_utility(quantities_by_good_id: GoodHoldings) -> float
-```
-
-Compute agent's utility given her utility function params and a good bundle.
-
-**Arguments**:
-
-- `quantities_by_good_id`: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
-
-**Returns**:
-
-utility value
-
-<a name=".aea.decision_maker.base.Preferences.linear_utility"></a>
-#### linear`_`utility
-
-```python
- | linear_utility(amount_by_currency_id: CurrencyHoldings) -> float
-```
-
-Compute agent's utility given her utility function params and a currency bundle.
-
-**Arguments**:
-
-- `amount_by_currency_id`: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
-
-**Returns**:
-
-utility value
-
-<a name=".aea.decision_maker.base.Preferences.utility"></a>
-#### utility
-
-```python
- | utility(quantities_by_good_id: GoodHoldings, amount_by_currency_id: CurrencyHoldings) -> float
-```
-
-Compute the utility given the good and currency holdings.
-
-**Arguments**:
-
-- `quantities_by_good_id`: the good holdings
-- `amount_by_currency_id`: the currency holdings
-
-**Returns**:
-
-the utility value.
-
 <a name=".aea.decision_maker.base.Preferences.marginal_utility"></a>
 #### marginal`_`utility
 
 ```python
- | marginal_utility(ownership_state: OwnershipState, delta_quantities_by_good_id: Optional[GoodHoldings] = None, delta_amount_by_currency_id: Optional[CurrencyHoldings] = None) -> float
+ | @abstractmethod
+ | marginal_utility(ownership_state: OwnershipState, **kwargs, ,) -> float
 ```
 
 Compute the marginal utility.
@@ -349,8 +194,7 @@ Compute the marginal utility.
 **Arguments**:
 
 - `ownership_state`: the ownership state against which to compute the marginal utility.
-- `delta_quantities_by_good_id`: the change in good holdings
-- `delta_amount_by_currency_id`: the change in money holdings
+- `kwargs`: optional keyword argyments
 
 **Returns**:
 
@@ -360,6 +204,7 @@ the marginal utility score
 #### utility`_`diff`_`from`_`transaction
 
 ```python
+ | @abstractmethod
  | utility_diff_from_transaction(ownership_state: OwnershipState, tx_message: TransactionMessage) -> float
 ```
 
@@ -373,6 +218,16 @@ Simulate a transaction and get the resulting utility difference (taking into acc
 **Returns**:
 
 the score.
+
+<a name=".aea.decision_maker.base.Preferences.__copy__"></a>
+#### `__`copy`__`
+
+```python
+ | @abstractmethod
+ | __copy__() -> "Preferences"
+```
+
+Copy the object.
 
 <a name=".aea.decision_maker.base.ProtectedQueue"></a>
 ### ProtectedQueue
@@ -492,6 +347,88 @@ Access protected get method.
 
 internal message
 
+<a name=".aea.decision_maker.base.DecisionMakerHandler"></a>
+### DecisionMakerHandler
+
+```python
+class DecisionMakerHandler(ABC)
+```
+
+This class implements the decision maker.
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(identity: Identity, wallet: Wallet, **kwargs)
+```
+
+Initialize the decision maker handler.
+
+**Arguments**:
+
+- `identity`: the identity
+- `wallet`: the wallet
+- `kwargs`: the key word arguments
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.identity"></a>
+#### identity
+
+```python
+ | @property
+ | identity() -> Identity
+```
+
+The identity of the agent.
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.wallet"></a>
+#### wallet
+
+```python
+ | @property
+ | wallet() -> Wallet
+```
+
+The wallet of the agent.
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.context"></a>
+#### context
+
+```python
+ | @property
+ | context() -> SimpleNamespace
+```
+
+Get the context.
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.message_out_queue"></a>
+#### message`_`out`_`queue
+
+```python
+ | @property
+ | message_out_queue() -> AsyncFriendlyQueue
+```
+
+Get (out) queue.
+
+<a name=".aea.decision_maker.base.DecisionMakerHandler.handle"></a>
+#### handle
+
+```python
+ | @abstractmethod
+ | handle(message: InternalMessage) -> None
+```
+
+Handle an internal message from the skills.
+
+**Arguments**:
+
+- `message`: the internal message
+
+**Returns**:
+
+None
+
 <a name=".aea.decision_maker.base.DecisionMaker"></a>
 ### DecisionMaker
 
@@ -505,16 +442,15 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, ledger_apis: LedgerApis)
+ | __init__(decision_maker_handler: DecisionMakerHandler)
 ```
 
 Initialize the decision maker.
 
 **Arguments**:
 
-- `identity`: the identity
-- `wallet`: the wallet
-- `ledger_apis`: the ledger apis
+- `agent_name`: the agent name
+- `decision_maker_handler`: the decision maker handler
 
 <a name=".aea.decision_maker.base.DecisionMaker.message_in_queue"></a>
 #### message`_`in`_`queue
@@ -531,70 +467,20 @@ Get (in) queue.
 
 ```python
  | @property
- | message_out_queue() -> Queue
+ | message_out_queue() -> AsyncFriendlyQueue
 ```
 
 Get (out) queue.
 
-<a name=".aea.decision_maker.base.DecisionMaker.wallet"></a>
-#### wallet
+<a name=".aea.decision_maker.base.DecisionMaker.decision_maker_handler"></a>
+#### decision`_`maker`_`handler
 
 ```python
  | @property
- | wallet() -> Wallet
+ | decision_maker_handler() -> DecisionMakerHandler
 ```
 
-Get wallet.
-
-<a name=".aea.decision_maker.base.DecisionMaker.ledger_apis"></a>
-#### ledger`_`apis
-
-```python
- | @property
- | ledger_apis() -> LedgerApis
-```
-
-Get ledger apis.
-
-<a name=".aea.decision_maker.base.DecisionMaker.ownership_state"></a>
-#### ownership`_`state
-
-```python
- | @property
- | ownership_state() -> OwnershipState
-```
-
-Get ownership state.
-
-<a name=".aea.decision_maker.base.DecisionMaker.ledger_state_proxy"></a>
-#### ledger`_`state`_`proxy
-
-```python
- | @property
- | ledger_state_proxy() -> LedgerStateProxy
-```
-
-Get ledger state proxy.
-
-<a name=".aea.decision_maker.base.DecisionMaker.preferences"></a>
-#### preferences
-
-```python
- | @property
- | preferences() -> Preferences
-```
-
-Get preferences.
-
-<a name=".aea.decision_maker.base.DecisionMaker.goal_pursuit_readiness"></a>
-#### goal`_`pursuit`_`readiness
-
-```python
- | @property
- | goal_pursuit_readiness() -> GoalPursuitReadiness
-```
-
-Get readiness of agent to pursuit its goals.
+Get the decision maker handler.
 
 <a name=".aea.decision_maker.base.DecisionMaker.start"></a>
 #### start
