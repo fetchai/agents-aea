@@ -72,6 +72,7 @@ nav:
         - Skill: 'skill.md'
         - Protocol: 'protocol.md'
         - Connection: 'connection.md'
+        - Configurations: 'config.md'
         - Scaffolding packages: 'scaffolding.md'
         - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
