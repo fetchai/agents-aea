@@ -29,7 +29,7 @@ from abc import ABC
 from enum import Enum
 from typing import Dict, FrozenSet, cast
 
-from aea.helpers.dialogue.base import Dialogue, Dialogues
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 

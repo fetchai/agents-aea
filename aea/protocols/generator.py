@@ -1409,7 +1409,8 @@ class ProtocolGenerator:
         cls_str += self.indent + "from enum import Enum\n"
         cls_str += self.indent + "from typing import Dict, FrozenSet, cast\n\n"
         cls_str += (
-            self.indent + "from aea.helpers.dialogue.base import Dialogue, Dialogues\n"
+            self.indent
+            + "from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
         )
         cls_str += self.indent + "from aea.mail.base import Address\n"
         cls_str += self.indent + "from aea.protocols.base import Message\n\n"
