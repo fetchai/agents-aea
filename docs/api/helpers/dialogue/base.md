@@ -419,25 +419,6 @@ These rules capture specific constraints designed for dialogues which are instan
 
 True if valid, False otherwise.
 
-<a name=".aea.helpers.dialogue.base.Dialogue.role_from_first_message"></a>
-#### role`_`from`_`first`_`message
-
-```python
- | @staticmethod
- | @abstractmethod
- | role_from_first_message(message: Message) -> "Role"
-```
-
-Infer the role of the agent from an incoming or outgoing first message
-
-**Arguments**:
-
-- `message`: an incoming/outgoing first message
-
-**Returns**:
-
-the agent's role
-
 <a name=".aea.helpers.dialogue.base.Dialogue.__str__"></a>
 #### `__`str`__`
 
@@ -566,6 +547,44 @@ If there are any errors, e.g. the message dialogue reference does not exists or 
 **Returns**:
 
 the new or existing dialogue the message is intended for, or None in case of any errors.
+
+<a name=".aea.helpers.dialogue.base.Dialogues.create_dialogue"></a>
+#### create`_`dialogue
+
+```python
+ | @abstractmethod
+ | create_dialogue(dialogue_label: DialogueLabel, role: Dialogue.Role) -> Dialogue
+```
+
+Create a dialogue instance.
+
+**Arguments**:
+
+- `dialogue_label`: the identifier of the dialogue
+- `role`: the role of the agent this dialogue is maintained for
+
+**Returns**:
+
+the created dialogue
+
+<a name=".aea.helpers.dialogue.base.Dialogues.role_from_first_message"></a>
+#### role`_`from`_`first`_`message
+
+```python
+ | @staticmethod
+ | @abstractmethod
+ | role_from_first_message(message: Message) -> Dialogue.Role
+```
+
+Infer the role of the agent from an incoming or outgoing first message
+
+**Arguments**:
+
+- `message`: an incoming/outgoing first message
+
+**Returns**:
+
+the agent's role
 
 <a name=".aea.helpers.dialogue.base.Dialogues.is_belonging_to_registered_dialogue"></a>
 #### is`_`belonging`_`to`_`registered`_`dialogue

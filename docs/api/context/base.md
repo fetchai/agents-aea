@@ -28,9 +28,7 @@ Initialize an agent context.
 - `connection_status`: the connection status of the multiplexer
 - `outbox`: the outbox
 - `decision_maker_message_queue`: the (in) queue of the decision maker
-- `ownership_state`: the ownership state of the agent
-- `preferences`: the preferences of the agent
-- `goal_pursuit_readiness`: if True, the agent is ready to pursuit its goals
+- `decision_maker_handler_context`: the decision maker's name space
 - `task_manager`: the task manager
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
