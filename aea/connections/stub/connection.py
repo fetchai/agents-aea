@@ -24,7 +24,7 @@ import os
 import re
 from contextlib import contextmanager
 from pathlib import Path
-from typing import AnyStr, IO, Optional, Union
+from typing import IO, List, Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.utils import platform
@@ -50,7 +50,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.4.0")
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
@@ -79,11 +79,11 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
 
 
 def _decode(e: bytes, separator: bytes = SEPARATOR):
-    split = e.split(separator, maxsplit=4)
+    split = e.split(separator)
 
-    if len(split) != 5 or split[4] not in [b"", b"\n"]:
+    if len(split) < 5 or split[-1] not in [b"", b"\n"]:
         raise ValueError(
-            "Expected 5 values separated by commas and last value being empty or a new line, got {}".format(
+            "Expected at least 5 values separated by commas and last value being empty or new line, got {}".format(
                 len(split)
             )
         )
@@ -91,13 +91,15 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
     protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
-    message = split[3]
+    # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
+    # we know everything remaining constitutes the protobuf message.
+    message = SEPARATOR.join(split[3:-1])
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
 
 @contextmanager
-def lock_file(file_descriptor: IO[AnyStr]):
+def lock_file(file_descriptor: IO[bytes]):
     """Lock file in context manager.
 
     :param file_descriptor: file descriptio of file to lock.
@@ -113,6 +115,60 @@ def lock_file(file_descriptor: IO[AnyStr]):
         yield
     finally:
         file_lock.unlock(file_descriptor)
+
+
+def read_envelopes(file_pointer: IO[bytes]) -> List[Envelope]:
+    """Receive new envelopes, if any."""
+    envelopes = []  # type: List[Envelope]
+    with lock_file(file_pointer):
+        lines = file_pointer.read()
+        if len(lines) > 0:
+            file_pointer.truncate(0)
+            file_pointer.seek(0)
+
+    if len(lines) == 0:
+        return envelopes
+
+    # get messages
+    # match with b"[^,]*,[^,]*,[^,]*,.*,[\n]?"
+    regex = re.compile(
+        (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 3 + b".*,[\n]?", re.DOTALL
+    )
+    messages = [m.group(0) for m in regex.finditer(lines)]
+    for msg in messages:
+        logger.debug("processing: {!r}".format(msg))
+        envelope = _process_line(msg)
+        if envelope is not None:
+            envelopes.append(envelope)
+    return envelopes
+
+
+def write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None:
+    """Write envelope to file."""
+    encoded_envelope = _encode(envelope, separator=SEPARATOR)
+    logger.debug("write {}".format(encoded_envelope))
+    with lock_file(file_pointer):
+        file_pointer.write(encoded_envelope)
+        file_pointer.flush()
+
+
+def _process_line(line: bytes) -> Optional[Envelope]:
+    """
+    Process a line of the file.
+
+    Decode the line to get the envelope, and put it in the agent's inbox.
+
+    :return: Envelope
+    :raise: Exception
+    """
+    envelope = None  # type: Optional[Envelope]
+    try:
+        envelope = _decode(line, separator=SEPARATOR)
+    except ValueError as e:
+        logger.error("Bad formatted line: {!r}. {}".format(line, e))
+    except Exception as e:
+        logger.error("Error when processing a line. Message: {}".format(str(e)))
+    return envelope
 
 
 class StubConnection(Connection):
@@ -176,40 +232,19 @@ class StubConnection(Connection):
 
     def read_envelopes(self) -> None:
         """Receive new envelopes, if any."""
-        with lock_file(self.input_file):
-            lines = self.input_file.read()
-            if len(lines) > 0:
-                self.input_file.truncate(0)
-                self.input_file.seek(0)
+        envelopes = read_envelopes(self.input_file)
+        self._put_envelopes(envelopes)
 
-        #
-        if len(lines) == 0:
-            return
-
-        # get messages
-        # match with b"[^,]*,[^,]*,[^,]*,[^,]*,[\n]?"
-        regex = re.compile(
-            (b"[^" + SEPARATOR + b"]*" + SEPARATOR) * 4 + b"[\n]?", re.DOTALL
-        )
-        messages = [m.group(0) for m in regex.finditer(lines)]
-        for msg in messages:
-            logger.debug("processing: {!r}".format(msg))
-            self._process_line(msg)
-
-    def _process_line(self, line) -> None:
-        """Process a line of the file.
-
-        Decode the line to get the envelope, and put it in the agent's inbox.
+    def _put_envelopes(self, envelopes: List[Envelope]) -> None:
         """
-        try:
-            envelope = _decode(line, separator=SEPARATOR)
-            assert self.in_queue is not None, "Input queue not initialized."
-            assert self._loop is not None, "Loop not initialized."
+        Put the envelopes in the inqueue.
+
+        :param envelopes: the list of envelopes
+        """
+        assert self.in_queue is not None, "Input queue not initialized."
+        assert self._loop is not None, "Loop not initialized."
+        for envelope in envelopes:
             asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
-        except ValueError as e:
-            logger.error("Bad formatted line: {}. {}".format(line, e))
-        except Exception as e:
-            logger.error("Error when processing a line. Message: {}".format(str(e)))
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
@@ -233,6 +268,8 @@ class StubConnection(Connection):
             self.in_queue = asyncio.Queue()
             self._observer.start()
         except Exception as e:  # pragma: no cover
+            self._observer.stop()
+            self._observer.join()
             raise e
         finally:
             self.connection_status.is_connected = False
@@ -240,7 +277,7 @@ class StubConnection(Connection):
         self.connection_status.is_connected = True
 
         # do a first processing of messages.
-        self.read_envelopes()
+        #  self.read_envelopes()
 
     async def disconnect(self) -> None:
         """
@@ -264,11 +301,7 @@ class StubConnection(Connection):
 
         :return: None
         """
-        encoded_envelope = _encode(envelope, separator=SEPARATOR)
-        logger.debug("write {}".format(encoded_envelope))
-        with lock_file(self.output_file):
-            self.output_file.write(encoded_envelope)
-            self.output_file.flush()
+        write_envelope(envelope, self.output_file)
 
     @classmethod
     def from_config(

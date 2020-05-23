@@ -38,6 +38,7 @@ from aea.cli.fingerprint import fingerprint
 from aea.cli.generate import generate
 from aea.cli.init import init
 from aea.cli.install import install
+from aea.cli.interact import interact
 from aea.cli.launch import launch
 from aea.cli.list import list as _list
 from aea.cli.login import login
@@ -321,6 +322,7 @@ cli.add_command(fingerprint)
 cli.add_command(generate)
 cli.add_command(init)
 cli.add_command(install)
+cli.add_command(interact)
 cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(logout)

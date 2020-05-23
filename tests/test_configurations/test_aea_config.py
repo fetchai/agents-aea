@@ -55,7 +55,7 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.3.0
+default_connection: fetchai/stub:0.4.0
 default_ledger: fetchai
 ledger_apis:
   fetchai:

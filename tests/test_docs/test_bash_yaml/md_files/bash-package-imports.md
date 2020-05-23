@@ -29,5 +29,5 @@ aea_name/
 ```
 ``` yaml
 connections:
-- fetchai/stub:0.3.0
+- fetchai/stub:0.4.0
 ```
