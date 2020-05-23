@@ -188,6 +188,7 @@ class Libp2pNode:
         module_path: str,
         clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
+        public_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -213,6 +214,9 @@ class Libp2pNode:
         # node uri
         self.uri = uri if uri is not None else Uri()
 
+        # node public uri, optional
+        self.public_uri = public_uri
+
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
 
@@ -221,7 +225,7 @@ class Libp2pNode:
         self.clargs = clargs if clargs is not None else []
 
         # node libp2p multiaddrs
-        self.multiaddrs = []  # type: List[MultiAddr]
+        self.multiaddrs = []  # type: Sequence[MultiAddr]
 
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
@@ -307,6 +311,11 @@ class Libp2pNode:
             )
             env_file.write("NODE_TO_AEA={}\n".format(in_path))
             env_file.write("AEA_TO_NODE={}\n".format(out_path))
+            env_file.write(
+                "AEA_P2P_URI_PUBLIC={}\n".format(
+                    str(self.public_uri) if self.public_uri is not None else ""
+                )
+            )
 
         # run node
         logger.info("Starting libp2p node...")
@@ -363,8 +372,6 @@ class Libp2pNode:
         )
         self._fileobj = os.fdopen(self._libp2p_to_aea, "r")
         await self._loop.connect_read_pipe(lambda: self._reader_protocol, self._fileobj)
-        with open(self.log_file, "r") as f:
-            logger.debug(f.read())
 
         logger.info("Successfully connected to libp2p node!")
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
@@ -405,7 +412,7 @@ class Libp2pNode:
             return None
 
     # TOFIX(LR) hack, need to import multihash library and compute multiaddr from uri and public key
-    def get_libp2p_node_multiaddrs(self) -> List[MultiAddr]:
+    def get_libp2p_node_multiaddrs(self) -> Sequence[MultiAddr]:
         """
         Get the node's multiaddresses.
 
@@ -463,6 +470,7 @@ class P2PLibp2pConnection(Connection):
         agent_addr: Address,
         key: FetchAICrypto,
         uri: Optional[Uri] = None,
+        public_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -487,6 +495,7 @@ class P2PLibp2pConnection(Connection):
             LIBP2P_NODE_MODULE,
             LIBP2P_NODE_CLARGS,
             uri,
+            public_uri,
             entry_peers,
             log_file,
             env_file,
@@ -622,6 +631,12 @@ class P2PLibp2pConnection(Connection):
         libp2p_key_file = configuration.config.get("libp2p_key_file")  # Optional[str]
         libp2p_host = configuration.config.get("libp2p_host")  # Optional[str]
         libp2p_port = configuration.config.get("libp2p_port")  # Optional[int]
+        libp2p_host_public = configuration.config.get(
+            "libp2p_public_host"
+        )  # Optional[str]
+        libp2p_port_public = configuration.config.get(
+            "libp2p_public_port"
+        )  # Optional[int]
         entry_peers = list(cast(List, configuration.config.get("libp2p_entry_peers")))
         log_file = configuration.config.get("libp2p_log_file")  # Optional[str]
         env_file = configuration.config.get("libp2p_env_file")  # Optional[str]
@@ -638,12 +653,17 @@ class P2PLibp2pConnection(Connection):
             else:
                 uri = Uri(host="127.0.0.1", port=libp2p_port)
 
+        public_uri = None
+        if libp2p_port_public is not None and libp2p_host_public is not None:
+            public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
         return P2PLibp2pConnection(
             address,  # TOFIX(LR) need to generate signature as well
             key,
             uri,
+            public_uri,
             entry_peers_maddrs,
             log_file,
             env_file,
