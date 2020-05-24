@@ -88,10 +88,10 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param exeution_timeout: amount of time to limit single act/handle to execute.
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
-        :param loop_mode: loop_mode to choose agent run loop.
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
         :param skill_exception_policy: the skill exception policy enum
+        :param loop_mode: loop_mode to choose agent run loop.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
 
         :return: None

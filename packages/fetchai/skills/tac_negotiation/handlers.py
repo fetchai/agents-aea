@@ -31,11 +31,10 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as Dialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.tac_negotiation.dialogues import Dialogues
+from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
@@ -114,8 +113,8 @@ class FIPANegotiationHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": b""},
-        )  # TODO: send FipaSerializer().encode(msg)
+            error_data={"fipa_message": FipaSerializer().encode(msg)},
+        )
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -484,7 +483,7 @@ class TransactionHandler(Handler):
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                     target=fipa_message.message_id,
                     info={
-                        "tx_signature": tx_message.signed_payload.get("tx_signature"),
+                        "tx_signature": tx_message.signed_payload["tx_signature"],
                         "tx_id": tx_message.tx_id,
                     },
                 )

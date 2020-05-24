@@ -8,7 +8,7 @@ This module contains the stub connection.
 
 ```python
 @contextmanager
-lock_file(file_descriptor: IO[AnyStr])
+lock_file(file_descriptor: IO[bytes])
 ```
 
 Lock file in context manager.
@@ -16,6 +16,24 @@ Lock file in context manager.
 **Arguments**:
 
 - `file_descriptor`: file descriptio of file to lock.
+
+<a name=".aea.connections.stub.connection.read_envelopes"></a>
+#### read`_`envelopes
+
+```python
+read_envelopes(file_pointer: IO[bytes]) -> List[Envelope]
+```
+
+Receive new envelopes, if any.
+
+<a name=".aea.connections.stub.connection.write_envelope"></a>
+#### write`_`envelope
+
+```python
+write_envelope(envelope: Envelope, file_pointer: IO[bytes]) -> None
+```
+
+Write envelope to file.
 
 <a name=".aea.connections.stub.connection.StubConnection.__init__"></a>
 #### `__`init`__`

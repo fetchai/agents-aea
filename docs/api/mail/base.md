@@ -481,7 +481,7 @@ Initialize the connection multiplexer.
 
 ```python
  | @property
- | in_queue() -> queue.Queue
+ | in_queue() -> AsyncFriendlyQueue
 ```
 
 Get the in queue.
@@ -515,6 +515,16 @@ Get the connections.
 ```
 
 Check whether the multiplexer is processing envelopes.
+
+<a name=".aea.mail.base.Multiplexer.default_routing"></a>
+#### default`_`routing
+
+```python
+ | @default_routing.setter
+ | default_routing(default_routing: Dict[PublicId, PublicId])
+```
+
+Set the default routing.
 
 <a name=".aea.mail.base.Multiplexer.connection_status"></a>
 #### connection`_`status
@@ -561,6 +571,32 @@ Get an envelope within a timeout.
 **Returns**:
 
 the envelope, or None if no envelope is available within a timeout.
+
+<a name=".aea.mail.base.Multiplexer.async_get"></a>
+#### async`_`get
+
+```python
+ | async async_get() -> Envelope
+```
+
+Get an envelope async way.
+
+**Returns**:
+
+the envelope
+
+<a name=".aea.mail.base.Multiplexer.async_wait"></a>
+#### async`_`wait
+
+```python
+ | async async_wait() -> None
+```
+
+Get an envelope async way.
+
+**Returns**:
+
+the envelope
 
 <a name=".aea.mail.base.Multiplexer.put"></a>
 #### put
@@ -651,6 +687,32 @@ Check for a envelope on the in queue and wait for no time.
 **Returns**:
 
 the envelope object
+
+<a name=".aea.mail.base.InBox.async_get"></a>
+#### async`_`get
+
+```python
+ | async async_get() -> Envelope
+```
+
+Check for a envelope on the in queue.
+
+**Returns**:
+
+the envelope object.
+
+<a name=".aea.mail.base.InBox.async_wait"></a>
+#### async`_`wait
+
+```python
+ | async async_wait() -> None
+```
+
+Check for a envelope on the in queue.
+
+**Returns**:
+
+the envelope object.
 
 <a name=".aea.mail.base.OutBox"></a>
 ### OutBox

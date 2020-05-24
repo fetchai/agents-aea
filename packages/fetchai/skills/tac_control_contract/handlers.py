@@ -91,7 +91,7 @@ class TACHandler(Handler):
         parameters = cast(Parameters, self.context.parameters)
         agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent name not in whitelist: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -110,7 +110,7 @@ class TACHandler(Handler):
 
         game = cast(Game, self.context.game)
         if message.counterparty in game.registration.agent_addr_to_name:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent already registered: '{}'".format(
                     self.context.agent_name,
                     game.registration.agent_addr_to_name[message.counterparty],
@@ -128,7 +128,7 @@ class TACHandler(Handler):
             )
 
         if agent_name in game.registration.agent_addr_to_name.values():
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent with this name already registered: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -159,7 +159,7 @@ class TACHandler(Handler):
         """
         game = cast(Game, self.context.game)
         if message.counterparty not in game.registration.agent_addr_to_name:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent not registered: '{}'".format(
                     self.context.agent_name, message.counterparty
                 )
@@ -234,7 +234,7 @@ class OEFRegistrationHandler(Handler):
 
         :return: None
         """
-        self.context.logger.error(
+        self.context.logger.warning(
             "[{}]: Received OEF Search error: dialogue_reference={}, operation={}".format(
                 self.context.agent_name,
                 oef_error.dialogue_reference,

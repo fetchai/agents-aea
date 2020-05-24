@@ -7,7 +7,7 @@ Fetchai module wrapping the public and private key cryptography and ledger api.
 ### FetchAICrypto
 
 ```python
-class FetchAICrypto(Crypto)
+class FetchAICrypto(Crypto[Entity])
 ```
 
 Class wrapping the Entity Generation from Fetch.AI ledger.
@@ -24,16 +24,6 @@ Instantiate a fetchai crypto object.
 **Arguments**:
 
 - `private_key_path`: the private key path of the agent
-
-<a name=".aea.crypto.fetchai.FetchAICrypto.entity"></a>
-#### entity
-
-```python
- | @property
- | entity() -> Entity
-```
-
-Get the entity.
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.public_key"></a>
 #### public`_`key
@@ -62,6 +52,24 @@ Return the address for the key pair.
 **Returns**:
 
 a display_address str
+
+<a name=".aea.crypto.fetchai.FetchAICrypto.load_private_key_from_path"></a>
+#### load`_`private`_`key`_`from`_`path
+
+```python
+ | @classmethod
+ | load_private_key_from_path(cls, file_name: str) -> Entity
+```
+
+Load a private key in hex format from a file.
+
+**Arguments**:
+
+- `file_name`: the path to the hex file.
+
+**Returns**:
+
+the Entity.
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.sign_message"></a>
 #### sign`_`message
@@ -102,19 +110,20 @@ signed transaction
 #### recover`_`message
 
 ```python
- | recover_message(message: bytes, signature: bytes) -> Address
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
-Recover the address from the hash.
+Recover the addresses from the hash.
 
 **Arguments**:
 
 - `message`: the message we expect
 - `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
 
 **Returns**:
 
-the recovered address
+the recovered addresses
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
@@ -133,24 +142,6 @@ Get the address from the public key.
 **Returns**:
 
 str
-
-<a name=".aea.crypto.fetchai.FetchAICrypto.load"></a>
-#### load
-
-```python
- | @classmethod
- | load(cls, fp: BinaryIO)
-```
-
-Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-**Arguments**:
-
-- `fp`: the input file pointer. Must be set in binary mode (mode='rb')
-
-**Returns**:
-
-None
 
 <a name=".aea.crypto.fetchai.FetchAICrypto.dump"></a>
 #### dump
@@ -304,4 +295,30 @@ Check whether a transaction is valid or not (non-blocking).
 **Returns**:
 
 True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.fetchai.FetchAIFaucetApi"></a>
+### FetchAIFaucetApi
+
+```python
+class FetchAIFaucetApi(FaucetApi)
+```
+
+Fetchai testnet faucet API.
+
+<a name=".aea.crypto.fetchai.FetchAIFaucetApi.get_wealth"></a>
+#### get`_`wealth
+
+```python
+ | get_wealth(address: Address) -> None
+```
+
+Get wealth from the faucet for the provided address.
+
+**Arguments**:
+
+- `address`: the address.
+
+**Returns**:
+
+None
 

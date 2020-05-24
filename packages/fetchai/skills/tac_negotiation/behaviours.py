@@ -55,7 +55,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.is_active = False
             return
 
-        if self.context.agent_goal_pursuit_readiness.is_ready:
+        if self.context.decision_maker_handler_context.goal_pursuit_readiness.is_ready:
 
             registration = cast(Registration, self.context.registration)
             if registration.is_time_to_update_services():

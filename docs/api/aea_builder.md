@@ -43,7 +43,7 @@ Set agent loop idle timeout in seconds.
 
 **Returns**:
 
-None
+self
 
 <a name=".aea.aea_builder.AEABuilder.set_execution_timeout"></a>
 #### set`_`execution`_`timeout
@@ -60,7 +60,7 @@ Set agent execution timeout in seconds.
 
 **Returns**:
 
-None
+self
 
 <a name=".aea.aea_builder.AEABuilder.set_max_reactions"></a>
 #### set`_`max`_`reactions
@@ -77,7 +77,78 @@ Set agent max reaction in one react.
 
 **Returns**:
 
-None
+self
+
+<a name=".aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
+#### set`_`decision`_`maker`_`handler
+
+```python
+ | set_decision_maker_handler(decision_maker_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+```
+
+Set decision maker handler class.
+
+**Arguments**:
+
+- `decision_maker_handler_dotted_path`: the dotted path to the decision maker handler
+- `file_path`: the file path to the file which contains the decision maker handler
+
+**Returns**:
+
+self
+
+<a name=".aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
+#### set`_`skill`_`exception`_`policy
+
+```python
+ | set_skill_exception_policy(skill_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
+```
+
+Set skill exception policy.
+
+**Arguments**:
+
+- `skill_exception_policy`: the policy
+
+**Returns**:
+
+self
+
+<a name=".aea.aea_builder.AEABuilder.set_default_routing"></a>
+#### set`_`default`_`routing
+
+```python
+ | set_default_routing(default_routing: Dict[PublicId, PublicId]) -> "AEABuilder"
+```
+
+Set default routing.
+
+This is a map from public ids (protocols) to public ids (connections).
+
+**Arguments**:
+
+- `default_routing`: the default routing mapping
+
+**Returns**:
+
+self
+
+<a name=".aea.aea_builder.AEABuilder.set_loop_mode"></a>
+#### set`_`loop`_`mode
+
+```python
+ | set_loop_mode(loop_mode: Optional[str]) -> "AEABuilder"
+```
+
+Set the loop mode.
+
+**Arguments**:
+
+- `loop_mode`: the agent loop mode
+
+**Returns**:
+
+self
 
 <a name=".aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
@@ -423,7 +494,7 @@ the AEABuilder
 #### build
 
 ```python
- | build(connection_ids: Optional[Collection[PublicId]] = None) -> AEA
+ | build(connection_ids: Optional[Collection[PublicId]] = None, ledger_apis: Optional[LedgerApis] = None) -> AEA
 ```
 
 Build the AEA.
@@ -431,6 +502,7 @@ Build the AEA.
 **Arguments**:
 
 - `connection_ids`: select only these connections to run the AEA.
+- `ledger_apis`: the api ledger that we want to use.
 
 **Returns**:
 

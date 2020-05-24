@@ -31,11 +31,14 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.connections.stub.connection import _process_line
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from ..conftest import _make_stub_connection
+
+SEPARATOR = ","
 
 
 class TestStubConnectionReception:
@@ -58,7 +61,7 @@ class TestStubConnectionReception:
         cls.multiplexer.connect()
         os.chdir(cls.tmpdir)
 
-    def test_reception(self):
+    def test_reception_a(self):
         """Test that the connection receives what has been enqueued in the input file."""
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -73,14 +76,61 @@ class TestStubConnectionReception:
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(msg),
         )
-        encoded_envelope = "{},{},{},{},".format(
+        encoded_envelope = "{}{}{}{}{}{}{}{}".format(
             expected_envelope.to,
+            SEPARATOR,
             expected_envelope.sender,
+            SEPARATOR,
             expected_envelope.protocol_id,
+            SEPARATOR,
             expected_envelope.message.decode("utf-8"),
+            SEPARATOR,
         )
         encoded_envelope = encoded_envelope.encode("utf-8")
 
+        with open(self.input_file_path, "ab+") as f:
+            f.write(encoded_envelope)
+            f.flush()
+
+        actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
+        assert expected_envelope == actual_envelope
+
+    def test_reception_b(self):
+        """Test that the connection receives what has been enqueued in the input file."""
+        # a message containing delimiters and newline characters
+        msg = b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468d\n,\nB8Ab795\n\n49B49C88DC991990E7910891,,dbd\n"
+        protocol_id = PublicId.from_str("some_author/some_name:0.1.0")
+        expected_envelope = Envelope(
+            to="any", sender="any", protocol_id=protocol_id, message=msg,
+        )
+        encoded_envelope = "{}{}{}{}{}{}{}{}".format(
+            expected_envelope.to,
+            SEPARATOR,
+            expected_envelope.sender,
+            SEPARATOR,
+            expected_envelope.protocol_id,
+            SEPARATOR,
+            expected_envelope.message.decode("utf-8"),
+            SEPARATOR,
+        )
+        encoded_envelope = encoded_envelope.encode("utf-8")
+
+        with open(self.input_file_path, "ab+") as f:
+            f.write(encoded_envelope)
+            f.flush()
+
+        actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
+        assert expected_envelope == actual_envelope
+
+    def test_reception_c(self):
+        """Test that the connection receives what has been enqueued in the input file."""
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.1.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        expected_envelope = Envelope(
+            to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
+            sender="default_oef",
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.1.0"),
+            message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
+        )
         with open(self.input_file_path, "ab+") as f:
             f.write(encoded_envelope)
             f.flush()
@@ -96,7 +146,7 @@ class TestStubConnectionReception:
             "aea.connections.stub.connection._decode",
             side_effect=Exception("an error."),
         ):
-            self.connection._process_line(b"")
+            _process_line(b"")
             mocked_logger_error.assert_called_with(
                 "Error when processing a line. Message: an error."
             )
@@ -144,14 +194,20 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        encoded_envelope = "{},{},{},{},".format(
+        encoded_envelope = "{}{}{}{}{}{}{}{}".format(
             "any",
+            SEPARATOR,
             "any",
+            SEPARATOR,
             DefaultMessage.protocol_id,
+            SEPARATOR,
             DefaultSerializer().encode(msg).decode("utf-8"),
+            SEPARATOR,
         )
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
-        self.connection._process_line(encoded_envelope)
+        envelope = _process_line(encoded_envelope)
+        if envelope is not None:
+            self.connection._put_envelopes([envelope])
 
         assert (
             self.connection.in_queue.empty()
@@ -181,7 +237,9 @@ class TestStubConnectionSending:
 
         assert len(lines) == 2
         line = lines[0] + lines[1]
-        to, sender, protocol_id, message, end = line.strip().split(b",", maxsplit=4)
+        to, sender, protocol_id, message, end = line.strip().split(
+            "{}".format(SEPARATOR).encode("utf-8"), maxsplit=4
+        )
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
         protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))

@@ -36,6 +36,16 @@ Initialize a Message object.
 
 Set the counterparty of the message.
 
+<a name=".aea.protocols.base.Message.is_incoming"></a>
+#### is`_`incoming
+
+```python
+ | @is_incoming.setter
+ | is_incoming(is_incoming: bool) -> None
+```
+
+Set the is_incoming of the message.
+
 <a name=".aea.protocols.base.Message.body"></a>
 #### body
 
@@ -53,6 +63,16 @@ Set the body of hte message.
 **Returns**:
 
 None
+
+<a name=".aea.protocols.base.Message.message_id"></a>
+#### message`_`id
+
+```python
+ | @property
+ | message_id() -> int
+```
+
+Get the message id.
 
 <a name=".aea.protocols.base.Message.set"></a>
 #### set

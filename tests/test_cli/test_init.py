@@ -120,7 +120,7 @@ class TestDoInit:
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "init", "--author", author],
-            input=f"y\nsome fake password\n",
+            input="y\nsome fake password\n",
         )
 
         assert result.exit_code == 0

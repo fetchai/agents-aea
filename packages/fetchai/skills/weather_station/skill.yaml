@@ -9,9 +9,9 @@ fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmX4fh9PLTW3uZ6q6Biac3FYR8A3Cxj5fHiPQCBCrkUxwH
   db_communication.py: QmPHjQJvYp96TRUWxTRW9TE9BHATNuUyMw3wy5oQSftnug
-  dialogues.py: QmVQQzLeDt6EAKBRMe6bWtZFrsgVi43AK97sTteg2ctM3G
+  dialogues.py: QmUVgQaBaAUB9cFKkyYGQmtYXNiXh53AGkcrCfcmDm6f1z
   dummy_weather_station_data.py: QmUD52fXy9DW2FgivyP1VMhk3YbvRVUWUEuZVftXmkNymR
-  handlers.py: QmXUBmHkimeA33ESs6HCYMduDDGECGMbjyS8tabhBVGyyX
+  handlers.py: QmQ6HzzfkHBmrsMSZ1eVDng953BZoc7Mnrpr3SQS5XKCSs
   strategy.py: Qmeh8PVR6sukZiaGsCWacZz5u9kwd6FKZocoGqg3LW3ZCQ
   weather_station_data_model.py: QmRr63QHUpvptFEAJ8mBzdy6WKE1AJoinagKutmnhkKemi
 fingerprint_ignore_patterns:

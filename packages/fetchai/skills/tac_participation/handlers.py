@@ -84,7 +84,7 @@ class OEFSearchHandler(Handler):
 
         :return: None
         """
-        self.context.logger.error(
+        self.context.logger.warning(
             "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 self.context.agent_name,
                 oef_error.dialogue_reference,
@@ -143,7 +143,7 @@ class OEFSearchHandler(Handler):
                 )
             )
         elif len(agent_addresses) > 1:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Found more than one TAC controller. Retrying...".format(
                     self.context.agent_name
                 )
@@ -179,6 +179,7 @@ class OEFSearchHandler(Handler):
             protocol_id=TacMessage.protocol_id,
             message=tac_bytes,
         )
+        self.context.behaviours.tac.is_active = False
 
 
 class TACHandler(Handler):
@@ -257,7 +258,7 @@ class TACHandler(Handler):
         :return: None
         """
         error_code = tac_message.error_code
-        self.context.logger.error(
+        self.context.logger.debug(
             "[{}]: Received error from the controller. error_msg={}".format(
                 self.context.agent_name, TacMessage.ErrorCode.to_msg(error_code.value)
             )

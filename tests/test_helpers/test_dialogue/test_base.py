@@ -24,7 +24,6 @@ from typing import Dict, FrozenSet
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogues as BaseDialogues
-from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 
@@ -58,6 +57,21 @@ class Dialogue(BaseDialogue):
         """
         pass
 
+
+class Dialogues(BaseDialogues):
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: Dialogue.Role,
+    ) -> Dialogue:
+        """
+        Create a dialogue instance.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        pass
+
     @staticmethod
     def role_from_first_message(message: Message) -> BaseDialogue.Role:
         """
@@ -65,25 +79,6 @@ class Dialogue(BaseDialogue):
 
         :param message: an incoming/outgoing first message
         :return: the agent's role
-        """
-        pass
-
-
-class Dialogues(BaseDialogues):
-    def _create_dialogue(
-        self,
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: Dialogue.Role,
-    ) -> Dialogue:
-        """
-        Create a dialogue instance.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: the created dialogue
         """
         pass
 

@@ -7,7 +7,7 @@ The base contract.
 ### Contract
 
 ```python
-class Contract(Component)
+class Contract(Component,  ABC)
 ```
 
 Abstract definition of a contract.
@@ -55,6 +55,62 @@ Get the configuration.
 ```
 
 Get the contract interface.
+
+<a name=".aea.contracts.base.Contract.set_instance"></a>
+#### set`_`instance
+
+```python
+ | @abstractmethod
+ | set_instance(ledger_api: LedgerApi) -> None
+```
+
+Set the instance.
+
+**Arguments**:
+
+- `ledger_api`: the ledger api we are using.
+
+**Returns**:
+
+None
+
+<a name=".aea.contracts.base.Contract.set_address"></a>
+#### set`_`address
+
+```python
+ | @abstractmethod
+ | set_address(ledger_api: LedgerApi, contract_address: str) -> None
+```
+
+Set the contract address.
+
+**Arguments**:
+
+- `ledger_api`: the ledger_api we are using.
+- `contract_address`: the contract address
+
+**Returns**:
+
+None
+
+<a name=".aea.contracts.base.Contract.set_deployed_instance"></a>
+#### set`_`deployed`_`instance
+
+```python
+ | @abstractmethod
+ | set_deployed_instance(ledger_api: LedgerApi, contract_address: str) -> None
+```
+
+Set the contract address.
+
+**Arguments**:
+
+- `ledger_api`: the ledger_api we are using.
+- `contract_address`: the contract address
+
+**Returns**:
+
+None
 
 <a name=".aea.contracts.base.Contract.from_dir"></a>
 #### from`_`dir
