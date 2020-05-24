@@ -42,19 +42,19 @@ def try_construct_envelope() -> Optional[Envelope]:
     envelope = None  # type: Optional[Envelope]
     try:
         print("Provide envelope to:")
-        to = input()
+        to = input()  # nosec
         if to == "":
             raise InterruptInputException
         print("Provide envelope sender:")
-        sender = input()
+        sender = input()  # nosec
         if sender == "":
             raise InterruptInputException
         print("Provide envelope protocol_id:")
-        protocol_id = input()
+        protocol_id = input()  # nosec
         if protocol_id == "":
             raise InterruptInputException
         print("Provide envelope message:")
-        message_escaped = input()
+        message_escaped = input()  # nosec
         if message_escaped == "":
             raise InterruptInputException
         message = codecs.decode(message_escaped.encode("utf-8"), "unicode-escape")

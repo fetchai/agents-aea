@@ -20,7 +20,7 @@
 """This module contains the tests for the FIPA protocol."""
 
 import logging
-from typing import Tuple, cast
+from typing import Any, Optional, Tuple, cast
 from unittest import mock
 
 import pytest
@@ -730,15 +730,6 @@ class BuyerDialogue(FipaDialogue):
             self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
         )
 
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.AgentRole.BUYER
-
 
 class BuyerDialogues(FipaDialogues):
     """The dialogues class keeps track of all dialogues."""
@@ -751,25 +742,30 @@ class BuyerDialogues(FipaDialogues):
         """
         FipaDialogues.__init__(self, agent_address)
 
-    def _create_dialogue(
-        self,
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: BaseDialogue.Role,
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
     ) -> BuyerDialogue:
         """
         Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: the created dialogue
         """
         dialogue = BuyerDialogue(
-            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.BUYER
 
 
 class SellerDialogue(FipaDialogue):
@@ -793,15 +789,7 @@ class SellerDialogue(FipaDialogue):
         FipaDialogue.__init__(
             self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
         )
-
-    @staticmethod
-    def role_from_first_message(message: Message) -> BaseDialogue.Role:
-        """Infer the role of the agent from an incoming/outgoing first message
-
-        :param message: an incoming/outgoing first message
-        :return: The role of the agent
-        """
-        return FipaDialogue.AgentRole.SELLER
+        self.some_object = None  # type: Optional[Any]
 
 
 class SellerDialogues(FipaDialogues):
@@ -815,22 +803,27 @@ class SellerDialogues(FipaDialogues):
         """
         FipaDialogues.__init__(self, agent_address)
 
-    def _create_dialogue(
-        self,
-        dialogue_label: DialogueLabel,
-        agent_address: Address,
-        role: BaseDialogue.Role,
+    def create_dialogue(
+        self, dialogue_label: DialogueLabel, role: BaseDialogue.Role,
     ) -> SellerDialogue:
         """
         Create an instance of fipa dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param agent_address: the address of the agent for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
         :return: the created dialogue
         """
         dialogue = SellerDialogue(
-            dialogue_label=dialogue_label, agent_address=agent_address, role=role
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
         )
         return dialogue
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """Infer the role of the agent from an incoming/outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: The role of the agent
+        """
+        return FipaDialogue.AgentRole.SELLER
