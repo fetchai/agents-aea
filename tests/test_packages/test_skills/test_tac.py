@@ -28,7 +28,6 @@ from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 from ...conftest import FUNDED_ETH_PRIVATE_KEY_1
 
 
-@pytest.mark.unstable
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
@@ -51,6 +50,13 @@ class TestTacSkills(AEATestCaseMany, UseOef):
         self.set_config("agent.default_ledger", "ethereum")
         self.run_install()
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/tac_controller:0.1.0", tac_controller_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         # prepare agents for test
         for agent_name in (tac_aea_one, tac_aea_two):
             self.set_agent_context(agent_name)
@@ -60,6 +66,14 @@ class TestTacSkills(AEATestCaseMany, UseOef):
             self.add_item("skill", "fetchai/tac_negotiation:0.1.0")
             self.set_config("agent.default_ledger", "ethereum")
             self.run_install()
+            diff = self.difference_to_fetched_agent(
+                "fetchai/tac_participant:0.1.0", agent_name
+            )
+            assert (
+                diff == []
+            ), "Difference between created and fetched project for files={}".format(
+                diff
+            )
 
         # run tac controller
         self.set_agent_context(tac_controller_name)

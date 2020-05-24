@@ -141,15 +141,15 @@ class Transactions(Model):
         if is_seller:
             for good_id in goods_component.keys():
                 goods_component[good_id] = goods_component[good_id] * (-1)
+        tx_amount_by_currency_id = {proposal_description.values["currency_id"]: amount}
+        tx_nonce = proposal_description.values["tx_nonce"]
         # need to hash positive.negative side separately
         tx_hash = tx_hash_from_values(
             tx_sender_addr=agent_addr,
             tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
             tx_quantities_by_good_id=goods_component,
-            tx_amount_by_currency_id={
-                proposal_description.values["currency_id"]: amount
-            },
-            tx_nonce=proposal_description.values["tx_nonce"],
+            tx_amount_by_currency_id=tx_amount_by_currency_id,
+            tx_nonce=tx_nonce,
         )
         skill_callback_ids = (
             [PublicId.from_str("fetchai/tac_participation:0.1.0")]
@@ -162,17 +162,12 @@ class Transactions(Model):
             tx_id=self.get_internal_tx_id(),
             tx_sender_addr=agent_addr,
             tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
-            tx_amount_by_currency_id={
-                proposal_description.values["currency_id"]: amount
-            },
+            tx_amount_by_currency_id=tx_amount_by_currency_id,
             tx_sender_fee=sender_tx_fee,
             tx_counterparty_fee=counterparty_tx_fee,
             tx_quantities_by_good_id=goods_component,
             ledger_id=OFF_CHAIN,
-            info={
-                "dialogue_label": dialogue_label.json,
-                "tx_nonce": proposal_description.values["tx_nonce"],
-            },
+            info={"dialogue_label": dialogue_label.json, "tx_nonce": tx_nonce},
             signing_payload={"tx_hash": tx_hash},
         )
         return transaction_msg
