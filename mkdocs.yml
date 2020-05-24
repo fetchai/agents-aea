@@ -145,7 +145,7 @@ nav:
           - Error Skill: 'api/skills/error/handlers.md'
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
-        - Test Tools: 'api/test_tools/'
+        - Test Tools: 'api/test_tools/generic.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:

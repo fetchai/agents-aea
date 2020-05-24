@@ -1,6 +1,6 @@
 # Release History
 
-## 0.3.3 (2020-05-22)
+## 0.3.3 (2020-05-24)
 
 - Adds option to pass ledger apis to aea builder
 - Refactors decision maker: separates interface and implementation; adds loading mechanisms so framework users can provide their own implementation
