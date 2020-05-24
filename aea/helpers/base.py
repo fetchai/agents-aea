@@ -20,6 +20,7 @@
 """Miscellaneous helpers."""
 
 import builtins
+import contextlib
 import importlib.util
 import logging
 import os
@@ -28,7 +29,7 @@ import signal
 import subprocess  # nosec
 import sys
 import types
-from collections import OrderedDict
+from collections import OrderedDict, UserString
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
@@ -306,3 +307,39 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:
         process.send_signal(signal.CTRL_C_EVENT)
     else:
         raise ValueError("Other platforms not supported.")
+
+
+class RegexConstrainedString(UserString):
+    """
+    A string that is constrained by a regex.
+
+    The default behaviour is to match anything.
+    Subclass this class and change the 'REGEX' class
+    attribute to implement a different behaviour.
+    """
+
+    REGEX = re.compile(".*", flags=re.DOTALL)
+
+    def __init__(self, seq):
+        super().__init__(seq)
+
+        if not self.REGEX.match(self.data):
+            self._handle_no_match()
+
+    def _handle_no_match(self):
+        raise ValueError(
+            "Value {data} does not match the regular expression {regex}".format(
+                data=self.data, regex=self.REGEX
+            )
+        )
+
+
+@contextlib.contextmanager
+def cd(path):
+    """Change working directory temporarily."""
+    old_path = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_path)

@@ -72,7 +72,7 @@ You can find more details about the CLI commands <a href="/cli-commands/">here</
 </details>
 
 <details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `fetchai/stub:0.3.0` connection, the `fetchai/default:0.1.0` protocol and the `fetchai/error:0.1.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+All AEA projects by default hold the `fetchai/stub:0.4.0` connection, the `fetchai/default:0.1.0` protocol and the `fetchai/error:0.1.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
 <br><br>
 You can find more details about the file structure <a href="/package-imports/">here</a>
 </details>

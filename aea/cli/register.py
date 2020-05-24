@@ -21,9 +21,10 @@
 
 import click
 
-from aea.cli.common import _update_cli_config, validate_author_name
 from aea.cli.registry.registration import register as register_new_account
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.utils.config import update_cli_config
+from aea.cli.utils.package_utils import validate_author_name
 
 
 def do_register(
@@ -41,7 +42,7 @@ def do_register(
     """
     username = validate_author_name(username)
     token = register_new_account(username, email, password, password_confirmation)
-    _update_cli_config({AUTH_TOKEN_KEY: token})
+    update_cli_config({AUTH_TOKEN_KEY: token})
     click.echo("Successfully registered and logged in: {}".format(username))
 
 

@@ -25,7 +25,6 @@ from typing import Any, Dict
 
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.mail.base import Address, OutBox
 from aea.skills.tasks import TaskManager
@@ -43,9 +42,7 @@ class AgentContext:
         connection_status: ConnectionStatus,
         outbox: OutBox,
         decision_maker_message_queue: Queue,
-        ownership_state: OwnershipState,
-        preferences: Preferences,
-        goal_pursuit_readiness: GoalPursuitReadiness,
+        decision_maker_handler_context: SimpleNamespace,
         task_manager: TaskManager,
         **kwargs
     ):
@@ -57,9 +54,7 @@ class AgentContext:
         :param connection_status: the connection status of the multiplexer
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
-        :param ownership_state: the ownership state of the agent
-        :param preferences: the preferences of the agent
-        :param goal_pursuit_readiness: if True, the agent is ready to pursuit its goals
+        :param decision_maker_handler_context: the decision maker's name space
         :param task_manager: the task manager
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
@@ -69,9 +64,7 @@ class AgentContext:
         self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
-        self._ownership_state = ownership_state
-        self._preferences = preferences
-        self._goal_pursuit_readiness = goal_pursuit_readiness
+        self._decision_maker_handler_context = decision_maker_handler_context
         self._task_manager = task_manager
         self._search_service_address = (
             DEFAULT_OEF  # TODO: make this configurable via aea-config.yaml
@@ -126,19 +119,9 @@ class AgentContext:
         return self._decision_maker_message_queue
 
     @property
-    def ownership_state(self) -> OwnershipState:
-        """Get the ownership state of the agent."""
-        return self._ownership_state
-
-    @property
-    def preferences(self) -> Preferences:
-        """Get the preferences of the agent."""
-        return self._preferences
-
-    @property
-    def goal_pursuit_readiness(self) -> GoalPursuitReadiness:
-        """Get the goal pursuit readiness."""
-        return self._goal_pursuit_readiness
+    def decision_maker_handler_context(self) -> SimpleNamespace:
+        """Get the decision maker handler context."""
+        return self._decision_maker_handler_context
 
     @property
     def ledger_apis(self) -> LedgerApis:

@@ -22,6 +22,7 @@ import inspect
 import json
 import logging
 import re
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, cast
 
@@ -32,12 +33,13 @@ from aea.configurations.base import (
     ContractId,
 )
 from aea.configurations.components import Component
+from aea.crypto.base import LedgerApi
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 
 logger = logging.getLogger(__name__)
 
 
-class Contract(Component):
+class Contract(Component, ABC):
     """Abstract definition of a contract."""
 
     def __init__(
@@ -67,6 +69,37 @@ class Contract(Component):
     def contract_interface(self) -> Dict[str, Any]:
         """Get the contract interface."""
         return self._contract_interface
+
+    @abstractmethod
+    def set_instance(self, ledger_api: LedgerApi) -> None:
+        """
+        Set the instance.
+
+        :param ledger_api: the ledger api we are using.
+        :return: None
+        """
+
+    @abstractmethod
+    def set_address(self, ledger_api: LedgerApi, contract_address: str) -> None:
+        """
+        Set the contract address.
+
+        :param ledger_api: the ledger_api we are using.
+        :param contract_address: the contract address
+        :return: None
+        """
+
+    @abstractmethod
+    def set_deployed_instance(
+        self, ledger_api: LedgerApi, contract_address: str
+    ) -> None:
+        """
+        Set the contract address.
+
+        :param ledger_api: the ledger_api we are using.
+        :param contract_address: the contract address
+        :return: None
+        """
 
     @classmethod
     def from_dir(cls, directory: str) -> "Contract":

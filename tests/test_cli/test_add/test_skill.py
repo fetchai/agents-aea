@@ -32,7 +32,6 @@ from jsonschema import ValidationError
 import yaml
 
 import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.cli.add import _validate_fingerprint
 from aea.configurations.base import (
@@ -41,7 +40,6 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.crypto.fetchai import FETCHAI as FETCHAI_NAME
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -387,7 +385,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
             "from_json",
             side_effect=ValidationError("test error message"),
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.result = cls.runner.invoke(
             cli,
@@ -410,7 +408,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -490,11 +488,9 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
 
     def test_add_skill_with_contracts_positive(self):
         """Test add skill with contract dependencies positive result."""
-        self.add_item("skill", "fetchai/erc1155_client:0.2.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.3.0")
 
-        contracts_path = os.path.join(
-            self.agent_name, "vendor", FETCHAI_NAME, "contracts"
-        )
+        contracts_path = os.path.join(self.agent_name, "vendor", "fetchai", "contracts")
         contracts_folders = os.listdir(contracts_path)
         contract_dependency_name = "erc1155"
         assert contract_dependency_name in contracts_folders

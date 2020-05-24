@@ -28,14 +28,19 @@ import pytest
 from web3.auto import Web3
 
 import aea
-import aea.decision_maker.base
+import aea.decision_maker.default
 from aea.configurations.base import PublicId
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import FETCHAI, Wallet
-from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
-from aea.decision_maker.base import LedgerStateProxy
+from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMaker
+from aea.decision_maker.default import (
+    DecisionMakerHandler,
+    LedgerStateProxy,
+    OwnershipState,
+    Preferences,
+)
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.identity.base import Identity
@@ -49,6 +54,7 @@ from ..conftest import (
 )
 
 MAX_REACTIONS = 10
+DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 
 
 def test_preferences_properties():
@@ -66,7 +72,7 @@ def test_preferences_init():
     exchange_params = {"FET": 10.0}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         exchange_params_by_currency_id=exchange_params,
         utility_params_by_good_id=utility_params,
         tx_fee=tx_fee,
@@ -85,7 +91,7 @@ def test_logarithmic_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -101,7 +107,7 @@ def test_linear_utility():
     exchange_params = {"FET": 10.0}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -118,7 +124,7 @@ def test_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -141,7 +147,7 @@ def test_marginal_utility():
     good_holdings = {"good_id": 2}
     tx_fee = 9
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -149,7 +155,7 @@ def test_marginal_utility():
     delta_good_holdings = {"good_id": 1}
     delta_currency_holdings = {"FET": -5}
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings,
     )
     marginal_utility = preferences.marginal_utility(
@@ -168,11 +174,11 @@ def test_score_diff_from_transaction():
     exchange_params = {"FET": 10.0}
     tx_fee = 3
     ownership_state = OwnershipState()
-    ownership_state._set(
+    ownership_state.set(
         amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
     )
     preferences = Preferences()
-    preferences._set(
+    preferences.set(
         utility_params_by_good_id=utility_params,
         exchange_params_by_currency_id=exchange_params,
         tx_fee=tx_fee,
@@ -215,7 +221,7 @@ class TestDecisionMaker:
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_warning = mock.patch.object(
-            aea.decision_maker.base.logger, "warning"
+            aea.decision_maker.default.logger, "warning"
         )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
@@ -231,18 +237,26 @@ class TestDecisionMaker:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {FETCHAI: private_key_pem_path, ETHEREUM: eth_private_key_pem_path}
+            {
+                FetchAICrypto.identifier: private_key_pem_path,
+                EthereumCrypto.identifier: eth_private_key_pem_path,
+            }
         )
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        cls.ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
+        )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI
+            cls.agent_name,
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()
-        cls.decision_maker = DecisionMaker(
+        cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet, ledger_apis=cls.ledger_apis,
         )
+        cls.decision_maker = DecisionMaker(cls.decision_maker_handler)
         cls.multiplexer.connect()
 
         cls.tx_id = "transaction0"
@@ -257,7 +271,6 @@ class TestDecisionMaker:
         """Test the properties of the decision maker."""
         assert isinstance(self.decision_maker.message_in_queue, Queue)
         assert isinstance(self.decision_maker.message_out_queue, Queue)
-        assert isinstance(self.decision_maker.ledger_apis, LedgerApis)
 
     def test_decision_maker_execute(self):
         """Test the execute method."""
@@ -304,12 +317,22 @@ class TestDecisionMaker:
             tx_fee=tx_fee,
         )
         self.decision_maker.handle(state_update_message)
-        assert self.decision_maker.ownership_state.amount_by_currency_id is not None
-        assert self.decision_maker.ownership_state.quantities_by_good_id is not None
         assert (
-            self.decision_maker.preferences.exchange_params_by_currency_id is not None
+            self.decision_maker_handler.context.ownership_state.amount_by_currency_id
+            is not None
         )
-        assert self.decision_maker.preferences.utility_params_by_good_id is not None
+        assert (
+            self.decision_maker_handler.context.ownership_state.quantities_by_good_id
+            is not None
+        )
+        assert (
+            self.decision_maker_handler.context.preferences.exchange_params_by_currency_id
+            is not None
+        )
+        assert (
+            self.decision_maker_handler.context.preferences.utility_params_by_good_id
+            is not None
+        )
 
         state_update_message = StateUpdateMessage(
             performative=StateUpdateMessage.Performative.APPLY,
@@ -326,11 +349,11 @@ class TestDecisionMaker:
             for key in set(good_holdings) | set(good_deltas)
         }
         assert (
-            self.decision_maker.ownership_state.amount_by_currency_id
+            self.decision_maker_handler.context.ownership_state.amount_by_currency_id
             == expected_amount_by_currency_id
         ), "The amount_by_currency_id must be equal with the expected amount."
         assert (
-            self.decision_maker.ownership_state.quantities_by_good_id
+            self.decision_maker_handler.context.ownership_state.quantities_by_good_id
             == expected_quantities_by_good_id
         )
 
@@ -354,10 +377,12 @@ class TestDecisionMaker:
         )
 
         with mock.patch.object(
-            self.decision_maker.ledger_apis, "token_balance", return_value=1000000
+            self.decision_maker_handler.context.ledger_apis,
+            "token_balance",
+            return_value=1000000,
         ):
             with mock.patch.object(
-                self.decision_maker.ledger_apis,
+                self.decision_maker_handler.context.ledger_apis,
                 "transfer",
                 return_value="This is a test digest",
             ):
@@ -367,7 +392,9 @@ class TestDecisionMaker:
 
     def test_decision_maker_handle_unknown_tx_message(self):
         """Test the handle tx message method."""
-        patch_logger_error = mock.patch.object(aea.decision_maker.base.logger, "error")
+        patch_logger_error = mock.patch.object(
+            aea.decision_maker.default.logger, "error"
+        )
         mocked_logger_error = patch_logger_error.__enter__()
 
         with mock.patch(
@@ -410,19 +437,23 @@ class TestDecisionMaker:
         )
 
         with mock.patch.object(
-            self.decision_maker.ledger_apis, "token_balance", return_value=1000000
+            self.decision_maker_handler.context.ledger_apis,
+            "token_balance",
+            return_value=1000000,
         ):
             with mock.patch.object(
-                self.decision_maker.ledger_apis,
+                self.decision_maker_handler.context.ledger_apis,
                 "transfer",
                 return_value="This is a test digest",
             ):
                 with mock.patch(
-                    "aea.decision_maker.base.GoalPursuitReadiness.Status"
+                    "aea.decision_maker.default.GoalPursuitReadiness.Status"
                 ) as mocked_status:
                     mocked_status.READY.value = False
                     self.decision_maker.handle(tx_message)
-                    assert not self.decision_maker.goal_pursuit_readiness.is_ready
+                    assert (
+                        not self.decision_maker_handler.context.goal_pursuit_readiness.is_ready
+                    )
                     self.decision_maker.message_out_queue.get()
 
         tx_message = TransactionMessage(
@@ -480,10 +511,12 @@ class TestDecisionMaker:
             tx_nonce="Transaction nonce",
         )
         with mock.patch.object(
-            self.decision_maker, "_is_acceptable_for_settlement", return_value=True
+            self.decision_maker_handler,
+            "_is_acceptable_for_settlement",
+            return_value=True,
         ):
             with mock.patch.object(
-                self.decision_maker, "_settle_tx", return_value="tx_digest"
+                self.decision_maker_handler, "_settle_tx", return_value="tx_digest"
             ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
@@ -507,10 +540,12 @@ class TestDecisionMaker:
         )
 
         with mock.patch.object(
-            self.decision_maker, "_is_acceptable_for_settlement", return_value=True
+            self.decision_maker_handler,
+            "_is_acceptable_for_settlement",
+            return_value=True,
         ):
             with mock.patch.object(
-                self.decision_maker, "_settle_tx", return_value=None
+                self.decision_maker_handler, "_settle_tx", return_value=None
             ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
@@ -546,7 +581,7 @@ class TestDecisionMaker:
             tx_nonce="Transaction nonce",
         )
 
-        assert self.decision_maker._is_affordable(tx_message)
+        assert self.decision_maker_handler._is_affordable(tx_message)
 
     def test_is_not_affordable_ledger_state_proxy(self):
         """Test that the tx_message is not affordable with initialized ledger_state_proxy."""
@@ -567,7 +602,7 @@ class TestDecisionMaker:
                 ledger_id="bitcoin",
                 info=self.info,
             )
-            var = self.decision_maker._is_affordable(tx_message)
+            var = self.decision_maker_handler._is_affordable(tx_message)
             assert not var
 
     def test_is_affordable_ledger_state_proxy(self):
@@ -588,12 +623,14 @@ class TestDecisionMaker:
         )
 
         with mock.patch.object(
-            self.decision_maker, "_is_acceptable_for_settlement", return_value=True
+            self.decision_maker_handler,
+            "_is_acceptable_for_settlement",
+            return_value=True,
         ):
             with mock.patch.object(
-                self.decision_maker, "_settle_tx", return_value="tx_digest"
+                self.decision_maker_handler, "_settle_tx", return_value="tx_digest"
             ):
-                self.decision_maker._is_affordable(tx_message)
+                self.decision_maker_handler._is_affordable(tx_message)
 
     def test_settle_tx_off_chain(self):
         """Test the off_chain message."""
@@ -612,7 +649,7 @@ class TestDecisionMaker:
             tx_nonce="Transaction nonce",
         )
 
-        tx_digest = self.decision_maker._settle_tx(tx_message)
+        tx_digest = self.decision_maker_handler._settle_tx(tx_message)
         assert tx_digest == "off_chain_settlement"
 
     def test_settle_tx_known_chain(self):
@@ -633,9 +670,11 @@ class TestDecisionMaker:
         )
 
         with mock.patch.object(
-            self.decision_maker.ledger_apis, "transfer", return_value="tx_digest"
+            self.decision_maker_handler.context.ledger_apis,
+            "transfer",
+            return_value="tx_digest",
         ):
-            tx_digest = self.decision_maker._settle_tx(tx_message)
+            tx_digest = self.decision_maker_handler._settle_tx(tx_message)
         assert tx_digest == "tx_digest"
 
     def test_is_utility_enhancing(self):
@@ -654,8 +693,10 @@ class TestDecisionMaker:
             info=self.info,
             tx_nonce="Transaction nonce",
         )
-        self.decision_maker.ownership_state._quantities_by_good_id = None
-        assert self.decision_maker._is_utility_enhancing(tx_message)
+        self.decision_maker_handler.context.ownership_state._quantities_by_good_id = (
+            None
+        )
+        assert self.decision_maker_handler._is_utility_enhancing(tx_message)
 
     def test_sign_tx_hash_fetchai(self):
         """Test the private function sign_tx of the decision maker for fetchai ledger_id."""
@@ -676,7 +717,7 @@ class TestDecisionMaker:
             signing_payload={"tx_hash": tx_hash},
         )
 
-        tx_signature = self.decision_maker._sign_tx_hash(tx_message)
+        tx_signature = self.decision_maker_handler._sign_tx_hash(tx_message)
         assert tx_signature is not None
 
     def test_sign_tx_hash_fetchai_is_acceptable_for_signing(self):
@@ -698,7 +739,7 @@ class TestDecisionMaker:
             signing_payload={"tx_hash": tx_hash},
         )
 
-        tx_signature = self.decision_maker._sign_tx_hash(tx_message)
+        tx_signature = self.decision_maker_handler._sign_tx_hash(tx_message)
         assert tx_signature is not None
 
     def test_sing_tx_offchain(self):
@@ -719,7 +760,7 @@ class TestDecisionMaker:
             signing_payload={"tx_hash": tx_hash},
         )
 
-        tx_signature = self.decision_maker._sign_tx_hash(tx_message)
+        tx_signature = self.decision_maker_handler._sign_tx_hash(tx_message)
         assert tx_signature is not None
 
     def test_respond_message(self):
@@ -762,7 +803,9 @@ class TestLedgerStateProxy:
     @classmethod
     def setup_class(cls):
         """Set up the test."""
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        cls.ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
+        )
         cls.ledger_state_proxy = LedgerStateProxy(ledger_apis=cls.ledger_apis)
 
     def test_ledger_apis(self):
@@ -823,18 +866,18 @@ class DecisionMakerTestCase(TestCase):
     """Test case for DecisionMaker class."""
 
     # @mock.patch(
-    #     "aea.decision_maker.base.DecisionMaker._is_acceptable_for_signing",
+    #     "aea.decision_maker.default.DecisionMaker._is_acceptable_for_signing",
     #     return_value=True,
     # )
-    # @mock.patch("aea.decision_maker.base.DecisionMaker._sign_ledger_tx")
-    # @mock.patch("aea.decision_maker.base.TransactionMessage.respond_signing")
+    # @mock.patch("aea.decision_maker.default.DecisionMaker._sign_ledger_tx")
+    # @mock.patch("aea.decision_maker.messages.transaction.TransactionMessage.respond_signing")
     # def test__handle_tx_message_for_signing_positive(self, *mocks):
     #     """Test for _handle_tx_message_for_signing positive result."""
     #     private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-    #     wallet = Wallet({FETCHAI: private_key_pem_path})
-    #     ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+    #     wallet = Wallet({FetchAICrypto.identifier: private_key_pem_path})
+    #     ledger_apis = LedgerApis({FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier)
     #     identity = Identity(
-    #         "agent_name", addresses=wallet.addresses, default_address_key=FETCHAI
+    #         "agent_name", addresses=wallet.addresses, default_address_key=FetchAICrypto.identifier
     #     )
     #     dm = DecisionMaker(identity, wallet, ledger_apis)
     #     dm._handle_tx_message_for_signing("tx_message")
@@ -842,12 +885,18 @@ class DecisionMakerTestCase(TestCase):
     def test__is_affordable_positive(self, *mocks):
         """Test for _is_affordable positive result."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_pem_path})
-        ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
-        identity = Identity(
-            "agent_name", addresses=wallet.addresses, default_address_key=FETCHAI
+        wallet = Wallet({FetchAICrypto.identifier: private_key_pem_path})
+        ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: DEFAULT_FETCHAI_CONFIG}, FetchAICrypto.identifier
         )
-        dm = DecisionMaker(identity, wallet, ledger_apis)
+        identity = Identity(
+            "agent_name",
+            addresses=wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
+        )
+        dmh = DecisionMakerHandler(
+            identity=identity, wallet=wallet, ledger_apis=ledger_apis
+        )
         tx_message = mock.Mock()
         tx_message.ledger_id = OFF_CHAIN
-        dm._is_affordable(tx_message)
+        dmh._is_affordable(tx_message)

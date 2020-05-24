@@ -28,7 +28,7 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -43,7 +43,8 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
-from .common.utils import AeaTool
+from tests.common.utils import run_in_thread, wait_for_condition
+
 from .conftest import (
     CUR_PATH,
     DUMMY_SKILL_PUBLIC_ID,
@@ -53,6 +54,9 @@ from .conftest import (
 )
 from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
+
+
+FETCHAI = FetchAICrypto.identifier
 
 
 def test_initialise_aea():
@@ -87,10 +91,13 @@ def test_act():
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
-    AeaTool(agent).spin_main_loop()
-
-    behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
-    assert behaviour.nb_act_called > 0, "Act() wasn't called"
+    with run_in_thread(agent.start, timeout=20):
+        wait_for_condition(
+            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+        )
+        behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+        wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
+        agent.stop()
 
 
 def test_react():
@@ -131,25 +138,22 @@ def test_react():
             message=message_bytes,
         )
 
-        try:
-            tool = AeaTool(agent).setup()
-
+        with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
+            wait_for_condition(
+                lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+            )
             agent.outbox.put(envelope)
-
-            tool.wait_inbox().spin_main_loop()
-
             default_protocol_public_id = DefaultMessage.protocol_id
             dummy_skill_public_id = DUMMY_SKILL_PUBLIC_ID
             handler = agent.resources.get_handler(
                 default_protocol_public_id, dummy_skill_public_id
             )
             assert handler is not None, "Handler is not set."
-            assert (
-                msg in handler.handled_messages
-            ), "The message is not inside the handled_messages."
-        except Exception:
-            raise
-        finally:
+            wait_for_condition(
+                lambda: msg in handler.handled_messages,
+                timeout=10,
+                error_msg="The message is not inside the handled_messages.",
+            )
             agent.stop()
 
 
@@ -175,35 +179,34 @@ async def test_handle():
         # TODO remove it.
         list(aea._connections)[0]._local_node = node
 
-        tool = AeaTool(aea)
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        message_bytes = DefaultSerializer().encode(msg)
 
-        try:
-            tool.setup().spin_main_loop()
+        envelope = Envelope(
+            to=aea.identity.address,
+            sender=aea.identity.address,
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=message_bytes,
+        )
 
+        with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
+            wait_for_condition(
+                lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
+            )
             dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.handlers["dummy"]
 
-            msg = DefaultMessage(
-                dialogue_reference=("", ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=b"hello",
-            )
-            message_bytes = DefaultSerializer().encode(msg)
-
-            envelope = Envelope(
-                to=aea.identity.address,
-                sender=aea.identity.address,
-                protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-                message=message_bytes,
-            )
-            # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            """ inbox twice cause first message is invalid. generates error message and it accepted """
-            tool.wait_inbox().react_one()
-            tool.wait_inbox().react_one()
-            assert len(dummy_handler.handled_messages) == 1
+
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 1, timeout=1,
+            )
 
             #   DECODING ERROR
             envelope = Envelope(
@@ -215,10 +218,10 @@ async def test_handle():
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
-            tool.wait_inbox().react_one()
-            tool.wait_inbox().react_one()
-            assert len(dummy_handler.handled_messages) == 2
 
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
+            )
             #   UNSUPPORTED SKILL
             msg = FipaSerializer().encode(
                 FipaMessage(
@@ -236,23 +239,16 @@ async def test_handle():
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            """ inbox twice cause first message is invalid. generates error message and it accepted """
-            tool.wait_inbox().react_one()
-            tool.wait_inbox().react_one()
-            assert len(dummy_handler.handled_messages) == 3
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 3, timeout=1,
+            )
 
-        finally:
             aea.stop()
 
 
-class TestInitializeAEAProgrammaticallyFromResourcesDir:
-    """Test that we can initialize the agent by providing the resource object loaded from dir."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.node = LocalNode()
-        cls.node.start()
+def test_initialize_aea_programmatically():
+    """Test that we can initialize an AEA programmatically."""
+    with LocalNode() as node:
         agent_name = "MyAgent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         builder = AEABuilder()
@@ -266,217 +262,198 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         )
         builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        cls.aea = builder.build(
-            connection_ids=[PublicId.from_str("fetchai/local:0.1.0")]
-        )
-        list(cls.aea._connections)[0]._local_node = cls.node
+        aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
+        list(aea._connections)[0]._local_node = node
 
-        cls.expected_message = DefaultMessage(
+        expected_message = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        cls.expected_message.counterparty = cls.aea.identity.address
+        expected_message.counterparty = aea.identity.address
         envelope = Envelope(
-            to=cls.aea.identity.address,
-            sender=cls.aea.identity.address,
+            to=aea.identity.address,
+            sender=aea.identity.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(cls.expected_message),
-        )
-        cls.aea._start_setup()
-        cls.aea.outbox.put(envelope)
-        AeaTool(cls.aea).wait_inbox().spin_main_loop()
-
-    def test_initialize_aea_programmatically(self):
-        """Test that we can initialize an AEA programmatically."""
-        dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
-        dummy_behaviour_name = "dummy"
-        dummy_behaviour = self.aea.resources.get_behaviour(
-            dummy_skill_id, dummy_behaviour_name
-        )
-        assert dummy_behaviour is not None
-        assert dummy_behaviour.nb_act_called > 0
-
-        # TODO the previous code caused an error:
-        #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
-        dummy_task = DummyTask()
-        task_id = self.aea.task_manager.enqueue_task(dummy_task)
-        async_result = self.aea.task_manager.get_task_result(task_id)
-        expected_dummy_task = async_result.get(2.0)
-        assert expected_dummy_task.nb_execute_called > 0
-
-        dummy_handler = self.aea.resources.get_handler(
-            DefaultMessage.protocol_id, dummy_skill_id
-        )
-        dummy_handler_alt = self.aea.resources._handler_registry.fetch(
-            (dummy_skill_id, "dummy")
-        )
-        assert dummy_handler == dummy_handler_alt
-        assert dummy_handler is not None
-        assert len(dummy_handler.handled_messages) == 1
-        assert dummy_handler.handled_messages[0] == self.expected_message
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        cls.aea.stop()
-        cls.node.stop()
-
-
-class TestInitializeAEAProgrammaticallyBuildResources:
-    """Test that we can initialize the agent by building the resource object."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.node = LocalNode()
-        cls.node.start()
-        cls.agent_name = "MyAgent"
-        cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
-        cls.ledger_apis = LedgerApis({}, FETCHAI)
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
-        cls.connection = _make_local_connection(cls.agent_name, cls.node)
-        cls.connections = [cls.connection]
-        cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
-        cls.resources = Resources(cls.temp)
-
-        cls.default_protocol = Protocol.from_dir(
-            str(Path(AEA_DIR, "protocols", "default"))
-        )
-        cls.resources.add_protocol(cls.default_protocol)
-
-        cls.error_skill = Skill.from_dir(str(Path(AEA_DIR, "skills", "error")))
-        cls.dummy_skill = Skill.from_dir(str(Path(CUR_PATH, "data", "dummy_skill")))
-        cls.resources.add_skill(cls.dummy_skill)
-        cls.resources.add_skill(cls.error_skill)
-
-        cls.aea = AEA(
-            cls.identity,
-            cls.connections,
-            cls.wallet,
-            cls.ledger_apis,
-            resources=cls.resources,
+            message=DefaultSerializer().encode(expected_message),
         )
 
-        cls.error_skill.skill_context.set_agent_context(cls.aea.context)
-        cls.dummy_skill.skill_context.set_agent_context(cls.aea.context)
-
-        default_protocol_id = DefaultMessage.protocol_id
-
-        cls.expected_message = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        cls.expected_message.counterparty = cls.agent_name
-
-        tool = AeaTool(cls.aea).setup()
-
-        cls.aea.outbox.put(
-            Envelope(
-                to=cls.agent_name,
-                sender=cls.agent_name,
-                protocol_id=default_protocol_id,
-                message=DefaultSerializer().encode(cls.expected_message),
+        with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
+            wait_for_condition(
+                lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
             )
-        )
+            aea.outbox.put(envelope)
 
-        tool.wait_inbox().spin_main_loop()
+            dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
+            dummy_behaviour_name = "dummy"
+            dummy_behaviour = aea.resources.get_behaviour(
+                dummy_skill_id, dummy_behaviour_name
+            )
+            wait_for_condition(lambda: dummy_behaviour is not None, timeout=10)
+            wait_for_condition(lambda: dummy_behaviour.nb_act_called > 0, timeout=10)
 
-    def test_initialize_aea_programmatically(self):
-        """Test that we can initialize an AEA programmatically."""
+            # TODO the previous code caused an error:
+            #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
+            dummy_task = DummyTask()
+            task_id = aea.task_manager.enqueue_task(dummy_task)
+            async_result = aea.task_manager.get_task_result(task_id)
+            expected_dummy_task = async_result.get(10.0)
+            wait_for_condition(
+                lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
+            )
 
-        dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
-        dummy_behaviour_name = "dummy"
-        dummy_behaviour = self.aea.resources.get_behaviour(
-            dummy_skill_id, dummy_behaviour_name
-        )
-        assert dummy_behaviour is not None
-        assert dummy_behaviour.nb_act_called > 0
-
-        dummy_task = DummyTask()
-        task_id = self.aea.task_manager.enqueue_task(dummy_task)
-        async_result = self.aea.task_manager.get_task_result(task_id)
-        expected_dummy_task = async_result.get(2.0)
-        assert expected_dummy_task.nb_execute_called > 0
-
-        dummy_handler_name = "dummy"
-        dummy_handler = self.aea.resources._handler_registry.fetch(
-            (dummy_skill_id, dummy_handler_name)
-        )
-        dummy_handler_alt = self.aea.resources.get_handler(
-            DefaultMessage.protocol_id, dummy_skill_id
-        )
-        assert dummy_handler == dummy_handler_alt
-        assert dummy_handler is not None
-        assert len(dummy_handler.handled_messages) == 1
-        assert dummy_handler.handled_messages[0] == self.expected_message
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        cls.aea.stop()
-        cls.node.stop()
-        Path(cls.temp).rmdir()
+            dummy_handler = aea.resources.get_handler(
+                DefaultMessage.protocol_id, dummy_skill_id
+            )
+            dummy_handler_alt = aea.resources._handler_registry.fetch(
+                (dummy_skill_id, "dummy")
+            )
+            wait_for_condition(lambda: dummy_handler == dummy_handler_alt, timeout=10)
+            wait_for_condition(lambda: dummy_handler is not None, timeout=10)
+            wait_for_condition(
+                lambda: len(dummy_handler.handled_messages) == 1, timeout=10
+            )
+            wait_for_condition(
+                lambda: dummy_handler.handled_messages[0] == expected_message,
+                timeout=10,
+            )
 
 
-class TestAddBehaviourDynamically:
+def test_initialize_aea_programmatically_build_resources():
+    """Test that we can initialize the agent by building the resource object."""
+    try:
+        temp = tempfile.mkdtemp(prefix="test_aea_resources")
+        with LocalNode() as node:
+            agent_name = "MyAgent"
+            private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+            wallet = Wallet({FETCHAI: private_key_path})
+            ledger_apis = LedgerApis({}, FETCHAI)
+            identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+            connection = _make_local_connection(agent_name, node)
+            connections = [connection]
+
+            resources = Resources(temp)
+
+            default_protocol = Protocol.from_dir(
+                str(Path(AEA_DIR, "protocols", "default"))
+            )
+            resources.add_protocol(default_protocol)
+
+            error_skill = Skill.from_dir(str(Path(AEA_DIR, "skills", "error")))
+            dummy_skill = Skill.from_dir(str(Path(CUR_PATH, "data", "dummy_skill")))
+            resources.add_skill(dummy_skill)
+            resources.add_skill(error_skill)
+
+            aea = AEA(identity, connections, wallet, ledger_apis, resources=resources,)
+
+            error_skill.skill_context.set_agent_context(aea.context)
+            dummy_skill.skill_context.set_agent_context(aea.context)
+
+            default_protocol_id = DefaultMessage.protocol_id
+
+            expected_message = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            expected_message.counterparty = agent_name
+
+            with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
+                wait_for_condition(
+                    lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
+                )
+                aea.outbox.put(
+                    Envelope(
+                        to=agent_name,
+                        sender=agent_name,
+                        protocol_id=default_protocol_id,
+                        message=DefaultSerializer().encode(expected_message),
+                    )
+                )
+
+                dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
+                dummy_behaviour_name = "dummy"
+                dummy_behaviour = aea.resources.get_behaviour(
+                    dummy_skill_id, dummy_behaviour_name
+                )
+                wait_for_condition(lambda: dummy_behaviour is not None, timeout=10)
+                wait_for_condition(
+                    lambda: dummy_behaviour.nb_act_called > 0, timeout=10
+                )
+
+                dummy_task = DummyTask()
+                task_id = aea.task_manager.enqueue_task(dummy_task)
+                async_result = aea.task_manager.get_task_result(task_id)
+                expected_dummy_task = async_result.get(10.0)
+                wait_for_condition(
+                    lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
+                )
+
+                dummy_handler_name = "dummy"
+                dummy_handler = aea.resources._handler_registry.fetch(
+                    (dummy_skill_id, dummy_handler_name)
+                )
+                dummy_handler_alt = aea.resources.get_handler(
+                    DefaultMessage.protocol_id, dummy_skill_id
+                )
+                wait_for_condition(
+                    lambda: dummy_handler == dummy_handler_alt, timeout=10
+                )
+                wait_for_condition(lambda: dummy_handler is not None, timeout=10)
+                wait_for_condition(
+                    lambda: len(dummy_handler.handled_messages) == 1, timeout=10
+                )
+                wait_for_condition(
+                    lambda: dummy_handler.handled_messages[0] == expected_message,
+                    timeout=10,
+                )
+    finally:
+        Path(temp).rmdir()
+
+
+def test_add_behaviour_dynamically():
     """Test that we can add a behaviour dynamically."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        agent_name = "MyAgent"
-        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, FETCHAI)
-        resources = Resources()
-        resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
-        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
-        cls.agent = AEA(
-            identity,
-            [_make_local_connection(identity.address, LocalNode())],
-            wallet,
-            ledger_apis,
-            resources,
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
+    ledger_apis = LedgerApis({}, FETCHAI)
+    resources = Resources()
+    resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
+    identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+    agent = AEA(
+        identity,
+        [_make_local_connection(identity.address, LocalNode())],
+        wallet,
+        ledger_apis,
+        resources,
+    )
+    for skill in resources.get_all_skills():
+        skill.skill_context.set_agent_context(agent.context)
+
+    with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
+        wait_for_condition(
+            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
         )
-        for skill in resources.get_all_skills():
-            skill.skill_context.set_agent_context(cls.agent.context)
 
-        AeaTool(cls.agent).setup().spin_main_loop()
-
-    def test_add_behaviour_dynamically(self):
-        """Test the dynamic registration of a behaviour."""
         dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
-        dummy_skill = self.agent.resources.get_skill(dummy_skill_id)
-        assert dummy_skill is not None
+        dummy_skill = agent.resources.get_skill(dummy_skill_id)
+
+        wait_for_condition(lambda: dummy_skill is not None, timeout=10)
+
         new_behaviour = DummyBehaviour(
             name="dummy2", skill_context=dummy_skill.skill_context
         )
         dummy_skill.skill_context.new_behaviours.put(new_behaviour)
 
-        """
-        doule loop spin!!!
-        cause new behaviour added using internal message
-        internal message processed after act.
-
-        first spin adds new behaviour to skill using update(internal messages)
-        second runs act for new behaviour
-        """
-        AeaTool(self.agent).spin_main_loop().spin_main_loop()
-
-        assert new_behaviour.nb_act_called > 0
-        assert len(self.agent.resources.get_behaviours(dummy_skill_id)) == 2
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the class down."""
-        cls.agent.stop()
+        wait_for_condition(lambda: new_behaviour.nb_act_called > 0, timeout=10)
+        wait_for_condition(
+            lambda: len(agent.resources.get_behaviours(dummy_skill_id)) == 2, timeout=10
+        )
 
 
 class TestContextNamespace:

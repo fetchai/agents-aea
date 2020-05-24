@@ -32,7 +32,6 @@ from oef.query import ConstraintExpr
 
 import pytest
 
-from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -56,7 +55,7 @@ from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
-from ....conftest import _make_oef_connection
+from ....conftest import FETCHAI_ADDRESS_ONE, FETCHAI_ADDRESS_TWO, _make_oef_connection
 
 DEFAULT_OEF = "default_oef"
 
@@ -69,9 +68,8 @@ class TestDefault(UseOef):
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.crypto1 = FetchAICrypto()
         cls.connection = _make_oef_connection(
-            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
@@ -87,8 +85,8 @@ class TestDefault(UseOef):
         )
         self.multiplexer.put(
             Envelope(
-                to=self.crypto1.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_ONE,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=DefaultMessage.protocol_id,
                 message=DefaultSerializer().encode(msg),
             )
@@ -111,9 +109,8 @@ class TestOEF(UseOef):
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = FetchAICrypto()
             cls.connection = _make_oef_connection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -135,7 +132,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -168,7 +165,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -209,7 +206,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -235,9 +232,8 @@ class TestOEF(UseOef):
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = FetchAICrypto()
             cls.connection = _make_oef_connection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -258,7 +254,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=msg_bytes,
                 )
@@ -276,7 +272,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -288,9 +284,9 @@ class TestOEF(UseOef):
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
             assert search_result.dialogue_reference[0] == str(request_id)
-            if search_result.agents != [self.crypto1.address]:
+            if search_result.agents != [FETCHAI_ADDRESS_ONE]:
                 logger.warning(
-                    "search_result.agents != [self.crypto1.address] FAILED in test_oef/test_communication.py"
+                    "search_result.agents != [FETCHAI_ADDRESS_ONE] FAILED in test_oef/test_communication.py"
                 )
 
         @classmethod
@@ -310,9 +306,8 @@ class TestOEF(UseOef):
             - Register a service
             - Check that the registration worked.
             """
-            cls.crypto1 = FetchAICrypto()
             cls.connection = _make_oef_connection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -331,7 +326,7 @@ class TestOEF(UseOef):
             cls.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=cls.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=msg_bytes,
                 )
@@ -351,7 +346,7 @@ class TestOEF(UseOef):
             cls.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=cls.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -363,9 +358,9 @@ class TestOEF(UseOef):
                 == OefSearchMessage.Performative.SEARCH_RESULT
             )
             assert search_result.message_id == cls.request_id
-            if search_result.agents != [cls.crypto1.address]:
+            if search_result.agents != [FETCHAI_ADDRESS_ONE]:
                 logger.warning(
-                    "search_result.agents != [self.crypto1.address] FAILED in test_oef/test_communication.py"
+                    "search_result.agents != [FETCHAI_ADDRESS_ONE] FAILED in test_oef/test_communication.py"
                 )
 
         def test_unregister_service(self):
@@ -386,7 +381,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=msg_bytes,
                 )
@@ -406,7 +401,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -432,9 +427,8 @@ class TestOEF(UseOef):
         @classmethod
         def setup_class(cls):
             """Set the tests up."""
-            cls.crypto1 = FetchAICrypto()
             cls.connection = _make_oef_connection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -455,7 +449,7 @@ class TestOEF(UseOef):
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
-                    sender=self.crypto1.address,
+                    sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
                     message=OefSearchSerializer().encode(search_request),
                 )
@@ -482,13 +476,11 @@ class TestFIPA(UseOef):
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
-        cls.crypto1 = FetchAICrypto()
-        cls.crypto2 = FetchAICrypto()
         cls.connection1 = _make_oef_connection(
-            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.connection2 = _make_oef_connection(
-            cls.crypto2.address, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_TWO, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer2 = Multiplexer([cls.connection2])
@@ -504,18 +496,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_message.counterparty = self.crypto2.address
+        cfp_message.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(cfp_message),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_message = FipaSerializer().decode(envelope.message)
-        expected_cfp_message.counterparty = self.crypto2.address
+        expected_cfp_message.counterparty = FETCHAI_ADDRESS_TWO
 
         assert expected_cfp_message == cfp_message
 
@@ -526,18 +518,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        cfp_none.counterparty = self.crypto2.address
+        cfp_none.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(cfp_none),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FipaSerializer().decode(envelope.message)
-        expected_cfp_none.counterparty = self.crypto2.address
+        expected_cfp_none.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_cfp_none == cfp_none
 
     def test_propose(self):
@@ -549,18 +541,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.PROPOSE,
             proposal=Description({"foo": "bar"}),
         )
-        propose_empty.counterparty = self.crypto2.address
+        propose_empty.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(propose_empty),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_empty = FipaSerializer().decode(envelope.message)
-        expected_propose_empty.counterparty = self.crypto2.address
+        expected_propose_empty.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FipaMessage(
@@ -573,18 +565,18 @@ class TestFIPA(UseOef):
             ),
         )
 
-        propose_descriptions.counterparty = self.crypto2.address
+        propose_descriptions.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(propose_descriptions),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_descriptions = FipaSerializer().decode(envelope.message)
-        expected_propose_descriptions.counterparty = self.crypto2.address
+        expected_propose_descriptions.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_propose_descriptions == propose_descriptions
 
     def test_accept(self):
@@ -595,18 +587,18 @@ class TestFIPA(UseOef):
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        accept.counterparty = self.crypto2.address
+        accept.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(accept),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FipaSerializer().decode(envelope.message)
-        expected_accept.counterparty = self.crypto2.address
+        expected_accept.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_accept == accept
 
     def test_match_accept(self):
@@ -618,18 +610,18 @@ class TestFIPA(UseOef):
             target=3,
             performative=FipaMessage.Performative.MATCH_ACCEPT,
         )
-        match_accept.counterparty = self.crypto2.address
+        match_accept.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(match_accept),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_match_accept = FipaSerializer().decode(envelope.message)
-        expected_match_accept.counterparty = self.crypto2.address
+        expected_match_accept.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_match_accept == match_accept
 
     def test_decline(self):
@@ -640,18 +632,18 @@ class TestFIPA(UseOef):
             target=0,
             performative=FipaMessage.Performative.DECLINE,
         )
-        decline.counterparty = self.crypto2.address
+        decline.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(decline),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FipaSerializer().decode(envelope.message)
-        expected_decline.counterparty = self.crypto2.address
+        expected_decline.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_decline == decline
 
     def test_match_accept_w_inform(self):
@@ -663,18 +655,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"address": "my_address"},
         )
-        match_accept_w_inform.counterparty = self.crypto2.address
+        match_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(match_accept_w_inform),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_match_accept_w_inform = FipaSerializer().decode(envelope.message)
-        returned_match_accept_w_inform.counterparty = self.crypto2.address
+        returned_match_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_match_accept_w_inform == match_accept_w_inform
 
     def test_accept_w_inform(self):
@@ -686,18 +678,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
             info={"address": "my_address"},
         )
-        accept_w_inform.counterparty = self.crypto2.address
+        accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(accept_w_inform),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_accept_w_inform = FipaSerializer().decode(envelope.message)
-        returned_accept_w_inform.counterparty = self.crypto2.address
+        returned_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_accept_w_inform == accept_w_inform
 
     def test_inform(self):
@@ -710,18 +702,18 @@ class TestFIPA(UseOef):
             performative=FipaMessage.Performative.INFORM,
             info=payload,
         )
-        inform.counterparty = self.crypto2.address
+        inform.counterparty = FETCHAI_ADDRESS_TWO
         self.multiplexer1.put(
             Envelope(
-                to=self.crypto2.address,
-                sender=self.crypto1.address,
+                to=FETCHAI_ADDRESS_TWO,
+                sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
                 message=FipaSerializer().encode(inform),
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FipaSerializer().decode(envelope.message)
-        returned_inform.counterparty = self.crypto2.address
+        returned_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_inform == inform
 
     def test_serialisation_fipa(self):
@@ -830,9 +822,8 @@ class TestOefConnection(UseOef):
 
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
-        crypto = FetchAICrypto()
         connection = _make_oef_connection(
-            crypto.address, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         multiplexer = Multiplexer([connection])
         multiplexer.connect()
@@ -990,9 +981,8 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_send_oef_message(self, pytestconfig):
         """Test the send oef message."""
-        address = FetchAICrypto().address
         oef_connection = _make_oef_connection(
-            address=address, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         request_id = 1
         oef_connection.loop = asyncio.get_event_loop()
@@ -1005,7 +995,7 @@ class TestSendWithOEF(UseOef):
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
-            sender=address,
+            sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
@@ -1027,7 +1017,7 @@ class TestSendWithOEF(UseOef):
         msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
-            sender=address,
+            sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
             message=msg_bytes,
         )
@@ -1040,9 +1030,8 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_cancelled_receive(self, pytestconfig):
         """Test the case when a receive request is cancelled."""
-        address = FetchAICrypto().address
         oef_connection = _make_oef_connection(
-            address=address, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
@@ -1050,7 +1039,7 @@ class TestSendWithOEF(UseOef):
         patch = unittest.mock.patch.object(
             packages.fetchai.connections.oef.connection.logger, "debug"
         )
-        mocked_logger_debug = patch.__enter__()
+        mocked_logger_debug = patch.start()
 
         async def receive():
             await oef_connection.receive()
@@ -1066,9 +1055,8 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_exception_during_receive(self, pytestconfig):
         """Test the case when there is an exception during a receive request."""
-        address = FetchAICrypto().address
         oef_connection = _make_oef_connection(
-            address=address, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         oef_connection.loop = asyncio.get_event_loop()
         await oef_connection.connect()
@@ -1084,9 +1072,8 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_connecting_twice_is_ok(self, pytestconfig):
         """Test that calling 'connect' twice works as expected."""
-        address = FetchAICrypto().address
         oef_connection = _make_oef_connection(
-            address=address, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
         oef_connection.loop = asyncio.get_event_loop()
 
@@ -1105,16 +1092,15 @@ class TestSendWithOEF(UseOef):
 )
 async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
-    address = FetchAICrypto().address
     oef_connection = _make_oef_connection(
-        address=address, oef_addr="a_fake_address", oef_port=10000,
+        address=FETCHAI_ADDRESS_ONE, oef_addr="a_fake_address", oef_port=10000,
     )
     oef_connection.loop = asyncio.get_event_loop()
 
     patch = unittest.mock.patch.object(
         packages.fetchai.connections.oef.connection.logger, "warning"
     )
-    mocked_logger_warning = patch.__enter__()
+    mocked_logger_warning = patch.start()
 
     async def try_to_connect():
         await oef_connection.connect()

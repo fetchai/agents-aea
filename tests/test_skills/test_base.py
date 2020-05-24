@@ -27,11 +27,11 @@ from unittest.mock import Mock
 
 from aea.aea import AEA
 from aea.connections.base import ConnectionStatus
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 from aea.skills.base import SkillComponent, SkillContext
@@ -42,10 +42,12 @@ from ..conftest import CUR_PATH, _make_dummy_connection
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-    wallet = Wallet({FETCHAI: private_key_path})
+    wallet = Wallet({FetchAICrypto.identifier: private_key_path})
     connections = [_make_dummy_connection()]
-    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
-    identity = Identity("name", address=wallet.addresses[FETCHAI])
+    ledger_apis = LedgerApis(
+        {"fetchai": {"network": "testnet"}}, FetchAICrypto.identifier
+    )
+    identity = Identity("name", address=wallet.addresses[FetchAICrypto.identifier])
     my_aea = AEA(
         identity,
         connections,
@@ -66,12 +68,19 @@ class TestSkillContext:
         eth_private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
         fet_private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {ETHEREUM: eth_private_key_path, FETCHAI: fet_private_key_path}
+            {
+                EthereumCrypto.identifier: eth_private_key_path,
+                FetchAICrypto.identifier: fet_private_key_path,
+            }
         )
-        cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
+        cls.ledger_apis = LedgerApis(
+            {FetchAICrypto.identifier: {"network": "testnet"}}, FetchAICrypto.identifier
+        )
         cls.connections = [_make_dummy_connection()]
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI
+            "name",
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(
             cls.identity,
@@ -104,16 +113,22 @@ class TestSkillContext:
 
     def test_agent_ownership_state(self):
         """Test the ownership state."""
-        assert isinstance(self.skill_context.agent_ownership_state, OwnershipState)
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.ownership_state,
+            OwnershipState,
+        )
 
     def test_agent_preferences(self):
         """Test the agents_preferences."""
-        assert isinstance(self.skill_context.agent_preferences, Preferences)
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.preferences, Preferences
+        )
 
     def test_agent_is_ready_to_pursuit_goals(self):
         """Test if the agent is ready to pursuit his goals."""
         assert isinstance(
-            self.skill_context.agent_goal_pursuit_readiness, GoalPursuitReadiness
+            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
+            GoalPursuitReadiness,
         )
 
     def test_message_in_queue(self):

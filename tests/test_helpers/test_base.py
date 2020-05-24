@@ -20,7 +20,7 @@
 """This module contains the tests for the helper module."""
 import os
 
-from aea.helpers.base import locate
+from aea.helpers.base import RegexConstrainedString, locate
 
 from packages.fetchai.connections.oef.connection import OEFConnection
 
@@ -69,3 +69,13 @@ class TestHelpersBase:
 
         result = locate("ThisClassDoesNotExist")
         assert result is None
+
+
+def test_regex_constrained_string_initialization():
+    """Test we can initialize a regex constrained with the default regex."""
+    RegexConstrainedString("")
+    RegexConstrainedString("abcde")
+    RegexConstrainedString(b"")
+    RegexConstrainedString(b"abcde")
+    RegexConstrainedString(RegexConstrainedString(""))
+    RegexConstrainedString(RegexConstrainedString("abcde"))

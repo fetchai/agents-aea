@@ -223,9 +223,9 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 
 We also need to add the oef connection and install its dependencies:
 ``` bash
-aea add connection fetchai/oef:0.2.0
+aea add connection fetchai/oef:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
 ## Step 8: Run a service provider AEA
@@ -238,8 +238,8 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch and run another finished AEA:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.3.0 && cd simple_service_registration
-aea run --connections fetchai/oef:0.2.0
+aea fetch fetchai/simple_service_registration:0.4.0 && cd simple_service_registration
+aea run --connections fetchai/oef:0.3.0
 ```
 
 This AEA will simply register a location service on the [OEF search node](../oef-ledger) so we can search for it.
@@ -331,25 +331,26 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=self._registered_service_description,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
-        self.context.logger.info(
-            "[{}]: unregistering services from OEF service directory.".format(
-                self.context.agent_name
+        if self._registered_service_description is not None:
+            strategy = cast(Strategy, self.context.strategy)
+            oef_msg_id = strategy.get_next_oef_msg_id()
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(oef_msg_id), ""),
+                service_description=self._registered_service_description,
             )
-        )
-        self._registered_service_description = None
+            self.context.outbox.put_message(
+                to=self.context.search_service_address,
+                sender=self.context.agent_address,
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(msg),
+            )
+            self.context.logger.info(
+                "[{}]: unregistering services from OEF service directory.".format(
+                    self.context.agent_name
+                )
+            )
+            self._registered_service_description = None
 ```
 
 We create a `model` type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
@@ -378,11 +379,11 @@ class Strategy(Model):
 
         :return: None
         """
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        super().__init__(**kwargs)
+        self._oef_msg_id = 0
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -411,14 +412,14 @@ The associated `skill.yaml` is:
 ``` yaml
 name: simple_service_registration
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmWKGwRe8VGJ9VxutL8Ghy866pBKFhfo7k6Wrvab89tVQZ
-  strategy.py: QmRodUmyDFC9282pGnZ54nJfNCQYcLTJTETq8SBHKPf3to
+  behaviours.py: QmT4nDbtEz5BDtSbw34fXzdZg4HfbYgV3dfMfsGe9R61n4
+  strategy.py: QmWwPzDvmeuVutPwxL5taU1tBGA6aiMDRwo6bTTtLxxHRn
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -456,7 +457,7 @@ dependencies: {}
 We can then launch our AEA.
 
 ``` bash
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 We can see that the AEA sends search requests to the [OEF search node](../oef-ledger) and receives search responses from the [OEF search node](../oef-ledger). Since our AEA is only searching on the [OEF search node](../oef-ledger) - and not registered on the [OEF search node](../oef-ledger) - the search response returns a single agent (the service provider).

@@ -20,7 +20,6 @@
 import json
 import unittest.mock
 
-
 from tests.common.utils import run_in_root_dir
 
 from .test_base import DummyPID, create_app
@@ -142,7 +141,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 11, data
+    assert len(data) == 13, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -166,7 +165,7 @@ def test_real_search():
         == "The local connection provides a stub for an OEF node."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/oef:0.2.0"
+    assert data[i]["id"] == "fetchai/oef:0.3.0"
     assert (
         data[i]["description"]
         == "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
@@ -176,6 +175,12 @@ def test_real_search():
     assert (
         data[i]["description"]
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/p2p_libp2p:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."
     )
     i += 1
     assert data[i]["id"] == "fetchai/p2p_noise:0.2.0"
@@ -190,7 +195,13 @@ def test_real_search():
         == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/stub:0.3.0"
+    assert data[i]["id"] == "fetchai/soef:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The soef connection provides a connection api to the simple OEF."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/stub:0.4.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."

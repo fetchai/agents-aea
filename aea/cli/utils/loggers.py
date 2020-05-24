@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import logging
 import sys
 
 import click
+
 
 OFF = 100
 logging.addLevelName(OFF, "OFF")
@@ -90,3 +91,7 @@ def default_logging_config(logger):
     logger.handlers = [default_handler]
     logger.propagate = True
     return logger
+
+
+logger = logging.getLogger("aea")
+logger = default_logging_config(logger)

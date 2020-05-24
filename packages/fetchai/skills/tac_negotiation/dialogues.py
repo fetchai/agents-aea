@@ -23,9 +23,21 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
+from typing import cast
+
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogues
+from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
+from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.fetchai.skills.tac_negotiation.helpers import (
+    DEMAND_DATAMODEL_NAME,
+    SUPPLY_DATAMODEL_NAME,
+)
+
+
+Dialogue = FipaDialogue
 
 
 class Dialogues(Model, FipaDialogues):
@@ -38,4 +50,40 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        fipa_message = cast(FipaMessage, message)
+        if fipa_message.performative != FipaMessage.Performative.CFP:
+            raise ValueError("First message must be a CFP!")
+        query = fipa_message.query
+        if query.model is None:
+            raise ValueError("Query must have a data model!")
+        if query.model.name not in [
+            SUPPLY_DATAMODEL_NAME,
+            DEMAND_DATAMODEL_NAME,
+        ]:
+            raise ValueError(
+                "Query data model name must be in [{},{}]".format(
+                    SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
+                )
+            )
+        if message.is_incoming:
+            is_seller = (
+                query.model.name == SUPPLY_DATAMODEL_NAME
+            )  # the counterparty is querying for supply/sellers (this agent is receiving their CFP so is the seller)
+        else:
+            is_seller = (
+                query.model.name == DEMAND_DATAMODEL_NAME
+            )  # the agent is querying for demand/buyers (this agent is sending the CFP so it is the seller)
+        role = (
+            FipaDialogue.AgentRole.SELLER if is_seller else FipaDialogue.AgentRole.BUYER
+        )
+        return role

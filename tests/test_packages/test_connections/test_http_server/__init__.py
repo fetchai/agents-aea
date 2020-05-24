@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the HTTP connection implementation."""
+"""This module contains the tests of the HTTP Server connection implementation."""

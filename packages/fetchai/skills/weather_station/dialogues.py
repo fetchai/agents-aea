@@ -26,8 +26,11 @@ This module contains the classes required for dialogue management.
 
 from typing import Dict, Optional
 
-from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.dialogue.base import Dialogue as BaseDialogue
+from aea.helpers.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.helpers.search.models import Description
+from aea.mail.base import Address
+from aea.protocols.base import Message
 from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
@@ -36,16 +39,24 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogue
 class Dialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        agent_address: Address,
+        role: BaseDialogue.Role,
+    ) -> None:
         """
-        Initialize a dialogue label.
+        Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
-        :param is_seller: indicates whether the agent associated with the dialogue is a seller or buyer
+        :param agent_address: the address of the agent for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
 
         :return: None
         """
-        FipaDialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
+        FipaDialogue.__init__(
+            self, dialogue_label=dialogue_label, agent_address=agent_address, role=role
+        )
         self.weather_data = None  # type: Optional[Dict[str, str]]
         self.proposal = None  # type: Optional[Description]
 
@@ -60,4 +71,30 @@ class Dialogues(Model, FipaDialogues):
         :return: None
         """
         Model.__init__(self, **kwargs)
-        FipaDialogues.__init__(self)
+        FipaDialogues.__init__(self, self.context.agent_address)
+
+    @staticmethod
+    def role_from_first_message(message: Message) -> BaseDialogue.Role:
+        """
+        Infer the role of the agent from an incoming or outgoing first message
+
+        :param message: an incoming/outgoing first message
+        :return: the agent's role
+        """
+        return FipaDialogue.AgentRole.SELLER
+
+    def create_dialogue(
+        self, dialogue_label: BaseDialogueLabel, role: BaseDialogue.Role,
+    ) -> Dialogue:
+        """
+        Create an instance of dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: the created dialogue
+        """
+        dialogue = Dialogue(
+            dialogue_label=dialogue_label, agent_address=self.agent_address, role=role
+        )
+        return dialogue

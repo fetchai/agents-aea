@@ -30,7 +30,6 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
-from packages.fetchai.protocols.fipa.dialogues import FipaDialogue
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -59,30 +58,17 @@ class FIPAHandler(Handler):
         :return: None
         """
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
+        # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    fipa_msg.counterparty, dialogue_reference, is_seller=True
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
+        # handle message
         if fipa_msg.performative == FipaMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, dialogue)
+            self._handle_propose(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -111,7 +97,7 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": b""},
+            error_data={"fipa_message": FipaSerializer().encode(msg)},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,
@@ -149,8 +135,9 @@ class FIPAHandler(Handler):
                 )
             )
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            strategy = cast(Strategy, self.context.strategy)
             contract.set_address(
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 contract_address=data["contract_address"],
             )
             tx_msg = contract.get_hash_single_transaction_msg(
@@ -161,7 +148,7 @@ class FIPAHandler(Handler):
                 to_supply=int(data["to_supply"]),
                 value=int(data["value"]),
                 trade_nonce=int(data["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )
@@ -227,20 +214,17 @@ class OEFSearchHandler(Handler):
             strategy.is_searching = False
             # pick first agent found
             opponent_addr = agents[0]
-            # create self_initiated_dialogue
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(
-                opponent_addr, self.context.agent_address, is_seller=False
-            )
             query = strategy.get_service_query()
             cfp_msg = FipaMessage(
-                message_id=FipaDialogue.STARTING_MESSAGE_ID,
-                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                message_id=Dialogue.STARTING_MESSAGE_ID,
+                dialogue_reference=dialogues.new_self_initiated_dialogue_reference(),
                 performative=FipaMessage.Performative.CFP,
-                target=FipaDialogue.STARTING_TARGET,
+                target=Dialogue.STARTING_TARGET,
                 query=query,
             )
-            dialogue.outgoing_extend(cfp_msg)
+            cfp_msg.counterparty = opponent_addr
+            dialogues.update(cfp_msg)
             self.context.logger.info(
                 "[{}]: sending CFP to agent={}".format(
                     self.context.agent_name, opponent_addr[-5:]

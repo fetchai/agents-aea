@@ -89,7 +89,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.3.0")
 
 
 class OEFObjectTranslator:
@@ -593,7 +593,7 @@ class OEFChannel(OEFAgent):
             message_id=MESSAGE_ID,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Destination not available",
-            error_data={},  # TODO: add helper info
+            error_data={},
         )
         msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(

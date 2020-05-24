@@ -26,6 +26,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Dict
+from unittest import TestCase
 from unittest.mock import patch
 
 import jsonschema
@@ -36,7 +37,6 @@ import pytest
 import yaml
 
 import aea
-import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.constants import (
@@ -330,7 +330,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.patch = patch.object(
             aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"}
         )
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -352,7 +352,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         assert self.result.exit_code == 1
 
     # TODO fix this on Windows
-    @skip_test_windows(is_test_class=True)
+    @skip_test_windows
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
         assert not Path(self.agent_name).exists()
@@ -360,7 +360,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -379,7 +379,7 @@ class TestCreateFailsWhenExceptionOccurs:
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
         cls.patch = patch.object(ConfigLoader, "dump", side_effect=Exception)
-        cls.patch.__enter__()
+        cls.patch.start()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -400,7 +400,7 @@ class TestCreateFailsWhenExceptionOccurs:
         assert self.result.exit_code == 1
 
     # TODO fix this on Windows
-    @skip_test_windows(is_test_class=True)
+    @skip_test_windows
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
         assert not Path(self.agent_name).exists()
@@ -408,7 +408,7 @@ class TestCreateFailsWhenExceptionOccurs:
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        cls.patch.__exit__()
+        cls.patch.stop()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -470,3 +470,37 @@ class TestCreateFailsWhenAlreadyInAEAProject:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class CreateCommandTestCase(TestCase):
+    """Test case for CLI create command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_create_no_init(self):
+        """Test for CLI create no init result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
+            standalone_mode=False,
+        )
+        self.assertEqual(
+            result.exception.message,
+            "Author is not set up. Please use 'aea init' to initialize.",
+        )
+
+    @patch("aea.cli.create.get_or_create_cli_config", return_value={})
+    def test_create_no_author_local(self, *mocks):
+        """Test for CLI create no author local result."""
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", "agent_name"],
+            standalone_mode=False,
+        )
+        expected_message = (
+            "The AEA configurations are not initialized. "
+            "Uses `aea init` before continuing or provide optional argument `--author`."
+        )
+        self.assertEqual(result.exception.message, expected_message)

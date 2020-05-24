@@ -23,7 +23,6 @@ import os
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from .programmatic_aea import run
 from ..helper import extract_code_blocks, extract_python_code
 from ...conftest import (
     CUR_PATH,
@@ -49,34 +48,52 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.3.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.4.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
             False,
             "bool",
         )
+        self.run_install()
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
-
-        self.start_thread(target=run)
+        file_path = os.path.join("tests", PY_FILE)
+        weather_client_process = self.start_subprocess(file_path, cwd=ROOT_DIR)
 
         check_strings = (
             "updating weather station services on OEF service directory.",
+            "unregistering weather station services from OEF service directory.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
             "sending MATCH_ACCEPT_W_INFORM to sender=",
             "received INFORM from sender=",
-            "unregistering weather station services from OEF service directory.",
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings
+            weather_station_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in weather_station output.".format(missing_strings)
 
+        check_strings = (
+            "found agents=",
+            "sending CFP to agent=",
+            "received proposal=",
+            "accepting the proposal from sender=",
+            "informing counterparty=",
+            "received INFORM from sender=",
+            "received the following weather data=",
+        )
+        missing_strings = self.missing_from_output(
+            weather_client_process, check_strings, is_terminating=False
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in weather_client output.".format(missing_strings)
+
+        self.terminate_agents(weather_client_process, weather_station_process)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."

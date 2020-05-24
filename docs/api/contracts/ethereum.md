@@ -30,20 +30,24 @@ Initialize the contract.
 #### set`_`instance
 
 ```python
- | set_instance(ledger_api: EthereumApi) -> None
+ | set_instance(ledger_api: LedgerApi) -> None
 ```
 
 Set the instance.
 
 **Arguments**:
 
-- `ledger_api`: the ethereum ledger api
+- `ledger_api`: the ledger api we are using.
+
+**Returns**:
+
+None
 
 <a name=".aea.contracts.ethereum.Contract.set_address"></a>
 #### set`_`address
 
 ```python
- | set_address(ledger_api: EthereumApi, contract_address: str) -> None
+ | set_address(ledger_api: LedgerApi, contract_address: str) -> None
 ```
 
 Set the contract address.
@@ -52,12 +56,16 @@ Set the contract address.
 
 - `ledger_api`: the ledger_api we are using.
 - `contract_address`: the contract address
+
+**Returns**:
+
+None
 
 <a name=".aea.contracts.ethereum.Contract.set_deployed_instance"></a>
 #### set`_`deployed`_`instance
 
 ```python
- | set_deployed_instance(ledger_api: EthereumApi, contract_address: str) -> None
+ | set_deployed_instance(ledger_api: LedgerApi, contract_address: str) -> None
 ```
 
 Set the contract address.
@@ -66,4 +74,8 @@ Set the contract address.
 
 - `ledger_api`: the ledger_api we are using.
 - `contract_address`: the contract address
+
+**Returns**:
+
+None
 

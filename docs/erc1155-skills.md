@@ -36,10 +36,10 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/erc1155_deploy:0.3.0
+aea add connection fetchai/oef:0.3.0
+aea add skill fetchai/erc1155_deploy:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
 Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
@@ -56,10 +56,10 @@ In another terminal, create the AEA that will sign the transaction.
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/erc1155_client:0.2.0
+aea add connection fetchai/oef:0.3.0
+aea add skill fetchai/erc1155_client:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 
 Additionally, create the private key for the client AEA. Generate and add a key for Ethereum use:
@@ -111,7 +111,7 @@ aea get-wealth ethereum
 First, run the deployer AEA.
 
 ``` bash 
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 It will perform the following steps:
@@ -127,7 +127,7 @@ Successfully minted items. Transaction digest: ...
 Then, in the separate terminal run the client AEA.
 
 ``` bash 
-aea run --connections fetchai/oef:0.2.0
+aea run --connections fetchai/oef:0.3.0
 ```
 
 You will see that upon discovery the two AEAs exchange information about the transaction and the client at the end signs and sends the signature to the deployer AEA to send it to the network.

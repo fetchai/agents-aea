@@ -26,9 +26,11 @@ import pprint
 import re
 import sys
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 import jsonschema
+
+from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -56,20 +58,23 @@ from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    _create_ethereum_private_key,
-    _create_fetchai_private_key,
-    _try_validate_ethereum_private_key_path,
-    _try_validate_fet_private_key_path,
+    IDENTIFIER_TO_KEY_FILES,
+    _try_validate_private_key_path,
+    create_private_key,
 )
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
+from aea.crypto.registry import registry
+from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import DecisionMakerHandler
+from aea.decision_maker.default import (
+    DecisionMakerHandler as DefaultDecisionMakerHandler,
+)
 from aea.exceptions import AEAException, AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.exception_policy import ExceptionPolicyEnum
+from aea.helpers.pypi import is_satisfiable
+from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.protocols.base import Protocol
@@ -200,11 +205,20 @@ class _DependenciesManager:
 
     @property
     def pypi_dependencies(self) -> Dependencies:
-        """Get all the PyPI dependencies."""
+        """
+        Get all the PyPI dependencies.
+
+        We currently consider only dependency that have the
+        default PyPI index url and that specify only the
+        version field.
+
+        :return: the merged PyPI dependencies
+        """
         all_pypi_dependencies = {}  # type: Dependencies
         for configuration in self._dependencies.values():
-            # TODO implement merging of two PyPI dependencies.
-            all_pypi_dependencies.update(configuration.pypi_dependencies)
+            all_pypi_dependencies = merge_dependencies(
+                all_pypi_dependencies, configuration.pypi_dependencies
+            )
         return all_pypi_dependencies
 
     @staticmethod
@@ -227,6 +241,11 @@ class AEABuilder:
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
     DEFAULT_EXECUTION_TIMEOUT = 0
     DEFAULT_MAX_REACTIONS = 20
+    DEFAULT_DECISION_MAKER_HANDLER_CLASS: Type[
+        DecisionMakerHandler
+    ] = DefaultDecisionMakerHandler
+    DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
+    DEFAULT_LOOP_MODE = "async"
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -248,6 +267,10 @@ class AEABuilder:
         self._timeout: Optional[float] = None
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
+        self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
+        self._default_routing: Dict[PublicId, PublicId] = {}
+        self._loop_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -266,7 +289,7 @@ class AEABuilder:
 
         :param timeout: timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._timeout = timeout
         return self
@@ -277,7 +300,7 @@ class AEABuilder:
 
         :param execution_timeout: execution_timeout in seconds
 
-        :return: None
+        :return: self
         """
         self._execution_timeout = execution_timeout
         return self
@@ -288,9 +311,71 @@ class AEABuilder:
 
         :param max_reactions: int
 
-        :return: None
+        :return: self
         """
         self._max_reactions = max_reactions
+        return self
+
+    def set_decision_maker_handler(
+        self, decision_maker_handler_dotted_path: str, file_path: Path
+    ) -> "AEABuilder":
+        """
+        Set decision maker handler class.
+
+        :param decision_maker_handler_dotted_path: the dotted path to the decision maker handler
+        :param file_path: the file path to the file which contains the decision maker handler
+
+        :return: self
+        """
+        dotted_path, class_name = decision_maker_handler_dotted_path.split(":")
+        module = load_module(dotted_path, file_path)
+        try:
+            _class = getattr(module, class_name)
+            self._decision_maker_handler_class = _class
+        except Exception as e:
+            logger.error(
+                "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, file_path, e
+                )
+            )
+        return self
+
+    def set_skill_exception_policy(
+        self, skill_exception_policy: Optional[ExceptionPolicyEnum]
+    ) -> "AEABuilder":
+        """
+        Set skill exception policy.
+
+        :param skill_exception_policy: the policy
+
+        :return: self
+        """
+        self._skill_exception_policy = skill_exception_policy
+        return self
+
+    def set_default_routing(
+        self, default_routing: Dict[PublicId, PublicId]
+    ) -> "AEABuilder":
+        """
+        Set default routing.
+
+        This is a map from public ids (protocols) to public ids (connections).
+
+        :param default_routing: the default routing mapping
+
+        :return: self
+        """
+        self._default_routing = default_routing
+        return self
+
+    def set_loop_mode(self, loop_mode: Optional[str]) -> "AEABuilder":
+        """
+        Set the loop mode.
+
+        :param loop_mode: the agent loop mode
+        :return: self
+        """
+        self._loop_mode = loop_mode
         return self
 
     def _add_default_packages(self) -> None:
@@ -326,6 +411,7 @@ class AEABuilder:
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
+        self._check_pypi_dependencies(configuration)
 
     def set_name(self, name: str) -> "AEABuilder":
         """
@@ -640,15 +726,21 @@ class AEABuilder:
 
         return sorted_selected_connections_ids
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None) -> AEA:
+    def build(
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        ledger_apis: Optional[LedgerApis] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         """
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
+        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_protocols()
         self._load_and_add_contracts()
         connections = self._load_connections(identity.address, connection_ids)
@@ -657,17 +749,50 @@ class AEABuilder:
             identity,
             connections,
             wallet,
-            LedgerApis(self.ledger_apis_config, self._default_ledger),
+            ledger_apis,
             self._resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
             execution_timeout=self._get_execution_timeout(),
             is_debug=False,
             max_reactions=self._get_max_reactions(),
-            **self._context_namespace
+            decision_maker_handler_class=self._get_decision_maker_handler_class(),
+            skill_exception_policy=self._get_skill_exception_policy(),
+            default_routing=self._get_default_routing(),
+            loop_mode=self._get_loop_mode(),
+            **self._context_namespace,
         )
+        aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context)
         return aea
+
+    def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
+        """
+        Load the ledger apis.
+
+        :param ledger_apis: the ledger apis provided
+        :return: ledger apis
+        """
+        if ledger_apis is not None:
+            self._check_consistent(ledger_apis)
+        else:
+            ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
+        return ledger_apis
+
+    def _check_consistent(self, ledger_apis: LedgerApis) -> None:
+        """
+        Check the ledger apis are consistent with the configs
+
+        :param ledger_apis: the ledger apis provided
+        :return: None
+        """
+        if self.ledger_apis_config != {}:
+            assert (
+                ledger_apis.configs == self.ledger_apis_config
+            ), "Config of LedgerApis does not match provided configs."
+        assert (
+            ledger_apis.default_ledger_id == self._default_ledger
+        ), "Default ledger id of LedgerApis does not match provided default ledger."
 
     # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
     def _update_identity(
@@ -739,6 +864,48 @@ class AEABuilder:
             else self.DEFAULT_MAX_REACTIONS
         )
 
+    def _get_decision_maker_handler_class(self) -> Type[DecisionMakerHandler]:
+        """
+        Return the decision maker handler class
+
+        :return: decision maker handler class
+        """
+        return (
+            self._decision_maker_handler_class
+            if self._decision_maker_handler_class is not None
+            else self.DEFAULT_DECISION_MAKER_HANDLER_CLASS
+        )
+
+    def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
+        """
+        Return the skill exception policy.
+
+        :return: the policy
+        """
+        return (
+            self._skill_exception_policy
+            if self._skill_exception_policy is not None
+            else self.DEFAULT_SKILL_EXCEPTION_POLICY
+        )
+
+    def _get_default_routing(self) -> Dict[PublicId, PublicId]:
+        """
+        Return the default routing
+
+        :return: the policy
+        """
+        return self._default_routing
+
+    def _get_loop_mode(self) -> str:
+        """
+        Return the loop mode
+
+        :return: the loop mode
+        """
+        return (
+            self._loop_mode if self._loop_mode is not None else self.DEFAULT_LOOP_MODE
+        )
+
     def _check_configuration_not_already_added(self, configuration) -> None:
         if (
             configuration.component_id
@@ -771,6 +938,26 @@ class AEABuilder:
                     pprint.pformat(sorted(map(str, not_supported_packages))),
                 )
             )
+
+    def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
+        """
+        Check that PyPI dependencies of a package don't conflict with
+        the existing ones.
+
+        :param configuration: the component configuration.
+        :return: None
+        :raises AEAException: if some PyPI dependency is conflicting.
+        """
+        all_pypi_dependencies = self._package_dependency_manager.pypi_dependencies
+        all_pypi_dependencies = merge_dependencies(
+            all_pypi_dependencies, configuration.pypi_dependencies
+        )
+        for pkg_name, dep_info in all_pypi_dependencies.items():
+            set_specifier = SpecifierSet(dep_info.get("version", ""))
+            if not is_satisfiable(set_specifier):
+                raise AEAException(
+                    f"Conflict on package {pkg_name}: specifier set '{dep_info['version']}' not satisfiable."
+                )
 
     @staticmethod
     def _find_component_directory_from_component_id(
@@ -845,6 +1032,16 @@ class AEABuilder:
         self.set_timeout(agent_configuration.timeout)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
+        if agent_configuration.decision_maker_handler != {}:
+            dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
+            file_path = agent_configuration.decision_maker_handler["file_path"]
+            self.set_decision_maker_handler(dotted_path, file_path)
+        if agent_configuration.skill_exception_policy is not None:
+            self.set_skill_exception_policy(
+                ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
+            )
+        self.set_default_routing(agent_configuration.default_routing)
+        self.set_loop_mode(agent_configuration.loop_mode)
 
         # load private keys
         for (
@@ -1081,48 +1278,30 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
     agent_configuration = agent_loader.load(fp_read)
 
     for identifier, _value in agent_configuration.private_key_paths.read_all():
-        if identifier not in SUPPORTED_CRYPTOS:
+        if identifier not in registry.supported_crypto_ids:
             ValueError("Unsupported identifier in private key paths.")
 
-    fetchai_private_key_path = agent_configuration.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_path is None:
-        _create_fetchai_private_key(
-            private_key_file=str(aea_project_path / FETCHAI_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    else:
-        try:
-            _try_validate_fet_private_key_path(
-                str(aea_project_path / fetchai_private_key_path), exit_on_error=False
+    for identifier, private_key_path in IDENTIFIER_TO_KEY_FILES.items():
+        config_private_key_path = agent_configuration.private_key_paths.read(identifier)
+        if config_private_key_path is None:
+            create_private_key(
+                identifier, private_key_file=str(aea_project_path / private_key_path)
             )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_path), FETCHAI,
+            agent_configuration.private_key_paths.update(identifier, private_key_path)
+        else:
+            try:
+                _try_validate_private_key_path(
+                    identifier,
+                    str(aea_project_path / private_key_path),
+                    exit_on_error=False,
                 )
-            )
-            raise
-
-    ethereum_private_key_path = agent_configuration.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_path is None:
-        _create_ethereum_private_key(
-            private_key_file=str(aea_project_path / ETHEREUM_PRIVATE_KEY_FILE)
-        )
-        agent_configuration.private_key_paths.update(
-            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
-        )
-    else:
-        try:
-            _try_validate_ethereum_private_key_path(
-                str(aea_project_path / ethereum_private_key_path), exit_on_error=False
-            )
-        except FileNotFoundError:  # pragma: no cover
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_path), ETHEREUM,
+            except FileNotFoundError:  # pragma: no cover
+                logger.error(
+                    "File {} for private key {} not found.".format(
+                        repr(private_key_path), identifier,
+                    )
                 )
-            )
-            raise
+                raise
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)

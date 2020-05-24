@@ -22,7 +22,6 @@
 import datetime
 from typing import List, Optional, Set
 
-from aea.crypto.ethereum import ETHEREUM
 from aea.skills.base import Model
 
 DEFAULT_MIN_NB_AGENTS = 5
@@ -39,6 +38,7 @@ DEFAULT_ITEM_SETUP_TIMEOUT = 60
 DEFAULT_COMPETITION_TIMEOUT = 300
 DEFAULT_INACTIVITY_TIMEOUT = 30
 DEFAULT_VERSION = "v1"
+DEFAULT_LEDGER_ID = "ethereum"
 
 
 class Parameters(Model):
@@ -47,7 +47,7 @@ class Parameters(Model):
     def __init__(self, **kwargs):
         """Instantiate the search class."""
 
-        self._ledger = kwargs.pop("ledger", ETHEREUM)
+        self._ledger = kwargs.pop("ledger", DEFAULT_LEDGER_ID)
         self._contract_address = kwargs.pop(
             "contract_adress", None
         )  # type: Optional[str]

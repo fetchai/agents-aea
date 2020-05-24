@@ -136,7 +136,11 @@ class PerformanceReport:
         return resources
 
     def _make_resource(
-        self, name: str, unit: str, attr_name: str, aggr_function: Optional["function"]
+        self,
+        name: str,
+        unit: str,
+        attr_name: str,
+        aggr_function: Optional["function"],  # noqa
     ) -> ResourceRecord:
         """
         Make ResourceRecord.

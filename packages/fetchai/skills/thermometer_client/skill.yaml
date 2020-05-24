@@ -1,21 +1,21 @@
 name: thermometer_client
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The thermometer client skill implements the skill to purchase temperature
   data.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmRLGnLmojPrafe41e1WrMpsGCdmfpWZ4sQTWgDSrsBHcu
-  dialogues.py: QmNN6MNEAfveuiasJ1zi5DP7H7EEkVuhQ2isvwF1deHMM9
-  handlers.py: QmSswo3ZEvX8H54s4z3SvRWabVm5fZsq4og93iBDs7uyoe
-  strategy.py: QmUyiNs8qWPvNBwKevuF1Qj7orgNGbczYRfKTzPHeF1kXt
+  behaviours.py: QmZHKXwPeCngdveHR4syA7zRmdvtgcNqdXk7SUyDxS94ud
+  dialogues.py: QmbUgDgUGfEMe4tsG96cvZ6UVQ7orVv2LZBzJEF25B62Yj
+  handlers.py: QmdqnzMzBZsqyZkMzRimMBMEoAfpyULm9nACcwiVsYVihy
+  strategy.py: QmYwypsndrFexLwHSeJ4kbyez3gbB4VCAcV53UzDjtvwti
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
+- fetchai/fipa:0.2.0
 - fetchai/oef_search:0.1.0
 behaviours:
   search:

@@ -20,6 +20,8 @@
 from pathlib import Path
 from unittest import TestCase, mock
 
+import pytest
+
 from aea.cli import cli
 from aea.cli.core import (
     _try_add_key,
@@ -29,8 +31,10 @@ from aea.cli.core import (
     _try_get_wealth,
     _wait_funds_release,
 )
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.exceptions import AEATestingException
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.conftest import CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
@@ -53,9 +57,8 @@ class TryGetBalanceTestCase(TestCase):
     def test__try_get_balance_positive(self):
         """Test for _try_get_balance method positive result."""
         agent_config = mock.Mock()
-        ledger_apis = mock.Mock()
-        ledger_apis.read_all = lambda: [["id", "config"], ["id", "config"]]
-        agent_config.ledger_apis = ledger_apis
+        ledger_apis = {"type_": {"address": "some-adress"}}
+        agent_config.ledger_apis_dict = ledger_apis
 
         wallet_mock = mock.Mock()
         wallet_mock.addresses = {"type_": "some-adress"}
@@ -68,7 +71,7 @@ class GenerateWealthTestCase(TestCase):
     @mock.patch("aea.cli.core.Wallet")
     @mock.patch("aea.cli.core.TESTNETS", {"type": "value"})
     @mock.patch("aea.cli.core.click.echo")
-    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
     @mock.patch("aea.cli.core._wait_funds_release")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
@@ -80,7 +83,7 @@ class GetWealthTestCase(TestCase):
     """Test case for _get_wealth method."""
 
     @mock.patch("aea.cli.core.Wallet")
-    @mock.patch("aea.cli.core._try_generate_testnet_wealth")
+    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
     @mock.patch("aea.cli.core._try_get_balance")
     def test__get_wealth_positive(self, *mocks):
         """Test for _get_wealth method positive result."""
@@ -108,8 +111,8 @@ class AddKeyTestCase(TestCase):
         _try_add_key(ctx, "type", "filepath")
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
@@ -127,15 +130,15 @@ class GenerateWealthCommandTestCase(TestCase):
                 "--skip-consistency-check",
                 "generate-wealth",
                 "--sync",
-                FETCHAI,
+                FetchAICrypto.identifier,
             ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_wealth")
 @mock.patch("aea.cli.core.click.echo")
 class GetWealthCommandTestCase(TestCase):
@@ -149,14 +152,19 @@ class GetWealthCommandTestCase(TestCase):
         """Test for CLI get_wealth positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-wealth", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-wealth",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._verify_or_create_private_keys")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.core.verify_or_create_private_keys")
 @mock.patch("aea.cli.core._try_get_address")
 @mock.patch("aea.cli.core.click.echo")
 class GetAddressCommandTestCase(TestCase):
@@ -170,14 +178,19 @@ class GetAddressCommandTestCase(TestCase):
         """Test for CLI get_address positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-address", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-address",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
-@mock.patch("aea.cli.core._validate_private_key_path")
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.core._try_validate_private_key_path")
 @mock.patch("aea.cli.core._try_add_key")
 class AddKeyCommandTestCase(TestCase):
     """Test case for CLI add_key command."""
@@ -193,7 +206,40 @@ class AddKeyCommandTestCase(TestCase):
         )  # some existing filepath to pass CLI argument check
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI, filepath],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "add-key",
+                FetchAICrypto.identifier,
+                filepath,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+class TestWealthCommands(AEATestCaseMany):
+    """Test case for CLI wealth commands."""
+
+    def test_wealth_commands(self):
+        """Test wealth commands."""
+        agent_name = "test_aea"
+        self.create_agents(agent_name)
+
+        self.set_agent_context(agent_name)
+        ledger_apis = {"fetchai": {"network": "testnet"}}
+        self.force_set_config("agent.ledger_apis", ledger_apis)
+
+        self.generate_private_key()
+        self.add_private_key()
+
+        self.generate_wealth()
+
+        settings = {"unsupported_crypto": "path"}
+        self.force_set_config("agent.private_key_paths", settings)
+        with pytest.raises(AEATestingException) as excinfo:
+            self.generate_wealth()
+
+        assert "Crypto not registered with id 'unsupported_crypto'." in str(
+            excinfo.value
+        )

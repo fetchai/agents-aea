@@ -19,19 +19,21 @@
 """Methods for CLI fetch functionality."""
 
 import os
-from shutil import rmtree
-from typing import Optional
+from typing import Optional, cast
 
 import click
 
 from aea.cli.add import _add_item
-from aea.cli.common import Context, try_to_load_agent_config
 from aea.cli.registry.utils import download_file, extract, request_api
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
+@clean_after
 def fetch_agent(
-    ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
+    click_context, public_id: PublicId, alias: Optional[str] = None
 ) -> None:
     """
     Fetch Agent from Registry.
@@ -47,16 +49,19 @@ def fetch_agent(
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
+    ctx = cast(Context, click_context.obj)
     filepath = download_file(file_url, ctx.cwd)
+
+    folder_name = name if alias is None else alias
+    aea_folder = os.path.join(ctx.cwd, folder_name)
+    ctx.clean_paths.append(aea_folder)
+
     extract(filepath, ctx.cwd)
 
     if alias is not None:
         os.rename(name, alias)
 
-    folder_name = name if alias is None else alias
-
-    target_folder = os.path.join(ctx.cwd, folder_name)
-    ctx.cwd = target_folder
+    ctx.cwd = aea_folder
     try_to_load_agent_config(ctx)
 
     if alias is not None:
@@ -78,11 +83,10 @@ def fetch_agent(
             try:
                 _add_item(click_context, item_type, item_public_id)
             except Exception as e:
-                rmtree(target_folder)
                 raise click.ClickException(
                     'Unable to fetch dependency for agent "{}", aborting. {}'.format(
                         name, e
                     )
                 )
     click.echo("Dependencies successfully fetched.")
-    click.echo("Agent {} successfully fetched to {}.".format(name, target_folder))
+    click.echo("Agent {} successfully fetched to {}.".format(name, aea_folder))

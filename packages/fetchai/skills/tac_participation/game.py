@@ -27,6 +27,8 @@ from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TacMessage
 
+DEFAULT_LEDGER_ID = "ethereum"
+
 
 class Phase(Enum):
     """This class defines the phases of the game."""
@@ -157,10 +159,16 @@ class Game(Model):
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._is_using_contract = kwargs.pop("is_using_contract", False)  # type: bool
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._conf = None  # type: Optional[Configuration]
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
 
     @property
     def is_using_contract(self) -> bool:

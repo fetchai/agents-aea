@@ -18,3 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the crypto modules."""
+
+from aea.crypto.registry import make, register  # noqa
+
+register(id="fetchai", entry_point="aea.crypto.fetchai:FetchAICrypto")
+
+register(id="ethereum", entry_point="aea.crypto.ethereum:EthereumCrypto")
+
+register(id="cosmos", entry_point="aea.crypto.cosmos:CosmosCrypto")

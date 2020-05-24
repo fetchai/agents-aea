@@ -26,13 +26,12 @@ from typing import Optional, cast
 import click
 
 from aea.cli.add import _add_item
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
-    _try_get_item_source_path,
-    try_to_load_agent_config,
-)
 from aea.cli.registry.fetch import fetch_agent
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.package_utils import try_get_item_source_path
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 
@@ -46,12 +45,12 @@ from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 @click.pass_context
 def fetch(click_context, public_id, alias, local):
     """Fetch Agent from Registry."""
-    ctx = cast(Context, click_context.obj)
     if local:
+        ctx = cast(Context, click_context.obj)
         ctx.set_config("is_local", True)
-        _fetch_agent_locally(ctx, public_id, click_context, alias)
+        _fetch_agent_locally(click_context, public_id, alias)
     else:
-        fetch_agent(ctx, public_id, click_context, alias)
+        fetch_agent(click_context, public_id, alias)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -66,22 +65,24 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
     return ctx.agent_config.version == agent_public_id.version
 
 
+@clean_after
 def _fetch_agent_locally(
-    ctx: Context, public_id: PublicId, click_context, alias: Optional[str] = None
+    click_context, public_id: PublicId, alias: Optional[str] = None
 ) -> None:
     """
     Fetch Agent from local packages.
 
-    :param ctx: Context
+    :param click_context: click context object.
     :param public_id: public ID of agent to be fetched.
     :param click_context: the click context.
     :param alias: an optional alias.
     :return: None
     """
     packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
-    source_path = _try_get_item_source_path(
+    source_path = try_get_item_source_path(
         packages_path, public_id.author, "agents", public_id.name
     )
+    ctx = cast(Context, click_context.obj)
     try_to_load_agent_config(ctx, agent_src_path=source_path)
     if not _is_version_correct(ctx, public_id):
         raise click.ClickException(
@@ -96,6 +97,8 @@ def _fetch_agent_locally(
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
+
+    ctx.clean_paths.append(target_path)
     copy_tree(source_path, target_path)
 
     ctx.cwd = target_path

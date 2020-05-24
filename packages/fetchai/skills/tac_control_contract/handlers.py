@@ -21,7 +21,6 @@
 
 from typing import cast
 
-from aea.crypto.ethereum import EthereumApi
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -92,7 +91,7 @@ class TACHandler(Handler):
         parameters = cast(Parameters, self.context.parameters)
         agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent name not in whitelist: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -111,7 +110,7 @@ class TACHandler(Handler):
 
         game = cast(Game, self.context.game)
         if message.counterparty in game.registration.agent_addr_to_name:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent already registered: '{}'".format(
                     self.context.agent_name,
                     game.registration.agent_addr_to_name[message.counterparty],
@@ -129,7 +128,7 @@ class TACHandler(Handler):
             )
 
         if agent_name in game.registration.agent_addr_to_name.values():
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent with this name already registered: '{}'".format(
                     self.context.agent_name, agent_name
                 )
@@ -160,7 +159,7 @@ class TACHandler(Handler):
         """
         game = cast(Game, self.context.game)
         if message.counterparty not in game.registration.agent_addr_to_name:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Agent not registered: '{}'".format(
                     self.context.agent_name, message.counterparty
                 )
@@ -235,7 +234,7 @@ class OEFRegistrationHandler(Handler):
 
         :return: None
         """
-        self.context.logger.error(
+        self.context.logger.warning(
             "[{}]: Received OEF Search error: dialogue_reference={}, operation={}".format(
                 self.context.agent_name,
                 oef_error.dialogue_reference,
@@ -271,9 +270,7 @@ class TransactionHandler(Handler):
         tx_msg_response = cast(TransactionMessage, message)
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
-        ledger_api = cast(
-            EthereumApi, self.context.ledger_apis.apis.get(parameters.ledger)
-        )
+        ledger_api = self.context.ledger_apis.get_api(parameters.ledger)
         if tx_msg_response.tx_id == "contract_deploy":
             game.phase = Phase.CONTRACT_DEPLOYING
             self.context.logger.info(

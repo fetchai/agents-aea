@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """ This module contains tests for aea/aea_builder.py """
 import os
 import re
@@ -25,15 +26,16 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
-
-from tests.common.utils import timeit_context
 
 from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
 
-@skip_test_windows()
+FETCHAI = FetchAICrypto.identifier
+
+
+@skip_test_windows
 def test_default_timeout_for_agent():
     """
     Tests agents loop sleep timeout
@@ -44,49 +46,17 @@ def test_default_timeout_for_agent():
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(FETCHAI, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
 
-    """ Default timeout == 0.05 """
     aea = builder.build()
     assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
 
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0_05 = time_result.time_passed
-
-    """ Timeout == 0.001 """
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(FETCHAI, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.001
+    builder.set_timeout(100)
 
     aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
-
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0_001 = time_result.time_passed
-
-    """ Timeout == 0.0 """
-    builder = AEABuilder()
-    builder.set_name(agent_name)
-    builder.add_private_key(FETCHAI, private_key_path)
-    builder.DEFAULT_AGENT_LOOP_TIMEOUT = 0.0
-
-    aea = builder.build()
-    assert aea._timeout == builder.DEFAULT_AGENT_LOOP_TIMEOUT
-
-    with timeit_context() as time_result:
-        aea._spin_main_loop()
-
-    assert time_result.time_passed > builder.DEFAULT_AGENT_LOOP_TIMEOUT
-    time_0 = time_result.time_passed
-
-    assert time_0 < time_0_001 < time_0_05
+    assert aea._timeout == 100
 
 
 def test_add_package_already_existing():
@@ -100,7 +70,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.1.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.2.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -113,12 +83,12 @@ def test_when_package_has_missing_dependency():
     """
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.2.0' of type 'connection' cannot be added. "
-        "Missing dependencies: ['(protocol, fetchai/fipa:0.1.0)', '(protocol, fetchai/oef_search:0.1.0)']"
+        "Package 'fetchai/oef:0.3.0' of type 'connection' cannot be added. "
+        "Missing dependencies: ['(protocol, fetchai/fipa:0.2.0)', '(protocol, fetchai/oef_search:0.1.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):
         # connection "fetchai/oef:0.1.0" requires
-        # "fetchai/oef_search:0.1.0" and "fetchai/fipa:0.1.0" protocols.
+        # "fetchai/oef_search:0.1.0" and "fetchai/fipa:0.2.0" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",

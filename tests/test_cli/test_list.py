@@ -61,7 +61,7 @@ class TestListProtocols:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False
@@ -74,7 +74,7 @@ class TestListProtocols:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -105,7 +105,7 @@ class TestListConnections:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False
@@ -118,7 +118,7 @@ class TestListConnections:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -149,7 +149,7 @@ class TestListSkills:
         os.chdir(Path(cls.t, "dummy_aea"))
 
         with mock.patch(
-            "aea.cli.list._format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+            "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False
@@ -162,7 +162,7 @@ class TestListSkills:
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
-        assert self.result.output == compare_text
+        assert self.result.output == compare_text, self.result.output
 
     @classmethod
     def teardown_class(cls):
@@ -174,20 +174,36 @@ class TestListSkills:
             pass
 
 
-@mock.patch("aea.cli.common.try_to_load_agent_config")
 class ListContractsCommandTestCase(TestCase):
     """Test that the command 'aea list contracts' works as expected."""
 
     def setUp(self):
         """Set the test up."""
         self.runner = CliRunner()
+        self.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        self.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), self.schema
+        )
+        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        # copy the 'dummy_aea' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(self.t, "dummy_aea"))
+        os.chdir(Path(self.t, "dummy_aea"))
 
     @mock.patch("aea.cli.list._get_item_details")
-    @mock.patch("aea.cli.common._validate_config_consistency")
-    @mock.patch("aea.cli.common._format_items")
+    @mock.patch("aea.cli.utils.formatting.format_items")
     def test_list_contracts_positive(self, *mocks):
         """Test list contracts command positive result."""
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "list", "contracts"], standalone_mode=False
         )
         self.assertEqual(result.exit_code, 0)
+
+    def tearDown(self):
+        """Tear the test down."""
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass

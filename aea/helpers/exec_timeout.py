@@ -100,7 +100,7 @@ class BaseExecTimeout(ABC):
 
     def __exit__(
         self, exc_type: Type[Exception], exc_val: Exception, exc_tb: TracebackType
-    ) -> bool:
+    ) -> None:
         """
         Exit context manager.
 
@@ -111,8 +111,6 @@ class BaseExecTimeout(ABC):
 
         if isinstance(exc_val, TimeoutException):
             self.result.set_cancelled_by_timeout()
-            return True
-        return False
 
     @abstractmethod
     def _set_timeout_watch(self) -> None:

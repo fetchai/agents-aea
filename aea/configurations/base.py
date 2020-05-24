@@ -70,6 +70,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "contract.yaml",
 ]
 
+# TODO implement a proper class to represent this type.
 Dependency = dict
 """
 A dependency is a dictionary with the following (optional) keys:
@@ -333,7 +334,7 @@ class PublicId(JSONSerializable):
 
     def _process_version(self, version_like: PackageVersionLike) -> Tuple[Any, Any]:
         if isinstance(version_like, str):
-            return version_like, semver.parse_version_info(version_like)
+            return version_like, semver.VersionInfo.parse(version_like)
         elif isinstance(version_like, semver.VersionInfo):
             return str(version_like), version_like
         else:
@@ -1181,6 +1182,10 @@ class AgentConfig(PackageConfiguration):
         timeout: Optional[float] = None,
         execution_timeout: Optional[float] = None,
         max_reactions: Optional[int] = None,
+        decision_maker_handler: Optional[Dict] = None,
+        skill_exception_policy: Optional[str] = None,
+        default_routing: Optional[Dict] = None,
+        loop_mode: Optional[str] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1213,6 +1218,21 @@ class AgentConfig(PackageConfiguration):
         self.timeout: Optional[float] = timeout
         self.execution_timeout: Optional[float] = execution_timeout
         self.max_reactions: Optional[int] = max_reactions
+        self.skill_exception_policy: Optional[str] = skill_exception_policy
+
+        self.decision_maker_handler = (
+            decision_maker_handler if decision_maker_handler is not None else {}
+        )
+
+        self.default_routing = (
+            {
+                PublicId.from_str(key): PublicId.from_str(value)
+                for key, value in default_routing.items()
+            }
+            if default_routing is not None
+            else {}
+        )  # type: Dict[PublicId, PublicId]
+        self.loop_mode = loop_mode
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1317,6 +1337,17 @@ class AgentConfig(PackageConfiguration):
             config["execution_timeout"] = self.execution_timeout
         if self.max_reactions is not None:
             config["max_reactions"] = self.max_reactions
+        if self.decision_maker_handler != {}:
+            config["decision_maker_handler"] = self.decision_maker_handler
+        if self.skill_exception_policy is not None:
+            config["skill_exception_policy"] = self.skill_exception_policy
+        if self.default_routing != {}:
+            config["default_routing"] = {
+                str(key): str(value) for key, value in self.default_routing.items()
+            }
+        if self.loop_mode is not None:
+            config["loop_mode"] = self.loop_mode
+
         return config
 
     @classmethod
@@ -1338,6 +1369,10 @@ class AgentConfig(PackageConfiguration):
             timeout=cast(float, obj.get("timeout")),
             execution_timeout=cast(float, obj.get("execution_timeout")),
             max_reactions=cast(int, obj.get("max_reactions")),
+            decision_maker_handler=cast(Dict, obj.get("decision_maker_handler", {})),
+            skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
+            default_routing=cast(Dict, obj.get("default_routing", {})),
+            loop_mode=cast(str, obj.get("loop_mode")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
@@ -1428,26 +1463,26 @@ class ProtocolSpecification(ProtocolConfig):
             description=description,
         )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
-        self._protobuf_snippets = None  # type: Optional[Dict]
-        self._dialogue_config = None  # type: Optional[Dict]
+        self._protobuf_snippets = {}  # type: Dict
+        self._dialogue_config = {}  # type: Dict
 
     @property
-    def protobuf_snippets(self) -> Optional[Dict]:
+    def protobuf_snippets(self) -> Dict:
         """Get the protobuf snippets."""
         return self._protobuf_snippets
 
     @protobuf_snippets.setter
-    def protobuf_snippets(self, protobuf_snippets: Optional[Dict]):
+    def protobuf_snippets(self, protobuf_snippets: Dict):
         """Set the protobuf snippets."""
         self._protobuf_snippets = protobuf_snippets
 
     @property
-    def dialogue_config(self) -> Optional[Dict]:
+    def dialogue_config(self) -> Dict:
         """Get the dialogue config."""
         return self._dialogue_config
 
     @dialogue_config.setter
-    def dialogue_config(self, dialogue_config: Optional[Dict]):
+    def dialogue_config(self, dialogue_config: Dict):
         """Set the dialogue config."""
         self._dialogue_config = dialogue_config
 
@@ -1599,7 +1634,7 @@ class ContractConfig(ComponentConfiguration):
         )
 
 
-"""The following functions are called from aea.cli.common."""
+"""The following functions are called from aea.cli.utils."""
 
 
 def _compute_fingerprint(

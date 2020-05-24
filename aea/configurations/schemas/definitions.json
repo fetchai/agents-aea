@@ -99,6 +99,10 @@
         "$ref": "definitions.json#/definitions/ignore_pattern"
       }
     },
+    "ledger_id": {
+      "type": "string",
+      "pattern": "^[^\\d\\W]\\w*\\Z"
+    },
     "ignore_pattern": {
       "type": "string"
     },
@@ -113,6 +117,14 @@
     "execution_timeout": {
       "type": ["number", "null"],
       "minimum": 0
+    },
+    "skill_exception_policy": {
+      "type": "string",
+      "enum": ["propagate", "just_log", "stop_and_exit"]
+    },
+    "loop_mode": {
+      "type": "string",
+      "enum": ["sync", "async"]
     }
   }
 }

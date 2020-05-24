@@ -22,7 +22,7 @@
 import os
 import time
 import uuid
-from typing import Any, Dict, List, Tuple, cast
+from typing import Dict, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
@@ -66,7 +66,7 @@ class Strategy(Model):
 
         self.data_price = kwargs.pop("data_price", DEFAULT_PRICE)
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
-        self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
 
@@ -88,6 +88,11 @@ class Strategy(Model):
             )
             self.record_balance(balance)
         self.other_carpark_processes_running = False
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id used."""
+        return self._ledger_id
 
     def record_balance(self, balance):
         """Record current balance to database."""
@@ -144,7 +149,7 @@ class Strategy(Model):
 
     def generate_proposal_and_data(
         self, query: Query, counterparty: Address
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, Dict[str, str]]:
         """
         Generate a proposal matching the query.
 
@@ -184,11 +189,12 @@ class Strategy(Model):
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
                 "max_spaces": max_spaces,
-                "tx_nonce": tx_nonce if tx_nonce is not None else "",
+                "tx_nonce": tx_nonce,
             }
         )
 
         data[0]["price_fet"] = self.data_price
         data[0]["message_type"] = "car_park_data"
+        data_dict = {str(key): str(value) for key, value in data[0].items()}
 
-        return proposal, data[0]
+        return proposal, data_dict

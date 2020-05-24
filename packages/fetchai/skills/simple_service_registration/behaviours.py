@@ -100,22 +100,23 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(oef_msg_id), ""),
-            service_description=self._registered_service_description,
-        )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
-        )
-        self.context.logger.info(
-            "[{}]: unregistering services from OEF service directory.".format(
-                self.context.agent_name
+        if self._registered_service_description is not None:
+            strategy = cast(Strategy, self.context.strategy)
+            oef_msg_id = strategy.get_next_oef_msg_id()
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(oef_msg_id), ""),
+                service_description=self._registered_service_description,
             )
-        )
-        self._registered_service_description = None
+            self.context.outbox.put_message(
+                to=self.context.search_service_address,
+                sender=self.context.agent_address,
+                protocol_id=OefSearchMessage.protocol_id,
+                message=OefSearchSerializer().encode(msg),
+            )
+            self.context.logger.info(
+                "[{}]: unregistering services from OEF service directory.".format(
+                    self.context.agent_name
+                )
+            )
+            self._registered_service_description = None

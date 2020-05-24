@@ -26,18 +26,17 @@ from typing import Collection, cast
 
 import click
 
-from aea.cli.common import (
-    Context,
-    PublicIdParameter,
-    _copy_package_directory,
-    _find_item_in_distribution,
-    _find_item_locally,
-    check_aea_project,
-    clean_after,
-    get_package_dest_path,
-    logger,
-)
 from aea.cli.registry.utils import fetch_package
+from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.loggers import logger
+from aea.cli.utils.package_utils import (
+    copy_package_directory,
+    find_item_in_distribution,
+    find_item_locally,
+    get_package_dest_path,
+)
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
@@ -157,8 +156,8 @@ def _add_item(click_context, item_type, item_public_id) -> None:
     ctx.clean_paths.append(dest_path)
 
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
-        source_path = _find_item_in_distribution(ctx, item_type, item_public_id)
-        package_path = _copy_package_directory(
+        source_path = find_item_in_distribution(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(
             ctx,
             source_path,
             item_type,
@@ -167,8 +166,8 @@ def _add_item(click_context, item_type, item_public_id) -> None:
             dest_path,
         )
     elif is_local:
-        source_path = _find_item_locally(ctx, item_type, item_public_id)
-        package_path = _copy_package_directory(
+        source_path = find_item_locally(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(
             ctx,
             source_path,
             item_type,

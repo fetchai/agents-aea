@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
@@ -50,40 +51,24 @@ class FIPAHandler(Handler):
         :param message: the message
         :return: None
         """
-        # convenience representations
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    fipa_msg.counterparty, dialogue_reference, is_seller=True
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         # handle message
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, dialogue)
+            self._handle_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -112,8 +97,8 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": b""},
-        )  # FipaSerializer().encode(msg)
+            error_data={"fipa_message": FipaSerializer().encode(msg)},
+        )
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -148,18 +133,19 @@ class FIPAHandler(Handler):
             dialogue.carpark_data = carpark_data
             dialogue.proposal = proposal
             self.context.logger.info(
-                "[{}]: sending sender={} a PROPOSE with proposal={}".format(
-                    self.context.agent_name, msg.counterparty[-5:], proposal.values
+                "[{}]: sending a PROPOSE with proposal={} to sender={}".format(
+                    self.context.agent_name, proposal.values, msg.counterparty[-5:]
                 )
             )
             proposal_msg = FipaMessage(
                 message_id=new_message_id,
-                target=new_target,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                target=new_target,
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            dialogue.outgoing_extend(proposal_msg)
+            proposal_msg.counterparty = msg.counterparty
+            dialogue.update(proposal_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -186,7 +172,8 @@ class FIPAHandler(Handler):
                 target=new_target,
                 performative=FipaMessage.Performative.DECLINE,
             )
-            dialogue.outgoing_extend(decline_msg)
+            decline_msg.counterparty = msg.counterparty
+            dialogue.update(decline_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
                 sender=self.context.agent_address,
@@ -224,7 +211,7 @@ class FIPAHandler(Handler):
             "[NONE]",
         )
         # dialogues = cast(Dialogues, self.context.dialogues)
-        # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
+        # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
 
     def _handle_accept(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -257,7 +244,8 @@ class FIPAHandler(Handler):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={"address": self.context.agent_addresses[identifier]},
         )
-        dialogue.outgoing_extend(match_accept_msg)
+        match_accept_msg.counterparty = msg.counterparty
+        dialogue.update(match_accept_msg)
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
@@ -277,7 +265,7 @@ class FIPAHandler(Handler):
         Handle the INFORM.
 
         If the INFORM message contains the transaction_digest then verify that it is settled, otherwise do nothing.
-        If the transaction is settled send the weather data, otherwise do nothing.
+        If the transaction is settled send the car data, otherwise do nothing.
 
         :param msg: the message
         :param dialogue: the dialogue object
@@ -293,6 +281,7 @@ class FIPAHandler(Handler):
 
         json_data = msg.info
         if "transaction_digest" in json_data.keys():
+            is_valid = False
             tx_digest = json_data["transaction_digest"]
             self.context.logger.info(
                 "[{}]: checking whether transaction={} has been received ...".format(
@@ -302,14 +291,22 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
             total_price = cast(int, proposal.values.get("price"))
-            is_valid = self.context.ledger_apis.is_tx_valid(
-                ledger_id,
-                tx_digest,
-                self.context.agent_addresses[ledger_id],
-                msg.counterparty,
-                cast(str, proposal.values.get("tx_nonce")),
-                cast(int, proposal.values.get("price")),
-            )
+            not_settled = True
+            time_elapsed = 0
+            # TODO: fix blocking code; move into behaviour!
+            while not_settled and time_elapsed < 60:
+                is_valid = self.context.ledger_apis.is_tx_valid(
+                    ledger_id,
+                    tx_digest,
+                    self.context.agent_addresses[ledger_id],
+                    msg.counterparty,
+                    cast(str, proposal.values.get("tx_nonce")),
+                    cast(int, proposal.values.get("price")),
+                )
+                not_settled = not is_valid
+                if not_settled:
+                    time.sleep(2)
+                    time_elapsed += 2
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
@@ -333,7 +330,8 @@ class FIPAHandler(Handler):
                     performative=FipaMessage.Performative.INFORM,
                     info=dialogue.carpark_data,
                 )
-                dialogue.outgoing_extend(inform_msg)
+                inform_msg.counterparty = msg.counterparty
+                dialogue.update(inform_msg)
                 self.context.outbox.put_message(
                     to=msg.counterparty,
                     sender=self.context.agent_address,
@@ -341,7 +339,7 @@ class FIPAHandler(Handler):
                     message=FipaSerializer().encode(inform_msg),
                 )
                 # dialogues = cast(Dialogues, self.context.dialogues)
-                # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
+                # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated)
                 strategy.db.add_in_progress_transaction(
                     tx_digest,
                     msg.counterparty[-5:],

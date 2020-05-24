@@ -25,12 +25,14 @@ import tempfile
 
 import click
 
-from aea.cli.common import Context, logger, try_to_load_agent_config
 from aea.cli.registry.utils import (
     check_is_author_logged_in,
     clean_tarfiles,
     request_api,
 )
+from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.context import Context
+from aea.cli.utils.loggers import logger
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 

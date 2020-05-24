@@ -23,8 +23,8 @@ from unittest.mock import Mock
 
 from click import ClickException
 
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
@@ -98,8 +98,12 @@ class AEAConfMock:
     def __init__(self, *args, **kwargs):
         """Init the AEAConf mock object."""
         self.author = AUTHOR
+        self.version = DEFAULT_TESTING_VERSION
         self.ledger_apis = Mock()
-        ledger_apis = ((ETHEREUM, "value"), (FETCHAI, "value"))
+        ledger_apis = (
+            (EthereumCrypto.identifier, "value"),
+            (FetchAICrypto.identifier, "value"),
+        )
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)
         ledger_api_config = {"host": "host", "port": "port", "address": "address"}
         self.ledger_apis.read = Mock(return_value=ledger_api_config)

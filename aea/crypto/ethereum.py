@@ -19,10 +19,11 @@
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 
+import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, Tuple, cast
 
 from eth_account import Account
 from eth_account.datastructures import AttributeDict
@@ -30,26 +31,27 @@ from eth_account.messages import encode_defunct
 
 from eth_keys import keys
 
+import requests
+
 import web3
 from web3 import HTTPProvider, Web3
 
-from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
 from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
-ETHEREUM = "ethereum"
+_ETHEREUM = "ethereum"
 ETHEREUM_CURRENCY = "ETH"
 DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
-CONFIRMATION_RETRY_TIMEOUT = 1.0
-MAX_SEND_API_CALL_RETRIES = 60
+ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 
 
-class EthereumCrypto(Crypto):
+class EthereumCrypto(Crypto[Account]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
-    identifier = ETHEREUM
+    identifier = _ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
@@ -57,18 +59,10 @@ class EthereumCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._account = (
-            self._generate_private_key()
-            if private_key_path is None
-            else self._load_private_key_from_path(private_key_path)
-        )
-        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
-        self._public_key = keys.PrivateKey(bytes_representation).public_key
-
-    @property
-    def entity(self) -> Account:
-        """Get the entity."""
-        return self._account
+        super().__init__(private_key_path=private_key_path)
+        bytes_representation = Web3.toBytes(hexstr=self.entity.key.hex())
+        self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
+        self._address = str(self.entity.address)
 
     @property
     def public_key(self) -> str:
@@ -86,9 +80,10 @@ class EthereumCrypto(Crypto):
 
         :return: a display_address str
         """
-        return str(self._account.address)
+        return self._address
 
-    def _load_private_key_from_path(self, file_name) -> Account:
+    @classmethod
+    def load_private_key_from_path(cls, file_name) -> Account:
         """
         Load a private key in hex format from a file.
 
@@ -96,16 +91,10 @@ class EthereumCrypto(Crypto):
         :return: the Entity.
         """
         path = Path(file_name)
-        try:
-            if path.is_file():
-                with open(path, "r") as key:
-                    data = key.read()
-                    account = Account.from_key(data)
-            else:
-                account = self._generate_private_key()
-            return account
-        except IOError as e:  # pragma: no cover
-            logger.exception(str(e))
+        with open(path, "r") as key:
+            data = key.read()
+            account = Account.from_key(data)
+        return account
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
@@ -116,6 +105,7 @@ class EthereumCrypto(Crypto):
         :return: signature of the message in string form
         """
         if is_deprecated_mode:
+            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
             signature_dict = self.entity.signHash(message)
             signed_msg = signature_dict["signature"].hex()
         else:
@@ -135,22 +125,29 @@ class EthereumCrypto(Crypto):
         #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction
         return signed_transaction
 
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(
+        self, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[Address, ...]:
         """
-        Recover the address from the hash.
+        Recover the addresses from the hash.
 
         :param message: the message we expect
         :param signature: the transaction signature
-        :return: the recovered address
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered addresses
         """
-        signable_message = encode_defunct(primitive=message)
-        addr = Account.recover_message(
-            signable_message=signable_message, signature=signature
-        )
-        return addr
+        if is_deprecated_mode:
+            assert len(message) == 32, "Message must be hashed to exactly 32 bytes."
+            address = Account.recoverHash(message_hash=message, signature=signature)
+        else:
+            signable_message = encode_defunct(primitive=message)
+            address = Account.recover_message(
+                signable_message=signable_message, signature=signature
+            )
+        return (address,)
 
     @classmethod
-    def _generate_private_key(cls) -> Account:
+    def generate_private_key(cls) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account
@@ -163,17 +160,10 @@ class EthereumCrypto(Crypto):
         :param public_key: the public key
         :return: str
         """
-        raise NotImplementedError  # pragma: no cover
-
-    @classmethod
-    def load(cls, fp: BinaryIO):
-        """
-        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+        keccak_hash = Web3.keccak(hexstr=public_key)
+        raw_address = keccak_hash[-20:].hex().upper()
+        address = Web3.toChecksumAddress(raw_address)
+        return address
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -182,13 +172,13 @@ class EthereumCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._account.key.hex().encode("utf-8"))
+        fp.write(self.entity.key.hex().encode("utf-8"))
 
 
 class EthereumApi(LedgerApi):
     """Class to interact with the Ethereum Web3 APIs."""
 
-    identifier = ETHEREUM
+    identifier = _ETHEREUM
 
     def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
         """
@@ -254,7 +244,7 @@ class EthereumApi(LedgerApi):
         }
 
         gas_estimate = self._try_get_gas_estimate(transaction)
-        if gas_estimate is None or tx_fee >= gas_estimate:
+        if gas_estimate is None or tx_fee <= gas_estimate:  # pragma: no cover
             logger.warning(
                 "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
                     gas_estimate
@@ -274,7 +264,7 @@ class EthereumApi(LedgerApi):
             nonce = self._api.eth.getTransactionCount(
                 self._api.toChecksumAddress(address)
             )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
             nonce = None
         return nonce
@@ -283,7 +273,7 @@ class EthereumApi(LedgerApi):
         """Try get the gas estimate."""
         try:
             gas_estimate = self._api.eth.estimateGas(transaction=transaction)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to retrieve transaction count: {}".format(str(e)))
             gas_estimate = None
         return gas_estimate
@@ -307,7 +297,7 @@ class EthereumApi(LedgerApi):
             logger.debug(
                 "Successfully sent transaction with digest: {}".format(tx_digest)
             )
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.warning("Unable to send transaction: {}".format(str(e)))
             tx_digest = None
         return tx_digest
@@ -320,7 +310,7 @@ class EthereumApi(LedgerApi):
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        tx_receipt = self.get_transaction_receipt(tx_digest)
         if tx_receipt is not None:
             is_successful = tx_receipt.status == 1
         return is_successful
@@ -401,7 +391,52 @@ class EthereumApi(LedgerApi):
         """
         try:
             tx = self._api.eth.getTransaction(tx_digest)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             logger.debug("Error when attempting getting tx: {}".format(str(e)))
             tx = None
         return tx
+
+
+class EthereumFaucetApi(FaucetApi):
+    """Ethereum testnet faucet API."""
+
+    identifier = _ETHEREUM
+
+    def get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        self._try_get_wealth(address)
+
+    def _try_get_wealth(self, address: Address) -> None:
+        """
+        Get wealth from the faucet for the provided address.
+
+        :param address: the address.
+        :return: None
+        """
+        try:
+            response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            elif response.status_code // 100 in [3, 4]:
+                response_dict = json.loads(response.text)
+                logger.warning(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )
+            elif response.status_code // 100 == 2:
+                response_dict = json.loads(response.text)
+                logger.info(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )  # pragma: no cover
+        except Exception as e:
+            logger.warning(
+                "An error occured while attempting to generate wealth:\n{}".format(e)
+            )

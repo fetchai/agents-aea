@@ -1103,7 +1103,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str, author: str, version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, timeout: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None)
+ | __init__(agent_name: str, author: str, version: str = "", license: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, registry_path: str = DEFAULT_REGISTRY_PATH, description: str = "", logging_config: Optional[Dict] = None, timeout: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, default_routing: Optional[Dict] = None, loop_mode: Optional[str] = None)
 ```
 
 Instantiate the agent configuration object.
@@ -1255,7 +1255,7 @@ Initialize a protocol specification configuration object.
 
 ```python
  | @protobuf_snippets.setter
- | protobuf_snippets(protobuf_snippets: Optional[Dict])
+ | protobuf_snippets(protobuf_snippets: Dict)
 ```
 
 Set the protobuf snippets.
@@ -1265,7 +1265,7 @@ Set the protobuf snippets.
 
 ```python
  | @dialogue_config.setter
- | dialogue_config(dialogue_config: Optional[Dict])
+ | dialogue_config(dialogue_config: Dict)
 ```
 
 Set the dialogue config.

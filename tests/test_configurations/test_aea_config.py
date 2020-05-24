@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the aea configurations."""
 import io
+from enum import Enum
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, List
+from typing import Any, List, Sequence
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -34,6 +35,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import AgentConfig, PackageType
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.exception_policy import ExceptionPolicyEnum
 
 from tests.conftest import ROOT_DIR
 
@@ -53,13 +55,13 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.3.0
+default_connection: fetchai/stub:0.4.0
 default_ledger: fetchai
 ledger_apis:
   fetchai:
     network: testnet
 private_key_paths:
-    fetchai: fet_private_key.txt
+    fetchai: tests/data/fet_private_key.txt
 registry_path: ../packages
 """
 )
@@ -70,7 +72,7 @@ class BaseConfigTestVariable(TestCase):
 
     OPTION_NAME: str = ""
     CONFIG_ATTR_NAME: str = ""
-    GOOD_VALUES: List[Any] = []
+    GOOD_VALUES: Sequence[Any] = []
     INCORRECT_VALUES: List[Any] = []
     BASE_CONFIG: str = base_config
     REQUIRED: bool = False
@@ -102,6 +104,7 @@ class BaseConfigTestVariable(TestCase):
         """
         if value is NotSet:
             return self.BASE_CONFIG
+        value = self._un_enum_value(value)
         return f"{self.BASE_CONFIG}\n" + yaml.dump({self.OPTION_NAME: value})
 
     def _make_configuration(self, value: Any = NotSet) -> AgentConfig:
@@ -115,6 +118,13 @@ class BaseConfigTestVariable(TestCase):
         f = io.StringIO(config_data)
         return self.loader.load(f)
 
+    @staticmethod
+    def _un_enum_value(value: Any) -> Any:
+        """Return enum.value if value is enum, otherwise just value."""
+        if isinstance(value, Enum):
+            value = value.value
+        return value
+
     def test_no_variable_passed(self) -> None:
         """Test option not specified in cofig."""
         if self.REQUIRED:
@@ -127,6 +137,7 @@ class BaseConfigTestVariable(TestCase):
     def test_good_value_passed(self) -> None:
         """Test correct values parsed and set."""
         for good_value in self.GOOD_VALUES:
+            good_value = self._un_enum_value(good_value)
             configuration = self._make_configuration(good_value)
             assert getattr(configuration, self.CONFIG_ATTR_NAME) == good_value
 
@@ -203,3 +214,27 @@ class TestMaxReactionsConfigVariable(BaseConfigTestVariable):
     REQUIRED = False
     AEA_ATTR_NAME = "max_reactions"
     AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_MAX_REACTIONS
+
+
+class TestLoopModeConfigVariable(BaseConfigTestVariable):
+    """Test `loop_mode` aea config option."""
+
+    OPTION_NAME = "loop_mode"
+    CONFIG_ATTR_NAME = "loop_mode"
+    GOOD_VALUES = ["sync", "async"]
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_loop_mode"
+    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_LOOP_MODE
+
+
+class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
+    """Test `skill_exception_policy` aea config option."""
+
+    OPTION_NAME = "skill_exception_policy"
+    CONFIG_ATTR_NAME = "skill_exception_policy"
+    GOOD_VALUES = ExceptionPolicyEnum  # type: ignore
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_skills_exception_policy"
+    AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate

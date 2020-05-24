@@ -54,32 +54,18 @@ class FIPAHandler(Handler):
         :return: None
         """
         fipa_msg = cast(FipaMessage, message)
-        dialogue_reference = fipa_msg.dialogue_reference
 
+        # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(
-            fipa_msg, self.context.agent_address
-        ):
-            dialogue = cast(
-                Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address)
-            )
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(
-                Dialogue,
-                dialogues.create_opponent_initiated(
-                    fipa_msg.counterparty, dialogue_reference, is_seller=True
-                ),
-            )
-            dialogue.incoming_extend(fipa_msg)
-        else:
+        fipa_dialogue = cast(Dialogue, dialogues.update(fipa_msg))
+        if fipa_dialogue is None:
             self._handle_unidentified_dialogue(fipa_msg)
             return
 
         if fipa_msg.performative == FipaMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, dialogue)
+            self._handle_cfp(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.ACCEPT_W_INFORM:
-            self._handle_accept_w_inform(fipa_msg, dialogue)
+            self._handle_accept_w_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """
@@ -108,7 +94,7 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": b""},
+            error_data={"fipa_message": FipaSerializer().encode(msg)},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,
@@ -158,7 +144,8 @@ class FIPAHandler(Handler):
                 performative=FipaMessage.Performative.PROPOSE,
                 proposal=proposal,
             )
-            dialogue.outgoing_extend(proposal_msg)
+            proposal_msg.counterparty = msg.counterparty
+            dialogue.update(proposal_msg)
             self.context.logger.info(
                 "[{}]: Sending PROPOSE to agent={}: proposal={}".format(
                     self.context.agent_name, msg.counterparty[-5:], proposal.values
@@ -191,6 +178,7 @@ class FIPAHandler(Handler):
                 )
             )
             contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+            strategy = cast(Strategy, self.context.strategy)
             tx = contract.get_atomic_swap_single_transaction_msg(
                 from_address=self.context.agent_address,
                 to_address=msg.counterparty,
@@ -199,7 +187,7 @@ class FIPAHandler(Handler):
                 to_supply=int(dialogue.proposal.values["to_supply"]),
                 value=int(dialogue.proposal.values["value"]),
                 trade_nonce=int(dialogue.proposal.values["trade_nonce"]),
-                ledger_api=self.context.ledger_apis.ethereum_api,
+                ledger_api=self.context.ledger_apis.get_api(strategy.ledger_id),
                 skill_callback_id=self.context.skill_id,
                 signature=tx_signature,
             )
@@ -235,20 +223,21 @@ class TransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         contract = cast(ERC1155Contract, self.context.contracts.erc1155)
+        strategy = cast(Strategy, self.context.strategy)
         if tx_msg_response.tx_id == contract.Performative.CONTRACT_DEPLOY.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
-                tx_digest
-            ):
+            while not self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).is_transaction_settled(tx_digest):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -265,7 +254,8 @@ class TransactionHandler(Handler):
                 )
             else:
                 contract.set_address(
-                    self.context.ledger_apis.ethereum_api, tx_receipt.contractAddress
+                    self.context.ledger_apis.get_api(strategy.ledger_id),
+                    tx_receipt.contractAddress,
                 )
                 self.context.logger.info(
                     "[{}]: Successfully deployed the contract. Transaction digest: {}".format(
@@ -275,18 +265,18 @@ class TransactionHandler(Handler):
 
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_CREATE_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
-                tx_digest
-            ):
+            while not self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).is_transaction_settled(tx_digest):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -310,18 +300,18 @@ class TransactionHandler(Handler):
                 )
         elif tx_msg_response.tx_id == contract.Performative.CONTRACT_MINT_BATCH.value:
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
-                tx_digest
-            ):
+            while not self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).is_transaction_settled(tx_digest):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(
@@ -355,18 +345,18 @@ class TransactionHandler(Handler):
             == contract.Performative.CONTRACT_ATOMIC_SWAP_SINGLE.value
         ):
             tx_signed = tx_msg_response.signed_payload.get("tx_signed")
-            tx_digest = self.context.ledger_apis.ethereum_api.send_signed_transaction(
-                tx_signed=tx_signed
-            )
+            tx_digest = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).send_signed_transaction(tx_signed=tx_signed)
             # TODO; handle case when no tx_digest returned and remove loop
             assert tx_digest is not None, "Error when submitting tx."
-            while not self.context.ledger_apis.ethereum_api.is_transaction_settled(
-                tx_digest
-            ):
+            while not self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).is_transaction_settled(tx_digest):
                 time.sleep(3.0)
-            tx_receipt = self.context.ledger_apis.ethereum_api.get_transaction_receipt(  # type: ignore
-                tx_digest=tx_digest
-            )
+            tx_receipt = self.context.ledger_apis.get_api(
+                strategy.ledger_id
+            ).get_transaction_receipt(tx_digest=tx_digest)
             if tx_receipt is None:
                 self.context.is_active = False
                 self.context.logger.info(

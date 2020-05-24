@@ -43,8 +43,8 @@ Create the AEA that will provide data.
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/generic_seller:0.3.0
+aea add connection fetchai/oef:0.3.0
+aea add skill fetchai/generic_seller:0.4.0
 ```
 
 ### Create the buyer client (ledger version)
@@ -54,8 +54,8 @@ In another terminal, create the AEA that will query the seller AEA.
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.2.0
-aea add skill fetchai/generic_buyer:0.2.0
+aea add connection fetchai/oef:0.3.0
+aea add skill fetchai/generic_buyer:0.3.0
 ```
 
 Additionally, create the private key for the buyer AEA based on the network you want to transact.
@@ -274,8 +274,8 @@ Run both AEAs from their respective terminals
 
 ``` bash 
 aea install
-aea config set agent.default_connection fetchai/oef:0.2.0
-aea run --connections fetchai/oef:0.2.0
+aea config set agent.default_connection fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.3.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 

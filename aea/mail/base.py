@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Mail module abstract base classes."""
 
 import asyncio
@@ -31,6 +30,7 @@ from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId, SkillId
 from aea.connections.base import Connection, ConnectionStatus
+from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail import base_pb2
 
 logger = logging.getLogger(__name__)
@@ -433,16 +433,17 @@ class Multiplexer:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = queue.Queue()  # type: queue.Queue
+        self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._connect_all_task = None  # type: Optional[Future]
         self._disconnect_all_task = None  # type: Optional[Future]
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
     @property
-    def in_queue(self) -> queue.Queue:
+    def in_queue(self) -> AsyncFriendlyQueue:
         """Get the in queue."""
         return self._in_queue
 
@@ -465,6 +466,16 @@ class Multiplexer:
         return self._loop.is_running() and all(
             c.connection_status.is_connected for c in self._connections
         )
+
+    @property
+    def default_routing(self) -> Dict[PublicId, PublicId]:
+        """Get the default routing."""
+        return self._default_routing
+
+    @default_routing.setter
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
+        """Set the default routing."""
+        self._default_routing = default_routing
 
     @property
     def connection_status(self) -> ConnectionStatus:
@@ -715,20 +726,27 @@ class Multiplexer:
         :raises ValueError: if the connection id provided is not valid.
         :raises AEAConnectionError: if the connection id provided is not valid.
         """
+        connection_id = None  # type: Optional[PublicId]
         envelope_context = envelope.context
-        connection_id = (
-            envelope_context.connection_id if envelope_context is not None else None
-        )
+        # first, try to route by context
+        if envelope_context is not None:
+            connection_id = envelope_context.connection_id
+
+        # second, try to route by default routing
+        if connection_id is None and envelope.protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope.protocol_id]
+            logger.debug("Using default routing: {}".format(connection_id))
 
         if connection_id is not None and connection_id not in self._id_to_connection:
             raise AEAConnectionError(
                 "No connection registered with id: {}.".format(connection_id)
             )
 
-        connection = self._id_to_connection.get(connection_id, None)  # type: ignore
         if connection_id is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
+        else:
+            connection = self._id_to_connection[connection_id]
 
         connection = cast(Connection, connection)
         if (
@@ -761,6 +779,25 @@ class Multiplexer:
             return self.in_queue.get(block=block, timeout=timeout)
         except queue.Empty:
             raise Empty
+
+    async def async_get(self) -> Envelope:
+        """
+        Get an envelope async way.
+
+        :return: the envelope
+        """
+        try:
+            return await self.in_queue.async_get()
+        except queue.Empty:
+            raise Empty
+
+    async def async_wait(self) -> None:
+        """
+        Get an envelope async way.
+
+        :return: the envelope
+        """
+        return await self.in_queue.async_wait()
 
     def put(self, envelope: Envelope) -> None:
         """
@@ -828,6 +865,32 @@ class InBox:
         except Empty:
             return None
         return envelope
+
+    async def async_get(self) -> Envelope:
+        """
+        Check for a envelope on the in queue.
+
+        :return: the envelope object.
+        """
+        logger.debug("Checks for envelope from the in queue async way...")
+        envelope = await self._multiplexer.async_get()
+        if envelope is None:
+            raise Empty()
+        logger.debug(
+            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
+                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            )
+        )
+        return envelope
+
+    async def async_wait(self) -> None:
+        """
+        Check for a envelope on the in queue.
+
+        :return: the envelope object.
+        """
+        logger.debug("Checks for envelope presents in queue async way...")
+        await self._multiplexer.async_wait()
 
 
 class OutBox:

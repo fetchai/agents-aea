@@ -22,7 +22,6 @@
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
@@ -85,7 +84,7 @@ class OEFSearchHandler(Handler):
 
         :return: None
         """
-        self.context.logger.error(
+        self.context.logger.warning(
             "[{}]: Received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 self.context.agent_name,
                 oef_error.dialogue_reference,
@@ -144,7 +143,7 @@ class OEFSearchHandler(Handler):
                 )
             )
         elif len(agent_addresses) > 1:
-            self.context.logger.error(
+            self.context.logger.warning(
                 "[{}]: Found more than one TAC controller. Retrying...".format(
                     self.context.agent_name
                 )
@@ -180,6 +179,7 @@ class OEFSearchHandler(Handler):
             protocol_id=TacMessage.protocol_id,
             message=tac_bytes,
         )
+        self.context.behaviours.tac.is_active = False
 
 
 class TACHandler(Handler):
@@ -258,7 +258,7 @@ class TACHandler(Handler):
         :return: None
         """
         error_code = tac_message.error_code
-        self.context.logger.error(
+        self.context.logger.debug(
             "[{}]: Received error from the controller. error_msg={}".format(
                 self.context.agent_name, TacMessage.ErrorCode.to_msg(error_code.value)
             )
@@ -302,11 +302,9 @@ class TACHandler(Handler):
             )
 
             if contract_address is not None:
-                ethereum_api = cast(
-                    EthereumApi, self.context.ledger_apis.apis[ETHEREUM]
-                )
+                ledger_api = self.context.ledger_apis.get_api(game.ledger_id)
                 contract.set_deployed_instance(
-                    ethereum_api, contract_address,
+                    ledger_api, contract_address,
                 )
                 self.context.logger.info(
                     "[{}]: Received a contract address: {}".format(

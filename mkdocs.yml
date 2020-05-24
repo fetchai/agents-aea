@@ -30,9 +30,10 @@ nav:
       - Gym skill: 'gym-skill.md'
       - ML skills: 'ml-skills.md'
       - TAC skills: 'tac-skills.md'
+      - TAC skills ledger-based: 'tac-skills-contract.md'
       - TAC external app: 'tac.md'
-      - Weather skills: 'weather-skills.md'
       - Thermometer skills: 'thermometer-skills.md'
+      - Weather skills: 'weather-skills.md'
     - Development:
       - Getting started:
         - Ways to build an AEA: 'steps.md'
@@ -71,6 +72,7 @@ nav:
         - Skill: 'skill.md'
         - Protocol: 'protocol.md'
         - Connection: 'connection.md'
+        - Configurations: 'config.md'
         - Scaffolding packages: 'scaffolding.md'
         - Generating protocols: 'protocol-generator.md'
         - Logging: 'logging.md'
@@ -86,6 +88,7 @@ nav:
         - AEA: 'api/aea.md'
         - AEA Builder: 'api/aea_builder.md'
         - Agent: 'api/agent.md'
+        - Agent Loop: 'api/agent_loop.md'
         - Configurations:
           - Base: 'api/configurations/base.md'
           - Components: 'api/configurations/components.md'
@@ -99,19 +102,26 @@ nav:
           - Ethereum: 'api/contracts/ethereum.md'
         - Crypto:
           - Base: 'api/crypto/base.md'
+          - Cosmos: 'api/crypto/cosmos.md'
           - Ethereum: 'api/crypto/ethereum.md'
           - Fetchai: 'api/crypto/fetchai.md'
           - LedgerApis: 'api/crypto/ledger_apis.md'
+          - Registry: 'api/crypto/registry.md'
           - Wallet: 'api/crypto/wallet.md'
         - Decision Maker:
           - Base: 'api/decision_maker/base.md'
+          - Default: 'api/decision_maker/default.md'
           - Messages:
             - Base: 'api/decision_maker/messages/base.md'
             - State Update: 'api/decision_maker/messages/state_update.md'
             - Transaction: 'api/decision_maker/messages/transaction.md'
         - Helpers:
+          - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
+          - Base: 'api/helpers/base.md'
           - Dialogue:
             - Base: 'api/helpers/dialogue/base.md'
+          - Exception Policy: 'api/helpers/exception_policy.md'
+          - Exec Timeout: 'api/helpers/exec_timeout.md'
           - IPFS:
             - Base: 'api/helpers/ipfs/base.md'
           - Preferences:
@@ -119,6 +129,7 @@ nav:
           - Search:
             - Generic: 'api/helpers/search/generic.md'
             - Models: 'api/helpers/search/models.md'
+          - Test Cases: 'api/helpers/test_cases.md'
         - Identity: 'api/identity/base.md'
         - Mail: 'api/mail/base.md'
         - Protocols:
@@ -134,6 +145,7 @@ nav:
           - Error Skill: 'api/skills/error/handlers.md'
           - Behaviors: 'api/skills/behaviours.md'
           - Task: 'api/skills/tasks.md'
+        - Test Tools: 'api/test_tools/generic.md'
     - Q&A: 'questions-and-answers.md'
 
 plugins:

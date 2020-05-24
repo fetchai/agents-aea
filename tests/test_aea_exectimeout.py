@@ -27,7 +27,7 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.fetchai import FetchAICrypto
 from aea.skills.base import Skill, SkillContext
 
 
@@ -37,6 +37,8 @@ from tests.common.utils import (
     make_handler_cls_from_funcion,
     timeit_context,
 )
+
+from .conftest import FETCHAI_PRIVATE_KEY_PATH
 
 if os.name == "nt":
     pytest.skip("signal.settimer non available on Windows.", allow_module_level=True)
@@ -56,6 +58,8 @@ def sleep_a_bit(sleep_time: float = 0.1, num_of_sleeps: int = 1) -> None:
 
 class BaseTimeExecutionCase(TestCase):
     """Base Test case for code execute timeout."""
+
+    BASE_TIMEOUT = 0.35
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -77,7 +81,7 @@ class BaseTimeExecutionCase(TestCase):
 
         builder = AEABuilder()
         builder.set_name(agent_name)
-        builder.add_private_key(FETCHAI, "")
+        builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH)
 
         self.function_finished = False
 
@@ -113,9 +117,9 @@ class BaseTimeExecutionCase(TestCase):
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
         num_sleeps = 10
-        sleep_time = 0.1
+        sleep_time = self.BASE_TIMEOUT
         function_sleep_time = num_sleeps * sleep_time
-        execution_timeout = 0.5
+        execution_timeout = self.BASE_TIMEOUT * 2
         assert execution_timeout < function_sleep_time
 
         self.prepare(lambda: sleep_a_bit(sleep_time, num_sleeps))
@@ -132,9 +136,9 @@ class BaseTimeExecutionCase(TestCase):
     def test_short_handler_not_cancelled_by_timeout(self):
         """Test short function NOTterminated by timeout."""
         num_sleeps = 1
-        sleep_time = 0.1
+        sleep_time = self.BASE_TIMEOUT
         function_sleep_time = num_sleeps * sleep_time
-        execution_timeout = 0.5
+        execution_timeout = self.BASE_TIMEOUT * 2
 
         assert function_sleep_time <= execution_timeout
 
@@ -152,7 +156,7 @@ class BaseTimeExecutionCase(TestCase):
     def test_no_timeout(self):
         """Test function NOT terminated by timeout cause timeout == 0."""
         num_sleeps = 1
-        sleep_time = 0.1
+        sleep_time = self.BASE_TIMEOUT
         function_sleep_time = num_sleeps * sleep_time
         execution_timeout = 0
 

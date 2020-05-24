@@ -25,6 +25,8 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+
 
 class TestMLSkills(AEATestCaseMany, UseOef):
     """Test that ml skills work."""
@@ -41,25 +43,36 @@ class TestMLSkills(AEATestCaseMany, UseOef):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
         self.run_install()
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.3.0")
+        setting_path = (
+            "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
+        )
+        self.set_config(setting_path, False, "bool")
         self.run_install()
 
         self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
-        check_strings = ("Got a Call for Terms", "Got an Accept", "a Data message:")
+        check_strings = (
+            "updating ml data provider service on OEF service directory.",
+            "unregistering ml data provider service from OEF service directory.",
+            "Got a Call for Terms",
+            "a Terms message:",
+            "Got an Accept",
+            "a Data message:",
+        )
         missing_strings = self.missing_from_output(
             data_provider_aea_process, check_strings, is_terminating=False
         )
@@ -72,8 +85,9 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         check_strings = (
             "found agents=",
             "sending CFT to agent=",
-            "Received terms message",
-            "Received data message",
+            "Received terms message from",
+            "sending dummy transaction digest ...",
+            "Received data message from",
             "Loss:",
         )
         missing_strings = self.missing_from_output(
@@ -108,34 +122,56 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.2.0")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/ml_data_provider:0.4.0", data_provider_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.2.0")
-        self.add_item("skill", "fetchai/ml_train:0.2.0")
-        setting_path = (
-            "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
-        )
-        self.set_config(setting_path, True, "bool")
+        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.3.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/ml_model_trainer:0.4.0", model_trainer_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
+        self.generate_private_key("fetchai")
+        self.add_private_key("fetchai", "fet_private_key.txt")
+        self.replace_private_key_in_file(
+            FUNDED_FET_PRIVATE_KEY_1, "fet_private_key.txt"
+        )
+
         self.set_agent_context(data_provider_aea_name)
-        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        data_provider_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
         self.set_agent_context(model_trainer_aea_name)
-        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.2.0")
+        model_trainer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
 
-        # TODO: finish test
-        check_strings = ("Got a Call for Terms",)  # "Got an Accept", "a Data message:")
+        check_strings = (
+            "updating ml data provider service on OEF service directory.",
+            "unregistering ml data provider service from OEF service directory.",
+            "Got a Call for Terms",
+            "a Terms message:",
+            "Got an Accept",
+            "a Data message:",
+        )
         missing_strings = self.missing_from_output(
             data_provider_aea_process, check_strings, is_terminating=False
         )
@@ -148,9 +184,13 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         check_strings = (
             "found agents=",
             "sending CFT to agent=",
-            # "Received terms message",
-            # "Received data message",
-            # "Loss:",
+            "Received terms message from",
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+            "Settling transaction on chain!",
+            "transaction was successful.",
+            "Sending accept to counterparty=",
+            "Received data message from",
+            "Loss:",
         )
         missing_strings = self.missing_from_output(
             model_trainer_aea_process, check_strings, is_terminating=False

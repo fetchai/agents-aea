@@ -16,18 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Conftest module for Pytest."""
-
 import asyncio
 import inspect
 import logging
 import os
+import platform
 import socket
 import sys
 import time
+from functools import wraps
 from threading import Timer
 from typing import Callable, Optional
+from unittest.mock import patch
 
 import docker as docker
 from docker.models.containers import Container
@@ -39,7 +40,8 @@ from oef.agents import AsyncioCore, OEFAgent
 import pytest
 
 from aea import AEA_DIR
-from aea.cli.common import _init_cli_config
+from aea.aea import AEA
+from aea.cli.utils.config import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -86,6 +88,43 @@ PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
 )
 
 DUMMY_ENV = gym.GoalEnv
+
+# private keys with value on testnet
+COSMOS_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+)
+ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "eth_private_key.txt"
+)
+FETCHAI_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", "fet_private_key.txt"
+)
+FUNDED_ETH_PRIVATE_KEY_1 = (
+    "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
+)
+FUNDED_ETH_PRIVATE_KEY_2 = (
+    "0x04b4cecf78288f2ab09d1b4c60219556928f86220f0fb2dcfc05e6a1c1149dbf"
+)
+FUNDED_FET_PRIVATE_KEY_1 = (
+    "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
+)
+
+# addresses with no value on testnet
+COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
+COSMOS_ADDRESS_TWO = "cosmos1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
+ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
+ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
+FETCHAI_ADDRESS_ONE = "Vu6aENcVSYYH9GhY1k3CsL7shWH9gKKBAWcc4ckLk5w4Ltynx"
+FETCHAI_ADDRESS_TWO = "2LnTTHvGxWvKK1WfEAXnZvu81RPcMRDVQW8CJF3Gsh7Z3axDfP"
+
+# testnets
+COSMOS_TESTNET_CONFIG = {"address": "http://aea-testnet.sandbox.fetch-ai.com:1317"}
+ETHEREUM_TESTNET_CONFIG = {
+    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    "gas_price": 50,
+}
+FETCHAI_TESTNET_CONFIG = {"network": "testnet"}
+ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
 
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
@@ -278,31 +317,41 @@ agent_config_files = [
 ]
 
 
-def skip_test_windows(is_test_class=False) -> Callable:
+def skip_test_windows(fn: Callable) -> Callable:
     """
     Decorate a pytest method to skip a test in a case we are on Windows.
 
     :return: decorated method.
     """
+    return skip_for_platform("Windows")(fn)
+
+
+def skip_for_platform(platform_name: str) -> Callable:
+    """
+    Decorate a pytest class or method to skip on certain platform.
+
+    :param platform_name: check `platform.system()` for available platforms.
+
+    :return: decorated object
+    """
 
     def decorator(pytest_func):
-        def check_windows():
-            if os.name == "nt":
-                pytest.skip("Skipping the test since it doesn't work on Windows.")
-                return False
-            return True
+        if platform.system() != platform_name:
+            return pytest_func
 
-        if is_test_class:
+        def skip(*args, **kwargs):
+            pytest.skip("Skipping the test since it doesn't work on Windows.")
 
-            def wrapper(self, *args, **kwargs):  # type: ignore
-                if check_windows():
-                    pytest_func(self, *args, **kwargs)
+        if isinstance(pytest_func, type):
+            return type(
+                pytest_func.__name__,
+                (pytest_func,),
+                {"setup_class": skip, "setup": skip, "setUp": skip},
+            )
 
-        else:
-
-            def wrapper(*args, **kwargs):  # type: ignore
-                if check_windows():
-                    pytest_func(*args, **kwargs)
+        @wraps(pytest_func)
+        def wrapper(*args, **kwargs):  # type: ignore
+            pytest.skip("Skipping the test since it doesn't work on Windows.")
 
         return wrapper
 
@@ -469,6 +518,49 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
         volumes=volumes,
     )
     return c
+
+
+def pytest_addoption(parser) -> None:
+    """Add --aea-loop option."""
+    parser.addoption(
+        "--aea-loop",
+        action="store",
+        default="async",
+        help="aea loop to use: async[default] or sync",
+    )
+    # disable inernet connection
+    parser.addoption(
+        "--no-inet",
+        action="store_true",
+        default=False,
+        help="block socket connect outside of 127.x.x.x",
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def inet_disable(request) -> None:
+    """Disable internet access via socket."""
+    if not request.config.getoption("--no-inet"):
+        return
+
+    orig_connect = socket.socket.connect
+
+    def socket_connect(*args):
+        host = args[1][0]
+        if host == "localhost" or host.startswith("127."):
+            return orig_connect(*args)
+        raise socket.error("Internet disabled by pytest option --no-inet")
+
+    p = patch.object(socket.socket, "connect", new=socket_connect)
+    p.start()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def apply_aea_loop(request) -> None:
+    """Patch AEA.DEFAULT_RUN_LOOP using pytest option `--aea-loop`."""
+    loop = request.config.getoption("--aea-loop")
+    assert loop in AEA.RUN_LOOPS
+    AEA.DEFAULT_RUN_LOOP = loop
 
 
 @pytest.fixture(scope="session")

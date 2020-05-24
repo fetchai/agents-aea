@@ -32,8 +32,11 @@ import click
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.common import AgentDirectory, Context, logger
 from aea.cli.run import run
+from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.context import Context
+from aea.cli.utils.loggers import logger
+from aea.helpers.base import cd
 
 
 def _run_agent(click_context, agent_directory: str):
@@ -95,15 +98,20 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
     """
     aeas = []  # type: List[AEA]
     for agent_directory in agents:
-        aeas.append(AEABuilder.from_aea_project(agent_directory).build())
+        with cd(agent_directory):
+            aeas.append(AEABuilder.from_aea_project(".").build())
 
     threads = [Thread(target=agent.start) for agent in aeas]
     for t in threads:
         t.start()
 
     try:
-        for t in threads:
-            t.join()
+        while sum([t.is_alive() for t in threads]) != 0:
+            # exit when all threads are not alive.
+            # done to avoid block on joins
+            for t in threads:
+                t.join(0.1)
+
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:

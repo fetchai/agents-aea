@@ -42,11 +42,11 @@ class Strategy(Model):
 
         :return: None
         """
-        super().__init__(**kwargs)
-        self._oef_msg_id = 0
         self._data_model_name = kwargs.pop("data_model_name", DEFAULT_DATA_MODEL_NAME)
         self._data_model = kwargs.pop("data_model", DEFAULT_DATA_MODEL)
         self._service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        super().__init__(**kwargs)
+        self._oef_msg_id = 0
 
     def get_next_oef_msg_id(self) -> int:
         """

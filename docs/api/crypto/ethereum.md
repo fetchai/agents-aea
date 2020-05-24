@@ -7,7 +7,7 @@ Ethereum module wrapping the public and private key cryptography and ledger api.
 ### EthereumCrypto
 
 ```python
-class EthereumCrypto(Crypto)
+class EthereumCrypto(Crypto[Account])
 ```
 
 Class wrapping the Account Generation from Ethereum ledger.
@@ -24,16 +24,6 @@ Instantiate an ethereum crypto object.
 **Arguments**:
 
 - `private_key_path`: the private key path of the agent
-
-<a name=".aea.crypto.ethereum.EthereumCrypto.entity"></a>
-#### entity
-
-```python
- | @property
- | entity() -> Account
-```
-
-Get the entity.
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.public_key"></a>
 #### public`_`key
@@ -62,6 +52,24 @@ Return the address for the key pair.
 **Returns**:
 
 a display_address str
+
+<a name=".aea.crypto.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+#### load`_`private`_`key`_`from`_`path
+
+```python
+ | @classmethod
+ | load_private_key_from_path(cls, file_name) -> Account
+```
+
+Load a private key in hex format from a file.
+
+**Arguments**:
+
+- `file_name`: the path to the hex file.
+
+**Returns**:
+
+the Entity.
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.sign_message"></a>
 #### sign`_`message
@@ -102,19 +110,30 @@ signed transaction
 #### recover`_`message
 
 ```python
- | recover_message(message: bytes, signature: bytes) -> Address
+ | recover_message(message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
-Recover the address from the hash.
+Recover the addresses from the hash.
 
 **Arguments**:
 
 - `message`: the message we expect
 - `signature`: the transaction signature
+- `is_deprecated_mode`: if the deprecated signing was used
 
 **Returns**:
 
-the recovered address
+the recovered addresses
+
+<a name=".aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
+#### generate`_`private`_`key
+
+```python
+ | @classmethod
+ | generate_private_key(cls) -> Account
+```
+
+Generate a key pair for ethereum network.
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
@@ -133,24 +152,6 @@ Get the address from the public key.
 **Returns**:
 
 str
-
-<a name=".aea.crypto.ethereum.EthereumCrypto.load"></a>
-#### load
-
-```python
- | @classmethod
- | load(cls, fp: BinaryIO)
-```
-
-Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
-**Arguments**:
-
-- `fp`: the input file pointer. Must be set in binary mode (mode='rb')
-
-**Returns**:
-
-None
 
 <a name=".aea.crypto.ethereum.EthereumCrypto.dump"></a>
 #### dump
@@ -321,4 +322,30 @@ Check whether a transaction is valid or not (non-blocking).
 **Returns**:
 
 True if the random_message is equals to tx['input']
+
+<a name=".aea.crypto.ethereum.EthereumFaucetApi"></a>
+### EthereumFaucetApi
+
+```python
+class EthereumFaucetApi(FaucetApi)
+```
+
+Ethereum testnet faucet API.
+
+<a name=".aea.crypto.ethereum.EthereumFaucetApi.get_wealth"></a>
+#### get`_`wealth
+
+```python
+ | get_wealth(address: Address) -> None
+```
+
+Get wealth from the faucet for the provided address.
+
+**Arguments**:
+
+- `address`: the address.
+
+**Returns**:
+
+None
 

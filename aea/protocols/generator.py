@@ -480,7 +480,9 @@ class ProtocolGenerator:
         self._custom_custom_types = dict()  # type: Dict[str, str]
 
         # dialogue config
+        self._initial_performative = ""
         self._reply = dict()  # type: Dict[str, List[str]]
+
         self._roles = list()  # type: List[str]
         self._end_states = list()  # type: List[str]
 
@@ -550,11 +552,37 @@ class ProtocolGenerator:
             pure_custom_type: "Custom" + pure_custom_type
             for pure_custom_type in self._all_custom_types
         }
-        if self.protocol_specification.dialogue_config != {}:
-            self._reply = self.protocol_specification.dialogue_config["reply"]  # type: ignore
+
+        # Dialogue attributes
+        if (
+            self.protocol_specification.dialogue_config != {}
+            and self.protocol_specification.dialogue_config is not None
+        ):
+            self._reply = self.protocol_specification.dialogue_config["reply"]
             roles_set = self.protocol_specification.dialogue_config["roles"]  # type: ignore
             self._roles = sorted(roles_set, reverse=True)
             self._end_states = self.protocol_specification.dialogue_config["end_states"]  # type: ignore
+
+            # infer initial performative
+            set_of_all_performatives = set(self._reply.keys())
+            set_of_all_replies = set()
+            for _, list_of_replies in self._reply.items():
+                set_of_replies = set(list_of_replies)
+                set_of_all_replies.update(set_of_replies)
+            initial_performative_set = set_of_all_performatives.difference(
+                set_of_all_replies
+            )
+            initial_performative_list = list(initial_performative_set)
+            if len(initial_performative_list) != 1:
+                raise ProtocolSpecificationParseError(
+                    "Invalid reply structure. There must be a single speech-act which is not a valid reply to any other speech-acts so it can be designated as the inital speech-act. Found {} of such speech-acts in the specification".format(
+                        len(initial_performative_list),
+                    )
+                )
+            else:
+                initial_performative = initial_performative_list[0].upper()
+
+            self._initial_performative = initial_performative
 
     def _change_indent(self, number: int, mode: str = None) -> None:
         """
@@ -1273,28 +1301,30 @@ class ProtocolGenerator:
         """
         valid_replies_str = self.indent + "VALID_REPLIES = {\n"
         self._change_indent(1)
-        for performative, replies in self._reply.items():
-            valid_replies_str += self.indent + "{}Message.Performative.{}: [".format(
-                self.protocol_specification_in_camel_case, performative.upper()
+        for performative in sorted(self._reply.keys()):
+            valid_replies_str += (
+                self.indent
+                + "{}Message.Performative.{}: frozenset(".format(
+                    self.protocol_specification_in_camel_case, performative.upper()
+                )
             )
-            if len(replies) > 0:
+            if len(self._reply[performative]) > 0:
                 valid_replies_str += "\n"
                 self._change_indent(1)
-                for reply in replies:
-                    valid_replies_str += (
-                        self.indent
-                        + "{}Message.Performative.{}, \n".format(
-                            self.protocol_specification_in_camel_case, reply.upper()
-                        )
+                valid_replies_str += self.indent + "["
+                for reply in self._reply[performative]:
+                    valid_replies_str += "{}Message.Performative.{}, ".format(
+                        self.protocol_specification_in_camel_case, reply.upper()
                     )
-                valid_replies_str = valid_replies_str[:-3]
-                valid_replies_str += "\n"
+                valid_replies_str = valid_replies_str[:-2]
+                valid_replies_str += "]\n"
                 self._change_indent(-1)
-            valid_replies_str += self.indent + "],\n"
+            valid_replies_str += self.indent + "),\n"
+
         self._change_indent(-1)
         valid_replies_str += (
             self.indent
-            + "}}  # type: Dict[{}Message.Performative, List[{}Message.Performative]]\n".format(
+            + "}}  # type: Dict[{}Message.Performative, FrozenSet[{}Message.Performative]]\n".format(
                 self.protocol_specification_in_camel_case,
                 self.protocol_specification_in_camel_case,
             )
@@ -1307,10 +1337,13 @@ class ProtocolGenerator:
 
         :return: the end state Enum string
         """
-        enum_str = self.indent + "class EndState(Enum):\n"
+        enum_str = self.indent + "class EndState(Dialogue.EndState):\n"
         self._change_indent(1)
         enum_str += (
-            self.indent + '"""This class defines the end states of a dialogue."""\n\n'
+            self.indent
+            + '"""This class defines the end states of a {} dialogue."""\n\n'.format(
+                self.protocol_specification.name
+            )
         )
         tag = 0
         for end_state in self._end_states:
@@ -1325,11 +1358,13 @@ class ProtocolGenerator:
 
         :return: the agent role Enum string
         """
-        enum_str = self.indent + "class AgentRole(Enum):\n"
+        enum_str = self.indent + "class AgentRole(Dialogue.Role):\n"
         self._change_indent(1)
         enum_str += (
             self.indent
-            + '"""This class defines the agent\'s role in the dialogue."""\n\n'
+            + '"""This class defines the agent\'s role in a {} dialogue."""\n\n'.format(
+                self.protocol_specification.name
+            )
         )
         for role in self._roles:
             enum_str += self.indent + '{} = "{}"\n'.format(role.upper(), role)
@@ -1370,8 +1405,9 @@ class ProtocolGenerator:
         cls_str += self.indent + '"""\n\n'
 
         # Imports
+        cls_str += self.indent + "from abc import ABC\n"
         cls_str += self.indent + "from enum import Enum\n"
-        cls_str += self.indent + "from typing import Dict, List, Tuple, cast\n\n"
+        cls_str += self.indent + "from typing import Dict, FrozenSet, cast\n\n"
         cls_str += (
             self.indent
             + "from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues\n"
@@ -1399,220 +1435,81 @@ class ProtocolGenerator:
             )
         )
 
-        # Class Constants
-        cls_str += self.indent + "\n"
-        cls_str += self.indent + "STARTING_MESSAGE_ID = 1\n"
-        cls_str += self.indent + "STARTING_TARGET = 0\n"
-        cls_str += self.indent + "\n"
-
         # Enums
-        cls_str += "\n" + self._end_state_enum_str()
         cls_str += "\n" + self._agent_role_enum_str()
+        cls_str += "\n" + self._end_state_enum_str()
         cls_str += "\n"
 
-        # __init__
-        cls_str += self.indent + "def __init__(\n"
-        self._change_indent(1)
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + "self, dialogue_label: DialogueLabel, is_{}: bool, **kwargs\n".format(
-                    self._roles[0]
-                )
-            )
-        else:
-            cls_str += self.indent + "self, dialogue_label: DialogueLabel, **kwargs\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ") -> None:\n"
+        # is_valid method
+        cls_str += self.indent + "def is_valid(self, message: Message) -> bool:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Initialize a dialogue label.\n\n"
-        cls_str += (
-            self.indent + ":param dialogue_label: the identifier of the dialogue.\n"
-        )
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + ":param is_{}: indicates whether the agent associated with the dialogue is a {} or {}\n\n".format(
-                    self._roles[0], self._roles[0], self._roles[1]
-                )
-            )
-        cls_str += self.indent + ":return: None\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += (
-            self.indent + "Dialogue.__init__(self, dialogue_label=dialogue_label)\n"
-        )
-        if len(self._roles) == 2:
-            cls_str += self.indent + "self._is_{} = is_{}\n".format(
-                self._roles[0], self._roles[0]
-            )
-            cls_str += self.indent + "self._role = (\n"
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + "{}Dialogue.AgentRole.{} if is_{} else {}Dialogue.AgentRole.{}\n".format(
-                    self.protocol_specification_in_camel_case,
-                    self._roles[0].upper(),
-                    self._roles[0],
-                    self.protocol_specification_in_camel_case,
-                    self._roles[1].upper(),
-                )
-            )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n\n"
-        self._change_indent(-1)
-
-        # Instance properties
-        if len(self._roles) == 2:
-            cls_str += self.indent + "@property\n"
-            cls_str += self.indent + "def is_{}(self) -> bool:\n".format(self._roles[0])
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + '"""Check whether the agent acts as a {} in this dialogue."""\n'.format(
-                    self._roles[0]
-                )
-            )
-            cls_str += self.indent + "return self._is_{}\n\n".format(self._roles[0])
-            self._change_indent(-1)
-            cls_str += self.indent + "@property\n"
-            cls_str += (
-                self.indent
-                + 'def role(self) -> "{}Dialogue.AgentRole":\n'.format(
-                    self.protocol_specification_in_camel_case
-                )
-            )
-            self._change_indent(1)
-            cls_str += self.indent + '"""Get role of agent in dialogue."""\n'
-            cls_str += self.indent + "return self._role\n\n"
-            self._change_indent(-1)
-
-        # is_consistent method
         cls_str += (
             self.indent
-            + "def is_valid_next_message(self, {}_msg: Message) -> bool:\n".format(
+            + "Check whether 'message' is a valid next message in the dialogue.\n\n"
+        )
+        cls_str += (
+            self.indent
+            + "These rules capture specific constraints designed for dialogues which are instances of a concrete sub-class of this class.\n"
+        )
+        cls_str += (
+            self.indent
+            + "Override this method with your additional dialogue rules.\n\n"
+        )
+        cls_str += self.indent + ":param message: the message to be validated\n"
+        cls_str += self.indent + ":return: True if valid, False otherwise\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "return True\n\n"
+        self._change_indent(-1)
+
+        # initial_performative method
+        cls_str += (
+            self.indent
+            + "def initial_performative(self) -> {}Message.Performative:\n".format(
+                self.protocol_specification_in_camel_case
+            )
+        )
+        self._change_indent(1)
+        cls_str += self.indent + '"""\n'
+        cls_str += (
+            self.indent
+            + "Get the performative which the initial message in the dialogue must have.\n\n"
+        )
+        cls_str += self.indent + ":return: the performative of the initial message\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "return {}Message.Performative.{}\n\n".format(
+            self.protocol_specification_in_camel_case, self._initial_performative
+        )
+        self._change_indent(-1)
+
+        # get_replies method
+        cls_str += (
+            self.indent + "def get_replies(self, performative: Enum) -> FrozenSet:\n"
+        )
+        self._change_indent(1)
+        cls_str += self.indent + '"""\n'
+        cls_str += (
+            self.indent
+            + "Given a 'performative', return the list of performatives which are its valid replies in a {} dialogue\n\n".format(
                 self.protocol_specification.name
             )
         )
-        self._change_indent(1)
+        cls_str += self.indent + ":param performative: the performative in a message\n"
+        cls_str += self.indent + ":return: list of valid performative replies\n"
         cls_str += self.indent + '"""\n'
         cls_str += (
             self.indent
-            + 'Check whether the message "{}_msg" is consistent with respect to this according to the protocol.\n\n'.format(
-                self.protocol_specification.name,
-            )
-        )
-        cls_str += self.indent + ":param {}_msg: the message to evaluate\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += self.indent + ":return: True if consistent, False otherwise.\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "{}_msg = cast({}Message, {}_msg)\n".format(
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-            self.protocol_specification.name,
-        )
-        cls_str += self.indent + "this_message_id = {}_msg.message_id\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += self.indent + "this_target = {}_msg.target\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += self.indent + "this_performative = {}_msg.performative\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += (
-            self.indent
-            + "last_outgoing_message = cast({}Message, self.last_outgoing_message)\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        cls_str += self.indent + "if last_outgoing_message is None:\n"
-        self._change_indent(1)
-        cls_str += self.indent + "result = (\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "this_message_id == {}Dialogue.STARTING_MESSAGE_ID\n".format(
+            + "performative = cast({}Message.Performative, performative)\n".format(
                 self.protocol_specification_in_camel_case
             )
         )
         cls_str += (
             self.indent
-            + "and this_target == {}Dialogue.STARTING_TARGET\n".format(
-                self.protocol_specification_in_camel_case
-            )
+            + "assert performative in VALID_REPLIES, \"this performative '{}' is not supported\".format(performative)\n"
         )
-        cls_str += (
-            self.indent
-            + "and this_performative == {}Message.Performative.CFP\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        self._change_indent(-1)
-        cls_str += self.indent + "else:\n"
-        self._change_indent(1)
-        cls_str += self.indent + "last_message_id = last_outgoing_message.message_id\n"
-        cls_str += self.indent + "last_target = last_outgoing_message.target\n"
-        cls_str += (
-            self.indent + "last_performative = last_outgoing_message.performative\n"
-        )
-        cls_str += self.indent + "result = (\n"
-        self._change_indent(1)
-        cls_str += self.indent + "this_message_id == last_message_id + 1\n"
-        cls_str += self.indent + "and this_target == last_target + 1\n"
-        cls_str += (
-            self.indent + "and this_performative in VALID_REPLIES[last_performative]\n"
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        self._change_indent(-1)
-        cls_str += self.indent + "return result\n\n"
-        self._change_indent(-1)
-
-        # assign final label
-        cls_str += (
-            self.indent
-            + "def assign_final_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:\n"
-        )
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Assign the final dialogue label.\n\n"
-        cls_str += (
-            self.indent + ":param final_dialogue_label: the final dialogue label\n"
-        )
-        cls_str += self.indent + ":return: None\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "assert (\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self.dialogue_label.dialogue_starter_reference\n"
-        cls_str += self.indent + "== final_dialogue_label.dialogue_starter_reference\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + 'assert self.dialogue_label.dialogue_responder_reference == ""\n'
-        )
-        cls_str += (
-            self.indent
-            + 'assert final_dialogue_label.dialogue_responder_reference != ""\n'
-        )
-        cls_str += self.indent + "assert (\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self.dialogue_label.dialogue_opponent_addr\n"
-        cls_str += self.indent + "== final_dialogue_label.dialogue_opponent_addr\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "assert (\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self.dialogue_label.dialogue_starter_addr\n"
-        cls_str += self.indent + "== final_dialogue_label.dialogue_starter_addr\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "self._dialogue_label = final_dialogue_label\n\n"
+        cls_str += self.indent + "return VALID_REPLIES[performative]\n\n"
         self._change_indent(-2)
+        cls_str += self.indent + "\n"
 
         # stats class
         cls_str += self.indent + "class {}DialogueStats(object):\n".format(
@@ -1621,7 +1518,7 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += (
             self.indent
-            + '"""Class to handle statistics for {} dialogues."""\n\n'.format(
+            + '"""Class to handle statistics on {} dialogues."""\n\n'.format(
                 self.protocol_specification.name
             )
         )
@@ -1708,9 +1605,10 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += self.indent + "self._other_initiated[end_state] += 1\n"
         self._change_indent(-3)
+        cls_str += self.indent + "\n\n"
 
         # dialogues class
-        cls_str += self.indent + "class {}Dialogues(Dialogues):\n".format(
+        cls_str += self.indent + "class {}Dialogues(Dialogues, ABC):\n".format(
             self.protocol_specification_in_camel_case
         )
         self._change_indent(1)
@@ -1720,74 +1618,23 @@ class ProtocolGenerator:
                 self.protocol_specification.name
             )
         )
-        cls_str += self.indent + "def __init__(self) -> None:\n"
+        cls_str += self.indent + "def __init__(self, agent_address: Address) -> None:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Initialize dialogues.\n\n"
-        cls_str += self.indent + ":return: None\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Dialogues.__init__(self)\n"
         cls_str += (
             self.indent
-            + "self._initiated_dialogues = {{}}  # type: Dict[DialogueLabel, {}Dialogue]\n".format(
-                self.protocol_specification_in_camel_case
-            )
+            + ":param agent_address: the address of the agent for whom dialogues are maintained\n"
         )
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{} = {{}}  # type: Dict[DialogueLabel, {}Dialogue]\n".format(
-                    self._roles[0], self.protocol_specification_in_camel_case,
-                )
-            )
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{} = {{}}  # type: Dict[DialogueLabel, {}Dialogue]\n".format(
-                    self._roles[1], self.protocol_specification_in_camel_case,
-                )
-            )
-        cls_str += self.indent + "self._dialogue_stats = {}DialogueStats()\n".format(
+        cls_str += self.indent + ":return: None\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += (
+            self.indent + "Dialogues.__init__(self, agent_address=agent_address)\n"
+        )
+        cls_str += self.indent + "self._dialogue_stats = {}DialogueStats()\n\n".format(
             self.protocol_specification_in_camel_case
         )
         self._change_indent(-1)
-
-        if len(self._roles) == 2:
-            cls_str += self.indent + "@property\n"
-            cls_str += (
-                self.indent
-                + "def dialogues_as_{}(self) -> Dict[DialogueLabel, {}Dialogue]:\n".format(
-                    self._roles[0], self.protocol_specification_in_camel_case,
-                )
-            )
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + '"""Get dictionary of dialogues in which the agent acts as a {}."""\n'.format(
-                    self._roles[0]
-                )
-            )
-            cls_str += self.indent + "return self._dialogues_as_{}\n\n".format(
-                self._roles[0]
-            )
-            self._change_indent(-1)
-            cls_str += self.indent + "@property\n"
-            cls_str += (
-                self.indent
-                + "def dialogues_as_{}(self) -> Dict[DialogueLabel, {}Dialogue]:\n".format(
-                    self._roles[1], self.protocol_specification_in_camel_case,
-                )
-            )
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + '"""Get dictionary of dialogues in which the agent acts as a {}."""\n'.format(
-                    self._roles[1]
-                )
-            )
-            cls_str += self.indent + "return self._dialogues_as_{}\n\n".format(
-                self._roles[1]
-            )
-            self._change_indent(-1)
         cls_str += self.indent + "@property\n"
         cls_str += (
             self.indent
@@ -1796,574 +1643,44 @@ class ProtocolGenerator:
             )
         )
         self._change_indent(1)
-        cls_str += self.indent + '"""Get the dialogue statistics."""\n'
-        cls_str += self.indent + "return self._dialogue_stats\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "Get the dialogue statistics.\n\n"
+        cls_str += self.indent + ":return: dialogue stats object\n"
+        cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "return self._dialogue_stats\n\n"
         self._change_indent(-1)
-
-        # is permitted method
+        cls_str += self.indent + "def create_dialogue(\n"
         cls_str += (
             self.indent
-            + "def is_permitted_for_new_dialogue(self, {}_msg: Message) -> bool:\n".format(
-                self.protocol_specification.name
-            )
+            + self.indent
+            + "self, dialogue_label: DialogueLabel, role: Dialogue.Role,\n"
+        )
+        cls_str += self.indent + ") -> {}Dialogue:\n".format(
+            self.protocol_specification_in_camel_case
         )
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
+        cls_str += self.indent + "Create an instance of fipa dialogue.\n\n"
         cls_str += (
-            self.indent
-            + "Check whether a {} message is permitted for a new dialogue.\n\n".format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += self.indent + ":param message: the {} message\n\n".format(
-            self.protocol_specification.name
+            self.indent + ":param dialogue_label: the identifier of the dialogue\n"
         )
         cls_str += (
             self.indent
-            + ":return: a boolean indicating whether the message is permitted for a new dialogue\n"
+            + ":param role: the role of the agent this dialogue is maintained for\n\n"
         )
+        cls_str += self.indent + ":return: the created dialogue\n"
         cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "{}_msg = cast({}Message, {}_msg)\n".format(
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-            self.protocol_specification.name,
-        )
-        cls_str += (
-            self.indent
-            + "dialogue_reference = {}_msg.dialogue_reference\n".format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += (
-            self.indent
-            + 'new_dialogue_label = DialogueLabel((dialogue_reference[0], ""), {}_msg.counterparty, "")\n'.format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += (
-            self.indent
-            + "new_dialogue = {}Dialogue(new_dialogue_label, False)\n\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        cls_str += (
-            self.indent
-            + "return new_dialogue.is_valid_next_message({}_msg)\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-
-        # is belonging to registered dialogue method
-        cls_str += self.indent + "def is_belonging_to_registered_dialogue(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self, {}_msg: Message, agent_addr: Address\n".format(
-            self.protocol_specification.name
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ") -> bool:\n"
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += (
-            self.indent
-            + "Check whether an agent message is part of a registered dialogue.\n\n"
-        )
-        cls_str += self.indent + ":param {}_msg: the {} message\n".format(
-            self.protocol_specification.name, self.protocol_specification.name
-        )
-        cls_str += self.indent + ":param agent_addr: the address of the agent\n\n"
-        cls_str += (
-            self.indent
-            + ":return: boolean indicating whether the message belongs to a registered dialogue\n"
-        )
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "{}_msg = cast({}Message, {}_msg)\n".format(
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-            self.protocol_specification.name,
-        )
-        cls_str += (
-            self.indent
-            + "dialogue_reference = {}_msg.dialogue_reference\n".format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += (
-            self.indent + 'alt_dialogue_reference = (dialogue_reference[0], "")\n'
-        )
-        cls_str += self.indent + "self_initiated_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "dialogue_reference, {}_msg.counterparty, agent_addr\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "alt_self_initiated_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "alt_dialogue_reference, {}_msg.counterparty, agent_addr\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "other_initiated_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "dialogue_reference, {}_msg.counterparty, {}_msg.counterparty\n".format(
-                self.protocol_specification.name, self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "result = False\n"
-        cls_str += (
-            self.indent + "if other_initiated_dialogue_label in self.dialogues:\n"
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "other_initiated_dialogue = cast(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "{}Dialogue, self.dialogues[other_initiated_dialogue_label]\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + "result = other_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + "if self_initiated_dialogue_label in self.dialogues:\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self_initiated_dialogue = cast(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "{}Dialogue, self.dialogues[self_initiated_dialogue_label]\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + "result = self_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += (
-            self.indent
-            + "if alt_self_initiated_dialogue_label in self._initiated_dialogues:\n"
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "self_initiated_dialogue = cast(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "{}Dialogue,\n".format(
+        cls_str += self.indent + "dialogue = {}Dialogue(\n".format(
             self.protocol_specification_in_camel_case
         )
         cls_str += (
             self.indent
-            + "self._initiated_dialogues[alt_self_initiated_dialogue_label],\n"
+            + self.indent
+            + "dialogue_label=dialogue_label, agent_address=self.agent_address, role=role\n"
         )
-        self._change_indent(-1)
         cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + "result = self_initiated_dialogue.is_valid_next_message({}_msg)\n".format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += self.indent + "if result:\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "self._initiated_dialogues.pop(alt_self_initiated_dialogue_label)\n"
-        )
-        cls_str += self.indent + "final_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "dialogue_reference,\n"
-        cls_str += (
-            self.indent + "alt_self_initiated_dialogue_label.dialogue_opponent_addr,\n"
-        )
-        cls_str += (
-            self.indent + "alt_self_initiated_dialogue_label.dialogue_starter_addr,\n"
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent + "self_initiated_dialogue.assign_final_dialogue_label(\n"
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "final_dialogue_label\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "self._add(self_initiated_dialogue)\n"
-        self._change_indent(-2)
-        cls_str += self.indent + "return result\n"
-        self._change_indent(-1)
-
-        # get dialogue
-        cls_str += (
-            self.indent
-            + "def get_dialogue(self, {}_msg: Message, agent_addr: Address) -> Dialogue:\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += (
-            self.indent
-            + "Given a message addressed to a specific dialogue, retrieve this dialogue if the message is a valid next move.\n\n"
-        )
-        cls_str += self.indent + ":param {}_msg: the message\n".format(
-            self.protocol_specification.name
-        )
-        cls_str += self.indent + ":param agent_addr: the address of the agent\n\n"
-        cls_str += self.indent + ":return: the dialogue\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "result = None\n"
-        cls_str += self.indent + "{}_msg = cast({}Message, {}_msg)\n".format(
-            self.protocol_specification.name,
-            self.protocol_specification_in_camel_case,
-            self.protocol_specification.name,
-        )
-        cls_str += (
-            self.indent
-            + "dialogue_reference = {}_msg.dialogue_reference\n".format(
-                self.protocol_specification.name
-            )
-        )
-        cls_str += self.indent + "self_initiated_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "dialogue_reference, {}_msg.counterparty, agent_addr\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "other_initiated_dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "dialogue_reference, {}_msg.counterparty, {}_msg.counterparty\n".format(
-                self.protocol_specification.name, self.protocol_specification.name
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent + "if other_initiated_dialogue_label in self.dialogues:\n"
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "other_initiated_dialogue = cast(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "{}Dialogue, self.dialogues[other_initiated_dialogue_label]\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + "if other_initiated_dialogue.is_valid_next_message({}_msg):\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "result = other_initiated_dialogue\n"
-        self._change_indent(-2)
-        cls_str += self.indent + "if self_initiated_dialogue_label in self.dialogues:\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self_initiated_dialogue = cast(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "{}Dialogue, self.dialogues[self_initiated_dialogue_label]\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += (
-            self.indent
-            + "if self_initiated_dialogue.is_valid_next_message({}_msg):\n".format(
-                self.protocol_specification.name
-            )
-        )
-        self._change_indent(1)
-        cls_str += self.indent + "result = self_initiated_dialogue\n"
-        self._change_indent(-2)
-        cls_str += self.indent + "if result is None:\n"
-        self._change_indent(1)
-        cls_str += self.indent + 'raise ValueError("Should have found dialogue.")\n'
-        self._change_indent(-1)
-        cls_str += self.indent + "return result\n"
-        self._change_indent(-1)
-
-        # create methods
-        cls_str += self.indent + "def create_self_initiated(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "dialogue_opponent_addr: Address,\n"
-        cls_str += self.indent + "dialogue_starter_addr: Address,\n"
-        if len(self._roles) == 2:
-            cls_str += self.indent + "is_{}: bool,\n".format(self._roles[0])
-        self._change_indent(-1)
-        cls_str += self.indent + ") -> Dialogue:\n"
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Create a self initiated dialogue.\n\n"
-        cls_str += (
-            self.indent
-            + ":param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.\n"
-        )
-        cls_str += (
-            self.indent
-            + ":param dialogue_starter_addr: the pbk of the agent which started the dialogue\n"
-        )
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + ":param is_{}: boolean indicating the agent role\n".format(
-                    self._roles[0]
-                )
-            )
-        cls_str += "\n"
-        cls_str += self.indent + ":return: the created dialogue.\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += (
-            self.indent
-            + 'dialogue_reference = (str(self._next_dialogue_nonce()), "")\n'
-        )
-        cls_str += self.indent + "dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "dialogue_reference, dialogue_opponent_addr, dialogue_starter_addr\n"
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + "dialogue = {}Dialogue(dialogue_label, is_{})\n".format(
-                    self.protocol_specification_in_camel_case, self._roles[0],
-                )
-            )
-        else:
-            cls_str += self.indent + "dialogue = {}Dialogue(dialogue_label)\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        cls_str += (
-            self.indent
-            + "self._initiated_dialogues.update({dialogue_label: dialogue})\n"
-        )
-        cls_str += self.indent + "return dialogue\n\n"
-        self._change_indent(-1)
-
-        cls_str += self.indent + "def create_opponent_initiated(\n"
-        self._change_indent(1)
-        cls_str += self.indent + "self,\n"
-        cls_str += self.indent + "dialogue_opponent_addr: Address,\n"
-        cls_str += self.indent + "dialogue_reference: Tuple[str, str],\n"
-        if len(self._roles) == 2:
-            cls_str += self.indent + "is_{}: bool,\n".format(self._roles[0])
-        self._change_indent(-1)
-        cls_str += self.indent + ") -> Dialogue:\n"
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Save an opponent initiated dialogue.\n\n"
-        cls_str += (
-            self.indent
-            + ":param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.\n"
-        )
-        cls_str += (
-            self.indent + ":param dialogue_reference: the reference of the dialogue.\n"
-        )
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + ":param is_{}: keeps track if the counterparty is a {}.\n".format(
-                    self._roles[0], self._roles[0]
-                )
-            )
-        cls_str += "\n"
-        cls_str += self.indent + ":return: the created dialogue\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "assert (\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + 'dialogue_reference[0] != "" and dialogue_reference[1] == ""\n'
-        )
-        self._change_indent(-1)
-        cls_str += (
-            self.indent
-            + '), "Cannot initiate dialogue with preassigned dialogue_responder_reference!"\n'
-        )
-        cls_str += self.indent + "new_dialogue_reference = (\n"
-        self._change_indent(1)
-        cls_str += self.indent + "dialogue_reference[0],\n"
-        cls_str += self.indent + "str(self._next_dialogue_nonce()),\n"
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        cls_str += self.indent + "dialogue_label = DialogueLabel(\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent
-            + "new_dialogue_reference, dialogue_opponent_addr, dialogue_opponent_addr\n"
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + ")\n"
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + "result = self._create(dialogue_label, is_{})\n".format(
-                    self._roles[0]
-                )
-            )
-        else:
-            cls_str += self.indent + "result = self._create(dialogue_label)\n"
-        cls_str += self.indent + "return result\n\n"
-        self._change_indent(-1)
-
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + "def _create(self, dialogue_label: DialogueLabel, is_{}: bool) -> {}Dialogue:\n".format(
-                    self._roles[0], self.protocol_specification_in_camel_case,
-                )
-            )
-        else:
-            cls_str += (
-                self.indent
-                + "def _create(self, dialogue_label: DialogueLabel) -> {}Dialogue:\n".format(
-                    self.protocol_specification_in_camel_case
-                )
-            )
-
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Create a dialogue.\n\n"
-        cls_str += self.indent + ":param dialogue_label: the dialogue label\n"
-        if len(self._roles) == 2:
-            cls_str += (
-                self.indent
-                + ":param is_{}: boolean indicating the agent role\n\n".format(
-                    self._roles[0]
-                )
-            )
-
-        cls_str += self.indent + ":return: the created dialogue\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "assert dialogue_label not in self.dialogues\n"
-        cls_str += (
-            self.indent
-            + "dialogue = {}Dialogue(dialogue_label, is_{})\n".format(
-                self.protocol_specification_in_camel_case, self._roles[0],
-            )
-        )
-        if len(self._roles) == 2:
-            cls_str += self.indent + "if is_{}:\n".format(self._roles[0])
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + "assert dialogue_label not in self.dialogues_as_{}\n".format(
-                    self._roles[0]
-                )
-            )
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{}.update({{dialogue_label: dialogue}})\n".format(
-                    self._roles[0]
-                )
-            )
-            self._change_indent(-1)
-            cls_str += self.indent + "else:\n"
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + "assert dialogue_label not in self.dialogues_as_{}\n".format(
-                    self._roles[1]
-                )
-            )
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{}.update({{dialogue_label: dialogue}})\n".format(
-                    self._roles[1]
-                )
-            )
-            self._change_indent(-1)
-        cls_str += self.indent + "self.dialogues.update({dialogue_label: dialogue})\n"
         cls_str += self.indent + "return dialogue\n"
-        self._change_indent(-1)
-
-        # add method
-        cls_str += (
-            self.indent
-            + "def _add(self, dialogue: {}Dialogue) -> None:\n".format(
-                self.protocol_specification_in_camel_case
-            )
-        )
-        self._change_indent(1)
-        cls_str += self.indent + '"""\n'
-        cls_str += self.indent + "Add a dialogue.\n\n"
-        cls_str += self.indent + ":param dialogue: the dialogue\n\n"
-        cls_str += self.indent + ":return: None\n"
-        cls_str += self.indent + '"""\n'
-        cls_str += (
-            self.indent + "assert dialogue.dialogue_label not in self.dialogues\n"
-        )
-        if len(self._roles) == 2:
-            cls_str += self.indent + "if dialogue.is_{}:\n".format(self._roles[0])
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + "assert dialogue.dialogue_label not in self.dialogues_as_{}\n".format(
-                    self._roles[0]
-                )
-            )
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{}.update({{dialogue.dialogue_label: dialogue}})\n".format(
-                    self._roles[0]
-                )
-            )
-            self._change_indent(-1)
-            cls_str += self.indent + "else:\n"
-            self._change_indent(1)
-            cls_str += (
-                self.indent
-                + "assert dialogue.dialogue_label not in self.dialogues_as_{}\n".format(
-                    self._roles[1]
-                )
-            )
-            cls_str += (
-                self.indent
-                + "self._dialogues_as_{}.update({{dialogue.dialogue_label: dialogue}})\n".format(
-                    self._roles[1]
-                )
-            )
-            self._change_indent(-1)
-        cls_str += (
-            self.indent + "self.dialogues.update({dialogue.dialogue_label: dialogue})\n"
-        )
-        self._change_indent(-1)
+        self._change_indent(-2)
         cls_str += self.indent + "\n"
 
         return cls_str

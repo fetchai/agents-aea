@@ -25,7 +25,7 @@ from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple
 
 from aea.configurations.base import PublicId
-from aea.decision_maker.base import OwnershipState
+from aea.decision_maker.default import OwnershipState
 from aea.decision_maker.messages.transaction import (
     OFF_CHAIN,
     TransactionId,
@@ -36,6 +36,7 @@ from aea.helpers.search.models import Description
 from aea.mail.base import Address
 from aea.skills.base import Model
 
+from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue
 from packages.fetchai.skills.tac_negotiation.helpers import tx_hash_from_values
 
 MessageId = int
@@ -96,7 +97,7 @@ class Transactions(Model):
         performative: TransactionMessage.Performative,
         proposal_description: Description,
         dialogue_label: DialogueLabel,
-        is_seller: bool,
+        role: Dialogue.AgentRole,
         agent_addr: Address,
     ) -> TransactionMessage:
         """
@@ -104,10 +105,12 @@ class Transactions(Model):
 
         :param proposal_description: the description of the proposal
         :param dialogue_label: the dialogue label
-        :param is_seller: the agent is a seller
+        :param role: the role of the agent (seller or buyer)
         :param agent_addr: the address of the agent
         :return: a transaction message
         """
+        is_seller = role == Dialogue.AgentRole.SELLER
+
         sender_tx_fee = (
             proposal_description.values["seller_tx_fee"]
             if is_seller
@@ -138,15 +141,15 @@ class Transactions(Model):
         if is_seller:
             for good_id in goods_component.keys():
                 goods_component[good_id] = goods_component[good_id] * (-1)
+        tx_amount_by_currency_id = {proposal_description.values["currency_id"]: amount}
+        tx_nonce = proposal_description.values["tx_nonce"]
         # need to hash positive.negative side separately
         tx_hash = tx_hash_from_values(
             tx_sender_addr=agent_addr,
             tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
             tx_quantities_by_good_id=goods_component,
-            tx_amount_by_currency_id={
-                proposal_description.values["currency_id"]: amount
-            },
-            tx_nonce=proposal_description.values["tx_nonce"],
+            tx_amount_by_currency_id=tx_amount_by_currency_id,
+            tx_nonce=tx_nonce,
         )
         skill_callback_ids = (
             [PublicId.from_str("fetchai/tac_participation:0.1.0")]
@@ -159,17 +162,12 @@ class Transactions(Model):
             tx_id=self.get_internal_tx_id(),
             tx_sender_addr=agent_addr,
             tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
-            tx_amount_by_currency_id={
-                proposal_description.values["currency_id"]: amount
-            },
+            tx_amount_by_currency_id=tx_amount_by_currency_id,
             tx_sender_fee=sender_tx_fee,
             tx_counterparty_fee=counterparty_tx_fee,
             tx_quantities_by_good_id=goods_component,
             ledger_id=OFF_CHAIN,
-            info={
-                "dialogue_label": dialogue_label.json,
-                "tx_nonce": proposal_description.values["tx_nonce"],
-            },
+            info={"dialogue_label": dialogue_label.json, "tx_nonce": tx_nonce},
             signing_payload={"tx_hash": tx_hash},
         )
         return transaction_msg
@@ -307,17 +305,19 @@ class Transactions(Model):
         self._last_update_for_transactions.append((now, transaction_id))
 
     def add_locked_tx(
-        self, transaction_msg: TransactionMessage, as_seller: bool
+        self, transaction_msg: TransactionMessage, role: Dialogue.AgentRole
     ) -> None:
         """
         Add a lock (in the form of a transaction).
 
         :param transaction_msg: the transaction message
-        :param as_seller: whether the agent is a seller or not
+        :param role: the role of the agent (seller or buyer)
         :raise AssertionError: if the transaction is already present.
 
         :return: None
         """
+        as_seller = role == Dialogue.AgentRole.SELLER
+
         transaction_id = transaction_msg.tx_id
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
@@ -358,7 +358,7 @@ class Transactions(Model):
             if is_seller
             else list(self._locked_txs_as_buyer.values())
         )
-        ownership_state_after_locks = self.context.agent_ownership_state.apply_transactions(
+        ownership_state_after_locks = self.context.decision_maker_handler_context.ownership_state.apply_transactions(
             transaction_msgs
         )
         return ownership_state_after_locks

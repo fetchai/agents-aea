@@ -25,7 +25,6 @@ from click import ClickException
 
 from requests.exceptions import ConnectionError
 
-from aea.cli.common import AEAConfigException
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
     _rm_tarfiles,
@@ -38,6 +37,7 @@ from aea.cli.registry.utils import (
     registry_logout,
     request_api,
 )
+from aea.cli.utils.exceptions import AEAConfigException
 from aea.configurations.base import PublicId
 
 
@@ -54,12 +54,12 @@ class TestFetchPackage:
         obj_type = "connection"
         public_id = PublicId.from_str("author/name:0.1.0")
         cwd = "cwd"
-        dest_path = "dest/path"
+        dest_path = os.path.join("dest", "path", "package_folder_name")
 
         fetch_package(obj_type, public_id, cwd, dest_path)
         request_api_mock.assert_called_with("GET", "/connections/author/name/0.1.0")
         download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", dest_path)
+        extract_mock.assert_called_once_with("filepath", os.path.join("dest", "path"))
 
 
 def _raise_connection_error(*args, **kwargs):
@@ -149,20 +149,20 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    @mock.patch("aea.cli.registry.utils._get_or_create_cli_config", return_value={})
+    @mock.patch("aea.cli.registry.utils.get_or_create_cli_config", return_value={})
     def test_request_api_no_auth_data(
-        self, _get_or_create_cli_config_mock, request_mock
+        self, get_or_create_cli_config_mock, request_mock
     ):
         """Test for request_api method no auth data."""
         with self.assertRaises(ClickException):
             request_api("GET", "/path", is_auth=True)
 
     @mock.patch(
-        "aea.cli.registry.utils._get_or_create_cli_config",
+        "aea.cli.registry.utils.get_or_create_cli_config",
         return_value={AUTH_TOKEN_KEY: "key"},
     )
     def test_request_api_with_auth_positive(
-        self, _get_or_create_cli_config_mock, request_mock
+        self, get_or_create_cli_config_mock, request_mock
     ):
         """Test for request_api method with auth positive result."""
         expected_result = {"correct": "json"}

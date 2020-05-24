@@ -27,6 +27,7 @@ DEFAULT_SEARCH_QUERY = {
     "search_value": True,
     "constraint_type": "==",
 }
+DEFAULT_LEDGER_ID = "fetchai"
 
 
 class Strategy(Model):
@@ -39,9 +40,15 @@ class Strategy(Model):
         :return: None
         """
         self.search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
 
     def get_next_search_id(self) -> int:
         """

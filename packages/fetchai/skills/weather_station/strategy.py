@@ -66,6 +66,11 @@ class Strategy(Model):
         self.db = DBCommunication()
         self._oef_msg_id = 0
 
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
     def get_next_oef_msg_id(self) -> int:
         """
         Get the next oef msg id.
@@ -127,7 +132,7 @@ class Strategy(Model):
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
                 "ledger_id": self._ledger_id,
-                "tx_nonce": tx_nonce if tx_nonce is not None else "",
+                "tx_nonce": tx_nonce,
             }
         )
         return proposal, weather_data

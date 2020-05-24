@@ -1,4 +1,4 @@
-A `Protocol` manages message representation (syntax, `message.py`), optionally rules of the message exchange (semantics, `dialogues.py`), as well as encoding, and decoding (`serialization.py`). All protocols are for point to point interaction between two agents. Agents can be AEAs or other types of agent-like services.
+A `Protocol` manages message representation (syntax in `message.py`), optionally rules of the message exchange (semantics in `dialogues.py`), as well as encoding and decoding (in `serialization.py`). All protocols are for point to point interactions between two agents. Agents can be AEAs or other types of agent-like services.
 
 <!-- ## Interaction Protocols
 
@@ -10,25 +10,30 @@ Protocols are not to be conflated with Interaction Protocols. The latter consist
 
 ## Metadata
 
-Each `Message` in an interaction protocol has a set of default metadata, which includes:
+Each `Message` in an interaction protocol has a set of default fields:
 
-* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
-* `message_id: int`, the id of the message. The default value is `1`.
-* `target: int`, the id of the message which is referenced by this message. The default value is `0`.
+* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
+* `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
+* `target: int`, the id of the message this message is replying to. The default value is `0`.
+* `Performative: Enum`, the purpose/intention of the message. 
+* `is_incoming: bool`, a boolean specifying whether the message is outgoing (from the agent), or incoming (from the other agent). The default value is `False`. 
+* `counterparty: Address`, the address of the counterparty of this agent; the other agent, this agent is communicating with.  
 
-By default, `dialogue_reference`, `message_id` and `target` are set, however, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep reference to the preceding messages in a dialogue for a given interaction. For instance, following receipt of a message with `target=0` and `message_id=1` the responding AEA should respond with a `message_id=2` and `target=1`. In particular, `target` holds the id of the message being referenced. This can be the preceding message, it can also be an older message. Hence, `0 < target < message_id` for `message_id > 1` and `target=0` if `message_id = 1`.
+The default values for the above fields assume the message is the first message by the agent in a dialogue. Therefore, the `message_id` is set to `1` indicating the first message in the dialogue, `target` is `0` since the first  message is the only message that does not reply to any other, and `is_incoming` is `False` indicating the message is by the agent itself.
 
-## Speech acts (`Performatives`)
+By default, the values of `dialogue_reference`, `message_id`, `target`, `is_incoming`, `counterparty` are set. However, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep track of messages and their replies. For instance, on receiving of a message with `message_id=1` and `target=0`, the responding agent could respond with a another with `message_id=2` and `target=1` replying to the first message. In particular, `target` holds the id of the message being replied to. This can be the preceding message, or an older one. 
 
-Each message must define a `performative`. This is the "type" of the message of a given protocol. The `performative` is one way in which message flow in a given protocol is handled.
+## Contents
+
+Each message may optionally have any number of contents of varying types. 
 
 ## Dialogue rules
 
-Protocols can optionaly define dialogue rules. These are rules on the permitted order of message performatives in a given dialogue. For instance, a protocol might specify that a certain performative, say `peformative_a`, can only be followed by `performative_b`. It might further specify that `performative_b` can only be replied to with a message of `performative_c` or `performative_d`.
+Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol. 
 
 ## Custom protocol
 
-The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech acts, speech act contents as well as the optional reply structure.
+The developer can generate custom protocols with the <a href="../protocol-generator">protocol generator</a>. This lets the developer specify the speech-acts as well as optionally the dialogue structure (e.g. roles of agents participating in a dialogue, the states a dialogue may end in, and the reply structure of the speech-acts in a dialogue).
 
 ## `fetchai/default:0.1.0` protocol
 
@@ -209,9 +214,9 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.1.0` protocol
+## `fetchai/fipa:0.2.0` protocol
 
-The `fetchai/fipa:0.1.0` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:0.2.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -227,7 +232,7 @@ class Performative(Enum):
     PROPOSE = "propose"
 
     def __str__(self):
-        """Get string representation."""
+        """Get the string representation."""
         return self.value
 ```
 
@@ -244,9 +249,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.1.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.2.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.1.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.2.0` protocol check out the <a href="../thermometer-skills-step-by-step" target=_blank> thermometer skill step by step guide</a>.
 
 
 
