@@ -198,7 +198,7 @@ def test_real_search():
     assert data[i]["id"] == "fetchai/soef:0.1.0"
     assert (
         data[i]["description"]
-        == "The soef connection provides a wrapper around the simple OEF and OEF SDK for connection with the simple OEF and OEF search and communication node."
+        == "The soef connection provides a connection api to the simple OEF."
     )
     i += 1
     assert data[i]["id"] == "fetchai/stub:0.4.0"
