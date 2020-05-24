@@ -593,7 +593,7 @@ class OEFChannel(OEFAgent):
             message_id=MESSAGE_ID,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Destination not available",
-            error_data={},  # TODO: add helper info
+            error_data={},
         )
         msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(

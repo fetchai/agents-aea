@@ -114,8 +114,8 @@ class FIPANegotiationHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": b""},
-        )  # TODO: send FipaSerializer().encode(msg)
+            error_data={"fipa_message": FipaSerializer().encode(msg)},
+        )
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,

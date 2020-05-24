@@ -8,7 +8,7 @@ fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmViRmMqhXUZymShpuK1sS683rTS8jf89pmmzeLNQt4fbp
   dialogues.py: Qmf3WGxKXa655d67icvZUSk2MzFtUxB6k2ggznSwNZQEjK
-  handlers.py: QmXno6K8EJpsz6hRMRTqZ7eFanqzupL5d7uD3x468YevwN
+  handlers.py: QmT5hTk4TFipnbkQy5ZfUDTdVqddDNZhXx73WyDTiKTzrX
   strategy.py: QmeoxCowVvHowrggqwYEmywVhx9JGK9Ef7wwaVrQHT5CQt
   thermometer_data_model.py: QmWBR4xcXgBJ1XtNKjcK2cnU46e1PQRBqMW9TSHo8n8NjE
 fingerprint_ignore_patterns: []
