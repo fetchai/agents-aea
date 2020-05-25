@@ -255,7 +255,7 @@ class AEABuilder:
         """
         self._name = None  # type: Optional[str]
         self._resources = Resources()
-        self._private_key_paths = {}  # type: Dict[str, str]
+        self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_key = None  # set by the user, or instantiate a default one.
         self._default_ledger = (
@@ -460,7 +460,7 @@ class AEABuilder:
         return self
 
     @property
-    def private_key_paths(self) -> Dict[str, str]:
+    def private_key_paths(self) -> Dict[str, Optional[str]]:
         """Get the private key paths."""
         return self._private_key_paths
 
