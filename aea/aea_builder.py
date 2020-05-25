@@ -434,16 +434,19 @@ class AEABuilder:
         return self
 
     def add_private_key(
-        self, identifier: str, private_key_path: PathLike
+        self, identifier: str, private_key_path: Optional[PathLike] = None
     ) -> "AEABuilder":
         """
         Add a private key path.
 
         :param identifier: the identifier for that private key path.
-        :param private_key_path: path to the private key file.
+        :param private_key_path: an (optional) path to the private key file.
+            If None, the key will be created at build time.
         :return: the AEABuilder
         """
-        self._private_key_paths[identifier] = str(private_key_path)
+        self._private_key_paths[identifier] = (
+            str(private_key_path) if private_key_path is not None else None
+        )
         return self
 
     def remove_private_key(self, identifier: str) -> "AEABuilder":
