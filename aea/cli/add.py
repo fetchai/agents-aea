@@ -19,17 +19,16 @@
 
 """Implementation of the 'aea add' subcommand."""
 
-from pathlib import Path
-from typing import Collection, cast
+from typing import cast
 
 import click
 from click.core import Context as ClickContext
 
 from aea.cli.registry.utils import fetch_package
 from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after
-from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
@@ -39,17 +38,12 @@ from aea.cli.utils.package_utils import (
     is_item_present,
     register_item,
 )
-from aea.configurations.base import (
-    PackageType,
-    PublicId,
-    _get_default_configuration_file_name_from_type,
-)
+from aea.configurations.base import PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     DEFAULT_SKILL,
 )
-from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
@@ -153,50 +147,13 @@ def _add_item(
         package_path = fetch_package(
             item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
-
-    item_config = _load_item_config(item_type, package_path)
+    item_config = load_item_config(item_type, package_path)
 
     if not is_fingerprint_correct(package_path, item_config):
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
 
-    _add_item_deps(click_context, item_type, item_config)
     register_item(ctx, item_type, item_public_id)
-
-
-def _add_protocols(
-    click_context: ClickContext, protocols: Collection[PublicId]
-) -> None:
-    """
-    Add protocols to AEA by list of public IDs.
-
-    :param click_context: click context object.
-    :param protocols: a Collection of protocol public IDs to be added.
-
-    :return: None
-    """
-    ctx = cast(Context, click_context.obj)
-    for protocol_public_id in protocols:
-        if protocol_public_id not in ctx.agent_config.protocols:
-            logger.debug(
-                "Adding protocol '{}' to the agent...".format(protocol_public_id)
-            )
-            _add_item(click_context, "protocol", protocol_public_id)
-
-
-def _load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
-    """
-    Load item configuration.
-
-    :param item_type: type of item.
-    :param package_path: path to package from which config should be loaded.
-
-    :return: configuration object.
-    """
-    configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
-    configuration_path = package_path / configuration_file_name
-    configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
-    item_config = configuration_loader.load(configuration_path.open())
-    return item_config
+    _add_item_deps(click_context, item_type, item_config)
 
 
 def _add_item_deps(click_context: ClickContext, item_type: str, item_config) -> None:
@@ -209,9 +166,15 @@ def _add_item_deps(click_context: ClickContext, item_type: str, item_config) -> 
 
     :return: None
     """
+    ctx = cast(Context, click_context.obj)
     if item_type in {"connection", "skill"}:
-        _add_protocols(click_context, item_config.protocols)
+        # add missing protocols
+        for protocol_public_id in item_config.protocols:
+            if protocol_public_id not in ctx.agent_config.protocols:
+                _add_item(click_context, "protocol", protocol_public_id)
 
     if item_type == "skill":
+        # add missing contracts
         for contract_public_id in item_config.contracts:
-            _add_item(click_context, "contract", contract_public_id)
+            if contract_public_id not in ctx.agent_config.contracts:
+                _add_item(click_context, "contract", contract_public_id)
