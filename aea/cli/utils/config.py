@@ -34,7 +34,12 @@ import yaml
 from aea.cli.utils.constants import CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
 from aea.cli.utils.package_utils import load_yaml
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PackageType,
+    _get_default_configuration_file_name_from_type,
+)
+from aea.configurations.loader import ConfigLoader
 
 
 def try_to_load_agent_config(
@@ -111,3 +116,19 @@ def get_or_create_cli_config() -> Dict:
     except FileNotFoundError:
         _init_cli_config()
     return load_yaml(CLI_CONFIG_PATH)
+
+
+def load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
+    """
+    Load item configuration.
+
+    :param item_type: type of item.
+    :param package_path: path to package from which config should be loaded.
+
+    :return: configuration object.
+    """
+    configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
+    configuration_path = package_path / configuration_file_name
+    configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
+    item_config = configuration_loader.load(configuration_path.open())
+    return item_config
