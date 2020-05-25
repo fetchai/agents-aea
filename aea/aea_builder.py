@@ -255,7 +255,7 @@ class AEABuilder:
         """
         self._name = None  # type: Optional[str]
         self._resources = Resources()
-        self._private_key_paths = {}  # type: Dict[str, str]
+        self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._default_key = None  # set by the user, or instantiate a default one.
         self._default_ledger = (
@@ -434,16 +434,19 @@ class AEABuilder:
         return self
 
     def add_private_key(
-        self, identifier: str, private_key_path: PathLike
+        self, identifier: str, private_key_path: Optional[PathLike] = None
     ) -> "AEABuilder":
         """
         Add a private key path.
 
         :param identifier: the identifier for that private key path.
-        :param private_key_path: path to the private key file.
+        :param private_key_path: an (optional) path to the private key file.
+            If None, the key will be created at build time.
         :return: the AEABuilder
         """
-        self._private_key_paths[identifier] = str(private_key_path)
+        self._private_key_paths[identifier] = (
+            str(private_key_path) if private_key_path is not None else None
+        )
         return self
 
     def remove_private_key(self, identifier: str) -> "AEABuilder":
@@ -457,7 +460,7 @@ class AEABuilder:
         return self
 
     @property
-    def private_key_paths(self) -> Dict[str, str]:
+    def private_key_paths(self) -> Dict[str, Optional[str]]:
         """Get the private key paths."""
         return self._private_key_paths
 
