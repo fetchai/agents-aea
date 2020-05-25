@@ -73,7 +73,13 @@ def _setup_package_folder(path: Path):
 
 
 @clean_after
-def _create_aea(click_context, agent_name: str, set_author: str, local: bool) -> None:
+def _create_aea(
+    click_context,
+    agent_name: str,
+    set_author: str,
+    local: bool,
+    has_default: bool = True,
+) -> None:
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
     ctx.clean_paths.append(str(path))
@@ -112,11 +118,12 @@ def _create_aea(click_context, agent_name: str, set_author: str, local: bool) ->
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        click.echo("Adding default packages ...")
-        if local:
-            ctx.set_config("is_local", True)
-        _add_item(click_context, "connection", DEFAULT_CONNECTION)
-        _add_item(click_context, "skill", DEFAULT_SKILL)
+        if has_default:
+            click.echo("Adding default packages ...")
+            if local:
+                ctx.set_config("is_local", True)
+            _add_item(click_context, "connection", DEFAULT_CONNECTION)
+            _add_item(click_context, "skill", DEFAULT_SKILL)
 
     except Exception as e:
         raise click.ClickException(str(e))
@@ -131,8 +138,9 @@ def _create_aea(click_context, agent_name: str, set_author: str, local: bool) ->
     help="Add the author to run `init` before `create` execution.",
 )
 @click.option("--local", is_flag=True, help="For using local folder.")
+@click.option("--empty", is_flag=True, help="Not adding default dependencies.")
 @click.pass_context
-def create(click_context, agent_name, author, local):
+def create(click_context, agent_name, author, local, empty):
     """Create an agent."""
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
@@ -161,4 +169,4 @@ def create(click_context, agent_name, author, local):
 
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))
-    _create_aea(click_context, agent_name, set_author, local)
+    _create_aea(click_context, agent_name, set_author, local, has_default=not empty)

@@ -27,6 +27,7 @@ Run this script from the root of the project directory:
 """
 import re
 import sys
+from itertools import chain
 from pathlib import Path
 from typing import Callable, Set
 
@@ -77,6 +78,18 @@ class PackageIdNotFound(Exception):
         self.match_obj = match_obj
 
 
+DEFAULT_CONFIG_FILE_PATHS = [
+    Path("aea", "connections", "stub", "connection.yaml"),
+    Path("aea", "protocols", "default", "protocol.yaml"),
+    Path("aea", "skills", "error", "skill.yaml"),
+]
+
+
+def default_config_file_paths():
+    for item in DEFAULT_CONFIG_FILE_PATHS:
+        yield item
+
+
 def get_public_id_from_yaml(configuration_file: Path):
     data = yaml.safe_load(configuration_file.open())
     author = data["author"]
@@ -90,8 +103,10 @@ def find_all_packages_ids() -> Set[PackageId]:
     """Find all packages ids."""
     package_ids: Set[PackageId] = set()
     packages_dir = Path("packages")
-    for configuration_file in packages_dir.glob("*/*/*/*.yaml"):
-        package_type = PackageType(configuration_file.parts[2][:-1])
+    for configuration_file in chain(
+        packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()
+    ):
+        package_type = PackageType(configuration_file.parts[-3][:-1])
         package_public_id = get_public_id_from_yaml(configuration_file)
         package_id = PackageId(package_type, package_public_id)
         package_ids.add(package_id)
