@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea list` sub-command."""
 
 import json
