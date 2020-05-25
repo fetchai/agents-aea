@@ -34,6 +34,11 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.components.loader import (
+    _handle_error_while_loading_component_generic_error,
+    _handle_error_while_loading_component_module_not_found,
+    load_component_from_config,
+)
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
@@ -57,7 +62,6 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
-from aea.contracts.base import Contract
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
     _try_validate_private_key_path,
@@ -70,14 +74,13 @@ from aea.decision_maker.base import DecisionMakerHandler
 from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
-from aea.exceptions import AEAException, AEAPackageLoadingError
+from aea.exceptions import AEAException
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
 from aea.mail.base import Address
-from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -1148,16 +1151,9 @@ class AEABuilder:
                     configuration
                 ]
             else:
-                try:
-                    protocol = Protocol.from_config(configuration)
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
+                protocol = load_component_from_config(
+                    ComponentType.PROTOCOL, configuration
+                )
             self._add_component_to_resources(protocol)
 
     def _load_and_add_contracts(self) -> None:
@@ -1171,17 +1167,19 @@ class AEABuilder:
                     configuration
                 ]
             else:
-                try:
-                    contract = Contract.from_config(configuration)
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
+                contract = load_component_from_config(
+                    ComponentType.CONTRACT, configuration
+                )
             self._add_component_to_resources(contract)
+
+    def _load_and_add_components(self, component_type: ComponentType) -> None:
+        """
+        Load and add components added to the builder.
+
+        :param component_type: the component type for which
+        :return: None
+        """
+        # TODO
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
         for configuration in self._package_dependency_manager.skills.values():
@@ -1305,95 +1303,3 @@ def _verify_or_create_private_keys(aea_project_path: Path) -> None:
 
     fp_write = path_to_configuration.open(mode="w", encoding="utf-8")
     agent_loader.dump(agent_configuration, fp_write)
-
-
-def _handle_error_while_loading_component_module_not_found(
-    configuration: ComponentConfiguration, e: ModuleNotFoundError
-):
-    """
-    Handle ModuleNotFoundError for AEA packages.
-
-    It will rewrite the error message only if the import path starts with 'packages'.
-    To do that, it will extract the wrong import path from the error message.
-
-    Depending on the import path, the possible error messages can be:
-
-    - "No AEA package found with author name '{}', type '{}', name '{}'"
-    - "'{}' is not a valid type name, choose one of ['protocols', 'connections', 'skills', 'contracts']"
-    - "The package '{}/{}' of type '{}' exists, but cannot find module '{}'"
-
-    :raises ModuleNotFoundError: if it is not
-    :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
-    """
-    error_message = str(e)
-    extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
-    match = extract_import_path_regex.match(error_message)
-    if match is None:
-        # if for some reason we cannot extract the import path, just re-raise the error
-        raise e from e
-
-    import_path = match.group(1)
-    parts = import_path.split(".")
-    nb_parts = len(parts)
-    if parts[0] != "packages" and nb_parts < 2:
-        # if the first part of the import path is not 'packages',
-        # the error is due for other reasons - just re-raise the error
-        raise e from e
-
-    def get_new_error_message_no_package_found() -> str:
-        """Create a new error message in case the package is not found."""
-        assert nb_parts <= 4, "More than 4 parts!"
-        author = parts[1]
-        new_message = "No AEA package found with author name '{}'".format(author)
-
-        if nb_parts >= 3:
-            pkg_type = parts[2]
-            try:
-                ComponentType(pkg_type[:-1])
-            except ValueError:
-                return "'{}' is not a valid type name, choose one of {}".format(
-                    pkg_type, list(map(lambda x: x.to_plural(), ComponentType))
-                )
-            new_message += ", type '{}'".format(pkg_type)
-        if nb_parts == 4:
-            pkg_name = parts[3]
-            new_message += ", name '{}'".format(pkg_name)
-        return new_message
-
-    def get_new_error_message_with_package_found() -> str:
-        """Create a new error message in case the package is found."""
-        assert nb_parts >= 5, "Less than 5 parts!"
-        author, pkg_name, pkg_type = parts[:3]
-        the_rest = ".".join(parts[4:])
-        return "The package '{}/{}' of type '{}' exists, but cannot find module '{}'".format(
-            author, pkg_name, pkg_type, the_rest
-        )
-
-    if nb_parts < 5:
-        new_message = get_new_error_message_no_package_found()
-    else:
-        new_message = get_new_error_message_with_package_found()
-
-    raise AEAPackageLoadingError(
-        "An error occurred while loading {} {}: No module named {}; {}".format(
-            str(configuration.component_type),
-            configuration.public_id,
-            import_path,
-            new_message,
-        )
-    ) from e
-
-
-def _handle_error_while_loading_component_generic_error(
-    configuration: ComponentConfiguration, e: Exception
-):
-    """
-    Handle Exception for AEA packages.
-
-    :raises Exception: the same exception, but prepending an informative message.
-    """
-    raise Exception(
-        "An error occurred while loading {} {}: {}".format(
-            str(configuration.component_type), configuration.public_id, str(e)
-        )
-    ) from e
