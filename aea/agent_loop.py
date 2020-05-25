@@ -409,21 +409,36 @@ class AsyncAgentLoop(BaseAgentLoop):
 class SyncAgentLoop(BaseAgentLoop):
     """Synchronous agent loop."""
 
-    def __init__(self, agent: "Agent") -> None:
+    def __init__(self, agent: "Agent", loop: AbstractEventLoop = None):
         """
         Init agent loop.
 
-        :param agent: agent or AEA instance.
+        :param agent: AEA instance
+        :param loop: asyncio loop to use. optional
         """
         super().__init__(agent)
+        self._agent: "AEA" = self._agent
+
+        try:
+            self._loop = loop or asyncio.get_event_loop()
+            assert not self._loop.is_closed()
+            assert not self._loop.is_running()
+        except (RuntimeError, AssertionError):
+            self._loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self._loop)
+
         self.is_running = False
 
     def start(self) -> None:
         """Start agent loop."""
         self.is_running = True
+        self._loop.run_until_complete(self._run())
+
+    async def _run(self) -> None:
+        """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
             self._spin_main_loop()
-            time.sleep(self._agent._timeout)
+            await asyncio.sleep(self._agent._timeout)
 
     def _spin_main_loop(self):
         """Run one spin of agent loop: act, react, update."""
