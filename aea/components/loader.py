@@ -19,7 +19,7 @@
 
 """This module contains utilities for loading components."""
 import re
-from typing import Type
+from typing import Dict, Type
 
 from aea.configurations.base import ComponentConfiguration, ComponentType
 from aea.configurations.components import Component
@@ -31,12 +31,13 @@ from aea.skills.base import Skill
 
 
 def component_type_to_class(component_type: ComponentType) -> Type[Component]:
-    return {
+    type_to_class: Dict[ComponentType, Type[Component]] = {
         ComponentType.PROTOCOL: Protocol,
         ComponentType.CONTRACT: Contract,
         ComponentType.CONNECTION: Connection,
         ComponentType.SKILL: Skill,
-    }[component_type]
+    }
+    return type_to_class[component_type]
 
 
 def load_component_from_dir(component_type: ComponentType, directory: str) -> Component:
@@ -48,10 +49,10 @@ def load_component_from_dir(component_type: ComponentType, directory: str) -> Co
     :return: the component instance.
     """
     component_class = component_type_to_class(component_type)
-    return component_class.from_dir(directory)
+    return component_class.from_dir(directory)  # type: ignore
 
 
-def load_component_from_config(
+def load_component_from_config(  # type: ignore
     component_type: ComponentType,
     configuration: ComponentConfiguration,
     *args,
@@ -66,7 +67,7 @@ def load_component_from_config(
     """
     component_class = component_type_to_class(component_type)
     try:
-        return component_class.from_config(*args, **kwargs, configuration=configuration)
+        return component_class.from_config(*args, **kwargs, configuration=configuration)  # type: ignore
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:

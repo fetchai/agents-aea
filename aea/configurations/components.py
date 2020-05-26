@@ -20,7 +20,7 @@
 """This module contains definitions of agent components."""
 import logging
 import types
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -98,13 +98,3 @@ class Component(ABC):
         """Set the directory. Raise error if already set."""
         assert self._directory is None, "Directory already set."
         self._directory = path
-
-    @classmethod
-    @abstractmethod
-    def from_dir(cls, directory: str) -> "Component":
-        """Load a component from a directory."""
-
-    @classmethod
-    @abstractmethod
-    def from_config(cls, *args, **kwargs) -> "Component":
-        """Load a component from a configuration."""
