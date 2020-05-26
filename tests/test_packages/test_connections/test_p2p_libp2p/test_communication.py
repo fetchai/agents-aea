@@ -42,7 +42,7 @@ from ....conftest import skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_NET_SIZE = 1
+DEFAULT_NET_SIZE = 4
 
 
 def _make_libp2p_connection(
@@ -414,11 +414,13 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
         cls.multiplexer_relay_1 = Multiplexer([cls.connection_relay_1])
         cls.multiplexer_relay_1.connect()
-        
+
         relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
 
         port_relay_2 = DEFAULT_PORT + 100
-        cls.connection_relay_2 = _make_libp2p_connection(port=port_relay_2, entry_peers=[relay_peer_1])
+        cls.connection_relay_2 = _make_libp2p_connection(
+            port=port_relay_2, entry_peers=[relay_peer_1]
+        )
         cls.multiplexer_relay_2 = Multiplexer([cls.connection_relay_2])
         cls.multiplexer_relay_2.connect()
 
