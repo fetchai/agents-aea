@@ -18,12 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for building an AEA."""
-import inspect
 import itertools
 import logging
 import os
 import pprint
-import re
 import sys
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
@@ -34,11 +32,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.components.loader import (
-    _handle_error_while_loading_component_generic_error,
-    _handle_error_while_loading_component_module_not_found,
-    load_component_from_config,
-)
+from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
@@ -75,7 +69,7 @@ from aea.decision_maker.default import (
     DecisionMakerHandler as DefaultDecisionMakerHandler,
 )
 from aea.exceptions import AEAException
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
@@ -1205,39 +1199,13 @@ class AEABuilder:
                     )
                 )
             return connection
-        try:
-            directory = cast(Path, configuration.directory)
-            package_modules = load_all_modules(
-                directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        else:
+            return cast(
+                Connection,
+                load_component_from_config(
+                    ComponentType.CONNECTION, configuration, address=address
+                ),
             )
-            add_modules_to_sys_modules(package_modules)
-            connection_module_path = directory / "connection.py"
-            assert (
-                connection_module_path.exists() and connection_module_path.is_file()
-            ), "Connection module '{}' not found.".format(connection_module_path)
-            connection_module = load_module(
-                "connection_module", directory / "connection.py"
-            )
-            classes = inspect.getmembers(connection_module, inspect.isclass)
-            connection_class_name = cast(str, configuration.class_name)
-            connection_classes = list(
-                filter(lambda x: re.match(connection_class_name, x[0]), classes)
-            )
-            name_to_class = dict(connection_classes)
-            logger.debug("Processing connection {}".format(connection_class_name))
-            connection_class = name_to_class.get(connection_class_name, None)
-            assert (
-                connection_class is not None
-            ), "Connection class '{}' not found.".format(connection_class_name)
-            return connection_class.from_config(
-                address=address, configuration=configuration
-            )
-        except ModuleNotFoundError as e:
-            _handle_error_while_loading_component_module_not_found(configuration, e)
-        except Exception as e:
-            _handle_error_while_loading_component_generic_error(configuration, e)
-        # this is to make MyPy stop complaining of "Missing return statement".
-        assert False  # noqa: B011
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:
