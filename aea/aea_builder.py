@@ -120,7 +120,7 @@ class _DependenciesManager:
         self, component_type: ComponentType
     ) -> Dict[ComponentId, ComponentConfiguration]:
         """Get the components by type."""
-        return self._all_dependencies_by_type[component_type]
+        return self._all_dependencies_by_type.get(component_type, {})
 
     @property
     def protocols(self) -> Dict[ComponentId, ProtocolConfig]:
