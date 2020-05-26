@@ -40,18 +40,6 @@ def component_type_to_class(component_type: ComponentType) -> Type[Component]:
     return type_to_class[component_type]
 
 
-def load_component_from_dir(component_type: ComponentType, directory: str) -> Component:
-    """
-    Load a component from a directory.
-
-    :param component_type: the component type.
-    :param directory: the directory.
-    :return: the component instance.
-    """
-    component_class = component_type_to_class(component_type)
-    return component_class.from_dir(directory)  # type: ignore
-
-
 def load_component_from_config(  # type: ignore
     component_type: ComponentType,
     configuration: ComponentConfiguration,
