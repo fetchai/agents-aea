@@ -116,6 +116,12 @@ class _DependenciesManager:
         """Get the dependencies with highest version."""
         return {max(ids) for _, ids in self._prefix_to_components.items()}
 
+    def get_components_by_type(
+        self, component_type: ComponentType
+    ) -> Dict[ComponentId, ComponentConfiguration]:
+        """Get the components by type."""
+        return self._all_dependencies_by_type[component_type]
+
     @property
     def protocols(self) -> Dict[ComponentId, ProtocolConfig]:
         """Get the protocols."""
@@ -744,8 +750,8 @@ class AEABuilder:
         wallet = Wallet(self.private_key_paths)
         identity = self._build_identity_from_wallet(wallet)
         ledger_apis = self._load_ledger_apis(ledger_apis)
-        self._load_and_add_protocols()
-        self._load_and_add_contracts()
+        self._load_and_add_components(ComponentType.PROTOCOL)
+        self._load_and_add_components(ComponentType.CONTRACT)
         connections = self._load_connections(identity.address, connection_ids)
         identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
@@ -1140,38 +1146,6 @@ class AEABuilder:
             for connection_id in connections_ids
         ]
 
-    def _load_and_add_protocols(self) -> None:
-        for configuration in self._package_dependency_manager.protocols.values():
-            configuration = cast(ProtocolConfig, configuration)
-            if (
-                configuration
-                in self._component_instances[ComponentType.PROTOCOL].keys()
-            ):
-                protocol = self._component_instances[ComponentType.PROTOCOL][
-                    configuration
-                ]
-            else:
-                protocol = load_component_from_config(
-                    ComponentType.PROTOCOL, configuration
-                )
-            self._add_component_to_resources(protocol)
-
-    def _load_and_add_contracts(self) -> None:
-        for configuration in self._package_dependency_manager.contracts.values():
-            configuration = cast(ContractConfig, configuration)
-            if (
-                configuration
-                in self._component_instances[ComponentType.CONTRACT].keys()
-            ):
-                contract = self._component_instances[ComponentType.CONTRACT][
-                    configuration
-                ]
-            else:
-                contract = load_component_from_config(
-                    ComponentType.CONTRACT, configuration
-                )
-            self._add_component_to_resources(contract)
-
     def _load_and_add_components(self, component_type: ComponentType) -> None:
         """
         Load and add components added to the builder.
@@ -1179,7 +1153,14 @@ class AEABuilder:
         :param component_type: the component type for which
         :return: None
         """
-        # TODO
+        for configuration in self._package_dependency_manager.get_components_by_type(
+            component_type
+        ).values():
+            if configuration in self._component_instances[component_type].keys():
+                component = self._component_instances[component_type][configuration]
+            else:
+                component = load_component_from_config(component_type, configuration)
+            self._add_component_to_resources(component)
 
     def _load_and_add_skills(self, context: AgentContext) -> None:
         for configuration in self._package_dependency_manager.skills.values():
