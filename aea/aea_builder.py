@@ -1178,18 +1178,9 @@ class AEABuilder:
                 skill_context = SkillContext()
                 skill_context.set_agent_context(context)
                 skill_context.logger = logging.getLogger(logger_name)
-                try:
-                    skill = Skill.from_config(
-                        configuration, skill_context=skill_context
-                    )
-                except ModuleNotFoundError as e:
-                    _handle_error_while_loading_component_module_not_found(
-                        configuration, e
-                    )
-                except Exception as e:
-                    _handle_error_while_loading_component_generic_error(
-                        configuration, e
-                    )
+                skill = load_component_from_config(  # type: ignore
+                    ComponentType.SKILL, configuration, skill_context=skill_context
+                )
             self._add_component_to_resources(skill)
 
     def _load_connection(
