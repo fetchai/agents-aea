@@ -25,9 +25,15 @@ from pathlib import Path
 import pytest
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType
+from aea.configurations.base import (
+    ComponentType,
+    SkillConfig,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
+from aea.skills.base import SkillContext, Skill
+from .common.utils import make_handler_cls_from_funcion, make_behaviour_cls_from_funcion
 
 from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
@@ -93,3 +99,42 @@ def test_when_package_has_missing_dependency():
             ComponentType.CONNECTION,
             Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
         )
+
+
+def test_reentrancy_with_components_loaded_from_directories():
+    """
+    Test the reentrancy of the AEABuilder class, when the components
+    are loaded from directories.
+
+    Namely, it means that multiple calls to the AEABuilder class
+    should instantiate different AEAs in all their components.
+
+    For example:
+
+        builder = AEABuilder()
+        ... # add components etc.
+        aea1 = builder.build()
+        aea2 = builder.build()
+
+    Instances of components  of aea1 are not shared with the aea2's ones.
+    """
+    dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
+
+    builder = AEABuilder()
+    builder.set_name("aea1")
+    builder.add_private_key("fetchai")
+    builder.add_skill(dummy_skill_path)
+
+    aea1 = builder.build()
+
+    builder.set_name("aea2")
+    aea2 = builder.build()
+
+    aea1_skills = aea1.resources.get_all_skills()
+    aea2_skills = aea2.resources.get_all_skills()
+
+    assert aea1_skills != aea2_skills
+
+    aea1_skills_configs = [s.configuration for s in aea1_skills]
+    aea2_skills_configs = [s.configuration for s in aea2_skills]
+    assert aea1_skills_configs != aea2_skills_configs

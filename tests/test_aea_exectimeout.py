@@ -108,7 +108,7 @@ class BaseTimeExecutionCase(TestCase):
         )
         skill_context._skill = test_skill  # weird hack
 
-        builder._add_component_to_resources(test_skill)
+        builder.add_component_instance(test_skill)
         aea = builder.build()
 
         self.aea_tool = AeaTool(aea)

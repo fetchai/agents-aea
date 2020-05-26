@@ -25,6 +25,7 @@ import pytest
 
 from aea.aea import logger
 from aea.aea_builder import AEABuilder
+from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum
@@ -78,7 +79,7 @@ class TestAeaExceptionPolicy:
         )
         skill_context._skill = test_skill  # weird hack
 
-        builder._add_component_to_resources(test_skill)
+        builder.add_component_instance(test_skill)
         self.aea = builder.build()
         self.aea_tool = AeaTool(self.aea)
 
