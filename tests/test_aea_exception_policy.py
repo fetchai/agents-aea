@@ -25,7 +25,6 @@ import pytest
 
 from aea.aea import logger
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 from aea.helpers.exception_policy import ExceptionPolicyEnum

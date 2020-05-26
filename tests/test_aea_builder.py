@@ -25,15 +25,9 @@ from pathlib import Path
 import pytest
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import (
-    ComponentType,
-    SkillConfig,
-    DEFAULT_SKILL_CONFIG_FILE,
-)
+from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
-from aea.skills.base import SkillContext, Skill
-from .common.utils import make_handler_cls_from_funcion, make_behaviour_cls_from_funcion
 
 from .conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 

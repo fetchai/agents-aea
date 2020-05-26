@@ -22,7 +22,7 @@ import itertools
 import logging
 import os
 import pprint
-from copy import deepcopy, copy
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
