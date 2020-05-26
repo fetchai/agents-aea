@@ -18,38 +18,28 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
-import datetime
 import logging
-import time
 from abc import ABC, abstractmethod
-from asyncio.events import AbstractEventLoop, TimerHandle
-from asyncio.futures import Future
-from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
+from asyncio.events import AbstractEventLoop
+from asyncio.tasks import Task
 from enum import Enum
 from functools import partial
 from typing import (
-    Any,
     Callable,
     Dict,
     List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-    cast,
 )
 
 from aea.exceptions import AEAException
+from aea.helpers.async_utils import (
+    AsyncState,
+    PeriodicCaller,
+    create_task,
+    ensure_loop,
+    wait_and_cancel,
+)
 from aea.mail.base import InBox
 from aea.skills.base import Behaviour
-
-
-try:
-    from asyncio import create_task
-except ImportError:  # pragma: no cover
-    # for python3.6!
-    from asyncio import ensure_future as create_task  # type: ignore
 
 
 logger = logging.getLogger(__file__)
@@ -57,128 +47,6 @@ logger = logging.getLogger(__file__)
 if False:  # MYPY compatible for types definitions
     from aea.aea import AEA  # pragma: no cover
     from aea.agent import Agent  # pragma: no cover
-
-
-def ensure_list(value: Any) -> List:
-    """Return [value] or list(value) if value is a sequence."""
-    if not isinstance(value, (list, tuple)):
-        value = [value]
-    return list(value)
-
-
-class AsyncState:
-    """Awaitable state."""
-
-    def __init__(self, initial_state: Any = None, loop: AbstractEventLoop = None):
-        """Init async state.
-
-        :param initial_state: state to set on start.
-        :param loop: optional asyncio event loop.
-        """
-        self._state = initial_state
-        self._watchers: Set[Future] = set()
-        self._loop = loop or asyncio.get_event_loop()
-
-    @property
-    def state(self) -> Any:
-        """Return current state."""
-        return self._state
-
-    @state.setter
-    def state(self, state: Any) -> None:
-        """Set state."""
-        if self._state == state:  # pragma: no cover
-            return
-        self._state_changed(state)
-        self._state = state
-
-    def _state_changed(self, state: Any) -> None:
-        """Fulfill watchers for state."""
-        for watcher in list(self._watchers):
-            if state in watcher._states:  # type: ignore
-                self._loop.call_soon_threadsafe(
-                    watcher.set_result, (self._state, state)
-                )
-
-    async def wait(self, state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]:
-        """Wait state to be set.
-
-        :params state_or_states: state or list of states.
-        :return: tuple of previous state and new state.
-        """
-        states = ensure_list(state_or_states)
-
-        if self._state in states:
-            return (None, self._state)
-
-        watcher: Future = Future()
-        watcher._states = states  # type: ignore
-        self._watchers.add(watcher)
-        try:
-            return await watcher
-        finally:
-            self._watchers.remove(watcher)
-
-
-class PeriodicCaller:
-    """Schedule a periodic call of callable using event loop."""
-
-    def __init__(
-        self,
-        callback: Callable,
-        period: float,
-        start_at: Optional[datetime.datetime] = None,
-        exception_callback: Optional[Callable[[Callable, Exception], None]] = None,
-        loop: Optional[AbstractEventLoop] = None,
-    ):
-        """
-        Init periodic caller.
-
-        :param callback: function to call periodically
-        :param period: period in seconds.
-        :param start_at: optional first call datetime
-        :param exception_callback: optional handler to call on exception raised.
-        :param loop: optional asyncio event loop
-        """
-        self._loop = loop or asyncio.get_event_loop()
-        self._periodic_callable = callback
-        self._start_at = start_at or datetime.datetime.now()
-        self._period = period
-        self._timerhandle: Optional[TimerHandle] = None
-        self._exception_callback = exception_callback
-
-    def _callback(self) -> None:
-        """Call on each scheduled call."""
-        self._schedule_call()
-        try:
-            self._periodic_callable()
-        except Exception as exception:
-            if not self._exception_callback:
-                raise
-            self._exception_callback(self._periodic_callable, exception)
-
-    def _schedule_call(self) -> None:
-        """Set schedule for call."""
-        if self._timerhandle is None:
-            ts = time.mktime(self._start_at.timetuple())
-            delay = max(0, ts - time.time())
-            self._timerhandle = self._loop.call_later(delay, self._callback)
-        else:
-            self._timerhandle = self._loop.call_later(self._period, self._callback)
-
-    def start(self) -> None:
-        """Activate period calls."""
-        if self._timerhandle:
-            return
-        self._schedule_call()
-
-    def stop(self) -> None:
-        """Remove from schedule."""
-        if not self._timerhandle:
-            return
-
-        self._timerhandle.cancel()
-        self._timerhandle = None
 
 
 class BaseAgentLoop(ABC):
@@ -231,13 +99,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         super().__init__(agent)
         self._agent: "AEA" = self._agent
 
-        try:
-            self._loop = loop or asyncio.get_event_loop()
-            assert not self._loop.is_closed()
-            assert not self._loop.is_running()
-        except (RuntimeError, AssertionError):
-            self._loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self._loop)
+        self._loop: AbstractEventLoop = ensure_loop(loop)
 
         self._behaviours_registry: Dict[Behaviour, PeriodicCaller] = {}
         self._state: AsyncState = AsyncState()
@@ -309,40 +171,20 @@ class AsyncAgentLoop(BaseAgentLoop):
         for behaviour in list(self._behaviours_registry.keys()):
             self._unregister_behaviour(behaviour)
 
-    def _create_tasks(self):
-        """Create tasks to execute and wait."""
-        tasks = self._create_processing_tasks()
-        stopping_task = create_task(
-            self._state.wait([AgentLoopStates.stopping, AgentLoopStates.error])
-        )
-
-        tasks.append(stopping_task)
-        return tasks
-
-    async def _cancel_and_wait_tasks(self, tasks: List[Task]) -> None:
-        """Cancel all tasks and wait they completed."""
-        for t in tasks:
-            t.cancel()
-
-        await asyncio.wait(tasks, return_when=ALL_COMPLETED)
-
-        for t in tasks:
-            if t.cancelled():
-                continue
-            exc = t.exception()
-            if exc:
-                self._exceptions.append(cast(Exception, exc))
+    async def _task_wait_for_stop(self) -> None:
+        """Wait for stop and unregister all behaviours on exit."""
+        try:
+            await self._state.wait([AgentLoopStates.stopping, AgentLoopStates.error])
+        finally:
+            # stop all behaviours on cancel or stop
+            self._stop_all_behaviours()
 
     async def _run(self) -> None:
         """Run all tasks and wait for stopping state."""
         tasks = self._create_tasks()
 
-        await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
-
-        # one task completed by some reason: error or state == stopped.
-        # clean up
-        self._stop_all_behaviours()
-        await self._cancel_and_wait_tasks(tasks)
+        exceptions = await wait_and_cancel(tasks)
+        self._exceptions.extend(exceptions)
 
         if self._exceptions:
             # check exception raised during run
@@ -360,9 +202,9 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         raise self._exceptions[0]
 
-    def _create_processing_tasks(self) -> List[Task]:
+    def _create_tasks(self) -> List[Task]:
         """
-        Create processing tasks.
+        Create tasks.
 
         :return: list of asyncio Tasks
         """
@@ -370,6 +212,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             self._task_process_inbox(),
             self._task_process_internal_messages(),
             self._task_process_new_behaviours(),
+            self._task_wait_for_stop(),
         ]
         return list(map(create_task, tasks))
 
