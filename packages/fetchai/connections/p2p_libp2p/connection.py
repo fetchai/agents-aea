@@ -333,6 +333,9 @@ class Libp2pNode:
         :return: None
         """
         if self._connection_attempts == 1:
+            with open(self.log_file, "r") as f:
+                logger.debug("Couldn't connect to libp2p p2p process, logs:")
+                logger.debug(f.read())
             raise Exception("Couldn't connect to libp2p p2p process")
             # TOFIX(LR) use proper exception
         self._connection_attempts -= 1
@@ -353,7 +356,6 @@ class Libp2pNode:
             )
         except OSError as e:
             if e.errno == errno.ENXIO:
-                logger.debug(e)
                 await asyncio.sleep(2)
                 await self._connect()
                 return
