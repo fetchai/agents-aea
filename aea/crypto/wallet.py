@@ -19,7 +19,7 @@
 
 """Module wrapping all the public and private keys cryptography."""
 
-from typing import Dict, cast
+from typing import Dict, Optional, cast
 
 import aea.crypto
 from aea.crypto.base import Crypto
@@ -28,7 +28,7 @@ from aea.crypto.base import Crypto
 class Wallet:
     """Store all the cryptos we initialise."""
 
-    def __init__(self, private_key_paths: Dict[str, str]):
+    def __init__(self, private_key_paths: Dict[str, Optional[str]]):
         """
         Instantiate a wallet object.
 
