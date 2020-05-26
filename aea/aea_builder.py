@@ -1176,8 +1176,11 @@ class AEABuilder:
                 skill_context = SkillContext()
                 skill_context.set_agent_context(context)
                 skill_context.logger = logging.getLogger(logger_name)
-                skill = load_component_from_config(  # type: ignore
-                    ComponentType.SKILL, configuration, skill_context=skill_context
+                skill = cast(
+                    Skill,
+                    load_component_from_config(
+                        ComponentType.SKILL, configuration, skill_context=skill_context
+                    ),
                 )
             self._add_component_to_resources(skill)
 
