@@ -24,7 +24,6 @@ import logging
 import os
 import pprint
 import re
-import sys
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -801,7 +800,10 @@ class AEABuilder:
     def _update_identity(
         self, identity: Identity, wallet: Wallet, connections: List[Connection]
     ) -> Identity:
-        """TEMPORARY fix to update identity with address from noise p2p connection. Only affects the noise p2p connection."""
+        """
+        TEMPORARY fix to update identity with address from noise p2p connection.
+        Only affects the noise p2p connection.
+        """
         public_ids = []  # type: List[PublicId]
         for connection in connections:
             public_ids.append(connection.public_id)
@@ -824,12 +826,11 @@ class AEABuilder:
                 identity = Identity(self._name, address=p2p_noise_connection.noise_address)  # type: ignore
             return identity
         else:
-            logger.error(
+            raise AEAException(
                 "The p2p-noise connection can only be used as a single connection. "
                 "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
                 "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
             )
-            sys.exit(1)
 
     def _get_agent_loop_timeout(self) -> float:
         """
