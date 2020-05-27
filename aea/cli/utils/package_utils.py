@@ -44,9 +44,10 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.helpers import (
     IDENTIFIER_TO_KEY_FILES,
-    _try_validate_private_key_path,
     create_private_key,
+    try_validate_private_key_path,
 )
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
 
 
@@ -72,7 +73,7 @@ def verify_or_create_private_keys(ctx: Context) -> None:
             aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
             try:
-                _try_validate_private_key_path(identifier, private_key_path)
+                try_validate_private_key_path(identifier, private_key_path)
             except FileNotFoundError:  # pragma: no cover
                 raise click.ClickException(
                     "File {} for private key {} not found.".format(
@@ -417,3 +418,18 @@ def is_item_present(ctx: Context, item_type: str, item_public_id: PublicId) -> b
         item_public_id.author,
         item_public_id.name,
     ) in items_in_config and dest_path.exists()
+
+
+def try_get_balance(agent_config, wallet, type_):
+    try:
+        if type_ not in agent_config.ledger_apis_dict:
+            raise ValueError(
+                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
+            )
+        ledger_apis = LedgerApis(
+            agent_config.ledger_apis_dict, agent_config.default_ledger
+        )
+        address = wallet.addresses[type_]
+        return ledger_apis.token_balance(type_, address)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        raise click.ClickException(str(e))

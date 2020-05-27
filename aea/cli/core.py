@@ -21,21 +21,22 @@
 
 """Core definitions for the AEA command-line tool."""
 
-import os
-import shutil
-import time
-from pathlib import Path
-from typing import cast
-
 import click
 
 import aea
 from aea.cli.add import add
+from aea.cli.add_key import add_key
 from aea.cli.config import config
 from aea.cli.create import create
+from aea.cli.delete import delete
 from aea.cli.fetch import fetch
 from aea.cli.fingerprint import fingerprint
+from aea.cli.freeze import freeze
 from aea.cli.generate import generate
+from aea.cli.generate_key import generate_key
+from aea.cli.generate_wealth import generate_wealth
+from aea.cli.get_address import get_address
+from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
@@ -50,26 +51,9 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.cli.utils.click_utils import AgentDirectory
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger, simple_verbosity_option
-from aea.cli.utils.package_utils import verify_or_create_private_keys
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.helpers import (
-    IDENTIFIER_TO_FAUCET_APIS,
-    IDENTIFIER_TO_KEY_FILES,
-    TESTNETS,
-    _try_validate_private_key_path,
-    create_private_key,
-    try_generate_testnet_wealth,
-)
-from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
-from aea.crypto.registry import registry
-from aea.crypto.wallet import Wallet
 from aea.helpers.win32 import enable_ctrl_c_support
-
-FUNDS_RELEASE_TIMEOUT = 10
 
 
 @click.group(name="aea")
@@ -95,231 +79,30 @@ def cli(click_context, skip_consistency_check: bool) -> None:
 
 
 @cli.command()
-@click.argument(
-    "agent_name", type=AgentDirectory(), required=True,
-)
-@click.pass_context
-def delete(click_context, agent_name):
-    """Delete an agent."""
-    click.echo("Deleting AEA project directory './{}'...".format(agent_name))
-
-    # delete the agent's directory
-    try:
-        shutil.rmtree(agent_name, ignore_errors=False)
-    except OSError:
-        raise click.ClickException(
-            "An error occurred while deleting the agent directory. Aborting..."
-        )
-
-
-@cli.command()
-@click.pass_context
-@check_aea_project
-def freeze(click_context):
-    """Get the dependencies."""
-    ctx = cast(Context, click_context.obj)
-    for dependency_name, dependency_data in sorted(
-        ctx.get_dependencies().items(), key=lambda x: x[0]
-    ):
-        print(dependency_name + dependency_data.get("version", ""))
-
-
-@cli.command()
 @click.option("-p", "--port", default=8080)
 @click.pass_context
-def gui(click_context, port):
+def gui(click_context, port):  # pragma: no cover
     """Run the CLI GUI."""
-    import aea.cli_gui  # pragma: no cover
+    import aea.cli_gui
 
-    click.echo("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
-    aea.cli_gui.run(port)  # pragma: no cover
-
-
-@cli.command()
-@click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice([*list(registry.supported_crypto_ids), "all"]),
-    required=True,
-)
-@click.pass_context
-def generate_key(click_context, type_):
-    """Generate private keys."""
-
-    def _can_write(path) -> bool:
-        if Path(path).exists():
-            value = click.confirm(
-                "The file {} already exists. Do you want to overwrite it?".format(path),
-                default=False,
-            )
-            return value
-        else:
-            return True
-
-    types = list(IDENTIFIER_TO_KEY_FILES.keys()) if type_ == "all" else [type_]
-    for type_ in types:
-        private_key_file = IDENTIFIER_TO_KEY_FILES[type_]
-        if _can_write(private_key_file):
-            create_private_key(type_)
-
-
-def _try_add_key(ctx, type_, filepath):
-    try:
-        ctx.agent_config.private_key_paths.create(type_, filepath)
-    except ValueError as e:  # pragma: no cover
-        raise click.ClickException(str(e))
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
-
-
-@cli.command()
-@click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice(list(registry.supported_crypto_ids)),
-    required=True,
-)
-@click.argument(
-    "file",
-    metavar="FILE",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    required=True,
-)
-@click.pass_context
-@check_aea_project
-def add_key(click_context, type_, file):
-    """Add a private key to the wallet."""
-    ctx = cast(Context, click_context.obj)
-    _try_validate_private_key_path(type_, file)
-    _try_add_key(ctx, type_, file)
-
-
-def _try_get_address(ctx, type_):
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    try:
-        wallet = Wallet(private_key_paths)
-        address = wallet.addresses[type_]
-        return address
-    except ValueError as e:  # pragma: no cover
-        raise click.ClickException(str(e))
-
-
-@cli.command()
-@click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice(list(registry.supported_crypto_ids)),
-    required=True,
-)
-@click.pass_context
-@check_aea_project
-def get_address(click_context, type_):
-    """Get the address associated with the private key."""
-    ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
-    address = _try_get_address(ctx, type_)
-    click.echo(address)
-
-
-def _try_get_balance(agent_config, wallet, type_):
-    try:
-        if type_ not in agent_config.ledger_apis_dict:
-            raise ValueError(
-                "No ledger api config for {} provided in aea-config.yaml.".format(type_)
-            )
-        ledger_apis = LedgerApis(
-            agent_config.ledger_apis_dict, agent_config.default_ledger
-        )
-        address = wallet.addresses[type_]
-        return ledger_apis.token_balance(type_, address)
-    except (AssertionError, ValueError) as e:  # pragma: no cover
-        raise click.ClickException(str(e))
-
-
-def _try_get_wealth(ctx, type_):
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    return _try_get_balance(ctx.agent_config, wallet, type_)
-
-
-@cli.command()
-@click.argument(
-    "type_", metavar="TYPE", type=click.Choice(SUPPORTED_LEDGER_APIS), required=True,
-)
-@click.pass_context
-@check_aea_project
-def get_wealth(ctx: Context, type_):
-    """Get the wealth associated with the private key."""
-    verify_or_create_private_keys(ctx)
-    wealth = _try_get_wealth(ctx, type_)
-    click.echo(wealth)
-
-
-def _wait_funds_release(agent_config, wallet, type_):
-    start_balance = _try_get_balance(agent_config, wallet, type_)
-    end_time = time.time() + FUNDS_RELEASE_TIMEOUT
-    while time.time() < end_time:
-        if start_balance != _try_get_balance(agent_config, wallet, type_):
-            break  # pragma: no cover
-        else:
-            time.sleep(1)
-
-
-def _try_generate_wealth(ctx, type_, sync):
-    private_key_paths = {
-        config_pair[0]: config_pair[1]
-        for config_pair in ctx.agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    try:
-        address = wallet.addresses[type_]
-        testnet = TESTNETS[type_]
-        click.echo(
-            "Requesting funds for address {} on test network '{}'".format(
-                address, testnet
-            )
-        )
-        try_generate_testnet_wealth(type_, address)
-        if sync:
-            _wait_funds_release(ctx.agent_config, wallet, type_)
-
-    except (AssertionError, ValueError) as e:  # pragma: no cover
-        raise click.ClickException(str(e))
-
-
-@cli.command()
-@click.argument(
-    "type_",
-    metavar="TYPE",
-    type=click.Choice(list(IDENTIFIER_TO_FAUCET_APIS.keys())),
-    required=True,
-)
-@click.option(
-    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
-)
-@click.pass_context
-@check_aea_project
-def generate_wealth(click_context, sync, type_):
-    """Generate wealth for address on test network."""
-    ctx = cast(Context, click_context.obj)
-    verify_or_create_private_keys(ctx)
-    _try_generate_wealth(ctx, type_, sync)
+    click.echo("Running the GUI.....(press Ctrl+C to exit)")
+    aea.cli_gui.run(port)
 
 
 cli.add_command(_list)
+cli.add_command(add_key)
 cli.add_command(add)
 cli.add_command(create)
 cli.add_command(config)
+cli.add_command(delete)
 cli.add_command(fetch)
 cli.add_command(fingerprint)
+cli.add_command(freeze)
+cli.add_command(generate_key)
+cli.add_command(generate_wealth)
 cli.add_command(generate)
+cli.add_command(get_address)
+cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
 cli.add_command(interact)

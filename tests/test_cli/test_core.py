@@ -23,14 +23,11 @@ from unittest import TestCase, mock
 import pytest
 
 from aea.cli import cli
-from aea.cli.core import (
-    _try_add_key,
-    _try_generate_wealth,
-    _try_get_address,
-    _try_get_balance,
-    _try_get_wealth,
-    _wait_funds_release,
-)
+from aea.cli.add_key import _try_add_key
+from aea.cli.generate_wealth import _try_generate_wealth, _wait_funds_release
+from aea.cli.get_address import _try_get_address
+from aea.cli.get_wealth import _try_get_wealth
+from aea.cli.utils.package_utils import try_get_balance
 from aea.crypto.fetchai import FetchAICrypto
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.exceptions import AEATestingException
@@ -40,39 +37,40 @@ from tests.conftest import CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
 
 
-@mock.patch("aea.cli.core._try_get_balance", return_value=0)
-@mock.patch("aea.cli.core.FUNDS_RELEASE_TIMEOUT", 0.5)
+@mock.patch("aea.cli.generate_wealth.try_get_balance", return_value=0)
+@mock.patch("aea.cli.generate_wealth.FUNDS_RELEASE_TIMEOUT", 0.5)
 class WaitFundsReleaseTestCase(TestCase):
     """Test case for _wait_funds_release method."""
 
-    def test__wait_funds_release_positive(self, _try_get_balance_mock):
+    def test__wait_funds_release_positive(self, try_get_balance_mock):
         """Test for _wait_funds_release method positive result."""
         _wait_funds_release("agent_config", "wallet", "type_")
 
 
-@mock.patch("aea.cli.core.LedgerApis", mock.MagicMock())
+@mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())
 class TryGetBalanceTestCase(TestCase):
-    """Test case for _try_get_balance method."""
+    """Test case for try_get_balance method."""
 
-    def test__try_get_balance_positive(self):
-        """Test for _try_get_balance method positive result."""
+    def test_try_get_balance_positive(self):
+        """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
         ledger_apis = {"type_": {"address": "some-adress"}}
         agent_config.ledger_apis_dict = ledger_apis
 
         wallet_mock = mock.Mock()
         wallet_mock.addresses = {"type_": "some-adress"}
-        _try_get_balance(agent_config, wallet_mock, "type_")
+        try_get_balance(agent_config, wallet_mock, "type_")
 
 
 class GenerateWealthTestCase(TestCase):
     """Test case for _generate_wealth method."""
 
-    @mock.patch("aea.cli.core.Wallet")
-    @mock.patch("aea.cli.core.TESTNETS", {"type": "value"})
-    @mock.patch("aea.cli.core.click.echo")
-    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
-    @mock.patch("aea.cli.core._wait_funds_release")
+    @mock.patch("aea.cli.generate_wealth.Wallet")
+    @mock.patch("aea.cli.generate_wealth.TESTNETS", {"type": "value"})
+    @mock.patch("aea.cli.generate_wealth.click.echo")
+    @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
+    @mock.patch("aea.cli.generate_wealth._wait_funds_release")
+    @mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
@@ -82,9 +80,9 @@ class GenerateWealthTestCase(TestCase):
 class GetWealthTestCase(TestCase):
     """Test case for _get_wealth method."""
 
-    @mock.patch("aea.cli.core.Wallet")
-    @mock.patch("aea.cli.core.try_generate_testnet_wealth")
-    @mock.patch("aea.cli.core._try_get_balance")
+    @mock.patch("aea.cli.get_wealth.Wallet")
+    @mock.patch("aea.cli.get_wealth.verify_or_create_private_keys")
+    @mock.patch("aea.cli.get_wealth.try_get_balance")
     def test__get_wealth_positive(self, *mocks):
         """Test for _get_wealth method positive result."""
         ctx = ContextMock()
@@ -94,7 +92,8 @@ class GetWealthTestCase(TestCase):
 class GetAddressTestCase(TestCase):
     """Test case for _get_address method."""
 
-    @mock.patch("aea.cli.core.Wallet")
+    @mock.patch("aea.cli.get_address.Wallet")
+    @mock.patch("aea.cli.get_address.verify_or_create_private_keys")
     def test__get_address_positive(self, *mocks):
         """Test for _get_address method positive result."""
         ctx = ContextMock()
@@ -112,8 +111,8 @@ class AddKeyTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core.verify_or_create_private_keys")
-@mock.patch("aea.cli.core._try_generate_wealth")
+@mock.patch("aea.cli.generate_wealth.verify_or_create_private_keys")
+@mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
 
@@ -138,9 +137,9 @@ class GenerateWealthCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core.verify_or_create_private_keys")
-@mock.patch("aea.cli.core._try_get_wealth")
-@mock.patch("aea.cli.core.click.echo")
+@mock.patch("aea.cli.get_wealth.verify_or_create_private_keys")
+@mock.patch("aea.cli.get_wealth._try_get_wealth")
+@mock.patch("aea.cli.get_wealth.click.echo")
 class GetWealthCommandTestCase(TestCase):
     """Test case for CLI get_wealth command."""
 
@@ -164,9 +163,9 @@ class GetWealthCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core.verify_or_create_private_keys")
-@mock.patch("aea.cli.core._try_get_address")
-@mock.patch("aea.cli.core.click.echo")
+@mock.patch("aea.cli.get_address.verify_or_create_private_keys")
+@mock.patch("aea.cli.get_address._try_get_address")
+@mock.patch("aea.cli.get_address.click.echo")
 class GetAddressCommandTestCase(TestCase):
     """Test case for CLI get_address command."""
 
@@ -190,8 +189,8 @@ class GetAddressCommandTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.core._try_validate_private_key_path")
-@mock.patch("aea.cli.core._try_add_key")
+@mock.patch("aea.cli.add_key.try_validate_private_key_path")
+@mock.patch("aea.cli.add_key._try_add_key")
 class AddKeyCommandTestCase(TestCase):
     """Test case for CLI add_key command."""
 
