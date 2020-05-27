@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea list' subcommand."""
 
-from typing import List, cast
+from typing import Dict, List, cast
 
 import click
 
@@ -74,43 +74,27 @@ def _get_config_value(ctx: Context, json_path: List[str]):
 
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
-    try:
-        parent_object = get_parent_object(configuration_object, parent_object_path)
-    except ValueError as e:
-        raise click.ClickException(str(e))
-
-    if attribute_name not in parent_object:
-        raise click.ClickException("Attribute '{}' not found.".format(attribute_name))
-    if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
-        raise click.ClickException(
-            "Attribute '{}' is not of primitive type.".format(attribute_name)
-        )
+    parent_object = _get_and_validate_parent_obj(
+        configuration_object, parent_object_path, attribute_name
+    )
 
     return parent_object.get(attribute_name)
 
 
-def _set_config(ctx: Context, json_path: List[str], value, type):
-    type_ = FROM_STRING_TO_TYPE[type]
+def _set_config(ctx: Context, json_path: List[str], value, type) -> None:
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
-    configuration_dict = load_yaml(configuration_file_path)
-    config_loader.validator.validate(instance=configuration_dict)
+    configuration_object = load_yaml(configuration_file_path)
+    config_loader.validator.validate(instance=configuration_object)
 
     parent_object_path = json_path[:-1]
     attribute_name = json_path[-1]
-    try:
-        parent_object = get_parent_object(configuration_dict, parent_object_path)
-    except ValueError as e:
-        raise click.ClickException(str(e))
+    parent_object = _get_and_validate_parent_obj(
+        configuration_object, parent_object_path, attribute_name
+    )
 
-    if attribute_name not in parent_object:
-        raise click.ClickException("Attribute '{}' not found.".format(attribute_name))
-    if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
-        raise click.ClickException(
-            "Attribute '{}' is not of primitive type.".format(attribute_name)
-        )
-
+    type_ = FROM_STRING_TO_TYPE[type]
     try:
         if type_ != bool:
             parent_object[attribute_name] = type_(value)
@@ -121,9 +105,36 @@ def _set_config(ctx: Context, json_path: List[str], value, type):
 
     try:
         configuration_obj = config_loader.configuration_class.from_json(
-            configuration_dict
+            configuration_object
         )
         config_loader.validator.validate(instance=configuration_obj.json)
         config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
         raise click.ClickException("Attribute or value not valid.")
+
+
+def _get_and_validate_parent_obj(
+    conf_obj: Dict, parent_obj_path: List, attr_name: str
+) -> Dict:
+    """
+    Get and validate parent object.
+
+    :param conf_obj: configuration object.
+    :param parent_obj_path: parent object path.
+    :param attr_name: attribute name.
+
+    :return: parent object.
+    :raises: ClickException if attribute is not valid.
+    """
+    try:
+        parent_obj = get_parent_object(conf_obj, parent_obj_path)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
+    if attr_name not in parent_obj:
+        raise click.ClickException("Attribute '{}' not found.".format(attr_name))
+    if not isinstance(parent_obj.get(attr_name), (str, int, bool, float)):
+        raise click.ClickException(
+            "Attribute '{}' is not of primitive type.".format(attr_name)
+        )
+    return parent_obj
