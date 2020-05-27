@@ -25,6 +25,7 @@ import tempfile
 from pathlib import Path
 
 from aea.cli import cli
+from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.test_tools.click_testing import CliRunner
 
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
@@ -87,7 +88,7 @@ class TestConfigGet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
+            == "The root of the dotted path must be one of: {}".format(ALLOWED_PATH_ROOTS)
         )
 
     def test_too_short_path_but_root_correct(self):
@@ -302,7 +303,7 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
+            == "The root of the dotted path must be one of: {}".format(ALLOWED_PATH_ROOTS)
         )
 
     def test_too_short_path_but_root_correct(self):
