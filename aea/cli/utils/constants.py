@@ -24,6 +24,7 @@ from typing import Dict
 
 from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
@@ -45,10 +46,11 @@ NOT_PERMITTED_AUTHORS = [
 
 FROM_STRING_TO_TYPE = dict(str=str, int=int, bool=bool, float=float)
 
-ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections", "vendor"]
+ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections", "contracts", "vendor"]
 RESOURCE_TYPE_TO_CONFIG_FILE = {
     "skills": DEFAULT_SKILL_CONFIG_FILE,
     "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
     "connections": DEFAULT_CONNECTION_CONFIG_FILE,
+    "contracts": DEFAULT_CONTRACT_CONFIG_FILE
 }  # type: Dict[str, str]
 FALSE_EQUIVALENTS = ["f", "false", "False"]
