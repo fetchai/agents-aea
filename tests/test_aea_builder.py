@@ -160,11 +160,11 @@ class TestReentrancy:
 
         d1 = {c.component_id: c for c in components_a}
         d2 = {c.component_id: c for c in components_b}
-        assert d1 != d2
+        assert all(d1[k] is not d2[k] for k in d1.keys())
 
-        configurations_1 = {c.component_id: c.configuration for c in components_a}
-        configurations_2 = {c.component_id: c.configuration for c in components_b}
-        assert configurations_1 != configurations_2
+        c1 = {c.component_id: c.configuration for c in components_a}
+        c2 = {c.component_id: c.configuration for c in components_b}
+        assert all(c1[k] is not c2[k] for k in c1.keys())
 
     def test_skills_instances_are_different(self):
         """Test that skill instances are different."""
