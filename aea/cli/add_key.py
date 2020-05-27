@@ -56,7 +56,8 @@ def _add_private_key(click_context: click.core.Context, type_: str, file: str) -
     Add private key to the wallet.
 
     :param click_context: click context object.
-    :param:
+    :param type_: type.
+    :param file: path to file.
 
     :return: None
     """
