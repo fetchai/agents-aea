@@ -30,8 +30,8 @@ from aea.cli.registry.utils import (
     request_api,
 )
 from aea.cli.utils.context import Context
+from aea.cli.utils.generic import load_yaml
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import load_yaml
 from aea.configurations.base import PublicId
 
 

@@ -29,7 +29,7 @@ from jsonschema import ValidationError
 
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import AEAJsonPathType, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -154,7 +154,7 @@ class InitConfigFolderTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config")
-@mock.patch("aea.cli.utils.package_utils.yaml.dump")
+@mock.patch("aea.cli.utils.generic.yaml.dump")
 @mock.patch("builtins.open", mock.mock_open())
 class UpdateCLIConfigTestCase(TestCase):
     """Test case for update_cli_config method."""
@@ -179,7 +179,7 @@ class GetOrCreateCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
 
     @mock.patch(
-        "aea.cli.utils.package_utils.yaml.safe_load", return_value={"correct": "output"}
+        "aea.cli.utils.generic.yaml.safe_load", return_value={"correct": "output"}
     )
     def testget_or_create_cli_config_positive(self, safe_load_mock):
         """Test for get_or_create_cli_config method positive result."""
@@ -188,7 +188,7 @@ class GetOrCreateCLIConfigTestCase(TestCase):
         self.assertEqual(result, expected_result)
         safe_load_mock.assert_called_once()
 
-    @mock.patch("aea.cli.utils.package_utils.yaml.safe_load", _raise_yamlerror)
+    @mock.patch("aea.cli.utils.generic.yaml.safe_load", _raise_yamlerror)
     def testget_or_create_cli_config_bad_yaml(self):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
         with self.assertRaises(ClickException):
@@ -371,3 +371,26 @@ class IsFingerprintCorrectTestCase(TestCase):
         package_path = "package_dir"
         result = is_fingerprint_correct(package_path, item_config)
         self.assertFalse(result)
+
+
+@mock.patch("aea.cli.config.click.ParamType")
+class AEAJsonPathTypeTestCase(TestCase):
+    """Test case for AEAJsonPathType class."""
+
+    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=True)
+    def test_convert_root_vendor_positive(self, *mocks):
+        """Test for convert method with root "vendor" positive result."""
+        value = "vendor.author.protocols.package_name.attribute_name"
+        ctx_mock = ContextMock()
+        ctx_mock.obj = mock.Mock()
+        ctx_mock.obj.set_config = mock.Mock()
+        obj = AEAJsonPathType()
+        obj.convert(value, "param", ctx_mock)
+
+    @mock.patch("aea.cli.utils.click_utils.Path.exists", return_value=False)
+    def test_convert_root_vendor_path_not_exists(self, *mocks):
+        """Test for convert method with root "vendor" path not exists."""
+        value = "vendor.author.protocols.package_name.attribute_name"
+        obj = AEAJsonPathType()
+        with self.assertRaises(BadParameter):
+            obj.convert(value, "param", "ctx")

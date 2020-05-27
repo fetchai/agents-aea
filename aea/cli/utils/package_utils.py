@@ -23,13 +23,11 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 
 from jsonschema import ValidationError
-
-import yaml
 
 from aea import AEA_DIR
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
@@ -317,23 +315,6 @@ def find_item_in_distribution(ctx, item_type, item_public_id) -> Path:
         )
 
     return package_path
-
-
-def load_yaml(filepath: str) -> Dict:
-    """
-    Read content from yaml file.
-
-    :param filepath: str path to yaml file.
-
-    :return: dict YAML content
-    """
-    with open(filepath, "r") as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise click.ClickException(
-                "Loading yaml config from {} failed: {}".format(filepath, e)
-            )
 
 
 def validate_author_name(author: Optional[str] = None) -> str:

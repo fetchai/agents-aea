@@ -23,15 +23,10 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
-
-from click.exceptions import BadParameter
 
 from aea.cli import cli
-from aea.cli.config import AEAJsonPathType
+from aea.cli.utils.constants import ALLOWED_PATH_ROOTS
 from aea.test_tools.click_testing import CliRunner
-
-from tests.test_cli.tools_for_testing import ContextMock
 
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -93,7 +88,9 @@ class TestConfigGet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
+            == "The root of the dotted path must be one of: {}".format(
+                ALLOWED_PATH_ROOTS
+            )
         )
 
     def test_too_short_path_but_root_correct(self):
@@ -308,7 +305,9 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
+            == "The root of the dotted path must be one of: {}".format(
+                ALLOWED_PATH_ROOTS
+            )
         )
 
     def test_too_short_path_but_root_correct(self):
@@ -422,26 +421,3 @@ class TestConfigSet:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-@mock.patch("aea.cli.config.click.ParamType")
-class AEAJsonPathTypeTestCase(TestCase):
-    """Test case for AEAJsonPathType class."""
-
-    @mock.patch("aea.cli.config.Path.exists", return_value=True)
-    def test_convert_root_vendor_positive(self, *mocks):
-        """Test for convert method with root "vendor" positive result."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        ctx_mock = ContextMock()
-        ctx_mock.obj = mock.Mock()
-        ctx_mock.obj.set_config = mock.Mock()
-        obj = AEAJsonPathType()
-        obj.convert(value, "param", ctx_mock)
-
-    @mock.patch("aea.cli.config.Path.exists", return_value=False)
-    def test_convert_root_vendor_path_not_exists(self, *mocks):
-        """Test for convert method with root "vendor" path not exists."""
-        value = "vendor.author.protocols.package_name.attribute_name"
-        obj = AEAJsonPathType()
-        with self.assertRaises(BadParameter):
-            obj.convert(value, "param", "ctx")
