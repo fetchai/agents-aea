@@ -21,11 +21,13 @@
 import os
 import re
 from pathlib import Path
+from typing import Collection
 
 import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
+from aea.configurations.components import Component
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 
@@ -95,7 +97,7 @@ def test_when_package_has_missing_dependency():
         )
 
 
-def test_reentrancy_with_components_loaded_from_directories():
+class TestReentrancy:
     """
     Test the reentrancy of the AEABuilder class, when the components
     are loaded from directories.
@@ -110,25 +112,80 @@ def test_reentrancy_with_components_loaded_from_directories():
         aea1 = builder.build()
         aea2 = builder.build()
 
-    Instances of components  of aea1 are not shared with the aea2's ones.
+    Instances of components of aea1 are not shared with the aea2's ones.
     """
-    dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 
-    builder = AEABuilder()
-    builder.set_name("aea1")
-    builder.add_private_key("fetchai")
-    builder.add_skill(dummy_skill_path)
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
+        protocol_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
+        )
+        contract_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"
+        )
+        connection_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "connections", "soef"
+        )
 
-    aea1 = builder.build()
+        builder = AEABuilder()
+        builder.set_name("aea1")
+        builder.add_private_key("fetchai")
+        builder.add_protocol(protocol_path)
+        builder.add_contract(contract_path)
+        builder.add_connection(connection_path)
+        builder.add_skill(dummy_skill_path)
 
-    builder.set_name("aea2")
-    aea2 = builder.build()
+        cls.aea1 = builder.build()
 
-    aea1_skills = aea1.resources.get_all_skills()
-    aea2_skills = aea2.resources.get_all_skills()
+        builder.set_name("aea2")
+        cls.aea2 = builder.build()
 
-    assert aea1_skills != aea2_skills
+    @staticmethod
+    def are_components_different(
+        components_a: Collection[Component], components_b: Collection[Component]
+    ) -> None:
+        """
+        Compare collections of component instances.
+        It only makes sense if they have the same number of elements and
+        the same component ids.
+        """
+        assert len(components_a) == len(
+            components_b
+        ), "Cannot compare, number of components is different."
+        assert {c.component_id for c in components_a} == {
+            c.component_id for c in components_b
+        }, "Cannot compare, component ids are different."
 
-    aea1_skills_configs = [s.configuration for s in aea1_skills]
-    aea2_skills_configs = [s.configuration for s in aea2_skills]
-    assert aea1_skills_configs != aea2_skills_configs
+        d1 = {c.component_id: c for c in components_a}
+        d2 = {c.component_id: c for c in components_b}
+        assert d1 != d2
+
+        configurations_1 = {c.component_id: c.configuration for c in components_a}
+        configurations_2 = {c.component_id: c.configuration for c in components_b}
+        assert configurations_1 != configurations_2
+
+    def test_skills_instances_are_different(self):
+        """Test that skill instances are different."""
+        aea1_skills = self.aea1.resources.get_all_skills()
+        aea2_skills = self.aea2.resources.get_all_skills()
+        self.are_components_different(aea1_skills, aea2_skills)
+
+    def test_protocols_instances_are_different(self):
+        """Test that protocols instances are different."""
+        aea1_protocols = self.aea1.resources.get_all_protocols()
+        aea2_protocols = self.aea2.resources.get_all_protocols()
+        self.are_components_different(aea1_protocols, aea2_protocols)
+
+    def test_contracts_instances_are_different(self):
+        """Test that contract instances are different."""
+        aea1_contracts = self.aea1.resources.get_all_contracts()
+        aea2_contracts = self.aea2.resources.get_all_contracts()
+        self.are_components_different(aea1_contracts, aea2_contracts)
+
+    def test_connections_instances_are_different(self):
+        """Test that connection instances are different."""
+        aea1_connections = self.aea1.multiplexer.connections
+        aea2_connections = self.aea2.multiplexer.connections
+        self.are_components_different(aea1_connections, aea2_connections)
