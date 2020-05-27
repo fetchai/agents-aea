@@ -23,7 +23,7 @@ import logging
 import logging.config
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 import click
 
@@ -31,15 +31,20 @@ import jsonschema  # type: ignore
 
 import yaml
 
-from aea.cli.utils.constants import CLI_CONFIG_PATH
+from aea.cli.utils.constants import (
+    ALLOWED_PATH_ROOTS,
+    CLI_CONFIG_PATH,
+    RESOURCE_TYPE_TO_CONFIG_FILE,
+)
 from aea.cli.utils.context import Context
-from aea.cli.utils.package_utils import load_yaml
+from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.exceptions import AEAException
 
 
 def try_to_load_agent_config(
@@ -132,3 +137,87 @@ def load_item_config(item_type: str, package_path: Path) -> ConfigLoader:
     configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
     item_config = configuration_loader.load(configuration_path.open())
     return item_config
+
+
+def handle_dotted_path(value: str) -> Tuple:
+    """Separate the path between path to resource and json path to attribute.
+
+    Allowed values:
+        'agent.an_attribute_name'
+        'protocols.my_protocol.an_attribute_name'
+        'connections.my_connection.an_attribute_name'
+        'contracts.my_contract.an_attribute_name'
+        'skills.my_skill.an_attribute_name'
+        'vendor.author.[protocols|connections|skills].package_name.attribute_name
+
+    :param value: dotted path.
+
+    :return: Tuple[list of settings dict keys, filepath, config loader].
+    """
+    parts = value.split(".")
+
+    root = parts[0]
+    if root not in ALLOWED_PATH_ROOTS:
+        raise AEAException(
+            "The root of the dotted path must be one of: {}".format(ALLOWED_PATH_ROOTS)
+        )
+
+    if (
+        len(parts) < 1
+        or parts[0] == "agent"
+        and len(parts) < 2
+        or parts[0] == "vendor"
+        and len(parts) < 5
+        or parts[0] != "agent"
+        and len(parts) < 3
+    ):
+        raise AEAException(
+            "The path is too short. Please specify a path up to an attribute name."
+        )
+
+    # if the root is 'agent', stop.
+    if root == "agent":
+        resource_type_plural = "agents"
+        path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
+        json_path = parts[1:]
+    elif root == "vendor":
+        resource_author = parts[1]
+        resource_type_plural = parts[2]
+        resource_name = parts[3]
+        path_to_resource_directory = (
+            Path(".")
+            / "vendor"
+            / resource_author
+            / resource_type_plural
+            / resource_name
+        )
+        path_to_resource_configuration = (
+            path_to_resource_directory
+            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+        )
+        json_path = parts[4:]
+        if not path_to_resource_directory.exists():
+            raise AEAException(
+                "Resource vendor/{}/{}/{} does not exist.".format(
+                    resource_author, resource_type_plural, resource_name
+                )
+            )
+    else:
+        # navigate the resources of the agent to reach the target configuration file.
+        resource_type_plural = root
+        resource_name = parts[1]
+        path_to_resource_directory = Path(".") / resource_type_plural / resource_name
+        path_to_resource_configuration = (
+            path_to_resource_directory
+            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+        )
+        json_path = parts[2:]
+        if not path_to_resource_directory.exists():
+            raise AEAException(
+                "Resource {}/{} does not exist.".format(
+                    resource_type_plural, resource_name
+                )
+            )
+
+    config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
+    return json_path, path_to_resource_configuration, config_loader

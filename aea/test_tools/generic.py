@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 import yaml
 
-from aea.cli.config import handle_dotted_path
+from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
 

@@ -20,6 +20,13 @@
 """Module with constants of the aea cli."""
 
 import os
+from typing import Dict
+
+from aea.configurations.base import (
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
@@ -37,3 +44,11 @@ NOT_PERMITTED_AUTHORS = [
 
 
 FROM_STRING_TO_TYPE = dict(str=str, int=int, bool=bool, float=float)
+
+ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections", "vendor"]
+RESOURCE_TYPE_TO_CONFIG_FILE = {
+    "skills": DEFAULT_SKILL_CONFIG_FILE,
+    "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
+    "connections": DEFAULT_CONNECTION_CONFIG_FILE,
+}  # type: Dict[str, str]
+FALSE_EQUIVALENTS = ["f", "false", "False"]
