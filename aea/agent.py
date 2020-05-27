@@ -188,6 +188,11 @@ class Agent(ABC):
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
 
+    @property
+    def loop_mode(self) -> str:
+        """Get the agent loop mode."""
+        return self._loop_mode
+
     def start(self) -> None:
         """
         Start the agent.
