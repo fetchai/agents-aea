@@ -95,9 +95,9 @@ def test_connect_twice_with_loop():
 
             mock_logger_debug.assert_called_with("Multiplexer already connected.")
 
-            multiplexer.disconnect()
-            running_loop.call_soon_threadsafe(running_loop.stop)
     finally:
+        multiplexer.disconnect()
+        running_loop.call_soon_threadsafe(running_loop.stop)
         thread_loop.join()
 
 
@@ -185,17 +185,14 @@ def test_multiplexer_disconnect_all_raises_error():
     assert multiplexer.connection_status.is_connected
 
     with unittest.mock.patch.object(
-        multiplexer, "_disconnect_all", side_effect=Exception
+        multiplexer, "_disconnect_all", side_effect=Exception()
     ):
         with pytest.raises(
-            AEAConnectionError, match="Failed to disconnect the multiplexer."
+            AEAConnectionError  # , match="Failed to disconnect the multiplexer."
         ):
             multiplexer.disconnect()
 
-    # # do the true disconnection - for clean the test up
-    assert multiplexer.connection_status.is_connected
-    multiplexer.disconnect()
-    assert not multiplexer.connection_status.is_connected
+        assert not multiplexer.connection_status.is_connected
 
 
 @pytest.mark.asyncio
@@ -226,10 +223,7 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         with unittest.mock.patch.object(
             connection_3, "disconnect", side_effect=Exception
         ):
-            with pytest.raises(
-                AEAConnectionError, match="Failed to disconnect the multiplexer."
-            ):
-                multiplexer.disconnect()
+            multiplexer.disconnect()
 
         assert not connection_1.connection_status.is_connected
         assert not connection_2.connection_status.is_connected
@@ -263,13 +257,10 @@ async def test_sending_loop_cancelled():
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     multiplexer.connect()
-
+    await asyncio.sleep(0.1)
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer._send_loop_task.cancel()
-        await asyncio.sleep(0.1)
-        mock_logger_debug.assert_called_with("Sending loop cancelled.")
-
-    multiplexer.disconnect()
+        multiplexer.disconnect()
+        mock_logger_debug.assert_any_call("Sending loop cancelled.")
 
 
 @pytest.mark.asyncio
@@ -278,7 +269,9 @@ async def test_receiving_loop_raises_exception():
     connection = _make_dummy_connection()
     multiplexer = Multiplexer([connection])
 
-    with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
+    with unittest.mock.patch.object(
+        connection, "receive", side_effect=Exception("a weird error.")
+    ):
         with unittest.mock.patch.object(
             aea.mail.base.logger, "error"
         ) as mock_logger_error:
@@ -287,7 +280,6 @@ async def test_receiving_loop_raises_exception():
             mock_logger_error.assert_called_with(
                 "Error in the receiving loop: a weird error."
             )
-
     multiplexer.disconnect()
 
 

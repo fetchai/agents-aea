@@ -18,14 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains tests of the implementation of an agent loop using asyncio."""
 
-import asyncio
 from queue import Empty
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type
 from unittest.mock import MagicMock
 
-import pytest
 
-from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
+from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -33,12 +31,6 @@ from aea.skills.base import Behaviour, Handler, SkillComponent, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 
 from tests.common.utils import run_in_thread, wait_for_condition
-
-try:
-    from asyncio import create_task
-except ImportError:
-    # for python3.6!
-    from asyncio import ensure_future as create_task  # type: ignore
 
 
 class CountHandler(Handler):
@@ -79,22 +71,6 @@ class CountBehaviour(TickerBehaviour):
         return cls(
             name="test", skill_context=SkillContext(), tick_interval=tick_interval
         )
-
-
-@pytest.mark.asyncio
-async def test_async_state():
-    """Test AsyncState class."""
-    initial = None
-    target_state = "target_state"
-    async_state = AsyncState(initial_state=initial)
-
-    assert async_state.state == initial
-    assert await async_state.wait(initial) == (None, initial)
-
-    task = create_task(async_state.wait(target_state))
-    await asyncio.sleep(0)
-    async_state.state = target_state
-    assert await asyncio.wait_for(task, timeout=1) == (initial, target_state)
 
 
 class AsyncFakeAgent:

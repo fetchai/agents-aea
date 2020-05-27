@@ -23,7 +23,18 @@ import time
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
-from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 try:
     from asyncio import create_task
@@ -42,15 +53,13 @@ def ensure_list(value: Any) -> List:
 class AsyncState:
     """Awaitable state."""
 
-    def __init__(self, initial_state: Any = None, loop: AbstractEventLoop = None):
+    def __init__(self, initial_state: Any = None):
         """Init async state.
 
         :param initial_state: state to set on start.
-        :param loop: optional asyncio event loop.
         """
         self._state = initial_state
         self._watchers: Set[Future] = set()
-        self._loop = loop or asyncio.get_event_loop()
 
     @property
     def state(self) -> Any:
@@ -69,7 +78,7 @@ class AsyncState:
         """Fulfill watchers for state."""
         for watcher in list(self._watchers):
             if state in watcher._states:  # type: ignore
-                self._loop.call_soon_threadsafe(
+                watcher._loop.call_soon_threadsafe(
                     watcher.set_result, (self._state, state)
                 )
 
@@ -197,3 +206,50 @@ async def wait_and_cancel(
             exceptions.append(cast(Exception, exc))
 
     return exceptions
+
+
+class AnotherThreadTask:
+    """
+    Shedule a task to run on the loop in another thread.
+
+    Provides better cancel behaviour: on cancel it will wait till cancelled completely.
+    """
+
+    def __init__(self, coro: Coroutine, loop: AbstractEventLoop) -> None:
+        """
+        Init the task.
+
+        :param coro: coroutine to schedule
+        :param loop: an event loop to schedule on.
+        """
+        self._task = loop.create_task(coro)
+        self._loop = loop
+        self._future = asyncio.run_coroutine_threadsafe(self._get_task_result(), loop)
+
+    async def _get_task_result(self) -> Any:
+        """Get task result, should be run in target loop."""
+        return await self._task
+
+    def result(self, timeout: Optional[float] = None) -> Any:
+        """
+        Wait for coroutine execution result.
+
+        :param timeout: optional timeout to wait in seconds.
+        """
+        return self._future.result(timeout)
+
+    def cancel(self) -> None:
+        """Cancel coroutine task execution in a target loop."""
+        self._loop.call_soon_threadsafe(self._task.cancel)
+
+    def future_cancel(self) -> None:
+        """
+        Cancel task waiting future.
+
+        In this case future result will raise CanclledError not waiting for real task exit.
+        """
+        self._future.cancel()
+
+    def done(self) -> bool:
+        """Check task is done."""
+        return self._future.done()
