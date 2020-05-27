@@ -715,7 +715,7 @@ class AEATestCase(BaseAEATestCase):
         """Set up the test class."""
         # make paths absolute
         cls.path_to_aea = cls.path_to_aea.absolute()
-        # cls.packages_dir_path = cls.packages_dir_path.absolute()
+        # TODO: decide whether to keep optionally: cls.packages_dir_path = cls.packages_dir_path.absolute()
         # load agent configuration
         with Path(cls.path_to_aea, DEFAULT_AEA_CONFIG_FILE).open(
             mode="r", encoding="utf-8"
@@ -726,7 +726,7 @@ class AEATestCase(BaseAEATestCase):
         cls.agent_name = agent_configuration.agent_name
 
         # this will create a temporary directory and move into it
-        # BaseAEATestCase.packages_dir_path = cls.packages_dir_path
+        # TODO: decide whether to keep optionally:  BaseAEATestCase.packages_dir_path = cls.packages_dir_path
         BaseAEATestCase.use_packages_dir = False
         BaseAEATestCase.setup_class()
 
@@ -738,6 +738,6 @@ class AEATestCase(BaseAEATestCase):
     def teardown_class(cls):
         """Teardown the test class."""
         cls.path_to_aea = Path(".")
-        # cls.packages_dir_path = Path("..", "packages")
+        # TODO: decide whether to keep optionally:  cls.packages_dir_path = Path("..", "packages")
         cls.agent_configuration = None
         BaseAEATestCase.teardown_class()
