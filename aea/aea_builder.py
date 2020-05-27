@@ -22,7 +22,7 @@ import itertools
 import logging
 import os
 import pprint
-from copy import deepcopy
+from copy import copy, deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -725,9 +725,9 @@ class AEABuilder:
         :return: the AEA object.
         """
         resources = Resources()
-        wallet = Wallet(deepcopy(self.private_key_paths))
+        wallet = Wallet(copy(self.private_key_paths))
         identity = self._build_identity_from_wallet(wallet)
-        ledger_apis = deepcopy(self._load_ledger_apis(ledger_apis))
+        ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
         connections = self._load_connections(identity.address, connection_ids)
@@ -762,6 +762,7 @@ class AEABuilder:
         """
         if ledger_apis is not None:
             self._check_consistent(ledger_apis)
+            ledger_apis = deepcopy(ledger_apis)
         else:
             ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
         return ledger_apis
