@@ -42,6 +42,7 @@ from aea.cli.utils.package_utils import (
     find_item_in_distribution,
     find_item_locally,
     is_fingerprint_correct,
+    try_get_balance,
     try_get_item_source_path,
     try_get_item_target_path,
     validate_author_name,
@@ -394,3 +395,18 @@ class AEAJsonPathTypeTestCase(TestCase):
         obj = AEAJsonPathType()
         with self.assertRaises(BadParameter):
             obj.convert(value, "param", "ctx")
+
+
+@mock.patch("aea.cli.utils.package_utils.LedgerApis", mock.MagicMock())
+class TryGetBalanceTestCase(TestCase):
+    """Test case for try_get_balance method."""
+
+    def test_try_get_balance_positive(self):
+        """Test for try_get_balance method positive result."""
+        agent_config = mock.Mock()
+        ledger_apis = {"type_": {"address": "some-adress"}}
+        agent_config.ledger_apis_dict = ledger_apis
+
+        wallet_mock = mock.Mock()
+        wallet_mock.addresses = {"type_": "some-adress"}
+        try_get_balance(agent_config, wallet_mock, "type_")
