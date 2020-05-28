@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """The test error skill module contains the tests of the error skill."""
 
 import logging
@@ -34,13 +35,15 @@ from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
 from aea.skills.error.handlers import ErrorHandler
 
-from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from tests.common.utils import wait_for_condition
 
 from ..conftest import CUR_PATH, _make_dummy_connection
+
+
+logger = logging.getLogger(__file__)
 
 
 class InboxWithHistory(InBox):
@@ -63,40 +66,40 @@ class TestSkillError:
 
     def setup(self):
         """Test the initialisation of the AEA."""
-        cls = self
-        cls.node = LocalNode()
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FetchAICrypto.identifier: private_key_path})
-        cls.ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
-        cls.agent_name = "Agent0"
+        self.wallet = Wallet({FetchAICrypto.identifier: private_key_path})
+        self.ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
+        self.agent_name = "Agent0"
 
-        cls.connection = _make_dummy_connection()
-        cls.connections = [cls.connection]
-        cls.identity = Identity(
-            cls.agent_name, address=cls.wallet.addresses[FetchAICrypto.identifier]
+        self.connection = _make_dummy_connection()
+        self.connections = [self.connection]
+        self.identity = Identity(
+            self.agent_name, address=self.wallet.addresses[FetchAICrypto.identifier]
         )
-        cls.address = cls.identity.address
-        cls.my_aea = AEA(
-            cls.identity,
-            cls.connections,
-            cls.wallet,
-            cls.ledger_apis,
-            timeout=2.0,
+        self.address = self.identity.address
+
+        self.my_aea = AEA(
+            self.identity,
+            self.connections,
+            self.wallet,
+            self.ledger_apis,
+            timeout=0.1,
             resources=Resources(),
         )
-        cls.my_aea._inbox = InboxWithHistory(cls.my_aea.multiplexer)
-        cls.skill_context = SkillContext(cls.my_aea._context)
+
+        self.my_aea._inbox = InboxWithHistory(self.my_aea.multiplexer)
+        self.skill_context = SkillContext(self.my_aea._context)
         logger_name = "aea.{}.skills.{}.{}".format(
-            cls.my_aea._context.agent_name, "fetchai", "error"
+            self.my_aea._context.agent_name, "fetchai", "error"
         )
-        cls.skill_context._logger = logging.getLogger(logger_name)
-        cls.my_error_handler = ErrorHandler(
-            name="error", skill_context=cls.skill_context
+        self.skill_context._logger = logging.getLogger(logger_name)
+        self.my_error_handler = ErrorHandler(
+            name="error", skill_context=self.skill_context
         )
-        cls.t = Thread(target=cls.my_aea.start)
-        cls.t.start()
+        self.t = Thread(target=self.my_aea.start)
+        self.t.start()
         wait_for_condition(
-            lambda: cls.my_aea._main_loop and cls.my_aea._main_loop.is_running, 10
+            lambda: self.my_aea._main_loop and self.my_aea._main_loop.is_running, 10
         )
 
     def test_error_handler_handle(self):

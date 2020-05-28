@@ -19,17 +19,34 @@
 """This module contains the misc utils for async code."""
 import asyncio
 import datetime
+import logging
 import time
+from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
-from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union, cast
+from threading import Thread
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 try:
     from asyncio import create_task
 except ImportError:  # pragma: no cover
     # for python3.6!
     from asyncio import ensure_future as create_task  # type: ignore # noqa: F401
+
+
+logger = logging.getLogger(__file__)
 
 
 def ensure_list(value: Any) -> List:
@@ -197,3 +214,111 @@ async def wait_and_cancel(
             exceptions.append(cast(Exception, exc))
 
     return exceptions
+
+
+class AnotherThreadTask:
+    """
+    Schedule a task to run on the loop in another thread.
+
+    Provides better cancel behaviour: on cancel it will wait till cancelled completely.
+    """
+
+    def __init__(self, coro: Coroutine, loop: AbstractEventLoop) -> None:
+        """
+        Init the task.
+
+        :param coro: coroutine to schedule
+        :param loop: an event loop to schedule on.
+        """
+        self._task = loop.create_task(coro)
+        self._loop = loop
+        self._future = asyncio.run_coroutine_threadsafe(self._get_task_result(), loop)
+
+    async def _get_task_result(self) -> Any:
+        """Get task result, should be run in target loop."""
+        return await self._task
+
+    def result(self, timeout: Optional[float] = None) -> Any:
+        """
+        Wait for coroutine execution result.
+
+        :param timeout: optional timeout to wait in seconds.
+        """
+        return self._future.result(timeout)
+
+    def cancel(self) -> None:
+        """Cancel coroutine task execution in a target loop."""
+        self._loop.call_soon_threadsafe(self._task.cancel)
+
+    def future_cancel(self) -> None:
+        """
+        Cancel task waiting future.
+
+        In this case future result will raise CanclledError not waiting for real task exit.
+        """
+        self._future.cancel()
+
+    def done(self) -> bool:
+        """Check task is done."""
+        return self._future.done()
+
+
+class ThreadedAsyncRunner(Thread):
+    """Util to run thread with event loop and execute coroutines inside."""
+
+    def __init__(self, loop=None) -> None:
+        """
+        Init threaded runner.
+
+        :param loop: optional event loop. is it's running loop, threaded runner will use it.
+        """
+        self._loop = loop or asyncio.new_event_loop()
+        assert not self._loop.is_closed()
+        super().__init__(daemon=True)
+
+    def start(self) -> None:
+        """Start event loop in dedicated thread."""
+        if self.is_alive() or self._loop.is_running():
+            return
+        super().start()
+        self.call(asyncio.sleep(0.001)).result(1)  # type: ignore # to ensure loop is started
+
+    def run(self) -> None:
+        """Run code inside thread."""
+        logger.debug("Starting threaded asyncio loop...")
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_forever()
+        logger.debug("Asyncio loop has been stopped.")
+
+    def call(self, coro: Coroutine) -> Any:
+        """
+        Run a coroutine inside the event loop.
+
+        :param coro: a coroutine to run.
+        """
+        return AnotherThreadTask(coro, self._loop)
+
+    def stop(self) -> None:
+        """Stop event loop in thread."""
+        logger.debug("Stopping...")
+        if not self.is_alive():
+            return
+        if self._loop.is_running():
+            logger.debug("Stopping loop...")
+            self._loop.call_soon_threadsafe(lambda: self._loop.stop())
+        logger.debug("Wait thread to join...")
+        self.join(10)
+        logger.debug("Stopped.")
+
+
+async def cancel_and_wait(task: Optional[Task]) -> Any:
+    """Wait cancelled task and skip CancelledError."""
+    if not task:
+        return
+    try:
+        if task.done():
+            return await task
+        task.cancel()
+        return await task
+    except CancelledError as e:
+        return e

@@ -75,6 +75,17 @@ def test_connect_twice():
     multiplexer.disconnect()
 
 
+def test_disconnect_twice():
+    """Test that connecting twice the multiplexer behaves correctly."""
+    multiplexer = Multiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    multiplexer.disconnect()
+
+
 def test_connect_twice_with_loop():
     """Test that connecting twice the multiplexer behaves correctly."""
     running_loop = asyncio.new_event_loop()
@@ -82,7 +93,7 @@ def test_connect_twice_with_loop():
     thread_loop.start()
 
     try:
-        multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop,)
+        multiplexer = Multiplexer([_make_dummy_connection()], loop=running_loop)
 
         with unittest.mock.patch.object(
             aea.mail.base.logger, "debug"
@@ -126,6 +137,7 @@ def test_multiplexer_connect_all_raises_error():
             AEAConnectionError, match="Failed to connect the multiplexer."
         ):
             multiplexer.connect()
+    multiplexer.disconnect()
 
 
 def test_multiplexer_connect_one_raises_error_many_connections():
@@ -156,6 +168,7 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     assert not connection_2.connection_status.is_connected
     assert not connection_3.connection_status.is_connected
 
+    multiplexer.disconnect()
     try:
         shutil.rmtree(tmpdir)
     except OSError as e:
@@ -263,13 +276,10 @@ async def test_sending_loop_cancelled():
     multiplexer = Multiplexer([_make_dummy_connection()])
 
     multiplexer.connect()
-
+    await asyncio.sleep(0.1)
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        multiplexer._send_loop_task.cancel()
-        await asyncio.sleep(0.1)
-        mock_logger_debug.assert_called_with("Sending loop cancelled.")
-
-    multiplexer.disconnect()
+        multiplexer.disconnect()
+        mock_logger_debug.assert_any_call("Sending loop cancelled.")
 
 
 @pytest.mark.asyncio

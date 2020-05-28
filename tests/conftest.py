@@ -24,6 +24,7 @@ import os
 import platform
 import socket
 import sys
+import threading
 import time
 from functools import wraps
 from threading import Timer
@@ -334,7 +335,7 @@ def skip_for_platform(platform_name: str) -> Callable:
 
     :return: decorated object
     """
-
+    # for docstyle.
     def decorator(pytest_func):
         if platform.system() != platform_name:
             return pytest_func
@@ -536,6 +537,13 @@ def pytest_addoption(parser) -> None:
         help="block socket connect outside of 127.x.x.x",
     )
 
+    parser.addoption(
+        "--check-threads",
+        action="store_true",
+        default=False,
+        help="check non closed threads i started during test",
+    )
+
 
 @pytest.fixture(scope="session", autouse=True)
 def inet_disable(request) -> None:
@@ -598,7 +606,7 @@ def network_node(
 
 @pytest.fixture(scope="session", autouse=True)
 def reset_aea_cli_config() -> None:
-    """Resets the cli config for each test."""
+    """Reset the cli config for each test."""
     _init_cli_config()
 
 
@@ -627,7 +635,7 @@ def get_host():
 
 
 def double_escape_windows_path_separator(path):
-    """Double-escape Windows path separator '\'."""
+    r"""Doubleescape Windows path separator '\'."""
     return path.replace("\\", "\\\\")
 
 
@@ -726,3 +734,18 @@ def check_test_cwd(request):
     yield
     if old_cwd != os.getcwd():
         raise CwdException()
+
+
+@pytest.fixture(autouse=True)
+def check_test_threads(request):
+    """Check particular test close all spawned threads."""
+    if not request.config.getoption("--check-threads"):
+        yield
+        return
+    if request.cls:
+        yield
+        return
+    num_threads = threading.activeCount()
+    yield
+    new_num_threads = threading.activeCount()
+    assert num_threads >= new_num_threads, "Non closed threads!"
