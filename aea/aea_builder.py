@@ -239,6 +239,39 @@ class AEABuilder:
 
     It follows the fluent interface. Every method of the builder
     returns the instance of the builder itself.
+
+    Note: the method 'build()' is guaranteed of being
+    re-entrant with respect to the 'add_component(path)'
+    method. That is, you can invoke the building method
+    many times against the same builder instance, and the
+    returned agent instance will not share the
+    components with other agents, e.g.:
+
+        builder = AEABuilder()
+        builder.add_component(...)
+        ...
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # following agents will have different components.
+        my_aea_2 = builder.build()  # all good
+
+    However, if you manually loaded some of the components and added
+    them with the method 'add_component_instance()', then calling build
+    more than one time is strongly discouraged:
+
+        builder = AEABuilder()
+        builder.add_component_instance(...)
+        ...  # other initialization code
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # in this case, following calls to '.build()'
+        # are strongly discouraged.
+        # my_aea_2 = builder.builder()  # bad
+
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
@@ -534,6 +567,8 @@ class AEABuilder:
 
         Please, pay attention, all dependencies have to be already loaded.
 
+        Notice also that this will make the call to 'build()' non re-entrant.
+
         :params component: Component instance already initialized.
         """
         self._check_can_add(component.configuration)
@@ -719,6 +754,12 @@ class AEABuilder:
     ) -> AEA:
         """
         Build the AEA.
+
+        This method is re-entrant only if the components have been
+        added through the method 'add_component'. If some of them
+        have been loaded with 'add_component_instance', it
+        should be called only once, and further calls will lead
+        to unexpected behaviour.
 
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
