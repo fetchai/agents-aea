@@ -1477,18 +1477,20 @@ class TestRunFailsWhenProtocolNotComplete:
 
 
 def _raise_click_exception(*args, **kwargs):
-    raise ClickException()
+    raise ClickException("message")
 
 
 class RunAEATestCase(TestCase):
     """Test case for _run_aea method."""
 
+    @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
     def test__run_aea_negative(self, *mocks):
         """Test _run_aea method for negative result."""
-        aea_mock = mock.Mock()
-        aea_mock.start = _raise_click_exception
+        click_context = mock.Mock()
+        click_context.obj = mock.Mock()
+        click_context.obj.config = {"skip_consistency_check": True}
         with self.assertRaises(ClickException):
-            _run_aea(aea_mock)
+            _run_aea(click_context, ["author/name:0.1.0"], "env_file", False)
 
 
 def _raise_aea_package_loading_error(*args, **kwargs):

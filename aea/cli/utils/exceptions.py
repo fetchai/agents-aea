@@ -24,3 +24,7 @@ from aea.exceptions import AEAException
 
 class AEAConfigException(AEAException):
     """Exception about AEA configuration."""
+
+
+class InterruptInputException(Exception):
+    """An exception to mark an interuption event."""

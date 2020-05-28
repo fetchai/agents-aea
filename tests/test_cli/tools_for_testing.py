@@ -73,6 +73,9 @@ class ContextMock:
         self.clean_paths: List = []
         self.obj = self
 
+    def set_config(self, key, value):
+        setattr(self.config, key, value)
+
 
 class PublicIdMock:
     """A class to mock PublicId."""

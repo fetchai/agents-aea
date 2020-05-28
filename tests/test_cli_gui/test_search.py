@@ -43,7 +43,7 @@ Version: 0.1.0
 dummy_error = """dummy error"""
 
 
-def _test_search_items_with_query(item_type: str, query: str):
+def _test_search_items_locally_with_query(item_type: str, query: str):
     """Test searching of generic items in registry."""
     app = create_app()
 
@@ -73,7 +73,7 @@ def _test_search_items_with_query(item_type: str, query: str):
     assert data["search_term"] == "test"
 
 
-def _test_search_items(item_type: str):
+def _test_search_items_locally(item_type: str):
     """Test searching of generic items in registry."""
     app = create_app()
 
@@ -93,7 +93,7 @@ def _test_search_items(item_type: str):
     assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 
-def _test_search_items_fail(item_type: str):
+def _test_search_items_locally_fail(item_type: str):
     """Test searching of generic items in registry failing."""
     app = create_app()
 
@@ -111,23 +111,23 @@ def _test_search_items_fail(item_type: str):
 
 def test_search_protocols():
     """Test for listing protocols supported by an agent."""
-    _test_search_items("protocol")
-    _test_search_items_fail("protocol")
-    _test_search_items_with_query("protocol", "test")
+    _test_search_items_locally("protocol")
+    _test_search_items_locally_fail("protocol")
+    _test_search_items_locally_with_query("protocol", "test")
 
 
 def test_search_connections():
     """Test for listing connections supported by an agent."""
-    _test_search_items("connection")
-    _test_search_items_fail("connection")
-    _test_search_items_with_query("connection", "test")
+    _test_search_items_locally("connection")
+    _test_search_items_locally_fail("connection")
+    _test_search_items_locally_with_query("connection", "test")
 
 
 def test_list_skills():
     """Test for listing connections supported by an agent."""
-    _test_search_items("skill")
-    _test_search_items_fail("skill")
-    _test_search_items_with_query("skill", "test")
+    _test_search_items_locally("skill")
+    _test_search_items_locally_fail("skill")
+    _test_search_items_locally_with_query("skill", "test")
 
 
 @run_in_root_dir

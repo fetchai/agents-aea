@@ -39,6 +39,36 @@ from aea.cli.utils.loggers import logger
 from aea.helpers.base import cd
 
 
+@click.command()
+@click.argument("agents", nargs=-1, type=AgentDirectory())
+@click.option("--multithreaded", is_flag=True)
+@click.pass_context
+def launch(click_context, agents: List[str], multithreaded: bool):
+    """Launch many agents at the same time."""
+    _launch_agents(click_context, agents, multithreaded)
+
+
+def _launch_agents(
+    click_context: click.core.Context, agents: List[str], multithreaded: bool
+) -> None:
+    """
+    Run multiple agents.
+
+    :param click_context: click context object.
+    :param agents: agents names.
+    :param multithreaded: bool flag to run as multithreads.
+
+    :return: None.
+    """
+    agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
+    if multithreaded:
+        failed = _launch_threads(click_context, agents_directories)
+    else:
+        failed = _launch_subprocesses(click_context, agents_directories)
+    logger.debug(f"Exit cli. code: {failed}")
+    sys.exit(failed)
+
+
 def _run_agent(click_context, agent_directory: str):
     os.chdir(agent_directory)
     click_context.invoke(run)
@@ -121,18 +151,3 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
             threads[idx].join()
             logger.info("Agent {} has been stopped.".format(agent.name))
     return 0
-
-
-@click.command()
-@click.argument("agents", nargs=-1, type=AgentDirectory())
-@click.option("--multithreaded", is_flag=True)
-@click.pass_context
-def launch(click_context, agents: List[str], multithreaded: bool):
-    """Launch many agents at the same time."""
-    agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
-    if multithreaded:
-        failed = _launch_threads(click_context, agents_directories)
-    else:
-        failed = _launch_subprocesses(click_context, agents_directories)
-    logger.debug(f"Exit cli. code: {failed}")
-    sys.exit(failed)
