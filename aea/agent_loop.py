@@ -278,7 +278,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             return
 
         periodic_caller = PeriodicCaller(
-            partial(self._agent._execution_control, behaviour.act, behaviour),
+            partial(self._agent._execution_control, behaviour.act_wrapper, behaviour),
             behaviour._tick_interval,
             behaviour._start_at,
             self._behaviour_exception_callback,
