@@ -77,6 +77,7 @@ class BaseAEATestCase(ABC):
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path("packages")
+    use_packages_dir: bool = True
     package_registry_src: Path = Path()
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
@@ -630,9 +631,10 @@ class BaseAEATestCase(ABC):
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
-        registry_tmp_dir = cls.t / cls.packages_dir_path
-        cls.package_registry_src = cls.old_cwd / cls.packages_dir_path
-        shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
+        if cls.use_packages_dir:
+            registry_tmp_dir = cls.t / cls.packages_dir_path
+            cls.package_registry_src = cls.old_cwd / cls.packages_dir_path
+            shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
         cls.stdout = {}
@@ -647,6 +649,7 @@ class BaseAEATestCase(ABC):
         cls.change_directory(cls.old_cwd)
         cls.last_cli_runner_result = None
         cls.packages_dir_path = Path("packages")
+        cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
         cls.package_registry_src = None
@@ -712,7 +715,7 @@ class AEATestCase(BaseAEATestCase):
         """Set up the test class."""
         # make paths absolute
         cls.path_to_aea = cls.path_to_aea.absolute()
-        cls.packages_dir_path = cls.packages_dir_path.absolute()
+        # TODO: decide whether to keep optionally: cls.packages_dir_path = cls.packages_dir_path.absolute()
         # load agent configuration
         with Path(cls.path_to_aea, DEFAULT_AEA_CONFIG_FILE).open(
             mode="r", encoding="utf-8"
@@ -723,7 +726,8 @@ class AEATestCase(BaseAEATestCase):
         cls.agent_name = agent_configuration.agent_name
 
         # this will create a temporary directory and move into it
-        BaseAEATestCase.packages_dir_path = cls.packages_dir_path
+        # TODO: decide whether to keep optionally:  BaseAEATestCase.packages_dir_path = cls.packages_dir_path
+        BaseAEATestCase.use_packages_dir = False
         BaseAEATestCase.setup_class()
 
         # copy the content of the agent into the temporary directory
@@ -734,6 +738,6 @@ class AEATestCase(BaseAEATestCase):
     def teardown_class(cls):
         """Teardown the test class."""
         cls.path_to_aea = Path(".")
-        cls.packages_dir_path = Path("..", "packages")
+        # TODO: decide whether to keep optionally:  cls.packages_dir_path = Path("..", "packages")
         cls.agent_configuration = None
         BaseAEATestCase.teardown_class()
