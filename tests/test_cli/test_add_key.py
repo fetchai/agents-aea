@@ -22,12 +22,13 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from unittest import mock
+from unittest import TestCase, mock
 
 import yaml
 
 import aea
 from aea.cli import cli
+from aea.cli.add_key import _try_add_key
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
@@ -37,7 +38,8 @@ from aea.crypto.helpers import (
 )
 from aea.test_tools.click_testing import CliRunner
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
+from tests.test_cli.tools_for_testing import ContextMock
 
 
 class TestAddFetchKey:
@@ -316,3 +318,42 @@ def test_add_key_fails_bad_ledger_id():
         assert len(config.private_key_paths.read_all()) == 0
     finally:
         os.chdir(oldcwd)
+
+
+@mock.patch("builtins.open", mock.mock_open())
+class AddKeyTestCase(TestCase):
+    """Test case for _add_key method."""
+
+    def test__add_key_positive(self, *mocks):
+        """Test for _add_key method positive result."""
+        ctx = ContextMock()
+        _try_add_key(ctx, "type", "filepath")
+
+
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.add_key.try_validate_private_key_path")
+@mock.patch("aea.cli.add_key._try_add_key")
+class AddKeyCommandTestCase(TestCase):
+    """Test case for CLI add_key command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_run_positive(self, *mocks):
+        """Test for CLI add_key positive result."""
+        filepath = str(
+            Path(ROOT_DIR, "setup.py")
+        )  # some existing filepath to pass CLI argument check
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "add-key",
+                FetchAICrypto.identifier,
+                filepath,
+            ],
+            standalone_mode=False,
+        )
+        self.assertEqual(result.exit_code, 0)

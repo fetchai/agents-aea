@@ -31,9 +31,9 @@ from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
-    _try_validate_private_key_path,
     create_private_key,
     try_generate_testnet_wealth,
+    try_validate_private_key_path,
 )
 
 from ..conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_PATH, FETCHAI_PRIVATE_KEY_PATH
@@ -54,20 +54,20 @@ class TestHelperFile:
     def tests_private_keys(self):
         """Test the private keys."""
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        _try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
+        try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
-            _try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
+            try_validate_private_key_path(FetchAICrypto.identifier, private_key_path)
 
         private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        _try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
+        try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
-            _try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
+            try_validate_private_key_path(EthereumCrypto.identifier, private_key_path)
 
     @patch("aea.crypto.fetchai.logger")
     def tests_generate_wealth_fetchai(self, mock_logging):
@@ -115,12 +115,12 @@ class TestHelperFile:
         """Test try_generate_testnet_wealth error_resp."""
         try_generate_testnet_wealth(EthereumCrypto.identifier, "address")
 
-    def test__try_validate_private_key_path_positive(self):
+    def test_try_validate_private_key_path_positive(self):
         """Test _validate_private_key_path positive result."""
-        _try_validate_private_key_path(
+        try_validate_private_key_path(
             FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH
         )
-        _try_validate_private_key_path(
+        try_validate_private_key_path(
             EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_PATH
         )
 
