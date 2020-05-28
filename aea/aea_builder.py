@@ -22,6 +22,7 @@ import itertools
 import logging
 import os
 import pprint
+from copy import copy, deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -238,6 +239,39 @@ class AEABuilder:
 
     It follows the fluent interface. Every method of the builder
     returns the instance of the builder itself.
+
+    Note: the method 'build()' is guaranteed of being
+    re-entrant with respect to the 'add_component(path)'
+    method. That is, you can invoke the building method
+    many times against the same builder instance, and the
+    returned agent instance will not share the
+    components with other agents, e.g.:
+
+        builder = AEABuilder()
+        builder.add_component(...)
+        ...
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # following agents will have different components.
+        my_aea_2 = builder.build()  # all good
+
+    However, if you manually loaded some of the components and added
+    them with the method 'add_component_instance()', then calling build
+    more than one time is strongly discouraged:
+
+        builder = AEABuilder()
+        builder.add_component_instance(...)
+        ...  # other initialization code
+
+        # first call
+        my_aea_1 = builder.build()
+
+        # in this case, following calls to '.build()'
+        # are strongly discouraged.
+        # my_aea_2 = builder.builder()  # bad
+
     """
 
     DEFAULT_AGENT_LOOP_TIMEOUT = 0.05
@@ -256,10 +290,8 @@ class AEABuilder:
         :param with_default_packages: add the default packages.
         """
         self._name = None  # type: Optional[str]
-        self._resources = Resources()
         self._private_key_paths = {}  # type: Dict[str, Optional[str]]
         self._ledger_apis_configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
-        self._default_key = None  # set by the user, or instantiate a default one.
         self._default_ledger = (
             "fetchai"  # set by the user, or instantiate a default one.
         )
@@ -535,6 +567,8 @@ class AEABuilder:
 
         Please, pay attention, all dependencies have to be already loaded.
 
+        Notice also that this will make the call to 'build()' non re-entrant.
+
         :params component: Component instance already initialized.
         """
         self._check_can_add(component.configuration)
@@ -550,23 +584,6 @@ class AEABuilder:
         self._context_namespace = context_namespace
         return self
 
-    def _add_component_to_resources(self, component: Component) -> None:
-        """Add component to the resources."""
-        if component.component_type == ComponentType.CONNECTION:
-            # Do nothing - we don't add connections to resources.
-            return
-        self._resources.add_component(component)
-
-    def _remove_component_from_resources(self, component_id: ComponentId) -> None:
-        """Remove a component from the resources."""
-        if component_id.component_type == ComponentType.CONNECTION:
-            return
-
-        if component_id.component_type == ComponentType.PROTOCOL:
-            self._resources.remove_protocol(component_id.public_id)
-        elif component_id.component_type == ComponentType.SKILL:
-            self._resources.remove_skill(component_id.public_id)
-
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
         """
         Remove a component.
@@ -580,7 +597,6 @@ class AEABuilder:
 
     def _remove(self, component_id: ComponentId):
         self._package_dependency_manager.remove_component(component_id)
-        self._remove_component_from_resources(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
         """
@@ -739,15 +755,22 @@ class AEABuilder:
         """
         Build the AEA.
 
+        This method is re-entrant only if the components have been
+        added through the method 'add_component'. If some of them
+        have been loaded with 'add_component_instance', it
+        should be called only once, and further calls will lead
+        to unexpected behaviour.
+
         :param connection_ids: select only these connections to run the AEA.
         :param ledger_apis: the api ledger that we want to use.
         :return: the AEA object.
         """
-        wallet = Wallet(self.private_key_paths)
+        resources = Resources()
+        wallet = Wallet(copy(self.private_key_paths))
         identity = self._build_identity_from_wallet(wallet)
         ledger_apis = self._load_ledger_apis(ledger_apis)
-        self._load_and_add_components(ComponentType.PROTOCOL)
-        self._load_and_add_components(ComponentType.CONTRACT)
+        self._load_and_add_components(ComponentType.PROTOCOL, resources)
+        self._load_and_add_components(ComponentType.CONTRACT, resources)
         connections = self._load_connections(identity.address, connection_ids)
         identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
@@ -755,7 +778,7 @@ class AEABuilder:
             connections,
             wallet,
             ledger_apis,
-            self._resources,
+            resources,
             loop=None,
             timeout=self._get_agent_loop_timeout(),
             execution_timeout=self._get_execution_timeout(),
@@ -765,10 +788,10 @@ class AEABuilder:
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
             loop_mode=self._get_loop_mode(),
-            **self._context_namespace,
+            **deepcopy(self._context_namespace),
         )
         aea.multiplexer.default_routing = self._get_default_routing()
-        self._load_and_add_skills(aea.context)
+        self._load_and_add_skills(aea.context, resources)
         return aea
 
     def _load_ledger_apis(self, ledger_apis: Optional[LedgerApis] = None) -> LedgerApis:
@@ -780,6 +803,7 @@ class AEABuilder:
         """
         if ledger_apis is not None:
             self._check_consistent(ledger_apis)
+            ledger_apis = deepcopy(ledger_apis)
         else:
             ledger_apis = LedgerApis(self.ledger_apis_config, self._default_ledger)
         return ledger_apis
@@ -1144,11 +1168,14 @@ class AEABuilder:
             for connection_id in connections_ids
         ]
 
-    def _load_and_add_components(self, component_type: ComponentType) -> None:
+    def _load_and_add_components(
+        self, component_type: ComponentType, resources: Resources
+    ) -> None:
         """
-        Load and add components added to the builder.
+        Load and add components added to the builder to a Resources instance.
 
         :param component_type: the component type for which
+        :param resources: the resources object to populate.
         :return: None
         """
         for configuration in self._package_dependency_manager.get_components_by_type(
@@ -1157,10 +1184,11 @@ class AEABuilder:
             if configuration in self._component_instances[component_type].keys():
                 component = self._component_instances[component_type][configuration]
             else:
+                configuration = deepcopy(configuration)
                 component = load_component_from_config(component_type, configuration)
-            self._add_component_to_resources(component)
+            resources.add_component(component)
 
-    def _load_and_add_skills(self, context: AgentContext) -> None:
+    def _load_and_add_skills(self, context: AgentContext, resources: Resources) -> None:
         for configuration in self._package_dependency_manager.skills.values():
             logger_name = "aea.packages.{}.skills.{}".format(
                 configuration.author, configuration.name
@@ -1173,6 +1201,7 @@ class AEABuilder:
                 skill.skill_context.set_agent_context(context)
                 skill.skill_context.logger = logging.getLogger(logger_name)
             else:
+                configuration = deepcopy(configuration)
                 skill_context = SkillContext()
                 skill_context.set_agent_context(context)
                 skill_context.logger = logging.getLogger(logger_name)
@@ -1182,7 +1211,7 @@ class AEABuilder:
                         ComponentType.SKILL, configuration, skill_context=skill_context
                     ),
                 )
-            self._add_component_to_resources(skill)
+            resources.add_component(skill)
 
     def _load_connection(
         self, address: Address, configuration: ConnectionConfig
@@ -1207,6 +1236,7 @@ class AEABuilder:
                 )
             return connection
         else:
+            configuration = deepcopy(configuration)
             return cast(
                 Connection,
                 load_component_from_config(
