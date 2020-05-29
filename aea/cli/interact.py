@@ -38,10 +38,10 @@ from aea.mail.base import Envelope, InBox, Multiplexer, OutBox
 def interact():
     """Interact with a running AEA via the stub connection."""
     click.echo("Starting AEA interaction channel...")
-    run_interaction_channel()
+    _run_interaction_channel()
 
 
-def run_interaction_channel():
+def _run_interaction_channel():
     stub_connection = StubConnection(
         input_file_path=DEFAULT_OUTPUT_FILE_NAME,
         output_file_path=DEFAULT_INPUT_FILE_NAME,
@@ -55,7 +55,7 @@ def run_interaction_channel():
         is_running = True
         while is_running:
             try:
-                envelope = try_construct_envelope()
+                envelope = _try_construct_envelope()
                 if envelope is None and not inbox.empty():
                     envelope = inbox.get_nowait()
                     assert (
@@ -90,7 +90,7 @@ def _construct_message(action_name, envelope):
     return message
 
 
-def try_construct_envelope() -> Optional[Envelope]:
+def _try_construct_envelope() -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
