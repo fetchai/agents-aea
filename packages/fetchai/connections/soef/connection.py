@@ -165,6 +165,13 @@ class SOEFChannel:
                 )
             )
 
+    def disconnect(self):
+        for values in self.service_name_to_page_address.values():
+            url = self.base_url + "/" + values
+            params = {"command": "unregister"}
+            response = requests.get(url=url, params=params)
+            logger.debug("Response: {}".format(response.text))
+
     @staticmethod
     def _is_compatible_description(service_description: Description) -> bool:
         """
@@ -475,6 +482,7 @@ class SOEFConnection(Connection):
             self.connection_status.is_connected or self.connection_status.is_connecting
         ), "Call connect before disconnect."
         assert self.in_queue is not None
+        self.channel.disconnect()
         self.channel.in_queue = None
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
