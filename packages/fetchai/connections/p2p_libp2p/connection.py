@@ -39,9 +39,6 @@ from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
-
-WORK_DIR = os.getcwd()
-
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
@@ -50,13 +47,11 @@ LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
 LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
-LIBP2P_NODE_CLARGS = [
-    str(os.path.join(WORK_DIR, LIBP2P_NODE_ENV_FILE))
-]  # type: List[str]
+LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.2.0")
 
 MultiAddr = str
 
@@ -229,9 +224,11 @@ class Libp2pNode:
 
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
+        self.log_file = os.path.join(os.path.abspath(os.getcwd()), self.log_file)
 
         # env file
         self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
+        self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
 
         # named pipes (fifos)
         tmp_dir = tempfile.mkdtemp()
@@ -291,9 +288,9 @@ class Libp2pNode:
         os.mkfifo(out_path)
 
         # setup config
-        if os.path.exists(LIBP2P_NODE_ENV_FILE):
-            os.remove(LIBP2P_NODE_ENV_FILE)
-        with open(LIBP2P_NODE_ENV_FILE, "a") as env_file:
+        if os.path.exists(self.env_file):
+            os.remove(self.env_file)
+        with open(self.env_file, "a") as env_file:
             env_file.write("AEA_AGENT_ADDR={}\n".format(self.agent_addr))
             env_file.write("AEA_P2P_ID={}\n".format(self.key))
             env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
@@ -320,7 +317,7 @@ class Libp2pNode:
         # run node
         logger.info("Starting libp2p node...")
         self.proc = _golang_module_run(
-            self.source, LIBP2P_NODE_MODULE_NAME, self.clargs, self._log_file_desc
+            self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
         )
 
         logger.info("Connecting to libp2p node...")
@@ -488,7 +485,7 @@ class P2PLibp2pConnection(Connection):
         """
         self._check_go_installed()
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
+            kwargs["connection_id"] = PUBLIC_ID # TOFIX(LR) why do we need to add this?
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         self.node = Libp2pNode(
