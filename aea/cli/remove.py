@@ -38,6 +38,54 @@ def remove(click_context):
     """Remove a resource from the agent."""
 
 
+@remove.command()
+@click.argument("connection_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def connection(ctx: Context, connection_id):
+    """
+    Remove a connection from the agent.
+
+    It expects the public id of the connection to remove from the local registry.
+    """
+    _remove_item(ctx, "connection", connection_id)
+
+
+@remove.command()
+@click.argument("contract_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_id):
+    """
+    Remove a contract from the agent.
+
+    It expects the public id of the contract to remove from the local registry.
+    """
+    _remove_item(ctx, "contract", contract_id)
+
+
+@remove.command()
+@click.argument("protocol_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def protocol(ctx: Context, protocol_id):
+    """
+    Remove a protocol from the agent.
+
+    It expects the public id of the protocol to remove from the local registry.
+    """
+    _remove_item(ctx, "protocol", protocol_id)
+
+
+@remove.command()
+@click.argument("skill_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def skill(ctx: Context, skill_id):
+    """
+    Remove a skill from the agent.
+
+    It expects the public id of the skill to remove from the local registry.
+    """
+    _remove_item(ctx, "skill", skill_id)
+
+
 def _remove_item(ctx: Context, item_type, item_id: PublicId):
     """Remove an item from the configuration file and agent, given the public id."""
     item_name = item_id.name
@@ -92,51 +140,3 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
     logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
     existing_item_ids.remove(item_public_id)
     ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
-
-
-@remove.command()
-@click.argument("connection_id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def connection(ctx: Context, connection_id):
-    """
-    Remove a connection from the agent.
-
-    It expects the public id of the connection to remove from the local registry.
-    """
-    _remove_item(ctx, "connection", connection_id)
-
-
-@remove.command()
-@click.argument("contract_id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def contract(ctx: Context, contract_id):
-    """
-    Remove a contract from the agent.
-
-    It expects the public id of the contract to remove from the local registry.
-    """
-    _remove_item(ctx, "contract", contract_id)
-
-
-@remove.command()
-@click.argument("protocol_id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def protocol(ctx: Context, protocol_id):
-    """
-    Remove a protocol from the agent.
-
-    It expects the public id of the protocol to remove from the local registry.
-    """
-    _remove_item(ctx, "protocol", protocol_id)
-
-
-@remove.command()
-@click.argument("skill_id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def skill(ctx: Context, skill_id):
-    """
-    Remove a skill from the agent.
-
-    It expects the public id of the skill to remove from the local registry.
-    """
-    _remove_item(ctx, "skill", skill_id)

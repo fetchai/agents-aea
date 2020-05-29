@@ -24,6 +24,7 @@ from typing import Optional
 
 import click
 
+from aea.cli.utils.exceptions import InterruptInputException
 from aea.configurations.base import PublicId
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
@@ -33,48 +34,14 @@ from aea.connections.stub.connection import (
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox
 
 
-class InterruptInputException(Exception):
-    """An exception to mark an interuption event."""
+@click.command()
+def interact():
+    """Interact with a running AEA via the stub connection."""
+    click.echo("Starting AEA interaction channel...")
+    _run_interaction_channel()
 
 
-def try_construct_envelope() -> Optional[Envelope]:
-    """Try construct an envelope from user input."""
-    envelope = None  # type: Optional[Envelope]
-    try:
-        print("Provide envelope to:")
-        to = input()  # nosec
-        if to == "":
-            raise InterruptInputException
-        print("Provide envelope sender:")
-        sender = input()  # nosec
-        if sender == "":
-            raise InterruptInputException
-        print("Provide envelope protocol_id:")
-        protocol_id = input()  # nosec
-        if protocol_id == "":
-            raise InterruptInputException
-        print("Provide envelope message:")
-        message_escaped = input()  # nosec
-        if message_escaped == "":
-            raise InterruptInputException
-        message = codecs.decode(message_escaped.encode("utf-8"), "unicode-escape")
-        message_encoded = message.encode("utf-8")
-        envelope = Envelope(
-            to=to,
-            sender=sender,
-            protocol_id=PublicId.from_str(protocol_id),
-            message=message_encoded,
-        )
-    except InterruptInputException:
-        print("Interrupting input, checking inbox ...")
-    except KeyboardInterrupt as e:
-        raise e
-    except Exception as e:
-        print(e)
-    return envelope
-
-
-def run():
+def _run_interaction_channel():
     stub_connection = StubConnection(
         input_file_path=DEFAULT_OUTPUT_FILE_NAME,
         output_file_path=DEFAULT_INPUT_FILE_NAME,
@@ -88,42 +55,73 @@ def run():
         is_running = True
         while is_running:
             try:
-                envelope = try_construct_envelope()
+                envelope = _try_construct_envelope()
                 if envelope is None and not inbox.empty():
                     envelope = inbox.get_nowait()
                     assert (
                         envelope is not None
                     ), "Could not recover envelope from inbox."
-                    print(
-                        "Received envelope:\nto: {}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
-                            envelope.to,
-                            envelope.sender,
-                            envelope.protocol_id,
-                            envelope.message,
-                        )
-                    )
+                    click.echo(_construct_message("received", envelope))
                 elif envelope is None and inbox.empty():
-                    print("Received no new envelope!")
+                    click.echo("Received no new envelope!")
                 else:
                     outbox.put(envelope)
-                    print(
-                        "Sending envelope:\nto: {}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
-                            envelope.to,
-                            envelope.sender,
-                            envelope.protocol_id,
-                            envelope.message,
-                        )
-                    )
+                    click.echo(_construct_message("sending", envelope))
             except KeyboardInterrupt:
                 is_running = False
             except Exception as e:
-                print(e)
+                click.echo(e)
     finally:
         multiplexer.disconnect()
 
 
-@click.command()
-def interact():
-    """Interact with a running AEA via the stub connection."""
-    click.echo("Starting AEA interaction channel...")
-    run()
+def _construct_message(action_name, envelope):
+    action_name = action_name.title()
+    message = (
+        "{} envelope:\nto: "
+        "{}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
+            action_name,
+            envelope.to,
+            envelope.sender,
+            envelope.protocol_id,
+            envelope.message,
+        )
+    )
+    return message
+
+
+def _try_construct_envelope() -> Optional[Envelope]:
+    """Try construct an envelope from user input."""
+    envelope = None  # type: Optional[Envelope]
+    try:
+        click.echo("Provide envelope to:")
+        to = input()  # nosec
+        if to == "":
+            raise InterruptInputException
+        click.echo("Provide envelope sender:")
+        sender = input()  # nosec
+        if sender == "":
+            raise InterruptInputException
+        click.echo("Provide envelope protocol_id:")
+        protocol_id = input()  # nosec
+        if protocol_id == "":
+            raise InterruptInputException
+        click.echo("Provide envelope message:")
+        message_escaped = input()  # nosec
+        if message_escaped == "":
+            raise InterruptInputException
+        message = codecs.decode(message_escaped.encode("utf-8"), "unicode-escape")
+        message_encoded = message.encode("utf-8")
+        envelope = Envelope(
+            to=to,
+            sender=sender,
+            protocol_id=PublicId.from_str(protocol_id),
+            message=message_encoded,
+        )
+    except InterruptInputException:
+        click.echo("Interrupting input, checking inbox ...")
+    except KeyboardInterrupt as e:
+        raise e
+    except Exception as e:
+        click.echo(e)
+    return envelope

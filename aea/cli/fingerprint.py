@@ -44,6 +44,38 @@ def fingerprint(click_context):
     """Fingerprint a resource."""
 
 
+@fingerprint.command()
+@click.argument("connection_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def connection(click_context, connection_public_id: PublicId):
+    """Fingerprint a connection and add the fingerprints to the configuration file."""
+    _fingerprint_item(click_context, "connection", connection_public_id)
+
+
+@fingerprint.command()
+@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def contract(click_context, contract_public_id: PublicId):
+    """Fingerprint a contract and add the fingerprints to the configuration file."""
+    _fingerprint_item(click_context, "contract", contract_public_id)
+
+
+@fingerprint.command()
+@click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def protocol(click_context, protocol_public_id):
+    """Fingerprint a protocol and add the fingerprints to the configuration file.."""
+    _fingerprint_item(click_context, "protocol", protocol_public_id)
+
+
+@fingerprint.command()
+@click.argument("skill_public_id", type=PublicIdParameter(), required=True)
+@click.pass_context
+def skill(click_context, skill_public_id: PublicId):
+    """Fingerprint a skill and add the fingerprints to the configuration file."""
+    _fingerprint_item(click_context, "skill", skill_public_id)
+
+
 def _fingerprint_item(click_context, item_type, item_public_id) -> None:
     """
     Fingerprint components of an item.
@@ -85,35 +117,3 @@ def _fingerprint_item(click_context, item_type, item_public_id) -> None:
         config_loader.dump(config, open(config_file_path, "w"))
     except Exception as e:
         raise click.ClickException(str(e))
-
-
-@fingerprint.command()
-@click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def connection(click_context, connection_public_id: PublicId):
-    """Fingerprint a connection and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "connection", connection_public_id)
-
-
-@fingerprint.command()
-@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def contract(click_context, contract_public_id: PublicId):
-    """Fingerprint a contract and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "contract", contract_public_id)
-
-
-@fingerprint.command()
-@click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def protocol(click_context, protocol_public_id):
-    """Fingerprint a protocol and add the fingerprints to the configuration file.."""
-    _fingerprint_item(click_context, "protocol", protocol_public_id)
-
-
-@fingerprint.command()
-@click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@click.pass_context
-def skill(click_context, skill_public_id: PublicId):
-    """Fingerprint a skill and add the fingerprints to the configuration file."""
-    _fingerprint_item(click_context, "skill", skill_public_id)

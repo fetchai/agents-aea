@@ -43,6 +43,38 @@ def list(click_context):
     """List the installed resources."""
 
 
+@list.command()
+@pass_ctx
+def connections(ctx: Context):
+    """List all the installed connections."""
+    result = _get_item_details(ctx, "connection")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def contracts(ctx: Context):
+    """List all the installed protocols."""
+    result = _get_item_details(ctx, "contract")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def protocols(ctx: Context):
+    """List all the installed protocols."""
+    result = _get_item_details(ctx, "protocol")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
+@list.command()
+@pass_ctx
+def skills(ctx: Context):
+    """List all the installed skills."""
+    result = _get_item_details(ctx, "skill")
+    click.echo(format_items(sorted(result, key=lambda k: k["name"])))
+
+
 def _get_item_details(ctx, item_type) -> List[Dict]:
     """Return a list of item details, given the item type."""
     result = []
@@ -72,35 +104,3 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
         )
         result.append(details)
     return result
-
-
-@list.command()
-@pass_ctx
-def connections(ctx: Context):
-    """List all the installed connections."""
-    result = _get_item_details(ctx, "connection")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def contracts(ctx: Context):
-    """List all the installed protocols."""
-    result = _get_item_details(ctx, "contract")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def protocols(ctx: Context):
-    """List all the installed protocols."""
-    result = _get_item_details(ctx, "protocol")
-    print(format_items(sorted(result, key=lambda k: k["name"])))
-
-
-@list.command()
-@pass_ctx
-def skills(ctx: Context):
-    """List all the installed skills."""
-    result = _get_item_details(ctx, "skill")
-    print(format_items(sorted(result, key=lambda k: k["name"])))

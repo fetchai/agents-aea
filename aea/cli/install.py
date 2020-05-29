@@ -33,6 +33,46 @@ from aea.configurations.base import Dependency
 from aea.exceptions import AEAException
 
 
+@click.command()
+@click.option(
+    "-r",
+    "--requirement",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+    required=False,
+    default=None,
+    help="Install from the given requirements file.",
+)
+@click.pass_context
+@check_aea_project
+def install(click_context, requirement: Optional[str]):
+    """Install the dependencies."""
+    _do_install(click_context, requirement)
+
+
+def _do_install(click_context: click.core.Context, requirement: Optional[str]) -> None:
+    """
+    Install necessary dependencies.
+
+    :param click_context: click context object.
+    :param requirement: optional str requirement.
+
+    :return: None
+    :raises: ClickException if AEAException occurres.
+    """
+    ctx = cast(Context, click_context.obj)
+    try:
+        if requirement:
+            logger.debug("Installing the dependencies in '{}'...".format(requirement))
+            _install_from_requirement(requirement)
+        else:
+            logger.debug("Installing all the dependencies...")
+            dependencies = ctx.get_dependencies()
+            for name, d in dependencies.items():
+                _install_dependency(name, d)
+    except AEAException as e:
+        raise click.ClickException(str(e))
+
+
 def _install_dependency(dependency_name: str, dependency: Dependency):
     click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
@@ -48,10 +88,10 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
             command += ["-i", index] if index is not None else []
             command += [dependency_name + version_constraint]
         logger.debug("Calling '{}'".format(" ".join(command)))
-        return_code = _try_install(command)
+        return_code = _run_install_subprocess(command)
         if return_code == 1:
             # try a second time
-            return_code = _try_install(command)
+            return_code = _run_install_subprocess(command)
         assert return_code == 0, "Return code != 0."
     except Exception as e:
         raise AEAException(
@@ -61,7 +101,9 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         )
 
 
-def _try_install(install_command: List[str], install_timeout: float = 300) -> int:
+def _run_install_subprocess(
+    install_command: List[str], install_timeout: float = 300
+) -> int:
     """
     Try executing install command.
 
@@ -91,7 +133,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
     :return: None
     """
     try:
-        returncode = _try_install(
+        returncode = _run_install_subprocess(
             [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
         )
         assert returncode == 0, "Return code != 0."
@@ -101,31 +143,3 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
                 file
             )
         )
-
-
-@click.command()
-@click.option(
-    "-r",
-    "--requirement",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    required=False,
-    default=None,
-    help="Install from the given requirements file.",
-)
-@click.pass_context
-@check_aea_project
-def install(click_context, requirement: Optional[str]):
-    """Install the dependencies."""
-    ctx = cast(Context, click_context.obj)
-
-    try:
-        if requirement:
-            logger.debug("Installing the dependencies in '{}'...".format(requirement))
-            _install_from_requirement(requirement)
-        else:
-            logger.debug("Installing all the dependencies...")
-            dependencies = ctx.get_dependencies()
-            for name, d in dependencies.items():
-                _install_dependency(name, d)
-    except AEAException as e:
-        raise click.ClickException(str(e))
