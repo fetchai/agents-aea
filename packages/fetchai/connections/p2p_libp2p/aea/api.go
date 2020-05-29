@@ -89,7 +89,7 @@ func (aea *AeaApi) Init() error {
 	// get config
 	err := godotenv.Load(env_file)
 	if err != nil {
-		log.Fatal("Error loading .env.noise file")
+		log.Fatal("Error loading env file")
 	}
 	aea.msgin_path = os.Getenv("AEA_TO_NODE")
 	aea.msgout_path = os.Getenv("NODE_TO_AEA")
