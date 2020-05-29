@@ -485,7 +485,7 @@ class P2PLibp2pConnection(Connection):
         """
         self._check_go_installed()
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID # TOFIX(LR) why do we need to add this?
+            kwargs["connection_id"] = PUBLIC_ID  # TOFIX(LR) why do we need to add this?
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         self.node = Libp2pNode(
