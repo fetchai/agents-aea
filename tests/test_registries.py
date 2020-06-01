@@ -208,7 +208,7 @@ class TestResources:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        cls.resources = Resources(os.path.join(cls.agent_folder))
+        cls.resources = Resources()
 
         cls.resources.add_component(
             Protocol.from_dir(Path(aea.AEA_DIR, "protocols", "default"))
@@ -420,7 +420,7 @@ class TestFilter:
         identity = Identity(
             cls.agent_name, address=wallet.addresses[FetchAICrypto.identifier]
         )
-        resources = Resources(cls.agent_folder)
+        resources = Resources()
 
         resources.add_component(Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill")))
 
