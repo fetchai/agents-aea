@@ -165,18 +165,6 @@ class SOEFChannel:
                 )
             )
 
-    def disconnect(self):
-        try:
-            for values in self.service_name_to_page_address.values():
-                url = "".join([self.base_url, "/", values])
-                params = {"command": "unregister"}
-                response = requests.get(url=url, params=params)
-                logger.debug("Response: {}".format(response.text))
-        except Exception as e:
-            logger.error(
-                "Something went wrong cannot Un register the service! {}".format(e)
-            )
-
     @staticmethod
     def _is_compatible_description(service_description: Description) -> bool:
         """
@@ -278,7 +266,35 @@ class SOEFChannel:
 
     def unregister_service(self, service_description):
         # TODO: add keep alive background tasks which ping the SOEF until the service is deregistered
-        raise NotImplementedError
+        if self._is_compatible_description(service_description):
+            service_name = service_description.values["service_name"]
+            if service_name in self.service_name_to_page_address.keys():
+                unique_page_address = self.service_name_to_page_address[service_name]
+                url = "".join([self.base_url, "/", unique_page_address])
+                params = {"command": "unregister"}
+                try:
+                    response = requests.get(url=url, params=params)
+                    if "<response><message>Goodbye!</message></response>" in response.text:
+                        logger.info("Successfully unregistered from the s-oef.")
+                except Exception as e:
+                    logger.error(
+                        "Something went wrong cannot unregister the service! {}".format(e)
+                    )
+            else:
+                logger.error("The service is not registered to the simple OEF. Cannot unregister.")
+
+    def disconnect(self):
+        try:
+            for values in self.service_name_to_page_address.values():
+                url = "".join([self.base_url, "/", values])
+                params = {"command": "unregister"}
+                response = requests.get(url=url, params=params)
+                if "<response><message>Goodbye!</message></response>" in response.text:
+                    logger.info("Successfully unregistered from the s-oef.")
+        except Exception as e:
+            logger.error(
+                "Something went wrong cannot unregister the service! {}".format(e)
+            )
 
     def search_services(self, search_id: int, query: Query) -> None:
         """
