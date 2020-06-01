@@ -20,7 +20,6 @@
 
 import logging
 import os
-from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA

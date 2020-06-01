@@ -20,7 +20,6 @@
 """This module contains the tests for the base classes for the skills."""
 
 import os
-from pathlib import Path
 from queue import Queue
 from unittest import TestCase, mock
 from unittest.mock import Mock

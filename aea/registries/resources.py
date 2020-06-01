@@ -21,7 +21,7 @@
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, Tuple, TypeVar, cast
 
 from aea.configurations.base import ComponentType, ContractId, PublicId, SkillId
 from aea.configurations.components import Component
