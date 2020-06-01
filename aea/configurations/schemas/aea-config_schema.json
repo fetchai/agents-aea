@@ -50,6 +50,15 @@
         }
       }
     },
+    "connection_private_key_paths": {
+      "type": "object",
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "definitions.json#/definitions/private_key_path"
+        }
+      }
+    },
     "ledger_apis": {
       "type": "object",
       "uniqueItems": true,
