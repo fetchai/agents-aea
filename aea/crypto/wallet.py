@@ -25,20 +25,25 @@ import aea.crypto
 from aea.crypto.base import Crypto
 
 
-class Wallet:
-    """Store all the cryptos we initialise."""
+class CryptoStore:
+    """Utility class to store and retrieve crypto objects."""
 
-    def __init__(self, private_key_paths: Dict[str, Optional[str]]):
+    def __init__(
+        self, crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None
+    ) -> None:
         """
-        Instantiate a wallet object.
+        Initialize the crypto store.
 
-        :param private_key_paths: the private key paths
+        :param crypto_id_to_path: dictionary from crypto id to an (optional) path
+            to the private key.
         """
+        if crypto_id_to_path is None:
+            crypto_id_to_path = {}
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
         addresses = {}  # type: Dict[str, str]
 
-        for identifier, path in private_key_paths.items():
+        for identifier, path in crypto_id_to_path.items():
             crypto = aea.crypto.make(identifier, private_key_path=path)
             crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
@@ -62,3 +67,46 @@ class Wallet:
     def addresses(self) -> Dict[str, str]:
         """Get the crypto addresses."""
         return self._addresses
+
+
+class Wallet:
+    """Store all the cryptos we initialise."""
+
+    def __init__(
+        self,
+        private_key_paths: Dict[str, Optional[str]],
+        connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None,
+    ):
+        """
+        Instantiate a wallet object.
+
+        :param private_key_paths: the private key paths
+        :param connection_private_key_paths: the private key paths for the connections.
+        """
+        self._main_cryptos = CryptoStore(private_key_paths)
+        self._connection_cryptos = CryptoStore(connection_private_key_paths)
+
+    @property
+    def public_keys(self):
+        """Get the public_key dictionary."""
+        return self._main_cryptos.public_keys
+
+    @property
+    def crypto_objects(self):
+        """Get the crypto objects (key pair)."""
+        return self._main_cryptos.crypto_objects
+
+    @property
+    def addresses(self) -> Dict[str, str]:
+        """Get the crypto addresses."""
+        return self._main_cryptos.addresses
+
+    @property
+    def main_cryptos(self) -> CryptoStore:
+        """Get the main crypto store."""
+        return self._main_cryptos
+
+    @property
+    def connection_cryptos(self) -> CryptoStore:
+        """Get the connection crypto store."""
+        return self._connection_cryptos
