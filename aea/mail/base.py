@@ -400,7 +400,7 @@ class Multiplexer:
 
     def __init__(
         self,
-        connections: Sequence["Connection"],
+        connections: Optional[Sequence[Connection]] = None,
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
     ):
@@ -409,24 +409,15 @@ class Multiplexer:
 
         :param connections: a sequence of connections.
         :param default_connection_index: the index of the connection to use as default.
-                                       | this information is used for envelopes which
-                                       | don't specify any routing context.
+            This information is used for envelopes which don't specify any routing context.
+            If connections is None, this parameter is ignored.
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
         """
-        assert len(connections) > 0, "List of connections cannot be empty."
-        assert (
-            0 <= default_connection_index <= len(connections) - 1
-        ), "Default connection index out of range."
-        assert len(set(c.connection_id for c in connections)) == len(
-            connections
-        ), "Connection names must be unique."
-        self._connections = connections  # type: Sequence[Connection]
-        self._id_to_connection = {
-            c.connection_id: c for c in connections
-        }  # type: Dict[PublicId, Connection]
-        self.default_connection = self._connections[
-            default_connection_index
-        ]  # type: Connection
+        self._connections: List[Connection] = []
+        self._id_to_connection: Dict[PublicId, Connection] = {}
+        self.default_connection: Optional[Connection] = None
+        self._initialize_connections_if_any(connections, default_connection_index)
+
         self._connection_status = ConnectionStatus()
 
         self._lock = Lock()
@@ -442,6 +433,16 @@ class Multiplexer:
         self._send_loop_task = None  # type: Optional[Future]
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
+    def _initialize_connections_if_any(
+        self, connections: Optional[Sequence[Connection]], default_connection_index: int
+    ):
+        if connections is not None:
+            assert (
+                0 <= default_connection_index <= len(connections) - 1
+            ), "Default connection index out of range."
+            for idx, connection in enumerate(connections):
+                self.add_connection(connection, idx == default_connection_index)
+
     @property
     def in_queue(self) -> AsyncFriendlyQueue:
         """Get the in queue."""
@@ -456,9 +457,9 @@ class Multiplexer:
         return self._out_queue
 
     @property
-    def connections(self) -> Tuple["Connection"]:
+    def connections(self) -> Tuple[Connection, ...]:
         """Get the connections."""
-        return cast(Tuple["Connection"], tuple(self._connections))
+        return tuple(self._connections)
 
     @property
     def is_connected(self) -> bool:
@@ -484,6 +485,7 @@ class Multiplexer:
 
     def connect(self) -> None:
         """Connect the multiplexer."""
+        self._connection_consistency_checks()
         with self._lock:
             if self.connection_status.is_connected:
                 logger.debug("Multiplexer already connected.")
@@ -580,6 +582,7 @@ class Multiplexer:
         logger.debug("Multiplexer stopped.")
 
     async def _connect_all(self):
+        """Set all the connection up."""
         """Set all the connection up."""
         logger.debug("Start multiplexer connections.")
         connected = []  # type: List[PublicId]
@@ -811,6 +814,37 @@ class Multiplexer:
         """
         fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
         fut.result()
+
+    def add_connection(self, connection: Connection, is_default: bool = False) -> None:
+        """
+        Add a connection to the mutliplexer.
+
+        :param connection: the connection to add.
+        :param is_default: whether the connection added should be the default one.
+        :return: None
+        """
+        if connection.connection_id in self._id_to_connection:
+            logger.warning(
+                f"A connection with id {connection.connection_id} was already added. Replacing it..."
+            )
+
+        self._connections.append(connection)
+        self._id_to_connection[connection.connection_id] = connection
+        if is_default:
+            self.default_connection = connection
+
+    def _connection_consistency_checks(self):
+        """
+        Do some consistency checks on the multiplexer connections.
+
+        :return: None
+        :raise AssertionError: if an inconsistency is found.
+        """
+        assert len(self.connections) > 0, "List of connections cannot be empty."
+
+        assert len(set(c.connection_id for c in self.connections)) == len(
+            self.connections
+        ), "Connection names must be unique."
 
 
 class InBox:
