@@ -22,18 +22,23 @@
 import logging
 import os
 import re
-from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, TypeVar, Union, cast
 
-from aea.configurations.base import ComponentType, ContractId, PublicId, SkillId
+from aea.configurations.base import (
+    ComponentId,
+    ComponentType,
+    ContractId,
+    PublicId,
+    SkillId,
+)
 from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
+    AgentComponentRegistry,
     ComponentRegistry,
-    ContractRegistry,
     HandlerRegistry,
     ProtocolId,
-    ProtocolRegistry,
     Registry,
 )
 from aea.skills.base import Behaviour, Handler, Model, Skill
@@ -50,7 +55,6 @@ DECISION_MAKER = "decision_maker"
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
-ComponentId = Tuple[SkillId, str]
 SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
@@ -65,16 +69,14 @@ class Resources:
         :param directory: the path to the directory which contains the resources
              (skills, connections and protocols)
         """
-        self._contract_registry = ContractRegistry()
-        self._protocol_registry = ProtocolRegistry()
+        self._component_registry = AgentComponentRegistry()
         self._handler_registry = HandlerRegistry()
         self._behaviour_registry = ComponentRegistry[Behaviour]()
         self._model_registry = ComponentRegistry[Model]()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
-            self._contract_registry,
-            self._protocol_registry,
+            self._component_registry,
             self._handler_registry,
             self._behaviour_registry,
             self._model_registry,
@@ -102,7 +104,7 @@ class Resources:
         :param protocol: a protocol
         :return: None
         """
-        self._protocol_registry.register(protocol.public_id, protocol)
+        self._component_registry.register(protocol.component_id, protocol)
 
     def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """
@@ -111,8 +113,10 @@ class Resources:
         :param protocol_id: the protocol id
         :return: a matching protocol, if present, else None
         """
-        protocol = self._protocol_registry.fetch(protocol_id)
-        return protocol
+        protocol = self._component_registry.fetch(
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        )
+        return cast(Protocol, protocol)
 
     def get_all_protocols(self) -> List[Protocol]:
         """
@@ -120,8 +124,8 @@ class Resources:
 
         :return: the list of protocols.
         """
-        protocols = self._protocol_registry.fetch_all()
-        return protocols
+        protocols = self._component_registry.fetch_by_type(ComponentType.PROTOCOL)
+        return cast(List[Protocol], protocols)
 
     def remove_protocol(self, protocol_id: ProtocolId) -> None:
         """
@@ -130,7 +134,9 @@ class Resources:
         :param protocol_id: the protocol id for the protocol to be removed.
         :return: None
         """
-        self._protocol_registry.unregister(protocol_id)
+        self._component_registry.unregister(
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        )
 
     def add_contract(self, contract: Contract) -> None:
         """
@@ -139,7 +145,7 @@ class Resources:
         :param contract: a contract
         :return: None
         """
-        self._contract_registry.register(contract.id, contract)
+        self._component_registry.register(contract.component_id, contract)
 
     def get_contract(self, contract_id: ContractId) -> Optional[Contract]:
         """
@@ -148,8 +154,10 @@ class Resources:
         :param contract_id: the contract id
         :return: a matching contract, if present, else None
         """
-        contract = self._contract_registry.fetch(contract_id)
-        return contract
+        contract = self._component_registry.fetch(
+            ComponentId(ComponentType.CONTRACT, contract_id)
+        )
+        return cast(Contract, contract)
 
     def get_all_contracts(self) -> List[Contract]:
         """
@@ -157,8 +165,8 @@ class Resources:
 
         :return: the list of contracts.
         """
-        contracts = self._contract_registry.fetch_all()
-        return contracts
+        contracts = self._component_registry.fetch_by_type(ComponentType.CONTRACT)
+        return cast(List[Contract], contracts)
 
     def remove_contract(self, contract_id: ContractId) -> None:
         """
@@ -167,7 +175,9 @@ class Resources:
         :param contract_id: the contract id for the contract to be removed.
         :return: None
         """
-        self._contract_registry.unregister(contract_id)
+        self._component_registry.unregister(
+            ComponentId(ComponentType.CONTRACT, contract_id)
+        )
 
     def add_skill(self, skill: Skill) -> None:
         """
@@ -194,12 +204,14 @@ class Resources:
             # check all contracts are present
             contracts = {}  # type: Dict[str, Contract]
             for contract_id in skill.config.contracts:
-                contract = self._contract_registry.fetch(contract_id)
+                contract = self._component_registry.fetch(
+                    ComponentId(ComponentType.CONTRACT, contract_id)
+                )
                 if contract is None:
                     raise ValueError(
                         "Missing contract for contract id {}".format(contract_id)
                     )
-                contracts[contract_id.name] = contract
+                contracts[contract_id.name] = cast(Contract, contract)
             skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
