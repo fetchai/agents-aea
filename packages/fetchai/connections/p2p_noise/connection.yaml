@@ -1,6 +1,6 @@
 name: p2p_noise
 author: fetchai
-version: 0.3.0
+version: 0.2.0
 description: The p2p noise connection implements an interface to standalone golang
   noise node that can exchange aea envelopes with other agents participating in the
   same p2p network.
