@@ -583,7 +583,6 @@ class Multiplexer:
 
     async def _connect_all(self):
         """Set all the connection up."""
-        """Set all the connection up."""
         logger.debug("Start multiplexer connections.")
         connected = []  # type: List[PublicId]
         for connection_id, connection in self._id_to_connection.items():
