@@ -177,7 +177,7 @@ def test_real_search():
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_libp2p:0.2.0"
+    assert data[i]["id"] == "fetchai/p2p_libp2p:0.3.0"
     assert (
         data[i]["description"]
         == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."

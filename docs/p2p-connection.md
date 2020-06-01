@@ -15,7 +15,7 @@ Create one AEA as follows:
 aea create my_genesis_aea
 cd my_genesis_aea
 aea add connection fetchai/p2p_libp2p:0.3.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.2.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.3.0
 aea run --connections fetchai/p2p_libp2p:0.3.0
 ```
 
@@ -44,7 +44,7 @@ Here `MULTI_ADDRESSES` needs to be replaced with the list of multi addresses dis
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.2.0
+aea run --connections fetchai/p2p_libp2p:0.3.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
