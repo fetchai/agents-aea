@@ -20,7 +20,6 @@
 """This module contains the resources class."""
 
 import logging
-import os
 import re
 from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
 
@@ -57,13 +56,11 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Mod
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
-    # TODO the 'directory' argument to be removed
-    def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
+    def __init__(self) -> None:
         """
         Instantiate the resources.
 
-        :param directory: the path to the directory which contains the resources
-             (skills, connections and protocols)
+        :return None
         """
         self._contract_registry = ContractRegistry()
         self._protocol_registry = ProtocolRegistry()

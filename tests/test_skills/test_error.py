@@ -83,7 +83,7 @@ class TestSkillError:
             cls.wallet,
             cls.ledger_apis,
             timeout=2.0,
-            resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))),
+            resources=Resources(),
         )
         cls.my_aea._inbox = InboxWithHistory(cls.my_aea.multiplexer)
         cls.skill_context = SkillContext(cls.my_aea._context)
