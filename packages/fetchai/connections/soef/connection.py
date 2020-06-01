@@ -166,11 +166,16 @@ class SOEFChannel:
             )
 
     def disconnect(self):
-        for values in self.service_name_to_page_address.values():
-            url = self.base_url + "/" + values
-            params = {"command": "unregister"}
-            response = requests.get(url=url, params=params)
-            logger.debug("Response: {}".format(response.text))
+        try:
+            for values in self.service_name_to_page_address.values():
+                url = "".join([self.base_url, "/", values])
+                params = {"command": "unregister"}
+                response = requests.get(url=url, params=params)
+                logger.debug("Response: {}".format(response.text))
+        except Exception as e:
+            logger.error(
+                "Something went wrong cannot Un register the service! {}".format(e)
+            )
 
     @staticmethod
     def _is_compatible_description(service_description: Description) -> bool:
@@ -194,7 +199,7 @@ class SOEFChannel:
         :return: the unique page address
         """
         logger.debug("Applying to SOEF lobby with address={}".format(self.address))
-        url = self.base_url + "/register"
+        url = "".join([self.base_url, "/register"])
         params = {
             "api_key": self.api_key,
             "chain_identifier": "fetchai",
@@ -220,7 +225,7 @@ class SOEFChannel:
                     unique_token = child.text
             if len(unique_page_address) > 0 and len(unique_token) > 0:
                 logger.debug("Registering service {}".format(service_name))
-                url = self.base_url + "/" + unique_page_address
+                url = "".join([self.base_url, "/", unique_page_address])
                 params = {"token": unique_token, "command": "acknowledge"}
                 response = requests.get(url=url, params=params)
                 if "<response><success>1</success></response>" in response.text:
@@ -257,7 +262,7 @@ class SOEFChannel:
             logger.debug(
                 "Registering position lat={}, long={}".format(latitude, longitude)
             )
-            url = self.base_url + "/" + unique_page_address
+            url = "".join([self.base_url, "/", unique_page_address])
             params = {
                 "longitude": str(longitude),
                 "latitude": str(latitude),
@@ -358,7 +363,7 @@ class SOEFChannel:
             logger.debug(
                 "Searching in radius={} of service={}".format(radius, service_name)
             )
-            url = self.base_url + "/" + unique_page_address
+            url = "".join([self.base_url, "/", unique_page_address])
             params = {
                 "range_in_km": str(radius),
                 "command": "find_around_me",
