@@ -18,20 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """This module contains registries."""
-
+import itertools
 import logging
+import operator
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar, cast
+from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.configurations.base import (
-    ContractId,
+    ComponentId,
+    ComponentType,
     ProtocolId,
     PublicId,
     SkillId,
 )
-from aea.contracts.base import Contract
-from aea.protocols.base import Protocol
+from aea.configurations.components import Component
 from aea.skills.base import Behaviour, Handler, Model
 
 
@@ -45,7 +46,6 @@ DECISION_MAKER = "decision_maker"
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
-ComponentId = Tuple[SkillId, str]
 SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 
 
@@ -107,8 +107,8 @@ class Registry(Generic[ItemId, Item], ABC):
         """
 
 
-class ContractRegistry(Registry[PublicId, Contract]):
-    """This class implements the contracts registry."""
+class AgentComponentRegistry(Registry[ComponentId, Component]):
+    """This class implements a simple dictionary-based registry for agent components."""
 
     def __init__(self) -> None:
         """
@@ -116,123 +116,98 @@ class ContractRegistry(Registry[PublicId, Contract]):
 
         :return: None
         """
-        self._contracts = {}  # type: Dict[ContractId, Contract]
+        self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
+        self._registered_keys: Set[ComponentId] = set()
 
-    def register(self, contract_id: ContractId, contract: Contract) -> None:
+    def register(self, component_id: ComponentId, component: Component) -> None:
         """
-        Register a contract.
+        Register a component.
 
-        :param contract_id: the public id of the contract.
-        :param contract: the contract object.
+        :param component_id: the id of the component.
+        :param component: the component object.
         """
-        if contract_id in self._contracts.keys():
+        if component_id in self._registered_keys:
             raise ValueError(
-                "Contract already registered with contract id '{}'".format(contract_id)
+                "Component already registered with item id '{}'".format(component_id)
             )
-        if contract.id != contract_id:
+        if component.component_id != component_id:
             raise ValueError(
-                "Contract id '{}' is different to the id '{}' specified.".format(
-                    contract.id, contract_id
+                "Component id '{}' is different to the id '{}' specified.".format(
+                    component.component_id, component_id
                 )
             )
-        self._contracts[contract_id] = contract
+        self._register(component_id, component)
 
-    def unregister(self, contract_id: ContractId) -> None:
+    def _register(self, component_id: ComponentId, component: Component) -> None:
         """
-        Unregister a contract.
+        Do the actual registration.
 
-        :param contract_id: the contract id
-        """
-        if contract_id not in self._contracts.keys():
-            raise ValueError(
-                "No contract registered with contract id '{}'".format(contract_id)
-            )
-        removed_contract = self._contracts.pop(contract_id)
-        logger.debug("Contract '{}' has been removed.".format(removed_contract.id))
-
-    def fetch(self, contract_id: ContractId) -> Optional[Contract]:
-        """
-        Fetch the contract by id.
-
-        :param contract_id: the contract id
-        :return: the contract or None if the contract is not registered
-        """
-        return self._contracts.get(contract_id, None)
-
-    def fetch_all(self) -> List[Contract]:
-        """Fetch all the contracts."""
-        return list(self._contracts.values())
-
-    def setup(self) -> None:
-        """
-        Set up the registry.
-
+        :param component_id: the component id
+        :param component: the component to register
         :return: None
         """
-        pass
+        self._components_by_type.setdefault(component_id.component_type, {})[
+            component_id.public_id
+        ] = component
+        self._registered_keys.add(component_id)
 
-    def teardown(self) -> None:
+    def _unregister(self, component_id: ComponentId) -> None:
         """
-        Teardown the registry.
+        Do the actual unregistration.
 
+        :param component_id: the component id
         :return: None
         """
-        self._contracts = {}
+        item = self._components_by_type.get(component_id.component_type, {}).pop(
+            component_id.public_id, None
+        )
+        self._registered_keys.discard(component_id)
+        if item is not None:
+            logger.debug("Component '{}' has been removed.".format(item.component_id))
 
-
-class ProtocolRegistry(Registry[PublicId, Protocol]):
-    """This class implements the handlers registry."""
-
-    def __init__(self) -> None:
+    def unregister(self, component_id: ComponentId) -> None:
         """
-        Instantiate the registry.
+        Unregister a component.
 
-        :return: None
+        :param component_id: the ComponentId
         """
-        self._protocols = {}  # type: Dict[ProtocolId, Protocol]
-
-    def register(self, item_id: PublicId, protocol: Protocol) -> None:
-        """
-        Register a protocol.
-
-        :param item_id: the public id of the protocol.
-        :param protocol: the protocol object.
-        """
-        if item_id in self._protocols.keys():
+        if component_id not in self._registered_keys:
             raise ValueError(
-                "Protocol already registered with protocol id '{}'".format(item_id)
+                "No item registered with contract id '{}'".format(ComponentId)
             )
-        if protocol.public_id != item_id:
-            raise ValueError(
-                "Protocol id '{}' is different to the id '{}' specified.".format(
-                    protocol.public_id, item_id
-                )
-            )
-        self._protocols[item_id] = protocol
+        self._unregister(component_id)
 
-    def unregister(self, protocol_id: ProtocolId) -> None:
-        """Unregister a protocol."""
-        if protocol_id not in self._protocols.keys():
-            raise ValueError(
-                "No protocol registered with protocol id '{}'".format(protocol_id)
-            )
-        removed_protocol = self._protocols.pop(protocol_id)
-        logger.debug(
-            "Protocol '{}' has been removed.".format(removed_protocol.public_id)
+    def fetch(self, component_id: ComponentId) -> Optional[Component]:
+        """
+        Fetch the component by id.
+
+        :param component_id: the contract id
+        :return: the component or None if the component is not registered
+        """
+        return self._components_by_type.get(component_id.component_type, {}).get(
+            component_id.public_id, None
         )
 
-    def fetch(self, protocol_id: ProtocolId) -> Optional[Protocol]:
+    def fetch_all(self) -> List[Component]:
         """
-        Fetch the protocol for the envelope.
+        Fetch all the components.
 
-        :param protocol_id: the protocol id
-        :return: the protocol id or None if the protocol is not registered
+        :return the list of registered components.
         """
-        return self._protocols.get(protocol_id, None)
+        return list(
+            itertools.chain(
+                map(operator.methodcaller("values"), self._components_by_type.values())
+            )
+        )
 
-    def fetch_all(self) -> List[Protocol]:
-        """Fetch all the protocols."""
-        return list(self._protocols.values())
+    def fetch_by_type(self, component_type: ComponentType) -> List[Component]:
+        """
+        Fetch all the components by a given type..
+
+        :param component_type: a component type
+        :return the list of registered components of a given type.
+        """
+        return list(self._components_by_type.get(component_type, {}).values())
 
     def setup(self) -> None:
         """
@@ -248,7 +223,8 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
 
         :return: None
         """
-        self._protocols = {}
+        self._components_by_type = {}
+        self._registered_keys = set()
 
 
 class ComponentRegistry(
