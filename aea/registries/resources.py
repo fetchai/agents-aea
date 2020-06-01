@@ -21,7 +21,7 @@
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, TypeVar, cast
+from typing import Dict, List, Optional, TypeVar, cast
 
 from aea.configurations.base import (
     ComponentId,
