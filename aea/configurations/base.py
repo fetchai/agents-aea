@@ -1201,6 +1201,7 @@ class AgentConfig(PackageConfiguration):
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
+        self.connection_private_key_paths = CRUDCollection[str]()
         self.ledger_apis = CRUDCollection[Dict]()
 
         self.logging_config = logging_config if logging_config is not None else {}
@@ -1270,6 +1271,11 @@ class AgentConfig(PackageConfiguration):
         }
 
     @property
+    def connection_private_key_paths_dict(self) -> Dict[str, str]:
+        """Get dictionary version of connection private key paths."""
+        return {key: path for key, path in self.connection_private_key_paths.read_all()}
+
+    @property
     def default_connection(self) -> str:
         """Get the default connection."""
         assert self._default_connection is not None, "Default connection not set yet."
@@ -1328,6 +1334,7 @@ class AgentConfig(PackageConfiguration):
                 "ledger_apis": self.ledger_apis_dict,
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
+                "connection_private_key_paths": self.connection_private_key_paths_dict,
                 "registry_path": self.registry_path,
             }
         )  # type: Dict[str, Any]
@@ -1380,6 +1387,9 @@ class AgentConfig(PackageConfiguration):
 
         for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
             agent_config.ledger_apis.create(ledger_id, ledger_data)
+
+        for crypto_id, path in obj.get("connection_private_key_paths", {}).items():  # type: ignore
+            agent_config.connection_private_key_paths.create(crypto_id, path)
 
         # parse connection public ids
         connections = set(
