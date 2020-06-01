@@ -73,7 +73,6 @@ class Resources:
         self._handler_registry = HandlerRegistry()
         self._behaviour_registry = ComponentRegistry[Behaviour]()
         self._model_registry = ComponentRegistry[Model]()
-        self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
             self._component_registry,
@@ -186,17 +185,20 @@ class Resources:
         :param skill: a skill
         :return: None
         """
-        skill_id = skill.config.public_id
-        self._skills[skill_id] = skill
+        self._component_registry.register(skill.component_id, skill)
         if skill.handlers is not None:
             for handler in skill.handlers.values():
-                self._handler_registry.register((skill_id, handler.name), handler)
+                self._handler_registry.register(
+                    (skill.public_id, handler.name), handler
+                )
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
-                self._behaviour_registry.register((skill_id, behaviour.name), behaviour)
+                self._behaviour_registry.register(
+                    (skill.public_id, behaviour.name), behaviour
+                )
         if skill.models is not None:
             for model in skill.models.values():
-                self._model_registry.register((skill_id, model.name), model)
+                self._model_registry.register((skill.public_id, model.name), model)
         self.inject_contracts(skill)
 
     def inject_contracts(self, skill: Skill) -> None:
@@ -221,7 +223,10 @@ class Resources:
         :param skill_id: the skill id
         :return: a matching skill, if present, else None
         """
-        return self._skills.get(skill_id, None)
+        skill = self._component_registry.fetch(
+            ComponentId(ComponentType.SKILL, skill_id)
+        )
+        return cast(Skill, skill)
 
     def get_all_skills(self) -> List[Skill]:
         """
@@ -229,7 +234,8 @@ class Resources:
 
         :return: the list of skills.
         """
-        return list(self._skills.values())
+        skills = self._component_registry.fetch_by_type(ComponentType.SKILL)
+        return cast(List[Skill], skills)
 
     def remove_skill(self, skill_id: SkillId) -> None:
         """
@@ -238,7 +244,7 @@ class Resources:
         :param skill_id: the skill id for the skill to be removed.
         :return: None
         """
-        self._skills.pop(skill_id, None)
+        self._component_registry.unregister(ComponentId(ComponentType.SKILL, skill_id))
         try:
             self._handler_registry.unregister_by_skill(skill_id)
         except ValueError:
