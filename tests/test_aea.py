@@ -119,7 +119,7 @@ def test_react():
         agent = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        list(agent._connections)[0]._local_node = node
+        list(agent.multiplexer.connections)[0]._local_node = node
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -177,7 +177,7 @@ async def test_handle():
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        list(aea._connections)[0]._local_node = node
+        list(aea.multiplexer.connections)[0]._local_node = node
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -263,7 +263,7 @@ def test_initialize_aea_programmatically():
         builder.set_default_connection(PublicId.from_str("fetchai/local:0.1.0"))
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         aea = builder.build(connection_ids=[PublicId.from_str("fetchai/local:0.1.0")])
-        list(aea._connections)[0]._local_node = node
+        list(aea.multiplexer.connections)[0]._local_node = node
 
         expected_message = DefaultMessage(
             dialogue_reference=("", ""),

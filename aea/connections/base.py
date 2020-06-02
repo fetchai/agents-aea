@@ -30,7 +30,7 @@ from aea.configurations.base import (
     ConnectionConfig,
     PublicId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 
