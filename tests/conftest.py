@@ -54,6 +54,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Address
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
@@ -644,7 +645,7 @@ def _make_local_connection(
 ) -> Connection:
     oef_local_connection = OEFLocalConnection(
         node,
-        address=address,
+        identity=Identity("", address),
         connection_id=PublicId("fetchai", "local", "0.1.0"),
         restricted_to_protocols=restricted_to_protocols,
         excluded_protocols=excluded_protocols,
@@ -656,7 +657,7 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
     oef_connection = OEFConnection(
         oef_addr,
         oef_port,
-        address=address,
+        identity=Identity("", address),
         connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     return oef_connection
@@ -664,14 +665,20 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
 
 def _make_tcp_server_connection(address: str, host: str, port: int):
     tcp_connection = TCPServerConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        host,
+        port,
+        identity=Identity("", address),
+        connection_id=PublicId("fetchai", "tcp", "0.1.0"),
     )
     return tcp_connection
 
 
 def _make_tcp_client_connection(address: str, host: str, port: int):
     tcp_connection = TCPClientConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        host,
+        port,
+        identity=Identity("", address),
+        connection_id=PublicId("fetchai", "tcp", "0.1.0"),
     )
     return tcp_connection
 
@@ -682,7 +689,7 @@ def _make_p2p_client_connection(
     p2p_client_connection = PeerToPeerClientConnection(
         provider_addr,
         provider_port,
-        address=address,
+        identity=Identity("", address),
         connection_id=PublicId("fetchai", "p2p", "0.1.0"),
     )
     return p2p_client_connection
