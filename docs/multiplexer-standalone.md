@@ -9,7 +9,8 @@ from threading import Thread
 from typing import Optional
 
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
@@ -111,7 +112,8 @@ from threading import Thread
 from typing import Optional
 
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 
 INPUT_FILE = "input.txt"
 OUTPUT_FILE = "output.txt"
