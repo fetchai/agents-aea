@@ -25,19 +25,16 @@ import unittest.mock
 import pytest
 
 import aea
-from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
-from aea.protocols.base import Message
-from aea.protocols.base import ProtobufSerializer
+from aea.mail.base import Envelope, URI
+from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.protocols.base import Message, ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode
 
-from .conftest import (
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_dummy_connection,
-    _make_local_connection,
-)
+from .conftest import (UNKNOWN_PROTOCOL_PUBLIC_ID, _make_dummy_connection,
+                       _make_local_connection)
 
 
 def test_uri():

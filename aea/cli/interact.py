@@ -26,12 +26,11 @@ import click
 
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.configurations.base import PublicId
-from aea.connections.stub.connection import (
-    DEFAULT_INPUT_FILE_NAME,
-    DEFAULT_OUTPUT_FILE_NAME,
-    StubConnection,
-)
-from aea.mail.base import Envelope, InBox, Multiplexer, OutBox
+from aea.connections.stub.connection import (DEFAULT_INPUT_FILE_NAME,
+                                             DEFAULT_OUTPUT_FILE_NAME,
+                                             StubConnection)
+from aea.mail.base import Envelope
+from aea.multiplexer import InBox, Multiplexer, OutBox
 
 
 @click.command()

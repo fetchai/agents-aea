@@ -45,7 +45,8 @@ from aea.context.base import AgentContext
 from aea.contracts.base import Contract
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address, OutBox
+from aea.mail.base import Address
+from aea.multiplexer import OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
