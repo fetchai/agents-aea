@@ -34,4 +34,5 @@ logging_config:
 private_key_paths:
   ethereum: eth_private_key.txt
   fetchai: fet_private_key.txt
+connection_private_key_paths: {}
 registry_path: ../../packages

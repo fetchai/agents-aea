@@ -65,23 +65,19 @@ def test_soef():
 
         time.sleep(3.0)
 
-        # register a service with location
-        attr_service_name = Attribute(
-            "service_name", str, True, "The name of the service."
-        )
+        # register an agent with location
         attr_location = Attribute(
-            "location", Location, True, "The location where the service is provided."
+            "location", Location, True, "The location where the agent is."
         )
-        service_location_model = DataModel(
-            "location_service",
-            [attr_service_name, attr_location],
-            "A data model to describe location of a service.",
+        agent_location_model = DataModel(
+            "location_agent",
+            [attr_location],
+            "A data model to describe location of an agent.",
         )
-        service_name = "train"
-        service_location = Location(52.2057092, 2.1183431)
-        service_instance = {"service_name": service_name, "location": service_location}
+        agent_location = Location(52.2057092, 2.1183431)
+        service_instance = {"location": agent_location}
         service_description = Description(
-            service_instance, data_model=service_location_model
+            service_instance, data_model=agent_location_model
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
@@ -95,26 +91,18 @@ def test_soef():
             message=message_b,
         )
         logger.info(
-            "Registering service={} at location=({},{}) by agent={}".format(
-                service_name,
-                service_location.latitude,
-                service_location.longitude,
-                crypto.address,
+            "Registering agent at location=({},{}) by agent={}".format(
+                agent_location.latitude, agent_location.longitude, crypto.address,
             )
         )
         multiplexer.put(envelope)
 
-        # find agents near the previously registered service
+        # find agents near me
         radius = 0.1
-        matches_my_service_name = Constraint(
-            "service_name", ConstraintType("==", service_name)
-        )
         close_to_my_service = Constraint(
-            "location", ConstraintType("distance", (service_location, radius))
+            "location", ConstraintType("distance", (agent_location, radius))
         )
-        closeness_query = Query(
-            [matches_my_service_name, close_to_my_service], model=service_location_model
-        )
+        closeness_query = Query([close_to_my_service], model=agent_location_model)
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
@@ -127,11 +115,8 @@ def test_soef():
             message=message_b,
         )
         logger.info(
-            "Searching for agents in radius={} of service={} at location=({},{})".format(
-                radius,
-                service_name,
-                service_location.latitude,
-                service_location.longitude,
+            "Searching for agents in radius={} of myself at location=({},{})".format(
+                radius, agent_location.latitude, agent_location.longitude,
             )
         )
         multiplexer.put(envelope)
