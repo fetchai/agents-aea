@@ -29,6 +29,8 @@ import requests
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, EnvelopeContext
 
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -244,15 +246,23 @@ class HTTPClientConnection(Connection):
             return None
 
     @classmethod
-    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
+    def from_config(
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+    ) -> "Connection":
         """
-        Get the HTTP connection from a connection configuration.
+        Initialize a connection instance from a configuration.
 
-        :param configuration: the connection configuration object.
-        :return: the connection object
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: an instance of the concrete connection class.
         """
         provider_address = cast(str, configuration.config.get("address"))
         provider_port = cast(int, configuration.config.get("port"))
         return HTTPClientConnection(
-            provider_address, provider_port, configuration=configuration, **kwargs
+            provider_address,
+            provider_port,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )

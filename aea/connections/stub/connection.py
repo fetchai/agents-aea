@@ -31,7 +31,9 @@ from watchdog.utils import platform
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
 from aea.helpers import file_lock
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
@@ -304,12 +306,16 @@ class StubConnection(Connection):
         write_envelope(envelope, self.output_file)
 
     @classmethod
-    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
+    def from_config(
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+    ) -> "Connection":
         """
-        Get the stub connection from the connection configuration.
+        Initialize a connection instance from a configuration.
 
-        :param configuration: the connection configuration object.
-        :return: the connection object
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: an instance of the concrete connection class.
         """
         input_file = configuration.config.get(
             INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
@@ -318,5 +324,9 @@ class StubConnection(Connection):
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )  # type: str
         return StubConnection(
-            input_file, output_file, configuration=configuration, **kwargs
+            input_file,
+            output_file,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )

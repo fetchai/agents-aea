@@ -29,7 +29,9 @@ import gym
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
 from aea.helpers.base import locate
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.gym.message import GymMessage
@@ -219,13 +221,19 @@ class GymConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
+    def from_config(
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+    ) -> "Connection":
         """
-        Get the Gym connection from the connection configuration.
+        Initialize a connection instance from a configuration.
 
-        :param configuration: the connection configuration object.
-        :return: the connection object
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: an instance of the concrete connection class.
         """
         gym_env_package = cast(str, configuration.config.get("env"))
         gym_env = locate(gym_env_package)
-        return GymConnection(gym_env(), configuration=configuration, **kwargs)
+        return GymConnection(
+            gym_env(), configuration=configuration, identity=identity, cryptos=cryptos
+        )
