@@ -42,6 +42,8 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -537,18 +539,24 @@ class HTTPServerConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
         Get the HTTP connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         host = cast(str, configuration.config.get("host"))
         port = cast(int, configuration.config.get("port"))
         api_spec_path = cast(str, configuration.config.get("api_spec_path"))
         return HTTPServerConnection(
-            host, port, api_spec_path, address=address, configuration=configuration
+            host,
+            port,
+            api_spec_path,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )
