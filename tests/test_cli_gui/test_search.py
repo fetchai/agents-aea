@@ -195,7 +195,7 @@ def test_real_search():
         == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/soef:0.1.0"
+    assert data[i]["id"] == "fetchai/soef:0.2.0"
     assert (
         data[i]["description"]
         == "The soef connection provides a connection api to the simple OEF."
