@@ -25,6 +25,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
@@ -32,7 +33,6 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.configurations.components import Component
 from aea.skills.base import Behaviour, Handler, Model
 
 

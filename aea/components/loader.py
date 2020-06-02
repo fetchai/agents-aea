@@ -24,12 +24,12 @@ import re
 from pathlib import Path
 from typing import Dict, Type, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
 )
-from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAPackageLoadingError
