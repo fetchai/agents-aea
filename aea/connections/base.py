@@ -19,6 +19,7 @@
 
 """The base connection package."""
 
+
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from typing import Optional, Set, TYPE_CHECKING, cast
@@ -29,6 +30,8 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.components import Component
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
@@ -51,10 +54,12 @@ class Connection(Component, ABC):
     def __init__(
         self,
         configuration: Optional[ConnectionConfig] = None,
-        address: Optional["Address"] = None,
+        cryptos: Optional["CryptoStore"] = None,
+        identity: Optional["Identity"] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         connection_id: Optional[PublicId] = None,
+        **kwargs
     ):
         """
         Initialize the connection.
@@ -63,15 +68,19 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
-        :param address: the address.
+        :param cryptos: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         :param connection_id: the connection identifier.
         """
         super().__init__(configuration)
-        self._loop = None  # type: Optional[AbstractEventLoop]
+        self._loop: Optional[AbstractEventLoop] = None
         self._connection_status = ConnectionStatus()
-        self._address = address  # type: Optional[Address]
+
+        assert cryptos is not None, "You must provide the crypto objects"
+        assert identity is not None, "You must provide the identity object"
+        self._cryptos: CryptoStore = cryptos
+        self._identity: Identity = identity
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -105,18 +114,7 @@ class Connection(Component, ABC):
     @property
     def address(self) -> "Address":
         """Get the address."""
-        assert self._address is not None, "Address not set."
-        return self._address
-
-    @address.setter
-    def address(self, address: "Address") -> None:
-        """
-        Set the address to be used by the connection.
-
-        :param address: a public key.
-        :return: None
-        """
-        self._address = address
+        return self._identity.address
 
     @property
     def component_type(self) -> ComponentType:
@@ -184,13 +182,14 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_config(
-        cls, address: "Address", configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, cryptos: CryptoStore, identity: Identity
     ) -> "Connection":
         """
         Initialize a connection instance from a configuration.
 
-        :param address: the address of the agent.
         :param configuration: the connection configuration.
+        :param cryptos: object to access the connection crypto objects.
+        :param identity: the identity object.
         :return: an instance of the concrete connection class.
         """
-        return cls(address=address, configuration=configuration)
+        return cls(configuration=configuration, cryptos=cryptos, identity=identity)

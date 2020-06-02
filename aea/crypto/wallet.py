@@ -70,8 +70,17 @@ class CryptoStore:
 
 
 class Wallet:
-    """Store all the cryptos we initialise."""
+    """
+    Container for crypto objects.
 
+    The cryptos are separated into two categories:
+
+    - main cryptos: used by the AEA for the economic side (i.e. signing transaction)
+    - connection cryptos: exposed to the connection objects for encrypted communication.
+    """
+
+    # TODO do some check after loading the keys
+    #   to see whether we have duplicate cryptos?
     def __init__(
         self,
         private_key_paths: Dict[str, Optional[str]],
