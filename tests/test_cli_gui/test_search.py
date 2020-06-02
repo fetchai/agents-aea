@@ -183,7 +183,7 @@ def test_real_search():
         == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_noise:0.2.0"
+    assert data[i]["id"] == "fetchai/p2p_noise:0.3.0"
     assert (
         data[i]["description"]
         == "The p2p noise connection implements an interface to standalone golang noise node that can exchange aea envelopes with other agents participating in the same p2p network."
