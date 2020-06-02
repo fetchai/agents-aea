@@ -32,7 +32,7 @@ from watchdog.utils import platform
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers import file_lock
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 
 if platform.is_darwin():
@@ -304,13 +304,10 @@ class StubConnection(Connection):
         write_envelope(envelope, self.output_file)
 
     @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
+    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
         """
         Get the stub connection from the connection configuration.
 
-        :param address: the address of the agent.
         :param configuration: the connection configuration object.
         :return: the connection object
         """
@@ -321,5 +318,5 @@ class StubConnection(Connection):
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )  # type: str
         return StubConnection(
-            input_file, output_file, address=address, configuration=configuration,
+            input_file, output_file, configuration=configuration, **kwargs
         )

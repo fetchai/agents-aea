@@ -77,10 +77,8 @@ class Connection(Component, ABC):
         self._loop: Optional[AbstractEventLoop] = None
         self._connection_status = ConnectionStatus()
 
-        assert identity is not None, "You must provide the identity object"
-        assert cryptos is not None, "You must provide the crypto objects"
-        self._identity: Identity = identity
-        self._cryptos: CryptoStore = cryptos
+        self._identity: Optional[Identity] = identity
+        self._cryptos: CryptoStore = cryptos if cryptos is not None else CryptoStore()
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -114,6 +112,9 @@ class Connection(Component, ABC):
     @property
     def address(self) -> "Address":
         """Get the address."""
+        assert (
+            self._identity is not None
+        ), "You must provide the identity to retrieve the address."
         return self._identity.address
 
     @property
