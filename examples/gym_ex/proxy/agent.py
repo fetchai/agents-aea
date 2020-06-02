@@ -52,7 +52,7 @@ class ProxyAgent(Agent):
         """
         identity = Identity(name, ADDRESS)
         super().__init__(
-            identity, [GymConnection(gym_env, address=identity.address)], timeout=0,
+            identity, [GymConnection(gym_env, identity=identity)], timeout=0,
         )
         self.proxy_env_queue = proxy_env_queue
 

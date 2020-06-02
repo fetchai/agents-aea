@@ -32,9 +32,10 @@ from aea.configurations.base import (
 from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
+from aea.crypto.wallet import CryptoStore
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -69,7 +70,7 @@ def load_component_from_config(  # type: ignore
     try:
         if component_type == ComponentType.CONNECTION:
             return _load_connection_from_config(configuration, **kwargs)
-        return component_class.from_config(*args, **kwargs, configuration=configuration)  # type: ignore
+        return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:
@@ -77,7 +78,7 @@ def load_component_from_config(  # type: ignore
 
 
 def _load_connection_from_config(
-    configuration: ComponentConfiguration, address: Address
+    configuration: ComponentConfiguration, identity: Identity, cryptos: CryptoStore
 ) -> Connection:
     """Load a connection from a configuration."""
     configuration = cast(ConnectionConfig, configuration)
@@ -102,7 +103,9 @@ def _load_connection_from_config(
     assert connection_class is not None, "Connection class '{}' not found.".format(
         connection_class_name
     )
-    return connection_class.from_config(address=address, configuration=configuration)
+    return connection_class.from_config(
+        configuration=configuration, identity=identity, cryptos=cryptos
+    )
 
 
 def _handle_error_while_loading_component_module_not_found(
