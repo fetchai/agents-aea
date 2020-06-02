@@ -2,40 +2,56 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
+aea fetch fetchai/generic_seller:0.1.0 --alias my_seller_aea
+cd my_seller_aea
+aea install
+```
+``` bash
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/generic_seller:0.4.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.3.0
+```
+``` bash
+aea fetch fetchai/generic_buyer:0.1.0 --alias my_buyer_aea
+cd my_buyer_aea
+aea install
 ```
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.3.0
 aea add skill fetchai/generic_buyer:0.3.0
+aea install
+aea config set agent.default_connection fetchai/oef:0.3.0
 ```
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 ``` bash
+aea generate-wealth fetchai
+```
+``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
-```
-``` bash
-aea install
-```
-``` bash
-aea generate-wealth fetchai
 ```
 ``` bash
 aea generate-wealth ethereum
 ```
 ``` bash
-addr: ${OEF_ADDR: 127.0.0.1}
+aea generate-key cosmos
+aea add-key cosmos cosmos_private_key.txt
+```
+``` bash
+aea generate-wealth cosmos
 ```
 ``` bash
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+```
+``` bash
 aea run --connections fetchai/oef:0.3.0
 ```
 ``` bash
@@ -50,10 +66,20 @@ ledger_apis:
 ```
 ``` yaml
 ledger_apis:
+  fetchai:
+    network: testnet
+```
+``` yaml
+ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
     gas_price: 50
+```
+``` yaml
+ledger_apis:
+  cosmos:
+    address: http://aea-testnet.sandbox.fetch-ai.com:1317
 ```
 ``` yaml
 |----------------------------------------------------------------------|
@@ -110,5 +136,5 @@ ledger_apis:
 |        search_value: UK           |        search_value: UK          |
 |        constraint_type: '=='      |        constraint_type: '=='     |
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
-|----------------------------------------------------------------------| 
+|----------------------------------------------------------------------|
 ```
