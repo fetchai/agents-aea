@@ -23,20 +23,27 @@ from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
 
 
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, configuration: ConnectionConfig, address: Address):
+    def __init__(
+        self, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+    ):
         """
         Initialize a connection to an SDK or API.
 
         :param configuration: the connection configuration.
-        :param address: the address used in the protocols.
+        :param cryptos: object to access the connection crypto objects.
+        :param identity: the identity object.
         """
-        super().__init__(configuration=configuration, address=address)
+        super().__init__(
+            configuration=configuration, cryptos=cryptos, identity=identity
+        )
 
     async def connect(self) -> None:
         """
@@ -73,13 +80,16 @@ class MyScaffoldConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: "Address", configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
         Get the scaffold connection from the connection configuration.
 
         :param configuration: the connection configuration object.
-        :param address: the address of the agent.
-        :return: the connection object
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: the connection object.
         """
-        return MyScaffoldConnection(address=address, configuration=configuration)
+        return MyScaffoldConnection(
+            configuration=configuration, identity=identity, cryptos=cryptos
+        )

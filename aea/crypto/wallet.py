@@ -77,6 +77,7 @@ class Wallet:
 
     - main cryptos: used by the AEA for the economic side (i.e. signing transaction)
     - connection cryptos: exposed to the connection objects for encrypted communication.
+
     """
 
     # TODO do some check after loading the keys

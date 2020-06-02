@@ -54,12 +54,11 @@ class Connection(Component, ABC):
     def __init__(
         self,
         configuration: Optional[ConnectionConfig] = None,
-        cryptos: Optional["CryptoStore"] = None,
-        identity: Optional["Identity"] = None,
+        identity: Optional[Identity] = None,
+        cryptos: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         connection_id: Optional[PublicId] = None,
-        **kwargs
     ):
         """
         Initialize the connection.
@@ -68,6 +67,7 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param identity: the identity object held by the agent.
         :param cryptos: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
@@ -77,10 +77,10 @@ class Connection(Component, ABC):
         self._loop: Optional[AbstractEventLoop] = None
         self._connection_status = ConnectionStatus()
 
-        assert cryptos is not None, "You must provide the crypto objects"
         assert identity is not None, "You must provide the identity object"
-        self._cryptos: CryptoStore = cryptos
+        assert cryptos is not None, "You must provide the crypto objects"
         self._identity: Identity = identity
+        self._cryptos: CryptoStore = cryptos
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -182,14 +182,14 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_config(
-        cls, configuration: ConnectionConfig, cryptos: CryptoStore, identity: Identity
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
         Initialize a connection instance from a configuration.
 
         :param configuration: the connection configuration.
-        :param cryptos: object to access the connection crypto objects.
         :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: an instance of the concrete connection class.
         """
-        return cls(configuration=configuration, cryptos=cryptos, identity=identity)
+        return cls(configuration=configuration, identity=identity, cryptos=cryptos)
