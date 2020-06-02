@@ -126,8 +126,8 @@ class SOEFChannel:
         elif (
             oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
         ):
-            service_description = oef_message.service_description
-            self._try_unregister_service(service_description)
+            service_name = oef_message.service_description.values["service_name"]
+            self._try_unregister_service(service_name)
         elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             query = oef_message.query
             dialogue_reference = oef_message.dialogue_reference[0]
@@ -265,35 +265,28 @@ class SOEFChannel:
         except Exception as e:
             logger.error("Exception when interacting with SOEF: {}".format(e))
 
-    def _try_unregister_service(self, service_description):
+    def _try_unregister_service(self, service_name: str):
         # TODO: add keep alive background tasks which ping the SOEF until the service is deregistered
-        if self._is_compatible_description(service_description):
-            service_name = service_description.values["service_name"]
-            if service_name in self.service_name_to_page_address.keys():
-                unique_page_address = self.service_name_to_page_address[service_name]
-                url = parse.urljoin(self.base_url, unique_page_address)
-                params = {"command": "unregister"}
-                try:
-                    response = requests.get(url=url, params=params)
-                    if (
-                        "<response><message>Goodbye!</message></response>"
-                        in response.text
-                    ):
-                        logger.info("Successfully unregistered from the s-oef.")
-                except Exception as e:
-                    logger.error(
-                        "Something went wrong cannot unregister the service! {}".format(
-                            e
-                        )
-                    )
-            else:
+        if service_name in self.service_name_to_page_address.keys():
+            unique_page_address = self.service_name_to_page_address[service_name]
+            url = parse.urljoin(self.base_url, unique_page_address)
+            params = {"command": "unregister"}
+            try:
+                response = requests.get(url=url, params=params)
+                if "<response><message>Goodbye!</message></response>" in response.text:
+                    logger.info("Successfully unregistered from the s-oef.")
+            except Exception as e:
                 logger.error(
-                    "The service is not registered to the simple OEF. Cannot unregister."
+                    "Something went wrong cannot unregister the service! {}".format(e)
                 )
+        else:
+            logger.error(
+                "The service is not registered to the simple OEF. Cannot unregister."
+            )
 
     def disconnect(self):
-        for value in self.service_name_to_page_address.values():
-            self._try_unregister_service(value)
+        for key in self.service_name_to_page_address.keys():
+            self._try_unregister_service(key)
 
     def search_services(self, search_id: int, query: Query) -> None:
         """
