@@ -26,7 +26,6 @@ import os
 import shutil
 import struct
 import subprocess  # nosec
-import sys
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from random import randint
@@ -35,6 +34,7 @@ from typing import IO, List, Optional, Sequence, cast
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
+from aea.exceptions import AEAException
 from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -610,11 +610,10 @@ class P2PLibp2pConnection(Connection):
         """Checks if go is installed. Sys.exits if not"""
         res = shutil.which("go")
         if res is None:
-            logger.error(
+            raise AEAException(
                 "Please install go before running the `fetchai/p2p_libp2p:0.1.0` connection. "
                 "Go is available for download here: https://golang.org/doc/install"
             )
-            sys.exit(1)
 
     @classmethod
     def from_config(
