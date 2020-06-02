@@ -62,6 +62,8 @@ ledger_apis:
     network: testnet
 private_key_paths:
     fetchai: tests/data/fet_private_key.txt
+connection_private_key_paths:
+    fetchai: tests/data/fet_private_key.txt
 registry_path: ../packages
 """
 )
