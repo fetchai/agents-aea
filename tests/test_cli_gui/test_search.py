@@ -144,7 +144,7 @@ def test_real_search():
     assert len(data) == 12, data
     i = 0
 
-    assert data[i]["id"] == "fetchai/gym:0.1.0"
+    assert data[i]["id"] == "fetchai/gym:0.2.0"
     assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
     i += 1
     assert data[i]["id"] == "fetchai/http_client:0.2.0"

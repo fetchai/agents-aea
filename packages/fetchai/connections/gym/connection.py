@@ -88,7 +88,7 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.2.0"):
             self.handle_gym_message(envelope)
         else:
             raise ValueError("This protocol is not valid for gym.")

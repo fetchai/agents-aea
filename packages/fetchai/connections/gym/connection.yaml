@@ -9,12 +9,12 @@ fingerprint:
   connection.py: QmSRhW6vLMLqY6MjZDoDgMNVjtPvFzejaYSyATr5sn5Ygg
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 class_name: GymConnection
 config:
   env: ''
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 dependencies:
   gym: {}
