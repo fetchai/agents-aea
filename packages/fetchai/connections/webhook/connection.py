@@ -27,10 +27,8 @@ from typing import Optional, Union, cast
 
 from aiohttp import web  # type: ignore
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
-from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -175,21 +173,15 @@ class WebhookChannel:
 class WebhookConnection(Connection):
     """Proxy to the functionality of a webhook."""
 
-    def __init__(
-        self, webhook_address: str, webhook_port: int, webhook_url_path: str, **kwargs,
-    ):
-        """
-        Initialize a connection.
-
-        :param webhook_address: the webhook hostname / IP address
-        :param webhook_port: the webhook port number
-        :param webhook_url_path: the url path to receive webhooks from
-        """
+    def __init__(self, **kwargs):
+        """Initialize a web hook connection."""
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
 
         super().__init__(**kwargs)
-
+        webhook_address = cast(str, self.configuration.config.get("webhook_address"))
+        webhook_port = cast(int, self.configuration.config.get("webhook_port"))
+        webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,
@@ -246,27 +238,3 @@ class WebhookConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the web hook connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        webhook_address = cast(str, configuration.config.get("webhook_address"))
-        webhook_port = cast(int, configuration.config.get("webhook_port"))
-        webhook_url_path = cast(str, configuration.config.get("webhook_url_path"))
-        return WebhookConnection(
-            webhook_address,
-            webhook_port,
-            webhook_url_path,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

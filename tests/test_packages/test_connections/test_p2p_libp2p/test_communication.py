@@ -27,6 +27,7 @@ from typing import Optional, Sequence
 
 import pytest
 
+from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -58,21 +59,30 @@ def _make_libp2p_connection(
         os.remove(log_file)
     if relay:
         identity = Identity("", address=FetchAICrypto().address)
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_public_host=host,
+            libp2p_public_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+        )
         return P2PLibp2pConnection(
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            Uri("{}:{}".format(host, port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
+            configuration=configuration,
             identity=identity,
         )
     else:
         identity = Identity("", address=FetchAICrypto().address)
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file
+        )
         return P2PLibp2pConnection(
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
+            configuration=configuration,
             identity=identity,
         )
 

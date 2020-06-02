@@ -73,13 +73,9 @@ class P2PStubConnection(StubConnection):
         output_file_path = os.path.join(
             self.namespace, "{}.out".format(identity.address)
         )
-        super().__init__(
-            input_file_path,
-            output_file_path,
-            configuration=configuration,
-            identity=identity,
-            **kwargs
-        )
+        configuration.config["input_file"] = input_file_path
+        configuration.config["output_file"] = output_file_path
+        super().__init__(configuration=configuration, identity=identity, **kwargs)
 
     async def send(self, envelope: Envelope):
         """

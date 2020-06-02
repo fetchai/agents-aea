@@ -49,7 +49,7 @@ from aea.configurations.base import (
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
-    PublicId,
+    PublicId, ConnectionConfig,
 )
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
@@ -696,10 +696,12 @@ def _make_p2p_client_connection(
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection = StubConnection(
+    configuration = ConnectionConfig(
         input_file_path=input_file_path,
         output_file_path=output_file_path,
-        connection_id=DEFAULT_CONNECTION,
+    )
+    connection = StubConnection(
+        configuration=configuration,
     )
     return connection
 

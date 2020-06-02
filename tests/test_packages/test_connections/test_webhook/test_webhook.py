@@ -34,6 +34,7 @@ import time
 import pytest
 
 # from yarl import URL  # type: ignore
+from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 
 from packages.fetchai.connections.webhook.connection import WebhookConnection
@@ -57,11 +58,14 @@ class TestWebhookConnect:
         cls.port = get_unused_tcp_port()
         cls.identity = Identity("", address="some string")
 
-        cls.webhook_connection = WebhookConnection(
-            identity=cls.identity,
+        configuration = ConnectionConfig(
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
+        )
+        cls.webhook_connection = WebhookConnection(
+            configuration=configuration,
+            identity=cls.identity,
         )
         cls.webhook_connection.loop = asyncio.get_event_loop()
 
@@ -87,11 +91,14 @@ class TestWebhookDisconnection:
         cls.port = get_unused_tcp_port()
         cls.identity = Identity("", address="some string")
 
-        cls.webhook_connection = WebhookConnection(
-            identity=cls.identity,
+        configuration = ConnectionConfig(
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
+        )
+        cls.webhook_connection = WebhookConnection(
+            configuration=configuration,
+            identity=cls.identity,
         )
         cls.webhook_connection.loop = asyncio.get_event_loop()
 

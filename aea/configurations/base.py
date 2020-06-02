@@ -830,8 +830,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: str = "",
+        author: str = "",
         version: str = "",
         license: str = "",
         aea_version: str = "",

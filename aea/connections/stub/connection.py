@@ -199,20 +199,15 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def __init__(self, configuration: ConnectionConfig, **kwargs):
-        """
-        Initialize a stub connection.
-
-        :param input_file_path: the input file for the incoming messages.
-        :param output_file_path: the output file for the outgoing messages.
-        """
+    def __init__(self, **kwargs):
+        """Initialize a stub connection."""
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
-        input_file: str = configuration.config.get(
+        input_file: str = self.configuration.config.get(
             INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
         )
-        output_file: str = configuration.config.get(
+        output_file: str = self.configuration.config.get(
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )
         input_file_path = Path(input_file)

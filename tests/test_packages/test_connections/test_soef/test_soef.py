@@ -23,7 +23,7 @@ import logging
 import time
 from threading import Thread
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -54,10 +54,14 @@ def test_soef():
     identity = Identity("", address=crypto.address)
 
     # create the connection and multiplexer objects
-    soef_connection = SOEFConnection(
+    configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.1.0")}
+    )
+    soef_connection = SOEFConnection(
+        configuration=configuration,
         identity=identity,
     )
     multiplexer = Multiplexer([soef_connection])

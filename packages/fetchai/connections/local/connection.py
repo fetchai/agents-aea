@@ -26,11 +26,9 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
 from aea.helpers.search.models import Description, Query
-from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -377,19 +375,3 @@ class OEFLocalConnection(Connection):
             return envelope
         except Exception:
             return None
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the local OEF connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        return OEFLocalConnection(
-            LocalNode(), configuration=configuration, identity=identity, cryptos=cryptos
-        )

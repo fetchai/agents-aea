@@ -60,7 +60,7 @@ class Connection(Component, ABC):
 
     def __init__(
         self,
-        configuration: ConnectionConfig,
+        configuration: Optional[ConnectionConfig] = None,
         identity: Optional[Identity] = None,
         cryptos: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -85,7 +85,7 @@ class Connection(Component, ABC):
         self._connection_status = ConnectionStatus()
 
         self._identity: Optional[Identity] = identity
-        self._cryptos: CryptoStore = cryptos if cryptos is not None else CryptoStore()
+        self._cryptos: Optional[CryptoStore] = cryptos
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -127,6 +127,7 @@ class Connection(Component, ABC):
     @property
     def cryptos(self) -> CryptoStore:
         """Get the crypto store."""
+        assert self._cryptos is not None, "Crypto not available."
         return self._cryptos
 
     @property

@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
-  connection.py: QmPEp4b5W9sNUhWBCJCvwgffjhUw65ewq4amcCe8YS7Sgf
+  connection.py: QmSun7U5qTyRyxhSvTzCLZi3k5VZFrkCLpPANbErZYPD2y
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: P2PStubConnection

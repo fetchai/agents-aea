@@ -28,6 +28,7 @@ import pytest
 
 import requests
 
+from aea.configurations.base import ConnectionConfig
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
@@ -54,10 +55,13 @@ class TestHTTPClientConnect:
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
         cls.agent_identity = Identity("name", address="some string")
-        cls.http_client_connection = HTTPClientConnection(
-            identity=cls.agent_identity,
+        configuration = ConnectionConfig(
             provider_address=cls.address,
             provider_port=cls.port,
+        )
+        cls.http_client_connection = HTTPClientConnection(
+            configuration=configuration,
+            identity=cls.agent_identity
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
@@ -89,10 +93,13 @@ class TestHTTPClientDisconnection:
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
         cls.agent_identity = Identity("name", address="some string")
-        cls.http_client_connection = HTTPClientConnection(
-            identity=cls.agent_identity,
+        configuration = ConnectionConfig(
             provider_address=cls.address,
             provider_port=cls.port,
+        )
+        cls.http_client_connection = HTTPClientConnection(
+            configuration=configuration,
+            identity=cls.agent_identity,
         )
         cls.http_client_connection.loop = asyncio.get_event_loop()
 
@@ -119,8 +126,12 @@ async def test_http_send():
     port = get_unused_tcp_port()
     agent_identity = Identity("name", address="some agent address")
 
+    configuration = ConnectionConfig(
+        provider_address=address, provider_port=port
+    )
     http_client_connection = HTTPClientConnection(
-        identity=agent_identity, provider_address=address, provider_port=port,
+        configuration=configuration,
+        identity=agent_identity
     )
     http_client_connection.loop = asyncio.get_event_loop()
 

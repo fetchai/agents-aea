@@ -28,9 +28,8 @@ from defusedxml import ElementTree as ET
 
 import requests
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -38,7 +37,6 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -405,21 +403,8 @@ class SOEFChannel:
 class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
-    def __init__(
-        self,
-        api_key: str,
-        soef_addr: str = "127.0.0.1",
-        soef_port: int = 10001,
-        **kwargs
-    ):
-        """
-        Initialize.
-
-        :param api_key: the SOEF API key
-        :param soef_addr: the SOEF IP address.
-        :param soef_port: the SOEF port.
-        :param kwargs: the keyword arguments (check the parent constructor)
-        """
+    def __init__(self, **kwargs):
+        """Initialize."""
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
         if (
@@ -435,6 +420,9 @@ class SOEFConnection(Connection):
                 PublicId.from_str("fetchai/oef_search:0.1.0")
             ]
         super().__init__(**kwargs)
+        api_key = cast(str, self.configuration.config.get("api_key"))
+        soef_addr = cast(str, self.configuration.config.get("soef_addr"))
+        soef_port = cast(int, self.configuration.config.get("soef_port"))
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
@@ -512,27 +500,3 @@ class SOEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        api_key = cast(str, configuration.config.get("api_key"))
-        soef_addr = cast(str, configuration.config.get("soef_addr"))
-        soef_port = cast(int, configuration.config.get("soef_port"))
-        return SOEFConnection(
-            api_key,
-            soef_addr,
-            soef_port,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )
