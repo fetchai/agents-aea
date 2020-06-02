@@ -220,15 +220,14 @@ class GymConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, **kwargs
     ) -> "Connection":
         """
         Get the Gym connection from the connection configuration.
 
-        :param address: the address of the agent.
         :param configuration: the connection configuration object.
         :return: the connection object
         """
         gym_env_package = cast(str, configuration.config.get("env"))
         gym_env = locate(gym_env_package)
-        return GymConnection(gym_env(), address=address, configuration=configuration,)
+        return GymConnection(gym_env(), configuration=configuration, **kwargs)
