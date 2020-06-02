@@ -219,9 +219,7 @@ class GymConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, **kwargs
-    ) -> "Connection":
+    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
         """
         Get the Gym connection from the connection configuration.
 

@@ -244,21 +244,15 @@ class HTTPClientConnection(Connection):
             return None
 
     @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
+    def from_config(cls, configuration: ConnectionConfig, **kwargs) -> "Connection":
         """
         Get the HTTP connection from a connection configuration.
 
-        :param address: the address of the agent.
         :param configuration: the connection configuration object.
         :return: the connection object
         """
         provider_address = cast(str, configuration.config.get("address"))
         provider_port = cast(int, configuration.config.get("port"))
         return HTTPClientConnection(
-            provider_address,
-            provider_port,
-            address=address,
-            configuration=configuration,
+            provider_address, provider_port, configuration=configuration, **kwargs
         )
