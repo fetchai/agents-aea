@@ -23,6 +23,7 @@ import asyncio
 import logging
 from asyncio import CancelledError
 from typing import Dict, List, Optional, Set, Tuple, cast
+from urllib import parse
 
 from defusedxml import ElementTree as ET
 
@@ -125,8 +126,8 @@ class SOEFChannel:
         elif (
             oef_message.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE
         ):
-            service_description = oef_message.service_description
-            self.unregister_service(service_description)
+            service_name = oef_message.service_description.values["service_name"]
+            self._try_unregister_service(service_name)
         elif oef_message.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
             query = oef_message.query
             dialogue_reference = oef_message.dialogue_reference[0]
@@ -187,7 +188,7 @@ class SOEFChannel:
         :return: the unique page address
         """
         logger.debug("Applying to SOEF lobby with address={}".format(self.address))
-        url = self.base_url + "/register"
+        url = parse.urljoin(self.base_url, "register")
         params = {
             "api_key": self.api_key,
             "chain_identifier": "fetchai",
@@ -213,7 +214,7 @@ class SOEFChannel:
                     unique_token = child.text
             if len(unique_page_address) > 0 and len(unique_token) > 0:
                 logger.debug("Registering service {}".format(service_name))
-                url = self.base_url + "/" + unique_page_address
+                url = parse.urljoin(self.base_url, unique_page_address)
                 params = {"token": unique_token, "command": "acknowledge"}
                 response = requests.get(url=url, params=params)
                 if "<response><success>1</success></response>" in response.text:
@@ -250,7 +251,7 @@ class SOEFChannel:
             logger.debug(
                 "Registering position lat={}, long={}".format(latitude, longitude)
             )
-            url = self.base_url + "/" + unique_page_address
+            url = parse.urljoin(self.base_url, unique_page_address)
             params = {
                 "longitude": str(longitude),
                 "latitude": str(latitude),
@@ -264,9 +265,28 @@ class SOEFChannel:
         except Exception as e:
             logger.error("Exception when interacting with SOEF: {}".format(e))
 
-    def unregister_service(self, service_description):
+    def _try_unregister_service(self, service_name: str):
         # TODO: add keep alive background tasks which ping the SOEF until the service is deregistered
-        raise NotImplementedError
+        if service_name in self.service_name_to_page_address.keys():
+            unique_page_address = self.service_name_to_page_address[service_name]
+            url = parse.urljoin(self.base_url, unique_page_address)
+            params = {"command": "unregister"}
+            try:
+                response = requests.get(url=url, params=params)
+                if "<response><message>Goodbye!</message></response>" in response.text:
+                    logger.info("Successfully unregistered from the s-oef.")
+            except Exception as e:
+                logger.error(
+                    "Something went wrong cannot unregister the service! {}".format(e)
+                )
+        else:
+            logger.error(
+                "The service is not registered to the simple OEF. Cannot unregister."
+            )
+
+    def disconnect(self):
+        for key in self.service_name_to_page_address.keys():
+            self._try_unregister_service(key)
 
     def search_services(self, search_id: int, query: Query) -> None:
         """
@@ -351,7 +371,7 @@ class SOEFChannel:
             logger.debug(
                 "Searching in radius={} of service={}".format(radius, service_name)
             )
-            url = self.base_url + "/" + unique_page_address
+            url = parse.urljoin(self.base_url, unique_page_address)
             params = {
                 "range_in_km": str(radius),
                 "command": "find_around_me",
@@ -475,6 +495,7 @@ class SOEFConnection(Connection):
             self.connection_status.is_connected or self.connection_status.is_connecting
         ), "Call connect before disconnect."
         assert self.in_queue is not None
+        self.channel.disconnect()
         self.channel.in_queue = None
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
