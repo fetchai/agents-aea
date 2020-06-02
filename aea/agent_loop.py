@@ -20,6 +20,7 @@
 import asyncio
 import logging
 from abc import ABC, abstractmethod
+from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from enum import Enum
@@ -28,21 +29,20 @@ from typing import (
     Callable,
     Dict,
     List,
+    Optional,
 )
 
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
     AsyncState,
     PeriodicCaller,
-    create_task,
     ensure_loop,
-    wait_and_cancel,
 )
 from aea.mail.base import InBox
 from aea.skills.base import Behaviour
 
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 if False:  # MYPY compatible for types definitions
     from aea.aea import AEA  # pragma: no cover
@@ -52,22 +52,80 @@ if False:  # MYPY compatible for types definitions
 class BaseAgentLoop(ABC):
     """Base abstract  agent loop class."""
 
-    def __init__(self, agent: "Agent") -> None:
+    def __init__(
+        self, agent: "Agent", loop: Optional[AbstractEventLoop] = None
+    ) -> None:
         """Init loop.
 
         :params agent: Agent or AEA to run.
+        :params loop: optional asyncio event loop. if not specified a new loop will be created.
         """
         self._agent = agent
+        self._loop = ensure_loop(loop)
+        self._tasks: List[asyncio.Task] = []
+        self._state: AsyncState = AsyncState()
+        self._exceptions: List[Exception] = []
+
+    def start(self) -> None:
+        """
+        Start agent loop.
+
+        Start own asyncio loop.
+        """
+        self._loop.run_until_complete(self._start_coro())
+
+    async def _start_coro(self) -> None:
+        """Run loop."""
+        logger.debug("agent loop started")
+        self._state.set(AgentLoopStates.started)
+        self._set_tasks()
+        try:
+            await self._gather_tasks()
+        except (CancelledError, KeyboardInterrupt):
+            await self._wait_all_tasks_stopped()
+        logger.debug("agent loop stopped")
+        self._state.set(AgentLoopStates.stopped)
+
+    async def _gather_tasks(self) -> None:
+        """Wait till first task exception."""
+        await asyncio.gather(*self._tasks, loop=self._loop)
 
     @abstractmethod
-    def start(self) -> None:
-        """Start agent loop."""
+    def _set_tasks(self) -> None:
+        """Set run loop tasks."""
         raise NotImplementedError
 
-    @abstractmethod
+    async def _wait_all_tasks_stopped(self) -> None:
+        """Wait all tasks stopped."""
+        return await asyncio.gather(
+            *self._tasks, loop=self._loop, return_exceptions=True
+        )
+
     def stop(self) -> None:
         """Stop agent loop."""
-        raise NotImplementedError
+        self._state.set(AgentLoopStates.stopping)
+        logger.debug("agent loop stopping!")
+        if self._loop.is_running():
+            self._loop.call_soon_threadsafe(self._stop_tasks)
+        else:
+
+            async def stop():
+                self._stop_tasks()
+                await self._wait_all_tasks_stopped()
+
+            self._loop.run_until_complete(stop())
+
+    def _stop_tasks(self) -> None:
+        """Cancel all tasks."""
+        for task in self._tasks:
+            if task.done():
+                continue
+            task.cancel()
+
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the loop."""
+        return self._state.get() == AgentLoopStates.started
 
 
 class AgentLoopException(AEAException):
@@ -96,23 +154,10 @@ class AsyncAgentLoop(BaseAgentLoop):
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
         """
-        super().__init__(agent)
+        super().__init__(agent=agent, loop=loop)
         self._agent: "AEA" = self._agent
 
-        self._loop: AbstractEventLoop = ensure_loop(loop)
-
         self._behaviours_registry: Dict[Behaviour, PeriodicCaller] = {}
-        self._state: AsyncState = AsyncState()
-        self._exceptions: List[Exception] = []
-
-    def start(self):
-        """Start agent loop."""
-        self._state.state = AgentLoopStates.started
-        self._loop.run_until_complete(self._run())
-
-    def stop(self):
-        """Stop agent loop."""
-        self._state.state = AgentLoopStates.stopping
 
     def _behaviour_exception_callback(self, fn: Callable, exc: Exception) -> None:
         """
@@ -125,7 +170,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         """
         logger.exception(f"Loop: Exception: `{exc}` occured during `{fn}` processing")
         self._exceptions.append(exc)
-        self._state.state = AgentLoopStates.error
+        self._state.set(AgentLoopStates.error)
 
     def _register_behaviour(self, behaviour: Behaviour) -> None:
         """
@@ -148,6 +193,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         )
         self._behaviours_registry[behaviour] = periodic_caller
         periodic_caller.start()
+        logger.debug(f"Behaviour {behaviour} registered.")
 
     def _register_all_behaviours(self) -> None:
         """Register all AEA behaviours to run periodically."""
@@ -171,36 +217,20 @@ class AsyncAgentLoop(BaseAgentLoop):
         for behaviour in list(self._behaviours_registry.keys()):
             self._unregister_behaviour(behaviour)
 
-    async def _task_wait_for_stop(self) -> None:
-        """Wait for stop and unregister all behaviours on exit."""
-        try:
-            await self._state.wait([AgentLoopStates.stopping, AgentLoopStates.error])
-        finally:
-            # stop all behaviours on cancel or stop
-            self._stop_all_behaviours()
-
-    async def _run(self) -> None:
-        """Run all tasks and wait for stopping state."""
-        tasks = self._create_tasks()
-
-        exceptions = await wait_and_cancel(tasks)
-        self._exceptions.extend(exceptions)
-
-        if self._exceptions:
-            # check exception raised during run
-            self._handle_exceptions()
-
-        self._state.state = AgentLoopStates.stopped
-
-    def _handle_exceptions(self) -> None:
-        """Log and raise exception if occurs."""
-        if not self._exceptions:
-            return
-
-        for e in self._exceptions:
-            logger.exception(e)
-
+    async def _task_wait_for_error(self) -> None:
+        """Wait for error and raise first."""
+        await self._state.wait(AgentLoopStates.error)
         raise self._exceptions[0]
+
+    def _stop_tasks(self):
+        """Cancel all tasks and stop behaviours registered."""
+        BaseAgentLoop._stop_tasks(self)
+        self._stop_all_behaviours()
+
+    def _set_tasks(self):
+        """Set run loop tasks."""
+        self._tasks = self._create_tasks()
+        logger.debug("tasks created!")
 
     def _create_tasks(self) -> List[Task]:
         """
@@ -212,19 +242,15 @@ class AsyncAgentLoop(BaseAgentLoop):
             self._task_process_inbox(),
             self._task_process_internal_messages(),
             self._task_process_new_behaviours(),
-            self._task_wait_for_stop(),
+            self._task_wait_for_error(),
         ]
-        return list(map(create_task, tasks))
-
-    @property
-    def is_running(self) -> bool:
-        """Get running state of the loop."""
-        return self._state.state == AgentLoopStates.started
+        return list(map(self._loop.create_task, tasks))  # type: ignore  # some issue with map and create_task
 
     async def _task_process_inbox(self) -> None:
         """Process incoming messages."""
         inbox: InBox = self._agent._inbox
         while self.is_running:
+            logger.info("[{}]: Start processing messages...".format(self._agent.name))
             await inbox.async_wait()
 
             if not self.is_running:  # make it close faster
@@ -259,36 +285,22 @@ class SyncAgentLoop(BaseAgentLoop):
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
         """
-        super().__init__(agent)
+        super().__init__(agent=agent, loop=loop)
         self._agent: "AEA" = self._agent
+        asyncio.set_event_loop(self._loop)
 
-        try:
-            self._loop = loop or asyncio.get_event_loop()
-            assert not self._loop.is_closed()
-            assert not self._loop.is_running()
-        except (RuntimeError, AssertionError):
-            self._loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self._loop)
-
-        self.is_running = False
-
-    def start(self) -> None:
-        """Start agent loop."""
-        self.is_running = True
-        self._loop.run_until_complete(self._run())
-
-    async def _run(self) -> None:
+    async def _run_loop(self) -> None:
         """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
             self._spin_main_loop()
             await asyncio.sleep(self._agent._timeout)
 
-    def _spin_main_loop(self):
+    def _spin_main_loop(self) -> None:
         """Run one spin of agent loop: act, react, update."""
         self._agent.act()
         self._agent.react()
         self._agent.update()
 
-    def stop(self):
-        """Stop agent loop."""
-        self.is_running = False
+    def _set_tasks(self) -> None:
+        """Set run loop tasks."""
+        self._tasks = [self._loop.create_task(self._run_loop())]

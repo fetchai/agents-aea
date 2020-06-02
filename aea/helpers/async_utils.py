@@ -59,36 +59,62 @@ def ensure_list(value: Any) -> List:
 class AsyncState:
     """Awaitable state."""
 
-    def __init__(self, initial_state: Any = None, loop: AbstractEventLoop = None):
+    def __init__(self, initial_state: Any = None):
         """Init async state.
 
         :param initial_state: state to set on start.
-        :param loop: optional asyncio event loop.
         """
         self._state = initial_state
         self._watchers: Set[Future] = set()
-        self._loop = loop or asyncio.get_event_loop()
 
     @property
     def state(self) -> Any:
         """Return current state."""
-        return self._state
+        return self.get()
 
     @state.setter
     def state(self, state: Any) -> None:
+        """Set state."""
+        self.set(state)
+
+    def set(self, state: Any) -> None:
         """Set state."""
         if self._state == state:  # pragma: no cover
             return
         self._state_changed(state)
         self._state = state
 
+    def get(self) -> Any:
+        """Get state."""
+        return self._state
+
     def _state_changed(self, state: Any) -> None:
         """Fulfill watchers for state."""
         for watcher in list(self._watchers):
-            if state in watcher._states:  # type: ignore
-                self._loop.call_soon_threadsafe(
-                    watcher.set_result, (self._state, state)
+            if state not in watcher._states:  # type: ignore
+                continue
+            if not watcher.done():
+                watcher._loop.call_soon_threadsafe(
+                    self._watcher_result_callback(watcher), (self._state, state)
                 )
+            self._remove_watcher(watcher)
+
+    def _remove_watcher(self, watcher: Future) -> None:
+        """Remove watcher for state wait."""
+        try:
+            self._watchers.remove(watcher)
+        except KeyError:
+            pass
+
+    def _watcher_result_callback(self, watcher: Future) -> Callable:
+        """Create callback for watcher result."""
+        # docstyle.
+        def _callback(result):
+            if watcher.done():
+                return
+            watcher.set_result(result)
+
+        return _callback
 
     async def wait(self, state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]:
         """Wait state to be set.
@@ -107,7 +133,7 @@ class AsyncState:
         try:
             return await watcher
         finally:
-            self._watchers.remove(watcher)
+            self._remove_watcher(watcher)
 
 
 class PeriodicCaller:
@@ -174,12 +200,11 @@ class PeriodicCaller:
 def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
     """Use loop provided or create new if not provided or closed."""
     try:
-        loop = loop or asyncio.get_event_loop()
+        loop = loop or asyncio.new_event_loop()
         assert not loop.is_closed()
         assert not loop.is_running()
     except (RuntimeError, AssertionError):
         loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
     return loop
 
 
@@ -191,28 +216,33 @@ async def wait_and_cancel(
     """
     Wait first task completed or exception raised and cancel other tasks.
 
+    Even terminated by cancel, will cancel all tasks.
+
     :param tasks: list of tasks to run and wait.
 
     :return: list of exceptions raised.
     """
     exceptions: List[Exception] = []
 
-    _, pending = await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
+    try:
+        await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
 
-    for task in pending:
-        task.cancel()
+    finally:
+        for task in tasks:
+            if task.done():
+                continue
+            task.cancel()
 
-    completed, pending = await asyncio.wait(tasks, return_when=ALL_COMPLETED)
+        _, pending = await asyncio.wait(tasks, return_when=ALL_COMPLETED)
 
-    assert not pending
+        assert not pending
 
-    for task in completed:
-        if not include_cancelled and task.cancelled():
-            continue
-        exc = task.exception()
-        if exc:
-            exceptions.append(cast(Exception, exc))
-
+        for task in tasks:
+            if not include_cancelled and task.cancelled():
+                continue
+            exc = task.exception()
+            if exc:
+                exceptions.append(cast(Exception, exc))
     return exceptions
 
 
@@ -230,12 +260,14 @@ class AnotherThreadTask:
         :param coro: coroutine to schedule
         :param loop: an event loop to schedule on.
         """
-        self._task = loop.create_task(coro)
         self._loop = loop
+        self._coro = coro
+        self._task: Optional[asyncio.Task] = None
         self._future = asyncio.run_coroutine_threadsafe(self._get_task_result(), loop)
 
     async def _get_task_result(self) -> Any:
         """Get task result, should be run in target loop."""
+        self._task = self._loop.create_task(self._coro)
         return await self._task
 
     def result(self, timeout: Optional[float] = None) -> Any:
@@ -248,7 +280,10 @@ class AnotherThreadTask:
 
     def cancel(self) -> None:
         """Cancel coroutine task execution in a target loop."""
-        self._loop.call_soon_threadsafe(self._task.cancel)
+        if self._task is None:
+            self._loop.call_soon_threadsafe(self._future.cancel)
+        else:
+            self._loop.call_soon_threadsafe(self._task.cancel)
 
     def future_cancel(self) -> None:
         """

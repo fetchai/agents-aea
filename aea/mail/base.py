@@ -557,11 +557,13 @@ class AsyncMultiplexer:
         """
         logger.debug("Stopping multiplexer...")
         await cancel_and_wait(self._recv_loop_task)
+        self._recv_loop_task = None
 
         if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
             await self.out_queue.put(None)
             await cancel_and_wait(self._send_loop_task)
+            self._send_loop_task = None
 
         for connection in [
             c
@@ -791,7 +793,7 @@ class AsyncMultiplexer:
         """
         return await self.in_queue.async_wait()
 
-    async def put(self, envelope: Envelope) -> None:
+    async def _put(self, envelope: Envelope) -> None:
         """
         Schedule an envelope for sending it.
 
@@ -802,6 +804,18 @@ class AsyncMultiplexer:
         :return: None
         """
         await self.out_queue.put(envelope)
+
+    def put(self, envelope: Envelope) -> None:
+        """
+        Schedule an envelope for sending it.
+
+        Notice that the output queue is an asyncio.Queue which uses an event loop
+        running on a different thread than the one used in this function.
+
+        :param envelope: the envelope to be sent.
+        :return: None
+        """
+        self.out_queue.put_nowait(envelope)
 
 
 class Multiplexer(AsyncMultiplexer):
@@ -868,7 +882,7 @@ class Multiplexer(AsyncMultiplexer):
         :param envelope: the envelope to be sent.
         :return: None
         """
-        self._thread_runner.call(super().put(envelope)).result(240)
+        self._thread_runner.call(super()._put(envelope))  # .result(240)
 
 
 class InBox:

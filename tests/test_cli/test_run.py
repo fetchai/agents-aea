@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
@@ -28,6 +27,8 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 from click import ClickException
+
+from pexpect.exceptions import EOF  # type: ignore
 
 import pytest
 
@@ -720,6 +721,8 @@ def test_run_with_install_deps():
                 sys.executable,
                 "-m",
                 "aea.cli",
+                "-v",
+                "DEBUG",
                 "run",
                 "--install-deps",
                 "--connections",
@@ -733,6 +736,7 @@ def test_run_with_install_deps():
         process.expect_all(["Start processing messages..."])
         time.sleep(1.0)
         process.control_c()
+        process.expect_all([EOF])
         process.wait_to_complete(10)
         assert process.returncode == 0
 
@@ -792,6 +796,8 @@ def test_run_with_install_deps_and_requirement_file():
                 sys.executable,
                 "-m",
                 "aea.cli",
+                "-v",
+                "DEBUG",
                 "run",
                 "--install-deps",
                 "--connections",
