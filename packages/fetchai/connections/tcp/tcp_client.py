@@ -27,7 +27,9 @@ from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
@@ -103,16 +105,22 @@ class TCPClientConnection(TCPConnection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
-        """Get the TCP server connection from the connection configuration.
+        """
+        Get the TCP client connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         server_address = cast(str, configuration.config.get("address"))
         server_port = cast(int, configuration.config.get("port"))
         return TCPClientConnection(
-            server_address, server_port, address=address, configuration=configuration
+            server_address,
+            server_port,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )
