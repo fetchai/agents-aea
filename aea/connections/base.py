@@ -114,8 +114,13 @@ class Connection(Component, ABC):
         """Get the address."""
         assert (
             self._identity is not None
-        ), "You must provide the identity to retrieve the address."
+        ), "You must provide the identity in order to retrieve the address."
         return self._identity.address
+
+    @property
+    def cryptos(self) -> CryptoStore:
+        """Get the crypto store."""
+        return self._cryptos
 
     @property
     def component_type(self) -> ComponentType:

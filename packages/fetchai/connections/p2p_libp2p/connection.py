@@ -34,7 +34,9 @@ from typing import IO, List, Optional, Sequence, cast
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.wallet import CryptoStore
 from aea.exceptions import AEAException
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -461,12 +463,11 @@ class Libp2pNode:
 
 
 class P2PLibp2pConnection(Connection):
-    """A libp2p p2p node connection.
-    """
+    """A libp2p p2p node connection."""
 
+    # TODO 'key' must be removed in favor of 'cryptos'
     def __init__(
         self,
-        agent_addr: Address,
         key: FetchAICrypto,
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
@@ -486,10 +487,13 @@ class P2PLibp2pConnection(Connection):
         self._check_go_installed()
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID  # TOFIX(LR) why do we need to add this?
+
+        # we put it here so below we can access the address
+        super().__init__(**kwargs)
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         self.node = Libp2pNode(
-            agent_addr,
+            self.address,
             key,
             LIBP2P_NODE_MODULE,
             LIBP2P_NODE_CLARGS,
@@ -499,7 +503,6 @@ class P2PLibp2pConnection(Connection):
             log_file,
             env_file,
         )
-        super().__init__(**kwargs)
 
         if uri is None and (entry_peers is None or len(entry_peers) == 0):
             raise ValueError("Uri parameter must be set for genesis connection")
@@ -617,13 +620,14 @@ class P2PLibp2pConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Get the stub connection from the connection configuration.
+        Get the P2P connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         libp2p_key_file = configuration.config.get("libp2p_key_file")  # Optional[str]
@@ -658,13 +662,13 @@ class P2PLibp2pConnection(Connection):
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
         return P2PLibp2pConnection(
-            address,  # TOFIX(LR) need to generate signature as well
             key,
             uri,
             public_uri,
             entry_peers_maddrs,
             log_file,
             env_file,
-            address=address,
             configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )

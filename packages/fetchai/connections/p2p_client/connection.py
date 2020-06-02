@@ -31,6 +31,8 @@ from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
@@ -229,17 +231,18 @@ class PeerToPeerClientConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
         Get the P2P connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         addr = cast(str, configuration.config.get("addr"))
         port = cast(int, configuration.config.get("port"))
         return PeerToPeerClientConnection(
-            addr, port, address=address, configuration=configuration
+            addr, port, configuration=configuration, identity=identity, cryptos=cryptos
         )
