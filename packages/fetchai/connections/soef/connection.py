@@ -188,7 +188,7 @@ class SOEFChannel:
         :return: the unique page address
         """
         logger.debug("Applying to SOEF lobby with address={}".format(self.address))
-        url = parse.urljoin(self.base_url, "/register")
+        url = parse.urljoin(self.base_url, "register")
         params = {
             "api_key": self.api_key,
             "chain_identifier": "fetchai",
