@@ -29,6 +29,8 @@ from aiohttp import web  # type: ignore
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
@@ -247,13 +249,14 @@ class WebhookConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Get the HTTP connection from a connection configuration.
+        Get the web hook connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         webhook_address = cast(str, configuration.config.get("webhook_address"))
@@ -263,6 +266,7 @@ class WebhookConnection(Connection):
             webhook_address,
             webhook_port,
             webhook_url_path,
-            address=address,
             configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )

@@ -34,7 +34,7 @@ import time
 import pytest
 
 # from yarl import URL  # type: ignore
-
+from aea.identity.base import Identity
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 
 from ....conftest import (
@@ -54,10 +54,10 @@ class TestWebhookConnect:
         """Initialise the class."""
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
-        cls.agent_address = "some string"
+        cls.identity = Identity("", address="some string")
 
         cls.webhook_connection = WebhookConnection(
-            address=cls.agent_address,
+            identity=cls.identity,
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
@@ -66,7 +66,7 @@ class TestWebhookConnect:
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
-        assert self.webhook_connection.address == self.agent_address
+        assert self.webhook_connection.address == self.identity.address
 
     @pytest.mark.asyncio
     async def test_connection(self):
@@ -84,10 +84,10 @@ class TestWebhookDisconnection:
         """Initialise the class."""
         cls.address = get_host()
         cls.port = get_unused_tcp_port()
-        cls.agent_address = "some string"
+        cls.identity = Identity("", address="some string")
 
         cls.webhook_connection = WebhookConnection(
-            address=cls.agent_address,
+            identity=cls.identity,
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
