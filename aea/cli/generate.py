@@ -48,6 +48,14 @@ def generate(click_context):
     """Generate a resource for the agent."""
 
 
+@generate.command()
+@click.argument("protocol_specification_path", type=str, required=True)
+@click.pass_context
+def protocol(click_context, protocol_specification_path: str):
+    """Generate a protocol based on a specification and add it to the configuration file and agent."""
+    _generate_item(click_context, "protocol", protocol_specification_path)
+
+
 @clean_after
 def _generate_item(click_context, item_type, specification_path):
     """Generate an item based on a specification and add it to the configuration file and agent."""
@@ -147,16 +155,21 @@ def _generate_item(click_context, item_type, specification_path):
             + str(e)
         )
 
-    # Run black code formatting
+    _run_black_formatting(os.path.join(item_type_plural, protocol_spec.name))
+    _fingerprint_item(click_context, "protocol", protocol_spec.public_id)
+
+
+def _run_black_formatting(path: str) -> None:
+    """
+    Run Black code formatting as subprocess.
+
+    :param path: a path where formatting should be applied.
+
+    :return: None
+    """
     try:
         subp = subprocess.Popen(  # nosec
-            [
-                sys.executable,
-                "-m",
-                "black",
-                os.path.join(item_type_plural, protocol_spec.name),
-                "--quiet",
-            ]
+            [sys.executable, "-m", "black", path, "--quiet"]
         )
         subp.wait(10.0)
     finally:
@@ -164,13 +177,3 @@ def _generate_item(click_context, item_type, specification_path):
         if poll is None:  # pragma: no cover
             subp.terminate()
             subp.wait(5)
-
-    _fingerprint_item(click_context, "protocol", protocol_spec.public_id)
-
-
-@generate.command()
-@click.argument("protocol_specification_path", type=str, required=True)
-@click.pass_context
-def protocol(click_context, protocol_specification_path: str):
-    """Generate a protocol based on a specification and add it to the configuration file and agent."""
-    _generate_item(click_context, "protocol", protocol_specification_path)

@@ -71,7 +71,7 @@ def test_initialise_aea():
     ), "AEA should not be connected."
     my_AEA.setup()
     assert my_AEA.resources is not None, "Resources must not be None after setup"
-    my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
+    my_AEA.resources = Resources()
     assert my_AEA.resources is not None, "Resources must not be None after set"
     assert (
         my_AEA.context.shared_state is not None
@@ -334,7 +334,7 @@ def test_initialize_aea_programmatically_build_resources():
             connection = _make_local_connection(agent_name, node)
             connections = [connection]
 
-            resources = Resources(temp)
+            resources = Resources()
 
             default_protocol = Protocol.from_dir(
                 str(Path(AEA_DIR, "protocols", "default"))

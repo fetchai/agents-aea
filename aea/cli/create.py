@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea create' subcommand."""
+
 import os
 from pathlib import Path
 from typing import cast
@@ -46,89 +47,6 @@ from aea.configurations.constants import (
 )
 
 
-def _check_is_parent_folders_are_aea_projects_recursively() -> None:
-    """Look for 'aea-config.yaml' in parent folders recursively up to the user home directory.
-
-    :return: None
-    :raise ValueError: if a parent folder has a file named 'aea-config.yaml'.
-    """
-    current = Path(".").resolve()
-    root = Path("/").resolve()
-    home = current.home()
-    while current not in (home, root):
-        files = set(map(lambda x: x.name, current.iterdir()))
-        if DEFAULT_AEA_CONFIG_FILE in files:
-            raise Exception(
-                "Folder {} has file named {}".format(current, DEFAULT_AEA_CONFIG_FILE)
-            )
-        current = current.parent.resolve()
-
-
-def _setup_package_folder(path: Path):
-    """Set a package folder up."""
-    path.mkdir(exist_ok=False)
-    init_module = path / "__init__.py"
-    logger.debug("Creating {}".format(init_module))
-    Path(init_module).touch(exist_ok=False)
-
-
-@clean_after
-def _create_aea(
-    click_context,
-    agent_name: str,
-    set_author: str,
-    local: bool,
-    has_default: bool = True,
-) -> None:
-    ctx = cast(Context, click_context.obj)
-    path = Path(agent_name)
-    ctx.clean_paths.append(str(path))
-
-    # we have already checked that the directory does not exist.
-    path.mkdir(exist_ok=False)
-
-    try:
-        # set up packages directories.
-        _setup_package_folder(Path(agent_name, "protocols"))
-        _setup_package_folder(Path(agent_name, "contracts"))
-        _setup_package_folder(Path(agent_name, "connections"))
-        _setup_package_folder(Path(agent_name, "skills"))
-
-        # set up a vendor directory
-        Path(agent_name, "vendor").mkdir(exist_ok=False)
-        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
-
-        # create a config file inside it
-        click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
-        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(
-            agent_name=agent_name,
-            aea_version=aea.__version__,
-            author=set_author,
-            version=DEFAULT_VERSION,
-            license=DEFAULT_LICENSE,
-            registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
-            description="",
-        )
-        agent_config.default_connection = DEFAULT_CONNECTION  # type: ignore
-        agent_config.default_ledger = DEFAULT_LEDGER
-        ctx.agent_loader.dump(agent_config, config_file)
-
-        # next commands must be done from the agent's directory -> overwrite ctx.cwd
-        ctx.agent_config = agent_config
-        ctx.cwd = agent_config.agent_name
-
-        if has_default:
-            click.echo("Adding default packages ...")
-            if local:
-                ctx.set_config("is_local", True)
-            _add_item(click_context, "connection", DEFAULT_CONNECTION)
-            _add_item(click_context, "skill", DEFAULT_SKILL)
-
-    except Exception as e:
-        raise click.ClickException(str(e))
-
-
 @click.command()
 @click.argument("agent_name", type=str, required=True)
 @click.option(
@@ -142,6 +60,13 @@ def _create_aea(
 @click.pass_context
 def create(click_context, agent_name, author, local, empty):
     """Create an agent."""
+    _create_aea(click_context, agent_name, author, local, empty)
+
+
+@clean_after
+def _create_aea(
+    click_context, agent_name: str, author: str, local: bool, empty: bool,
+) -> None:
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
@@ -169,4 +94,93 @@ def create(click_context, agent_name, author, local, empty):
 
     click.echo("Initializing AEA project '{}'".format(agent_name))
     click.echo("Creating project directory './{}'".format(agent_name))
-    _create_aea(click_context, agent_name, set_author, local, has_default=not empty)
+
+    ctx = cast(Context, click_context.obj)
+    path = Path(agent_name)
+    ctx.clean_paths.append(str(path))
+
+    # we have already checked that the directory does not exist.
+    path.mkdir(exist_ok=False)
+
+    try:
+        # set up packages directories.
+        _setup_package_folder(Path(agent_name, "protocols"))
+        _setup_package_folder(Path(agent_name, "contracts"))
+        _setup_package_folder(Path(agent_name, "connections"))
+        _setup_package_folder(Path(agent_name, "skills"))
+
+        # set up a vendor directory
+        Path(agent_name, "vendor").mkdir(exist_ok=False)
+        Path(agent_name, "vendor", "__init__.py").touch(exist_ok=False)
+
+        # create a config file inside it
+        click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+        agent_config = _crete_agent_config(ctx, agent_name, set_author)
+
+        # next commands must be done from the agent's directory -> overwrite ctx.cwd
+        ctx.agent_config = agent_config
+        ctx.cwd = agent_config.agent_name
+
+        if not empty:
+            click.echo("Adding default packages ...")
+            if local:
+                ctx.set_config("is_local", True)
+            _add_item(click_context, "connection", DEFAULT_CONNECTION)
+            _add_item(click_context, "skill", DEFAULT_SKILL)
+
+    except Exception as e:
+        raise click.ClickException(str(e))
+
+
+def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> AgentConfig:
+    """
+    Create agent config.
+
+    :param ctx: context object.
+    :param agent_name: agent name.
+    :param set_author: author name to set.
+
+    :return: AgentConfig object.
+    """
+    agent_config = AgentConfig(
+        agent_name=agent_name,
+        aea_version=aea.__version__,
+        author=set_author,
+        version=DEFAULT_VERSION,
+        license=DEFAULT_LICENSE,
+        registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
+        description="",
+    )
+    agent_config.default_connection = DEFAULT_CONNECTION  # type: ignore
+    agent_config.default_ledger = DEFAULT_LEDGER
+
+    with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:
+        ctx.agent_loader.dump(agent_config, config_file)
+
+    return agent_config
+
+
+def _check_is_parent_folders_are_aea_projects_recursively() -> None:
+    """Look for 'aea-config.yaml' in parent folders recursively up to the user home directory.
+
+    :return: None
+    :raise ValueError: if a parent folder has a file named 'aea-config.yaml'.
+    """
+    current = Path(".").resolve()
+    root = Path("/").resolve()
+    home = current.home()
+    while current not in (home, root):
+        files = set(map(lambda x: x.name, current.iterdir()))
+        if DEFAULT_AEA_CONFIG_FILE in files:
+            raise Exception(
+                "Folder {} has file named {}".format(current, DEFAULT_AEA_CONFIG_FILE)
+            )
+        current = current.parent.resolve()
+
+
+def _setup_package_folder(path: Path):
+    """Set a package folder up."""
+    path.mkdir(exist_ok=False)
+    init_module = path / "__init__.py"
+    logger.debug("Creating {}".format(init_module))
+    Path(init_module).touch(exist_ok=False)

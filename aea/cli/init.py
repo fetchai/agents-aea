@@ -33,32 +33,14 @@ from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.package_utils import validate_author_name
 
 
-def _registry_init(username: str) -> None:
-    """
-    Create an author name on the registry.
-
-    :param author: the author name
-    """
-    if username is not None and is_auth_token_present():
-        check_is_author_logged_in(username)
-    else:
-        is_registered = click.confirm("Do you have a Registry account?")
-        if is_registered:
-            password = click.prompt("Password", type=str, hide_input=True)
-            do_login(username, password)
-        else:
-            click.echo("Create a new account on the Registry now:")
-            email = click.prompt("Email", type=str)
-            password = click.prompt("Password", type=str, hide_input=True)
-
-            password_confirmation = ""  # nosec
-            while password_confirmation != password:
-                click.echo("Please make sure that passwords are equal.")
-                password_confirmation = click.prompt(
-                    "Confirm password", type=str, hide_input=True
-                )
-
-            do_register(username, email, password, password_confirmation)
+@click.command()
+@click.option("--author", type=str, required=False)
+@click.option("--reset", is_flag=True, help="To reset the initialization.")
+@click.option("--local", is_flag=True, help="For init AEA locally.")
+@pass_ctx
+def init(ctx: Context, author: str, reset: bool, local: bool):
+    """Initialize your AEA configurations."""
+    do_init(author, reset, not local)
 
 
 def do_init(author: str, reset: bool, registry: bool) -> None:
@@ -90,11 +72,29 @@ def do_init(author: str, reset: bool, registry: bool) -> None:
     click.echo(success_msg)
 
 
-@click.command()
-@click.option("--author", type=str, required=False)
-@click.option("--reset", is_flag=True, help="To reset the initialization.")
-@click.option("--local", is_flag=True, help="For init AEA locally.")
-@pass_ctx
-def init(ctx: Context, author: str, reset: bool, local: bool):
-    """Initialize your AEA configurations."""
-    do_init(author, reset, not local)
+def _registry_init(username: str) -> None:
+    """
+    Create an author name on the registry.
+
+    :param author: the author name
+    """
+    if username is not None and is_auth_token_present():
+        check_is_author_logged_in(username)
+    else:
+        is_registered = click.confirm("Do you have a Registry account?")
+        if is_registered:
+            password = click.prompt("Password", type=str, hide_input=True)
+            do_login(username, password)
+        else:
+            click.echo("Create a new account on the Registry now:")
+            email = click.prompt("Email", type=str)
+            password = click.prompt("Password", type=str, hide_input=True)
+
+            password_confirmation = ""  # nosec
+            while password_confirmation != password:
+                click.echo("Please make sure that passwords are equal.")
+                password_confirmation = click.prompt(
+                    "Confirm password", type=str, hide_input=True
+                )
+
+            do_register(username, email, password, password_confirmation)

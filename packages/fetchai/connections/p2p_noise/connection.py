@@ -26,7 +26,6 @@ import os
 import shutil
 import struct
 import subprocess  # nosec
-import sys
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
@@ -38,6 +37,7 @@ import nacl.signing
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.exceptions import AEAException
 from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_noise")
@@ -59,7 +59,7 @@ NOISE_NODE_CLARGS = [
 
 NOISE = "noise"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_noise:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_noise:0.3.0")
 
 
 # TOFIX(LR) error: Cannot add child handler, the child watcher does not have a loop attached
@@ -594,11 +594,10 @@ class P2PNoiseConnection(Connection):
         """Checks if go is installed. Sys.exits if not"""
         res = shutil.which("go")
         if res is None:
-            logger.error(
-                "Please install go before running the `fetchai/p2p_noise:0.2.0` connection. "
+            raise AEAException(
+                "Please install go before running the `fetchai/p2p_noise:0.3.0` connection. "
                 "Go is available for download here: https://golang.org/doc/install"
             )
-            sys.exit(1)
 
     @classmethod
     def from_config(

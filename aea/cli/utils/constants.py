@@ -20,6 +20,7 @@
 """Module with constants of the aea cli."""
 
 import os
+from pathlib import Path
 from typing import Dict
 
 from aea.configurations.base import (
@@ -29,6 +30,8 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 
+
+AEA_DIR = str(Path("."))
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR_KEY = "author"

@@ -82,7 +82,7 @@ class TestSearchContractsLocal(TestCase):
         self.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
-    @mock.patch("aea.cli.search._search_items", return_value=["item1"])
+    @mock.patch("aea.cli.search._search_items_locally", return_value=["item1"])
     def test_search_contracts_positive(self, *mocks):
         """Test search contracts command positive result."""
         result = self.runner.invoke(

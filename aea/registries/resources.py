@@ -20,20 +20,24 @@
 """This module contains the resources class."""
 
 import logging
-import os
 import re
-from typing import Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Dict, List, Optional, TypeVar, cast
 
-from aea.configurations.base import ComponentType, ContractId, PublicId, SkillId
+from aea.configurations.base import (
+    ComponentId,
+    ComponentType,
+    ContractId,
+    PublicId,
+    SkillId,
+)
 from aea.configurations.components import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
+    AgentComponentRegistry,
     ComponentRegistry,
-    ContractRegistry,
     HandlerRegistry,
     ProtocolId,
-    ProtocolRegistry,
     Registry,
 )
 from aea.skills.base import Behaviour, Handler, Model, Skill
@@ -50,31 +54,25 @@ DECISION_MAKER = "decision_maker"
 
 Item = TypeVar("Item")
 ItemId = TypeVar("ItemId")
-ComponentId = Tuple[SkillId, str]
 SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Task, Model)
 
 
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
-    # TODO the 'directory' argument to be removed
-    def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
+    def __init__(self) -> None:
         """
         Instantiate the resources.
 
-        :param directory: the path to the directory which contains the resources
-             (skills, connections and protocols)
+        :return None
         """
-        self._contract_registry = ContractRegistry()
-        self._protocol_registry = ProtocolRegistry()
+        self._component_registry = AgentComponentRegistry()
         self._handler_registry = HandlerRegistry()
         self._behaviour_registry = ComponentRegistry[Behaviour]()
         self._model_registry = ComponentRegistry[Model]()
-        self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
-            self._contract_registry,
-            self._protocol_registry,
+            self._component_registry,
             self._handler_registry,
             self._behaviour_registry,
             self._model_registry,
@@ -102,7 +100,7 @@ class Resources:
         :param protocol: a protocol
         :return: None
         """
-        self._protocol_registry.register(protocol.public_id, protocol)
+        self._component_registry.register(protocol.component_id, protocol)
 
     def get_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """
@@ -111,8 +109,10 @@ class Resources:
         :param protocol_id: the protocol id
         :return: a matching protocol, if present, else None
         """
-        protocol = self._protocol_registry.fetch(protocol_id)
-        return protocol
+        protocol = self._component_registry.fetch(
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        )
+        return cast(Protocol, protocol)
 
     def get_all_protocols(self) -> List[Protocol]:
         """
@@ -120,8 +120,8 @@ class Resources:
 
         :return: the list of protocols.
         """
-        protocols = self._protocol_registry.fetch_all()
-        return protocols
+        protocols = self._component_registry.fetch_by_type(ComponentType.PROTOCOL)
+        return cast(List[Protocol], protocols)
 
     def remove_protocol(self, protocol_id: ProtocolId) -> None:
         """
@@ -130,7 +130,9 @@ class Resources:
         :param protocol_id: the protocol id for the protocol to be removed.
         :return: None
         """
-        self._protocol_registry.unregister(protocol_id)
+        self._component_registry.unregister(
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        )
 
     def add_contract(self, contract: Contract) -> None:
         """
@@ -139,7 +141,7 @@ class Resources:
         :param contract: a contract
         :return: None
         """
-        self._contract_registry.register(contract.id, contract)
+        self._component_registry.register(contract.component_id, contract)
 
     def get_contract(self, contract_id: ContractId) -> Optional[Contract]:
         """
@@ -148,8 +150,10 @@ class Resources:
         :param contract_id: the contract id
         :return: a matching contract, if present, else None
         """
-        contract = self._contract_registry.fetch(contract_id)
-        return contract
+        contract = self._component_registry.fetch(
+            ComponentId(ComponentType.CONTRACT, contract_id)
+        )
+        return cast(Contract, contract)
 
     def get_all_contracts(self) -> List[Contract]:
         """
@@ -157,8 +161,8 @@ class Resources:
 
         :return: the list of contracts.
         """
-        contracts = self._contract_registry.fetch_all()
-        return contracts
+        contracts = self._component_registry.fetch_by_type(ComponentType.CONTRACT)
+        return cast(List[Contract], contracts)
 
     def remove_contract(self, contract_id: ContractId) -> None:
         """
@@ -167,7 +171,9 @@ class Resources:
         :param contract_id: the contract id for the contract to be removed.
         :return: None
         """
-        self._contract_registry.unregister(contract_id)
+        self._component_registry.unregister(
+            ComponentId(ComponentType.CONTRACT, contract_id)
+        )
 
     def add_skill(self, skill: Skill) -> None:
         """
@@ -176,17 +182,20 @@ class Resources:
         :param skill: a skill
         :return: None
         """
-        skill_id = skill.config.public_id
-        self._skills[skill_id] = skill
+        self._component_registry.register(skill.component_id, skill)
         if skill.handlers is not None:
             for handler in skill.handlers.values():
-                self._handler_registry.register((skill_id, handler.name), handler)
+                self._handler_registry.register(
+                    (skill.public_id, handler.name), handler
+                )
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
-                self._behaviour_registry.register((skill_id, behaviour.name), behaviour)
+                self._behaviour_registry.register(
+                    (skill.public_id, behaviour.name), behaviour
+                )
         if skill.models is not None:
             for model in skill.models.values():
-                self._model_registry.register((skill_id, model.name), model)
+                self._model_registry.register((skill.public_id, model.name), model)
         self.inject_contracts(skill)
 
     def inject_contracts(self, skill: Skill) -> None:
@@ -194,12 +203,14 @@ class Resources:
             # check all contracts are present
             contracts = {}  # type: Dict[str, Contract]
             for contract_id in skill.config.contracts:
-                contract = self._contract_registry.fetch(contract_id)
+                contract = self._component_registry.fetch(
+                    ComponentId(ComponentType.CONTRACT, contract_id)
+                )
                 if contract is None:
                     raise ValueError(
                         "Missing contract for contract id {}".format(contract_id)
                     )
-                contracts[contract_id.name] = contract
+                contracts[contract_id.name] = cast(Contract, contract)
             skill.inject_contracts(contracts)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
@@ -209,7 +220,10 @@ class Resources:
         :param skill_id: the skill id
         :return: a matching skill, if present, else None
         """
-        return self._skills.get(skill_id, None)
+        skill = self._component_registry.fetch(
+            ComponentId(ComponentType.SKILL, skill_id)
+        )
+        return cast(Skill, skill)
 
     def get_all_skills(self) -> List[Skill]:
         """
@@ -217,7 +231,8 @@ class Resources:
 
         :return: the list of skills.
         """
-        return list(self._skills.values())
+        skills = self._component_registry.fetch_by_type(ComponentType.SKILL)
+        return cast(List[Skill], skills)
 
     def remove_skill(self, skill_id: SkillId) -> None:
         """
@@ -226,7 +241,7 @@ class Resources:
         :param skill_id: the skill id for the skill to be removed.
         :return: None
         """
-        self._skills.pop(skill_id, None)
+        self._component_registry.unregister(ComponentId(ComponentType.SKILL, skill_id))
         try:
             self._handler_registry.unregister_by_skill(skill_id)
         except ValueError:
