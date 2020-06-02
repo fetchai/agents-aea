@@ -855,8 +855,8 @@ class AEABuilder:
         else:
             raise AEAException(
                 "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.3.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.3.0` to run it as a single connection."
             )
 
     def _get_agent_loop_timeout(self) -> float:
