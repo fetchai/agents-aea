@@ -32,6 +32,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.components.base import Component
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
@@ -47,7 +48,6 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.components.base import Component
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,

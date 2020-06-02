@@ -26,8 +26,8 @@ from typing import Collection
 import pytest
 
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import ComponentType
 from aea.components.base import Component
+from aea.configurations.base import ComponentType
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 

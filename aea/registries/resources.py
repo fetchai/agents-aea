@@ -23,6 +23,7 @@ import logging
 import re
 from typing import Dict, List, Optional, TypeVar, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentId,
     ComponentType,
@@ -30,7 +31,6 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.components.base import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (

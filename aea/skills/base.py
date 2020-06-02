@@ -31,6 +31,7 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Set, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
@@ -39,7 +40,6 @@ from aea.configurations.base import (
     SkillComponentConfiguration,
     SkillConfig,
 )
-from aea.components.base import Component
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract

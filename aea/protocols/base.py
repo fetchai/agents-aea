@@ -30,13 +30,13 @@ from typing import Any, Dict, Optional, cast
 
 from google.protobuf.struct_pb2 import Struct
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
     ProtocolConfig,
     PublicId,
 )
-from aea.components.base import Component
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address
 

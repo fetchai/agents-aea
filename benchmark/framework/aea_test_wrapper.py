@@ -26,8 +26,8 @@ from benchmark.framework.fake_connection import FakeConnection
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import SkillConfig
 from aea.components.base import Component
+from aea.configurations.base import SkillConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
