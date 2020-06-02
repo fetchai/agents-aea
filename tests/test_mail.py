@@ -33,8 +33,11 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode
 
-from .conftest import (UNKNOWN_PROTOCOL_PUBLIC_ID, _make_dummy_connection,
-                       _make_local_connection)
+from .conftest import (
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+    _make_dummy_connection,
+    _make_local_connection,
+)
 
 
 def test_uri():

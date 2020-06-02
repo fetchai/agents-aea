@@ -22,8 +22,14 @@ import time
 
 import pytest
 
-from aea.helpers.search.models import (Attribute, Constraint, ConstraintType,
-                                       DataModel, Description, Query)
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+    Query,
+)
 from aea.mail.base import AEAConnectionError, Envelope
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
@@ -33,8 +39,7 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import \
-    OefSearchSerializer
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 from ....conftest import _make_local_connection
 
