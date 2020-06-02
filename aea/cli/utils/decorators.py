@@ -39,6 +39,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoaders
+from aea.exceptions import AEAException
 
 
 pass_ctx = click.make_pass_decorator(Context)
@@ -152,7 +153,7 @@ def clean_after(func: Callable) -> Callable:
     :return: decorated method.
     """
 
-    def wrapper(click_context, *args, **kwargs):
+    def wrapper(context, *args, **kwargs):
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
@@ -162,9 +163,17 @@ def clean_after(func: Callable) -> Callable:
 
         :return: source method output.
         """
-        ctx = cast(Context, click_context.obj)
+        if type(context) is Context:
+            ctx = context
+        elif type(context) is click.core.Context:
+            ctx = cast(Context, context.obj)
+        else:
+            raise AEAException(
+                "clean_after decorator should be used only on methods with Context "
+                "or click.core.Context object as a first argument."
+            )
         try:
-            return func(click_context, *args, **kwargs)
+            return func(context, *args, **kwargs)
         except click.ClickException as e:
             _rmdirs(*ctx.clean_paths)
             raise e

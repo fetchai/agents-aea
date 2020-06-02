@@ -173,53 +173,56 @@ def try_get_item_target_path(
     return target_path
 
 
-def get_package_dest_path(
-    ctx: Context, author_name: str, item_type_plural: str, item_name: str
-) -> str:
+def get_package_vendor_path(ctx: Context, item_type: str, public_id: PublicId) -> str:
     """
-    Get a destenation path for a package.
+    Get a vendorized path for a package.
 
     :param ctx: context.
-    :param author_name: package author name.
-    :param item_type_plural: plural of item type.
-    :param item_name: package name.
+    :param item_type: item type.
+    :param public_id: item public ID.
 
-    :return: destenation path for package.
+    :return: vendorized estenation path for package.
     """
-    return os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
+    item_type_plural = item_type + "s"
+    return os.path.join(
+        ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
+    )
 
 
-def copy_package_directory(
-    ctx: Context,
-    package_path: Path,
-    item_type: str,
-    item_name: str,
-    author_name: str,
-    dest: str,
-) -> Path:
+def get_package_eject_path(ctx: Context, item_type: str, public_id: PublicId):
+    """
+    Get an ejected path for a package.
+
+    :param ctx: context.
+    :param item_type: item type.
+    :param public_id: item public ID.
+
+    :return: destenation path for ejected package.
+    """
+    item_type_plural = item_type + "s"
+    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+
+
+def copy_package_directory(src: Path, dst: str) -> Path:
     """
      Copy a package directory to the agent vendor resources.
 
-    :param ctx: the CLI context .
-    :param package_path: the path to the package to be added.
-    :param item_type: the type of the package.
-    :param item_name: the name of the package.
-    :param author_name: the author of the package.
+    :param src: source path to the package to be added.
+    :param dst: str package destenation path.
 
     :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
-    item_type_plural = item_type + "s"
-    src = str(package_path.absolute())
-    logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+    src_path = str(src.absolute())
+    logger.debug("Copying modules. src={} dst={}".format(src_path, dst))
     try:
-        shutil.copytree(src, dest)
+        shutil.copytree(src_path, dst)
     except Exception as e:
         raise click.ClickException(str(e))
 
-    Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
-    return Path(dest)
+    Path(dst, "__init__.py").touch()
+    return Path(dst)
 
 
 def find_item_locally(ctx, item_type, item_public_id) -> Path:
@@ -396,7 +399,9 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
 
 
-def is_item_present(ctx: Context, item_type: str, item_public_id: PublicId) -> bool:
+def is_item_present(
+    ctx: Context, item_type: str, item_public_id: PublicId, ejected=False
+) -> bool:
     """
     Check if item is already present in AEA.
 
@@ -406,18 +411,18 @@ def is_item_present(ctx: Context, item_type: str, item_public_id: PublicId) -> b
 
     :return: boolean is item present.
     """
-    item_type_plural = item_type + "s"
-    dest_path = Path(
-        ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name
-    )
     # check item presence only by author/package_name pair, without version.
+    item_type_plural = item_type + "s"
     items_in_config = set(
         map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
     )
-    return (
-        item_public_id.author,
-        item_public_id.name,
-    ) in items_in_config and dest_path.exists()
+    if ejected:
+        item_path = get_package_eject_path(ctx, item_type, item_public_id)
+    else:
+        item_path = get_package_vendor_path(ctx, item_type, item_public_id)
+    return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
+        item_path
+    ).exists()
 
 
 def try_get_balance(agent_config, wallet, type_):
