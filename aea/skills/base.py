@@ -39,7 +39,7 @@ from aea.configurations.base import (
     SkillComponentConfiguration,
     SkillConfig,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.contracts.base import Contract

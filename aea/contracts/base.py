@@ -32,7 +32,7 @@ from aea.configurations.base import (
     ContractConfig,
     ContractId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.crypto.base import LedgerApi
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 

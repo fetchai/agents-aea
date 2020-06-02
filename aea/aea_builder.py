@@ -47,7 +47,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,

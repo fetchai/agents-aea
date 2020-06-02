@@ -32,7 +32,7 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.skills.base import Behaviour, Handler, Model
 
 

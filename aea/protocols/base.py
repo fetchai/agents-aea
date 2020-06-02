@@ -36,7 +36,7 @@ from aea.configurations.base import (
     ProtocolConfig,
     PublicId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.mail.base import Address
 

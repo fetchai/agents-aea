@@ -28,7 +28,7 @@ from aea.configurations.base import (
     ConnectionConfig,
     PublicId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover

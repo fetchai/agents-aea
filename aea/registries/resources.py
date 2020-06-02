@@ -30,7 +30,7 @@ from aea.configurations.base import (
     PublicId,
     SkillId,
 )
-from aea.configurations.components import Component
+from aea.components.base import Component
 from aea.contracts.base import Contract
 from aea.protocols.base import Protocol
 from aea.registries.base import (
