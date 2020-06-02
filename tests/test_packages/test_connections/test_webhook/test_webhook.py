@@ -35,6 +35,7 @@ import pytest
 
 # from yarl import URL  # type: ignore
 from aea.identity.base import Identity
+
 from packages.fetchai.connections.webhook.connection import WebhookConnection
 
 from ....conftest import (
