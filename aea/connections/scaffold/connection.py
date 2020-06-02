@@ -77,19 +77,3 @@ class MyScaffoldConnection(Connection):
         :return: the envelope received, or None.
         """
         raise NotImplementedError  # pragma: no cover
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the scaffold connection from the connection configuration.
-
-        :param configuration: the connection configuration object.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object.
-        """
-        return MyScaffoldConnection(
-            configuration=configuration, identity=identity, cryptos=cryptos
-        )

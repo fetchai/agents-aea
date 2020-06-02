@@ -31,9 +31,7 @@ from watchdog.utils import platform
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
 from aea.helpers import file_lock
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
@@ -201,12 +199,7 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def __init__(
-        self,
-        input_file_path: Union[str, Path],
-        output_file_path: Union[str, Path],
-        **kwargs
-    ):
+    def __init__(self, configuration: ConnectionConfig, **kwargs):
         """
         Initialize a stub connection.
 
@@ -216,8 +209,14 @@ class StubConnection(Connection):
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
-        input_file_path = Path(input_file_path)
-        output_file_path = Path(output_file_path)
+        input_file: str = configuration.config.get(
+            INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
+        )
+        output_file: str = configuration.config.get(
+            OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
+        )
+        input_file_path = Path(input_file)
+        output_file_path = Path(output_file)
         if not input_file_path.exists():
             input_file_path.touch()
 
@@ -304,29 +303,3 @@ class StubConnection(Connection):
         :return: None
         """
         write_envelope(envelope, self.output_file)
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the stub connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        input_file = configuration.config.get(
-            INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME
-        )  # type: str
-        output_file = configuration.config.get(
-            OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
-        )  # type: str
-        return StubConnection(
-            input_file,
-            output_file,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

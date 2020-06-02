@@ -18,24 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for loading components."""
-import inspect
 import logging
 import re
-from pathlib import Path
-from typing import Dict, Type, cast
+from typing import Dict, Type
 
 from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
-    ConnectionConfig,
 )
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
-from aea.crypto.wallet import CryptoStore
 from aea.exceptions import AEAPackageLoadingError
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 

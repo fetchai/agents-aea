@@ -26,14 +26,14 @@ from asyncio import AbstractEventLoop
 from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     PublicId,
 )
-from aea.components.base import Component
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.base import load_all_modules, add_modules_to_sys_modules, load_module
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
 from aea.identity.base import Identity
 
 
@@ -60,7 +60,7 @@ class Connection(Component, ABC):
 
     def __init__(
         self,
-        configuration: Optional[ConnectionConfig] = None,
+        configuration: ConnectionConfig,
         identity: Optional[Identity] = None,
         cryptos: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
