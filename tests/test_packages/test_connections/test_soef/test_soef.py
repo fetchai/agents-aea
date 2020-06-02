@@ -34,6 +34,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -50,13 +51,14 @@ def test_soef():
 
     # First run OEF in a separate terminal: python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
     crypto = FetchAICrypto()
+    identity = Identity("", address=crypto.address)
 
     # create the connection and multiplexer objects
     soef_connection = SOEFConnection(
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        address=crypto.address,
+        identity=identity,
     )
     multiplexer = Multiplexer([soef_connection])
     try:

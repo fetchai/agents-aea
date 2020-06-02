@@ -30,6 +30,7 @@ import requests
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
+from aea.crypto.wallet import CryptoStore
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -37,6 +38,7 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
+from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -513,17 +515,24 @@ class SOEFConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
         Get the OEF connection from the connection configuration.
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         api_key = cast(str, configuration.config.get("api_key"))
         soef_addr = cast(str, configuration.config.get("soef_addr"))
         soef_port = cast(int, configuration.config.get("soef_port"))
         return SOEFConnection(
-            api_key, soef_addr, soef_port, address=address, configuration=configuration,
+            api_key,
+            soef_addr,
+            soef_port,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
         )
