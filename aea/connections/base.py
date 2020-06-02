@@ -18,13 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
-
-
+import inspect
+import logging
+import re
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
+from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
-from aea.components.base import Component
 from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
@@ -32,11 +33,15 @@ from aea.configurations.base import (
 )
 from aea.components.base import Component
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.base import load_all_modules, add_modules_to_sys_modules, load_module
 from aea.identity.base import Identity
 
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
+
+
+logger = logging.getLogger(__name__)
 
 
 # TODO refactoring: this should be an enum
@@ -193,11 +198,37 @@ class Connection(Component, ABC):
         cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Initialize a connection instance from a configuration.
+        Load a connection from a configuration.
 
         :param configuration: the connection configuration.
         :param identity: the identity object.
         :param cryptos: object to access the connection crypto objects.
         :return: an instance of the concrete connection class.
         """
-        return cls(configuration=configuration, identity=identity, cryptos=cryptos)
+        configuration = cast(ConnectionConfig, configuration)
+        directory = cast(Path, configuration.directory)
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        connection_module_path = directory / "connection.py"
+        assert (
+            connection_module_path.exists() and connection_module_path.is_file()
+        ), "Connection module '{}' not found.".format(connection_module_path)
+        connection_module = load_module(
+            "connection_module", directory / "connection.py"
+        )
+        classes = inspect.getmembers(connection_module, inspect.isclass)
+        connection_class_name = cast(str, configuration.class_name)
+        connection_classes = list(
+            filter(lambda x: re.match(connection_class_name, x[0]), classes)
+        )
+        name_to_class = dict(connection_classes)
+        logger.debug("Processing connection {}".format(connection_class_name))
+        connection_class = name_to_class.get(connection_class_name, None)
+        assert connection_class is not None, "Connection class '{}' not found.".format(
+            connection_class_name
+        )
+        return connection_class.from_config(
+            configuration=configuration, identity=identity, cryptos=cryptos
+        )
