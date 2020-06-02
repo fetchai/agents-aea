@@ -250,12 +250,12 @@ class HTTPClientConnection(Connection):
         cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Initialize a connection instance from a configuration.
+        Get the HTTP connection from the connection configuration.
 
         :param configuration: the connection configuration.
         :param identity: the identity object.
         :param cryptos: object to access the connection crypto objects.
-        :return: an instance of the concrete connection class.
+        :return: the connection object
         """
         provider_address = cast(str, configuration.config.get("address"))
         provider_port = cast(int, configuration.config.get("port"))
