@@ -43,6 +43,8 @@ logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 """default 'to' field for Gym envelopes."""
 DEFAULT_GYM = "gym"
 
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.2.0")
+
 
 class GymChannel:
     """A wrapper of the gym environment."""
