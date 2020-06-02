@@ -97,6 +97,32 @@ def test_soef():
         )
         multiplexer.put(envelope)
 
+        # register personality pieces
+        attr_piece = Attribute("piece", str, True, "The personality piece key.")
+        attr_value = Attribute("value", str, True, "The personality piece value.")
+        agent_personality_model = DataModel(
+            "personality_agent",
+            [attr_piece, attr_value],
+            "A data model to describe the personality of an agent.",
+        )
+        service_instance = {"piece": "genus", "value": "service"}
+        service_description = Description(
+            service_instance, data_model=agent_personality_model
+        )
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        message_b = OefSearchSerializer().encode(message)
+        envelope = Envelope(
+            to="soef",
+            sender=crypto.address,
+            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
+            message=message_b,
+        )
+        logger.info("Registering agent personality")
+        multiplexer.put(envelope)
+
         # find agents near me
         radius = 0.1
         close_to_my_service = Constraint(

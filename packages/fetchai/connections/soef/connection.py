@@ -157,8 +157,12 @@ class SOEFChannel:
         """
         if self._is_compatible_description(service_description):
             service_location = service_description.values.get("location", None)
-            if service_location is not None:
+            piece = service_description.values.get("piece", None)
+            value = service_description.values.get("value", None)
+            if service_location is not None and type(service_location) == Location:
                 self._set_location(service_location)
+            elif type(piece) == str and type(value) == str:
+                self._set_personality_piece(piece, value)
             else:
                 self._send_error_response()
         else:
@@ -179,6 +183,9 @@ class SOEFChannel:
         """
         is_compatible = (
             type(service_description.values.get("location", None)) == Location
+        ) or (
+            type(service_description.values.get("piece", None)) == str
+            and type(service_description.values.get("value", None)) == str
         )
         return is_compatible
 
@@ -281,6 +288,35 @@ class SOEFChannel:
                 self.agent_location = agent_location
             else:
                 logger.debug("Location registration error.")
+                self._send_error_response(
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
+                )
+        except Exception as e:
+            logger.error("Exception when interacting with SOEF: {}".format(e))
+            self._send_error_response()
+
+    def _set_personality_piece(self, piece: str, value: str) -> None:
+        """
+        Set the personality piece.
+
+        :param piece: the piece to be set
+        :param value: the value to be set
+        """
+        try:
+            url = parse.urljoin(self.base_url, self.unique_page_address)
+            logger.debug(
+                "Registering personality piece: piece={}, value={}".format(piece, value)
+            )
+            params = {
+                "piece": piece,
+                "value": value,
+                "command": "set_personality_piece",
+            }
+            response = requests.get(url=url, params=params)
+            if "<response><success>1</success></response>" in response.text:
+                logger.debug("Personality piece registration SUCCESS")
+            else:
+                logger.debug("Personality piece registration error.")
                 self._send_error_response(
                     oef_error_operation=OefSearchMessage.OefErrorOperation.REGISTER_SERVICE
                 )
