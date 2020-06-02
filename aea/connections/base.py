@@ -23,12 +23,12 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from typing import Optional, Set, TYPE_CHECKING, cast
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentType,
     ConnectionConfig,
     PublicId,
 )
-from aea.configurations.components import Component
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover

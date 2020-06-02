@@ -33,6 +33,8 @@ from aea.configurations.base import (
 
 AEA_DIR = str(Path("."))
 
+ITEM_TYPES = ("connection", "contract", "protocol", "skill")
+
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
