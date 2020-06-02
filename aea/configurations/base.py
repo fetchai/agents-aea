@@ -1334,10 +1334,15 @@ class AgentConfig(PackageConfiguration):
                 "ledger_apis": self.ledger_apis_dict,
                 "logging_config": self.logging_config,
                 "private_key_paths": self.private_key_paths_dict,
-                "connection_private_key_paths": self.connection_private_key_paths_dict,
                 "registry_path": self.registry_path,
             }
         )  # type: Dict[str, Any]
+
+        if len(self.connection_private_key_paths_dict) > 0:
+            config[
+                "connection_private_key_paths"
+            ] = self.connection_private_key_paths_dict
+
         if self.timeout is not None:
             config["timeout"] = self.timeout
         if self.execution_timeout is not None:
