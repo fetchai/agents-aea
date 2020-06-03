@@ -30,8 +30,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     copy_package_directory,
-    get_package_eject_path,
-    get_package_vendor_path,
+    get_package_path,
     is_item_present,
 )
 from aea.configurations.base import DEFAULT_VERSION, PublicId
@@ -97,11 +96,11 @@ def _eject_item(ctx: Context, item_type: str, public_id: PublicId):
         raise click.ClickException(
             "{} {} not found in agent items.".format(item_type.title(), public_id)
         )
-    src = get_package_vendor_path(ctx, item_type, public_id)
-    dst = get_package_eject_path(ctx, item_type, public_id)
-    if is_item_present(ctx, item_type, public_id, ejected=True):
+    src = get_package_path(ctx, item_type, public_id)
+    dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
+    if is_item_present(ctx, item_type, public_id, is_vendor=False):
         raise click.ClickException(
-            "{} {} is already in agent ejected items.".format(
+            "{} {} is already in a non-vendor item.".format(
                 item_type.title(), public_id
             )
         )

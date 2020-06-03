@@ -173,7 +173,9 @@ def try_get_item_target_path(
     return target_path
 
 
-def get_package_vendor_path(ctx: Context, item_type: str, public_id: PublicId) -> str:
+def get_package_path(
+    ctx: Context, item_type: str, public_id: PublicId, is_vendor: bool = True
+) -> str:
     """
     Get a vendorized path for a package.
 
@@ -184,23 +186,12 @@ def get_package_vendor_path(ctx: Context, item_type: str, public_id: PublicId) -
     :return: vendorized estenation path for package.
     """
     item_type_plural = item_type + "s"
-    return os.path.join(
-        ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
-    )
-
-
-def get_package_eject_path(ctx: Context, item_type: str, public_id: PublicId):
-    """
-    Get an ejected path for a package.
-
-    :param ctx: context.
-    :param item_type: item type.
-    :param public_id: item public ID.
-
-    :return: destenation path for ejected package.
-    """
-    item_type_plural = item_type + "s"
-    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+    if is_vendor:
+        return os.path.join(
+            ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
+        )
+    else:
+        return os.path.join(ctx.cwd, item_type_plural, public_id.name)
 
 
 def copy_package_directory(src: Path, dst: str) -> Path:
@@ -401,7 +392,7 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
 
 
 def is_item_present(
-    ctx: Context, item_type: str, item_public_id: PublicId, ejected=False
+    ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
 ) -> bool:
     """
     Check if item is already present in AEA.
@@ -409,6 +400,7 @@ def is_item_present(
     :param ctx: context object.
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
+    :param is_vendor: flag for vendorized path (True by defaut).
 
     :return: boolean is item present.
     """
@@ -417,10 +409,10 @@ def is_item_present(
     items_in_config = set(
         map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
     )
-    if ejected:
-        item_path = get_package_eject_path(ctx, item_type, item_public_id)
+    if is_vendor:
+        item_path = get_package_path(ctx, item_type, item_public_id)
     else:
-        item_path = get_package_vendor_path(ctx, item_type, item_public_id)
+        item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=False)
     return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
         item_path
     ).exists()

@@ -33,7 +33,7 @@ from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
     find_item_locally,
-    get_package_vendor_path,
+    get_package_path,
     is_fingerprint_correct,
     is_item_present,
     register_item,
@@ -116,7 +116,7 @@ def _add_item(
             )
         )
 
-    dest_path = get_package_vendor_path(ctx, item_type, item_public_id)
+    dest_path = get_package_path(ctx, item_type, item_public_id)
     is_local = ctx.config.get("is_local")
 
     ctx.clean_paths.append(dest_path)
