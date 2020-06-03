@@ -23,22 +23,20 @@ import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Union
+from typing import Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.base import Connection
 from aea.connections.stub.connection import (
     StubConnection,
     _encode,
     lock_file,
 )
-from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.2.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -50,36 +48,29 @@ class P2PStubConnection(StubConnection):
     The connection detects new messages by watchdogging the input file looking for new lines.
     """
 
-    def __init__(
-        self,
-        namespace_dir_path: Union[str, Path],
-        configuration: ConnectionConfig,
-        identity: Identity,
-        **kwargs
-    ):
-        """
-        Initialize a stub connection.
+    connection_id = PUBLIC_ID
 
-        :param namesapce_dir_path: directory path to share with other agents.
-        :param connection: the connection configuration
-        :param identity: the agent identity
+    def __init__(self, configuration: ConnectionConfig, identity: Identity, **kwargs):
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
+        Initialize a p2p stub connection.
 
+        :param configuration: the connection configuration
+        :param identity: the identity
+        """
+        namespace_dir_path = cast(
+            Union[str, Path],
+            configuration.config.get("namespace_dir", tempfile.mkdtemp()),
+        )
+        assert namespace_dir_path is not None, "namespace_dir_path must be set!"
         self.namespace = os.path.abspath(namespace_dir_path)
 
         input_file_path = os.path.join(self.namespace, "{}.in".format(identity.address))
         output_file_path = os.path.join(
             self.namespace, "{}.out".format(identity.address)
         )
-        super().__init__(
-            input_file_path,
-            output_file_path,
-            configuration=configuration,
-            identity=identity,
-            **kwargs
-        )
+        configuration.config["input_file"] = input_file_path
+        configuration.config["output_file"] = output_file_path
+        super().__init__(configuration=configuration, identity=identity, **kwargs)
 
     async def send(self, envelope: Envelope):
         """
@@ -104,25 +95,3 @@ class P2PStubConnection(StubConnection):
     async def disconnect(self) -> None:
         await super().disconnect()
         os.rmdir(self.namespace)
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the P2P Stub connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        namespace_dir = configuration.config.get(
-            "namespace_dir", tempfile.mkdtemp()
-        )  # type: str
-        return P2PStubConnection(
-            namespace_dir,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

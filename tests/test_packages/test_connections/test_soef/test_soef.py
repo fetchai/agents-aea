@@ -23,7 +23,7 @@ import logging
 import time
 from threading import Thread
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -54,12 +54,14 @@ def test_soef():
     identity = Identity("", address=crypto.address)
 
     # create the connection and multiplexer objects
-    soef_connection = SOEFConnection(
+    configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        identity=identity,
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.1.0")},
+        connection_id=SOEFConnection.connection_id,
     )
+    soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
     multiplexer = Multiplexer([soef_connection])
     try:
         # Set the multiplexer running in a different thread
@@ -68,23 +70,19 @@ def test_soef():
 
         time.sleep(3.0)
 
-        # register a service with location
-        attr_service_name = Attribute(
-            "service_name", str, True, "The name of the service."
-        )
+        # register an agent with location
         attr_location = Attribute(
-            "location", Location, True, "The location where the service is provided."
+            "location", Location, True, "The location where the agent is."
         )
-        service_location_model = DataModel(
-            "location_service",
-            [attr_service_name, attr_location],
-            "A data model to describe location of a service.",
+        agent_location_model = DataModel(
+            "location_agent",
+            [attr_location],
+            "A data model to describe location of an agent.",
         )
-        service_name = "train"
-        service_location = Location(52.2057092, 2.1183431)
-        service_instance = {"service_name": service_name, "location": service_location}
+        agent_location = Location(52.2057092, 2.1183431)
+        service_instance = {"location": agent_location}
         service_description = Description(
-            service_instance, data_model=service_location_model
+            service_instance, data_model=agent_location_model
         )
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
@@ -98,26 +96,44 @@ def test_soef():
             message=message_b,
         )
         logger.info(
-            "Registering service={} at location=({},{}) by agent={}".format(
-                service_name,
-                service_location.latitude,
-                service_location.longitude,
-                crypto.address,
+            "Registering agent at location=({},{}) by agent={}".format(
+                agent_location.latitude, agent_location.longitude, crypto.address,
             )
         )
         multiplexer.put(envelope)
 
-        # find agents near the previously registered service
+        # register personality pieces
+        attr_piece = Attribute("piece", str, True, "The personality piece key.")
+        attr_value = Attribute("value", str, True, "The personality piece value.")
+        agent_personality_model = DataModel(
+            "personality_agent",
+            [attr_piece, attr_value],
+            "A data model to describe the personality of an agent.",
+        )
+        service_instance = {"piece": "genus", "value": "service"}
+        service_description = Description(
+            service_instance, data_model=agent_personality_model
+        )
+        message = OefSearchMessage(
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=service_description,
+        )
+        message_b = OefSearchSerializer().encode(message)
+        envelope = Envelope(
+            to="soef",
+            sender=crypto.address,
+            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
+            message=message_b,
+        )
+        logger.info("Registering agent personality")
+        multiplexer.put(envelope)
+
+        # find agents near me
         radius = 0.1
-        matches_my_service_name = Constraint(
-            "service_name", ConstraintType("==", service_name)
-        )
         close_to_my_service = Constraint(
-            "location", ConstraintType("distance", (service_location, radius))
+            "location", ConstraintType("distance", (agent_location, radius))
         )
-        closeness_query = Query(
-            [matches_my_service_name, close_to_my_service], model=service_location_model
-        )
+        closeness_query = Query([close_to_my_service], model=agent_location_model)
         message = OefSearchMessage(
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
@@ -130,11 +146,8 @@ def test_soef():
             message=message_b,
         )
         logger.info(
-            "Searching for agents in radius={} of service={} at location=({},{})".format(
-                radius,
-                service_name,
-                service_location.latitude,
-                service_location.longitude,
+            "Searching for agents in radius={} of myself at location=({},{})".format(
+                radius, agent_location.latitude, agent_location.longitude,
             )
         )
         multiplexer.put(envelope)

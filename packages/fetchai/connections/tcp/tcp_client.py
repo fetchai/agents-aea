@@ -26,9 +26,6 @@ from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
@@ -41,14 +38,16 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self, host: str, port: int, **kwargs):
+    def __init__(self, configuration: ConnectionConfig, **kwargs):
         """
-        Initialize a TCP channel.
+        Initialize a TCP client connection.
 
-        :param host: the socket bind address.
-        :param port: the socket bind port.
+        :param configuration: the configuration object.
         """
-        super().__init__(host, port, **kwargs)
+        address = cast(str, configuration.config.get("address"))
+        port = cast(int, configuration.config.get("port"))
+        assert address is not None and port is not None, "address and port must be set!"
+        super().__init__(address, port, configuration=configuration, **kwargs)
         self._reader, self._writer = (
             None,
             None,
@@ -102,25 +101,3 @@ class TCPClientConnection(TCPConnection):
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
         return self._writer
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the TCP client connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        server_address = cast(str, configuration.config.get("address"))
-        server_port = cast(int, configuration.config.get("port"))
-        return TCPClientConnection(
-            server_address,
-            server_port,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

@@ -21,7 +21,7 @@
 
 from typing import Optional
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
@@ -30,6 +30,8 @@ from aea.mail.base import Envelope
 
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
+
+    connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
 
     def __init__(
         self, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
@@ -77,19 +79,3 @@ class MyScaffoldConnection(Connection):
         :return: the envelope received, or None.
         """
         raise NotImplementedError  # pragma: no cover
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the scaffold connection from the connection configuration.
-
-        :param configuration: the connection configuration object.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object.
-        """
-        return MyScaffoldConnection(
-            configuration=configuration, identity=identity, cryptos=cryptos
-        )

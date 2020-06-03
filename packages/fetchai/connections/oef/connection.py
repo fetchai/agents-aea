@@ -55,9 +55,8 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
 from aea.helpers.search.models import (
     And,
     Attribute,
@@ -72,7 +71,6 @@ from aea.helpers.search.models import (
     Or,
     Query,
 )
-from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -91,7 +89,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.4.0")
 
 
 class OEFObjectTranslator:
@@ -673,7 +671,9 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, oef_addr: str, oef_port: int = 10000, **kwargs):
+    connection_id = PUBLIC_ID
+
+    def __init__(self, **kwargs):
         """
         Initialize.
 
@@ -681,11 +681,12 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
-        self.oef_addr = oef_addr
-        self.oef_port = oef_port
+        addr = cast(str, self.configuration.config.get("addr"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert addr is not None and port is not None, "addr and port must be set!"
+        self.oef_addr = addr
+        self.oef_port = port
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
@@ -801,25 +802,3 @@ class OEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        oef_addr = cast(str, configuration.config.get("addr"))
-        oef_port = cast(int, configuration.config.get("port"))
-        return OEFConnection(
-            oef_addr,
-            oef_port,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

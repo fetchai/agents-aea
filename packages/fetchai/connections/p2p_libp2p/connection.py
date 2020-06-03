@@ -31,12 +31,10 @@ from asyncio import AbstractEventLoop, CancelledError
 from random import randint
 from typing import IO, List, Optional, Sequence, cast
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.wallet import CryptoStore
 from aea.exceptions import AEAException
-from aea.identity.base import Identity
 from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
@@ -465,31 +463,52 @@ class Libp2pNode:
 class P2PLibp2pConnection(Connection):
     """A libp2p p2p node connection."""
 
+    connection_id = PUBLIC_ID
+
     # TODO 'key' must be removed in favor of 'cryptos'
-    def __init__(
-        self,
-        key: FetchAICrypto,
-        uri: Optional[Uri] = None,
-        public_uri: Optional[Uri] = None,
-        entry_peers: Optional[Sequence[MultiAddr]] = None,
-        log_file: Optional[str] = None,
-        env_file: Optional[str] = None,
-        **kwargs
-    ):
-        """
-        Initialize a p2p libp2p connection.
-
-        :param key: FET sepc256k1 curve private key.
-        :param uri: libp2p node ip address and port number in format ipaddress:port.
-        :param entry_peers: libp2p entry peers multiaddresses.
-        :param log_file: libp2p node log file
-        """
+    def __init__(self, **kwargs):
+        """Initialize a p2p libp2p connection."""
         self._check_go_installed()
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID  # TOFIX(LR) why do we need to add this?
-
         # we put it here so below we can access the address
         super().__init__(**kwargs)
+        libp2p_key_file = self.configuration.config.get(
+            "libp2p_key_file"
+        )  # Optional[str]
+        libp2p_host = self.configuration.config.get("libp2p_host")  # Optional[str]
+        libp2p_port = self.configuration.config.get("libp2p_port")  # Optional[int]
+        libp2p_host_public = self.configuration.config.get(
+            "libp2p_public_host"
+        )  # Optional[str]
+        libp2p_port_public = self.configuration.config.get(
+            "libp2p_public_port"
+        )  # Optional[int]
+        libp2p_entry_peers = self.configuration.config.get("libp2p_entry_peers")
+        if libp2p_entry_peers is None:
+            libp2p_entry_peers = []
+        libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
+        log_file = self.configuration.config.get("libp2p_log_file")  # Optional[str]
+        env_file = self.configuration.config.get("libp2p_env_file")  # Optional[str]
+        assert (
+            libp2p_host is not None and libp2p_port is not None and log_file is not None
+        ), "Config is missing values!"
+        if libp2p_key_file is None:
+            key = FetchAICrypto()
+        else:
+            key = FetchAICrypto(libp2p_key_file)
+
+        uri = None
+        if libp2p_port is not None:
+            if libp2p_host is not None:
+                uri = Uri(host=libp2p_host, port=libp2p_port)
+            else:
+                uri = Uri(host="127.0.0.1", port=libp2p_port)
+
+        public_uri = None
+        if libp2p_port_public is not None and libp2p_host_public is not None:
+            public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+
+        entry_peers = [MultiAddr(maddr) for maddr in libp2p_entry_peers]
+
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         self.node = Libp2pNode(
@@ -617,58 +636,3 @@ class P2PLibp2pConnection(Connection):
                 "Please install go before running the `fetchai/p2p_libp2p:0.1.0` connection. "
                 "Go is available for download here: https://golang.org/doc/install"
             )
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the P2P connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        libp2p_key_file = configuration.config.get("libp2p_key_file")  # Optional[str]
-        libp2p_host = configuration.config.get("libp2p_host")  # Optional[str]
-        libp2p_port = configuration.config.get("libp2p_port")  # Optional[int]
-        libp2p_host_public = configuration.config.get(
-            "libp2p_public_host"
-        )  # Optional[str]
-        libp2p_port_public = configuration.config.get(
-            "libp2p_public_port"
-        )  # Optional[int]
-        entry_peers = list(cast(List, configuration.config.get("libp2p_entry_peers")))
-        log_file = configuration.config.get("libp2p_log_file")  # Optional[str]
-        env_file = configuration.config.get("libp2p_env_file")  # Optional[str]
-
-        if libp2p_key_file is None:
-            key = FetchAICrypto()
-        else:
-            key = FetchAICrypto(libp2p_key_file)
-
-        uri = None
-        if libp2p_port is not None:
-            if libp2p_host is not None:
-                uri = Uri(host=libp2p_host, port=libp2p_port)
-            else:
-                uri = Uri(host="127.0.0.1", port=libp2p_port)
-
-        public_uri = None
-        if libp2p_port_public is not None and libp2p_host_public is not None:
-            public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
-
-        entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
-
-        return P2PLibp2pConnection(
-            key,
-            uri,
-            public_uri,
-            entry_peers_maddrs,
-            log_file,
-            env_file,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

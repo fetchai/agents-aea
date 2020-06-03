@@ -96,9 +96,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.force_set_config(
@@ -122,16 +122,16 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
         self.run_cli_command(
             "fingerprint",
             "skill",
-            "fetchai/generic_seller:0.1.0",
+            "fetchai/generic_seller:0.2.0",
             cwd=str(Path(seller_aea_name, "vendor", "fetchai")),
         )
         self.run_install()
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.force_set_config("agent.ledger_apis", ledger_apis)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
         self.force_set_config(
@@ -149,10 +149,10 @@ class TestOrmIntegrationDocs(AEATestCaseMany, UseOef):
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         # TODO: finish test with funded key
         check_strings = (
