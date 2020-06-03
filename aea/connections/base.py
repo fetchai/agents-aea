@@ -28,6 +28,7 @@ from typing import Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
+    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     PublicId,
@@ -185,6 +186,25 @@ class Connection(Component, ABC):
 
         :return: the received envelope, or None if an error occurred.
         """
+
+    @classmethod
+    def from_dir(
+        cls, directory: str, identity: Identity, cryptos: CryptoStore
+    ) -> "Connection":
+        """
+        Load the connection from a directory.
+
+        :param directory: the directory to the connection package.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: the connection object.
+        """
+        configuration = cast(
+            ConnectionConfig,
+            ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
+        )
+        configuration._directory = Path(directory)
+        return Connection.from_config(configuration, identity, cryptos)
 
     @classmethod
     def from_config(
