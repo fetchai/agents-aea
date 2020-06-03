@@ -223,7 +223,16 @@ def handle_dotted_path(value: str) -> Tuple:
     return json_path, path_to_resource_configuration, config_loader
 
 
-def update_item_config(item_type: str, package_path: Path, **kwargs):
+def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
+    """
+    Update item config and item config file.
+
+    :param item_type: type of item.
+    :param package_path: path to a package folder.
+    :param kwargs: pairs of config key-value to update.
+
+    :return: None
+    """
     item_config = load_item_config(item_type, package_path)
     for key, value in kwargs.items():
         setattr(item_config, key, value)
