@@ -1783,10 +1783,10 @@ aea generate-wealth fetchai
 Run both AEAs from their respective terminals
 
 ``` bash 
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
@@ -1841,10 +1841,10 @@ Go to the <a href="https://faucet.metamask.io/"> MetaMask Faucet </a> and reques
 Run both AEAs from their respective terminals.
 
 ``` bash 
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Ethereum testnet.

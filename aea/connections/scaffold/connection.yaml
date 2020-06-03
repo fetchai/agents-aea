@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmYBiXw8rTCCsMETpyAGjSwWcXeCzcj4HRPQCY115WKf4k
+  connection.py: QmUsg2N6ykzd277GoQM62Gd7TavBEUv5QigbciefSQMkHD
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: MyScaffoldConnection

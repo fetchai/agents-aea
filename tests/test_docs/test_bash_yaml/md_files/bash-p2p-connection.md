@@ -15,8 +15,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.2.0
 aea run --connections fetchai/p2p_libp2p:0.2.0
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.4.0
-aea fetch fetchai/weather_client:0.4.0
+aea fetch fetchai/weather_station:0.5.0
+aea fetch fetchai/weather_client:0.5.0
 ```
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.2.0
@@ -25,7 +25,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.2.0
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.3.0"
+aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 ``` bash
 My libp2p addresses: ...
@@ -38,7 +38,7 @@ aea add-key fetchai fet_private_key.txt
 aea generate-wealth fetchai
 ```
 ``` bash
-aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.3.0"
+aea run --connections "fetchai/p2p_libp2p:0.2.0,fetchai/oef:0.4.0"
 ```
 ``` yaml
 config:
@@ -57,5 +57,5 @@ config:
 ``` yaml
 default_routing:
   ? "fetchai/oef_search:0.1.0"
-  : "fetchai/oef:0.3.0"
+  : "fetchai/oef:0.4.0"
 ```

@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    connection_id = PublicId.from_str("fetchai/my_scaffold_connection:0.1.0")
+    connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
 
     def __init__(
         self, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore

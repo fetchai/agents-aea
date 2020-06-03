@@ -50,7 +50,7 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.4.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.5.0")
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):

@@ -55,7 +55,7 @@ SERVER_ERROR = 500
 logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = str
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.3.0")
 
 
 class Request(OpenAPIRequest):

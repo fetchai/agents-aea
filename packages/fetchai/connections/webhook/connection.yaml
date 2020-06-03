@@ -1,12 +1,12 @@
 name: webhook
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The webhook connection that wraps a webhook functionality.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmWUKSmXaBgGMvKgdmzKmMjCx43BnrfW6og2n3afNoAALq
-  connection.py: QmWmdjXFib8fEFna2xEWHk5iYVb2S75MWWDo5WJzCKNwxJ
+  connection.py: QmdZg28gMprhRRHxANWzXTSv8RbYkNRDd38kthfuA4DoBs
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/http:0.1.0

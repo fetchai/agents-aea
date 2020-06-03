@@ -355,7 +355,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.1.0"
+        cls.connection_id = "fetchai/local:0.2.0"
         cls.connection_name = "local"
 
         # copy the 'packages' directory in the parent of the agent folder.
@@ -423,7 +423,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.1.0"
+        cls.connection_id = "fetchai/local:0.2.0"
         cls.connection_name = "local"
 
         # copy the 'packages' directory in the parent of the agent folder.
