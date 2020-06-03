@@ -411,10 +411,7 @@ def is_item_present(
     items_in_config = set(
         map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
     )
-    if is_vendor:
-        item_path = get_package_path(ctx, item_type, item_public_id)
-    else:
-        item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=False)
+    item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
     return (item_public_id.author, item_public_id.name,) in items_in_config and Path(
         item_path
     ).exists()
