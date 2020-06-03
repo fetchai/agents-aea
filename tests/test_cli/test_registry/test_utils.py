@@ -31,35 +31,12 @@ from aea.cli.registry.utils import (
     check_is_author_logged_in,
     download_file,
     extract,
-    fetch_package,
     is_auth_token_present,
     registry_login,
     registry_logout,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
-from aea.configurations.base import PublicId
-
-
-@mock.patch("aea.cli.registry.utils.request_api", return_value={"file": "url"})
-@mock.patch("aea.cli.registry.utils.download_file", return_value="filepath")
-@mock.patch("aea.cli.registry.utils.extract")
-class TestFetchPackage:
-    """Test case for fetch_package method."""
-
-    def test_fetch_package_positive(
-        self, extract_mock, download_file_mock, request_api_mock
-    ):
-        """Test for fetch_package method positive result."""
-        obj_type = "connection"
-        public_id = PublicId.from_str("author/name:0.1.0")
-        cwd = "cwd"
-        dest_path = os.path.join("dest", "path", "package_folder_name")
-
-        fetch_package(obj_type, public_id, cwd, dest_path)
-        request_api_mock.assert_called_with("GET", "/connections/author/name/0.1.0")
-        download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", os.path.join("dest", "path"))
 
 
 def _raise_connection_error(*args, **kwargs):
