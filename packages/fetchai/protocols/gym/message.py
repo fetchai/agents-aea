@@ -27,6 +27,7 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.gym.custom_types import AnyObject as CustomAnyObject
+from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.gym.message")
 
@@ -37,6 +38,7 @@ class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
     protocol_id = ProtocolId("fetchai", "gym", "0.1.0")
+    serializer = GymSerializer
 
     AnyObject = CustomAnyObject
 

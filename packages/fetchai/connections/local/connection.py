@@ -31,10 +31,8 @@ from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.connections.local")
 
@@ -150,8 +148,10 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        oef_message = OefSearchSerializer().decode(envelope.message)
-        oef_message = cast(OefSearchMessage, oef_message)
+        assert isinstance(
+            envelope.message, OefSearchMessage
+        ), "Message not of type OefSearchMessage"
+        oef_message = cast(OefSearchMessage, envelope.message)
         sender = envelope.sender
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
             await self._register_service(sender, oef_message.service_description)
@@ -188,12 +188,11 @@ class LocalNode:
                 error_msg="Destination not available",
                 error_data={},  # TODO: reference incoming message.
             )
-            msg_bytes = DefaultSerializer().encode(msg)
             error_envelope = Envelope(
                 to=envelope.sender,
                 sender=DEFAULT_OEF,
                 protocol_id=DefaultMessage.protocol_id,
-                message=msg_bytes,
+                message=msg,
             )
             await self._send(error_envelope)
             return
@@ -236,12 +235,11 @@ class LocalNode:
                     message_id=RESPONSE_MESSAGE_ID,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                 )
-                msg_bytes = OefSearchSerializer().encode(msg)
                 envelope = Envelope(
                     to=address,
                     sender=DEFAULT_OEF,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=msg_bytes,
+                    message=msg,
                 )
                 await self._send(envelope)
             else:
@@ -279,12 +277,11 @@ class LocalNode:
             message_id=RESPONSE_MESSAGE_ID,
             agents=tuple(sorted(set(result))),
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=address,
             sender=DEFAULT_OEF,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         await self._send(envelope)
 

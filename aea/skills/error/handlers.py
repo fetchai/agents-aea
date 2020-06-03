@@ -25,8 +25,7 @@ from typing import Optional
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+from aea.protocols.default import DefaultMessage
 from aea.skills.base import Handler
 
 
@@ -86,7 +85,7 @@ class ErrorHandler(Handler):
             to=envelope.sender,
             sender=self.context.agent_address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
+            message=reply,
         )
 
     def send_decoding_error(self, envelope: Envelope) -> None:
@@ -115,7 +114,7 @@ class ErrorHandler(Handler):
             to=envelope.sender,
             sender=self.context.agent_address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
+            message=reply,
         )
 
     def send_unsupported_skill(self, envelope: Envelope) -> None:
@@ -151,5 +150,5 @@ class ErrorHandler(Handler):
             to=envelope.sender,
             sender=self.context.agent_address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(reply),
+            message=reply,
         )

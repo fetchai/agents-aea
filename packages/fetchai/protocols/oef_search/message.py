@@ -33,6 +33,7 @@ from packages.fetchai.protocols.oef_search.custom_types import (
     OefErrorOperation as CustomOefErrorOperation,
 )
 from packages.fetchai.protocols.oef_search.custom_types import Query as CustomQuery
+from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.oef_search.message")
 
@@ -43,6 +44,7 @@ class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
     protocol_id = ProtocolId("fetchai", "oef_search", "0.1.0")
+    serializer = OefSearchSerializer
 
     Description = CustomDescription
 

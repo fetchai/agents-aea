@@ -7,10 +7,10 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmT34enu6hywjnL6Kttxhoedmmg8JuEPBavLruSZGnMWdW
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
-  message.py: QmNmSti4yEWqciPRx91yaco9oyHxYaMCAvxR8j3YdvpxLR
+  message.py: QmYXmBCPDg8dd9WTV55hjoyDCkb7wBUCMhYcjyF61UH3XL
   ml_trade.proto: QmeB21MQduEGQCrtiYZQzPpRqHL4CWEkvvcaKZ9GsfE8f6
   ml_trade_pb2.py: QmWTsjtBgu7epfzSoJmAvkaiP74ErPibA3yGQXzk2VBRq4
-  serialization.py: QmTR584SMeiALHpfhJkqPgtAVs24m8sRGd6z1N4WLPDbUw
+  serialization.py: QmSHywy12uQkzakU1RHnnkaPuTzaFTALsKisyYF8dPc8ns
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

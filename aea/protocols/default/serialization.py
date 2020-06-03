@@ -31,7 +31,8 @@ from aea.protocols.default.message import DefaultMessage
 class DefaultSerializer(Serializer):
     """Serialization for the 'default' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'Default' message into bytes.
 
@@ -67,7 +68,8 @@ class DefaultSerializer(Serializer):
         default_bytes = default_msg.SerializeToString()
         return default_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'Default' message.
 

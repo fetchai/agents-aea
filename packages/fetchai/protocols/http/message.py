@@ -26,6 +26,8 @@ from typing import Set, Tuple, cast
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
+from packages.fetchai.protocols.http.serialization import HttpSerializer
+
 logger = logging.getLogger("aea.packages.fetchai.protocols.http.message")
 
 DEFAULT_BODY_SIZE = 4
@@ -35,6 +37,7 @@ class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
     protocol_id = ProtocolId("fetchai", "http", "0.1.0")
+    serializer = HttpSerializer
 
     class Performative(Enum):
         """Performatives for the http protocol."""

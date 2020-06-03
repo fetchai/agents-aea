@@ -28,7 +28,6 @@ from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.carpark_detection.strategy import Strategy
 
 REGISTER_ID = 1
@@ -196,7 +195,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
                 protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(msg),
+                message=msg,
             )
             self.context.logger.info(
                 "[{}]: updating car park detection services on OEF.".format(
@@ -221,7 +220,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
                 protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(msg),
+                message=msg,
             )
             self.context.logger.info(
                 "[{}]: unregistering car park detection services from OEF.".format(

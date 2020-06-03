@@ -72,7 +72,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += str(e.protocol_id).encode("utf-8")
     result += separator
-    result += e.message
+    result += e.message_bytes
     result += separator
 
     return result

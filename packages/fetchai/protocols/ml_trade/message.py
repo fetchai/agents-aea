@@ -30,6 +30,7 @@ from packages.fetchai.protocols.ml_trade.custom_types import (
     Description as CustomDescription,
 )
 from packages.fetchai.protocols.ml_trade.custom_types import Query as CustomQuery
+from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.ml_trade.message")
 
@@ -40,6 +41,7 @@ class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
     protocol_id = ProtocolId("fetchai", "ml_trade", "0.1.0")
+    serializer = MlTradeSerializer
 
     Description = CustomDescription
 

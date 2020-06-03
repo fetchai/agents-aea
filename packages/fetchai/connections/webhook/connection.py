@@ -32,7 +32,6 @@ from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope, EnvelopeContext, URI
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 SUCCESS = 200
 NOT_FOUND = 404
@@ -165,7 +164,7 @@ class WebhookChannel:
             sender=request.remote,
             protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
             context=context,
-            message=HttpSerializer().encode(http_message),
+            message=http_message,
         )
         return envelope
 

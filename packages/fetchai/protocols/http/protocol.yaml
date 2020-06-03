@@ -8,8 +8,8 @@ fingerprint:
   __init__.py: QmRdY1QzpEXg7bX78QTpCTmMKRRR1DcyfpyvkL8xHnoY5C
   http.proto: QmdTUTvvxGxMxSTB67AXjMUSDLdsxBYiSuJNVxHuLKB1jS
   http_pb2.py: QmbwRzuZuSj9c9fb1fv5mPVMbRgJ6Zz5TUKmZmjoKs5dwi
-  message.py: QmcfB66axSpSJr436nqrJsWvxMxJxXPA371sRJtfQ5oXCz
-  serialization.py: Qma1qPZdxKAF1TZsVQoZKxUKSdx5pkP99gSpBpC8dz7PXX
+  message.py: QmYRERg2FUJeHvQFFrsQumwm5ESVCyPGuZpE1rMAcDjV9b
+  serialization.py: QmUgo5BtLYDyy7syHBd6brd8zAXivNR2UEiBckryCwg6hk
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

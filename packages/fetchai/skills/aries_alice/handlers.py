@@ -23,7 +23,7 @@ import json
 from typing import Dict, Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
@@ -32,7 +32,6 @@ from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 
@@ -68,15 +67,13 @@ class DefaultHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        context = EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID)
-        envelope = Envelope(
+        self.context.outbox.put_message(
             to=self.admin_url,
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            context=context,
-            message=HttpSerializer().encode(request_http_message),
+            message=request_http_message,
+            context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
         )
-        self.context.outbox.put(envelope)
 
     def setup(self) -> None:
         """

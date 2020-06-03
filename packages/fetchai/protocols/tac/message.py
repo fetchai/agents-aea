@@ -27,6 +27,7 @@ from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 
 from packages.fetchai.protocols.tac.custom_types import ErrorCode as CustomErrorCode
+from packages.fetchai.protocols.tac.serialization import TacSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.tac.message")
 
@@ -37,6 +38,7 @@ class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
     protocol_id = ProtocolId("fetchai", "tac", "0.1.0")
+    serializer = TacSerializer
 
     ErrorCode = CustomErrorCode
 

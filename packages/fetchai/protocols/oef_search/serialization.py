@@ -34,7 +34,8 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 class OefSearchSerializer(Serializer):
     """Serialization for the 'oef_search' protocol."""
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a 'OefSearch' message into bytes.
 
@@ -83,7 +84,8 @@ class OefSearchSerializer(Serializer):
         oef_search_bytes = oef_search_msg.SerializeToString()
         return oef_search_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a 'OefSearch' message.
 

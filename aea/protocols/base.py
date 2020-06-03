@@ -26,7 +26,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Type, cast
 
 from google.protobuf.struct_pb2 import Struct
 
@@ -38,15 +38,17 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
+
+Address = str
 
 
 class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    serializer = None  # type: Type["Serializer"]
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
@@ -165,12 +167,17 @@ class Message:
             + ")"
         )
 
+    def encode(self) -> bytes:
+        """Encode the message."""
+        return self.serializer.encode(self)
+
 
 class Encoder(ABC):
     """Encoder interface."""
 
+    @staticmethod
     @abstractmethod
-    def encode(self, msg: Message) -> bytes:
+    def encode(msg: Message) -> bytes:
         """
         Encode a message.
 
@@ -182,8 +189,9 @@ class Encoder(ABC):
 class Decoder(ABC):
     """Decoder interface."""
 
+    @staticmethod
     @abstractmethod
-    def decode(self, obj: bytes) -> Message:
+    def decode(obj: bytes) -> Message:
         """
         Decode a message.
 
@@ -203,14 +211,16 @@ class ProtobufSerializer(Serializer):
     It assumes that the Message contains a JSON-serializable body.
     """
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """Encode a message into bytes using Protobuf."""
         body_json = Struct()
         body_json.update(msg.body)
         body_bytes = body_json.SerializeToString()
         return body_bytes
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """Decode bytes into a message using Protobuf."""
         body_json = Struct()
         body_json.ParseFromString(obj)
@@ -227,7 +237,8 @@ class JSONSerializer(Serializer):
     It assumes that the Message contains a JSON-serializable body.
     """
 
-    def encode(self, msg: Message) -> bytes:
+    @staticmethod
+    def encode(msg: Message) -> bytes:
         """
         Encode a message into bytes using JSON format.
 
@@ -237,7 +248,8 @@ class JSONSerializer(Serializer):
         bytes_msg = json.dumps(msg.body).encode("utf-8")
         return bytes_msg
 
-    def decode(self, obj: bytes) -> Message:
+    @staticmethod
+    def decode(obj: bytes) -> Message:
         """
         Decode bytes into a message using JSON.
 

@@ -25,13 +25,14 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, Sequence, Tuple, cast
+from typing import Dict, List, Optional, Sequence, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId, SkillId
 from aea.connections.base import Connection, ConnectionStatus
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.mail import base_pb2
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -214,7 +215,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_id)
-        envelope_pb.message = envelope.message
+        envelope_pb.message = envelope.message_bytes
         if envelope.context is not None:
             envelope_pb.uri = envelope.context.uri_raw
 
@@ -267,7 +268,7 @@ class Envelope:
         to: Address,
         sender: Address,
         protocol_id: ProtocolId,
-        message: bytes,
+        message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
     ):
         """
@@ -316,14 +317,21 @@ class Envelope:
         self._protocol_id = protocol_id
 
     @property
-    def message(self) -> bytes:
+    def message(self) -> Union[Message, bytes]:
         """Get the protocol-specific message."""
         return self._message
 
     @message.setter
-    def message(self, message: bytes) -> None:
+    def message(self, message: Union[Message, bytes]) -> None:
         """Set the protocol-specific message."""
         self._message = message
+
+    @property
+    def message_bytes(self) -> bytes:
+        """Get the protocol-specific message."""
+        if isinstance(self._message, Message):
+            return self._message.encode()
+        return self._message
 
     @property
     def context(self) -> EnvelopeContext:
@@ -357,7 +365,7 @@ class Envelope:
             and self.context == other.context
         )
 
-    def encode(self, serializer: Optional[EnvelopeSerializer] = None) -> bytes:
+    def encode(self, serializer: Optional[EnvelopeSerializer] = None,) -> bytes:
         """
         Encode the envelope.
 
@@ -954,14 +962,23 @@ class OutBox:
         :return: None
         """
         logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'...".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+                envelope.to,
+                envelope.sender,
+                envelope.protocol_id,
+                envelope.message,
+                envelope.context,
             )
         )
         self._multiplexer.put(envelope)
 
     def put_message(
-        self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes
+        self,
+        to: Address,
+        sender: Address,
+        protocol_id: ProtocolId,
+        message: Union[Message, bytes],
+        context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
@@ -971,10 +988,24 @@ class OutBox:
         :param to: the recipient of the envelope.
         :param sender: the sender of the envelope.
         :param protocol_id: the protocol id.
-        :param message: the content of the message.
+        :param message: the message.
+        :param context: the envelope context
         :return: None
         """
         envelope = Envelope(
-            to=to, sender=sender, protocol_id=protocol_id, message=message
+            to=to,
+            sender=sender,
+            protocol_id=protocol_id,
+            message=message,
+            context=context,
+        )
+        logger.debug(
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
+                envelope.to,
+                envelope.sender,
+                envelope.protocol_id,
+                envelope.message,
+                envelope.context,
+            )
         )
         self._multiplexer.put(envelope)

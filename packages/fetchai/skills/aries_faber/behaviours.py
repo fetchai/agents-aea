@@ -25,7 +25,6 @@ from typing import Dict
 from aea.skills.behaviours import OneShotBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 DEFAULT_ADMIN_HOST = "127.0.0.1"
@@ -60,7 +59,7 @@ class FaberBehaviour(OneShotBehaviour):
             to=self.admin_url,
             sender=self.context.agent_address,
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
+            message=request_http_message,
         )
 
     def setup(self) -> None:

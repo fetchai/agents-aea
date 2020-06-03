@@ -28,7 +28,6 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -113,7 +112,7 @@ class FIPAHandler(Handler):
             to=msg.counterparty,
             sender=self.context.agent_address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
+            message=default_msg,
         )
 
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -154,7 +153,7 @@ class FIPAHandler(Handler):
                 to=msg.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(accept_msg),
+                message=accept_msg,
             )
         else:
             self.context.logger.info(
@@ -174,7 +173,7 @@ class FIPAHandler(Handler):
                 to=msg.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(decline_msg),
+                message=decline_msg,
             )
 
     def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
@@ -248,7 +247,7 @@ class FIPAHandler(Handler):
                 to=msg.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
+                message=inform_msg,
             )
             self.context.logger.info(
                 "[{}]: informing counterparty={} of payment.".format(
@@ -358,7 +357,7 @@ class OEFSearchHandler(Handler):
                 to=opponent_addr,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(cfp_msg),
+                message=cfp_msg,
             )
         else:
             self.context.logger.info(
@@ -417,7 +416,7 @@ class MyTransactionHandler(Handler):
                 to=counterparty_id,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform_msg),
+                message=inform_msg,
             )
             self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(

@@ -18,3 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the scaffold protocol."""
+
+from aea.protocols.scaffold.message import (
+    MyScaffoldMessage as ImportedMyScaffoldMessage,
+)
+from aea.protocols.scaffold.serialization import MyScaffoldSerializer
+
+
+class MyScaffoldMessage(ImportedMyScaffoldMessage):
+    serializer = MyScaffoldSerializer

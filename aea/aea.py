@@ -38,7 +38,7 @@ from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default import DefaultMessage
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillComponent
@@ -239,7 +239,10 @@ class AEA(Agent):
             return
 
         try:
-            msg = protocol.serializer.decode(envelope.message)
+            if isinstance(envelope.message, Message):
+                msg = envelope.message
+            else:
+                msg = protocol.serializer.decode(envelope.message)
             msg.counterparty = envelope.sender
             msg.is_incoming = True
         except Exception as e:
