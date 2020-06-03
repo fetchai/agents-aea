@@ -86,7 +86,7 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.2.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
             self.handle_gym_message(envelope)
         else:
             raise ValueError("This protocol is not valid for gym.")
@@ -149,17 +149,18 @@ class GymConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, gym_env: gym.Env, **kwargs):
+    def __init__(self, gym_env: Optional[gym.Env] = None, **kwargs):
         """
         Initialize a connection to a local gym environment.
 
-        :param gym_env: the gym environment.
+        :param gym_env: the gym environment (this cannot be loaded by AEA loader).
         :param kwargs: the keyword arguments of the parent class.
         """
         super().__init__(**kwargs)
-        gym_env_package = cast(str, self.configuration.config.get("env"))
-        assert gym_env_package is not None, "env must be set!"
-        gym_env = locate(gym_env_package)
+        if gym_env is None:
+            gym_env_package = cast(str, self.configuration.config.get("env"))
+            assert gym_env_package is not None, "env must be set!"
+            gym_env = locate(gym_env_package)
         self.channel = GymChannel(self.address, gym_env)
 
     async def connect(self) -> None:
