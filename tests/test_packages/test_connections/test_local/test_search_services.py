@@ -30,7 +30,8 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import AEAConnectionError, Envelope, InBox, Multiplexer
+from aea.mail.base import AEAConnectionError, Envelope
+from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 

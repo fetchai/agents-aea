@@ -32,7 +32,9 @@ from aea.connections.stub.connection import (
     _encode,
     lock_file,
 )
-from aea.mail.base import Address, Envelope
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -48,23 +50,34 @@ class P2PStubConnection(StubConnection):
     The connection detects new messages by watchdogging the input file looking for new lines.
     """
 
+    connection_id = PUBLIC_ID
+
     def __init__(
-        self, address: Address, namespace_dir_path: Union[str, Path], **kwargs
+        self,
+        namespace_dir_path: Union[str, Path],
+        configuration: ConnectionConfig,
+        identity: Identity,
+        **kwargs
     ):
         """
         Initialize a stub connection.
 
-        :param address: agent address.
         :param namesapce_dir_path: directory path to share with other agents.
+        :param connection: the connection configuration
+        :param identity: the agent identity
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
 
         self.namespace = os.path.abspath(namespace_dir_path)
 
-        input_file_path = os.path.join(self.namespace, "{}.in".format(address))
-        output_file_path = os.path.join(self.namespace, "{}.out".format(address))
-        super().__init__(input_file_path, output_file_path, address=address, **kwargs)
+        input_file_path = os.path.join(self.namespace, "{}.in".format(identity.address))
+        output_file_path = os.path.join(
+            self.namespace, "{}.out".format(identity.address)
+        )
+        configuration.config["input_file"] = input_file_path
+        configuration.config["output_file"] = output_file_path
+        super().__init__(configuration=configuration, identity=identity, **kwargs)
 
     async def send(self, envelope: Envelope):
         """
@@ -87,21 +100,27 @@ class P2PStubConnection(StubConnection):
                 file.flush()
 
     async def disconnect(self) -> None:
-        super().disconnect()
+        await super().disconnect()
         os.rmdir(self.namespace)
 
     @classmethod
     def from_config(
-        cls, address: Address, configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Get the stub connection from the connection configuration.
+        Get the P2P Stub connection from the connection configuration.
 
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
+        :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: the connection object
         """
         namespace_dir = configuration.config.get(
             "namespace_dir", tempfile.mkdtemp()
         )  # type: str
-        return P2PStubConnection(address, namespace_dir, configuration=configuration,)
+        return P2PStubConnection(
+            namespace_dir,
+            configuration=configuration,
+            identity=identity,
+            cryptos=cryptos,
+        )

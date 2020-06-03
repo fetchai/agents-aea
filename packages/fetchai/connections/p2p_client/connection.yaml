@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmdwnPo8iC2uqf9CmB4ocbh6HP2jcgCtuFdS4djuajp6Li
-  connection.py: QmQ1zHGtRMk6wCcCg27gUJoCoeojsE2Afpm1c4DQ1CAH2C
+  connection.py: QmeEckP2A3S4P4iy34597KChQn39wCNoyr6PwZg9P2KDLf
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: PeerToPeerConnection
@@ -15,7 +15,7 @@ config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
 excluded_protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 restricted_to_protocols: []
 dependencies:
   fetch:

@@ -32,7 +32,9 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
-from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multiplexer
+from aea.identity.base import Identity
+from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
@@ -349,17 +351,17 @@ def test_get_from_multiplexer_when_empty():
 def test_multiple_connection():
     """Test that we can send a message with two different connections."""
     with LocalNode() as node:
-        address_1 = "address_1"
-        address_2 = "address_2"
+        identity_1 = Identity("", address="address_1")
+        identity_2 = Identity("", address="address_2")
         connection_1_id = PublicId.from_str("author/local_1:0.1.0")
         connection_2_id = PublicId.from_str("author/local_2:0.1.0")
 
         connection_1 = OEFLocalConnection(
-            node, address=address_1, connection_id=connection_1_id
+            node, identity=identity_1, connection_id=connection_1_id
         )
 
         connection_2 = OEFLocalConnection(
-            node, address=address_2, connection_id=connection_2_id
+            node, identity=identity_2, connection_id=connection_2_id
         )
 
         multiplexer = Multiplexer([connection_1, connection_2])
@@ -380,8 +382,8 @@ def test_multiple_connection():
             content=b"hello",
         )
         envelope_from_1_to_2 = Envelope(
-            to=address_2,
-            sender=address_1,
+            to=identity_2.address,
+            sender=identity_1.address,
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
             context=EnvelopeContext(connection_id=connection_1_id),
@@ -392,8 +394,8 @@ def test_multiple_connection():
         assert envelope_from_1_to_2 == actual_envelope
 
         envelope_from_2_to_1 = Envelope(
-            to=address_1,
-            sender=address_2,
+            to=identity_1.address,
+            sender=identity_2.address,
             protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
             context=EnvelopeContext(connection_id=connection_2_id),
@@ -409,10 +411,10 @@ def test_multiple_connection():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        address_1 = "address_1"
+        identity_1 = Identity("", address="address_1")
         public_id = PublicId.from_str("fetchai/my_private_protocol:0.1.0")
         connection_1 = _make_local_connection(
-            address_1,
+            identity_1.address,
             node,
             restricted_to_protocols={public_id},
             excluded_protocols={public_id},
@@ -424,8 +426,8 @@ def test_send_message_no_supported_protocol():
         with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
             protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             envelope = Envelope(
-                to=address_1,
-                sender=address_1,
+                to=identity_1.address,
+                sender=identity_1.address,
                 protocol_id=protocol_id,
                 message=b"some bytes",
             )

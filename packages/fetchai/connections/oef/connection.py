@@ -55,7 +55,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,
@@ -340,6 +340,8 @@ class OEFObjectTranslator:
 
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
+
+    connection_id = PUBLIC_ID
 
     def __init__(
         self,
@@ -671,7 +673,7 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, oef_addr: str, oef_port: int = 10000, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize.
 
@@ -682,6 +684,8 @@ class OEFConnection(Connection):
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
             kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
+        oef_addr = cast(str, self.configuration.config.get("addr"))
+        oef_port = cast(int, self.configuration.config.get("port"))
         self.oef_addr = oef_addr
         self.oef_port = oef_port
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
@@ -799,19 +803,3 @@ class OEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        oef_addr = cast(str, configuration.config.get("addr"))
-        oef_port = cast(int, configuration.config.get("port"))
-        return OEFConnection(
-            oef_addr, oef_port, address=address, configuration=configuration
-        )

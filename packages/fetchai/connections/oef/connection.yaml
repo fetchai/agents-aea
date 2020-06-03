@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmNnVPrgDXSdGTrW9UwBUUzqESJF3Z8Gv3PKi2T27VWTu2
+  connection.py: QmWv6KKoRXqLKGjj2sPZY9xWFsAF8hHm7Y3mx6P6CtQW2M
 fingerprint_ignore_patterns: []
 protocols:
 - fetchai/default:0.1.0
@@ -18,7 +18,7 @@ config:
   addr: ${OEF_ADDR:127.0.0.1}
   port: ${OEF_PORT:10000}
 excluded_protocols:
-- fetchai/gym:0.1.0
+- fetchai/gym:0.2.0
 restricted_to_protocols: []
 dependencies:
   colorlog: {}

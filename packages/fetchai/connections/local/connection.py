@@ -26,7 +26,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, cast
 
-from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -44,6 +44,7 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.1.0")
 
 
 class LocalNode:
@@ -315,7 +316,9 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, local_node: LocalNode, **kwargs):
+    connection_id = PUBLIC_ID
+
+    def __init__(self, **kwargs):
         """
         Load the connection configuration.
 
@@ -324,10 +327,10 @@ class OEFLocalConnection(Connection):
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
         if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "local", "0.1.0")
+            kwargs["connection_id"] = PUBLIC_ID
 
         super().__init__(**kwargs)
-        self._local_node = local_node
+        self._local_node = LocalNode()
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
 
@@ -375,17 +378,3 @@ class OEFLocalConnection(Connection):
             return envelope
         except Exception:
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: "Address", configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Initialize a connection instance from a configuration.
-        :param address: the address of the agent.
-        :param configuration: the connection configuration.
-        :return: an instance of the concrete connection class.
-        """
-        return OEFLocalConnection(
-            LocalNode(), address=address, configuration=configuration
-        )

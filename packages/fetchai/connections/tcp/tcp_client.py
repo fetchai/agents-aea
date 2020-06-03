@@ -26,8 +26,7 @@ from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.mail.base import Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 
@@ -39,14 +38,17 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self, host: str, port: int, **kwargs):
+    def __init__(self, configuration: ConnectionConfig, **kwargs):
         """
-        Initialize a TCP channel.
+        Initialize a TCP client connection.
 
-        :param host: the socket bind address.
-        :param port: the socket bind port.
+        :param configuration: the configuration object.
         """
-        super().__init__(host, port, **kwargs)
+        server_address = cast(str, configuration.config.get("address"))
+        server_port = cast(int, configuration.config.get("port"))
+        super().__init__(
+            server_address, server_port, configuration=configuration, **kwargs
+        )
         self._reader, self._writer = (
             None,
             None,
@@ -100,19 +102,3 @@ class TCPClientConnection(TCPConnection):
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
         return self._writer
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """Get the TCP server connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        server_address = cast(str, configuration.config.get("address"))
-        server_port = cast(int, configuration.config.get("port"))
-        return TCPClientConnection(
-            server_address, server_port, address=address, configuration=configuration
-        )

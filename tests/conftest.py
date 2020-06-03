@@ -44,6 +44,7 @@ from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
+    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
@@ -54,6 +55,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Address
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
@@ -642,36 +644,43 @@ def _make_local_connection(
     restricted_to_protocols=None,
     excluded_protocols=None,
 ) -> Connection:
-    oef_local_connection = OEFLocalConnection(
-        node,
-        address=address,
-        connection_id=PublicId("fetchai", "local", "0.1.0"),
+    configuration = ConnectionConfig(
         restricted_to_protocols=restricted_to_protocols,
         excluded_protocols=excluded_protocols,
+        connection_id=OEFLocalConnection.connection_id,
+    )
+    oef_local_connection = OEFLocalConnection(
+        configuration=configuration, identity=Identity("name", address),
     )
     return oef_local_connection
 
 
 def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+    configuration = ConnectionConfig(
+        oef_addr=oef_addr, oef_port=oef_port, connection_id=OEFConnection.connection_id
+    )
     oef_connection = OEFConnection(
-        oef_addr,
-        oef_port,
-        address=address,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        configuration=configuration, identity=Identity("name", address),
     )
     return oef_connection
 
 
 def _make_tcp_server_connection(address: str, host: str, port: int):
+    configuration = ConnectionConfig(
+        host=host, port=port, connection_id=TCPServerConnection.connection_id
+    )
     tcp_connection = TCPServerConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        configuration=configuration, identity=Identity("name", address),
     )
     return tcp_connection
 
 
 def _make_tcp_client_connection(address: str, host: str, port: int):
+    configuration = ConnectionConfig(
+        host=host, port=port, connection_id=TCPClientConnection.connection_id
+    )
     tcp_connection = TCPClientConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        configuration=configuration, identity=Identity("name", address),
     )
     return tcp_connection
 
@@ -679,21 +688,24 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
 def _make_p2p_client_connection(
     address: Address, provider_addr: str, provider_port: int
 ):
+    configuration = ConnectionConfig(
+        provider_addr=provider_addr,
+        provider_port=provider_port,
+        connection_id=PeerToPeerClientConnection.connection_id,
+    )
     p2p_client_connection = PeerToPeerClientConnection(
-        provider_addr,
-        provider_port,
-        address=address,
-        connection_id=PublicId("fetchai", "p2p", "0.1.0"),
+        configuration=configuration, identity=Identity("", address),
     )
     return p2p_client_connection
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection = StubConnection(
+    configuration = ConnectionConfig(
         input_file_path=input_file_path,
         output_file_path=output_file_path,
-        connection_id=DEFAULT_CONNECTION,
+        connection_id=StubConnection.connection_id,
     )
+    connection = StubConnection(configuration=configuration)
     return connection
 
 

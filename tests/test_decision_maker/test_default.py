@@ -44,7 +44,7 @@ from aea.decision_maker.default import (
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.identity.base import Identity
-from aea.mail.base import Multiplexer
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 
 from ..conftest import (

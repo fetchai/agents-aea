@@ -41,7 +41,7 @@ from typing import (
 )
 
 from aea.exceptions import AEAException
-from aea.mail.base import InBox
+from aea.multiplexer import InBox
 from aea.skills.base import Behaviour
 
 

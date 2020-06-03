@@ -830,8 +830,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: str = "",
+        author: str = "",
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -843,9 +843,27 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        connection_id: Optional[PublicId] = None,
         **config,
     ):
         """Initialize a connection configuration object."""
+        if connection_id is None:
+            assert name != "", "Name or connection_id must be set."
+            assert author != "", "Author or connection_id must be set."
+            assert version != "", "Version or connection_id must be set."
+        else:
+            assert (
+                name == "" or name == connection_id.name
+            ), "Non matching name in ConnectionConfig name and public id."
+            name = connection_id.name
+            assert (
+                author == "" or author == connection_id.author
+            ), "Non matching author in ConnectionConfig author and public id."
+            author = connection_id.author
+            assert (
+                version == "" or version == connection_id.version
+            ), "Non matching version in ConnectionConfig version and public id."
+            version = connection_id.version
         super().__init__(
             name,
             author,

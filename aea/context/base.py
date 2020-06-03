@@ -26,7 +26,8 @@ from typing import Any, Dict
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ledger_apis import LedgerApis
 from aea.identity.base import Identity
-from aea.mail.base import Address, OutBox
+from aea.mail.base import Address
+from aea.multiplexer import OutBox
 from aea.skills.tasks import TaskManager
 
 DEFAULT_OEF = "default_oef"

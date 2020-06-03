@@ -31,6 +31,7 @@ from typing import Dict, Tuple, cast
 import pytest
 
 from aea.configurations.base import PublicId
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
@@ -54,7 +55,7 @@ class TestHTTPServerConnectionConnectDisconnect:
     def setup_class(cls):
         """Initialise the class and test connect."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -62,7 +63,7 @@ class TestHTTPServerConnectionConnectDisconnect:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -89,7 +90,7 @@ class TestHTTPServerConnectionSend:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -97,7 +98,7 @@ class TestHTTPServerConnectionSend:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -185,7 +186,7 @@ class TestHTTPServerConnectionGET404:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -193,7 +194,7 @@ class TestHTTPServerConnectionGET404:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -257,7 +258,7 @@ class TestHTTPServerConnectionGET408:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -265,7 +266,7 @@ class TestHTTPServerConnectionGET408:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -315,7 +316,7 @@ class TestHTTPServerConnectionGET408:
 
         client_task = asyncio.ensure_future(client_thread(self.host, self.port))
         agent_task = asyncio.ensure_future(
-            agent_processing(self.http_connection, self.address)
+            agent_processing(self.http_connection, self.identity.address)
         )
 
         await asyncio.gather(client_task, agent_task)
@@ -346,7 +347,7 @@ class TestHTTPServerConnectionGET200:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -354,7 +355,7 @@ class TestHTTPServerConnectionGET200:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -454,7 +455,7 @@ class TestHTTPServerConnectionPOST404:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -462,7 +463,7 @@ class TestHTTPServerConnectionPOST404:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -526,7 +527,7 @@ class TestHTTPServerConnectionPOST408:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -534,7 +535,7 @@ class TestHTTPServerConnectionPOST408:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
@@ -584,7 +585,7 @@ class TestHTTPServerConnectionPOST408:
 
         client_task = asyncio.ensure_future(client_thread(self.host, self.port))
         agent_task = asyncio.ensure_future(
-            agent_processing(self.http_connection, self.address)
+            agent_processing(self.http_connection, self.identity.address)
         )
 
         await asyncio.gather(client_task, agent_task)
@@ -615,7 +616,7 @@ class TestHTTPServerConnectionPOST201:
     def setup_class(cls):
         """Initialise the class."""
 
-        cls.address = "my_key"
+        cls.identity = Identity("name", address="my_key")
         cls.host = get_host()
         cls.port = get_unused_tcp_port()
         cls.api_spec_path = os.path.join(ROOT_DIR, "tests", "data", "petstore_sim.yaml")
@@ -623,7 +624,7 @@ class TestHTTPServerConnectionPOST201:
         cls.protocol_id = PublicId("fetchai", "http", "0.1.0")
 
         cls.http_connection = HTTPServerConnection(
-            address=cls.address,
+            identity=cls.identity,
             host=cls.host,
             port=cls.port,
             api_spec_path=cls.api_spec_path,
