@@ -30,7 +30,7 @@ from aea.configurations.base import PublicId
 
 def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
     """
-    Fetch connection/protocol/skill from Registry.
+    Fetch a package (connection/contract/protocol/skill) from Registry.
 
     :param obj_type: str type of object you want to fetch:
         'connection', 'protocol', 'skill'

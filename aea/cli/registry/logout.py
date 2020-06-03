@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Registry utils used for CLI login command."""
+"""Registry utils used for CLI logout command."""
 
 from aea.cli.registry.utils import request_api
 
