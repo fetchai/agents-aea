@@ -634,7 +634,10 @@ def double_escape_windows_path_separator(path):
 
 
 def _make_dummy_connection() -> Connection:
-    dummy_connection = DummyConnection()
+    configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
+    dummy_connection = DummyConnection(
+        configuration=configuration, identity=Identity("name", "address")
+    )
     return dummy_connection
 
 

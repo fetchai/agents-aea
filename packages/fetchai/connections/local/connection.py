@@ -327,24 +327,24 @@ class OEFLocalConnection(Connection):
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest. (Note, AEA loader will not accept this argument.)
         """
         super().__init__(**kwargs)
-        self._local_node = local_node or LocalNode()
+        self._local_node = local_node
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
 
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
+        assert self._local_node is not None, "No local node set!"
         if not self.connection_status.is_connected:
-            self._local_node.start()
             self._reader = Queue()
             self._writer = await self._local_node.connect(self.address, self._reader)
             self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
+        assert self._local_node is not None, "No local node set!"
         if self.connection_status.is_connected:
             assert self._reader is not None
             await self._local_node.disconnect(self.address)
-            self._local_node.stop()
             await self._reader.put(None)
             self._reader, self._writer = None, None
             self.connection_status.is_connected = False
