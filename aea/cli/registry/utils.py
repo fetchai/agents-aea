@@ -162,30 +162,6 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def registry_login(username: str, password: str) -> str:
-    """
-    Login into Registry account.
-
-    :param username: str username.
-    :param password: str password.
-
-    :return: str token
-    """
-    resp = request_api(
-        "POST", "/rest-auth/login/", data={"username": username, "password": password}
-    )
-    return resp["key"]
-
-
-def registry_logout() -> None:
-    """
-    Logout from Registry account.
-
-    :return: None
-    """
-    request_api("POST", "/rest-auth/logout/")
-
-
 def _rm_tarfiles():
     cwd = os.getcwd()
     for filename in os.listdir(cwd):

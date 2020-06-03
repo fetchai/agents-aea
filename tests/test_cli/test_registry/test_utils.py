@@ -32,8 +32,6 @@ from aea.cli.registry.utils import (
     download_file,
     extract,
     is_auth_token_present,
-    registry_login,
-    registry_logout,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
@@ -265,28 +263,6 @@ class RmTarfilesTestCase(TestCase):
         _rm_tarfiles()
         listdir_mock.assert_called_once_with("cwd")
         remove_mock.assert_called_once()
-
-
-@mock.patch("aea.cli.registry.utils.request_api", return_value={"key": "key"})
-class RegistryLoginTestCase(TestCase):
-    """Test case for registry_login method."""
-
-    def test_registry_login_positive(self, request_api_mock):
-        """Test for registry_login method positive result."""
-        result = registry_login("username", "password")
-        expected_result = "key"
-        self.assertEqual(result, expected_result)
-        request_api_mock.assert_called_once()
-
-
-@mock.patch("aea.cli.registry.utils.request_api")
-class RegistryLogoutTestCase(TestCase):
-    """Test case for registry_logout method."""
-
-    def test_registry_logout_positive(self, request_api_mock):
-        """Test for registry_logout method positive result."""
-        registry_logout()
-        request_api_mock.assert_called_once()
 
 
 @mock.patch("aea.cli.registry.utils.get_auth_token", return_value="token")
