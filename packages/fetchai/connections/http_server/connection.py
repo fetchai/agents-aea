@@ -467,6 +467,7 @@ class HTTPServerConnection(Connection):
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
+        assert host is not None and port is not None, "host and port must be set!"
         api_spec_path = cast(str, self.configuration.config.get("api_spec_path"))
         self.channel = HTTPChannel(
             self.address,

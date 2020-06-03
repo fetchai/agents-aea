@@ -62,6 +62,7 @@ class TestWebhookConnect:
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
+            connection_id=WebhookConnection.connection_id,
         )
         cls.webhook_connection = WebhookConnection(
             configuration=configuration, identity=cls.identity,
@@ -94,6 +95,7 @@ class TestWebhookDisconnection:
             webhook_address=cls.address,
             webhook_port=cls.port,
             webhook_url_path="/webhooks/topic/{topic}/",
+            connection_id=WebhookConnection.connection_id,
         )
         cls.webhook_connection = WebhookConnection(
             configuration=configuration, identity=cls.identity,

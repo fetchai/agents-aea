@@ -469,9 +469,6 @@ class P2PLibp2pConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
         self._check_go_installed()
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID  # TOFIX(LR) why do we need to add this?
-
         # we put it here so below we can access the address
         super().__init__(**kwargs)
         libp2p_key_file = self.configuration.config.get(
@@ -485,12 +482,15 @@ class P2PLibp2pConnection(Connection):
         libp2p_port_public = self.configuration.config.get(
             "libp2p_public_port"
         )  # Optional[int]
-        libp2p_entry_peers = list(
-            cast(List, self.configuration.config.get("libp2p_entry_peers"))
-        )
+        libp2p_entry_peers = self.configuration.config.get("libp2p_entry_peers")
+        if libp2p_entry_peers is None:
+            libp2p_entry_peers = []
+        libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
         log_file = self.configuration.config.get("libp2p_log_file")  # Optional[str]
         env_file = self.configuration.config.get("libp2p_env_file")  # Optional[str]
-
+        assert (
+            libp2p_host is not None and libp2p_port is not None and log_file is not None
+        ), "Config is missing values!"
         if libp2p_key_file is None:
             key = FetchAICrypto()
         else:

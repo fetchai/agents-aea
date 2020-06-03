@@ -318,25 +318,23 @@ class OEFLocalConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, local_node: Optional[LocalNode] = None, **kwargs):
         """
         Load the connection configuration.
 
         Initialize a OEF proxy for a local OEF Node
 
-        :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest. (Note, AEA loader will not accept this argument.)
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
-
         super().__init__(**kwargs)
-        self._local_node = LocalNode()
+        self._local_node = local_node or LocalNode()
         self._reader = None  # type: Optional[Queue]
         self._writer = None  # type: Optional[Queue]
 
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         if not self.connection_status.is_connected:
+            self._local_node.start()
             self._reader = Queue()
             self._writer = await self._local_node.connect(self.address, self._reader)
             self.connection_status.is_connected = True
@@ -346,6 +344,7 @@ class OEFLocalConnection(Connection):
         if self.connection_status.is_connected:
             assert self._reader is not None
             await self._local_node.disconnect(self.address)
+            self._local_node.stop()
             await self._reader.put(None)
             self._reader, self._writer = None, None
             self.connection_status.is_connected = False

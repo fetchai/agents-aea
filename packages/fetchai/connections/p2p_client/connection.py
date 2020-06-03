@@ -161,11 +161,10 @@ class PeerToPeerClientConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize a connection to an SDK or API."""
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
         addr = cast(str, self.configuration.config.get("addr"))
         port = cast(int, self.configuration.config.get("port"))
+        assert addr is not None and port is not None, "addr and port must be set!"
         self.channel = PeerToPeerChannel(self.address, addr, port, excluded_protocols=self.excluded_protocols)  # type: ignore
 
     async def connect(self) -> None:

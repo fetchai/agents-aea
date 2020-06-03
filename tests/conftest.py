@@ -650,14 +650,14 @@ def _make_local_connection(
         connection_id=OEFLocalConnection.connection_id,
     )
     oef_local_connection = OEFLocalConnection(
-        configuration=configuration, identity=Identity("name", address),
+        configuration=configuration, identity=Identity("name", address), local_node=node
     )
     return oef_local_connection
 
 
 def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
     configuration = ConnectionConfig(
-        oef_addr=oef_addr, oef_port=oef_port, connection_id=OEFConnection.connection_id
+        addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(
         configuration=configuration, identity=Identity("name", address),
@@ -667,7 +667,7 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
 
 def _make_tcp_server_connection(address: str, host: str, port: int):
     configuration = ConnectionConfig(
-        host=host, port=port, connection_id=TCPServerConnection.connection_id
+        address=host, port=port, connection_id=TCPServerConnection.connection_id
     )
     tcp_connection = TCPServerConnection(
         configuration=configuration, identity=Identity("name", address),
@@ -677,7 +677,7 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
 
 def _make_tcp_client_connection(address: str, host: str, port: int):
     configuration = ConnectionConfig(
-        host=host, port=port, connection_id=TCPClientConnection.connection_id
+        address=host, port=port, connection_id=TCPClientConnection.connection_id
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration, identity=Identity("name", address),
@@ -689,8 +689,8 @@ def _make_p2p_client_connection(
     address: Address, provider_addr: str, provider_port: int
 ):
     configuration = ConnectionConfig(
-        provider_addr=provider_addr,
-        provider_port=provider_port,
+        addr=provider_addr,
+        port=provider_port,
         connection_id=PeerToPeerClientConnection.connection_id,
     )
     p2p_client_connection = PeerToPeerClientConnection(
@@ -701,8 +701,8 @@ def _make_p2p_client_connection(
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
     configuration = ConnectionConfig(
-        input_file_path=input_file_path,
-        output_file_path=output_file_path,
+        input_file=input_file_path,
+        output_file=output_file_path,
         connection_id=StubConnection.connection_id,
     )
     connection = StubConnection(configuration=configuration)

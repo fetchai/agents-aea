@@ -504,8 +504,6 @@ class SOEFConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize."""
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         if (
             kwargs.get("configuration") is None
             and kwargs.get("excluded_protocols") is None
@@ -522,6 +520,9 @@ class SOEFConnection(Connection):
         api_key = cast(str, self.configuration.config.get("api_key"))
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
+        assert (
+            api_key is not None and soef_addr is not None and soef_port is not None
+        ), "api_key, soef_addr and soef_port must be set!"
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port

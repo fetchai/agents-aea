@@ -44,8 +44,8 @@ def run():
 
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
-        input_file_path=INPUT_FILE,
-        output_file_path=OUTPUT_FILE,
+        input_file=INPUT_FILE,
+        output_file=OUTPUT_FILE,
         connection_id=StubConnection.connection_id,
     )
     stub_connection = StubConnection(

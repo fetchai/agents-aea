@@ -203,8 +203,6 @@ class StubConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize a stub connection."""
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
         input_file: str = self.configuration.config.get(
             INPUT_FILE_KEY, DEFAULT_INPUT_FILE_NAME

@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb
-  base.py: QmSVEVMmte4LwDw5UzKfYrXRYNEh3ET9YR8VbVyRnp5Uc9
+  base.py: QmekP8rsHarWmbJy6n5tb6fCs7ByxSM5ogwYjDGJ3Gbfi3
   connection.py: QmcG4q5Hg55aXRPiYi6zXAPDCJGchj7xUMxUHoYRS6G1J5
-  tcp_client.py: QmcWnu8BsRbLXZYBLFMAhAZXWQUG3uVsXG9XN8KgheRdv7
-  tcp_server.py: QmawgCQuvcUERjo6qy5oRxpy41g542oKgKcSog5UgRKa3w
+  tcp_client.py: Qmdc3t4soYeCzEBy5pu3jwsFeAMNiu7tZS2d3hs5mdaCXM
+  tcp_server.py: QmewqNtG3rQXZaXyR9uHwZmYumKxqtozxYUFQK8iqVpMya
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: TCPClientConnection

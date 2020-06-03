@@ -66,6 +66,7 @@ def _make_libp2p_connection(
             libp2p_public_port=port,
             libp2p_entry_peers=entry_peers,
             libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
         )
         return P2PLibp2pConnection(configuration=configuration, identity=identity,)
     else:
@@ -76,6 +77,7 @@ def _make_libp2p_connection(
             libp2p_port=port,
             libp2p_entry_peers=entry_peers,
             libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
         )
         return P2PLibp2pConnection(configuration=configuration, identity=identity,)
 

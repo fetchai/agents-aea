@@ -57,7 +57,7 @@ def run():
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
     configuration = ConnectionConfig(
-        oef_addr=HOST, oef_port=PORT, connection_id=OEFConnection.connection_id
+        addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(configuration=configuration, identity=identity)
     ledger_apis = LedgerApis({}, FetchAICrypto.identifier)

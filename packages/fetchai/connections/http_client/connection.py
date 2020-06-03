@@ -172,16 +172,14 @@ class HTTPClientConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize a HTTP client connection."""
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
-
         super().__init__(**kwargs)
-        provider_address = cast(str, self.configuration.config.get("address"))
-        provider_port = cast(int, self.configuration.config.get("port"))
+        address = cast(str, self.configuration.config.get("address"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert address is not None and port is not None, "address and port must be set!"
         self.channel = HTTPClientChannel(
             self.address,
-            provider_address,
-            provider_port,
+            address,
+            port,
             connection_id=self.connection_id,
             excluded_protocols=self.excluded_protocols,
         )

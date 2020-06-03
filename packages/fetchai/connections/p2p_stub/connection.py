@@ -23,16 +23,14 @@ import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Union
+from typing import Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.base import Connection
 from aea.connections.stub.connection import (
     StubConnection,
     _encode,
     lock_file,
 )
-from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
@@ -52,23 +50,18 @@ class P2PStubConnection(StubConnection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(
-        self,
-        namespace_dir_path: Union[str, Path],
-        configuration: ConnectionConfig,
-        identity: Identity,
-        **kwargs
-    ):
+    def __init__(self, configuration: ConnectionConfig, identity: Identity, **kwargs):
         """
-        Initialize a stub connection.
+        Initialize a p2p stub connection.
 
-        :param namesapce_dir_path: directory path to share with other agents.
-        :param connection: the connection configuration
-        :param identity: the agent identity
+        :param configuration: the connection configuration
+        :param identity: the identity
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
-
+        namespace_dir_path = cast(
+            Union[str, Path],
+            configuration.config.get("namespace_dir", tempfile.mkdtemp()),
+        )
+        assert namespace_dir_path is not None, "namespace_dir_path must be set!"
         self.namespace = os.path.abspath(namespace_dir_path)
 
         input_file_path = os.path.join(self.namespace, "{}.in".format(identity.address))
@@ -102,25 +95,3 @@ class P2PStubConnection(StubConnection):
     async def disconnect(self) -> None:
         await super().disconnect()
         os.rmdir(self.namespace)
-
-    @classmethod
-    def from_config(
-        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
-    ) -> "Connection":
-        """
-        Get the P2P Stub connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param cryptos: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        namespace_dir = configuration.config.get(
-            "namespace_dir", tempfile.mkdtemp()
-        )  # type: str
-        return P2PStubConnection(
-            namespace_dir,
-            configuration=configuration,
-            identity=identity,
-            cryptos=cryptos,
-        )

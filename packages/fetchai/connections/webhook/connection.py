@@ -177,13 +177,15 @@ class WebhookConnection(Connection):
 
     def __init__(self, **kwargs):
         """Initialize a web hook connection."""
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
-
         super().__init__(**kwargs)
         webhook_address = cast(str, self.configuration.config.get("webhook_address"))
         webhook_port = cast(int, self.configuration.config.get("webhook_port"))
         webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
+        assert (
+            webhook_address is not None
+            and webhook_port is not None
+            and webhook_url_path is not None
+        ), "webhook_address, webhook_port and webhook_url_path must be set!"
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,

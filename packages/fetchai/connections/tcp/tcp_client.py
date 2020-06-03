@@ -44,11 +44,10 @@ class TCPClientConnection(TCPConnection):
 
         :param configuration: the configuration object.
         """
-        server_address = cast(str, configuration.config.get("address"))
-        server_port = cast(int, configuration.config.get("port"))
-        super().__init__(
-            server_address, server_port, configuration=configuration, **kwargs
-        )
+        address = cast(str, configuration.config.get("address"))
+        port = cast(int, configuration.config.get("port"))
+        assert address is not None and port is not None, "address and port must be set!"
+        super().__init__(address, port, configuration=configuration, **kwargs)
         self._reader, self._writer = (
             None,
             None,

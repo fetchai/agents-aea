@@ -341,8 +341,6 @@ class OEFObjectTranslator:
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    connection_id = PUBLIC_ID
-
     def __init__(
         self,
         address: Address,
@@ -673,6 +671,8 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
+    connection_id = PUBLIC_ID
+
     def __init__(self, **kwargs):
         """
         Initialize.
@@ -681,13 +681,12 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
         super().__init__(**kwargs)
-        oef_addr = cast(str, self.configuration.config.get("addr"))
-        oef_port = cast(int, self.configuration.config.get("port"))
-        self.oef_addr = oef_addr
-        self.oef_port = oef_port
+        addr = cast(str, self.configuration.config.get("addr"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert addr is not None and port is not None, "addr and port must be set!"
+        self.oef_addr = addr
+        self.oef_port = port
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(self.address, self.oef_addr, self.oef_port, core=self._core)  # type: ignore
