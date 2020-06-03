@@ -144,6 +144,26 @@ def _rmdirs(*paths: str) -> None:
             shutil.rmtree(path)
 
 
+def _cast_ctx(context) -> Context:
+    """
+    Cast a Context object from context if needed.
+
+    :param context: Context or click.core.Context object.
+
+    :return: context object.
+    :raises: AEAException if context is none of Context and click.core.Context types.
+    """
+    if type(context) is Context:
+        return context
+    elif type(context) is click.core.Context:
+        return cast(Context, context.obj)
+    else:
+        raise AEAException(
+            "clean_after decorator should be used only on methods with Context "
+            "or click.core.Context object as a first argument."
+        )
+
+
 def clean_after(func: Callable) -> Callable:
     """
     Decorate a function to remove created folders after ClickException raise.
@@ -157,21 +177,13 @@ def clean_after(func: Callable) -> Callable:
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
-        :param click_context: click context object.
+        :param context: context object.
 
         :raises ClickException: if caught re-raises it.
 
         :return: source method output.
         """
-        if type(context) is Context:
-            ctx = context
-        elif type(context) is click.core.Context:
-            ctx = cast(Context, context.obj)
-        else:
-            raise AEAException(
-                "clean_after decorator should be used only on methods with Context "
-                "or click.core.Context object as a first argument."
-            )
+        ctx = _cast_ctx(context)
         try:
             return func(context, *args, **kwargs)
         except click.ClickException as e:

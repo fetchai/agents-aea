@@ -221,7 +221,8 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     except Exception as e:
         raise click.ClickException(str(e))
 
-    Path(dst, "__init__.py").touch()
+    items_folder = os.path.split(dst)[0]
+    Path(items_folder, "__init__.py").touch()
     return Path(dst)
 
 
