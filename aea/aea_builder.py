@@ -74,7 +74,6 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
-from aea.mail.base import Address
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -771,10 +770,9 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
-        connections = self._load_connections(identity.address, connection_ids)
         aea = AEA(
             identity,
-            connections,
+            [],
             wallet,
             ledger_apis,
             resources,
@@ -789,6 +787,8 @@ class AEABuilder:
             loop_mode=self._get_loop_mode(),
             **deepcopy(self._context_namespace),
         )
+        # load connection
+        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
         aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context, resources)
         return aea
@@ -1117,7 +1117,10 @@ class AEABuilder:
         return builder
 
     def _load_connections(
-        self, address: Address, connection_ids: Optional[Collection[PublicId]] = None
+        self,
+        identity: Identity,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
     ):
         connections_ids = self._process_connection_ids(connection_ids)
 
@@ -1127,7 +1130,9 @@ class AEABuilder:
             ]
 
         return [
-            self._load_connection(address, get_connection_configuration(connection_id))
+            self._load_connection(
+                identity, wallet, get_connection_configuration(connection_id)
+            )
             for connection_id in connections_ids
         ]
 
@@ -1177,12 +1182,13 @@ class AEABuilder:
             resources.add_component(skill)
 
     def _load_connection(
-        self, address: Address, configuration: ConnectionConfig
+        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
     ) -> Connection:
         """
         Load a connection from a directory.
 
-        :param address: the connection address.
+        :param identity: the AEA identity
+        :param wallet: the wallet
         :param configuration: the connection configuration.
         :return: the connection.
         """
@@ -1191,7 +1197,7 @@ class AEABuilder:
                 Connection,
                 self._component_instances[ComponentType.CONNECTION][configuration],
             )
-            if connection.address != address:
+            if connection.address != identity.address:
                 logger.warning(
                     "The address set on connection '{}' does not match the default address!".format(
                         str(connection.connection_id)
@@ -1203,9 +1209,22 @@ class AEABuilder:
             return cast(
                 Connection,
                 load_component_from_config(
-                    ComponentType.CONNECTION, configuration, address=address
+                    ComponentType.CONNECTION,
+                    configuration,
+                    identity=identity,
+                    cryptos=wallet.connection_cryptos,
                 ),
             )
+
+    def _load_and_add_connections(
+        self,
+        aea: AEA,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
+    ):
+        connections = self._load_connections(aea.identity, wallet, connection_ids)
+        for c in connections:
+            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:

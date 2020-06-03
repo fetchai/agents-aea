@@ -48,7 +48,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.4.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.5.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -56,7 +56,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany, UseOef):
             "bool",
         )
         self.run_install()
-        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        weather_station_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         file_path = os.path.join("tests", PY_FILE)
         weather_client_process = self.start_subprocess(file_path, cwd=ROOT_DIR)

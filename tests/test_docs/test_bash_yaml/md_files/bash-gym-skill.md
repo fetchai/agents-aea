@@ -10,8 +10,8 @@ mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 ``` bash
-aea add connection fetchai/gym:0.1.0
-aea config set agent.default_connection fetchai/gym:0.1.0
+aea add connection fetchai/gym:0.2.0
+aea config set agent.default_connection fetchai/gym:0.2.0
 ```
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
@@ -20,7 +20,7 @@ aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedR
 aea install
 ```
 ``` bash
-aea run --connections fetchai/gym:0.1.0
+aea run --connections fetchai/gym:0.2.0
 ```
 ``` bash
 cd ..

@@ -30,9 +30,13 @@ from aea.mail.base import Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.2.0")
+
 
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
+
+    connection_id = PUBLIC_ID
 
     def __init__(self, host: str, port: int, **kwargs):
         """
@@ -41,8 +45,6 @@ class TCPConnection(Connection, ABC):
         :param host: the socket bind address.
         :param port: the socket bind port.
         """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PublicId("fetchai", "tcp", "0.1.0")
         super().__init__(**kwargs)
         # for the server, the listening address/port
         # for the client, the server address/port

@@ -19,7 +19,7 @@ description: "The oef connection provides a wrapper around the OEF SDK for conne
 class_name: OEFConnection
 protocols: ["fetchai/oef_search:0.1.0", "fetchai/fipa:0.2.0"]
 restricted_to_protocols: []
-excluded_protocols: ["fetchai/gym:0.1.0"]
+excluded_protocols: ["fetchai/gym:0.2.0"]
 config:
   addr: ${OEF_ADDR:127.0.0.1}
   port: ${OEF_PORT:10000}

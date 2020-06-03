@@ -29,13 +29,13 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger("aea.packages.fetchai.connections.p2p_client")
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_client:0.2.0")
 
 
 class PeerToPeerChannel:
@@ -157,20 +157,15 @@ class PeerToPeerChannel:
 class PeerToPeerClientConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, provider_addr: str, provider_port: int = 8000, **kwargs):
-        """
-        Initialize a connection to an SDK or API.
+    connection_id = PUBLIC_ID
 
-        :param provider_addr: the provider address.
-        :param provider_port: the provider port.
-        :param kwargs: keyword argument for the parent class.
-        """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
+    def __init__(self, **kwargs):
+        """Initialize a connection to an SDK or API."""
         super().__init__(**kwargs)
-        provider_addr = provider_addr
-        provider_port = provider_port
-        self.channel = PeerToPeerChannel(self.address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
+        addr = cast(str, self.configuration.config.get("addr"))
+        port = cast(int, self.configuration.config.get("port"))
+        assert addr is not None and port is not None, "addr and port must be set!"
+        self.channel = PeerToPeerChannel(self.address, addr, port, excluded_protocols=self.excluded_protocols)  # type: ignore
 
     async def connect(self) -> None:
         """
@@ -226,20 +221,3 @@ class PeerToPeerClientConnection(Connection):
             return envelope
         except CancelledError:  # pragma: no cover
             return None
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the P2P connection from the connection configuration.
-
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        addr = cast(str, configuration.config.get("addr"))
-        port = cast(int, configuration.config.get("port"))
-        return PeerToPeerClientConnection(
-            addr, port, address=address, configuration=configuration
-        )

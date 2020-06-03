@@ -8,7 +8,9 @@ from copy import copy
 from threading import Thread
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -28,8 +30,13 @@ A `Multiplexer` only needs a list of connections. The `StubConnection` is a simp
         os.remove(OUTPUT_FILE)
 
     # create the connection and multiplexer objects
+    configuration = ConnectionConfig(
+        input_file=INPUT_FILE,
+        output_file=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
+    )
     stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+        configuration=configuration, identity=Identity("some_agent", "some_address")
     )
     multiplexer = Multiplexer([stub_connection])
 ```
@@ -111,7 +118,9 @@ from copy import copy
 from threading import Thread
 from typing import Optional
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -127,8 +136,13 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # create the connection and multiplexer objects
+    configuration = ConnectionConfig(
+        input_file=INPUT_FILE,
+        output_file=OUTPUT_FILE,
+        connection_id=StubConnection.connection_id,
+    )
     stub_connection = StubConnection(
-        input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+        configuration=configuration, identity=Identity("some_agent", "some_address")
     )
     multiplexer = Multiplexer([stub_connection])
     try:

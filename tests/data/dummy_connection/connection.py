@@ -25,15 +25,19 @@ from typing import Optional
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Address, Envelope
+from aea.crypto.wallet import CryptoStore
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
 
 
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
+    connection_id = PublicId("fetchai", "dummy", "0.1.0")
+
     def __init__(self, **kwargs):
         """Initialize."""
-        super().__init__(connection_id=PublicId("fetchai", "dummy", "0.1.0"), **kwargs)
+        super().__init__(**kwargs)
         self.connection_status.is_connected = False
         self._queue = None
 
@@ -73,13 +77,16 @@ class DummyConnection(Connection):
 
     @classmethod
     def from_config(
-        cls, address: "Address", configuration: ConnectionConfig
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Initialize a connection instance from a configuration.
+        Get the dummy connection from the connection configuration.
 
-        :param address: the address of the agent.
         :param configuration: the connection configuration.
-        :return: an instance of the concrete connection class.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: the connection object
         """
-        return DummyConnection(address=address, configuration=configuration)
+        return DummyConnection(
+            configuration=configuration, identity=identity, cryptos=cryptos
+        )

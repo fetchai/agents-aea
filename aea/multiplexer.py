@@ -71,7 +71,7 @@ class Multiplexer:
     def _initialize_connections_if_any(
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
     ):
-        if connections is not None:
+        if connections is not None and len(connections) > 0:
             assert (
                 0 <= default_connection_index <= len(connections) - 1
             ), "Default connection index out of range."
