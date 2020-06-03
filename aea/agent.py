@@ -104,8 +104,8 @@ class Agent(ABC):
         self._identity = identity
         self._connections = connections
 
-        self._runtime = runtime or AsyncRuntime(loop=loop, agent=self)
-        self._multiplexer = Multiplexer(self._connections, loop=self._runtime._loop)
+        self._runtime = runtime or AsyncRuntime(agent=self, loop=loop)
+        self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
         self._outbox = OutBox(self._multiplexer)
         self._liveness = Liveness()
@@ -229,14 +229,14 @@ class Agent(ABC):
 
     def _start_setup(self) -> None:
         """
-        Set up Agent on start:
+        Set up Agent on start.
+
         - connect Multiplexer
         - call agent.setup
         - set liveness to started
 
         :return: None
         """
-
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
 
@@ -248,7 +248,6 @@ class Agent(ABC):
 
         :return: None
         """
-
         logger.info("[{}]: Start processing messages...".format(self.name))
         assert self._main_loop is not None, "Agent loop was not set"
         self._main_loop.start()

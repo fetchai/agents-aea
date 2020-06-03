@@ -421,15 +421,24 @@ class AsyncMultiplexer:
 
         self._connection_status = ConnectionStatus()
 
-        self._loop = loop if loop is not None else asyncio.new_event_loop()
-        self._lock = asyncio.Lock(loop=self._loop)
-
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._recv_loop_task = None  # type: Optional[Task]
         self._send_loop_task = None  # type: Optional[Task]
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
+        self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop and all event loopp related objects.
+
+        :param loop: asyncio event loop.
+        :return: None
+        """
+        self._loop: AbstractEventLoop = loop
+        self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
 
     def _initialize_connections_if_any(
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
@@ -832,10 +841,19 @@ class Multiplexer(AsyncMultiplexer):
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
         """
         super().__init__(*args, **kwargs)
-        self._thread_runner = ThreadedAsyncRunner(self._loop)
         self._sync_lock = threading.Lock()
         self._thread_was_started = False
         self._is_connected = False
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop and all event loopp related objects.
+
+        :param loop: asyncio event loop.
+        :return: None
+        """
+        super().set_loop(loop)
+        self._thread_runner = ThreadedAsyncRunner(self._loop)
 
     def connect(self) -> None:  # type: ignore  # cause overrides coroutine
         """

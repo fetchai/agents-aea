@@ -61,10 +61,14 @@ class BaseAgentLoop(ABC):
         :params loop: optional asyncio event loop. if not specified a new loop will be created.
         """
         self._agent = agent
-        self._loop = ensure_loop(loop)
+        self.set_loop(ensure_loop(loop))
         self._tasks: List[asyncio.Task] = []
         self._state: AsyncState = AsyncState()
         self._exceptions: List[Exception] = []
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """Set event loop and all event loopp related objects."""
+        self._loop: AbstractEventLoop = loop
 
     def start(self) -> None:
         """
@@ -83,6 +87,8 @@ class BaseAgentLoop(ABC):
             await self._gather_tasks()
         except (CancelledError, KeyboardInterrupt):
             await self._wait_all_tasks_stopped()
+            if self._exceptions:
+                raise self._exceptions[0]
         logger.debug("agent loop stopped")
         self._state.set(AgentLoopStates.stopped)
 

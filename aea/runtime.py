@@ -120,9 +120,9 @@ class AsyncRuntime(BaseRuntime):
                 raise ValueError("Runtime alrady started!")
 
             asyncio.set_event_loop(self._loop)
-            self._loop.set_debug(True)
-            self._agent._multiplexer._loop = self._loop
-            self._agent._main_loop._loop = self._loop
+            self._agent._multiplexer.set_loop(self._loop)
+            self._agent._main_loop.set_loop(self._loop)
+
             self._state.set(RuntimeStates.started)
             self._thread = threading.current_thread()
             self._async_stop_lock = asyncio.Lock()
@@ -211,3 +211,28 @@ class AsyncRuntime(BaseRuntime):
             self._stopping_task = self._loop.create_task(self._stop_coro())
 
         self._loop.call_soon_threadsafe(set_task)
+
+
+class ThreadedRuntime(BaseRuntime):
+    """Run agent and multiplexer in different threads with own asyncio loops."""
+
+    def _start(self) -> None:
+        """Implement runtime start function here."""
+        self._state.set(RuntimeStates.started)
+
+        self._agent.multiplexer.set_loop(asyncio.new_event_loop())
+
+        self._agent.multiplexer.connect()
+        self._agent._start_setup()
+        self._agent._main_loop.start()
+        self._state.set(RuntimeStates.stopped)
+
+    def _stop(self) -> None:
+        """Implement runtime stop function here."""
+        try:
+            self._state.set(RuntimeStates.stopped)
+            self._agent._main_loop.stop()
+            self._agent.multiplexer.disconnect()
+
+        except Exception as e:
+            print(99999999999999999999999999999, e)
