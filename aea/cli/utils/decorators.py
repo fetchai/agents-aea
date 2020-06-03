@@ -23,7 +23,7 @@ import os
 import shutil
 from functools import update_wrapper
 from pathlib import Path
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, Union, cast
 
 import click
 
@@ -144,7 +144,7 @@ def _rmdirs(*paths: str) -> None:
             shutil.rmtree(path)
 
 
-def _cast_ctx(context) -> Context:
+def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
     """
     Cast a Context object from context if needed.
 
@@ -154,9 +154,9 @@ def _cast_ctx(context) -> Context:
     :raises: AEAException if context is none of Context and click.core.Context types.
     """
     if type(context) is Context:
-        return context
+        return context  # type: ignore
     elif type(context) is click.core.Context:
-        return cast(Context, context.obj)
+        return cast(Context, context.obj)  # type: ignore
     else:
         raise AEAException(
             "clean_after decorator should be used only on methods with Context "
@@ -173,7 +173,7 @@ def clean_after(func: Callable) -> Callable:
     :return: decorated method.
     """
 
-    def wrapper(context, *args, **kwargs):
+    def wrapper(context: Union[Context, click.core.Context], *args, **kwargs):
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
