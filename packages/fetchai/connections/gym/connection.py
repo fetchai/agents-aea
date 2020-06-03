@@ -160,7 +160,8 @@ class GymConnection(Connection):
         if gym_env is None:
             gym_env_package = cast(str, self.configuration.config.get("env"))
             assert gym_env_package is not None, "env must be set!"
-            gym_env = locate(gym_env_package)
+            gym_env_class = locate(gym_env_package)
+            gym_env = gym_env_class()
         self.channel = GymChannel(self.address, gym_env)
 
     async def connect(self) -> None:
