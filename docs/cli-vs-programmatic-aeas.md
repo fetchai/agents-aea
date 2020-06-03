@@ -67,6 +67,7 @@ from typing import cast
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.ledger_apis import LedgerApis
@@ -96,7 +97,10 @@ def run():
     identity = Identity(
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
-    oef_connection = OEFConnection(identity=identity, oef_addr=HOST, oef_port=PORT)
+    configuration = ConnectionConfig(
+        oef_addr=HOST, oef_port=PORT, connection_id=OEFConnection.connection_id
+    )
+    oef_connection = OEFConnection(configuration=configuration, identity=identity)
     ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
     resources = Resources()
 
