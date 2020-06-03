@@ -48,8 +48,8 @@ class TestRemoveConnectionWithPublicId:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.connection_id = "fetchai/local:0.2.0"
-        cls.connection_name = "local"
+        cls.connection_id = "fetchai/http_client:0.3.0"
+        cls.connection_name = "http_client"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
@@ -165,8 +165,8 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.connection_id = "fetchai/local:0.2.0"
-        cls.connection_name = "local"
+        cls.connection_id = "fetchai/http_client:0.3.0"
+        cls.connection_name = "http_client"
 
         os.chdir(cls.t)
         result = cls.runner.invoke(

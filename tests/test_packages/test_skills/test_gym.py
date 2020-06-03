@@ -33,7 +33,7 @@ class TestGymSkill(AEATestCaseEmpty):
     @skip_test_windows
     def test_gym(self):
         """Run the gym skill sequence."""
-        self.add_item("skill", "fetchai/gym:0.1.0")
+        self.add_item("skill", "fetchai/gym:0.2.0")
         self.add_item("connection", "fetchai/gym:0.2.0")
         self.run_install()
 
