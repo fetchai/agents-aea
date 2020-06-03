@@ -56,7 +56,7 @@ class TestHTTPClientConnect:
         cls.port = get_unused_tcp_port()
         cls.agent_identity = Identity("name", address="some string")
         configuration = ConnectionConfig(
-            address=cls.address,
+            host=cls.address,
             port=cls.port,
             connection_id=HTTPClientConnection.connection_id,
         )
@@ -94,7 +94,7 @@ class TestHTTPClientDisconnection:
         cls.port = get_unused_tcp_port()
         cls.agent_identity = Identity("name", address="some string")
         configuration = ConnectionConfig(
-            address=cls.address,
+            host=cls.address,
             port=cls.port,
             connection_id=HTTPClientConnection.connection_id,
         )
@@ -127,7 +127,7 @@ async def test_http_send():
     agent_identity = Identity("name", address="some agent address")
 
     configuration = ConnectionConfig(
-        address=address, port=port, connection_id=HTTPClientConnection.connection_id
+        host=address, port=port, connection_id=HTTPClientConnection.connection_id
     )
     http_client_connection = HTTPClientConnection(
         configuration=configuration, identity=agent_identity
