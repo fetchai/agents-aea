@@ -49,6 +49,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registry import registry
+from aea.crypto.wallet import Wallet
 
 
 def verify_or_create_private_keys(ctx: Context) -> None:
@@ -182,6 +183,7 @@ def get_package_path(
     :param ctx: context.
     :param item_type: item type.
     :param public_id: item public ID.
+    :param is_vendor: flag for vendorized path (True by defaut).
 
     :return: vendorized estenation path for package.
     """
@@ -418,7 +420,16 @@ def is_item_present(
     ).exists()
 
 
-def try_get_balance(agent_config, wallet, type_):
+def try_get_balance(agent_config: AgentConfig, wallet: Wallet, type_: str) -> int:
+    """
+    Try to get wallet balance.
+
+    :param agent_config: agent config object.
+    :param wallet: wallet object.
+    :param type_: type of ledger API.
+
+    :retun: token balance.
+    """
     try:
         if type_ not in agent_config.ledger_apis_dict:
             raise ValueError(
