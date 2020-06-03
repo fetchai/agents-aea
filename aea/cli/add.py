@@ -24,7 +24,7 @@ from typing import cast
 import click
 from click.core import Context as ClickContext
 
-from aea.cli.registry.utils import fetch_package
+from aea.cli.registry.add import fetch_package
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context

@@ -21,7 +21,6 @@
 
 import os
 import tarfile
-from pathlib import Path
 
 import click
 
@@ -30,7 +29,6 @@ import requests
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import PublicId
 
 
 def get_auth_token() -> str:
@@ -162,77 +160,6 @@ def extract(source: str, target: str) -> None:
         raise Exception("Unknown file type: {}".format(source))
 
     os.remove(source)
-
-
-def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
-    """
-    Fetch connection/protocol/skill from Registry.
-
-    :param obj_type: str type of object you want to fetch:
-        'connection', 'protocol', 'skill'
-    :param public_id: str public ID of object.
-    :param cwd: str path to current working directory.
-
-    :return: package path
-    """
-    logger.debug(
-        "Fetching {obj_type} {public_id} from Registry...".format(
-            public_id=public_id, obj_type=obj_type
-        )
-    )
-    author, name, version = public_id.author, public_id.name, public_id.version
-    item_type_plural = obj_type + "s"  # used for API and folder paths
-
-    api_path = "/{}/{}/{}/{}".format(item_type_plural, author, name, version)
-    resp = request_api("GET", api_path)
-    file_url = resp["file"]
-
-    logger.debug(
-        "Downloading {obj_type} {public_id}...".format(
-            public_id=public_id, obj_type=obj_type
-        )
-    )
-    filepath = download_file(file_url, cwd)
-
-    # next code line is needed because the items are stored in tarball packages as folders
-    dest = os.path.split(dest)[0]  # TODO: replace this hotfix with a proper solution
-    logger.debug(
-        "Extracting {obj_type} {public_id}...".format(
-            public_id=public_id, obj_type=obj_type
-        )
-    )
-    extract(filepath, dest)
-    click.echo(
-        "Successfully fetched {obj_type}: {public_id}.".format(
-            public_id=public_id, obj_type=obj_type
-        )
-    )
-    package_path = os.path.join(dest, public_id.name)
-    return Path(package_path)
-
-
-def registry_login(username: str, password: str) -> str:
-    """
-    Login into Registry account.
-
-    :param username: str username.
-    :param password: str password.
-
-    :return: str token
-    """
-    resp = request_api(
-        "POST", "/rest-auth/login/", data={"username": username, "password": password}
-    )
-    return resp["key"]
-
-
-def registry_logout() -> None:
-    """
-    Logout from Registry account.
-
-    :return: None
-    """
-    request_api("POST", "/rest-auth/logout/")
 
 
 def _rm_tarfiles():
