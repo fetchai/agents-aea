@@ -20,28 +20,23 @@
 """This module contains the libp2p client connection."""
 
 import asyncio
-import errno
 import logging
-import os
 import random
-import shutil
 import struct
-import subprocess  # nosec
-import sys
-import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from pathlib import Path
 from random import randint
-from typing import IO, List, Optional, Sequence, cast, Union
+from typing import List, Optional, Sequence, Union
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Address, Envelope
 
-logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
+logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p_client")
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.1.0")
+
 
 class Uri:
     """
@@ -124,7 +119,7 @@ class Libp2pClientConnection(Connection):
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)
         self.node_uri = self.delegate_uris[index]
-        #self.node_cert = self.delegate_certs[index]
+        # self.node_cert = self.delegate_certs[index]
 
         # tcp connection
         self._reader = None  # type: asyncio.StreamReader
@@ -158,7 +153,6 @@ class Libp2pClientConnection(Connection):
 
             self.connection_status.is_connecting = False
             self.connection_status.is_connected = True
-            
 
             # start receiving msgs
             self._in_queue = asyncio.Queue()
@@ -168,9 +162,9 @@ class Libp2pClientConnection(Connection):
         except (CancelledError, Exception) as e:
             self.connection_status.is_connected = False
             raise e
-    
+
     async def _setup_connection(self):
-        await self._send(bytes(self.agent_addr, 'utf-8'))
+        await self._send(bytes(self.agent_addr, "utf-8"))
         await self._receive()
 
     async def disconnect(self) -> None:
@@ -193,7 +187,7 @@ class Libp2pClientConnection(Connection):
         await self._writer.drain()
         self._writer.close()
         # TOFIX(LR) requires python 3.7 minimum
-        # await self._writer.wait_closed() 
+        # await self._writer.wait_closed()
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -291,17 +285,17 @@ class Libp2pClientConnection(Connection):
             key = FetchAICrypto()
         else:
             key = FetchAICrypto(key_file)
-        
+
         if libp2p_host is None or libp2p_port is None:
             raise ValueError("libp2p node tcp uri is mandatory")
         libp2p_uri = Uri(host=libp2p_host, port=libp2p_port)
 
-        uris = list() # type: List[str]
-        certs_files = list() # type: List[str]
+        uris = list()  # type: List[str]
+        certs_files = list()  # type: List[str]
 
         uris.append(libp2p_uri)
         if libp2p_cert_file is not None:
-            certs_files.append(libp2p_cert_file) # TOFIX(LR) will be mandatory 
+            certs_files.append(libp2p_cert_file)  # TOFIX(LR) will be mandatory
 
         return Libp2pClientConnection(
             address,  # TOFIX(LR) need to generate signature as well

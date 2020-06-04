@@ -37,10 +37,10 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     P2PLibp2pConnection,
     Uri,
 )
-
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     Libp2pClientConnection,
 )
+
 
 from ....conftest import skip_test_windows
 
@@ -92,7 +92,7 @@ def _make_libp2p_client_connection(
     )
 
 
-# @skip_test_windows
+@skip_test_windows
 @pytest.mark.asyncio
 class TestLibp2pClientConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
@@ -132,7 +132,7 @@ class TestLibp2pClientConnectionConnectDisconnect:
             pass
 
 
-# @skip_test_windows
+@skip_test_windows
 class TestLibp2pClientConnectionEchoEnvelope:
     """Test that connection will route envelope to destination through the same libp2p node"""
 
@@ -233,7 +233,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         except (OSError, IOError):
             pass
 
-# @skip_test_windows
+
+@skip_test_windows
 class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
     """Test that connection will route envelope to destination connected to different node"""
 
@@ -355,7 +356,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             pass
 
 
-# @skip_test_windows
+@skip_test_windows
 class TestLibp2pClientConnectionRouting:
     """Test that libp2p DHT network will reliably route envelopes from clients connected to different nodes"""
 
@@ -372,34 +373,35 @@ class TestLibp2pClientConnectionRouting:
         cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
         cls.multiplexer_node_1.connect()
 
-        time.sleep(2) # TOFIX(LR) not needed
         entry_peer = cls.connection_node_1.node.multiaddrs[0]
 
         cls.connection_node_2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2, delegate_port=DEFAULT_DELEGATE_PORT + 2, entry_peers=[entry_peer]
+            port=DEFAULT_PORT + 2,
+            delegate_port=DEFAULT_DELEGATE_PORT + 2,
+            entry_peers=[entry_peer],
         )
         cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
         cls.multiplexer_node_2.connect()
-        
+
         cls.connections = [cls.connection_node_1, cls.connection_node_2]
         cls.multiplexers = [cls.multiplexer_node_1, cls.multiplexer_node_2]
-        cls.addresses = [cls.connection_node_1.node.agent_addr, cls.connection_node_2.node.agent_addr]
-        #cls.connections = []
-        #cls.multiplexers = []
-        #cls.addresses = []
+        cls.addresses = [
+            cls.connection_node_1.node.agent_addr,
+            cls.connection_node_2.node.agent_addr,
+        ]
 
         for _ in range(DEFAULT_CLIENTS_PER_NODE):
             for port in [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]:
                 conn = _make_libp2p_client_connection(port)
                 muxer = Multiplexer([conn])
-            
+
                 cls.connections.append(conn)
                 cls.multiplexers.append(muxer)
                 cls.addresses.append(conn.agent_addr)
-            
+
                 muxer.connect()
 
-        time.sleep(2) # TOFIX(LR) not needed
+        time.sleep(2)  # TOFIX(LR) not needed
 
     def test_connection_is_established(self):
         for conn in self.connections:
@@ -441,9 +443,7 @@ class TestLibp2pClientConnectionRouting:
         """Tear down the test"""
         for multiplexer in reversed(cls.multiplexers):
             multiplexer.disconnect()
-        #cls.multiplexer_node_1.disconnect()
-        #cls.multiplexer_node_2.disconnect()
-        
+
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

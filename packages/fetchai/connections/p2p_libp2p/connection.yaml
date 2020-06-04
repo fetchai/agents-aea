@@ -8,10 +8,10 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmNUnPDZCFKGjTqxmrtCaJ4F41o88cyvsovN793tFR13gE
-  connection.py: Qmb5dP2nwSsxPWmgAqFmHx87rVte98iXvqpyDYcizSYgcZ
+  aea/api.go: QmWNyteimr85BxKFbopCdNjZd86zDH7eFNUmbaVGYKCZWP
+  connection.py: QmPwCXGQpUuxFnk73dZ3W8xFn46WHSgDf16dn9Vb5fzwwn
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  libp2p_node.go: QmThC8hDZcHTotDDLozF4Y27tHYGj47Hd3qFJYzJoXfW1m
+  libp2p_node.go: QmPXPXYwiAGeDYjLNkrwzKhWPvB97CZjdx8bEDUmpCb1pF
 fingerprint_ignore_patterns:
 - go.sum
 - libp2p_node
