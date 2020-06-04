@@ -39,7 +39,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 )
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     Libp2pClientConnection,
-    Uri as UriC # TOFIX(LR)
+    Uri as UriC,  # TOFIX(LR)
 )
 
 

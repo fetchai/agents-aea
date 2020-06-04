@@ -185,7 +185,7 @@ class Libp2pClientConnection(Connection):
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
-            #self._process_messages_task = None
+            # self._process_messages_task = None
 
         logger.debug("disconnecting libp2p client connection...")
         self._writer.write_eof()
