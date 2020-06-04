@@ -40,6 +40,7 @@ type AeaApi struct {
 	msgout        *os.File
 	out_queue     chan *Envelope
 	closing       bool
+	connected     bool
 	sandbox       bool
 }
 
@@ -79,6 +80,10 @@ func (aea *AeaApi) Queue() <-chan *Envelope {
 	return aea.out_queue
 }
 
+func (aea AeaApi) Connected() bool {
+	return aea.connected
+}
+
 func (aea *AeaApi) Stop() {
 	aea.closing = true
 	aea.stop()
@@ -89,6 +94,12 @@ func (aea *AeaApi) Init() error {
 	if aea.sandbox {
 		return nil
 	}
+
+	if aea.connected {
+		return nil
+	}
+	aea.connected = false
+
 	env_file := os.Args[1]
 	fmt.Println("[aea-api  ][debug] env_file:", env_file)
 
@@ -198,6 +209,8 @@ func (aea *AeaApi) Connect() error {
 	go aea.listen_for_envelopes()
 	fmt.Println("[aea-api  ][info] connected to agent")
 
+	aea.connected = true
+
 	return nil
 }
 
@@ -256,9 +269,15 @@ func write(pipe *os.File, data []byte) error {
 	binary.BigEndian.PutUint32(buf, size)
 	_, err := pipe.Write(buf)
 	if err != nil {
+		fmt.Println("[aea-api  ][error] while writing size to pipe:", size, buf, ":", err, err == os.ErrInvalid)
 		return err
 	}
+	fmt.Println("[aea-api  ][debug] writing size to pipe:", size, buf, ":", err)
 	_, err = pipe.Write(data)
+	if err != nil {
+		fmt.Println("[aea-api  ][error] while writing data to pipe ", data, ":", err)
+	}
+	fmt.Println("[aea-api  ][debug] writing data to pipe len ", size, ":", err)
 	return err
 }
 

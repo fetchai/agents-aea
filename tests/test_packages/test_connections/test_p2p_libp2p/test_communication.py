@@ -84,6 +84,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
         cls.connection = _make_libp2p_connection()
 
     @pytest.mark.asyncio

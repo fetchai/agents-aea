@@ -210,8 +210,11 @@ class Libp2pClientConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 logger.debug("Received None.")
-                await self.disconnect()
-                self.connection_status.is_connected = False
+                if (
+                    self._connection_status.is_connected
+                    or self._connection_status.is_connecting
+                ):
+                    await self.disconnect()
                 return None
                 # TOFIX(LR) attempt restarting the node?
             logger.debug("Received data: {}".format(data))

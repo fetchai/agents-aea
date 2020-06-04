@@ -22,7 +22,6 @@
 import os
 import shutil
 import tempfile
-import time
 from typing import Optional, Sequence
 
 import pytest
@@ -221,6 +220,40 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
+    def test_envelope_echoed_back_node_agent(self):
+        addr_1 = self.connection_client_1.agent_addr
+        addr_n = self.connection_node.node.agent_addr
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        original_envelope = Envelope(
+            to=addr_n,
+            sender=addr_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        self.multiplexer_client_1.put(original_envelope)
+        delivered_envelope = self.multiplexer_node.get(block=True, timeout=10)
+        assert delivered_envelope is not None
+
+        delivered_envelope.to = addr_1
+        delivered_envelope.sender = addr_n
+
+        self.multiplexer_node.put(delivered_envelope)
+        echoed_envelope = self.multiplexer_client_1.get(block=True, timeout=5)
+
+        assert echoed_envelope is not None
+        assert echoed_envelope.to == original_envelope.sender
+        assert delivered_envelope.sender == original_envelope.to
+        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert delivered_envelope.message == original_envelope.message
+
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
@@ -252,7 +285,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
         cls.multiplexer_node_1.connect()
 
-        time.sleep(2)  # TOFIX(LR) Not needed
+        # time.sleep(2)  # TOFIX(LR) Not needed
         genesis_peer = cls.connection_node_1.node.multiaddrs[0]
 
         cls.connection_node_2 = _make_libp2p_connection(
@@ -342,6 +375,40 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
         assert delivered_envelope.message == original_envelope.message
 
+    def test_envelope_echoed_back_node_agent(self):
+        addr_1 = self.connection_client_1.agent_addr
+        addr_n = self.connection_node_2.node.agent_addr
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        original_envelope = Envelope(
+            to=addr_n,
+            sender=addr_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        self.multiplexer_client_1.put(original_envelope)
+        delivered_envelope = self.multiplexer_node_2.get(block=True, timeout=10)
+        assert delivered_envelope is not None
+
+        delivered_envelope.to = addr_1
+        delivered_envelope.sender = addr_n
+
+        self.multiplexer_node_2.put(delivered_envelope)
+        echoed_envelope = self.multiplexer_client_1.get(block=True, timeout=5)
+
+        assert echoed_envelope is not None
+        assert echoed_envelope.to == original_envelope.sender
+        assert delivered_envelope.sender == original_envelope.to
+        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert delivered_envelope.message == original_envelope.message
+
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
@@ -401,8 +468,6 @@ class TestLibp2pClientConnectionRouting:
                 cls.addresses.append(conn.agent_addr)
 
                 muxer.connect()
-
-        time.sleep(2)  # TOFIX(LR) not needed
 
     def test_connection_is_established(self):
         for conn in self.connections:

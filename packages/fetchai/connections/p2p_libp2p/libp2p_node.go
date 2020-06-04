@@ -205,6 +205,10 @@ func main() {
 		handleAeaStream(s, agent)
 	})
 
+	// Connect to the agent
+	check(agent.Connect())
+	log.Println("successfully connected to AEA!")
+
 	// setup delegate service
 	if nodePortDelegate != 0 {
 		if cfg_client {
@@ -216,10 +220,6 @@ func main() {
 			}()
 		}
 	}
-
-	// Connect to the agent
-	check(agent.Connect())
-	log.Println("successfully connected to AEA!")
 
 	////// Receive envelopes from agent and forward to peer
 	////	var bootstrapID peer.ID
@@ -290,17 +290,23 @@ func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDH
 		// read envelopes
 		envel, err := readEnvelopeConn(conn)
 		if err != nil {
-			log.Println("ERROR while reading envelope from client connection:", err)
-			log.Println("      aborting...")
+			if err == io.EOF {
+				log.Println("INFO connection closed by client:", err)
+				log.Println("      stoppig...")
+			} else {
+				log.Println("ERROR while reading envelope from client connection:", err)
+				log.Println("      aborting..")
+			}
 			break
 		}
 
 		// route envelope
 		// first test if destination is self
 		if envel.To == agent.AeaAddress() {
+			log.Println("INFO pre-route envelope destinated to my local agent ...")
 			err = agent.Put(envel)
 			if err != nil {
-				log.Println("ERROR While putting envelope to agent:", err)
+				log.Println("ERROR While putting envelope to agent from tcp client:", err)
 			}
 		} else {
 			err = route(*envel, hhost, hdht)
@@ -433,7 +439,7 @@ func route(envel aea.Envelope, routedHost host.Host, hdht *dht.IpfsDHT) error {
 				return err
 			}
 		} else if conn, exists := cfg_addresses_tcp_map[target]; exists {
-			log.Println("DEBUG route - destination", target, " is a tcp client", conn.LocalAddr().String())
+			log.Println("DEBUG route - destination", target, " is a tcp client", conn.RemoteAddr().String())
 			return writeEnvelopeConn(conn, envel)
 		} else {
 			log.Println("DEBUG route - did NOT found address on my local lookup table, looking for it on the DHT...")
@@ -798,7 +804,7 @@ func handleAeaStream(s network.Stream, agent aea.AeaApi) {
 	} else {
 		err = agent.Put(env)
 		if err != nil {
-			log.Println("ERROR While putting envelope to agent:", err)
+			log.Println("ERROR While putting envelope to agent from stream:", err)
 		}
 	}
 }

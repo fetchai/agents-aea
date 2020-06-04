@@ -681,7 +681,7 @@ class P2PLibp2pConnection(Connection):
             if libp2p_host_delegate is not None:
                 delegate_uri = Uri(host=libp2p_host_delegate, port=libp2p_port_delegate)
             else:
-                delegate_uri = Uri(host="0.0.0.0", port=libp2p_port_delegate)
+                delegate_uri = Uri(host="0.0.0.0", port=libp2p_port_delegate)  # nosec
 
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
