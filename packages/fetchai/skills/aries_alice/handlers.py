@@ -33,8 +33,6 @@ from packages.fetchai.connections.http_client.connection import (
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 
-HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
-
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8031
 
@@ -67,10 +65,8 @@ class DefaultHandler(Handler):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
+        request_http_message.counterparty = self.admin_url
         self.context.outbox.put_message(
-            to=self.admin_url,
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
             context=EnvelopeContext(connection_id=HTTP_CLIENT_CONNECTION_PUBLIC_ID),
         )

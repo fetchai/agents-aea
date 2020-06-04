@@ -26,7 +26,6 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 
 class HttpHandler(Handler):
@@ -95,7 +94,7 @@ class HttpHandler(Handler):
             sender=self.context.agent_address,
             to=http_msg.counterparty,
             protocol_id=http_response.protocol_id,
-            message=HttpSerializer().encode(http_response),
+            message=http_response,
         )
 
     def _handle_post(self, http_msg: HttpMessage) -> None:
@@ -123,7 +122,7 @@ class HttpHandler(Handler):
             sender=self.context.agent_address,
             to=http_msg.counterparty,
             protocol_id=http_response.protocol_id,
-            message=HttpSerializer().encode(http_response),
+            message=http_response,
         )
 
     def teardown(self) -> None:

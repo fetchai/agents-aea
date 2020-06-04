@@ -25,7 +25,6 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.thermometer.strategy import Strategy
 
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -117,7 +116,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
+            message=msg,
         )
         self.context.logger.info(
             "[{}]: updating thermometer services on OEF service directory.".format(
@@ -142,7 +141,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(msg),
+            message=msg,
         )
         self.context.logger.info(
             "[{}]: unregistering thermometer station services from OEF service directory.".format(

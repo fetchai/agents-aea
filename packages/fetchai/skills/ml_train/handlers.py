@@ -30,7 +30,6 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
@@ -124,7 +123,7 @@ class TrainHandler(Handler):
                 to=ml_trade_msg.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(ml_accept),
+                message=ml_accept,
             )
             self.context.logger.info(
                 "[{}]: sending dummy transaction digest ...".format(
@@ -235,7 +234,7 @@ class OEFSearchHandler(Handler):
                 to=opponent_address,
                 sender=self.context.agent_address,
                 protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(cft_msg),
+                message=cft_msg,
             )
 
 
@@ -274,7 +273,7 @@ class MyTransactionHandler(Handler):
                 to=tx_msg_response.tx_counterparty_addr,
                 sender=self.context.agent_address,
                 protocol_id=MlTradeMessage.protocol_id,
-                message=MlTradeSerializer().encode(ml_accept),
+                message=ml_accept,
             )
             self.context.logger.info(
                 "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(

@@ -30,7 +30,6 @@ from packages.fetchai.protocols.fipa.custom_types import (
     Description as CustomDescription,
 )
 from packages.fetchai.protocols.fipa.custom_types import Query as CustomQuery
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 logger = logging.getLogger("aea.packages.fetchai.protocols.fipa.message")
 
@@ -41,7 +40,6 @@ class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
     protocol_id = ProtocolId("fetchai", "fipa", "0.2.0")
-    serializer = FipaSerializer
 
     Description = CustomDescription
 

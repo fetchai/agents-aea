@@ -31,7 +31,6 @@ from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.carpark_client.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.carpark_client.strategy import Strategy
@@ -106,14 +105,10 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=default_msg,
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -149,12 +144,7 @@ class FIPAHandler(Handler):
             )
             accept_msg.counterparty = msg.counterparty
             dialogue.update(accept_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=accept_msg,
-            )
+            self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
                 "[{}]: declining the proposal from sender={}".format(
@@ -169,12 +159,7 @@ class FIPAHandler(Handler):
             )
             decline_msg.counterparty = msg.counterparty
             dialogue.update(decline_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=decline_msg,
-            )
+            self.context.outbox.put_message(message=decline_msg)
 
     def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -243,12 +228,7 @@ class FIPAHandler(Handler):
             )
             inform_msg.counterparty = msg.counterparty
             dialogue.update(inform_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=inform_msg,
-            )
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of payment.".format(
                     self.context.agent_name, msg.counterparty[-5:]
@@ -353,12 +333,7 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg.counterparty = opponent_addr
             dialogues.update(cfp_msg)
-            self.context.outbox.put_message(
-                to=opponent_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=cfp_msg,
-            )
+            self.context.outbox.put_message(message=cfp_msg)
         else:
             self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
@@ -411,13 +386,9 @@ class MyTransactionHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info=json_data,
             )
-            dialogue.outgoing_extend(inform_msg)
-            self.context.outbox.put_message(
-                to=counterparty_id,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=inform_msg,
-            )
+            inform_msg.counterparty = counterparty_id
+            dialogue.update(inform_msg)
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(
                     self.context.agent_name, counterparty_id[-5:]

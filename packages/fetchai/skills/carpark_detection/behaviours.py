@@ -191,12 +191,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 dialogue_reference=(str(self._oef_msf_id), ""),
                 service_description=desc,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=msg,
-            )
+            msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=msg)
             self.context.logger.info(
                 "[{}]: updating car park detection services on OEF.".format(
                     self.context.agent_name
@@ -216,12 +212,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 dialogue_reference=(str(self._oef_msf_id), ""),
                 service_description=self._registered_service_description,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=msg,
-            )
+            msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=msg)
             self.context.logger.info(
                 "[{}]: unregistering car park detection services from OEF.".format(
                     self.context.agent_name

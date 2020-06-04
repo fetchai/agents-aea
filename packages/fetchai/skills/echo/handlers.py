@@ -43,12 +43,7 @@ class EchoHandler(Handler):
         self.context.logger.info(
             "Echo Handler: message={}, sender={}".format(message, message.counterparty)
         )
-        self.context.outbox.put_message(
-            to=message.counterparty,
-            sender=self.context.agent_name,
-            protocol_id=DefaultMessage.protocol_id,
-            message=message,
-        )
+        self.context.outbox.put_message(message=message)
 
     def teardown(self) -> None:
         """

@@ -31,7 +31,6 @@ from aea.skills.base import Handler
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 
@@ -172,12 +171,11 @@ class OEFSearchHandler(Handler):
             performative=TacMessage.Performative.REGISTER,
             agent_name=self.context.agent_name,
         )
-        tac_bytes = TacSerializer().encode(tac_msg)
         self.context.outbox.put_message(
             to=controller_addr,
             sender=self.context.agent_address,
             protocol_id=TacMessage.protocol_id,
-            message=tac_bytes,
+            message=tac_msg,
         )
         self.context.behaviours.tac.is_active = False
 
@@ -441,7 +439,7 @@ class TransactionHandler(Handler):
                     to=game.conf.controller_addr,
                     sender=self.context.agent_address,
                     protocol_id=TacMessage.protocol_id,
-                    message=TacSerializer().encode(msg),
+                    message=msg,
                 )
             else:
                 self.context.logger.warning(

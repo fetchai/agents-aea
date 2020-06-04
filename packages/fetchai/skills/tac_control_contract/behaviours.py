@@ -29,9 +29,7 @@ from aea.skills.behaviours import SimpleBehaviour, TickerBehaviour
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control_contract.game import (
     AgentState,
     Configuration,
@@ -206,7 +204,7 @@ class TACBehaviour(SimpleBehaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
+            message=oef_msg,
         )
         self._registered_desc = desc
         self.context.logger.info(
@@ -234,7 +232,7 @@ class TACBehaviour(SimpleBehaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
+            message=oef_msg,
         )
         self._registered_desc = None
 
@@ -304,7 +302,7 @@ class TACBehaviour(SimpleBehaviour):
                 to=agent_address,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
 
     def _end_tac(self, game: Game, reason: str) -> None:
@@ -320,7 +318,7 @@ class TACBehaviour(SimpleBehaviour):
                 to=agent_addr,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
 
     def _game_finished_summary(self, game: Game) -> None:

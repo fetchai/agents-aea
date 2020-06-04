@@ -24,7 +24,6 @@ from typing import cast
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -83,7 +82,7 @@ class MySearchBehaviour(TickerBehaviour):
                 to=self.context.search_service_address,
                 sender=self.context.agent_address,
                 protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(oef_msg),
+                message=oef_msg,
             )
 
     def teardown(self) -> None:

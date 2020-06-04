@@ -26,7 +26,6 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 
 
@@ -81,7 +80,7 @@ class MLTradeHandler(Handler):
             to=ml_trade_msg.counterparty,
             sender=self.context.agent_address,
             protocol_id=MlTradeMessage.protocol_id,
-            message=MlTradeSerializer().encode(terms_msg),
+            message=terms_msg,
         )
 
     def _handle_accept(self, ml_trade_msg: MlTradeMessage) -> None:
@@ -115,7 +114,7 @@ class MLTradeHandler(Handler):
             to=ml_trade_msg.counterparty,
             sender=self.context.agent_address,
             protocol_id=MlTradeMessage.protocol_id,
-            message=MlTradeSerializer().encode(data_msg),
+            message=data_msg,
         )
 
     def teardown(self) -> None:

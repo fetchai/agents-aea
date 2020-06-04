@@ -26,7 +26,6 @@ from aea.skills.behaviours import OneShotBehaviour
 
 from packages.fetchai.protocols.http.message import HttpMessage
 
-HTTP_PROTOCOL_PUBLIC_ID = HttpMessage.protocol_id
 DEFAULT_ADMIN_HOST = "127.0.0.1"
 DEFAULT_ADMIN_PORT = 8021
 
@@ -55,12 +54,8 @@ class FaberBehaviour(OneShotBehaviour):
             version="",
             bodyy=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
-        self.context.outbox.put_message(
-            to=self.admin_url,
-            sender=self.context.agent_address,
-            protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=request_http_message,
-        )
+        request_http_message.counterparty = self.admin_url
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """

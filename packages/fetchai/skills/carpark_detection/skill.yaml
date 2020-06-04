@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmQoECB7dpCDCG3xCnBsoMy6oqgSdu69CzRcAcuZuyapnQ
-  behaviours.py: QmVZBRnQZvbQHELsV8GC3m1k9zLcyGYwmHke9x7tAQtSq1
+  behaviours.py: QmepjZcV5PVT5a9S8cGSAkR8tqPDD6dhGgELywDJUQyqTR
   carpark_detection_data_model.py: QmZej7YGMXhNAgYG53pio7ifgPhH9giTbwkV1xdpMRyRgr
   detection_database.py: QmaPNzCHC9RnrSQJDGt8kvkerdXS3jYhkPmzz3NtT9eAUh
   dialogues.py: QmXvtptqguRrfHxRpQT9gQYE85x7KLyALmV6Wd7r8ipXxc
-  handlers.py: QmcsfXB51dDWWfYzjKcn4FaRvBkNy6hRo7cqgZqnikafNC
+  handlers.py: QmaMGQv42116aunu21zKLyCETPsVYa1FBDn6x6XMZis1aW
   strategy.py: QmcFQ9QymhW2SRczxiicsgJbUt2PyqZdb3rmQ3ueqWUmzq
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*

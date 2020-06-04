@@ -24,7 +24,6 @@ from typing import cast
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.skills.carpark_client.strategy import Strategy
 
 
@@ -74,12 +73,8 @@ class MySearchBehaviour(TickerBehaviour):
                 dialogue_reference=(str(self._search_id), ""),
                 query=query,
             )
-            self.context.outbox.put_message(
-                to=self.context.search_service_address,
-                sender=self.context.agent_address,
-                protocol_id=OefSearchMessage.protocol_id,
-                message=OefSearchSerializer().encode(search_request),
-            )
+            search_request.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=search_request,)
 
     def teardown(self) -> None:
         """

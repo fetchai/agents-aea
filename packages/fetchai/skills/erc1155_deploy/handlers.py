@@ -27,12 +27,10 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.skills.erc1155_deploy.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 
@@ -94,14 +92,10 @@ class FIPAHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 
     def _handle_cfp(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -151,12 +145,7 @@ class FIPAHandler(Handler):
                     self.context.agent_name, msg.counterparty[-5:], proposal.values
                 )
             )
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(proposal_msg),
-            )
+            self.context.outbox.put_message(message=proposal_msg)
         else:
             self.context.logger.info("Contract items not minted yet. Try again later.")
 

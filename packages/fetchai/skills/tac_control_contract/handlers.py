@@ -27,7 +27,6 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control_contract.game import Game, Phase
 from packages.fetchai.skills.tac_control_contract.parameters import Parameters
 
@@ -104,7 +103,7 @@ class TACHandler(Handler):
                 to=message.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
             return
 
@@ -124,7 +123,7 @@ class TACHandler(Handler):
                 to=message.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
 
         if agent_name in game.registration.agent_addr_to_name.values():
@@ -141,7 +140,7 @@ class TACHandler(Handler):
                 to=message.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
         game.registration.register_agent(message.counterparty, agent_name)
         self.context.logger.info(
@@ -172,7 +171,7 @@ class TACHandler(Handler):
                 to=message.counterparty,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
         else:
             self.context.logger.debug(

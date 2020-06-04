@@ -937,14 +937,16 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: Multiplexer):
+    def __init__(self, multiplexer: Multiplexer, default_address: Address):
         """
         Initialize the outbox.
 
         :param multiplexer: the multiplexer
+        :param default_address: the default address of the agent
         """
         super().__init__()
         self._multiplexer = multiplexer
+        self._default_address = default_address
 
     def empty(self) -> bool:
         """
@@ -970,14 +972,17 @@ class OutBox:
                 envelope.context,
             )
         )
+        assert isinstance(
+            envelope.message, Message
+        ), "Only Message type allowed in envelope message field when putting into outbox."
         self._multiplexer.put(envelope)
 
     def put_message(
         self,
-        to: Address,
-        sender: Address,
-        protocol_id: ProtocolId,
-        message: Union[Message, bytes],
+        message: Message,
+        to: Optional[Address] = None,
+        sender: Optional[Address] = None,
+        protocol_id: Optional[ProtocolId] = None,
         context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
@@ -992,20 +997,23 @@ class OutBox:
         :param context: the envelope context
         :return: None
         """
+        assert isinstance(
+            message, Message
+        ), "Only messages allowed in envelope message field."
+        assert (
+            to or message.counterparty
+        ), "Either provide to or message.counterparty field."
+        assert (
+            to == message.counterparty
+        ), "Inconsistent to and message.counterparty field."
+        assert (
+            protocol_id == message.protocol_id
+        ), "Inconsistent protocol_id and message."
         envelope = Envelope(
-            to=to,
-            sender=sender,
-            protocol_id=protocol_id,
+            to=to or message.counterparty,
+            sender=sender or self._default_address,
+            protocol_id=protocol_id or message.protocol_id,
             message=message,
             context=context,
         )
-        logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'...".format(
-                envelope.to,
-                envelope.sender,
-                envelope.protocol_id,
-                envelope.message,
-                envelope.context,
-            )
-        )
-        self._multiplexer.put(envelope)
+        self.put(envelope)

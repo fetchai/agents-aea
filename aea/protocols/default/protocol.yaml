@@ -5,7 +5,7 @@ description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
-  __init__.py: QmeM6Ld6CugDCTkp3SZoFfpRFfyuqy5vdcu7NSEyREYsye
+  __init__.py: QmPMtKUrzVJp594VqNuapJzCesWLQ6Awjqv2ufG3wKNRmH
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmNzMUvXkBm5bbitR5Yi49ADiwNn1FhCvXqSKKoqAPZyXv
   default_pb2.py: QmeRdcv4f6X4shHKv6i1ktxDo8W7G6pdHsw4cqmz6WrFz3

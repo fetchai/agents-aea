@@ -28,11 +28,9 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import Dialogue, Dialogues
 from packages.fetchai.skills.tac_negotiation.search import Search
@@ -113,13 +111,13 @@ class FIPANegotiationHandler(Handler):
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"fipa_message": FipaSerializer().encode(msg)},
+            error_data={"fipa_message": msg.encode()},
         )
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(default_msg),
+            message=default_msg,
         )
 
     def _on_cfp(self, cfp: FipaMessage, dialogue: Dialogue) -> None:
@@ -207,7 +205,7 @@ class FIPANegotiationHandler(Handler):
             to=dialogue.dialogue_label.dialogue_opponent_addr,
             sender=self.context.agent_address,
             protocol_id=FipaMessage.protocol_id,
-            message=FipaSerializer().encode(fipa_msg),
+            message=fipa_msg,
         )
 
     def _on_propose(self, propose: FipaMessage, dialogue: Dialogue) -> None:
@@ -275,7 +273,7 @@ class FIPANegotiationHandler(Handler):
             to=dialogue.dialogue_label.dialogue_opponent_addr,
             sender=self.context.agent_address,
             protocol_id=FipaMessage.protocol_id,
-            message=FipaSerializer().encode(fipa_msg),
+            message=fipa_msg,
         )
 
     def _on_decline(self, decline: FipaMessage, dialogue: Dialogue) -> None:
@@ -378,7 +376,7 @@ class FIPANegotiationHandler(Handler):
                 to=dialogue.dialogue_label.dialogue_opponent_addr,
                 sender=self.context.agent_address,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(fipa_msg),
+                message=fipa_msg,
             )
 
     def _on_match_accept(self, match_accept: FipaMessage, dialogue: Dialogue) -> None:
@@ -487,12 +485,12 @@ class TransactionHandler(Handler):
                         "tx_id": tx_message.tx_id,
                     },
                 )
-                dialogue.outgoing_extend(fipa_msg)
+                dialogue.update(fipa_msg)
                 self.context.outbox.put_message(
                     to=dialogue.dialogue_label.dialogue_opponent_addr,
                     sender=self.context.agent_address,
                     protocol_id=FipaMessage.protocol_id,
-                    message=FipaSerializer().encode(fipa_msg),
+                    message=fipa_msg,
                 )
             else:
                 self.context.logger.warning(
@@ -606,7 +604,7 @@ class OEFSearchHandler(Handler):
                     to=opponent_addr,
                     sender=self.context.agent_address,
                     protocol_id=FipaMessage.protocol_id,
-                    message=FipaSerializer().encode(fipa_msg),
+                    message=fipa_msg,
                 )
         else:
             self.context.logger.info(

@@ -26,9 +26,7 @@ from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
 
@@ -126,7 +124,7 @@ class TACBehaviour(Behaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
+            message=oef_msg,
         )
         self._registered_desc = desc
 
@@ -149,7 +147,7 @@ class TACBehaviour(Behaviour):
             to=self.context.search_service_address,
             sender=self.context.agent_address,
             protocol_id=OefSearchMessage.protocol_id,
-            message=OefSearchSerializer().encode(oef_msg),
+            message=oef_msg,
         )
         self._registered_desc = None
 
@@ -190,7 +188,7 @@ class TACBehaviour(Behaviour):
                 to=agent_address,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
 
     def _cancel_tac(self):
@@ -207,7 +205,7 @@ class TACBehaviour(Behaviour):
                 to=agent_addr,
                 sender=self.context.agent_address,
                 protocol_id=TacMessage.protocol_id,
-                message=TacSerializer().encode(tac_msg),
+                message=tac_msg,
             )
         if game.phase == Phase.GAME:
             self.context.logger.info(
