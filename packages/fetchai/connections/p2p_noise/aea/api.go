@@ -308,7 +308,7 @@ func run_aea_sandbox(msgin_path string, msgout_path string) error {
 		i := 1
 		for {
 			time.Sleep(time.Duration((rand.Intn(5000) + 3000)) * time.Millisecond)
-			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.1.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
+			envel := &Envelope{"aea-sandbox", "golang", "fetchai/default:0.2.0", []byte("\x08\x01*\x07\n\x05Message from sandbox " + strconv.Itoa(i)), ""}
 			err := write_envelope(msgin, envel)
 			if err != nil {
 				fmt.Println("[aea-api  ][error][sandbox] stopped producing envelopes:", err)

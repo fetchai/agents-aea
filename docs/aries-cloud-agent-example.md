@@ -113,7 +113,7 @@ It then adds the HTTP protocol to the AEA. THe HTTP protocol defines the format 
                 )
             )
         )
-        http_protocol = Protocol(http_protocol_configuration, HttpSerializer())
+        http_protocol = Protocol(http_protocol_configuration, HttpMessage.serializer())
         resources.add_protocol(http_protocol)
 ```
 
@@ -134,11 +134,12 @@ Then, the request message and envelope is created:
             version="",
             bodyy=b"",
         )
+        request_http_message.counterparty = "ACA"
         request_envelope = Envelope(
             to="ACA",
             sender="AEA",
             protocol_id=HTTP_PROTOCOL_PUBLIC_ID,
-            message=HttpSerializer().encode(request_http_message),
+            message=request_http_message,
         )
 ```
 

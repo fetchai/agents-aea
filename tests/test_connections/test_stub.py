@@ -80,7 +80,7 @@ class TestStubConnectionReception:
             SEPARATOR,
             expected_envelope.protocol_id,
             SEPARATOR,
-            expected_envelope.message.decode("utf-8"),
+            expected_envelope.message_bytes.decode("utf-8"),
             SEPARATOR,
         )
         encoded_envelope = encoded_envelope.encode("utf-8")
@@ -90,24 +90,26 @@ class TestStubConnectionReception:
             f.flush()
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
-        assert expected_envelope == actual_envelope
+        assert expected_envelope.to == actual_envelope.to
+        assert expected_envelope.sender == actual_envelope.sender
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        msg.counterparty = actual_envelope.to
+        assert expected_envelope.message == msg
 
     def test_reception_b(self):
         """Test that the connection receives what has been enqueued in the input file."""
         # a message containing delimiters and newline characters
         msg = b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468d\n,\nB8Ab795\n\n49B49C88DC991990E7910891,,dbd\n"
         protocol_id = PublicId.from_str("some_author/some_name:0.1.0")
-        expected_envelope = Envelope(
-            to="any", sender="any", protocol_id=protocol_id, message=msg,
-        )
         encoded_envelope = "{}{}{}{}{}{}{}{}".format(
-            expected_envelope.to,
+            "any",
             SEPARATOR,
-            expected_envelope.sender,
+            "any",
             SEPARATOR,
-            expected_envelope.protocol_id,
+            protocol_id,
             SEPARATOR,
-            expected_envelope.message.decode("utf-8"),
+            msg.decode("utf-8"),
             SEPARATOR,
         )
         encoded_envelope = encoded_envelope.encode("utf-8")
@@ -117,15 +119,18 @@ class TestStubConnectionReception:
             f.flush()
 
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
-        assert expected_envelope == actual_envelope
+        assert "any" == actual_envelope.to
+        assert "any" == actual_envelope.sender
+        assert protocol_id == actual_envelope.protocol_id
+        assert msg == actual_envelope.message
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.1.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:0.2.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_id=PublicId.from_str("fetchai/oef_search:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/oef_search:0.2.0"),
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
@@ -198,7 +203,7 @@ class TestStubConnectionSending:
             SEPARATOR,
             DefaultMessage.protocol_id,
             SEPARATOR,
-            DefaultMessage.serialize.encode(msg).decode("utf-8"),
+            DefaultMessage.serializer.encode(msg).decode("utf-8"),
             SEPARATOR,
         )
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
@@ -243,7 +248,12 @@ class TestStubConnectionSending:
         actual_envelope = Envelope(
             to=to, sender=sender, protocol_id=protocol_id, message=message
         )
-        assert expected_envelope == actual_envelope
+        assert expected_envelope.to == actual_envelope.to
+        assert expected_envelope.sender == actual_envelope.sender
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        msg = DefaultMessage.serializer.decode(actual_envelope.message)
+        msg.counterparty = actual_envelope.to
+        assert expected_envelope.message == msg
 
     @classmethod
     def teardown_class(cls):

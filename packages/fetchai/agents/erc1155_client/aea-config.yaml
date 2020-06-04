@@ -12,9 +12,9 @@ connections:
 contracts:
 - fetchai/erc1155:0.3.0
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/oef_search:0.2.0
 skills:
 - fetchai/erc1155_client:0.3.0
 - fetchai/error:0.2.0

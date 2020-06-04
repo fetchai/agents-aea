@@ -16,5 +16,5 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 ```

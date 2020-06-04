@@ -6,10 +6,10 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmeuSkRPH4ZmNq1sP4bSFntcsv4exNjj8Ybmw8nt7tg8BQ
+  connection.py: QmaqbhLt45GHGeUoDxy9m9E3rJWkyk2hF271VC3t9ZQLLE
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/oef_search:0.1.0
+- fetchai/oef_search:0.2.0
 class_name: SOEFConnection
 config:
   api_key: TwiCIriSl0mLahw17pyqoA
@@ -17,6 +17,6 @@ config:
   soef_port: 9002
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/oef_search:0.1.0
+- fetchai/oef_search:0.2.0
 dependencies:
   defusedxml: {}

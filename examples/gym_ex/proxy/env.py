@@ -179,7 +179,7 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
+            if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.2.0"):
                 gym_msg = envelope.message
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT

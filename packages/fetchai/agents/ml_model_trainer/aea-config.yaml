@@ -11,10 +11,10 @@ connections:
 - fetchai/stub:0.4.0
 contracts: []
 protocols:
-- fetchai/default:0.1.0
-- fetchai/fipa:0.2.0
-- fetchai/ml_trade:0.1.0
-- fetchai/oef_search:0.1.0
+- fetchai/default:0.2.0
+- fetchai/fipa:0.3.0
+- fetchai/ml_trade:0.2.0
+- fetchai/oef_search:0.2.0
 skills:
 - fetchai/error:0.2.0
 - fetchai/ml_train:0.3.0

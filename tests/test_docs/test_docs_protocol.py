@@ -69,7 +69,7 @@ class TestProtocolDocs:
         )
 
     def test_oef_search_protocol(self):
-        """Test the fetchai/oef_search:0.1.0 protocol documentation."""
+        """Test the fetchai/oef_search:0.2.0 protocol documentation."""
         # this is the offset of code blocks for the section under testing
         offset = 4
 
@@ -106,7 +106,7 @@ class TestProtocolDocs:
         compare_enum_classes(ExpectedOefErrorOperation, ActualOefErrorOperation)
 
     def test_fipa_protocol(self):
-        """Test the fetchai/fipa:0.2.0 documentation."""
+        """Test the fetchai/fipa:0.3.0 documentation."""
         offset = 15
         locals_dict = {"Enum": Enum}
         compile_and_exec(self.code_blocks[offset]["text"], locals_dict=locals_dict)

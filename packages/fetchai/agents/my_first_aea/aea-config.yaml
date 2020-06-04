@@ -10,7 +10,7 @@ connections:
 - fetchai/stub:0.4.0
 contracts: []
 protocols:
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 skills:
 - fetchai/echo:0.1.0
 - fetchai/error:0.2.0

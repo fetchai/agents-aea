@@ -70,7 +70,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.2.0
 Then extend the `aea-config.yaml` of each project as follows:
 ``` yaml
 default_routing:
-  ? "fetchai/oef_search:0.1.0"
+  ? "fetchai/oef_search:0.2.0"
   : "fetchai/oef:0.3.0"
 ```
 ### Run OEF

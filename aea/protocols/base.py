@@ -267,7 +267,7 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
-    def __init__(self, configuration: ProtocolConfig, serializer: Serializer):
+    def __init__(self, configuration: ProtocolConfig, message_class: Type[Message]):
         """
         Initialize the protocol manager.
 
@@ -276,12 +276,12 @@ class Protocol(Component):
         """
         super().__init__(configuration)
 
-        self._serializer = serializer  # type: Serializer
+        self._message_class = message_class
 
     @property
-    def serializer(self) -> Serializer:
+    def serializer(self) -> Type[Serializer]:
         """Get the serializer."""
-        return self._serializer
+        return self._message_class.serializer
 
     @classmethod
     def from_dir(cls, directory: str) -> "Protocol":
@@ -314,15 +314,10 @@ class Protocol(Component):
             directory, glob="__init__.py", prefix=configuration.prefix_import_path
         )
         add_modules_to_sys_modules(package_modules)
-        serialization_module = load_module(
-            "serialization", Path(directory, "serialization.py")
-        )
-        classes = inspect.getmembers(serialization_module, inspect.isclass)
-        serializer_classes = list(
-            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
-        )
-        assert len(serializer_classes) == 1, "Not exactly one serializer detected."
-        serializer_class = serializer_classes[0][1]
+        class_module = load_module("message", Path(directory, "message.py"))
+        classes = inspect.getmembers(class_module, inspect.isclass)
+        message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
+        assert len(message_classes) == 1, "Not exactly one message class detected."
+        message_class = message_classes[0][1]
 
-        serializer = serializer_class()
-        return Protocol(configuration, serializer)
+        return Protocol(configuration, message_class)

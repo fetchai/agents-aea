@@ -24,7 +24,7 @@ connections:                                    # The list of connection public 
 - fetchai/stub:0.4.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:0.1.0
+- fetchai/default:0.2.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/error:0.2.0
 default_connection: fetchai/oef:0.3.0           # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).

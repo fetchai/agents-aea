@@ -85,7 +85,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
+            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
             message=message,
         )
         logger.info(
@@ -114,7 +114,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
+            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
             message=message,
         )
         logger.info("Registering agent personality")
@@ -133,7 +133,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
+            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
             message=message,
         )
         logger.info(

@@ -614,7 +614,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.1.0"):
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef_search:0.2.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)

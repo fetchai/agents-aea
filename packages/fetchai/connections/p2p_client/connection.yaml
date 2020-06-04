@@ -14,8 +14,7 @@ class_name: PeerToPeerConnection
 config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
-excluded_protocols:
-- fetchai/gym:0.1.0
+excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
   fetch:

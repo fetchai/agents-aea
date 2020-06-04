@@ -85,7 +85,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.2.0', 'fetchai/oef_search:0.1.0', 'fetchai/default:0.1.0']
+protocols: ['fetchai/fipa:0.3.0', 'fetchai/oef_search:0.2.0', 'fetchai/default:0.2.0']
 ledgers: ['fetchai']
 dependencies:
   pyserial: {}
@@ -127,7 +127,7 @@ models:
   dialogues:
     class_name: Dialogues
     args: {}
-protocols: ['fetchai/fipa:0.2.0','fetchai/default:0.1.0','fetchai/oef_search:0.1.0']
+protocols: ['fetchai/fipa:0.3.0','fetchai/default:0.2.0','fetchai/oef_search:0.2.0']
 ledgers: ['fetchai']
 ```
 ``` yaml

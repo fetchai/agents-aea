@@ -144,7 +144,7 @@ class TestProtocolRegistry:
 
         cls.expected_protocol_ids = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/fipa:0.2.0"),
+            PublicId.from_str("fetchai/fipa:0.3.0"),
         }
 
     def test_fetch_all(self):
@@ -238,7 +238,7 @@ class TestResources:
 
         cls.expected_protocols = {
             DEFAULT_PROTOCOL,
-            PublicId.from_str("fetchai/oef_search:0.1.0"),
+            PublicId.from_str("fetchai/oef_search:0.2.0"),
         }
 
     def test_unregister_handler(self):

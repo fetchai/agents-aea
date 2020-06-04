@@ -137,7 +137,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.1.0"):
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef_search:0.2.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
