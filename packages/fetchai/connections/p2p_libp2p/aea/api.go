@@ -25,20 +25,22 @@ import (
 */
 
 type AeaApi struct {
-	msgin_path  string
-	msgout_path string
-	agent_addr  string
-	id          string
-	entry_peers []string
-	host        string
-	port        uint16
-	host_public string
-	port_public uint16
-	msgin       *os.File
-	msgout      *os.File
-	out_queue   chan *Envelope
-	closing     bool
-	sandbox     bool
+	msgin_path    string
+	msgout_path   string
+	agent_addr    string
+	id            string
+	entry_peers   []string
+	host          string
+	port          uint16
+	host_public   string
+	port_public   uint16
+	host_delegate string
+	port_delegate uint16
+	msgin         *os.File
+	msgout        *os.File
+	out_queue     chan *Envelope
+	closing       bool
+	sandbox       bool
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -55,6 +57,10 @@ func (aea AeaApi) Address() (string, uint16) {
 
 func (aea AeaApi) PublicAddress() (string, uint16) {
 	return aea.host_public, aea.port_public
+}
+
+func (aea AeaApi) DelegateAddress() (string, uint16) {
+	return aea.host_delegate, aea.port_delegate
 }
 
 func (aea AeaApi) EntryPeers() []string {
@@ -98,6 +104,7 @@ func (aea *AeaApi) Init() error {
 	entry_peers := os.Getenv("AEA_P2P_ENTRY_URIS")
 	uri := os.Getenv("AEA_P2P_URI")
 	uri_public := os.Getenv("AEA_P2P_URI_PUBLIC")
+	uri_delegate := os.Getenv("AEA_P2P_DELEGATE_URI")
 	fmt.Println("[aea-api  ][debug] msgin_path:", aea.msgin_path)
 	fmt.Println("[aea-api  ][debug] msgout_path:", aea.msgout_path)
 	fmt.Println("[aea-api  ][debug] id:", aea.id)
@@ -105,6 +112,7 @@ func (aea *AeaApi) Init() error {
 	fmt.Println("[aea-api  ][debug] entry_peers:", entry_peers)
 	fmt.Println("[aea-api  ][debug] uri:", uri)
 	fmt.Println("[aea-api  ][debug] uri public:", uri_public)
+	fmt.Println("[aea-api  ][debug] uri delegate service:", uri_delegate)
 
 	if aea.msgin_path == "" || aea.msgout_path == "" || aea.id == "" || uri == "" {
 		fmt.Println("[aea-api  ][error] couldn't get configuration")
@@ -136,7 +144,7 @@ func (aea *AeaApi) Init() error {
 	if uri_public != "" {
 		parts = strings.SplitN(uri_public, ":", -1)
 		if len(parts) < 2 {
-			fmt.Println("[aea-api  ][error] malformed Uri:", uri)
+			fmt.Println("[aea-api  ][error] malformed Uri:", uri_public)
 			return errors.New("Malformed Uri.")
 		}
 		aea.host_public = parts[0]
@@ -145,6 +153,21 @@ func (aea *AeaApi) Init() error {
 	} else {
 		aea.host_public = ""
 		aea.port_public = 0
+	}
+
+	// parse delegate uri
+	if uri_delegate != "" {
+		parts = strings.SplitN(uri_delegate, ":", -1)
+		if len(parts) < 2 {
+			fmt.Println("[aea-api  ][error] malformed Uri:", uri_delegate)
+			return errors.New("Malformed Uri.")
+		}
+		aea.host_delegate = parts[0]
+		port, _ = strconv.ParseUint(parts[1], 10, 16)
+		aea.port_delegate = uint16(port)
+	} else {
+		aea.host_delegate = ""
+		aea.port_delegate = 0
 	}
 
 	// parse entry peers multiaddrs

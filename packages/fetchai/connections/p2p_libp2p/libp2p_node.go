@@ -29,8 +29,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"time"
 
@@ -68,9 +70,10 @@ func check(err error) {
 
 // TOFIX(LR) temp, just the time to refactor
 var (
-	cfg_client        = false
-	cfg_relays        = []peer.ID{}
-	cfg_addresses_map = map[string]string{}
+	cfg_client            = false
+	cfg_relays            = []peer.ID{}
+	cfg_addresses_map     = map[string]string{}
+	cfg_addresses_tcp_map = map[string]net.Conn{}
 )
 
 func main() {
@@ -80,7 +83,7 @@ func main() {
 	// Initialize connection to aea
 	agent := aea.AeaApi{}
 	check(agent.Init())
-	log.Println("successfully initialised API to AEA!")
+	log.Println("successfully initialized API to AEA!")
 
 	// Get node configuration
 
@@ -92,6 +95,9 @@ func main() {
 
 	// node public address, if set
 	nodeHostPublic, nodePortPublic := agent.PublicAddress()
+
+	// node delegate service address, if set
+	nodeHostDelegate, nodePortDelegate := agent.DelegateAddress()
 
 	// node private key
 	key := agent.PrivateKey()
@@ -109,7 +115,7 @@ func main() {
 	check(err)
 
 	// Run as a peer or just as a client
-	// TOFIX(LR) global vars, will be refatoring very soon
+	// TOFIX(LR) global vars, will be refactoring very soon
 	if nodePortPublic == 0 {
 		// if no external address is provided, run as a client
 		cfg_client = true
@@ -130,10 +136,11 @@ func main() {
 
 	log.Println("successfully created libp2p node!")
 
+	annouced := false // TOFIX(LR) hack, need to define own NetworkManager otherwise
 	if !cfg_client {
 		// Allow clients to register their agents addresses
 		log.Println("DEBUG Setting /aea-register/0.1.0 stream...")
-		annouced := false // TOFIX(LR) hack, need to define own NetworkManager otherwise
+		annouced = false // TOFIX(LR) hack, need to define own NetworkManager otherwise
 		routedHost.SetStreamHandler("/aea-register/0.1.0", func(s network.Stream) {
 			handleAeaRegisterStream(hdht, s, &annouced)
 		})
@@ -167,7 +174,7 @@ func main() {
 	}
 
 	if cfg_client {
-		// ask the bootstrap peer to annouce my address for myself
+		// ask the bootstrap peer to announce my address for myself
 		// register my address to bootstrap peer
 		// TOFIX(LR) only to one bootsrap peer
 		err = registerAgentAddressClient(routedHost, aeaAddr, bootstrapPeers[0].ID)
@@ -198,6 +205,18 @@ func main() {
 		handleAeaStream(s, agent)
 	})
 
+	// setup delegate service
+	if nodePortDelegate != 0 {
+		if cfg_client {
+			log.Println("WARN ignoring delegate service for client node")
+		} else {
+			go func() {
+				log.Println("DEBUG setting up traffic delegation service...")
+				setupDelegationService(nodeHostDelegate, nodePortDelegate, routedHost, hdht, &annouced)
+			}()
+		}
+	}
+
 	// Connect to the agent
 	check(agent.Connect())
 	log.Println("successfully connected to AEA!")
@@ -220,6 +239,111 @@ func main() {
 	<-c
 
 	log.Println("node stopped")
+}
+
+//func setupDelegationService(host string, port uint16) (net.Listener, error) {
+func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool) {
+	address := host + ":" + strconv.FormatInt(int64(port), 10)
+	l, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Println("ERROR while setting up listening tcp socket", address)
+		check(err)
+	}
+	defer l.Close()
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Println("ERROR while accepting a new connection:", err)
+			continue
+		}
+		go handleDelegationConnection(conn, hhost, hdht, annouced)
+	}
+}
+
+func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool) {
+	log.Println("INFO received a new connection from ", conn.RemoteAddr().String())
+	// receive agent address
+	buf, err := readBytesConn(conn)
+	if err != nil {
+		log.Println("ERROR while receiving agent's Address:", err)
+		return
+	}
+
+	err = writeBytesConn(conn, []byte("DONE")) // TOFIX(LR)
+	addr := string(buf)
+
+	log.Println("INFO connection from ", conn.RemoteAddr().String(), "established for Address", addr)
+
+	// Add connection to map
+	cfg_addresses_tcp_map[addr] = conn
+	if *annouced {
+		log.Println("DEBUG Announcing tcp client address", addr, "...")
+		err = registerAgentAddress(hdht, addr)
+		if err != nil {
+			log.Println("ERROR While announcing tcp client address to the dht:", err)
+			return
+		}
+	}
+
+	for {
+		// read envelopes
+		envel, err := readEnvelopeConn(conn)
+		if err != nil {
+			log.Println("ERROR while reading envelope from client connection:", err)
+			log.Println("      aborting...")
+			break
+		}
+
+		// route envelope
+		err = route(*envel, hhost, hdht)
+		if err != nil {
+			log.Println("ERROR while routing envelope from client connection to dht..")
+		}
+	}
+}
+
+func writeBytesConn(conn net.Conn, data []byte) error {
+	size := uint32(len(data))
+	buf := make([]byte, 4)
+	binary.BigEndian.PutUint32(buf, size)
+	_, err := conn.Write(buf)
+	if err != nil {
+		return err
+	}
+	_, err = conn.Write(data)
+	return err
+}
+
+func readBytesConn(conn net.Conn) ([]byte, error) {
+	buf := make([]byte, 4)
+	_, err := conn.Read(buf)
+	if err != nil {
+		return buf, err
+	}
+	size := binary.BigEndian.Uint32(buf)
+
+	buf = make([]byte, size)
+	_, err = conn.Read(buf)
+	return buf, err
+}
+
+func writeEnvelopeConn(conn net.Conn, envelope aea.Envelope) error {
+	data, err := proto.Marshal(&envelope)
+	if err != nil {
+		return err
+	}
+	return writeBytesConn(conn, data)
+}
+
+func readEnvelopeConn(conn net.Conn) (*aea.Envelope, error) {
+	envelope := &aea.Envelope{}
+	data, err := readBytesConn(conn)
+	if err != nil {
+		return envelope, err
+	}
+	err = proto.Unmarshal(data, envelope)
+	return envelope, err
 }
 
 func aeaAddressCID(addr string) (cid.Cid, error) {
@@ -259,13 +383,14 @@ func route(envel aea.Envelope, routedHost host.Host, hdht *dht.IpfsDHT) error {
 	if cfg_client {
 		// client can get addresses only through bootstrap peer
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		// TOFIX(LR) choose relay randomly
 		s, err := routedHost.NewStream(ctx, cfg_relays[0], "/aea-address/0.1.0")
 		if err != nil {
 			log.Println("ERROR route - couldn't open stream to relay", cfg_relays[0].Pretty())
 			return err
 		}
 
-		log.Println("DEBUG route - requesting peer ID registred with addr from relay...")
+		log.Println("DEBUG route - requesting peer ID registered with addr from relay...")
 
 		err = writeBytes(s, []byte(target))
 		if err != nil {
@@ -299,6 +424,9 @@ func route(envel aea.Envelope, routedHost host.Host, hdht *dht.IpfsDHT) error {
 				log.Println("CRITICAL route - couldn't get peer ID from local addresses map:", err)
 				return err
 			}
+		} else if conn, exists := cfg_addresses_tcp_map[target]; exists {
+			log.Println("DEBUG route - destination", target, " is a tcp client", conn.LocalAddr().String())
+			return writeEnvelopeConn(conn, envel)
 		} else {
 			log.Println("DEBUG route - did NOT found address on my local lookup table, looking for it on the DHT...")
 			peerid, err = lookupAddress(routedHost, hdht, target)
@@ -439,7 +567,7 @@ func registerAgentAddress(hdht *dht.IpfsDHT, address string) error {
 	// TOFIX(LR) tune timeout
 	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
-	log.Println("DEBUG Annoucing address", address, "to the dht with cid key", addressCID.String())
+	log.Println("DEBUG Announcing address", address, "to the dht with cid key", addressCID.String())
 	err = hdht.Provide(ctx, addressCID, true)
 	if err != context.DeadlineExceeded {
 		return err
@@ -521,6 +649,21 @@ func handleAeaAddressStream(routedHost host.Host, hdht *dht.IpfsDHT, s network.S
 					log.Println("ERROR While sending peerID to peer:", err)
 				}
 				return
+			} else if _, exists := cfg_addresses_tcp_map[reqAddress]; exists {
+				// TOFIX(LR) code duplication for case when reqAddress == address
+				key, err := crypto.UnmarshalPublicKey(pubKey)
+				if err != nil {
+					log.Println("ERROR While preparing peerID to be sent to peer (TOFIX):", err)
+				}
+
+				peerid, err := peer.IDFromPublicKey(key)
+
+				err = writeBytes(s, []byte(peerid.Pretty()))
+				if err != nil {
+					log.Println("ERROR While sending peerID to peer:", err)
+				}
+				return
+
 			} else {
 				log.Println("DEBUG did NOT found address on my local lookup table, looking for it on the DHT...")
 				rpeerid, err := lookupAddress(routedHost, hdht, reqAddress)
@@ -584,13 +727,13 @@ func handleAeaRegisterStream(hdht *dht.IpfsDHT, s network.Stream, annouced *bool
 
 	err = writeBytes(s, []byte("donePeerID"))
 
-	log.Println("DEBUG Received address regitration request (addr, peerid):", client_addr, client_peerid)
+	log.Println("DEBUG Received address registration request (addr, peerid):", client_addr, client_peerid)
 	cfg_addresses_map[string(client_addr)] = string(client_peerid)
 	if *annouced {
-		log.Println("DEBUG Annoucing client address", client_addr, client_peerid, "...")
+		log.Println("DEBUG Announcing client address", client_addr, client_peerid, "...")
 		err = registerAgentAddress(hdht, string(client_addr))
 		if err != nil {
-			log.Println("ERROR While annoucing client address to the dht:", err)
+			log.Println("ERROR While announcing client address to the dht:", err)
 			s.Reset()
 			return
 		}
@@ -603,12 +746,22 @@ func handleAeaNotifStream(s network.Stream, hdht *dht.IpfsDHT, aeaAddr string, a
 	if !*annouced {
 		err := registerAgentAddress(hdht, aeaAddr)
 		if err != nil {
-			log.Println("ERROR while annoucing my address to dht:" + err.Error())
+			log.Println("ERROR while announcing my address to dht:" + err.Error())
 			return
 		}
-		// annouce clients addresses
+		// announce clients addresses
 		for a, _ := range cfg_addresses_map {
 			err = registerAgentAddress(hdht, a)
+			if err != nil {
+				log.Println("ERROR while announcing libp2p client address:", err)
+			}
+		}
+		// announce tcp client addresses
+		for a, _ := range cfg_addresses_tcp_map {
+			err = registerAgentAddress(hdht, a)
+			if err != nil {
+				log.Println("ERROR while announcing tcp client address:", err)
+			}
 		}
 		*annouced = true
 	}
@@ -616,7 +769,7 @@ func handleAeaNotifStream(s network.Stream, hdht *dht.IpfsDHT, aeaAddr string, a
 }
 
 func handleAeaStream(s network.Stream, agent aea.AeaApi) {
-	log.Println("DEBUG Got a new stream")
+	log.Println("DEBUG Got a new aea stream")
 	env, err := readEnvelope(s)
 	if err != nil {
 		log.Println("ERROR While reading envelope from stream:", err)
@@ -627,9 +780,18 @@ func handleAeaStream(s network.Stream, agent aea.AeaApi) {
 	}
 
 	log.Println("DEBUG Received envelope from peer:", env)
-	err = agent.Put(env)
-	if err != nil {
-		log.Println("ERROR While sending envelope to agent:", err)
+
+	// check if destination is a tcp client
+	if conn, exists := cfg_addresses_tcp_map[env.To]; exists {
+		err = writeEnvelopeConn(conn, *env)
+		if err != nil {
+			log.Println("ERROR While sending envelope to tcp client:", err)
+		}
+	} else {
+		err = agent.Put(env)
+		if err != nil {
+			log.Println("ERROR While putting envelope to agent:", err)
+		}
 	}
 }
 

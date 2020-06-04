@@ -184,6 +184,7 @@ class Libp2pNode:
         clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
+        delegate_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -195,6 +196,8 @@ class Libp2pNode:
         :param source: the source path
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
+        :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
+        :param delegation_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
@@ -211,6 +214,9 @@ class Libp2pNode:
 
         # node public uri, optional
         self.public_uri = public_uri
+
+        # node delegate uri, optional
+        self.delegate_uri = delegate_uri
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
@@ -311,6 +317,11 @@ class Libp2pNode:
             env_file.write(
                 "AEA_P2P_URI_PUBLIC={}\n".format(
                     str(self.public_uri) if self.public_uri is not None else ""
+                )
+            )
+            env_file.write(
+                "AEA_P2P_DELEGATE_URI={}\n".format(
+                    str(self.delegate_uri) if self.delegate_uri is not None else ""
                 )
             )
 
@@ -470,6 +481,7 @@ class P2PLibp2pConnection(Connection):
         key: FetchAICrypto,
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
+        delegate_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -480,6 +492,8 @@ class P2PLibp2pConnection(Connection):
 
         :param key: FET sepc256k1 curve private key.
         :param uri: libp2p node ip address and port number in format ipaddress:port.
+        :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
+        :param delegate_uri: libp2p node delegation service ip address and port number in format ipaddress:port.
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: libp2p node log file
         """
@@ -495,6 +509,7 @@ class P2PLibp2pConnection(Connection):
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
+            delegate_uri,
             entry_peers,
             log_file,
             env_file,
@@ -635,6 +650,12 @@ class P2PLibp2pConnection(Connection):
         libp2p_port_public = configuration.config.get(
             "libp2p_public_port"
         )  # Optional[int]
+        libp2p_host_delegate = configuration.config.get(
+            "libp2p_delegate_host"
+        )  # Optional[str]
+        libp2p_port_delegate = configuration.config.get(
+            "libp2p_delegate_port"
+        )  # Optional[int]
         entry_peers = list(cast(List, configuration.config.get("libp2p_entry_peers")))
         log_file = configuration.config.get("libp2p_log_file")  # Optional[str]
         env_file = configuration.config.get("libp2p_env_file")  # Optional[str]
@@ -649,11 +670,18 @@ class P2PLibp2pConnection(Connection):
             if libp2p_host is not None:
                 uri = Uri(host=libp2p_host, port=libp2p_port)
             else:
-                uri = Uri(host="127.0.0.1", port=libp2p_port)
+                uri = Uri(host="0.0.0.0", port=libp2p_port)
 
         public_uri = None
         if libp2p_port_public is not None and libp2p_host_public is not None:
             public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+
+        delegate_uri = None
+        if libp2p_port_delegate is not None:
+            if libp2p_host_delegate is not None:
+                delegate_uri = Uri(host=libp2p_host_delegate, port=libp2p_port_delegate)
+            else:
+                delegate_uri = Uri(host="0.0.0.0", port=libp2p_port_delegate)
 
         entry_peers_maddrs = [MultiAddr(maddr) for maddr in entry_peers]
 
@@ -662,6 +690,7 @@ class P2PLibp2pConnection(Connection):
             key,
             uri,
             public_uri,
+            delegate_uri,
             entry_peers_maddrs,
             log_file,
             env_file,
