@@ -32,6 +32,7 @@ from aea.connections.stub.connection import (
     StubConnection,
 )
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox
+from aea.protocols.default.message import DefaultMessage
 
 
 @click.command()
@@ -48,7 +49,7 @@ def _run_interaction_channel():
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
-    outbox = OutBox(multiplexer)
+    outbox = OutBox(multiplexer, default_address="interact")
 
     try:
         multiplexer.connect()
@@ -102,21 +103,22 @@ def _try_construct_envelope() -> Optional[Envelope]:
         sender = input()  # nosec
         if sender == "":
             raise InterruptInputException
-        click.echo("Provide envelope protocol_id:")
-        protocol_id = input()  # nosec
-        if protocol_id == "":
-            raise InterruptInputException
-        click.echo("Provide envelope message:")
+        # click.echo("Provide envelope protocol_id:")
+        # protocol_id = input()  # nosec
+        # if protocol_id == "":
+        #    raise InterruptInputException
+        click.echo("Provide encoded message for protocol fetchai/default:0.2.0:")
         message_escaped = input()  # nosec
         if message_escaped == "":
             raise InterruptInputException
         message = codecs.decode(message_escaped.encode("utf-8"), "unicode-escape")
         message_encoded = message.encode("utf-8")
+        msg = DefaultMessage.serializer.decode(message_encoded)
         envelope = Envelope(
             to=to,
             sender=sender,
-            protocol_id=PublicId.from_str(protocol_id),
-            message=message_encoded,
+            protocol_id=DefaultMessage.protocol_id,  # PublicId.from_str(protocol_id),
+            message=msg,
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")

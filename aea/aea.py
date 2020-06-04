@@ -19,7 +19,6 @@
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import logging
 from asyncio import AbstractEventLoop
-from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
 from aea.agent import Agent
@@ -259,7 +258,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            self._handle_message_with_handler(deepcopy(msg), handler)
+            self._handle_message_with_handler(msg, handler)
 
     def _handle_message_with_handler(self, message: Message, handler: Handler) -> None:
         """

@@ -57,10 +57,11 @@ class TestEchoSkill(AEATestCaseEmpty):
         time.sleep(2.0)
         received_envelope = self.read_envelope_from_agent(self.agent_name)
 
-        assert sent_envelope.to == received_envelope.sender
+        # assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
         assert sent_envelope.protocol_id == received_envelope.protocol_id
-        assert sent_envelope.message == received_envelope.message
+        msg = DefaultMessage.serializer.decode(received_envelope.message)
+        assert sent_envelope.message == msg
 
         check_strings = (
             "Echo Handler: setup method called.",

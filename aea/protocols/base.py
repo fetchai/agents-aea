@@ -319,5 +319,11 @@ class Protocol(Component):
         message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
         assert len(message_classes) == 1, "Not exactly one message class detected."
         message_class = message_classes[0][1]
+        class_module = load_module("serialization", Path(directory, "serialization.py"))
+        classes = inspect.getmembers(class_module, inspect.isclass)
+        ser_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
+        assert len(ser_classes) == 1, "Not exactly one serializer class detected."
+        ser_class = ser_classes[0][1]
+        message_class.serializer = ser_class
 
         return Protocol(configuration, message_class)
