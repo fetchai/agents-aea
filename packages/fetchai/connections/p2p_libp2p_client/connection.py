@@ -122,12 +122,12 @@ class Libp2pClientConnection(Connection):
         # self.node_cert = self.delegate_certs[index]
 
         # tcp connection
-        self._reader = None  # type: asyncio.StreamReader
-        self._writer = None  # type: asyncio.StreamWriter
+        self._reader = None  # type: Optional[asyncio.StreamReader]
+        self._writer = None  # type: Optional[asyncio.StreamWriter]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._in_queue = None  # type: Optional[asyncio.Queue]
-        self._process_message_task = None  # type: Optional[asyncio.Future]
+        self._process_message_task = None  # type: Union[asyncio.Future, None]
 
     async def connect(self) -> None:
         """
@@ -178,9 +178,14 @@ class Libp2pClientConnection(Connection):
         ), "Call connect before disconnect."
         self.connection_status.is_connected = False
         self.connection_status.is_connecting = False
+
+        assert self._process_messages_task is not None
+        assert self._writer is not None
+
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
-            self._process_messages_task = None
+            # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
+            #self._process_messages_task = None
 
         logger.debug("disconnecting libp2p client connection...")
         self._writer.write_eof()
@@ -240,12 +245,14 @@ class Libp2pClientConnection(Connection):
             self._in_queue.put_nowait(data)
 
     async def _send(self, data: bytes) -> None:
+        assert self._writer is not None
         size = struct.pack("!I", len(data))
         self._writer.write(size)
         self._writer.write(data)
         await self._writer.drain()
 
     async def _receive(self) -> Optional[bytes]:
+        assert self._reader is not None
         try:
             logger.debug("Waiting for messages...")
             buf = await self._reader.readexactly(4)
@@ -290,7 +297,7 @@ class Libp2pClientConnection(Connection):
             raise ValueError("libp2p node tcp uri is mandatory")
         libp2p_uri = Uri(host=libp2p_host, port=libp2p_port)
 
-        uris = list()  # type: List[str]
+        uris = list()  # type: List[Uri]
         certs_files = list()  # type: List[str]
 
         uris.append(libp2p_uri)

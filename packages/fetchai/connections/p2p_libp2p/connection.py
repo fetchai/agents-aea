@@ -670,7 +670,7 @@ class P2PLibp2pConnection(Connection):
             if libp2p_host is not None:
                 uri = Uri(host=libp2p_host, port=libp2p_port)
             else:
-                uri = Uri(host="0.0.0.0", port=libp2p_port)
+                uri = Uri(host="127.0.0.1", port=libp2p_port)
 
         public_uri = None
         if libp2p_port_public is not None and libp2p_host_public is not None:

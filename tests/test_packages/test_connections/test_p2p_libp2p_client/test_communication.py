@@ -39,6 +39,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 )
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     Libp2pClientConnection,
+    Uri as UriC # TOFIX(LR)
 )
 
 
@@ -87,7 +88,7 @@ def _make_libp2p_client_connection(
     return Libp2pClientConnection(
         FetchAICrypto().address,
         FetchAICrypto(),
-        [Uri("{}:{}".format(node_host, node_port))],
+        [UriC("{}:{}".format(node_host, node_port))],
         [],
     )
 
