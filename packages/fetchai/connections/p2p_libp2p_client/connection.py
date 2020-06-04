@@ -188,8 +188,12 @@ class Libp2pClientConnection(Connection):
             self._process_messages_task.cancel()
             self._process_messages_task = None
 
+        logger.debug("disconnecting libp2p client connection...")
+        self._writer.write_eof()
+        await self._writer.drain()
         self._writer.close()
-        await self._writer.wait_closed()
+        # TOFIX(LR) requires python 3.7 minimum
+        # await self._writer.wait_closed() 
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -279,8 +283,8 @@ class Libp2pClientConnection(Connection):
         """
         key_file = configuration.config.get("key_file")  # Optional[str]
         # TOFIX(LR) should be a list of libp2p nodes config [(host, port, certfile)]
-        libp2p_host = configuration.config.get("libp2p_host")  # Optional[str]
-        libp2p_port = configuration.config.get("libp2p_port")  # Optional[int]
+        libp2p_host = configuration.config.get("libp2p_node_host")  # Optional[str]
+        libp2p_port = configuration.config.get("libp2p_node_port")  # Optional[int]
         libp2p_cert_file = configuration.config.get("libp2p_cert_file")  # Optional[str]
 
         if key_file is None:

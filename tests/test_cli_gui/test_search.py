@@ -141,7 +141,7 @@ def test_real_search():
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert len(data) == 13, data
+    assert len(data) == 14, data
     i = 0
 
     assert data[i]["id"] == "fetchai/gym:0.1.0"
@@ -181,6 +181,12 @@ def test_real_search():
     assert (
         data[i]["description"]
         == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."
+    )
+    i += 1
+    assert data[i]["id"] == "fetchai/p2p_libp2p_client:0.1.0"
+    assert (
+        data[i]["description"]
+        == "The libp2p client connection implements a tcp connection to a running libp2p node as a traffic delegate to send/receive envelopes to/from agents in the DHT."
     )
     i += 1
     assert data[i]["id"] == "fetchai/p2p_noise:0.3.0"

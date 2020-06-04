@@ -1,27 +1,18 @@
-name: p2p_libp2p
+name: p2p_libp2p_client
 author: fetchai
-version: 0.2.0
-description: The p2p libp2p connection implements an interface to standalone golang
-  go-libp2p node that can exchange aea envelopes with other agents connected to the
-  same DHT.
+version: 0.1.0
+description: The libp2p client connection implements a tcp connection to a running libp2p node as a traffic delegate to send/receive envelopes to/from agents in the DHT.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmNUnPDZCFKGjTqxmrtCaJ4F41o88cyvsovN793tFR13gE
   connection.py: Qmb5dP2nwSsxPWmgAqFmHx87rVte98iXvqpyDYcizSYgcZ
-  go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  libp2p_node.go: QmThC8hDZcHTotDDLozF4Y27tHYGj47Hd3qFJYzJoXfW1m
-fingerprint_ignore_patterns:
-- go.sum
-- libp2p_node
+fingerprint_ignore_patterns: []
 protocols: []
-class_name: P2PLibp2pConnection
+class_name: Libp2pClientConnection
 config:
-  libp2p_entry_peers: []
-  libp2p_host: 0.0.0.0
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9000
+  libp2p_node_host: 127.0.0.1
+  libp2p_node_port: 11000
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

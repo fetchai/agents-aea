@@ -212,7 +212,7 @@ func main() {
 		} else {
 			go func() {
 				log.Println("DEBUG setting up traffic delegation service...")
-				setupDelegationService(nodeHostDelegate, nodePortDelegate, routedHost, hdht, &annouced)
+				setupDelegationService(nodeHostDelegate, nodePortDelegate, routedHost, hdht, &annouced, agent)
 			}()
 		}
 	}
@@ -242,7 +242,7 @@ func main() {
 }
 
 //func setupDelegationService(host string, port uint16) (net.Listener, error) {
-func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool) {
+func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent aea.AeaApi) {
 	address := host + ":" + strconv.FormatInt(int64(port), 10)
 	l, err := net.Listen("tcp", address)
 	if err != nil {
@@ -257,11 +257,11 @@ func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht
 			log.Println("ERROR while accepting a new connection:", err)
 			continue
 		}
-		go handleDelegationConnection(conn, hhost, hdht, annouced)
+		go handleDelegationConnection(conn, hhost, hdht, annouced, agent)
 	}
 }
 
-func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool) {
+func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent aea.AeaApi) {
 	log.Println("INFO received a new connection from ", conn.RemoteAddr().String())
 	// receive agent address
 	buf, err := readBytesConn(conn)
@@ -296,9 +296,17 @@ func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDH
 		}
 
 		// route envelope
-		err = route(*envel, hhost, hdht)
-		if err != nil {
-			log.Println("ERROR while routing envelope from client connection to dht..")
+		// first test if destination is self
+		if envel.To == agent.AeaAddress() {
+			err = agent.Put(envel)
+			if err != nil {
+				log.Println("ERROR While putting envelope to agent:", err)
+			}
+		} else {
+			err = route(*envel, hhost, hdht)
+			if err != nil {
+				log.Println("ERROR while routing envelope from client connection to dht.. ", err)
+			}
 		}
 	}
 }
