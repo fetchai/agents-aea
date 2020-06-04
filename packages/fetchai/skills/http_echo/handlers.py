@@ -90,12 +90,8 @@ class HttpHandler(Handler):
         self.context.logger.info(
             "[{}] responding with: {}".format(self.context.agent_name, http_response)
         )
-        self.context.outbox.put_message(
-            sender=self.context.agent_address,
-            to=http_msg.counterparty,
-            protocol_id=http_response.protocol_id,
-            message=http_response,
-        )
+        http_response.counterparty = http_msg.counterparty
+        self.context.outbox.put_message(message=http_response)
 
     def _handle_post(self, http_msg: HttpMessage) -> None:
         """
@@ -118,12 +114,8 @@ class HttpHandler(Handler):
         self.context.logger.info(
             "[{}] responding with: {}".format(self.context.agent_name, http_response)
         )
-        self.context.outbox.put_message(
-            sender=self.context.agent_address,
-            to=http_msg.counterparty,
-            protocol_id=http_response.protocol_id,
-            message=http_response,
-        )
+        http_response.counterparty = http_msg.counterparty
+        self.context.outbox.put_message(message=http_response)
 
     def teardown(self) -> None:
         """

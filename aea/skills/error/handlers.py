@@ -81,12 +81,8 @@ class ErrorHandler(Handler):
                 "envelope": encoded_envelope,
             },
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=reply,
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)
 
     def send_decoding_error(self, envelope: Envelope) -> None:
         """
@@ -110,12 +106,8 @@ class ErrorHandler(Handler):
             error_msg="Decoding error.",
             error_data={"envelope": encoded_envelope},
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=reply,
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)
 
     def send_unsupported_skill(self, envelope: Envelope) -> None:
         """
@@ -146,9 +138,5 @@ class ErrorHandler(Handler):
             error_msg="Unsupported skill.",
             error_data={"envelope": encoded_envelope},
         )
-        self.context.outbox.put_message(
-            to=envelope.sender,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=reply,
-        )
+        reply.counterparty = envelope.sender
+        self.context.outbox.put_message(message=reply)
