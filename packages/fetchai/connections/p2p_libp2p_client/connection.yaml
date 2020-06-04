@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmZs9QFHPLU4MjkfeYNnPGZ5Tz1ZkwV3BPQHC99b2mg9Sn
+  connection.py: QmVbH345587fjTyf6UbkUhJb9EVvAmGbazmDrrRogt9uMv
 fingerprint_ignore_patterns: []
 protocols: []
 class_name: Libp2pClientConnection
