@@ -43,7 +43,7 @@ from aea.configurations.base import (
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import AEAException
 
 
@@ -221,3 +221,25 @@ def handle_dotted_path(value: str) -> Tuple:
 
     config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
     return json_path, path_to_resource_configuration, config_loader
+
+
+def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
+    """
+    Update item config and item config file.
+
+    :param item_type: type of item.
+    :param package_path: path to a package folder.
+    :param kwargs: pairs of config key-value to update.
+
+    :return: None
+    """
+    item_config = load_item_config(item_type, package_path)
+    for key, value in kwargs.items():
+        setattr(item_config, key, value)
+
+    config_filepath = os.path.join(
+        package_path, item_config.default_configuration_filename  # type: ignore
+    )
+    loader = ConfigLoaders.from_package_type(item_type)
+    with open(config_filepath, "w") as f:
+        loader.dump(item_config, f)

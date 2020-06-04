@@ -35,6 +35,7 @@ def _raise_click_exception(*args, **kwargs):
 
 
 @mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.utils.decorators._cast_ctx")
 @mock.patch("aea.cli.fetch.os.path.join", return_value="joined-path")
 @mock.patch("aea.cli.fetch.try_get_item_source_path", return_value="path")
 @mock.patch("aea.cli.fetch.try_to_load_agent_config")
