@@ -23,7 +23,6 @@ import time
 
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from ...conftest import skip_test_windows
@@ -50,7 +49,7 @@ class TestEchoSkill(AEATestCaseEmpty):
             to=self.agent_name,
             sender="sender",
             protocol_id=message.protocol_id,
-            message=DefaultSerializer().encode(message),
+            message=message,
         )
 
         self.send_envelope_to_agent(sent_envelope, self.agent_name)

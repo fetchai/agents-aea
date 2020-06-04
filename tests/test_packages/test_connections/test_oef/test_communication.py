@@ -44,16 +44,13 @@ from aea.helpers.search.models import (
 )
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import UseOef
 
 import packages
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 from ....conftest import FETCHAI_ADDRESS_ONE, FETCHAI_ADDRESS_TWO, _make_oef_connection
 
@@ -88,7 +85,7 @@ class TestDefault(UseOef):
                 to=FETCHAI_ADDRESS_ONE,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=DefaultMessage.protocol_id,
-                message=DefaultSerializer().encode(msg),
+                message=msg,
             )
         )
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
@@ -134,12 +131,12 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -167,12 +164,12 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -208,11 +205,11 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             print("HERE:" + str(search_result))
             assert (
                 search_result.performative
@@ -250,13 +247,12 @@ class TestOEF(UseOef):
                 dialogue_reference=(str(request_id), ""),
                 service_description=desc,
             )
-            msg_bytes = OefSearchSerializer().encode(msg)
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=msg_bytes,
+                    message=msg,
                 )
             )
             time.sleep(0.5)
@@ -274,11 +270,11 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -322,13 +318,12 @@ class TestOEF(UseOef):
                 dialogue_reference=(str(cls.request_id), ""),
                 service_description=cls.desc,
             )
-            msg_bytes = OefSearchSerializer().encode(msg)
             cls.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=msg_bytes,
+                    message=msg,
                 )
             )
 
@@ -348,11 +343,11 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
             envelope = cls.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -377,13 +372,12 @@ class TestOEF(UseOef):
                 dialogue_reference=(str(self.request_id), ""),
                 service_description=self.desc,
             )
-            msg_bytes = OefSearchSerializer().encode(msg)
             self.multiplexer.put(
                 Envelope(
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=msg_bytes,
+                    message=msg,
                 )
             )
 
@@ -403,12 +397,12 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -451,12 +445,12 @@ class TestOEF(UseOef):
                     to=DEFAULT_OEF,
                     sender=FETCHAI_ADDRESS_ONE,
                     protocol_id=OefSearchMessage.protocol_id,
-                    message=OefSearchSerializer().encode(search_request),
+                    message=search_request,
                 )
             )
 
             envelope = self.multiplexer.get(block=True, timeout=5.0)
-            search_result = OefSearchSerializer().decode(envelope.message)
+            search_result = envelope.message
             assert (
                 search_result.performative
                 == OefSearchMessage.Performative.SEARCH_RESULT
@@ -502,11 +496,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(cfp_message),
+                message=cfp_message,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
-        expected_cfp_message = FipaSerializer().decode(envelope.message)
+        expected_cfp_message = FipaMessage.serializer.decode(envelope.message)
         expected_cfp_message.counterparty = FETCHAI_ADDRESS_TWO
 
         assert expected_cfp_message == cfp_message
@@ -524,11 +518,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(cfp_none),
+                message=cfp_none,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
-        expected_cfp_none = FipaSerializer().decode(envelope.message)
+        expected_cfp_none = FipaMessage.serializer.decode(envelope.message)
         expected_cfp_none.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_cfp_none == cfp_none
 
@@ -547,11 +541,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(propose_empty),
+                message=propose_empty,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        expected_propose_empty = FipaSerializer().decode(envelope.message)
+        expected_propose_empty = FipaMessage.serializer.decode(envelope.message)
         expected_propose_empty.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_propose_empty == propose_empty
 
@@ -571,11 +565,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(propose_descriptions),
+                message=propose_descriptions,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        expected_propose_descriptions = FipaSerializer().decode(envelope.message)
+        expected_propose_descriptions = FipaMessage.serializer.decode(envelope.message)
         expected_propose_descriptions.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_propose_descriptions == propose_descriptions
 
@@ -593,11 +587,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(accept),
+                message=accept,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        expected_accept = FipaSerializer().decode(envelope.message)
+        expected_accept = FipaMessage.serializer.decode(envelope.message)
         expected_accept.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_accept == accept
 
@@ -616,11 +610,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(match_accept),
+                message=match_accept,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        expected_match_accept = FipaSerializer().decode(envelope.message)
+        expected_match_accept = FipaMessage.serializer.decode(envelope.message)
         expected_match_accept.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_match_accept == match_accept
 
@@ -638,11 +632,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(decline),
+                message=decline,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        expected_decline = FipaSerializer().decode(envelope.message)
+        expected_decline = FipaMessage.serializer.decode(envelope.message)
         expected_decline.counterparty = FETCHAI_ADDRESS_TWO
         assert expected_decline == decline
 
@@ -661,11 +655,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(match_accept_w_inform),
+                message=match_accept_w_inform,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_match_accept_w_inform = FipaSerializer().decode(envelope.message)
+        returned_match_accept_w_inform = FipaMessage.serializer.decode(envelope.message)
         returned_match_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_match_accept_w_inform == match_accept_w_inform
 
@@ -684,11 +678,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(accept_w_inform),
+                message=accept_w_inform,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_accept_w_inform = FipaSerializer().decode(envelope.message)
+        returned_accept_w_inform = FipaMessage.serializer.decode(envelope.message)
         returned_accept_w_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_accept_w_inform == accept_w_inform
 
@@ -708,11 +702,11 @@ class TestFIPA(UseOef):
                 to=FETCHAI_ADDRESS_TWO,
                 sender=FETCHAI_ADDRESS_ONE,
                 protocol_id=FipaMessage.protocol_id,
-                message=FipaSerializer().encode(inform),
+                message=inform,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_inform = FipaSerializer().decode(envelope.message)
+        returned_inform = FipaMessage.serializer.decode(envelope.message)
         returned_inform.counterparty = FETCHAI_ADDRESS_TWO
         assert returned_inform == inform
 
@@ -730,7 +724,7 @@ class TestFIPA(UseOef):
                 "packages.fetchai.protocols.fipa.message.FipaMessage.Performative"
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
-                FipaSerializer().encode(msg), "Raises Value Error"
+                FipaMessage.serializer.encode(msg), "Raises Value Error"
         with pytest.raises(EOFError):
             cfp_msg = FipaMessage(
                 message_id=1,
@@ -751,7 +745,7 @@ class TestFIPA(UseOef):
             fipa_bytes = fipa_msg.SerializeToString()
 
             # The encoded message is not a valid FIPA message.
-            FipaSerializer().decode(fipa_bytes)
+            FipaMessage.serializer.decode(fipa_bytes)
         with pytest.raises(ValueError):
             cfp_msg = FipaMessage(
                 message_id=1,
@@ -775,7 +769,7 @@ class TestFIPA(UseOef):
                 fipa_bytes = fipa_msg.SerializeToString()
 
                 # The encoded message is not a FIPA message
-                FipaSerializer().decode(fipa_bytes)
+                FipaMessage.serializer.decode(fipa_bytes)
 
     def test_on_oef_error(self):
         """Test the oef error."""
@@ -792,7 +786,7 @@ class TestFIPA(UseOef):
             operation=OEFErrorOperation.SEARCH_SERVICES,
         )
         envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        dec_msg = OefSearchSerializer().decode(envelope.message)
+        dec_msg = envelope.message
         assert dec_msg.dialogue_reference == ("1", str(oef_channel.oef_msg_id))
         assert (
             dec_msg.performative is OefSearchMessage.Performative.OEF_ERROR
@@ -992,12 +986,11 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=(str(request_id), ""),
             oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         with pytest.raises(ValueError):
             await oef_connection.send(envelope)
@@ -1014,12 +1007,11 @@ class TestSendWithOEF(UseOef):
             dialogue_reference=(str(request_id), ""),
             query=query,
         )
-        msg_bytes = OefSearchSerializer().encode(msg)
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender=FETCHAI_ADDRESS_ONE,
             protocol_id=OefSearchMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
         await oef_connection.send(envelope)
         search_result = await oef_connection.receive()

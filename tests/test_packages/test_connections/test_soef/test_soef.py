@@ -38,7 +38,6 @@ from aea.mail.base import Envelope, Multiplexer
 
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -83,12 +82,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
             protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            message=message,
         )
         logger.info(
             "Registering agent at location=({},{}) by agent={}".format(
@@ -113,12 +111,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
             protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            message=message,
         )
         logger.info("Registering agent personality")
         multiplexer.put(envelope)
@@ -133,12 +130,11 @@ def test_soef():
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        message_b = OefSearchSerializer().encode(message)
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
             protocol_id=ProtocolId.from_str("fetchai/oef_search:0.1.0"),
-            message=message_b,
+            message=message,
         )
         logger.info(
             "Searching for agents in radius={} of myself at location=({},{})".format(
@@ -150,7 +146,7 @@ def test_soef():
 
         # check for search results
         envelope = multiplexer.get()
-        message = OefSearchSerializer().decode(envelope.message)
+        message = envelope.message
         assert len(message.agents) >= 0
 
     finally:

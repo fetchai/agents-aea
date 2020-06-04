@@ -118,12 +118,8 @@ class ProxyEnv(gym.Env):
         self._step_count = 0
         self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
-        self._skill_context.outbox.put_message(
-            to=DEFAULT_GYM,
-            sender=self._skill_context.agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_msg,
-        )
+        gym_msg.counterparty = DEFAULT_GYM
+        self._skill_context.outbox.put_message(message=gym_msg)
 
     def close(self) -> None:
         """
@@ -133,12 +129,8 @@ class ProxyEnv(gym.Env):
         """
         self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
-        self._skill_context.outbox.put_message(
-            to=DEFAULT_GYM,
-            sender=self._skill_context.agent_address,
-            protocol_id=GymMessage.protocol_id,
-            message=gym_msg,
-        )
+        gym_msg.counterparty = DEFAULT_GYM
+        self._skill_context.outbox.put_message(message=gym_msg)
 
     def _encode_and_send_action(self, action: Action, step_id: int) -> None:
         """

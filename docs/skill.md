@@ -19,7 +19,7 @@ For example, in the `ErrorHandler(Handler)` class, the code often grabs a refere
 Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
 
 ``` python
-self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
+self.context.outbox.put_message(message=reply)
 ``` 
 
 Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.

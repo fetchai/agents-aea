@@ -35,7 +35,6 @@ from aea.helpers.search.models import (
 )
 
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
-from packages.fetchai.protocols.ml_trade.serialization import MlTradeSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +67,8 @@ def test_ml_message_creation():
     dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
     msg = MlTradeMessage(performative=MlTradeMessage.Performative.CFP, query=query)
-    msg_bytes = MlTradeSerializer().encode(msg)
-    recovered_msg = MlTradeSerializer().decode(msg_bytes)
+    msg_bytes = MlTradeMessage.serializer.encode(msg)
+    recovered_msg = MlTradeMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg
 
     terms = Description(
@@ -85,8 +84,8 @@ def test_ml_message_creation():
     )
 
     msg = MlTradeMessage(performative=MlTradeMessage.Performative.TERMS, terms=terms)
-    msg_bytes = MlTradeSerializer().encode(msg)
-    recovered_msg = MlTradeSerializer().decode(msg_bytes)
+    msg_bytes = MlTradeMessage.serializer.encode(msg)
+    recovered_msg = MlTradeMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg
 
     tx_digest = "This is the transaction digest."
@@ -95,8 +94,8 @@ def test_ml_message_creation():
         terms=terms,
         tx_digest=tx_digest,
     )
-    msg_bytes = MlTradeSerializer().encode(msg)
-    recovered_msg = MlTradeSerializer().decode(msg_bytes)
+    msg_bytes = MlTradeMessage.serializer.encode(msg)
+    recovered_msg = MlTradeMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg
 
     data = np.zeros((5, 2)), np.zeros((5, 2))
@@ -104,8 +103,8 @@ def test_ml_message_creation():
     msg = MlTradeMessage(
         performative=MlTradeMessage.Performative.DATA, terms=terms, payload=payload
     )
-    msg_bytes = MlTradeSerializer().encode(msg)
-    recovered_msg = MlTradeSerializer().decode(msg_bytes)
+    msg_bytes = MlTradeMessage.serializer.encode(msg)
+    recovered_msg = MlTradeMessage.serializer.decode(msg_bytes)
     assert recovered_msg == msg
     recovered_data = pickle.loads(recovered_msg.payload)  # nosec
     assert np.array_equal(recovered_data, data)

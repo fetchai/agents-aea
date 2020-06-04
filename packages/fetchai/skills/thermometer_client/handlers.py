@@ -101,12 +101,8 @@ class FIPAHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=default_msg,
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 
     def _handle_propose(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -143,12 +139,7 @@ class FIPAHandler(Handler):
             )
             accept_msg.counterparty = msg.counterparty
             dialogue.update(accept_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=accept_msg,
-            )
+            self.context.outbox.put_message(message=accept_msg)
         else:
             self.context.logger.info(
                 "[{}]: declining the proposal from sender={}".format(
@@ -163,12 +154,7 @@ class FIPAHandler(Handler):
             )
             decline_msg.counterparty = msg.counterparty
             dialogue.update(decline_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=decline_msg,
-            )
+            self.context.outbox.put_message(message=decline_msg)
 
     def _handle_decline(self, msg: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -248,12 +234,7 @@ class FIPAHandler(Handler):
             )
             inform_msg.counterparty = msg.counterparty
             dialogue.update(inform_msg)
-            self.context.outbox.put_message(
-                to=msg.counterparty,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=inform_msg,
-            )
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of payment.".format(
                     self.context.agent_name, msg.counterparty[-5:]
@@ -356,12 +337,7 @@ class OEFSearchHandler(Handler):
             )
             cfp_msg.counterparty = opponent_addr
             dialogues.update(cfp_msg)
-            self.context.outbox.put_message(
-                to=opponent_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=cfp_msg,
-            )
+            self.context.outbox.put_message(message=cfp_msg)
         else:
             self.context.logger.info(
                 "[{}]: found no agents, continue searching.".format(
@@ -413,13 +389,9 @@ class MyTransactionHandler(Handler):
                 performative=FipaMessage.Performative.INFORM,
                 info=json_data,
             )
+            inform_msg.counterparty = counterparty_addr
             dialogue.update(inform_msg)
-            self.context.outbox.put_message(
-                to=counterparty_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=inform_msg,
-            )
+            self.context.outbox.put_message(message=inform_msg)
             self.context.logger.info(
                 "[{}]: informing counterparty={} of transaction digest.".format(
                     self.context.agent_name, counterparty_addr[-5:]

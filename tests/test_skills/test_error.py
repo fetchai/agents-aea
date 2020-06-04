@@ -29,14 +29,12 @@ from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, InBox, Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
 from aea.skills.error.handlers import ErrorHandler
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from tests.common.utils import wait_for_condition
 
@@ -119,19 +117,19 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FipaSerializer().encode(msg)
+        msg.counterparty = self.address
         envelope = Envelope(
             to=self.address,
             sender=self.address,
             protocol_id=FipaMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
         wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
         envelope = self.my_aea._inbox._history[-1]
-        msg = DefaultSerializer().decode(envelope.message)
+        msg = envelope.message
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL
 
@@ -144,19 +142,19 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FipaSerializer().encode(msg)
+        msg.counterparty = self.address
         envelope = Envelope(
             to=self.address,
             sender=self.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
 
         self.my_error_handler.send_decoding_error(envelope)
         wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
         envelope = self.my_aea._inbox._history[-1]
 
-        msg = DefaultSerializer().decode(envelope.message)
+        msg = envelope.message
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.DECODING_ERROR
 
@@ -168,12 +166,12 @@ class TestSkillError:
             target=0,
             performative=FipaMessage.Performative.ACCEPT,
         )
-        msg_bytes = FipaSerializer().encode(msg)
+        msg.counterparty = self.address
         envelope = Envelope(
             to=self.address,
             sender=self.address,
             protocol_id=DefaultMessage.protocol_id,
-            message=msg_bytes,
+            message=msg,
         )
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
@@ -181,7 +179,7 @@ class TestSkillError:
         wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
         envelope = self.my_aea._inbox._history[-1]
 
-        msg = DefaultSerializer().decode(envelope.message)
+        msg = envelope.message
         assert msg.performative == DefaultMessage.Performative.ERROR
         assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL
 

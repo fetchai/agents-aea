@@ -32,7 +32,6 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
     UNKNOWN_PROTOCOL_PUBLIC_ID,
@@ -138,7 +137,7 @@ async def test_http_send():
         to="receiver",
         sender="sender",
         protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=HttpSerializer().encode(request_http_message),
+        message=request_http_message,
     )
 
     connection_response_mock = Mock()

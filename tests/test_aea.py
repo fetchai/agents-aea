@@ -40,7 +40,6 @@ from aea.skills.base import Skill
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.fipa.serialization import FipaSerializer
 
 from tests.common.utils import run_in_thread, wait_for_condition
 
@@ -211,21 +210,19 @@ async def test_handle():
                 protocol_id=DefaultMessage.protocol_id,
                 message=b"",
             )
-            # send envelope via localnode back to agent
-            aea.multiplexer.inbox.put(envelope)
+            # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            aea.outbox._multiplexer.put(envelope)
             """ inbox twice cause first message is invalid. generates error message and it accepted """
 
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
             )
             #   UNSUPPORTED SKILL
-            msg = FipaSerializer().encode(
-                FipaMessage(
-                    performative=FipaMessage.Performative.ACCEPT,
-                    message_id=1,
-                    dialogue_reference=(str(0), ""),
-                    target=0,
-                )
+            msg = FipaMessage(
+                performative=FipaMessage.Performative.ACCEPT,
+                message_id=1,
+                dialogue_reference=(str(0), ""),
+                target=0,
             )
             msg.counterparty = aea.identity.address
             envelope = Envelope(
@@ -235,7 +232,7 @@ async def test_handle():
                 message=msg,
             )
             # send envelope via localnode back to agent
-            aea.multiplexer.inbox.put(envelope)
+            aea.outbox.put(envelope)
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 3, timeout=1,
             )

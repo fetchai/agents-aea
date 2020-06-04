@@ -180,7 +180,7 @@ class ProxyEnv(gym.Env):
         """
         if envelope is not None:
             if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
-                gym_msg = GymMessage.serializer.decode(envelope.message)
+                gym_msg = envelope.message
                 if (
                     gym_msg.performative == GymMessage.Performative.PERCEPT
                     and gym_msg.step_id == expected_step_id

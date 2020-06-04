@@ -171,12 +171,8 @@ class OEFSearchHandler(Handler):
             performative=TacMessage.Performative.REGISTER,
             agent_name=self.context.agent_name,
         )
-        self.context.outbox.put_message(
-            to=controller_addr,
-            sender=self.context.agent_address,
-            protocol_id=TacMessage.protocol_id,
-            message=tac_msg,
-        )
+        tac_msg.counterparty = controller_addr
+        self.context.outbox.put_message(message=tac_msg)
         self.context.behaviours.tac.is_active = False
 
 
@@ -435,12 +431,8 @@ class TransactionHandler(Handler):
                     ),
                     tx_nonce=tx_message.info.get("tx_nonce"),
                 )
-                self.context.outbox.put_message(
-                    to=game.conf.controller_addr,
-                    sender=self.context.agent_address,
-                    protocol_id=TacMessage.protocol_id,
-                    message=msg,
-                )
+                msg.counterparty = game.conf.controller_addr
+                self.context.outbox.put_message(message=msg)
             else:
                 self.context.logger.warning(
                     "[{}]: transaction has no counterparty id or signature!".format(

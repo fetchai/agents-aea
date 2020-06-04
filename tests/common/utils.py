@@ -30,7 +30,6 @@ from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Behaviour, Handler
 
 from tests.conftest import ROOT_DIR
@@ -174,12 +173,8 @@ class AeaTool:
         :return: Envelope
         """
         message = message or cls.dummy_default_message()
-        return Envelope(
-            to=to,
-            sender=sender,
-            protocol_id=protocol_id,
-            message=DefaultSerializer().encode(message),
-        )
+        message.counterparty = to
+        return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
 
     def put_inbox(self, envelope: Envelope) -> None:
         """Add an envelope to agent's inbox."""

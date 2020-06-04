@@ -30,7 +30,6 @@ import pytest
 from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
     MultiAddr,
@@ -150,7 +149,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             to=addr_2,
             sender=addr_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            message=msg,
         )
 
         self.multiplexer1.put(envelope)
@@ -160,7 +159,9 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
         assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        assert delivered_envelope.message != envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.agent_addr
@@ -177,7 +178,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             to=addr_2,
             sender=addr_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            message=msg,
         )
 
         self.multiplexer1.put(original_envelope)
@@ -194,7 +195,9 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
-        assert delivered_envelope.message == original_envelope.message
+        assert delivered_envelope.message != original_envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        assert original_envelope.message == msg
 
     @classmethod
     def teardown_class(cls):
@@ -264,7 +267,7 @@ class TestP2PLibp2pConnectionRouting:
                     to=addrs[destination],
                     sender=addrs[source],
                     protocol_id=DefaultMessage.protocol_id,
-                    message=DefaultSerializer().encode(msg),
+                    message=msg,
                 )
 
                 self.multiplexers[source].put(envelope)
@@ -276,7 +279,9 @@ class TestP2PLibp2pConnectionRouting:
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
                 assert delivered_envelope.protocol_id == envelope.protocol_id
-                assert delivered_envelope.message == envelope.message
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
 
     @classmethod
     def teardown_class(cls):
@@ -340,7 +345,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             to=addr_2,
             sender=addr_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            message=msg,
         )
 
         self.multiplexer1.put(envelope)
@@ -350,7 +355,9 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
         assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message == envelope.message
+        assert delivered_envelope.message != envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        assert envelope.message == msg
 
     def test_envelope_echoed_back(self):
         addr_1 = self.connection1.node.agent_addr
@@ -367,7 +374,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             to=addr_2,
             sender=addr_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            message=msg,
         )
 
         self.multiplexer1.put(original_envelope)
@@ -384,7 +391,9 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
         assert delivered_envelope.protocol_id == original_envelope.protocol_id
-        assert delivered_envelope.message == original_envelope.message
+        assert delivered_envelope.message != original_envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        assert original_envelope.message == msg
 
     @classmethod
     def teardown_class(cls):
@@ -478,7 +487,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                     to=addrs[destination],
                     sender=addrs[source],
                     protocol_id=DefaultMessage.protocol_id,
-                    message=DefaultSerializer().encode(msg),
+                    message=msg,
                 )
 
                 self.multiplexers[source].put(envelope)
@@ -490,7 +499,9 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
                 assert delivered_envelope.protocol_id == envelope.protocol_id
-                assert delivered_envelope.message == envelope.message
+                assert delivered_envelope.message != envelope.message
+                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+                assert envelope.message == msg
 
     @classmethod
     def teardown_class(cls):

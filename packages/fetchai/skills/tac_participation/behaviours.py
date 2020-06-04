@@ -81,9 +81,5 @@ class TACBehaviour(TickerBehaviour):
             dialogue_reference=(str(search_id), ""),
             query=query,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=oef_msg,
-        )
+        oef_msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=oef_msg)

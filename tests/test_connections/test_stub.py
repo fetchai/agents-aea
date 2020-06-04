@@ -34,7 +34,6 @@ from aea.configurations.base import PublicId
 from aea.connections.stub.connection import _process_line
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from ..conftest import _make_stub_connection
 
@@ -70,11 +69,9 @@ class TestStubConnectionReception:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
+        msg.counterparty = "any"
         expected_envelope = Envelope(
-            to="any",
-            sender="any",
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
         )
         encoded_envelope = "{}{}{}{}{}{}{}{}".format(
             expected_envelope.to,
@@ -201,7 +198,7 @@ class TestStubConnectionSending:
             SEPARATOR,
             DefaultMessage.protocol_id,
             SEPARATOR,
-            DefaultSerializer().encode(msg).decode("utf-8"),
+            DefaultMessage.serialize.encode(msg).decode("utf-8"),
             SEPARATOR,
         )
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
@@ -222,11 +219,9 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
+        msg.counterparty = "any"
         expected_envelope = Envelope(
-            to="any",
-            sender="any",
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=msg,
         )
 
         self.multiplexer.put(expected_envelope)

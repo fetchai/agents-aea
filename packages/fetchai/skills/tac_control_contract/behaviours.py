@@ -200,12 +200,8 @@ class TACBehaviour(SimpleBehaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=oef_msg,
-        )
+        oef_msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = desc
         self.context.logger.info(
             "[{}]: TAC open for registration until: {}".format(
@@ -228,12 +224,8 @@ class TACBehaviour(SimpleBehaviour):
             dialogue_reference=(str(self._oef_msg_id), ""),
             service_description=self._registered_desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=oef_msg,
-        )
+        oef_msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=oef_msg)
         self._registered_desc = None
 
     def _create_items(
@@ -298,12 +290,8 @@ class TACBehaviour(SimpleBehaviour):
             self.context.logger.debug(
                 "[{}]: game data={}".format(self.context.agent_name, str(tac_msg))
             )
-            self.context.outbox.put_message(
-                to=agent_address,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=tac_msg,
-            )
+            tac_msg.counterparty = agent_address
+            self.context.outbox.put_message(message=tac_msg)
 
     def _end_tac(self, game: Game, reason: str) -> None:
         """Notify agents that the TAC is cancelled."""
@@ -314,12 +302,8 @@ class TACBehaviour(SimpleBehaviour):
         )
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-            self.context.outbox.put_message(
-                to=agent_addr,
-                sender=self.context.agent_address,
-                protocol_id=TacMessage.protocol_id,
-                message=tac_msg,
-            )
+            tac_msg.counterparty = agent_addr
+            self.context.outbox.put_message(message=tac_msg)
 
     def _game_finished_summary(self, game: Game) -> None:
         """Provide summary of game stats."""

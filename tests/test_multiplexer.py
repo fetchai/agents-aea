@@ -34,7 +34,6 @@ import aea
 from aea.configurations.base import PublicId
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multiplexer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 
@@ -379,11 +378,12 @@ def test_multiple_connection():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
+        message.counterparty = address_2
         envelope_from_1_to_2 = Envelope(
             to=address_2,
             sender=address_1,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(message),
+            message=message,
             context=EnvelopeContext(connection_id=connection_1_id),
         )
         multiplexer.put(envelope_from_1_to_2)
@@ -391,11 +391,12 @@ def test_multiple_connection():
         actual_envelope = multiplexer.get(block=True, timeout=2.0)
         assert envelope_from_1_to_2 == actual_envelope
 
+        message.counterparty = address_1
         envelope_from_2_to_1 = Envelope(
             to=address_1,
             sender=address_2,
             protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(message),
+            message=message,
             context=EnvelopeContext(connection_id=connection_2_id),
         )
         multiplexer.put(envelope_from_2_to_1)

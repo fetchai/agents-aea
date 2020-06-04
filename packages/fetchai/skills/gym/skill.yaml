@@ -7,7 +7,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmTf1GCgHxu7qq4HvUNYiBwuGEL1DcsHQuWH7N7TB5TtoC
   handlers.py: QmaYf2XGHhGDYQpyud9BDrP7jfENpjRKARr6Y1H2vKM5cQ
-  helpers.py: QmXg4CS6hyiqTSRGwzaYjzzD5TT2BrHEUYNddhcSyqtUjM
+  helpers.py: QmdfUqPT4dtrhZB2QqZgpKY8oVrBSezCsnhm9vqhVbErBB
   rl_agent.py: QmU9qMEamGZCTcX28zzY8G7gBeCdTttHnnZJWu7JqPhN7y
   tasks.py: QmURSaDncmKj9Ri6JM4eBwWkEg2JEJrMdxMygKiBNiD2cf
 fingerprint_ignore_patterns: []

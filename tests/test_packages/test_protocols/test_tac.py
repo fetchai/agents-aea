@@ -24,7 +24,6 @@ from unittest import mock
 import pytest
 
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.protocols.tac.serialization import TacSerializer
 
 
 def test_tac_message_instantiation():
@@ -78,14 +77,14 @@ def test_tac_serialization():
     msg = TacMessage(
         performative=TacMessage.Performative.REGISTER, agent_name="some_name"
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = TacMessage(performative=TacMessage.Performative.UNREGISTER)
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -102,14 +101,14 @@ def test_tac_serialization():
         tx_sender_signature="some_signature",
         tx_counterparty_signature="some_other_signature",
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = TacMessage(performative=TacMessage.Performative.CANCELLED)
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -125,8 +124,8 @@ def test_tac_serialization():
         good_id_to_name={"123": "First good", "1234": "Second good"},
         version_id="game_version_1",
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -136,8 +135,8 @@ def test_tac_serialization():
         amount_by_currency_id={"FET": 10},
         quantities_by_good_id={"123": 20, "1234": 15},
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -148,14 +147,14 @@ def test_tac_serialization():
             "packages.fetchai.protocols.tac.message.TacMessage.Performative"
         ) as mocked_type:
             mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
-            TacSerializer().encode(msg)
+            TacMessage.serializer.encode(msg)
 
     msg = TacMessage(
         performative=TacMessage.Performative.TAC_ERROR,
         error_code=TacMessage.ErrorCode.GENERIC_ERROR,
         info={"msg": "This is info msg."},
     )
-    msg_bytes = TacSerializer().encode(msg)
-    actual_msg = TacSerializer().decode(msg_bytes)
+    msg_bytes = TacMessage.serializer.encode(msg)
+    actual_msg = TacMessage.serializer.decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg

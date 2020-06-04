@@ -28,7 +28,6 @@ from aea.helpers.search.models import (
 )
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.oef_search.serialization import OefSearchSerializer
 
 
 def test_oef_type_string_value():
@@ -102,7 +101,7 @@ def test_oef_message_oef_error():
         message_id=1,
         oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
     ), "Expects an oef message Error!"
-    msg_bytes = OefSearchSerializer().encode(msg)
+    msg_bytes = OefSearchMessage.serializer.encode(msg)
     assert len(msg_bytes) > 0, "Expects the length of bytes not to be Empty"
-    deserialized_msg = OefSearchSerializer().decode(msg_bytes)
+    deserialized_msg = OefSearchMessage.serializer.decode(msg_bytes)
     assert msg == deserialized_msg, "Expected the deserialized_msg to me equals to msg"

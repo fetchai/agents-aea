@@ -27,9 +27,7 @@ import pytest
 import aea
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
 from aea.protocols.base import Message
-from aea.protocols.base import ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode
 
@@ -66,20 +64,22 @@ def test_uri_eq():
 
 def test_envelope_initialisation():
     """Testing the envelope initialisation."""
+    agent_address = "Agent0"
+    receiver_address = "Agent1"
     msg = Message(content="hello")
-    message_bytes = ProtobufSerializer().encode(msg)
+    msg.counterparty = receiver_address
     assert Envelope(
-        to="Agent1",
-        sender="Agent0",
+        to=receiver_address,
+        sender=agent_address,
         protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=message_bytes,
+        message=msg,
     ), "Cannot generate a new envelope"
 
     envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
+        to=receiver_address,
+        sender=agent_address,
         protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=message_bytes,
+        message=msg,
     )
 
     envelope.to = "ChangedAgent"
@@ -105,14 +105,16 @@ def test_inbox_empty():
 
 def test_inbox_nowait():
     """Tests the inbox without waiting."""
+    agent_address = "Agent0"
+    receiver_address = "Agent1"
     msg = Message(content="hello")
-    message_bytes = ProtobufSerializer().encode(msg)
+    msg.counterparty = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
+        to=receiver_address,
+        sender=agent_address,
         protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=message_bytes,
+        message=msg,
     )
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
@@ -123,14 +125,16 @@ def test_inbox_nowait():
 
 def test_inbox_get():
     """Tests for a envelope on the in queue."""
+    agent_address = "Agent0"
+    receiver_address = "Agent1"
     msg = Message(content="hello")
-    message_bytes = ProtobufSerializer().encode(msg)
+    msg.counterparty = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
     envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
+        to=receiver_address,
+        sender=agent_address,
         protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=message_bytes,
+        message=msg,
     )
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
@@ -160,6 +164,8 @@ def test_inbox_get_nowait_returns_none():
 
 def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
+    agent_address = "Agent0"
+    receiver_address = "Agent1"
     msg = DefaultMessage(
         dialogue_reference=("", ""),
         message_id=1,
@@ -167,17 +173,17 @@ def test_outbox_put():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    message_bytes = DefaultSerializer().encode(msg)
+    msg.counterparty = receiver_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer)
+    outbox = OutBox(multiplexer, agent_address)
     inbox = InBox(multiplexer)
     multiplexer.connect()
     envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
+        to=receiver_address,
+        sender=agent_address,
         protocol_id=DefaultMessage.protocol_id,
-        message=message_bytes,
+        message=msg,
     )
     outbox.put(envelope)
     time.sleep(0.5)
@@ -187,6 +193,8 @@ def test_outbox_put():
 
 def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
+    agent_address = "Agent0"
+    receiver_address = "Agent1"
     msg = DefaultMessage(
         dialogue_reference=("", ""),
         message_id=1,
@@ -194,13 +202,13 @@ def test_outbox_put_message():
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    message_bytes = DefaultSerializer().encode(msg)
+    msg.counterparty = receiver_address
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
-    outbox = OutBox(multiplexer)
+    outbox = OutBox(multiplexer, agent_address)
     inbox = InBox(multiplexer)
     multiplexer.connect()
-    outbox.put_message("Agent1", "Agent0", DefaultMessage.protocol_id, message_bytes)
+    outbox.put_message(msg)
     time.sleep(0.5)
     assert not inbox.empty(), "Inbox will not be empty after putting a message."
     multiplexer.disconnect()
@@ -208,10 +216,11 @@ def test_outbox_put_message():
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
+    agent_address = "Agent0"
     dummy_connection = _make_dummy_connection()
     multiplexer = Multiplexer([dummy_connection])
     multiplexer.connect()
-    outbox = OutBox(multiplexer)
+    outbox = OutBox(multiplexer, agent_address)
     assert outbox.empty(), "The outbox is not empty"
     multiplexer.disconnect()
 

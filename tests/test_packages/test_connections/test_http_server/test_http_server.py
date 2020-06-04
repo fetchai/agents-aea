@@ -35,7 +35,6 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.http.serialization import HttpSerializer
 
 from ....conftest import (
     ROOT_DIR,
@@ -128,7 +127,7 @@ class TestHTTPServerConnectionSend:
             to=client_id,
             sender="from_key",
             protocol_id=self.protocol_id,
-            message=HttpSerializer().encode(message),
+            message=message,
         )
         await self.http_connection.send(envelope)
         # we expect the envelope to be dropped
@@ -155,7 +154,7 @@ class TestHTTPServerConnectionSend:
             to=client_id,
             sender="from_key",
             protocol_id=self.protocol_id,
-            message=HttpSerializer().encode(message),
+            message=message,
         )
         self.http_connection.channel.pending_request_ids.add("to_key")
         await self.http_connection.send(envelope)
@@ -396,9 +395,7 @@ class TestHTTPServerConnectionGET200:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
-                incoming_message = cast(
-                    HttpMessage, HttpSerializer().decode(envelope.message)
-                )
+                incoming_message = cast(HttpMessage, envelope.message)
                 message = HttpMessage(
                     performative=HttpMessage.Performative.RESPONSE,
                     dialogue_reference=("", ""),
@@ -415,7 +412,7 @@ class TestHTTPServerConnectionGET200:
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=HttpSerializer().encode(message),
+                    message=message,
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True
@@ -664,9 +661,7 @@ class TestHTTPServerConnectionPOST201:
             await asyncio.sleep(1)
             envelope = await http_connection.receive()
             if envelope is not None:
-                incoming_message = cast(
-                    HttpMessage, HttpSerializer().decode(envelope.message)
-                )
+                incoming_message = cast(HttpMessage, envelope.message)
                 message = HttpMessage(
                     performative=HttpMessage.Performative.RESPONSE,
                     dialogue_reference=("", ""),
@@ -683,7 +678,7 @@ class TestHTTPServerConnectionPOST201:
                     sender=envelope.to,
                     protocol_id=envelope.protocol_id,
                     context=envelope.context,
-                    message=HttpSerializer().encode(message),
+                    message=message,
                 )
                 await http_connection.send(response_envelope)
                 is_exiting_correctly = True

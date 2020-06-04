@@ -113,12 +113,8 @@ class FIPANegotiationHandler(Handler):
             error_msg="Invalid dialogue.",
             error_data={"fipa_message": msg.encode()},
         )
-        self.context.outbox.put_message(
-            to=msg.counterparty,
-            sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=default_msg,
-        )
+        default_msg.counterparty = msg.counterparty
+        self.context.outbox.put_message(message=default_msg)
 
     def _on_cfp(self, cfp: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -201,12 +197,7 @@ class FIPANegotiationHandler(Handler):
             )
         fipa_msg.counterparty = cfp.counterparty
         dialogue.update(fipa_msg)
-        self.context.outbox.put_message(
-            to=dialogue.dialogue_label.dialogue_opponent_addr,
-            sender=self.context.agent_address,
-            protocol_id=FipaMessage.protocol_id,
-            message=fipa_msg,
-        )
+        self.context.outbox.put_message(message=fipa_msg)
 
     def _on_propose(self, propose: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -269,12 +260,7 @@ class FIPANegotiationHandler(Handler):
             )
         fipa_msg.counterparty = propose.counterparty
         dialogue.update(fipa_msg)
-        self.context.outbox.put_message(
-            to=dialogue.dialogue_label.dialogue_opponent_addr,
-            sender=self.context.agent_address,
-            protocol_id=FipaMessage.protocol_id,
-            message=fipa_msg,
-        )
+        self.context.outbox.put_message(message=fipa_msg)
 
     def _on_decline(self, decline: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -372,12 +358,7 @@ class FIPANegotiationHandler(Handler):
             dialogues.dialogue_stats.add_dialogue_endstate(
                 Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated
             )
-            self.context.outbox.put_message(
-                to=dialogue.dialogue_label.dialogue_opponent_addr,
-                sender=self.context.agent_address,
-                protocol_id=FipaMessage.protocol_id,
-                message=fipa_msg,
-            )
+            self.context.outbox.put_message(message=fipa_msg)
 
     def _on_match_accept(self, match_accept: FipaMessage, dialogue: Dialogue) -> None:
         """
@@ -485,13 +466,9 @@ class TransactionHandler(Handler):
                         "tx_id": tx_message.tx_id,
                     },
                 )
+                fipa_msg.counterparty = dialogue.dialogue_label.dialogue_opponent_addr
                 dialogue.update(fipa_msg)
-                self.context.outbox.put_message(
-                    to=dialogue.dialogue_label.dialogue_opponent_addr,
-                    sender=self.context.agent_address,
-                    protocol_id=FipaMessage.protocol_id,
-                    message=fipa_msg,
-                )
+                self.context.outbox.put_message(message=fipa_msg)
             else:
                 self.context.logger.warning(
                     "[{}]: last message should be of performative accept.".format(
@@ -600,12 +577,7 @@ class OEFSearchHandler(Handler):
                 )
                 fipa_msg.counterparty = opponent_addr
                 dialogues.update(fipa_msg)
-                self.context.outbox.put_message(
-                    to=opponent_addr,
-                    sender=self.context.agent_address,
-                    protocol_id=FipaMessage.protocol_id,
-                    message=fipa_msg,
-                )
+                self.context.outbox.put_message(message=fipa_msg)
         else:
             self.context.logger.info(
                 "[{}]: found no {} agents on search_id={}, continue searching.".format(

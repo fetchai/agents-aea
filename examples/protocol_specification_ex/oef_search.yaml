@@ -1,7 +1,7 @@
 ---
 name: oef_search
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'

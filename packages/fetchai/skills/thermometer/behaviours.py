@@ -112,12 +112,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=(str(oef_msg_id), ""),
             service_description=desc,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=msg,
-        )
+        msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info(
             "[{}]: updating thermometer services on OEF service directory.".format(
                 self.context.agent_name
@@ -137,12 +133,8 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             dialogue_reference=(str(oef_msg_id), ""),
             service_description=self._registered_service_description,
         )
-        self.context.outbox.put_message(
-            to=self.context.search_service_address,
-            sender=self.context.agent_address,
-            protocol_id=OefSearchMessage.protocol_id,
-            message=msg,
-        )
+        msg.counterparty = self.context.search_service_address
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info(
             "[{}]: unregistering thermometer station services from OEF service directory.".format(
                 self.context.agent_name

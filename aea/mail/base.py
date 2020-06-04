@@ -980,9 +980,7 @@ class OutBox:
     def put_message(
         self,
         message: Message,
-        to: Optional[Address] = None,
         sender: Optional[Address] = None,
-        protocol_id: Optional[ProtocolId] = None,
         context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
@@ -990,29 +988,19 @@ class OutBox:
 
         This constructs an envelope with the input arguments.
 
-        :param to: the recipient of the envelope.
-        :param sender: the sender of the envelope.
-        :param protocol_id: the protocol id.
+        :param sender: the sender of the envelope (optional field only necessary when the non-default address is used for sending).
         :param message: the message.
         :param context: the envelope context
         :return: None
         """
-        assert isinstance(
-            message, Message
-        ), "Only messages allowed in envelope message field."
+        assert isinstance(message, Message), "Provided message not of type Message."
         assert (
-            to or message.counterparty
-        ), "Either provide to or message.counterparty field."
-        assert (
-            to == message.counterparty
-        ), "Inconsistent to and message.counterparty field."
-        assert (
-            protocol_id == message.protocol_id
-        ), "Inconsistent protocol_id and message."
+            message.counterparty
+        ), "Provided message has message.counterparty not set."
         envelope = Envelope(
-            to=to or message.counterparty,
+            to=message.counterparty,
             sender=sender or self._default_address,
-            protocol_id=protocol_id or message.protocol_id,
+            protocol_id=message.protocol_id,
             message=message,
             context=context,
         )
