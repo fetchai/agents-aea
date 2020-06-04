@@ -28,7 +28,7 @@ from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.mail.base import InBox, Multiplexer, OutBox
-from aea.runtime import AsyncRuntime, BaseRuntime
+from aea.runtime import AsyncRuntime, BaseRuntime, ThreadedRuntime
 
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,12 @@ class Agent(ABC):
     }
     DEFAULT_RUN_LOOP: str = "sync"
 
+    RUNTIMES: Dict[str, Type[BaseRuntime]] = {
+        "async": AsyncRuntime,
+        "threaded": ThreadedRuntime,
+    }
+    DEFAULT_RUNTIME: str = "threaded"
+
     def __init__(
         self,
         identity: Identity,
@@ -86,7 +92,7 @@ class Agent(ABC):
         timeout: float = 1.0,
         is_debug: bool = False,
         loop_mode: Optional[str] = None,
-        runtime: Optional[BaseRuntime] = None,
+        runtime_mode: Optional[str] = None,
     ) -> None:
         """
         Instantiate the agent.
@@ -104,7 +110,6 @@ class Agent(ABC):
         self._identity = identity
         self._connections = connections
 
-        self._runtime = runtime or AsyncRuntime(agent=self, loop=loop)
         self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
         self._outbox = OutBox(self._multiplexer)
@@ -116,12 +121,34 @@ class Agent(ABC):
         self.is_debug = is_debug
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
+
+        loop_cls = self._get_main_loop_class()
+        self._main_loop: BaseAgentLoop = loop_cls(self)
+
+        self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
+        runtime_cls = self._get_runtime_class()
+        self._runtime: BaseRuntime = runtime_cls(agent=self, loop=loop)
+
+    @property
+    def is_running(self):
+        """Get running state of the runtime and agent."""
+        return self._runtime.is_running
+
+    def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
+        """Get main loop class based on loop mode."""
         if self._loop_mode not in self.RUN_LOOPS:
             raise ValueError(
                 f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
             )
-        loop_cls = self.RUN_LOOPS[self._loop_mode]
-        self._main_loop: BaseAgentLoop = loop_cls(self)
+        return self.RUN_LOOPS[self._loop_mode]
+
+    def _get_runtime_class(self) -> Type[BaseRuntime]:
+        """Get runtime class based on runtime mode."""
+        if self._runtime_mode not in self.RUNTIMES:
+            raise ValueError(
+                f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
+            )
+        return self.RUNTIMES[self._runtime_mode]
 
     @property
     def identity(self) -> Identity:
@@ -242,7 +269,7 @@ class Agent(ABC):
 
         self.liveness.start()
 
-    def _run_main_loop(self) -> None:
+    def _depricated_run_main_loop(self) -> None:
         """
         Run the main loop of the agent.
 

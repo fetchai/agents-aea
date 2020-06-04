@@ -71,22 +71,18 @@ class BaseAgentLoop(ABC):
         self._loop: AbstractEventLoop = loop
 
     def start(self) -> None:
-        """
-        Start agent loop.
+        """Start agent loop synchronously in own asyncio loop."""
+        self._loop.run_until_complete(self._run_loop())
 
-        Start own asyncio loop.
-        """
-        self._loop.run_until_complete(self._start_coro())
-
-    async def _start_coro(self) -> None:
-        """Run loop."""
+    async def _run_loop(self) -> None:
+        """Run agent loop."""
         logger.debug("agent loop started")
         self._state.set(AgentLoopStates.started)
         self._set_tasks()
         try:
             await self._gather_tasks()
         except (CancelledError, KeyboardInterrupt):
-            await self._wait_all_tasks_stopped()
+            await self._wait_run_loop_stopped()
             if self._exceptions:
                 raise self._exceptions[0]
         logger.debug("agent loop stopped")
@@ -101,7 +97,7 @@ class BaseAgentLoop(ABC):
         """Set run loop tasks."""
         raise NotImplementedError
 
-    async def _wait_all_tasks_stopped(self) -> None:
+    async def _wait_run_loop_stopped(self) -> None:
         """Wait all tasks stopped."""
         return await asyncio.gather(
             *self._tasks, loop=self._loop, return_exceptions=True
@@ -117,7 +113,7 @@ class BaseAgentLoop(ABC):
 
             async def stop():
                 self._stop_tasks()
-                await self._wait_all_tasks_stopped()
+                await self._wait_run_loop_stopped()
 
             self._loop.run_until_complete(stop())
 
@@ -295,7 +291,7 @@ class SyncAgentLoop(BaseAgentLoop):
         self._agent: "AEA" = self._agent
         asyncio.set_event_loop(self._loop)
 
-    async def _run_loop(self) -> None:
+    async def _agent_loop(self) -> None:
         """Run loop inside coroutine but call synchronous callbacks from agent."""
         while self.is_running:
             self._spin_main_loop()
@@ -309,4 +305,4 @@ class SyncAgentLoop(BaseAgentLoop):
 
     def _set_tasks(self) -> None:
         """Set run loop tasks."""
-        self._tasks = [self._loop.create_task(self._run_loop())]
+        self._tasks = [self._loop.create_task(self._agent_loop())]

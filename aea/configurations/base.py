@@ -1186,6 +1186,7 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1234,6 +1235,7 @@ class AgentConfig(PackageConfiguration):
             else {}
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
+        self.runtime_mode = runtime_mode
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1355,6 +1357,9 @@ class AgentConfig(PackageConfiguration):
         if self.loop_mode is not None:
             config["loop_mode"] = self.loop_mode
 
+        if self.runtime_mode is not None:
+            config["runtime_mode"] = self.runtime_mode
+
         return config
 
     @classmethod
@@ -1380,6 +1385,7 @@ class AgentConfig(PackageConfiguration):
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
+            runtime_mode=cast(str, obj.get("runtime_mode")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore

@@ -134,6 +134,9 @@
     },
     "loop_mode": {
       "$ref": "definitions.json#/definitions/loop_mode"
+    },
+	"runtime_mode": {
+      "$ref": "definitions.json#/definitions/runtime_mode"
     }
   }
 }

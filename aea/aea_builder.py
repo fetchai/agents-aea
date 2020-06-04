@@ -282,6 +282,7 @@ class AEABuilder:
     ] = DefaultDecisionMakerHandler
     DEFAULT_SKILL_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
+    DEFAULT_RUNTIME_MODE = "threaded"
 
     def __init__(self, with_default_packages: bool = True):
         """
@@ -305,6 +306,7 @@ class AEABuilder:
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
+        self._runtime_mode: Optional[str] = None
 
         self._package_dependency_manager = _DependenciesManager()
         self._component_instances = {
@@ -410,6 +412,16 @@ class AEABuilder:
         :return: self
         """
         self._loop_mode = loop_mode
+        return self
+
+    def set_runtime_mode(self, runtime_mode: Optional[str]) -> "AEABuilder":
+        """
+        Set the runtime mode.
+
+        :param runtime_mode: the agent runtime mode
+        :return: self
+        """
+        self._runtime_mode = runtime_mode
         return self
 
     def _add_default_packages(self) -> None:
@@ -788,6 +800,7 @@ class AEABuilder:
             skill_exception_policy=self._get_skill_exception_policy(),
             default_routing=self._get_default_routing(),
             loop_mode=self._get_loop_mode(),
+            runtime_mode=self._get_runtime_mode(),
             **deepcopy(self._context_namespace),
         )
         aea.multiplexer.default_routing = self._get_default_routing()
@@ -929,12 +942,24 @@ class AEABuilder:
 
     def _get_loop_mode(self) -> str:
         """
-        Return the loop mode
+        Return the loop mode name
 
-        :return: the loop mode
+        :return: the loop mode name
         """
         return (
             self._loop_mode if self._loop_mode is not None else self.DEFAULT_LOOP_MODE
+        )
+
+    def _get_runtime_mode(self) -> str:
+        """
+        Return the runtime mode name
+
+        :return: the runtime mode name
+        """
+        return (
+            self._runtime_mode
+            if self._runtime_mode is not None
+            else self.DEFAULT_RUNTIME_MODE
         )
 
     def _check_configuration_not_already_added(self, configuration) -> None:
@@ -1073,6 +1098,7 @@ class AEABuilder:
             )
         self.set_default_routing(agent_configuration.default_routing)
         self.set_loop_mode(agent_configuration.loop_mode)
+        self.set_runtime_mode(agent_configuration.runtime_mode)
 
         # load private keys
         for (
