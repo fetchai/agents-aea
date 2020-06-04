@@ -117,7 +117,7 @@ class Libp2pClientConnection(Connection):
         self.delegate_certs = list(libp2p_delegate_certs)
 
         # select a delegate
-        index = random.randint(0, len(self.delegate_uris) - 1)
+        index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
         self.node_uri = self.delegate_uris[index]
         # self.node_cert = self.delegate_certs[index]
 
