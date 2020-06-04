@@ -9,7 +9,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmVZGyiKxBrcZoX9xLMCAh5BDZCzzJWAGQmcFJr5dmiRmL
-  connection.py: QmcZRboP2bDmQQgFtL1HqEvjAK9fPofSdPDfzXqzgwFg2j
+  connection.py: QmetF3EsMD48rKPgpJg1VgioUHp2NsarTrk7QdsmWpUtEc
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
   libp2p_node.go: QmP3vjkGwDsYBKSi3JN2rqrxVBWsWohciSSxPnuoDATpjw
 fingerprint_ignore_patterns:
