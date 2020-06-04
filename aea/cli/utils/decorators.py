@@ -153,10 +153,10 @@ def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
     :return: context object.
     :raises: AEAException if context is none of Context and click.core.Context types.
     """
-    if type(context) is Context:
-        return context  # type: ignore
-    elif type(context) is click.core.Context:
-        return cast(Context, context.obj)  # type: ignore
+    if isinstance(context, Context):
+        return context
+    elif isinstance(context, click.core.Context):
+        return cast(Context, context.obj)
     else:
         raise AEAException(
             "clean_after decorator should be used only on methods with Context "
