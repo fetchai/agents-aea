@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = ProtocolId("fetchai", "default", "0.1.0")
+    protocol_id = ProtocolId("fetchai", "default", "0.2.0")
 
     ErrorCode = CustomErrorCode
 

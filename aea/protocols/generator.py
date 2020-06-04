@@ -2424,7 +2424,7 @@ class ProtocolGenerator:
         """
         init_str = _copyright_header_str(self.protocol_specification.author)
         init_str += "\n"
-        init_str += '"""This module contains the support resources for the {} protocol."""\n'.format(
+        init_str += '"""This module contains the support resources for the {} protocol."""\n\n'.format(
             self.protocol_specification.name
         )
         init_str += "from packages.{}.protocols.{}.message import {}Message\n".format(
@@ -2437,7 +2437,7 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification_in_camel_case,
         )
-        init_str += "{}.serializer = {}Serializer\n".format(
+        init_str += "{}Message.serializer = {}Serializer\n".format(
             self.protocol_specification_in_camel_case,
             self.protocol_specification_in_camel_case,
         )
