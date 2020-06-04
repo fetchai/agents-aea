@@ -101,6 +101,11 @@ class BaseRuntime(ABC):
         """Get running state of the runtime."""
         return self._state.get() == RuntimeStates.started
 
+    @property
+    def is_stopped(self) -> bool:
+        """Get stopped state of the runtime."""
+        return self._state.get() == RuntimeStates.stopped
+
 
 class AsyncRuntime(BaseRuntime):
     """Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loop."""

@@ -134,6 +134,11 @@ class Agent(ABC):
         """Get running state of the runtime and agent."""
         return self._runtime.is_running
 
+    @property
+    def is_stopped(self):
+        """Get running state of the runtime and agent."""
+        return self._runtime.is_stopped
+
     def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
         """Get main loop class based on loop mode."""
         if self._loop_mode not in self.RUN_LOOPS:
@@ -212,14 +217,9 @@ class Agent(ABC):
             and not self.multiplexer.connection_status.is_connected
         ):
             return AgentState.INITIATED
-        elif (
-            self.multiplexer.connection_status.is_connected and self.liveness.is_stopped
-        ):
+        elif self.multiplexer.connection_status.is_connected and not self.is_running:
             return AgentState.CONNECTED
-        elif (
-            self.multiplexer.connection_status.is_connected
-            and not self.liveness.is_stopped
-        ):
+        elif self.multiplexer.connection_status.is_connected and self.is_running:
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
@@ -266,7 +266,6 @@ class Agent(ABC):
         """
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
-
         self.liveness.start()
 
     def _depricated_run_main_loop(self) -> None:

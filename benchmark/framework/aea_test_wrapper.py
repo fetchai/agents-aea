@@ -245,7 +245,7 @@ class AEATestWrapper:
 
         :return: bool
         """
-        return not self.aea.liveness.is_stopped
+        return not self.aea.is_running
 
     def set_fake_connection(
         self, inbox_num: int, envelope: Optional[Envelope] = None
