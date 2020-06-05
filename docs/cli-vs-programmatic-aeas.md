@@ -35,7 +35,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.4.0
+aea fetch fetchai/weather_station:0.5.0
 ```
 
 ### Update the AEA configs
@@ -48,7 +48,7 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 
 ### Create the weather client AEA
@@ -67,6 +67,7 @@ from typing import cast
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, create_private_key
 from aea.crypto.ledger_apis import LedgerApis
@@ -96,9 +97,10 @@ def run():
     identity = Identity(
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
-    oef_connection = OEFConnection(
-        address=identity.address, oef_addr=HOST, oef_port=PORT
+    configuration = ConnectionConfig(
+        addr=HOST, port=PORT, connection_id=OEFConnection.connection_id
     )
+    oef_connection = OEFConnection(configuration=configuration, identity=identity)
     ledger_apis = LedgerApis({}, FetchAICrypto.identifier)
     resources = Resources()
 

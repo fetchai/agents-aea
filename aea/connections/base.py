@@ -18,20 +18,31 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
-
+import inspect
+import logging
+import re
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
+from pathlib import Path
 from typing import Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component
 from aea.configurations.base import (
+    ComponentConfiguration,
     ComponentType,
     ConnectionConfig,
     PublicId,
 )
+from aea.crypto.wallet import CryptoStore
+from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.identity.base import Identity
+
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
+
+
+logger = logging.getLogger(__name__)
 
 
 # TODO refactoring: this should be an enum
@@ -48,13 +59,15 @@ class ConnectionStatus:
 class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
+    connection_id = None  # type: PublicId
+
     def __init__(
         self,
-        configuration: Optional[ConnectionConfig] = None,
-        address: Optional["Address"] = None,
+        configuration: ConnectionConfig,
+        identity: Optional[Identity] = None,
+        cryptos: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        connection_id: Optional[PublicId] = None,
     ):
         """
         Initialize the connection.
@@ -63,15 +76,21 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
-        :param address: the address.
+        :param identity: the identity object held by the agent.
+        :param cryptos: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
-        :param connection_id: the connection identifier.
         """
+        assert configuration is not None, "The configuration must be provided."
         super().__init__(configuration)
-        self._loop = None  # type: Optional[AbstractEventLoop]
+        assert (
+            super().public_id == self.connection_id
+        ), "Connection ids in configuration and class not matching."
+        self._loop: Optional[AbstractEventLoop] = None
         self._connection_status = ConnectionStatus()
-        self._address = address  # type: Optional[Address]
+
+        self._identity: Optional[Identity] = identity
+        self._cryptos: Optional[CryptoStore] = cryptos
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -79,10 +98,6 @@ class Connection(Component, ABC):
         self._excluded_protocols = (
             excluded_protocols if excluded_protocols is not None else set()
         )
-        self._connection_id = connection_id
-        assert (self._connection_id is None) is not (
-            self._configuration is None
-        ), "Either provide the configuration or the connection id."
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -105,31 +120,21 @@ class Connection(Component, ABC):
     @property
     def address(self) -> "Address":
         """Get the address."""
-        assert self._address is not None, "Address not set."
-        return self._address
+        assert (
+            self._identity is not None
+        ), "You must provide the identity in order to retrieve the address."
+        return self._identity.address
 
-    @address.setter
-    def address(self, address: "Address") -> None:
-        """
-        Set the address to be used by the connection.
-
-        :param address: a public key.
-        :return: None
-        """
-        self._address = address
+    @property
+    def cryptos(self) -> CryptoStore:
+        """Get the crypto store."""
+        assert self._cryptos is not None, "Crypto not available."
+        return self._cryptos
 
     @property
     def component_type(self) -> ComponentType:
         """Get the component type."""
         return ComponentType.CONNECTION
-
-    @property
-    def connection_id(self) -> PublicId:
-        """Get the id of the connection."""
-        if self._configuration is None:
-            return cast(PublicId, self._connection_id)
-        else:
-            return super().public_id
 
     @property
     def configuration(self) -> ConnectionConfig:
@@ -183,14 +188,60 @@ class Connection(Component, ABC):
         """
 
     @classmethod
-    def from_config(
-        cls, address: "Address", configuration: ConnectionConfig
+    def from_dir(
+        cls, directory: str, identity: Identity, cryptos: CryptoStore
     ) -> "Connection":
         """
-        Initialize a connection instance from a configuration.
+        Load the connection from a directory.
 
-        :param address: the address of the agent.
+        :param directory: the directory to the connection package.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
+        :return: the connection object.
+        """
+        configuration = cast(
+            ConnectionConfig,
+            ComponentConfiguration.load(ComponentType.CONNECTION, Path(directory)),
+        )
+        configuration._directory = Path(directory)
+        return Connection.from_config(configuration, identity, cryptos)
+
+    @classmethod
+    def from_config(
+        cls, configuration: ConnectionConfig, identity: Identity, cryptos: CryptoStore
+    ) -> "Connection":
+        """
+        Load a connection from a configuration.
+
         :param configuration: the connection configuration.
+        :param identity: the identity object.
+        :param cryptos: object to access the connection crypto objects.
         :return: an instance of the concrete connection class.
         """
-        return cls(address=address, configuration=configuration)
+        configuration = cast(ConnectionConfig, configuration)
+        directory = cast(Path, configuration.directory)
+        package_modules = load_all_modules(
+            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        )
+        add_modules_to_sys_modules(package_modules)
+        connection_module_path = directory / "connection.py"
+        assert (
+            connection_module_path.exists() and connection_module_path.is_file()
+        ), "Connection module '{}' not found.".format(connection_module_path)
+        connection_module = load_module(
+            "connection_module", directory / "connection.py"
+        )
+        classes = inspect.getmembers(connection_module, inspect.isclass)
+        connection_class_name = cast(str, configuration.class_name)
+        connection_classes = list(
+            filter(lambda x: re.match(connection_class_name, x[0]), classes)
+        )
+        name_to_class = dict(connection_classes)
+        logger.debug("Processing connection {}".format(connection_class_name))
+        connection_class = name_to_class.get(connection_class_name, None)
+        assert connection_class is not None, "Connection class '{}' not found.".format(
+            connection_class_name
+        )
+        return connection_class(
+            configuration=configuration, identity=identity, cryptos=cryptos
+        )

@@ -36,8 +36,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
@@ -47,8 +47,8 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
@@ -58,10 +58,10 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         check_strings = (
             "updating generic seller services on OEF service directory.",
@@ -116,13 +116,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_seller:0.4.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.1.0", seller_aea_name
+            "fetchai/generic_seller:0.2.0", seller_aea_name
         )
         assert (
             diff == []
@@ -131,13 +131,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
         self.force_set_config("agent.ledger_apis", ledger_apis)
-        self.add_item("connection", "fetchai/oef:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/oef:0.3.0")
+        self.add_item("connection", "fetchai/oef:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
         self.add_item("skill", "fetchai/generic_buyer:0.3.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.1.0", buyer_aea_name
+            "fetchai/generic_buyer:0.2.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -151,10 +151,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
-        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        seller_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         self.set_agent_context(buyer_aea_name)
-        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.3.0")
+        buyer_aea_process = self.run_agent("--connections", "fetchai/oef:0.4.0")
 
         # TODO: finish test once testnet is reliable
         check_strings = (

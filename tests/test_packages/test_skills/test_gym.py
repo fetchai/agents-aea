@@ -34,7 +34,7 @@ class TestGymSkill(AEATestCaseEmpty):
     def test_gym(self):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.2.0")
-        self.add_item("connection", "fetchai/gym:0.1.0")
+        self.add_item("connection", "fetchai/gym:0.2.0")
         self.run_install()
 
         # add gyms folder from examples
@@ -44,7 +44,7 @@ class TestGymSkill(AEATestCaseEmpty):
 
         # change default connection
         setting_path = "agent.default_connection"
-        self.set_config(setting_path, "fetchai/gym:0.1.0")
+        self.set_config(setting_path, "fetchai/gym:0.2.0")
 
         # change connection config
         setting_path = "vendor.fetchai.connections.gym.config.env"
@@ -54,7 +54,7 @@ class TestGymSkill(AEATestCaseEmpty):
         setting_path = "vendor.fetchai.skills.gym.handlers.gym.args.nb_steps"
         self.set_config(setting_path, 20, "int")
 
-        gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.1.0")
+        gym_aea_process = self.run_agent("--connections", "fetchai/gym:0.2.0")
 
         check_strings = (
             "Training starting ...",

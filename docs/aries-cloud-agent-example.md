@@ -85,7 +85,7 @@ Now take a look at the following method. This is where the demo resides. It firs
             default_address_key=FetchAICrypto.identifier,
         )
         http_client_connection = HTTPClientConnection(
-            address=self.aea_address,
+            identity=identity,
             provider_address=self.aca_admin_address,
             provider_port=self.aca_admin_port,
         )
