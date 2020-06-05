@@ -184,6 +184,7 @@ class Libp2pNode:
         clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
+        delegate_uri: Optional[Uri] = None,
         entry_peers: Optional[Sequence[MultiAddr]] = None,
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
@@ -195,6 +196,8 @@ class Libp2pNode:
         :param source: the source path
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
+        :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
+        :param delegation_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
@@ -211,6 +214,9 @@ class Libp2pNode:
 
         # node public uri, optional
         self.public_uri = public_uri
+
+        # node delegate uri, optional
+        self.delegate_uri = delegate_uri
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
@@ -311,6 +317,11 @@ class Libp2pNode:
             env_file.write(
                 "AEA_P2P_URI_PUBLIC={}\n".format(
                     str(self.public_uri) if self.public_uri is not None else ""
+                )
+            )
+            env_file.write(
+                "AEA_P2P_DELEGATE_URI={}\n".format(
+                    str(self.delegate_uri) if self.delegate_uri is not None else ""
                 )
             )
 
@@ -468,6 +479,7 @@ class P2PLibp2pConnection(Connection):
     # TODO 'key' must be removed in favor of 'cryptos'
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
+
         self._check_go_installed()
         # we put it here so below we can access the address
         super().__init__(**kwargs)
@@ -481,6 +493,12 @@ class P2PLibp2pConnection(Connection):
         )  # Optional[str]
         libp2p_port_public = self.configuration.config.get(
             "libp2p_public_port"
+        )  # Optional[int]
+        libp2p_host_delegate = self.configuration.config.get(
+            "libp2p_delegate_host"
+        )  # Optional[str]
+        libp2p_port_delegate = self.configuration.config.get(
+            "libp2p_delegate_port"
         )  # Optional[int]
         libp2p_entry_peers = self.configuration.config.get("libp2p_entry_peers")
         if libp2p_entry_peers is None:
@@ -507,7 +525,17 @@ class P2PLibp2pConnection(Connection):
         if libp2p_port_public is not None and libp2p_host_public is not None:
             public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
 
+        delegate_uri = None
+        if libp2p_port_delegate is not None:
+            if libp2p_host_delegate is not None:
+                delegate_uri = Uri(host=libp2p_host_delegate, port=libp2p_port_delegate)
+            else:
+                delegate_uri = Uri(host="127.0.0.1", port=libp2p_port_delegate)
+
         entry_peers = [MultiAddr(maddr) for maddr in libp2p_entry_peers]
+
+        if uri is None and (entry_peers is None or len(entry_peers) == 0):
+            raise ValueError("Uri parameter must be set for genesis connection")
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
@@ -518,13 +546,11 @@ class P2PLibp2pConnection(Connection):
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
+            delegate_uri,
             entry_peers,
             log_file,
             env_file,
         )
-
-        if uri is None and (entry_peers is None or len(entry_peers) == 0):
-            raise ValueError("Uri parameter must be set for genesis connection")
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]

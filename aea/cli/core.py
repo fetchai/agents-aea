@@ -29,6 +29,7 @@ from aea.cli.add_key import add_key
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.delete import delete
+from aea.cli.eject import eject
 from aea.cli.fetch import fetch
 from aea.cli.fingerprint import fingerprint
 from aea.cli.freeze import freeze
@@ -95,6 +96,7 @@ cli.add_command(add)
 cli.add_command(create)
 cli.add_command(config)
 cli.add_command(delete)
+cli.add_command(eject)
 cli.add_command(fetch)
 cli.add_command(fingerprint)
 cli.add_command(freeze)

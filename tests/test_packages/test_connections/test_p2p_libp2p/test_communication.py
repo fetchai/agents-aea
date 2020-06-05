@@ -23,69 +23,24 @@ import os
 import shutil
 import tempfile
 import time
-from typing import Optional, Sequence
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    MultiAddr,
-    P2PLibp2pConnection,
-)
-
-from ....conftest import skip_test_windows
+from ....conftest import _make_libp2p_connection, skip_test_windows
 
 DEFAULT_PORT = 10234
-DEFAULT_HOST = "127.0.0.1"
 DEFAULT_NET_SIZE = 4
-
-
-def _make_libp2p_connection(
-    port: Optional[int] = DEFAULT_PORT,
-    host: Optional[str] = DEFAULT_HOST,
-    relay: Optional[bool] = True,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
-    if os.path.exists(log_file):
-        os.remove(log_file)
-    if relay:
-        identity = Identity("", address=FetchAICrypto().address)
-        configuration = ConnectionConfig(
-            libp2p_key_file=None,
-            libp2p_host=host,
-            libp2p_port=port,
-            libp2p_public_host=host,
-            libp2p_public_port=port,
-            libp2p_entry_peers=entry_peers,
-            libp2p_log_file=log_file,
-            connection_id=P2PLibp2pConnection.connection_id,
-        )
-        return P2PLibp2pConnection(configuration=configuration, identity=identity,)
-    else:
-        identity = Identity("", address=FetchAICrypto().address)
-        configuration = ConnectionConfig(
-            libp2p_key_file=None,
-            libp2p_host=host,
-            libp2p_port=port,
-            libp2p_entry_peers=entry_peers,
-            libp2p_log_file=log_file,
-            connection_id=P2PLibp2pConnection.connection_id,
-        )
-        return P2PLibp2pConnection(configuration=configuration, identity=identity,)
 
 
 @skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
-    """Test that connection will route envelope to destination"""
+    """Test that connection is established and torn down correctly"""
 
     @classmethod
     def setup_class(cls):
@@ -93,6 +48,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
         cls.connection = _make_libp2p_connection()
 
     @pytest.mark.asyncio

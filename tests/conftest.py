@@ -27,7 +27,7 @@ import sys
 import time
 from functools import wraps
 from threading import Timer
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 from unittest.mock import patch
 
 import docker as docker
@@ -55,6 +55,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.crypto.fetchai import FetchAICrypto
 from aea.identity.base import Identity
 from aea.mail.base import Address
 
@@ -62,6 +63,13 @@ from packages.fetchai.connections.local.connection import LocalNode, OEFLocalCon
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_client.connection import (
     PeerToPeerClientConnection,
+)
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    MultiAddr,
+    P2PLibp2pConnection,
+)
+from packages.fetchai.connections.p2p_libp2p_client.connection import (
+    P2PLibp2pClientConnection,
 )
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
@@ -710,6 +718,68 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
     )
     connection = StubConnection(configuration=configuration)
     return connection
+
+
+def _make_libp2p_connection(
+    port: int = 10234,
+    host: str = "127.0.0.1",
+    relay: bool = True,
+    delegate: bool = False,
+    entry_peers: Optional[Sequence[MultiAddr]] = None,
+    delegate_port: int = 11234,
+    delegate_host: str = "127.0.0.1",
+) -> P2PLibp2pConnection:
+    log_file = "libp2p_node_{}.log".format(port)
+    if os.path.exists(log_file):
+        os.remove(log_file)
+    identity = Identity("", address=FetchAICrypto().address)
+    if relay and delegate:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_public_host=host,
+            libp2p_public_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            libp2p_delegate_port=delegate_port,
+            libp2p_delegate_host=delegate_host,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    elif relay and not delegate:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_public_host=host,
+            libp2p_public_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    else:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    return P2PLibp2pConnection(configuration=configuration, identity=identity)
+
+
+def _make_libp2p_client_connection(
+    node_port: int = 11234, node_host: str = "127.0.0.1",
+) -> P2PLibp2pClientConnection:
+    identity = Identity("", address=FetchAICrypto().address)
+    configuration = ConnectionConfig(
+        libp2p_key_file=None,
+        libp2p_node_host=node_host,
+        libp2p_node_port=node_port,
+        connection_id=P2PLibp2pClientConnection.connection_id,
+    )
+    return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
 
 
 class CwdException(Exception):

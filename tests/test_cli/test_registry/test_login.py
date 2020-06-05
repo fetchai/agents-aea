@@ -16,29 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This test module contains tests for CLI Registry login methods."""
 
-"""Implementation of the 'aea logout' subcommand."""
+from unittest import TestCase, mock
 
-import click
-
-from aea.cli.registry.logout import registry_logout
-from aea.cli.registry.settings import AUTH_TOKEN_KEY
-from aea.cli.utils.config import update_cli_config
+from aea.cli.registry.login import registry_login
 
 
-@click.command(name="logout", help="Logout from Registry account.")
-def logout():
-    """Logout from Registry account command."""
-    click.echo("Logging out...")
-    do_logout()
-    click.echo("Successfully logged out.")
+@mock.patch("aea.cli.registry.login.request_api", return_value={"key": "key"})
+class RegistryLoginTestCase(TestCase):
+    """Test case for registry_login method."""
 
-
-def do_logout() -> None:
-    """
-    Logout from Registry account.
-
-    :return: None.
-    """
-    registry_logout()
-    update_cli_config({AUTH_TOKEN_KEY: None})
+    def test_registry_login_positive(self, request_api_mock):
+        """Test for registry_login method positive result."""
+        result = registry_login("username", "password")
+        expected_result = "key"
+        self.assertEqual(result, expected_result)
+        request_api_mock.assert_called_once()
