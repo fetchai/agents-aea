@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the weather skills."""
+import pytest
+
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -27,6 +29,7 @@ from ...conftest import FUNDED_FET_PRIVATE_KEY_1
 class TestWeatherSkills(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
+    @pytest.mark.flaky(reruns=5)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
@@ -103,6 +106,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
+    @pytest.mark.flaky(reruns=5)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"

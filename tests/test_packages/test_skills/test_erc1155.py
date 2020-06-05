@@ -30,6 +30,7 @@ from ...conftest import FUNDED_ETH_PRIVATE_KEY_1, FUNDED_ETH_PRIVATE_KEY_2
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
+    @pytest.mark.flaky(reruns=5)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"

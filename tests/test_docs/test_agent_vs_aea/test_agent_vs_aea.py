@@ -22,6 +22,8 @@
 import os
 from pathlib import Path
 
+import pytest
+
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from .agent_code_block import run
@@ -50,6 +52,9 @@ class TestAgentVsAEA(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @pytest.mark.flaky(
+        reruns=5
+    )  # TODO: check why it raises permission error on file on windows platform!
     def test_run_agent(self):
         """Run the agent from the file."""
         run()

@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the thermometer skills."""
+import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
@@ -27,6 +28,7 @@ from ...conftest import FUNDED_FET_PRIVATE_KEY_1
 class TestThermometerSkill(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
+    @pytest.mark.flaky(reruns=5)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -108,6 +110,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
+    @pytest.mark.flaky(reruns=5)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 

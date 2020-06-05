@@ -492,6 +492,7 @@ def test_run_ethereum_private_key_config():
         pass
 
 
+@pytest.mark.flaky(reruns=5)  # cause ledger depends on network
 def test_run_ledger_apis():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
@@ -586,6 +587,7 @@ def test_run_ledger_apis():
             pass
 
 
+@pytest.mark.flaky(reruns=5)  # cause ledger depends on network
 def test_run_fet_ledger_apis():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
@@ -676,6 +678,7 @@ def test_run_fet_ledger_apis():
             pass
 
 
+@pytest.mark.flaky(reruns=5)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
     runner = CliRunner()
@@ -746,6 +749,7 @@ def test_run_with_install_deps():
             pass
 
 
+@pytest.mark.flaky(reruns=5)  # install depends on network
 def test_run_with_install_deps_and_requirement_file():
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
     runner = CliRunner()
