@@ -23,60 +23,24 @@ import os
 import shutil
 import tempfile
 import time
-from typing import Optional, Sequence
 
 import pytest
 
-from aea.crypto.fetchai import FetchAICrypto
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    MultiAddr,
-    P2PLibp2pConnection,
-    Uri,
-)
-
-from ....conftest import skip_test_windows
+from ....conftest import _make_libp2p_connection, skip_test_windows
 
 DEFAULT_PORT = 10234
-DEFAULT_HOST = "127.0.0.1"
 DEFAULT_NET_SIZE = 4
-
-
-def _make_libp2p_connection(
-    port: Optional[int] = DEFAULT_PORT,
-    host: Optional[str] = DEFAULT_HOST,
-    relay: Optional[bool] = True,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
-    if os.path.exists(log_file):
-        os.remove(log_file)
-    if relay:
-        return P2PLibp2pConnection(
-            FetchAICrypto().address,
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            Uri("{}:{}".format(host, port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
-        )
-    else:
-        return P2PLibp2pConnection(
-            FetchAICrypto().address,
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
-        )
 
 
 @skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
-    """Test that connection will route envelope to destination"""
+    """Test that connection is established and torn down correctly"""
 
     @classmethod
     def setup_class(cls):
@@ -84,6 +48,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
         cls.connection = _make_libp2p_connection()
 
     @pytest.mark.asyncio
@@ -136,8 +101,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert self.connection2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -163,8 +128,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -246,7 +211,7 @@ class TestP2PLibp2pConnectionRouting:
             assert conn.connection_status.is_connected is True
 
     def test_star_routing_connectivity(self):
-        addrs = [conn.node.agent_addr for conn in self.connections]
+        addrs = [conn.node.address for conn in self.connections]
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -326,8 +291,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert self.connection2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -353,8 +318,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -460,7 +425,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             assert conn.connection_status.is_connected is True
 
     def test_star_routing_connectivity(self):
-        addrs = [conn.node.agent_addr for conn in self.connections]
+        addrs = [conn.node.address for conn in self.connections]
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),

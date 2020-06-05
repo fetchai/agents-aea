@@ -207,3 +207,37 @@ class ListContractsCommandTestCase(TestCase):
             shutil.rmtree(self.t)
         except (OSError, IOError):
             pass
+
+
+class ListAllCommandTestCase(TestCase):
+    """Test case for aea list all command."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    @mock.patch("aea.cli.list._get_item_details", return_value=[])
+    @mock.patch("aea.cli.list.format_items")
+    @mock.patch("aea.cli.utils.decorators._check_aea_project")
+    def test_list_all_no_details_positive(self, *mocks):
+        """Test list all command no details positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "list", "all"], standalone_mode=False
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.output, "")
+
+    @mock.patch("aea.cli.list._get_item_details", return_value=[{"name": "some"}])
+    @mock.patch("aea.cli.list.format_items", return_value="correct")
+    @mock.patch("aea.cli.utils.decorators._check_aea_project")
+    def test_list_all_positive(self, *mocks):
+        """Test list all command positive result."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "list", "all"], standalone_mode=False
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(
+            result.output,
+            "Connections:\ncorrect\nContracts:\ncorrect\n"
+            "Protocols:\ncorrect\nSkills:\ncorrect\n",
+        )

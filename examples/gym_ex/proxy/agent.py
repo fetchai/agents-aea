@@ -26,6 +26,7 @@ from typing import Optional
 import gym
 
 from aea.agent import Agent
+from aea.configurations.base import ConnectionConfig
 from aea.helpers.base import locate
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
@@ -51,8 +52,11 @@ class ProxyAgent(Agent):
         :return: None
         """
         identity = Identity(name, ADDRESS)
+        configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
         super().__init__(
-            identity, [GymConnection(gym_env, address=identity.address)], timeout=0,
+            identity,
+            [GymConnection(gym_env, identity=identity, configuration=configuration)],
+            timeout=0,
         )
         self.proxy_env_queue = proxy_env_queue
 

@@ -32,7 +32,8 @@ import pytest
 import aea
 from aea.configurations.base import PublicId
 from aea.connections.stub.connection import _process_line
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
@@ -292,6 +293,8 @@ async def test_connection_when_already_connected():
     await connection.connect()
     assert connection.connection_status.is_connected
 
+    await connection.disconnect()
+
 
 @pytest.mark.asyncio
 async def test_receiving_returns_none_when_error_occurs():
@@ -307,3 +310,5 @@ async def test_receiving_returns_none_when_error_occurs():
     with mock.patch.object(connection.in_queue, "get", side_effect=Exception):
         ret = await connection.receive()
         assert ret is None
+
+    await connection.disconnect()

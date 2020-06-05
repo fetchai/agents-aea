@@ -35,20 +35,20 @@ aea add-key fetchai fet_private_key.txt
 aea generate-wealth fetchai
 ```
 ``` bash
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
 ```
 ``` bash
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
-aea run --connections fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
+aea run --connections fetchai/oef:0.4.0
 ```
 ``` bash
 cd ..

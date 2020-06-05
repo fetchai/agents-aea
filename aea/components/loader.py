@@ -18,23 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains utilities for loading components."""
-import inspect
 import logging
 import re
-from pathlib import Path
-from typing import Dict, Type, cast
+from typing import Dict, Type
 
+from aea.components.base import Component
 from aea.configurations.base import (
     ComponentConfiguration,
     ComponentType,
-    ConnectionConfig,
 )
-from aea.configurations.components import Component
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAPackageLoadingError
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
-from aea.mail.base import Address
 from aea.protocols.base import Protocol
 from aea.skills.base import Skill
 
@@ -67,42 +62,11 @@ def load_component_from_config(  # type: ignore
     """
     component_class = component_type_to_class(component_type)
     try:
-        if component_type == ComponentType.CONNECTION:
-            return _load_connection_from_config(configuration, **kwargs)
-        return component_class.from_config(*args, **kwargs, configuration=configuration)  # type: ignore
+        return component_class.from_config(*args, configuration=configuration, **kwargs)  # type: ignore
     except ModuleNotFoundError as e:
         _handle_error_while_loading_component_module_not_found(configuration, e)
     except Exception as e:
         _handle_error_while_loading_component_generic_error(configuration, e)
-
-
-def _load_connection_from_config(
-    configuration: ComponentConfiguration, address: Address
-) -> Connection:
-    """Load a connection from a configuration."""
-    configuration = cast(ConnectionConfig, configuration)
-    directory = cast(Path, configuration.directory)
-    package_modules = load_all_modules(
-        directory, glob="__init__.py", prefix=configuration.prefix_import_path
-    )
-    add_modules_to_sys_modules(package_modules)
-    connection_module_path = directory / "connection.py"
-    assert (
-        connection_module_path.exists() and connection_module_path.is_file()
-    ), "Connection module '{}' not found.".format(connection_module_path)
-    connection_module = load_module("connection_module", directory / "connection.py")
-    classes = inspect.getmembers(connection_module, inspect.isclass)
-    connection_class_name = cast(str, configuration.class_name)
-    connection_classes = list(
-        filter(lambda x: re.match(connection_class_name, x[0]), classes)
-    )
-    name_to_class = dict(connection_classes)
-    logger.debug("Processing connection {}".format(connection_class_name))
-    connection_class = name_to_class.get(connection_class_name, None)
-    assert connection_class is not None, "Connection class '{}' not found.".format(
-        connection_class_name
-    )
-    return connection_class.from_config(address=address, configuration=configuration)
 
 
 def _handle_error_while_loading_component_module_not_found(

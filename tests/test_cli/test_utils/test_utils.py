@@ -200,6 +200,7 @@ class CleanAfterTestCase(TestCase):
     """Test case for clean_after decorator method."""
 
     @mock.patch("aea.cli.utils.decorators.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.utils.decorators._cast_ctx", lambda x: x)
     @mock.patch("aea.cli.utils.decorators.shutil.rmtree")
     def test_clean_after_positive(self, rmtree_mock, *mocks):
         """Test clean_after decorator method for positive result."""

@@ -198,6 +198,18 @@ class TestSearchAgentsLocal:
 
         os.chdir(Path(cls.t, "myagent"))
         result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "config",
+                "set",
+                "agent.description",
+                "Some description.",
+            ],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False
         )
         assert result.exit_code == 0
@@ -213,7 +225,7 @@ class TestSearchAgentsLocal:
             "------------------------------\n"
             "Public ID: default_author/myagent:0.1.0\n"
             "Name: myagent\n"
-            "Description: \n"
+            "Description: Some description.\n"
             "Author: default_author\n"
             "Version: 0.1.0\n"
             "------------------------------\n\n"

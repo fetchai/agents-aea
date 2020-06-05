@@ -26,8 +26,8 @@ from typing import Collection
 import pytest
 
 from aea.aea_builder import AEABuilder
+from aea.components.base import Component
 from aea.configurations.base import ComponentType
-from aea.configurations.components import Component
 from aea.crypto.fetchai import FetchAICrypto
 from aea.exceptions import AEAException
 
@@ -85,7 +85,7 @@ def test_when_package_has_missing_dependency():
     """
     builder = AEABuilder()
     expected_message = re.escape(
-        "Package 'fetchai/oef:0.3.0' of type 'connection' cannot be added. "
+        "Package 'fetchai/oef:0.4.0' of type 'connection' cannot be added. "
         "Missing dependencies: ['(protocol, fetchai/fipa:0.2.0)', '(protocol, fetchai/oef_search:0.1.0)']"
     )
     with pytest.raises(AEAException, match=expected_message):

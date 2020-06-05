@@ -86,7 +86,7 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea add skill fetchai/generic_seller:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
@@ -119,7 +119,7 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea add skill fetchai/generic_buyer:0.3.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.3.0
@@ -365,7 +365,7 @@ Also, create two new functions, one that will create a connection with the datab
 Run both AEAs from their respective terminals
 
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 You will see that the AEAs negotiate and then transact using the configured testnet.
 

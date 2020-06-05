@@ -830,8 +830,8 @@ class ConnectionConfig(ComponentConfiguration):
 
     def __init__(
         self,
-        name: str,
-        author: str,
+        name: str = "",
+        author: str = "",
         version: str = "",
         license: str = "",
         aea_version: str = "",
@@ -843,9 +843,27 @@ class ConnectionConfig(ComponentConfiguration):
         excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        connection_id: Optional[PublicId] = None,
         **config,
     ):
         """Initialize a connection configuration object."""
+        if connection_id is None:
+            assert name != "", "Name or connection_id must be set."
+            assert author != "", "Author or connection_id must be set."
+            assert version != "", "Version or connection_id must be set."
+        else:
+            assert (
+                name == "" or name == connection_id.name
+            ), "Non matching name in ConnectionConfig name and public id."
+            name = connection_id.name
+            assert (
+                author == "" or author == connection_id.author
+            ), "Non matching author in ConnectionConfig author and public id."
+            author = connection_id.author
+            assert (
+                version == "" or version == connection_id.version
+            ), "Non matching version in ConnectionConfig version and public id."
+            version = connection_id.version
         super().__init__(
             name,
             author,
@@ -1186,6 +1204,7 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         default_routing: Optional[Dict] = None,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
     ):
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1234,6 +1253,7 @@ class AgentConfig(PackageConfiguration):
             else {}
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
+        self.runtime_mode = runtime_mode
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -1360,6 +1380,9 @@ class AgentConfig(PackageConfiguration):
         if self.loop_mode is not None:
             config["loop_mode"] = self.loop_mode
 
+        if self.runtime_mode is not None:
+            config["runtime_mode"] = self.runtime_mode
+
         return config
 
     @classmethod
@@ -1385,6 +1408,7 @@ class AgentConfig(PackageConfiguration):
             skill_exception_policy=cast(str, obj.get("skill_exception_policy")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
+            runtime_mode=cast(str, obj.get("runtime_mode")),
         )
 
         for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore

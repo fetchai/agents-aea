@@ -146,7 +146,7 @@ def _launch_threads(click_context: click.Context, agents: List[Path]) -> int:
         logger.info("Keyboard interrupt detected.")
     finally:
         for idx, agent in enumerate(aeas):
-            if not agent.liveness.is_stopped:
+            if not agent.is_stopped:
                 agent.stop()
             threads[idx].join()
             logger.info("Agent {} has been stopped.".format(agent.name))

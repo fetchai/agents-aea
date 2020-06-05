@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,5 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Registry utils used for CLI logout command."""
 
-"""Implementation of the p2p noise connection."""
+from aea.cli.registry.utils import request_api
+
+
+def registry_logout() -> None:
+    """
+    Logout from Registry account.
+
+    :return: None
+    """
+    request_api("POST", "/rest-auth/logout/")

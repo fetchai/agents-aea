@@ -144,34 +144,34 @@ def test_real_search():
     assert len(data) == 13, data
     i = 0
 
-    assert data[i]["id"] == "fetchai/gym:0.1.0"
+    assert data[i]["id"] == "fetchai/gym:0.2.0"
     assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
     i += 1
-    assert data[i]["id"] == "fetchai/http_client:0.2.0"
+    assert data[i]["id"] == "fetchai/http_client:0.3.0"
     assert (
         data[i]["description"]
         == "The HTTP_client connection that wraps a web-based client connecting to a RESTful API specification."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/http_server:0.2.0"
+    assert data[i]["id"] == "fetchai/http_server:0.3.0"
     assert (
         data[i]["description"]
         == "The HTTP server connection that wraps http server implementing a RESTful API specification."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/local:0.1.0"
+    assert data[i]["id"] == "fetchai/local:0.2.0"
     assert (
         data[i]["description"]
         == "The local connection provides a stub for an OEF node."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/oef:0.3.0"
+    assert data[i]["id"] == "fetchai/oef:0.4.0"
     assert (
         data[i]["description"]
         == "The oef connection provides a wrapper around the OEF SDK for connection with the OEF search and communication node."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_client:0.1.0"
+    assert data[i]["id"] == "fetchai/p2p_client:0.2.0"
     assert (
         data[i]["description"]
         == "The p2p_client connection provides a connection with the fetch.ai mail provider."
@@ -183,37 +183,37 @@ def test_real_search():
         == "The p2p libp2p connection implements an interface to standalone golang go-libp2p node that can exchange aea envelopes with other agents connected to the same DHT."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_noise:0.3.0"
+    assert data[i]["id"] == "fetchai/p2p_libp2p_client:0.1.0"
     assert (
         data[i]["description"]
-        == "The p2p noise connection implements an interface to standalone golang noise node that can exchange aea envelopes with other agents participating in the same p2p network."
+        == "The libp2p client connection implements a tcp connection to a running libp2p node as a traffic delegate to send/receive envelopes to/from agents in the DHT."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/p2p_stub:0.1.0"
+    assert data[i]["id"] == "fetchai/p2p_stub:0.2.0"
     assert (
         data[i]["description"]
         == "The stub p2p connection implements a local p2p connection allowing agents to communicate with each other through files created in the namespace directory."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/soef:0.1.0"
+    assert data[i]["id"] == "fetchai/soef:0.2.0"
     assert (
         data[i]["description"]
         == "The soef connection provides a connection api to the simple OEF."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/stub:0.4.0"
+    assert data[i]["id"] == "fetchai/stub:0.5.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/tcp:0.1.0"
+    assert data[i]["id"] == "fetchai/tcp:0.2.0"
     assert (
         data[i]["description"]
         == "The tcp connection implements a tcp server and client."
     )
     i += 1
-    assert data[i]["id"] == "fetchai/webhook:0.1.0"
+    assert data[i]["id"] == "fetchai/webhook:0.2.0"
     assert (
         data[i]["description"]
         == "The webhook connection that wraps a webhook functionality."
