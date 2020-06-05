@@ -80,7 +80,7 @@ The following steps create the seller from scratch:
 aea create my_seller_aea
 cd my_seller_aea
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_seller:0.4.0
+aea add skill fetchai/generic_seller:0.5.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```
@@ -112,7 +112,7 @@ The following steps create the buyer from scratch:
 aea create my_buyer_aea
 cd my_buyer_aea
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/generic_buyer:0.3.0
+aea add skill fetchai/generic_buyer:0.4.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 ```

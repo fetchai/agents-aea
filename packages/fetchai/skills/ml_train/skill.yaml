@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
 license: Apache-2.0

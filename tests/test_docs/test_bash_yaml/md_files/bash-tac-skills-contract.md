@@ -10,7 +10,7 @@ aea install
 aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_control_contract:0.1.0
+aea add skill fetchai/tac_control_contract:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
@@ -42,8 +42,8 @@ aea create tac_participant_two
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
@@ -52,8 +52,8 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum

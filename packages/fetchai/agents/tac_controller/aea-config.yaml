@@ -17,7 +17,7 @@ protocols:
 - fetchai/tac:0.2.0
 skills:
 - fetchai/error:0.2.0
-- fetchai/tac_control:0.1.0
+- fetchai/tac_control:0.2.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: ethereum
 ledger_apis: {}

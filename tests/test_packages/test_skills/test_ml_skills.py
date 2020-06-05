@@ -45,14 +45,14 @@ class TestMLSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.4.0")
         self.run_install()
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/ml_train:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -124,7 +124,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(data_provider_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.3.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.4.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()
@@ -140,7 +140,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.set_agent_context(model_trainer_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/ml_train:0.3.0")
+        self.add_item("skill", "fetchai/ml_train:0.4.0")
         setting_path = "agent.ledger_apis"
         self.force_set_config(setting_path, ledger_apis)
         self.run_install()

@@ -18,7 +18,7 @@ protocols:
 - fetchai/http:0.2.0
 - fetchai/oef_search:0.2.0
 skills:
-- fetchai/aries_alice:0.1.0
+- fetchai/aries_alice:0.2.0
 - fetchai/error:0.2.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai

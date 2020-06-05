@@ -1,6 +1,6 @@
 name: carpark_detection
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0

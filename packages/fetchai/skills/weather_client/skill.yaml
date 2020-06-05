@@ -1,6 +1,6 @@
 name: weather_client
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'

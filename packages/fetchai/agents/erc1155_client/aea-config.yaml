@@ -16,7 +16,7 @@ protocols:
 - fetchai/fipa:0.3.0
 - fetchai/oef_search:0.2.0
 skills:
-- fetchai/erc1155_client:0.3.0
+- fetchai/erc1155_client:0.4.0
 - fetchai/error:0.2.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: ethereum

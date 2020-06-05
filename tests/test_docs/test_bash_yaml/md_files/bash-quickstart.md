@@ -99,5 +99,5 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add skill fetchai/echo:0.1.0		
+aea add skill fetchai/echo:0.2.0		
 ```

@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
 license: Apache-2.0

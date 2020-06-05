@@ -16,7 +16,7 @@ protocols:
 - fetchai/oef_search:0.2.0
 skills:
 - fetchai/error:0.2.0
-- fetchai/weather_station:0.3.0
+- fetchai/weather_station:0.4.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai
 ledger_apis:

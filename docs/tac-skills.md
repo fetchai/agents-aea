@@ -121,7 +121,7 @@ The following steps create the controller from scratch:
 aea create tac_controller
 cd tac_controller
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_control:0.1.0
+aea add skill fetchai/tac_control:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
@@ -153,8 +153,8 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum
@@ -164,8 +164,8 @@ Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/oef:0.4.0
-aea add skill fetchai/tac_participation:0.1.0
-aea add skill fetchai/tac_negotiation:0.1.0
+aea add skill fetchai/tac_participation:0.2.0
+aea add skill fetchai/tac_negotiation:0.2.0
 aea install
 aea config set agent.default_connection fetchai/oef:0.4.0
 aea config set agent.default_ledger ethereum

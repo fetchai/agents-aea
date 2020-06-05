@@ -1,6 +1,6 @@
 name: http_echo
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The http echo skill prints out the content of received http messages
   and responds with success.
 license: Apache-2.0

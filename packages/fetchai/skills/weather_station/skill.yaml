@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0

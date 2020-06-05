@@ -15,7 +15,7 @@ protocols:
 - fetchai/tac:0.2.0
 - fetchai/fipa:0.3.0
 skills:
-- fetchai/echo:0.1.0
+- fetchai/echo:0.2.0
 default_connection: fetchai/oef:0.4.0
 default_ledger: fetchai
 ledger_apis:

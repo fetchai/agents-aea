@@ -38,7 +38,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(seller_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -49,7 +49,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
         self.set_agent_context(buyer_aea_name)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -118,7 +118,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_seller:0.4.0")
+        self.add_item("skill", "fetchai/generic_seller:0.5.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
@@ -133,7 +133,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
         self.force_set_config("agent.ledger_apis", ledger_apis)
         self.add_item("connection", "fetchai/oef:0.4.0")
         self.set_config("agent.default_connection", "fetchai/oef:0.4.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.3.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.4.0")
         self.run_install()
 
         diff = self.difference_to_fetched_agent(

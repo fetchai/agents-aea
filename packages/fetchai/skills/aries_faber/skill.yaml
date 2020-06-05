@@ -1,6 +1,6 @@
 name: aries_faber
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: The aries_faber skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
