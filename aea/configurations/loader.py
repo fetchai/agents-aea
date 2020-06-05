@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Dict, Generic, TextIO, Type, TypeVar, Union
+from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -92,6 +92,15 @@ class ConfigLoader(Generic[T]):
     def validator(self) -> Draft4Validator:
         """Get the json schema validator."""
         return self._validator
+
+    @property
+    def required_fields(self) -> List[str]:
+        """
+        Get required fields.
+
+        :return: list of required fields.
+        """
+        return self._schema["required"]
 
     @property
     def configuration_class(self) -> Type[T]:

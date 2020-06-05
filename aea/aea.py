@@ -74,6 +74,7 @@ class AEA(Agent):
         ] = DefaultDecisionMakerHandler,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
@@ -103,6 +104,7 @@ class AEA(Agent):
             timeout=timeout,
             is_debug=is_debug,
             loop_mode=loop_mode,
+            runtime_mode=runtime_mode,
         )
 
         self.max_reactions = max_reactions
@@ -352,6 +354,8 @@ class AEA(Agent):
 
         :return: None
         """
+        logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.liveness.stop()
         self.decision_maker.stop()
         self.task_manager.stop()
         self.resources.teardown()

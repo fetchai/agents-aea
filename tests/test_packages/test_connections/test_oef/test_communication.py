@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the OEF communication using an OEF."""
 
 import asyncio
@@ -32,6 +31,7 @@ from oef.query import ConstraintExpr
 
 import pytest
 
+from aea.helpers.async_utils import cancel_and_wait
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -1089,10 +1089,11 @@ class TestSendWithOEF(UseOef):
 async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
-        address=FETCHAI_ADDRESS_ONE, oef_addr="a_fake_address", oef_port=10000,
+        address=FETCHAI_ADDRESS_ONE,
+        oef_addr="127.0.0.1",
+        oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
     oef_connection.loop = asyncio.get_event_loop()
-
     patch = unittest.mock.patch.object(
         packages.fetchai.connections.oef.connection.logger, "warning"
     )
@@ -1106,5 +1107,6 @@ async def test_cannot_connect_to_oef():
     mocked_logger_warning.assert_called_with(
         "Cannot connect to OEFChannel. Retrying in 5 seconds..."
     )
-    task.cancel()
-    await asyncio.sleep(1.0)
+    await cancel_and_wait(task)
+    oef_connection.channel.disconnect()
+    oef_connection.disconnect()

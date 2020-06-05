@@ -100,6 +100,8 @@ async def test_async_state():
 class AsyncFakeAgent:
     """Fake agent form testing."""
 
+    name = "fake_agent"
+
     def __init__(self, handlers=None, behaviours=None):
         """Init agent."""
         self.handlers = handlers or []

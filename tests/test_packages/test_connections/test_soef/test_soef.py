@@ -16,11 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the soef connection module."""
 
 import logging
-import time
 from threading import Thread
 
 from aea.configurations.base import ConnectionConfig, PublicId
@@ -40,6 +38,9 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+
+from tests.common.utils import wait_for_condition
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -62,12 +63,13 @@ def test_soef():
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
     multiplexer = Multiplexer([soef_connection])
+
     try:
         # Set the multiplexer running in a different thread
         t = Thread(target=multiplexer.connect)
         t.start()
 
-        time.sleep(3.0)
+        wait_for_condition(lambda: multiplexer.is_connected, timeout=5)
 
         # register an agent with location
         attr_location = Attribute(
@@ -147,7 +149,7 @@ def test_soef():
             )
         )
         multiplexer.put(envelope)
-        time.sleep(4.0)
+        wait_for_condition(lambda: not multiplexer.in_queue.empty(), timeout=20)
 
         # check for search results
         envelope = multiplexer.get()

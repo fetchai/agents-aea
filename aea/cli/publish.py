@@ -20,14 +20,17 @@
 """Implementation of the 'aea publish' subcommand."""
 
 import os
+from pathlib import Path
 from shutil import copyfile
 from typing import cast
 
 import click
 
 from aea.cli.registry.publish import publish_agent
+from aea.cli.utils.config import validate_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
@@ -48,10 +51,26 @@ def publish(click_context, local):
     """Publish Agent to Registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
+    _validate_config(ctx)
     if local:
         _save_agent_locally(ctx)
     else:
         publish_agent(ctx)
+
+
+def _validate_config(ctx: Context) -> None:
+    """
+    Validate agent config.
+
+    :param ctx: Context object.
+
+    :return: None
+    :raises ClickException: if validation is failed.
+    """
+    try:
+        validate_item_config("agent", Path(ctx.cwd))
+    except AEAConfigException as e:
+        raise click.ClickException("Failed to validate agent config. {}".format(str(e)))
 
 
 def _validate_pkp(private_key_paths: CRUDCollection) -> None:

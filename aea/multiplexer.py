@@ -19,14 +19,15 @@
 """Module for the multiplexer class and related classes."""
 import asyncio
 import queue
+import threading
 from asyncio.events import AbstractEventLoop
-from concurrent.futures._base import CancelledError, Future
-from threading import Lock, Thread
+from concurrent.futures._base import CancelledError
 from typing import Dict, List, Optional, Sequence, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStatus
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
+from aea.helpers.async_utils import ThreadedAsyncRunner, cancel_and_wait
 from aea.mail.base import (
     AEAConnectionError,
     Address,
@@ -38,7 +39,7 @@ from aea.mail.base import (
 from aea.protocols.base import Message
 
 
-class Multiplexer:
+class AsyncMultiplexer:
     """This class can handle multiple connections at once."""
 
     def __init__(
@@ -63,18 +64,24 @@ class Multiplexer:
 
         self._connection_status = ConnectionStatus()
 
-        self._lock = Lock()
-        self._loop = loop if loop is not None else asyncio.new_event_loop()
-        self._thread = Thread(target=self._run_loop)
-
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
-        self._connect_all_task = None  # type: Optional[Future]
-        self._disconnect_all_task = None  # type: Optional[Future]
-        self._recv_loop_task = None  # type: Optional[Future]
-        self._send_loop_task = None  # type: Optional[Future]
+        self._recv_loop_task = None  # type: Optional[asyncio.Task]
+        self._send_loop_task = None  # type: Optional[asyncio.Task]
         self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
+        self.set_loop(loop if loop is not None else asyncio.new_event_loop())
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop and all event loopp related objects.
+
+        :param loop: asyncio event loop.
+        :return: None
+        """
+        self._loop: AbstractEventLoop = loop
+        self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
 
     def _initialize_connections_if_any(
         self, connections: Optional[Sequence[Connection]], default_connection_index: int
@@ -85,6 +92,37 @@ class Multiplexer:
             ), "Default connection index out of range."
             for idx, connection in enumerate(connections):
                 self.add_connection(connection, idx == default_connection_index)
+
+    def add_connection(self, connection: Connection, is_default: bool = False) -> None:
+        """
+        Add a connection to the mutliplexer.
+
+        :param connection: the connection to add.
+        :param is_default: whether the connection added should be the default one.
+        :return: None
+        """
+        if connection.connection_id in self._id_to_connection:
+            logger.warning(
+                f"A connection with id {connection.connection_id} was already added. Replacing it..."
+            )
+
+        self._connections.append(connection)
+        self._id_to_connection[connection.connection_id] = connection
+        if is_default:
+            self.default_connection = connection
+
+    def _connection_consistency_checks(self):
+        """
+        Do some consistency checks on the multiplexer connections.
+
+        :return: None
+        :raise AssertionError: if an inconsistency is found.
+        """
+        assert len(self.connections) > 0, "List of connections cannot be empty."
+
+        assert len(set(c.connection_id for c in self.connections)) == len(
+            self.connections
+        ), "Connection names must be unique."
 
     @property
     def in_queue(self) -> AsyncFriendlyQueue:
@@ -107,9 +145,7 @@ class Multiplexer:
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing envelopes."""
-        return self._loop.is_running() and all(
-            c.connection_status.is_connected for c in self._connections
-        )
+        return all(c.connection_status.is_connected for c in self._connections)
 
     @property
     def default_routing(self) -> Dict[PublicId, PublicId]:
@@ -126,107 +162,73 @@ class Multiplexer:
         """Get the connection status."""
         return self._connection_status
 
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """Connect the multiplexer."""
+        logger.debug("Multiplexer connecting...")
         self._connection_consistency_checks()
-        with self._lock:
+        self._out_queue = asyncio.Queue()
+        async with self._lock:
             if self.connection_status.is_connected:
                 logger.debug("Multiplexer already connected.")
                 return
-            self._start_loop_threaded_if_not_running()
             try:
-                self._connect_all_task = asyncio.run_coroutine_threadsafe(
-                    self._connect_all(), loop=self._loop
-                )
-                self._connect_all_task.result()
-                self._connect_all_task = None
+                await self._connect_all()
                 assert self.is_connected, "At least one connection failed to connect!"
                 self._connection_status.is_connected = True
-                self._recv_loop_task = asyncio.run_coroutine_threadsafe(
-                    self._receiving_loop(), loop=self._loop
-                )
-                self._send_loop_task = asyncio.run_coroutine_threadsafe(
-                    self._send_loop(), loop=self._loop
-                )
+                self._recv_loop_task = self._loop.create_task(self._receiving_loop())
+                self._send_loop_task = self._loop.create_task(self._send_loop())
+                logger.debug("Multiplexer connected and running.")
             except (CancelledError, Exception):
+                logger.exception("Exception on connect:")
                 self._connection_status.is_connected = False
-                self._stop()
+                await self._stop()
                 raise AEAConnectionError("Failed to connect the multiplexer.")
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """Disconnect the multiplexer."""
-        with self._lock:
+        logger.debug("Multiplexer disconnecting...")
+        async with self._lock:
             if not self.connection_status.is_connected:
                 logger.debug("Multiplexer already disconnected.")
-                self._stop()
+                await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
-                logger.debug("Disconnecting the multiplexer...")
-                self._disconnect_all_task = asyncio.run_coroutine_threadsafe(
-                    self._disconnect_all(), loop=self._loop
-                )
-                self._disconnect_all_task.result()
-                self._disconnect_all_task = None
-                self._stop()
+                await asyncio.wait_for(self._disconnect_all(), timeout=60)
+                await asyncio.wait_for(self._stop(), timeout=60)
                 self._connection_status.is_connected = False
+                logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
+                logger.exception("Exception on disconnect:")
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
 
-    def _run_loop(self):
+    async def _stop(self) -> None:
         """
-        Run the asyncio loop.
+        Stop the multiplexer.
 
-        This method is supposed to be run only in the Multiplexer thread.
+        Stops recv and send loops.
+        Disconnect every connection.
         """
-        logger.debug("Starting threaded asyncio loop...")
-        asyncio.set_event_loop(self._loop)
-        self._out_queue = asyncio.Queue()
-        self._loop.run_forever()
-        logger.debug("Asyncio loop has been stopped.")
-
-    def _start_loop_threaded_if_not_running(self):
-        """Start the multiplexer."""
-        if not self._loop.is_running() and not self._thread.is_alive():
-            self._thread.start()
-        logger.debug("Multiplexer started.")
-
-    def _stop(self):
-        """Stop the multiplexer."""
-        if self._recv_loop_task is not None and not self._recv_loop_task.done():
-            self._recv_loop_task.cancel()
+        logger.debug("Stopping multiplexer...")
+        await cancel_and_wait(self._recv_loop_task)
+        self._recv_loop_task = None
 
         if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing envelopes.
-            asyncio.run_coroutine_threadsafe(
-                self.out_queue.put(None), self._loop
-            ).result()
-            self._send_loop_task.cancel()
-
-        if self._connect_all_task is not None:
-            self._connect_all_task.cancel()
-        if self._disconnect_all_task is not None:
-            self._disconnect_all_task.cancel()
+            await self.out_queue.put(None)
+            await cancel_and_wait(self._send_loop_task)
+            self._send_loop_task = None
 
         for connection in [
             c
             for c in self.connections
             if c.connection_status.is_connected or c.connection_status.is_connecting
         ]:
-            asyncio.run_coroutine_threadsafe(
-                connection.disconnect(), self._loop
-            ).result()
-
-        if self._loop.is_running() and not self._thread.is_alive():
-            self._loop.call_soon_threadsafe(self._loop.stop)
-            self._loop.stop()
-        elif self._loop.is_running() and self._thread.is_alive():
-            self._loop.call_soon_threadsafe(self._loop.stop)
-            self._thread.join()
+            await connection.disconnect()
         logger.debug("Multiplexer stopped.")
 
-    async def _connect_all(self):
+    async def _connect_all(self) -> None:
         """Set all the connection up."""
-        logger.debug("Start multiplexer connections.")
+        logger.debug("Starting multiplexer connections.")
         connected = []  # type: List[PublicId]
         for connection_id, connection in self._id_to_connection.items():
             try:
@@ -241,6 +243,7 @@ class Multiplexer:
                 for c in connected:
                     await self._disconnect_one(c)
                 break
+        logger.debug("Multiplexer connections are set.")
 
     async def _connect_one(self, connection_id: PublicId) -> None:
         """
@@ -264,7 +267,7 @@ class Multiplexer:
                 )
             )
 
-    async def _disconnect_all(self):
+    async def _disconnect_all(self) -> None:
         """Tear all the connections down."""
         logger.debug("Tear the multiplexer connections down.")
         for connection_id, connection in self._id_to_connection.items():
@@ -298,7 +301,7 @@ class Multiplexer:
                 )
             )
 
-    async def _send_loop(self):
+    async def _send_loop(self) -> None:
         """Process the outgoing envelopes."""
         if not self.is_connected:
             logger.debug("Sending loop not started. The multiplexer is not connected.")
@@ -324,7 +327,7 @@ class Multiplexer:
                 logger.error("Error in the sending loop: {}".format(str(e)))
                 return
 
-    async def _receiving_loop(self):
+    async def _receiving_loop(self) -> None:
         """Process incoming envelopes."""
         logger.debug("Starting receving loop...")
         task_to_connection = {
@@ -444,6 +447,18 @@ class Multiplexer:
         """
         return await self.in_queue.async_wait()
 
+    async def _put(self, envelope: Envelope) -> None:
+        """
+        Schedule an envelope for sending it.
+
+        Notice that the output queue is an asyncio.Queue which uses an event loop
+        running on a different thread than the one used in this function.
+
+        :param envelope: the envelope to be sent.
+        :return: None
+        """
+        await self.out_queue.put(envelope)
+
     def put(self, envelope: Envelope) -> None:
         """
         Schedule an envelope for sending it.
@@ -454,39 +469,83 @@ class Multiplexer:
         :param envelope: the envelope to be sent.
         :return: None
         """
-        fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
-        fut.result()
+        self.out_queue.put_nowait(envelope)
 
-    def add_connection(self, connection: Connection, is_default: bool = False) -> None:
+
+class Multiplexer(AsyncMultiplexer):
+    """Transit sync multiplexer for compatibility."""
+
+    def __init__(self, *args, **kwargs):
         """
-        Add a connection to the mutliplexer.
+        Initialize the connection multiplexer.
 
-        :param connection: the connection to add.
-        :param is_default: whether the connection added should be the default one.
+        :param connections: a sequence of connections.
+        :param default_connection_index: the index of the connection to use as default.
+                                       | this information is used for envelopes which
+                                       | don't specify any routing context.
+        :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
+        """
+        super().__init__(*args, **kwargs)
+        self._sync_lock = threading.Lock()
+        self._thread_was_started = False
+        self._is_connected = False
+
+    def set_loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set event loop and all event loopp related objects.
+
+        :param loop: asyncio event loop.
         :return: None
         """
-        if connection.connection_id in self._id_to_connection:
-            logger.warning(
-                f"A connection with id {connection.connection_id} was already added. Replacing it..."
-            )
+        super().set_loop(loop)
+        self._thread_runner = ThreadedAsyncRunner(self._loop)
 
-        self._connections.append(connection)
-        self._id_to_connection[connection.connection_id] = connection
-        if is_default:
-            self.default_connection = connection
-
-    def _connection_consistency_checks(self):
+    def connect(self) -> None:  # type: ignore  # cause overrides coroutine
         """
-        Do some consistency checks on the multiplexer connections.
+        Connect the multiplexer.
 
+        Synchronously in thread spawned if new loop created.
+        """
+        with self._sync_lock:
+            if not self._loop.is_running():
+                self._thread_runner.start()
+                self._thread_was_started = True
+
+            self._thread_runner.call(super().connect()).result(240)
+            self._is_connected = True
+
+    def disconnect(self) -> None:  # type: ignore  # cause overrides coroutine
+        """
+        Disconnect the multiplexer.
+
+        Also stops a dedicated thread for event loop if spawned on connect.
+        """
+        logger.debug("Disconnect called")
+        with self._sync_lock:
+            if not self._loop.is_running():
+                return
+
+            if self._is_connected:
+                self._thread_runner.call(super().disconnect()).result(240)
+                self._is_connected = False
+            logger.debug("Disconnect async method executed")
+
+            if self._thread_runner.is_alive() and self._thread_was_started:
+                self._thread_runner.stop()
+                logger.debug("Thread stopped")
+            logger.debug("Disconnected")
+
+    def put(self, envelope: Envelope) -> None:  # type: ignore  # cause overrides coroutine
+        """
+        Schedule an envelope for sending it.
+
+        Notice that the output queue is an asyncio.Queue which uses an event loop
+        running on a different thread than the one used in this function.
+
+        :param envelope: the envelope to be sent.
         :return: None
-        :raise AssertionError: if an inconsistency is found.
         """
-        assert len(self.connections) > 0, "List of connections cannot be empty."
-
-        assert len(set(c.connection_id for c in self.connections)) == len(
-            self.connections
-        ), "Connection names must be unique."
+        self._thread_runner.call(super()._put(envelope))  # .result(240)
 
 
 class InBox:

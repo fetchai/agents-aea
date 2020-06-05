@@ -37,6 +37,7 @@ from aea.cli.utils.constants import (
     RESOURCE_TYPE_TO_CONFIG_FILE,
 )
 from aea.cli.utils.context import Context
+from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -243,3 +244,24 @@ def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
     loader = ConfigLoaders.from_package_type(item_type)
     with open(config_filepath, "w") as f:
         loader.dump(item_config, f)
+
+
+def validate_item_config(item_type: str, package_path: Path) -> None:
+    """
+    Validate item configuration.
+
+    :param item_type: type of item.
+    :param package_path: path to a package folder.
+
+    :return: None
+    :raises AEAConfigException: if something is wrong with item configuration.
+    """
+    item_config = load_item_config(item_type, package_path)
+    loader = ConfigLoaders.from_package_type(item_type)
+    for field_name in loader.required_fields:
+        if not getattr(item_config, field_name):
+            raise AEAConfigException(
+                "Parameter '{}' is missing from {} config.".format(
+                    field_name, item_type
+                )
+            )
