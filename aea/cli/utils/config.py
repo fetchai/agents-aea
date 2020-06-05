@@ -254,7 +254,7 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
     :param package_path: path to a package folder.
 
     :return: None
-    :raises AEAConfigException: if something is whong with item configuration.
+    :raises AEAConfigException: if something is wrong with item configuration.
     """
     item_config = load_item_config(item_type, package_path)
     loader = ConfigLoaders.from_package_type(item_type)
