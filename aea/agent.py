@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of a generic agent."""
 
 import logging
@@ -30,6 +28,8 @@ from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
 from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.runtime import AsyncRuntime, BaseRuntime, ThreadedRuntime
+
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,12 @@ class Agent(ABC):
     }
     DEFAULT_RUN_LOOP: str = "sync"
 
+    RUNTIMES: Dict[str, Type[BaseRuntime]] = {
+        "async": AsyncRuntime,
+        "threaded": ThreadedRuntime,
+    }
+    DEFAULT_RUNTIME: str = "threaded"
+
     def __init__(
         self,
         identity: Identity,
@@ -86,6 +92,7 @@ class Agent(ABC):
         timeout: float = 1.0,
         is_debug: bool = False,
         loop_mode: Optional[str] = None,
+        runtime_mode: Optional[str] = None,
     ) -> None:
         """
         Instantiate the agent.
@@ -96,6 +103,7 @@ class Agent(ABC):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param is_debug: if True, run the agent in debug mode (does not connect the multiplexer).
         :param loop_mode: loop_mode to choose agent run loop.
+        :param runtime: runtime to up agent.
 
         :return: None
         """
@@ -109,10 +117,43 @@ class Agent(ABC):
         self._timeout = timeout
 
         self._tick = 0
-        self._main_loop: Optional[BaseAgentLoop] = None
 
         self.is_debug = is_debug
+
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
+
+        loop_cls = self._get_main_loop_class()
+        self._main_loop: BaseAgentLoop = loop_cls(self)
+
+        self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
+        runtime_cls = self._get_runtime_class()
+        self._runtime: BaseRuntime = runtime_cls(agent=self, loop=loop)
+
+    @property
+    def is_running(self):
+        """Get running state of the runtime and agent."""
+        return self._runtime.is_running
+
+    @property
+    def is_stopped(self):
+        """Get running state of the runtime and agent."""
+        return self._runtime.is_stopped
+
+    def _get_main_loop_class(self) -> Type[BaseAgentLoop]:
+        """Get main loop class based on loop mode."""
+        if self._loop_mode not in self.RUN_LOOPS:
+            raise ValueError(
+                f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
+            )
+        return self.RUN_LOOPS[self._loop_mode]
+
+    def _get_runtime_class(self) -> Type[BaseRuntime]:
+        """Get runtime class based on runtime mode."""
+        if self._runtime_mode not in self.RUNTIMES:
+            raise ValueError(
+                f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
+            )
+        return self.RUNTIMES[self._runtime_mode]
 
     @property
     def identity(self) -> Identity:
@@ -176,14 +217,9 @@ class Agent(ABC):
             and not self.multiplexer.connection_status.is_connected
         ):
             return AgentState.INITIATED
-        elif (
-            self.multiplexer.connection_status.is_connected and self.liveness.is_stopped
-        ):
+        elif self.multiplexer.connection_status.is_connected and not self.is_running:
             return AgentState.CONNECTED
-        elif (
-            self.multiplexer.connection_status.is_connected
-            and not self.liveness.is_stopped
-        ):
+        elif self.multiplexer.connection_status.is_connected and self.is_running:
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
@@ -216,49 +252,28 @@ class Agent(ABC):
 
         :return: None
         """
-        self._start_setup()
-        self._run_main_loop()
-
-    def _set_main_loop(self) -> None:
-        """
-        Construct main loop from loop_name.
-
-        :param loop_name: name of loop to use from list of supported loops.
-
-        :return: None
-        """
-        if self._loop_mode not in self.RUN_LOOPS:
-            raise ValueError(
-                f"Loop `{self._loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
-            )
-
-        loop_cls = self.RUN_LOOPS[self._loop_mode]
-        self._main_loop = loop_cls(self)
+        self._runtime.start()
 
     def _start_setup(self) -> None:
         """
-        Set up Agent on start:
+        Set up Agent on start.
+
         - connect Multiplexer
         - call agent.setup
         - set liveness to started
 
         :return: None
         """
-        if not self.is_debug:
-            self.multiplexer.connect()
-
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
-
         self.liveness.start()
 
-    def _run_main_loop(self) -> None:
+    def _depricated_run_main_loop(self) -> None:
         """
         Run the main loop of the agent.
 
         :return: None
         """
-        self._set_main_loop()
         logger.info("[{}]: Start processing messages...".format(self.name))
         assert self._main_loop is not None, "Agent loop was not set"
         self._main_loop.start()
@@ -276,15 +291,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self.liveness.stop()
-        if self._main_loop is not None:
-            self._main_loop.stop()
-        logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.teardown()
-
-        logger.debug("[{}]: Stopping message processing...".format(self.name))
-        self.multiplexer.disconnect()
-        logger.debug("[{}]: Stopped".format(self.name))
+        self._runtime.stop()
 
     @abstractmethod
     def setup(self) -> None:

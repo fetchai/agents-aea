@@ -18,11 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 
+import logging
 import os
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -96,7 +95,27 @@ def test_act():
             lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
         )
         behaviour = agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
+        import time
+
+        time.sleep(1)
         wait_for_condition(lambda: behaviour.nb_act_called > 0, timeout=10)
+        agent.stop()
+
+
+def test_start_stop():
+    """Tests the act function of the AEA."""
+    agent_name = "MyAgent"
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    builder = AEABuilder()
+    builder.set_name(agent_name)
+    builder.add_private_key(FETCHAI, private_key_path)
+    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+    agent = builder.build()
+
+    with run_in_thread(agent.start, timeout=20):
+        wait_for_condition(
+            lambda: agent._main_loop and agent._main_loop.is_running, timeout=10
+        )
         agent.stop()
 
 
@@ -158,8 +177,7 @@ def test_react():
             agent.stop()
 
 
-@pytest.mark.asyncio
-async def test_handle():
+def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
         agent_name = "MyAgent"
@@ -197,7 +215,7 @@ async def test_handle():
             message=message_bytes,
         )
 
-        with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
+        with run_in_thread(aea.start, timeout=5):
             wait_for_condition(
                 lambda: aea._main_loop and aea._main_loop.is_running, timeout=10
             )
@@ -219,8 +237,6 @@ async def test_handle():
             )
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
-            """ inbox twice cause first message is invalid. generates error message and it accepted """
-
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 2, timeout=1,
             )
@@ -242,9 +258,8 @@ async def test_handle():
             # send envelope via localnode back to agent
             aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 3, timeout=1,
+                lambda: len(dummy_handler.handled_messages) == 3, timeout=2,
             )
-
             aea.stop()
 
 
@@ -353,6 +368,8 @@ def test_initialize_aea_programmatically_build_resources():
 
             error_skill.skill_context.set_agent_context(aea.context)
             dummy_skill.skill_context.set_agent_context(aea.context)
+            error_skill.skill_context.logger = logging.getLogger("error_skill")
+            dummy_skill.skill_context.logger = logging.getLogger("dummy_skills")
 
             default_protocol_id = DefaultMessage.protocol_id
 
@@ -395,7 +412,6 @@ def test_initialize_aea_programmatically_build_resources():
                 wait_for_condition(
                     lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
                 )
-
                 dummy_handler_name = "dummy"
                 dummy_handler = aea.resources._handler_registry.fetch(
                     (dummy_skill_id, dummy_handler_name)

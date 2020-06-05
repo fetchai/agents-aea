@@ -125,6 +125,10 @@
     "loop_mode": {
       "type": "string",
       "enum": ["sync", "async"]
+    },
+    "runtime_mode": {
+      "type": "string",
+      "enum": ["async", "threaded"]
     }
   }
 }

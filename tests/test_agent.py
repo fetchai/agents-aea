@@ -82,6 +82,13 @@ def test_run_agent():
         assert isinstance(agent.inbox, InBox)
         assert isinstance(agent.outbox, OutBox)
 
+        agent.multiplexer.disconnect()
+
+        import asyncio
+
+        agent = DummyAgent(
+            identity, [oef_local_connection], loop=asyncio.new_event_loop()
+        )
         agent_thread = Thread(target=agent.start)
         agent_thread.start()
         try:

@@ -23,7 +23,6 @@ import os
 import shutil
 import sys
 import tempfile
-import time
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
@@ -167,7 +166,6 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
                 ],
                 timeout=20,
             )
-            time.sleep(0.1)  # cause race condition in termination and ctrl+c handling.
             process_launch.control_c()
             process_launch.expect_all(
                 [
