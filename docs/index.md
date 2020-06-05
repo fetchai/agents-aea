@@ -25,11 +25,11 @@ AEAs are not:
 
 The AEA framework is a Python-based development suite which equips you with an efficient and accessible set of tools for building AEAs. The framework is modular, extensible, and composable. This framework attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-To get started developing your own AEA, check out the <a href="quickstart">quick start</a>.
+To get started developing your own AEA, check out the <a href="step_one">getting started</a> section.
 
 To learn more about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
 
-AEAs achieve their goals with the help of the <a href="oef-ledger">OEF</a> - a search and discovery platform for agents by Fetch.ai - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement layer. Third-party blockchains, such as Ethereum, may also allow AEA integration.
+AEAs achieve their goals with the help of the <a href="oef-ledger">Open Economic Framework (OEF)</a> - a decentralized communication and search & discovery system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement layer. Third-party blockchains, such as Ethereum, may also allow AEA integration.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

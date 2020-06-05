@@ -1,7 +1,10 @@
-<div class="admonition note">
+<!-- <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
 </div>
+ -->
+
+This guide will take you through the development of a simple skill.
 
 ### Dependencies
 
@@ -464,6 +467,13 @@ We can see that the AEA sends search requests to the [OEF search node](../oef-le
 
 We stop the AEA with `CTRL + C`.
 
+<!-- ## Next steps
+
+We recommend you continue with the next step in the 'Getting Started' series:
+
+- <a href="../aea-vs-mvc/">Build a skill for an AEA</a>
+
+ -->
 ## Now it's your turn
 
 We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
