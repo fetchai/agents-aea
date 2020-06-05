@@ -24,9 +24,9 @@ message Envelope{
 
 The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression.</a>.
 
- * to: (`regexp`) `something`
- * sender: (`regexp`) `something` 
- * protocol_id: (`regexp`) `[a-zA-Z0-9_]+/[a-zA-Z0-9_]+:[0-9]+.[0-9]+.[0-9]+`
+ * to: any string
+ * sender: any string 
+ * protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`
  * URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a>
 
 - It MUST implement each protocol with the required meta-fields:
@@ -101,7 +101,7 @@ message DefaultMessage{
 
 - It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key.
 
-- It SHOULD implement handling of errors using the `default` protocol.
+- It SHOULD implement handling of errors using the `default` protocol. The protobuf schema is given above.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
