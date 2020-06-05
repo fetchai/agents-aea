@@ -111,8 +111,6 @@ class P2PLibp2pClientConnection(Connection):
                 libp2p_cert_file
             )  # TOFIX(LR) will be mandatory
 
-        self.agent_addr = self.identity.address
-
         if key_file is None:
             key = FetchAICrypto()
         else:
@@ -178,7 +176,7 @@ class P2PLibp2pClientConnection(Connection):
             raise e
 
     async def _setup_connection(self):
-        await self._send(bytes(self.agent_addr, "utf-8"))
+        await self._send(bytes(self.address, "utf-8"))
         await self._receive()
 
     async def disconnect(self) -> None:
