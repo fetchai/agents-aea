@@ -117,7 +117,7 @@ class ConfigLoaderMock:
 
     def __init__(self, *args, **kwargs):
         """Init the ConfigLoader mock object."""
-        pass
+        self.required_fields = kwargs.get("required_fields", [])
 
     def load(self, *args, **kwargs):
         """Mock the load method."""
