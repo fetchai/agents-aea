@@ -92,6 +92,9 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 ``` bash
+aea interact
+```
+``` bash
 aea delete my_first_aea
 ```
 ``` bash

@@ -20,16 +20,24 @@
 """Implementation of the 'aea interact' subcommand."""
 
 import codecs
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 
 import click
 
 from aea.cli.utils.exceptions import InterruptInputException
+from aea.configurations.base import (
+    ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    PackageType,
+)
+from aea.configurations.loader import ConfigLoader
 from aea.connections.stub.connection import (
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_OUTPUT_FILE_NAME,
     StubConnection,
 )
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
@@ -43,20 +51,30 @@ def interact():
 
 
 def _run_interaction_channel():
+    # load agent configuration file
+    loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
+    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
+    agent_name = agent_configuration.name
+    # load stub connection
+    configuration = ConnectionConfig(
+        input_file=DEFAULT_OUTPUT_FILE_NAME,
+        output_file=DEFAULT_INPUT_FILE_NAME,
+        connection_id=StubConnection.connection_id,
+    )
+    identity_stub = Identity(agent_name + "_interact", "interact")
     stub_connection = StubConnection(
-        input_file_path=DEFAULT_OUTPUT_FILE_NAME,
-        output_file_path=DEFAULT_INPUT_FILE_NAME,
+        configuration=configuration, identity=identity_stub
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
-    outbox = OutBox(multiplexer, default_address="interact")
+    outbox = OutBox(multiplexer, default_address=identity_stub.address)
 
     try:
         multiplexer.connect()
         is_running = True
         while is_running:
             try:
-                envelope = _try_construct_envelope()
+                envelope = _try_construct_envelope(agent_name, identity_stub.name)
                 if envelope is None and not inbox.empty():
                     envelope = inbox.get_nowait()
                     assert (
@@ -78,44 +96,49 @@ def _run_interaction_channel():
 
 def _construct_message(action_name, envelope):
     action_name = action_name.title()
+    msg = (
+        DefaultMessage.serializer.decode(envelope.message)
+        if isinstance(envelope.message, bytes)
+        else envelope.message
+    )
     message = (
-        "{} envelope:\nto: "
+        "\n{} envelope:\nto: "
         "{}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
-            action_name,
-            envelope.to,
-            envelope.sender,
-            envelope.protocol_id,
-            envelope.message,
+            action_name, envelope.to, envelope.sender, envelope.protocol_id, msg,
         )
     )
     return message
 
 
-def _try_construct_envelope() -> Optional[Envelope]:
+def _try_construct_envelope(agent_name: str, sender: str) -> Optional[Envelope]:
     """Try construct an envelope from user input."""
     envelope = None  # type: Optional[Envelope]
     try:
-        click.echo("Provide envelope to:")
-        to = input()  # nosec
-        if to == "":
-            raise InterruptInputException
-        click.echo("Provide envelope sender:")
-        sender = input()  # nosec
-        if sender == "":
-            raise InterruptInputException
-        # click.echo("Provide envelope protocol_id:")
-        # protocol_id = input()  # nosec
-        # if protocol_id == "":
-        #    raise InterruptInputException
-        click.echo("Provide encoded message for protocol fetchai/default:0.2.0:")
+        # click.echo("Provide performative of protocol fetchai/default:0.2.0:")
+        # performative_str = input()  # nosec
+        # if performative_str == "":
+        #     raise InterruptInputException
+        performative_str = "bytes"
+        performative = DefaultMessage.Performative(performative_str)
+        click.echo(
+            "Provide message of protocol fetchai/default:0.2.0 for performative {}:".format(
+                performative_str
+            )
+        )
         message_escaped = input()  # nosec
+        message_escaped = message_escaped.strip()
         if message_escaped == "":
             raise InterruptInputException
-        message = codecs.decode(message_escaped.encode("utf-8"), "unicode-escape")
-        message_encoded = message.encode("utf-8")
-        msg = DefaultMessage.serializer.decode(message_encoded)
+        if performative == DefaultMessage.Performative.BYTES:
+            message_decoded = codecs.decode(
+                message_escaped.encode("utf-8"), "unicode-escape"
+            )
+            message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
+        else:
+            message = message_escaped
+        msg = DefaultMessage(performative=performative, content=message)
         envelope = Envelope(
-            to=to,
+            to=agent_name,
             sender=sender,
             protocol_id=DefaultMessage.protocol_id,  # PublicId.from_str(protocol_id),
             message=msg,

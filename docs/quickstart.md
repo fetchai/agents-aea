@@ -205,6 +205,18 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
+<details><summary>CLI interact command</summary>
+
+Optionally, use the CLI interact command from a different terminal:
+
+``` bash
+aea interact
+```
+
+You can then send the AEA messages via an interactive tool.
+
+</details>
+
 ## Stop the AEA
 
 Stop the AEA by pressing `CTRL C`
