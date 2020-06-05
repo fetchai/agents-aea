@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: Qmb6sFJ5Wcjdwo2PCWKx5yjuVvDwp7Bx5mMePpggVnkjY9
+  connection.py: QmUEdDTirgB7jQQC2mG1mCDiUzVMiiMtdQDZM45Rf4D1iK
 fingerprint_ignore_patterns: []
 protocols:
-- fetchai/http:0.1.0
+- fetchai/http:0.2.0
 class_name: HTTPServerConnection
 config:
   api_spec_path: ''
@@ -18,7 +18,7 @@ config:
   port: 8000
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:0.1.0
+- fetchai/http:0.2.0
 dependencies:
   openapi-core:
     version: ==0.13.2

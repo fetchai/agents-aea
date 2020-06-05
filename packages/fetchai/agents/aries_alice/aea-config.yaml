@@ -15,7 +15,7 @@ contracts: []
 protocols:
 - fetchai/default:0.2.0
 - fetchai/fipa:0.3.0
-- fetchai/http:0.1.0
+- fetchai/http:0.2.0
 - fetchai/oef_search:0.2.0
 skills:
 - fetchai/aries_alice:0.1.0

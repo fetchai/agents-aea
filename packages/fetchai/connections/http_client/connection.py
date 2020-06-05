@@ -152,7 +152,7 @@ class HTTPClientChannel:
         envelope = Envelope(
             to=self.agent_address,
             sender="HTTP Server",
-            protocol_id=PublicId.from_str("fetchai/http:0.1.0"),
+            protocol_id=PublicId.from_str("fetchai/http:0.2.0"),
             context=context,
             message=http_message,
         )

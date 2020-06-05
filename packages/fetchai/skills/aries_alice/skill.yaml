@@ -12,7 +12,7 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.2.0
-- fetchai/http:0.1.0
+- fetchai/http:0.2.0
 behaviours: {}
 handlers:
   aries_demo_default:
