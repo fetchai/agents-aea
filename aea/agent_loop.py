@@ -60,7 +60,7 @@ class BaseAgentLoop(ABC):
         :params agent: Agent or AEA to run.
         :params loop: optional asyncio event loop. if not specified a new loop will be created.
         """
-        self._agent = agent
+        self._agent: "Agent" = agent
         self.set_loop(ensure_loop(loop))
         self._tasks: List[asyncio.Task] = []
         self._state: AsyncState = AsyncState()

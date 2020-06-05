@@ -123,6 +123,7 @@ class AsyncRuntime(BaseRuntime):
         super().__init__(agent=agent, loop=loop)
         self._stopping_task: Optional[asyncio.Task] = None
         self._async_stop_lock: Optional[asyncio.Lock] = None
+        self._task: Optional[asyncio.Task] = None
 
     def _start(self) -> None:
         """

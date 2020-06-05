@@ -24,19 +24,18 @@ import time
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
-from asyncio.tasks import ALL_COMPLETED, FIRST_COMPLETED, Task
+from asyncio.tasks import Task
 from threading import Thread
 from typing import (
     Any,
+    Awaitable,
     Callable,
-    Coroutine,
     List,
     Optional,
     Sequence,
     Set,
     Tuple,
     Union,
-    cast,
 )
 
 try:
@@ -137,7 +136,11 @@ class AsyncState:
 
 
 class PeriodicCaller:
-    """Schedule a periodic call of callable using event loop."""
+    """
+    Schedule a periodic call of callable using event loop.
+
+    Used for periodic function run using asyncio.
+    """
 
     def __init__(
         self,
@@ -198,7 +201,14 @@ class PeriodicCaller:
 
 
 def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
-    """Use loop provided or create new if not provided or closed."""
+    """
+    Use loop provided or create new if not provided or closed.
+
+    Return loop passed if its provided,not closed and not running, otherwise returns new event loop.
+
+    :param loop: optional event loop
+    :return: asyncio event loop
+    """
     try:
         loop = loop or asyncio.new_event_loop()
         assert not loop.is_closed()
@@ -208,44 +218,6 @@ def ensure_loop(loop: AbstractEventLoop = None) -> AbstractEventLoop:
     return loop
 
 
-async def wait_and_cancel(
-    tasks: Sequence[Task],
-    include_cancelled: bool = False,
-    loop: Optional[AbstractEventLoop] = None,
-) -> List[Exception]:
-    """
-    Wait first task completed or exception raised and cancel other tasks.
-
-    Even terminated by cancel, will cancel all tasks.
-
-    :param tasks: list of tasks to run and wait.
-
-    :return: list of exceptions raised.
-    """
-    exceptions: List[Exception] = []
-
-    try:
-        await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
-
-    finally:
-        for task in tasks:
-            if task.done():
-                continue
-            task.cancel()
-
-        _, pending = await asyncio.wait(tasks, return_when=ALL_COMPLETED)
-
-        assert not pending
-
-        for task in tasks:
-            if not include_cancelled and task.cancelled():
-                continue
-            exc = task.exception()
-            if exc:
-                exceptions.append(cast(Exception, exc))
-    return exceptions
-
-
 class AnotherThreadTask:
     """
     Schedule a task to run on the loop in another thread.
@@ -253,7 +225,7 @@ class AnotherThreadTask:
     Provides better cancel behaviour: on cancel it will wait till cancelled completely.
     """
 
-    def __init__(self, coro: Coroutine, loop: AbstractEventLoop) -> None:
+    def __init__(self, coro: Awaitable, loop: AbstractEventLoop) -> None:
         """
         Init the task.
 
@@ -266,7 +238,11 @@ class AnotherThreadTask:
         self._future = asyncio.run_coroutine_threadsafe(self._get_task_result(), loop)
 
     async def _get_task_result(self) -> Any:
-        """Get task result, should be run in target loop."""
+        """
+        Get task result, should be run in target loop.
+
+        :return: task result value or raise an exception if task failed
+        """
         self._task = self._loop.create_task(self._coro)
         return await self._task
 
@@ -316,7 +292,7 @@ class ThreadedAsyncRunner(Thread):
         if self.is_alive() or self._loop.is_running():
             return
         super().start()
-        self.call(asyncio.sleep(0.001)).result(1)  # type: ignore # to ensure loop is started
+        self.call(asyncio.sleep(0.001)).result(1)
 
     def run(self) -> None:
         """Run code inside thread."""
@@ -325,7 +301,7 @@ class ThreadedAsyncRunner(Thread):
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
-    def call(self, coro: Coroutine) -> Any:
+    def call(self, coro: Awaitable) -> Any:
         """
         Run a coroutine inside the event loop.
 

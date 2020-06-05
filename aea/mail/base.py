@@ -521,6 +521,7 @@ class AsyncMultiplexer:
 
     async def connect(self) -> None:
         """Connect the multiplexer."""
+        logger.debug("Multiplexer connecting...")
         self._connection_consistency_checks()
         self._out_queue = asyncio.Queue()
         async with self._lock:
@@ -542,17 +543,17 @@ class AsyncMultiplexer:
 
     async def disconnect(self) -> None:
         """Disconnect the multiplexer."""
-        logger.debug("Disconnect called.")
+        logger.debug("Multiplexer disconnecting...")
         async with self._lock:
             if not self.connection_status.is_connected:
                 logger.debug("Multiplexer already disconnected.")
                 await asyncio.wait_for(self._stop(), timeout=60)
                 return
             try:
-                logger.debug("Disconnecting the multiplexer...")
                 await asyncio.wait_for(self._disconnect_all(), timeout=60)
                 await asyncio.wait_for(self._stop(), timeout=60)
                 self._connection_status.is_connected = False
+                logger.debug("Multiplexer disconnected.")
             except (CancelledError, Exception):
                 logger.exception("Exception on disconnect:")
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
@@ -584,7 +585,7 @@ class AsyncMultiplexer:
 
     async def _connect_all(self) -> None:
         """Set all the connection up."""
-        logger.debug("Start multiplexer connections.")
+        logger.debug("Starting multiplexer connections.")
         connected = []  # type: List[PublicId]
         for connection_id, connection in self._id_to_connection.items():
             try:
@@ -599,6 +600,7 @@ class AsyncMultiplexer:
                 for c in connected:
                     await self._disconnect_one(c)
                 break
+        logger.debug("Multiplexer connections are set.")
 
     async def _connect_one(self, connection_id: PublicId) -> None:
         """
