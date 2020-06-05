@@ -39,6 +39,7 @@ from dotenv import load_dotenv
 
 import yaml
 
+from aea.configurations.base import ComponentConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,42 @@ def locate(path):
         except AttributeError:
             return None
     return object
+
+
+def load_aea_package(configuration: ComponentConfiguration) -> None:
+    """
+    Load the AEA package.
+
+    It adds all the __init__.py modules into `sys.modules`.
+
+    :param configuration: the configuration object.
+    :return: None
+    """
+    dir = configuration.directory
+    assert dir is not None
+
+    # patch sys.modules with dummy modules
+    prefix_root = "packages"
+    prefix_author = prefix_root + f".{configuration.author}"
+    prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
+    prefix_pkg = prefix_pkg_type + f".{configuration.name}"
+    sys.modules[prefix_root] = types.ModuleType(prefix_root)
+    sys.modules[prefix_author] = types.ModuleType(prefix_author)
+    sys.modules[prefix_pkg_type] = types.ModuleType(prefix_pkg_type)
+
+    for subpackage_init_file in dir.rglob("__init__.py"):
+        parent_dir = subpackage_init_file.parent
+        relative_parent_dir = parent_dir.relative_to(dir)
+        if relative_parent_dir == Path("."):
+            # this handles the case when 'subpackage_init_file'
+            # is path/to/package/__init__.py
+            import_path = prefix_pkg
+        else:
+            import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
+        spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[prefix_pkg] = module
+        spec.loader.exec_module(module)  # type: ignore
 
 
 def load_all_modules(

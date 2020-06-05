@@ -143,9 +143,7 @@ def test_tac_serialization():
     with pytest.raises(
         ValueError, match="Performative not valid: transaction_confirmation"
     ):
-        with mock.patch(
-            "packages.fetchai.protocols.tac.message.TacMessage.Performative"
-        ) as mocked_type:
+        with mock.patch.object(TacMessage, "Performative") as mocked_type:
             mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
             TacMessage.serializer.encode(msg)
 
