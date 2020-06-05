@@ -93,7 +93,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             standalone_mode=False,
         )
 
-    @unittest.mock.patch("aea.cli.add.get_package_dest_path", return_value="dest/path")
+    @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
     @unittest.mock.patch("aea.cli.add.fetch_package")
     def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""

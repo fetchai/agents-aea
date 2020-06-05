@@ -24,7 +24,7 @@ from typing import cast
 import click
 from click.core import Context as ClickContext
 
-from aea.cli.registry.utils import fetch_package
+from aea.cli.registry.add import fetch_package
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
@@ -33,7 +33,7 @@ from aea.cli.utils.package_utils import (
     copy_package_directory,
     find_item_in_distribution,
     find_item_locally,
-    get_package_dest_path,
+    get_package_path,
     is_fingerprint_correct,
     is_item_present,
     register_item,
@@ -103,7 +103,6 @@ def _add_item(
     """
     ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    item_type_plural = item_type + "s"
 
     click.echo(
         "Adding {} '{}' to the agent '{}'...".format(
@@ -117,32 +116,16 @@ def _add_item(
             )
         )
 
-    dest_path = get_package_dest_path(
-        ctx, item_public_id.author, item_type_plural, item_public_id.name
-    )
+    dest_path = get_package_path(ctx, item_type, item_public_id)
     is_local = ctx.config.get("is_local")
 
     ctx.clean_paths.append(dest_path)
     if item_public_id in [DEFAULT_CONNECTION, DEFAULT_PROTOCOL, DEFAULT_SKILL]:
         source_path = find_item_in_distribution(ctx, item_type, item_public_id)
-        package_path = copy_package_directory(
-            ctx,
-            source_path,
-            item_type,
-            item_public_id.name,
-            item_public_id.author,
-            dest_path,
-        )
+        package_path = copy_package_directory(source_path, dest_path)
     elif is_local:
         source_path = find_item_locally(ctx, item_type, item_public_id)
-        package_path = copy_package_directory(
-            ctx,
-            source_path,
-            item_type,
-            item_public_id.name,
-            item_public_id.author,
-            dest_path,
-        )
+        package_path = copy_package_directory(source_path, dest_path)
     else:
         package_path = fetch_package(
             item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path

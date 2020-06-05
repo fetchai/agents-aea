@@ -32,6 +32,7 @@ from packaging.specifiers import SpecifierSet
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.components.base import Component
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
     AgentConfig,
@@ -47,7 +48,6 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.configurations.components import Component
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
@@ -868,8 +868,8 @@ class AEABuilder:
         else:
             raise AEAException(
                 "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.2.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.2.0` to run it as a single connection."
+                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.3.0` "
+                "And use `aea run --connections fetchai/p2p_noise:0.3.0` to run it as a single connection."
             )
 
     def _get_agent_loop_timeout(self) -> float:
