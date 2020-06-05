@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
@@ -47,7 +46,7 @@ from aea.test_tools.click_testing import CliRunner
 
 from tests.common.pexpect_popen import PexpectWrapper
 
-from ..conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
+from ..conftest import AUTHOR, CLI_LOG_OPTION, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 if sys.platform.startswith("win"):
@@ -492,6 +491,7 @@ def test_run_ethereum_private_key_config():
         pass
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause ledger depends on network
 def test_run_ledger_apis():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
@@ -586,6 +586,7 @@ def test_run_ledger_apis():
             pass
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause ledger depends on network
 def test_run_fet_ledger_apis():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
@@ -676,6 +677,7 @@ def test_run_fet_ledger_apis():
             pass
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
     runner = CliRunner()
@@ -746,6 +748,7 @@ def test_run_with_install_deps():
             pass
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps_and_requirement_file():
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
     runner = CliRunner()

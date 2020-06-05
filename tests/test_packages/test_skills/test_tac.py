@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the tac skills."""
 
 import datetime
@@ -25,12 +24,13 @@ import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_ETH_PRIVATE_KEY_1
+from ...conftest import FUNDED_ETH_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestTacSkills(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
@@ -149,6 +149,7 @@ class TestTacSkills(AEATestCaseMany, UseOef):
 class TestTacSkillsContract(AEATestCaseMany, UseOef):
     """Test that tac skills work."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
