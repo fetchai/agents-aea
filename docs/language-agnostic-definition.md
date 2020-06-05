@@ -15,11 +15,19 @@ message Envelope{
     string uri = 5;
 }
 ```
-
+<!--
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Additional constraints on envelope fields will be added soon!</p>
 </div>
+-->
+
+The format for the above fields, except `message`, is specified below. For those with `regexp`, the format is described in <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target=_blank>regular expression.</a>.
+
+ * to: any string
+ * sender: any string 
+ * protocol_id: (`regexp`) `^[a-zA-Z0-9_]*/[a-zA-Z_][a-zA-Z0-9_]*:(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`
+ * URI: <a href="https://tools.ietf.org/html/rfc3986" target=_blank>this syntax</a>
 
 - It MUST implement each protocol with the required meta-fields:
 
@@ -89,9 +97,11 @@ message DefaultMessage{
 }
 ```
 
-- It MUST process `Envelopes` asynchronously.
+- It is recommended that it processes `Envelopes` asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation choice/constraint; for example, the AEA can process envelopes either synchronously and asynchronously. However, due to the high level of activity that an AEA might be subject to, other AEAs expect a certain minimum level of responsiveness and reactivity of an AEA's implementation, especially in the case of many concurrent dialogues with other peers. That could imply the need for asynchronous programming to make the AEA's implementation scalable.
 
 - It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key.
+
+- It SHOULD implement handling of errors using the `default` protocol. The protobuf schema is given above.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

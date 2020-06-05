@@ -38,7 +38,7 @@ Protocol specific messages, wrapped in envelopes, are sent and received to other
 
 The module `connections/base.py` contains the abstract class which defines a <a href="api/connections/base">Connection</a>. A `Connection` acts as a bridge to the SDK or API to be wrapped, and is, where necessary, responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
-The framework provides one default connection, called`stub`. It implements an I/O reader and writer to send messages to the agent from a local file. Additional connections can be added as packages.
+The framework provides one default connection, called `stub`. It implements an I/O reader and writer to send messages to the agent from a local file. Additional connections can be added as packages.
 
 An AEA can run connections via the `Multiplexer`.
 
@@ -52,12 +52,14 @@ It maintains an `InBox` and `OutBox`, which are, respectively, queues for incomi
 
 <a href="api/skill/base">Skills</a> are the core focus of the framework's extensibility. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
-A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, `Model` and `Task`:
+A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
 * `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' reactive behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
 * `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the AEA. Behaviours implement AEAs' pro-activeness.
 * `Models`: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
 * `Task`: none, one or more `Tasks` encapsulate background work internal to the AEA.
+
+`Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
 
 A skill can read (parts of) the state of the the AEA, and suggest action(s) to the AEA according to its specific logic.  As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. 
 
