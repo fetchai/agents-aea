@@ -25,7 +25,7 @@ import random
 import struct
 from asyncio import AbstractEventLoop, CancelledError
 from random import randint
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
@@ -90,26 +90,16 @@ class P2PLibp2pClientConnection(Connection):
         """
         super().__init__(**kwargs)
 
-        key_file = self.configuration.config.get("key_file")  # Optional[str]
-        # TOFIX(LR) should be a list of libp2p nodes config [(host, port, certfile)]
-        libp2p_host = self.configuration.config.get("libp2p_node_host")  # Optional[str]
-        libp2p_port = self.configuration.config.get("libp2p_node_port")  # Optional[int]
-        libp2p_cert_file = self.configuration.config.get(
-            "libp2p_cert_file"
-        )  # Optional[str]
+        key_file = self.configuration.config.get("client_key_file")  # Optional[str]
+        nodes = self.configuration.config.get("nodes")
 
-        if libp2p_host is None or libp2p_port is None:
-            raise ValueError("libp2p node tcp uri is mandatory")
-        libp2p_uri = Uri(host=libp2p_host, port=libp2p_port)
+        assert nodes is not None, "At least one node should be provided"
+        nodes = list(cast(List, nodes))
 
-        libp2p_delegate_uris = list()  # type: List[Uri]
-        libp2p_delegate_certs = list()  # type: List[str]
-
-        libp2p_delegate_uris.append(libp2p_uri)
-        if libp2p_cert_file is not None:
-            libp2p_delegate_certs.append(
-                libp2p_cert_file
-            )  # TOFIX(LR) will be mandatory
+        nodes_uris = [n["uri"] for n in nodes]
+        assert len(nodes_uris) == len(
+            nodes
+        ), "Delegate Uri should be provided for each node"
 
         if key_file is None:
             key = FetchAICrypto()
@@ -120,13 +110,12 @@ class P2PLibp2pClientConnection(Connection):
         self.key = key
         logger.debug("Public key used by libp2p client: {}".format(key.public_key))
 
-        # delegates uris
-        self.delegate_uris = list(libp2p_delegate_uris)
-        if len(self.delegate_uris) == 0:
-            raise ValueError("At least one libp2p node uri should be provided")
+        # delegate uris
+        self.delegate_uris = [Uri(u) for u in nodes_uris]
 
         # delegates certificates
-        self.delegate_certs = list(libp2p_delegate_certs)
+        # TOFIX(LR) will be mandatory
+        self.delegate_certs = []
 
         # select a delegate
         index = random.randint(0, len(self.delegate_uris) - 1)  # nosec
