@@ -16,21 +16,24 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the generic buyer and seller skills."""
 
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_ETH_PRIVATE_KEY_1, FUNDED_ETH_PRIVATE_KEY_2
+from ...conftest import (
+    FUNDED_ETH_PRIVATE_KEY_1,
+    FUNDED_ETH_PRIVATE_KEY_2,
+    MAX_FLAKY_RERUNS,
+)
 
 
 @pytest.mark.unstable
 class TestERCSkillsEthereumLedger(AEATestCaseMany, UseOef):
     """Test that erc1155 skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"

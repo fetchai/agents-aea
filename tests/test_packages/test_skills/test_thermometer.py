@@ -16,19 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the thermometer skills."""
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestThermometerSkill(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 
@@ -110,7 +109,7 @@ class TestThermometerSkill(AEATestCaseMany, UseOef):
 class TestThermometerSkillFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that thermometer skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_thermometer(self):
         """Run the thermometer skills sequence."""
 

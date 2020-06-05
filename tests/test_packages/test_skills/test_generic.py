@@ -16,19 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the generic buyer and seller skills."""
 import pytest
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestGenericSkills(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"
@@ -105,7 +104,7 @@ class TestGenericSkills(AEATestCaseMany, UseOef):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that generic skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_generic(self, pytestconfig):
         """Run the generic skills sequence."""
         seller_aea_name = "my_generic_seller"

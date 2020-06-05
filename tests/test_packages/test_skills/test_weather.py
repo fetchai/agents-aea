@@ -16,20 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the weather skills."""
 import pytest
 
 
 from aea.test_tools.test_cases import AEATestCaseMany, UseOef
 
-from ...conftest import FUNDED_FET_PRIVATE_KEY_1
+from ...conftest import FUNDED_FET_PRIVATE_KEY_1, MAX_FLAKY_RERUNS
 
 
 class TestWeatherSkills(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
@@ -106,7 +105,7 @@ class TestWeatherSkills(AEATestCaseMany, UseOef):
 class TestWeatherSkillsFetchaiLedger(AEATestCaseMany, UseOef):
     """Test that weather skills work."""
 
-    @pytest.mark.flaky(reruns=5)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # cause possible network issues
     def test_weather(self):
         """Run the weather skills sequence."""
         weather_station_aea_name = "my_weather_station"
