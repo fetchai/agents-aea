@@ -2,30 +2,30 @@
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.1.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.2.0 --alias my_seller_aea
 cd generic_seller
 aea install
 ```
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea add skill fetchai/generic_seller:0.4.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.1.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.2.0 --alias my_buyer_aea
 cd generic_buyer
 aea install
 ```
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/oef:0.3.0
+aea add connection fetchai/oef:0.4.0
 aea add skill fetchai/generic_buyer:0.3.0
 aea install
-aea config set agent.default_connection fetchai/oef:0.3.0
+aea config set agent.default_connection fetchai/oef:0.4.0
 ```
 ``` bash
 aea generate-key fetchai
@@ -65,7 +65,7 @@ aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.currency
 aea config set vendor.fetchai.skills.generic_buyer.models.strategy.args.ledger_id cosmos
 ```
 ``` bash
-aea run --connections fetchai/oef:0.3.0
+aea run --connections fetchai/oef:0.4.0
 ```
 ``` bash
 cd ..

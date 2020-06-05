@@ -31,7 +31,8 @@ from aea.connections.stub.connection import (
     DEFAULT_OUTPUT_FILE_NAME,
     StubConnection,
 )
-from aea.mail.base import Envelope, InBox, Multiplexer, OutBox
+from aea.mail.base import Envelope
+from aea.multiplexer import InBox, Multiplexer, OutBox
 
 
 @click.command()
