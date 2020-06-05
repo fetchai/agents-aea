@@ -14,7 +14,7 @@ Skills communicate with the decision maker via `InternalMessages`. There exist t
 
 The `StateUpdateMessage` is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
 
-The `TransactionMessage` is used by a skill to propose a transaction to the decision maker. The performative `TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT` is used by a skill to propose a transaction which the decision maker is supposed to settle on chain. The performative `TransactionMessage.Performative.PROPOSE_FOR_SIGNING` is used by the skill to propose a transaction which the decision maker is supposed to sign and which will be settled later.
+The `TransactionMessage` is used by skills to propose a transaction to the decision-maker. It can be used either for settling the transaction on-chain or to sign a transaction to be used within a negotiation.
 
 The decision maker processes messages and can accept or reject them.
 
@@ -30,15 +30,16 @@ The wallet contains the private-public key pairs used by the AEA.
 
 ### Identity
 
-The identity contains the AEAs addresses as well as its name.
+The identity is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
 
+The identity can be accessed in a skill via the <a href="../api/context/base/">agent context</a>.
 
 ## Optional elements AEAs use
 
 ### Ledger APIs
 
-Ledger APIs are special types of connections.
-<!--  #In particular, they must implement a protocol compatible 
+<!-- 
+Ledger APIs are special types of connections. In particular, they must implement a protocol compatible 
  -->
 
 AEAs use Ledger APIs to communicate with public ledgers.

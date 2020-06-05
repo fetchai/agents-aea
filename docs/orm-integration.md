@@ -272,6 +272,7 @@ In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_b
 |ledgers: ['fetchai']               |ledgers: ['ethereum']             |
 |----------------------------------------------------------------------|
 ```
+
 After changing the skill config files you should run the following command for both agents to install each dependency:
 ``` bash
 aea install
