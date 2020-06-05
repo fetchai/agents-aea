@@ -9,7 +9,7 @@ aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   aea/api.go: QmVZGyiKxBrcZoX9xLMCAh5BDZCzzJWAGQmcFJr5dmiRmL
-  connection.py: QmXemkWHBBACUJTUqoug3i5hazY84n9owNM5JQ9n8ZKZj7
+  connection.py: Qmc6k6ytXH6zXBf2RnScXJmEdFKm56MZErXWH6CYeCSpYX
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
   libp2p_node.go: QmaeJigHExXgSsECEePoZcjZJYBMwoYoz4wPfVix8fPzHM
 fingerprint_ignore_patterns:
@@ -18,11 +18,12 @@ fingerprint_ignore_patterns:
 protocols: []
 class_name: P2PLibp2pConnection
 config:
-  libp2p_delegate_port: 11000
-  libp2p_entry_peers: []
-  libp2p_host: 127.0.0.1
-  libp2p_log_file: libp2p_node.log
-  libp2p_port: 9000
+  entry_peers:
+  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
+  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9002/p2p/16Uiu2HAmNJ8ZPRaXgYjhFf8xo8RBTX8YoUU5kzTW7Z4E5J3x9L1t
+  local_uri: 0.0.0.0:9000
+  log_file: libp2p_node.log
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

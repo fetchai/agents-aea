@@ -49,6 +49,7 @@ LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
 LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
+# TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.2.0")
@@ -484,58 +485,61 @@ class P2PLibp2pConnection(Connection):
         # we put it here so below we can access the address
         super().__init__(**kwargs)
         libp2p_key_file = self.configuration.config.get(
-            "libp2p_key_file"
+            "node_key_file"
         )  # Optional[str]
-        libp2p_host = self.configuration.config.get("libp2p_host")  # Optional[str]
-        libp2p_port = self.configuration.config.get("libp2p_port")  # Optional[int]
-        libp2p_host_public = self.configuration.config.get(
-            "libp2p_public_host"
+        libp2p_local_uri = self.configuration.config.get("local_uri")  # Optional[str]
+        libp2p_public_uri = self.configuration.config.get("public_uri")  # Optional[str]
+        libp2p_delegate_uri = self.configuration.config.get(
+            "delegate_uri"
         )  # Optional[str]
-        libp2p_port_public = self.configuration.config.get(
-            "libp2p_public_port"
-        )  # Optional[int]
-        libp2p_host_delegate = self.configuration.config.get(
-            "libp2p_delegate_host"
-        )  # Optional[str]
-        libp2p_port_delegate = self.configuration.config.get(
-            "libp2p_delegate_port"
-        )  # Optional[int]
-        libp2p_entry_peers = self.configuration.config.get("libp2p_entry_peers")
+        libp2p_entry_peers = self.configuration.config.get("entry_peers")
         if libp2p_entry_peers is None:
             libp2p_entry_peers = []
         libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
-        log_file = self.configuration.config.get("libp2p_log_file")  # Optional[str]
-        env_file = self.configuration.config.get("libp2p_env_file")  # Optional[str]
-        assert (
-            libp2p_host is not None and libp2p_port is not None and log_file is not None
-        ), "Config is missing values!"
+        log_file = self.configuration.config.get("log_file")  # Optional[str]
+        env_file = self.configuration.config.get("env_file")  # Optional[str]
+
         if libp2p_key_file is None:
             key = FetchAICrypto()
         else:
             key = FetchAICrypto(libp2p_key_file)
 
         uri = None
-        if libp2p_port is not None:
-            if libp2p_host is not None:
-                uri = Uri(host=libp2p_host, port=libp2p_port)
-            else:
-                uri = Uri(host="127.0.0.1", port=libp2p_port)
+        if libp2p_local_uri is not None:
+            uri = Uri(libp2p_local_uri)
 
         public_uri = None
-        if libp2p_port_public is not None and libp2p_host_public is not None:
-            public_uri = Uri(host=libp2p_host_public, port=libp2p_port_public)
+        if libp2p_public_uri is not None:
+            public_uri = Uri(libp2p_public_uri)
 
         delegate_uri = None
-        if libp2p_port_delegate is not None:
-            if libp2p_host_delegate is not None:
-                delegate_uri = Uri(host=libp2p_host_delegate, port=libp2p_port_delegate)
-            else:
-                delegate_uri = Uri(host="127.0.0.1", port=libp2p_port_delegate)
+        if libp2p_delegate_uri is not None:
+            delegate_uri = Uri(libp2p_delegate_uri)
 
         entry_peers = [MultiAddr(maddr) for maddr in libp2p_entry_peers]
+        # TOFIX(LR) Make sure that this node is reachable in the case where
+        #   fetchai's public dht nodes are used as entry peer and public
+        #   uri is provided.
+        #   Otherwise, it may impact the proper functioning of the dht
 
-        if uri is None and (entry_peers is None or len(entry_peers) == 0):
-            raise ValueError("Uri parameter must be set for genesis connection")
+        if public_uri is None:
+            # node will be run as a ClientDHT
+            # requires entry peers to use as relay
+            if entry_peers is None or len(entry_peers) == 0:
+                raise ValueError(
+                    "At least one Entry Peer should be provided when Public Uri is not set"
+                )
+            if delegate_uri is not None:
+                logger.warn(
+                    "Ignoring Delegate Uri configuration as Public Uri is not set"
+                )
+        else:
+            # node will be run as a full NodeDHT
+            if uri is None:
+                raise ValueError(
+                    "Local Uri must be set when Public Uri is provided. "
+                    "Hint: they are the same for local host/network deployment"
+                )
 
         # libp2p local node
         logger.debug("Public key used by libp2p node: {}".format(key.public_key))
