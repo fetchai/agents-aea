@@ -215,18 +215,19 @@ class TACBehaviour(SimpleBehaviour):
 
         :return: None.
         """
-        self._oef_msg_id += 1
-        self.context.logger.info(
-            "[{}]: Unregistering TAC data model".format(self.context.agent_name)
-        )
-        oef_msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            dialogue_reference=(str(self._oef_msg_id), ""),
-            service_description=self._registered_desc,
-        )
-        oef_msg.counterparty = self.context.search_service_address
-        self.context.outbox.put_message(message=oef_msg)
-        self._registered_desc = None
+        if self._registered_desc is not None:
+            self._oef_msg_id += 1
+            self.context.logger.info(
+                "[{}]: Unregistering TAC data model".format(self.context.agent_name)
+            )
+            oef_msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                dialogue_reference=(str(self._oef_msg_id), ""),
+                service_description=self._registered_desc,
+            )
+            oef_msg.counterparty = self.context.search_service_address
+            self.context.outbox.put_message(message=oef_msg)
+            self._registered_desc = None
 
     def _create_items(
         self, game: Game, ledger_api: LedgerApi, contract: ERC1155Contract
