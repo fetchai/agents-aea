@@ -101,8 +101,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert self.connection2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -128,8 +128,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -211,7 +211,7 @@ class TestP2PLibp2pConnectionRouting:
             assert conn.connection_status.is_connected is True
 
     def test_star_routing_connectivity(self):
-        addrs = [conn.node.agent_addr for conn in self.connections]
+        addrs = [conn.node.address for conn in self.connections]
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -291,8 +291,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert self.connection2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -318,8 +318,8 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection1.node.agent_addr
-        addr_2 = self.connection2.node.agent_addr
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -425,7 +425,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             assert conn.connection_status.is_connected is True
 
     def test_star_routing_connectivity(self):
-        addrs = [conn.node.agent_addr for conn in self.connections]
+        addrs = [conn.node.address for conn in self.connections]
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),

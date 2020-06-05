@@ -110,8 +110,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -137,8 +137,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -171,8 +171,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_n = self.connection_node.node.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_n = self.connection_node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -268,8 +268,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -295,8 +295,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -329,8 +329,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_n = self.connection_node_2.node.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_n = self.connection_node_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -410,8 +410,8 @@ class TestLibp2pClientConnectionRouting:
         cls.connections = [cls.connection_node_1, cls.connection_node_2]
         cls.multiplexers = [cls.multiplexer_node_1, cls.multiplexer_node_2]
         cls.addresses = [
-            cls.connection_node_1.node.agent_addr,
-            cls.connection_node_2.node.agent_addr,
+            cls.connection_node_1.address,
+            cls.connection_node_2.address,
         ]
 
         for _ in range(DEFAULT_CLIENTS_PER_NODE):
@@ -421,7 +421,7 @@ class TestLibp2pClientConnectionRouting:
 
                 cls.connections.append(conn)
                 cls.multiplexers.append(muxer)
-                cls.addresses.append(conn.agent_addr)
+                cls.addresses.append(conn.address)
 
                 muxer.connect()
 

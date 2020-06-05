@@ -203,7 +203,7 @@ class Libp2pNode:
         :param env_file: the env file path for the exchange of environment variables
         """
 
-        self.agent_addr = agent_addr
+        self.address = agent_addr
 
         # node id in the p2p network
         self.key = key.entity.private_key_hex
@@ -297,7 +297,7 @@ class Libp2pNode:
         if os.path.exists(self.env_file):
             os.remove(self.env_file)
         with open(self.env_file, "a") as env_file:
-            env_file.write("AEA_AGENT_ADDR={}\n".format(self.agent_addr))
+            env_file.write("AEA_AGENT_ADDR={}\n".format(self.address))
             env_file.write("AEA_P2P_ID={}\n".format(self.key))
             env_file.write("AEA_P2P_URI={}\n".format(str(self.uri)))
             env_file.write(
