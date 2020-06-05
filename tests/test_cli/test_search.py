@@ -340,15 +340,15 @@ class TestSearchWithRegistryInSubfolderLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        assert (
-            self.result.output == 'Searching for ""...\n'
+        expected = (
+            'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
             "Public ID: fetchai/echo:0.2.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n"
             "------------------------------\n"
             "Public ID: fetchai/error:0.2.0\n"
@@ -358,6 +358,7 @@ class TestSearchWithRegistryInSubfolderLocal:
             "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
+        assert self.result.output == expected
 
     @classmethod
     def teardown_class(cls):
@@ -414,15 +415,15 @@ class TestSearchInAgentDirectoryLocal:
 
     def test_correct_output(self,):
         """Test that the command has printed the correct output.."""
-        assert (
-            self.result.output == 'Searching for ""...\n'
+        expected = (
+            'Searching for ""...\n'
             "Skills found:\n\n"
             "------------------------------\n"
             "Public ID: fetchai/echo:0.2.0\n"
             "Name: echo\n"
             "Description: The echo skill implements simple echo functionality.\n"
             "Author: fetchai\n"
-            "Version: 0.1.0\n"
+            "Version: 0.2.0\n"
             "------------------------------\n"
             "------------------------------\n"
             "Public ID: fetchai/error:0.2.0\n"
@@ -432,6 +433,7 @@ class TestSearchInAgentDirectoryLocal:
             "Version: 0.2.0\n"
             "------------------------------\n\n"
         )
+        assert self.result.output == expected
 
     @classmethod
     def teardown_class(cls):

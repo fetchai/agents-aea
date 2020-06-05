@@ -23,7 +23,7 @@ import logging
 import time
 from threading import Thread
 
-from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -57,7 +57,7 @@ def test_soef():
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.1.0")},
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.2.0")},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -90,7 +90,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
+            protocol_id=message.protocol_id,
             message=message,
         )
         logger.info(
@@ -119,7 +119,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
+            protocol_id=message.protocol_id,
             message=message,
         )
         logger.info("Registering agent personality")
@@ -138,7 +138,7 @@ def test_soef():
         envelope = Envelope(
             to="soef",
             sender=crypto.address,
-            protocol_id=ProtocolId.from_str("fetchai/oef_search:0.2.0"),
+            protocol_id=message.protocol_id,
             message=message,
         )
         logger.info(

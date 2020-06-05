@@ -59,10 +59,10 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_name = "error"
-        cls.skill_author = "fetchai"
-        cls.skill_version = "0.1.0"
-        cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
+        cls.skill_id = PublicId.from_str("fetchai/error:0.2.0")
+        cls.skill_name = cls.skill_id.name
+        cls.skill_author = cls.skill_id.author
+        cls.skill_version = cls.skill_id.version
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -85,7 +85,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         # add the error skill again
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            [*CLI_LOG_OPTION, "add", "--local", "skill", str(cls.skill_id)],
             standalone_mode=False,
         )
 
@@ -141,10 +141,10 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_name = "echo"
-        cls.skill_author = "fetchai"
-        cls.skill_version = "0.1.0"
-        cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
+        cls.skill_id = PublicId.from_str("fetchai/echo:0.2.0")
+        cls.skill_name = cls.skill_id.name
+        cls.skill_author = cls.skill_id.author
+        cls.skill_version = cls.skill_id.version
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -165,7 +165,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--local", "skill", cls.skill_id],
+            [*CLI_LOG_OPTION, "add", "--local", "skill", str(cls.skill_id)],
             standalone_mode=False,
         )
         assert cls.result.exit_code == 0
