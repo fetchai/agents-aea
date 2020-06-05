@@ -205,10 +205,6 @@ func main() {
 		handleAeaStream(s, agent)
 	})
 
-	// Connect to the agent
-	check(agent.Connect())
-	log.Println("successfully connected to AEA!")
-
 	// setup delegate service
 	if nodePortDelegate != 0 {
 		if cfg_client {
@@ -216,10 +212,14 @@ func main() {
 		} else {
 			go func() {
 				log.Println("DEBUG setting up traffic delegation service...")
-				setupDelegationService(nodeHostDelegate, nodePortDelegate, routedHost, hdht, &annouced, agent)
+				setupDelegationService(nodeHostDelegate, nodePortDelegate, routedHost, hdht, &annouced, &agent)
 			}()
 		}
 	}
+
+	// Connect to the agent
+	check(agent.Connect())
+	log.Println("successfully connected to AEA!")
 
 	////// Receive envelopes from agent and forward to peer
 	////	var bootstrapID peer.ID
@@ -242,7 +242,7 @@ func main() {
 }
 
 //func setupDelegationService(host string, port uint16) (net.Listener, error) {
-func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent aea.AeaApi) {
+func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent *aea.AeaApi) {
 	address := host + ":" + strconv.FormatInt(int64(port), 10)
 	l, err := net.Listen("tcp", address)
 	if err != nil {
@@ -261,7 +261,7 @@ func setupDelegationService(host string, port uint16, hhost host.Host, hdht *dht
 	}
 }
 
-func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent aea.AeaApi) {
+func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDHT, annouced *bool, agent *aea.AeaApi) {
 	log.Println("INFO received a new connection from ", conn.RemoteAddr().String())
 	// receive agent address
 	buf, err := readBytesConn(conn)
@@ -273,7 +273,7 @@ func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDH
 	err = writeBytesConn(conn, []byte("DONE")) // TOFIX(LR)
 	addr := string(buf)
 
-	log.Println("INFO connection from ", conn.RemoteAddr().String(), "established for Address", addr)
+	log.Println("DEBUG connection from ", conn.RemoteAddr().String(), "established for Address", addr)
 
 	// Add connection to map
 	cfg_addresses_tcp_map[addr] = conn
@@ -303,7 +303,11 @@ func handleDelegationConnection(conn net.Conn, hhost host.Host, hdht *dht.IpfsDH
 		// route envelope
 		// first test if destination is self
 		if envel.To == agent.AeaAddress() {
-			log.Println("INFO pre-route envelope destinated to my local agent ...")
+			log.Println("DEBUG pre-route envelope destinated to my local agent ...")
+			for !agent.Connected() {
+				log.Println("DEBUG pre-route not connected to agent yet, sleeping for some time ...")
+				time.Sleep(time.Duration(100) * time.Millisecond)
+			}
 			err = agent.Put(envel)
 			if err != nil {
 				log.Println("ERROR While putting envelope to agent from tcp client:", err)
