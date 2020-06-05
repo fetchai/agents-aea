@@ -96,6 +96,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 @mock.patch("aea.cli.publish._validate_pkp")
+@mock.patch("aea.cli.publish._validate_config")
 @mock.patch("aea.cli.publish.cast", return_value=ContextMock())
 class PublishCommandTestCase(TestCase):
     """Test case for CLI publish command."""
