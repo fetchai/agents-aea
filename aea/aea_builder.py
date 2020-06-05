@@ -74,7 +74,6 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.pypi import is_satisfiable
 from aea.helpers.pypi import merge_dependencies
 from aea.identity.base import Identity
-from aea.mail.base import Address
 from aea.registries.resources import Resources
 from aea.skills.base import Skill, SkillContext
 
@@ -783,11 +782,9 @@ class AEABuilder:
         ledger_apis = self._load_ledger_apis(ledger_apis)
         self._load_and_add_components(ComponentType.PROTOCOL, resources)
         self._load_and_add_components(ComponentType.CONTRACT, resources)
-        connections = self._load_connections(identity.address, connection_ids)
-        identity = self._update_identity(identity, wallet, connections)
         aea = AEA(
             identity,
-            connections,
+            [],
             wallet,
             ledger_apis,
             resources,
@@ -803,6 +800,8 @@ class AEABuilder:
             runtime_mode=self._get_runtime_mode(),
             **deepcopy(self._context_namespace),
         )
+        # load connection
+        self._load_and_add_connections(aea, wallet, connection_ids=connection_ids)
         aea.multiplexer.default_routing = self._get_default_routing()
         self._load_and_add_skills(aea.context, resources)
         return aea
@@ -835,42 +834,6 @@ class AEABuilder:
         assert (
             ledger_apis.default_ledger_id == self._default_ledger
         ), "Default ledger id of LedgerApis does not match provided default ledger."
-
-    # TODO: remove and replace with a clean approach (~noise based crypto module or similar)
-    def _update_identity(
-        self, identity: Identity, wallet: Wallet, connections: List[Connection]
-    ) -> Identity:
-        """
-        TEMPORARY fix to update identity with address from noise p2p connection.
-        Only affects the noise p2p connection.
-        """
-        public_ids = []  # type: List[PublicId]
-        for connection in connections:
-            public_ids.append(connection.public_id)
-        if not PublicId("fetchai", "p2p_noise", "0.1.0") in public_ids:
-            return identity
-        if len(public_ids) == 1:
-            p2p_noise_connection = connections[0]
-            noise_addresses = {
-                p2p_noise_connection.noise_address_id: p2p_noise_connection.noise_address  # type: ignore
-            }
-            # update identity:
-            assert self._name is not None, "Name not set!"
-            if len(wallet.addresses) > 1:
-                identity = Identity(
-                    self._name,
-                    addresses={**wallet.addresses, **noise_addresses},
-                    default_address_key=p2p_noise_connection.noise_address_id,  # type: ignore
-                )
-            else:  # pragma: no cover
-                identity = Identity(self._name, address=p2p_noise_connection.noise_address)  # type: ignore
-            return identity
-        else:
-            raise AEAException(
-                "The p2p-noise connection can only be used as a single connection. "
-                "Set it as the default connection with `aea config set agent.default_connection fetchai/p2p_noise:0.3.0` "
-                "And use `aea run --connections fetchai/p2p_noise:0.3.0` to run it as a single connection."
-            )
 
     def _get_agent_loop_timeout(self) -> float:
         """
@@ -1180,7 +1143,10 @@ class AEABuilder:
         return builder
 
     def _load_connections(
-        self, address: Address, connection_ids: Optional[Collection[PublicId]] = None
+        self,
+        identity: Identity,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
     ):
         connections_ids = self._process_connection_ids(connection_ids)
 
@@ -1190,7 +1156,9 @@ class AEABuilder:
             ]
 
         return [
-            self._load_connection(address, get_connection_configuration(connection_id))
+            self._load_connection(
+                identity, wallet, get_connection_configuration(connection_id)
+            )
             for connection_id in connections_ids
         ]
 
@@ -1240,12 +1208,13 @@ class AEABuilder:
             resources.add_component(skill)
 
     def _load_connection(
-        self, address: Address, configuration: ConnectionConfig
+        self, identity: Identity, wallet: Wallet, configuration: ConnectionConfig
     ) -> Connection:
         """
         Load a connection from a directory.
 
-        :param address: the connection address.
+        :param identity: the AEA identity
+        :param wallet: the wallet
         :param configuration: the connection configuration.
         :return: the connection.
         """
@@ -1254,7 +1223,7 @@ class AEABuilder:
                 Connection,
                 self._component_instances[ComponentType.CONNECTION][configuration],
             )
-            if connection.address != address:
+            if connection.address != identity.address:
                 logger.warning(
                     "The address set on connection '{}' does not match the default address!".format(
                         str(connection.connection_id)
@@ -1266,9 +1235,22 @@ class AEABuilder:
             return cast(
                 Connection,
                 load_component_from_config(
-                    ComponentType.CONNECTION, configuration, address=address
+                    ComponentType.CONNECTION,
+                    configuration,
+                    identity=identity,
+                    cryptos=wallet.connection_cryptos,
                 ),
             )
+
+    def _load_and_add_connections(
+        self,
+        aea: AEA,
+        wallet: Wallet,
+        connection_ids: Optional[Collection[PublicId]] = None,
+    ):
+        connections = self._load_connections(aea.identity, wallet, connection_ids)
+        for c in connections:
+            aea.multiplexer.add_connection(c, c.public_id == self._default_connection)
 
 
 def _verify_or_create_private_keys(aea_project_path: Path) -> None:

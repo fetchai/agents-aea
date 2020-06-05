@@ -22,74 +22,24 @@
 import os
 import shutil
 import tempfile
-from typing import Optional, Sequence
 
 import pytest
 
-from aea.crypto.fetchai import FetchAICrypto
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    MultiAddr,
-    P2PLibp2pConnection,
-    Uri,
+from ....conftest import (
+    _make_libp2p_client_connection,
+    _make_libp2p_connection,
+    skip_test_windows,
 )
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
-    Libp2pClientConnection,
-    Uri as UriC,  # TOFIX(LR)
-)
-
-
-from ....conftest import skip_test_windows
 
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
-
-
-def _make_libp2p_connection(
-    port: Optional[int] = DEFAULT_PORT,
-    host: Optional[str] = DEFAULT_HOST,
-    relay: Optional[bool] = True,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: Optional[int] = DEFAULT_DELEGATE_PORT,
-) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
-    if os.path.exists(log_file):
-        os.remove(log_file)
-    if relay:
-        return P2PLibp2pConnection(
-            FetchAICrypto().address,
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            Uri("{}:{}".format(host, port)),
-            Uri("{}:{}".format(host, delegate_port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
-        )
-    else:
-        return P2PLibp2pConnection(
-            FetchAICrypto().address,
-            FetchAICrypto(),
-            Uri("{}:{}".format(host, port)),
-            entry_peers=entry_peers,
-            log_file=log_file,
-        )
-
-
-def _make_libp2p_client_connection(
-    node_port: Optional[int] = DEFAULT_DELEGATE_PORT,
-    node_host: Optional[str] = DEFAULT_HOST,
-) -> Libp2pClientConnection:
-    return Libp2pClientConnection(
-        FetchAICrypto().address,
-        FetchAICrypto(),
-        [UriC("{}:{}".format(node_host, node_port))],
-        [],
-    )
 
 
 @skip_test_windows
@@ -104,7 +54,7 @@ class TestLibp2pClientConnectionConnectDisconnect:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection_node = _make_libp2p_connection()
+        cls.connection_node = _make_libp2p_connection(delegate=True)
         cls.connection = _make_libp2p_client_connection()
 
     @pytest.mark.asyncio
@@ -143,7 +93,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection_node = _make_libp2p_connection(DEFAULT_PORT + 1)
+        cls.connection_node = _make_libp2p_connection(DEFAULT_PORT + 1, delegate=True)
         cls.multiplexer_node = Multiplexer([cls.connection_node])
         cls.multiplexer_node.connect()
 
@@ -160,8 +110,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -187,8 +137,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -221,8 +171,8 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_n = self.connection_node.node.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_n = self.connection_node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -280,7 +230,9 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         os.chdir(cls.t)
 
         cls.connection_node_1 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 1, delegate_port=DEFAULT_DELEGATE_PORT + 1
+            port=DEFAULT_PORT + 1,
+            delegate_port=DEFAULT_DELEGATE_PORT + 1,
+            delegate=True,
         )
         cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
         cls.multiplexer_node_1.connect()
@@ -292,6 +244,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             port=DEFAULT_PORT + 2,
             delegate_port=DEFAULT_DELEGATE_PORT + 2,
             entry_peers=[genesis_peer],
+            delegate=True,
         )
         cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
         cls.multiplexer_node_2.connect()
@@ -315,8 +268,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert self.connection_client_2.connection_status.is_connected is True
 
     def test_envelope_routed(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -342,8 +295,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_2 = self.connection_client_2.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -376,8 +329,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
-        addr_1 = self.connection_client_1.agent_addr
-        addr_n = self.connection_node_2.node.agent_addr
+        addr_1 = self.connection_client_1.address
+        addr_n = self.connection_node_2.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -436,7 +389,9 @@ class TestLibp2pClientConnectionRouting:
         os.chdir(cls.t)
 
         cls.connection_node_1 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 1, delegate_port=DEFAULT_DELEGATE_PORT + 1
+            port=DEFAULT_PORT + 1,
+            delegate_port=DEFAULT_DELEGATE_PORT + 1,
+            delegate=True,
         )
         cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
         cls.multiplexer_node_1.connect()
@@ -447,6 +402,7 @@ class TestLibp2pClientConnectionRouting:
             port=DEFAULT_PORT + 2,
             delegate_port=DEFAULT_DELEGATE_PORT + 2,
             entry_peers=[entry_peer],
+            delegate=True,
         )
         cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
         cls.multiplexer_node_2.connect()
@@ -454,8 +410,8 @@ class TestLibp2pClientConnectionRouting:
         cls.connections = [cls.connection_node_1, cls.connection_node_2]
         cls.multiplexers = [cls.multiplexer_node_1, cls.multiplexer_node_2]
         cls.addresses = [
-            cls.connection_node_1.node.agent_addr,
-            cls.connection_node_2.node.agent_addr,
+            cls.connection_node_1.address,
+            cls.connection_node_2.address,
         ]
 
         for _ in range(DEFAULT_CLIENTS_PER_NODE):
@@ -465,7 +421,7 @@ class TestLibp2pClientConnectionRouting:
 
                 cls.connections.append(conn)
                 cls.multiplexers.append(muxer)
-                cls.addresses.append(conn.agent_addr)
+                cls.addresses.append(conn.address)
 
                 muxer.connect()
 

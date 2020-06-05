@@ -27,7 +27,7 @@ from typing import Optional
 
 from aea.agent_loop import AsyncState
 from aea.helpers.async_utils import ensure_loop
-from aea.mail.base import AsyncMultiplexer
+from aea.multiplexer import AsyncMultiplexer
 
 if False:
     # for mypy

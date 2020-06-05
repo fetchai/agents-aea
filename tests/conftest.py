@@ -28,7 +28,7 @@ import threading
 import time
 from functools import wraps
 from threading import Timer
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 from unittest.mock import patch
 
 import docker as docker
@@ -45,6 +45,7 @@ from aea.aea import AEA
 from aea.cli.utils.config import _init_cli_config
 from aea.cli_gui import DEFAULT_AUTHOR
 from aea.configurations.base import (
+    ConnectionConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
@@ -55,12 +56,21 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_CONNECTION
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.crypto.fetchai import FetchAICrypto
+from aea.identity.base import Identity
 from aea.mail.base import Address
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
 from packages.fetchai.connections.p2p_client.connection import (
     PeerToPeerClientConnection,
+)
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    MultiAddr,
+    P2PLibp2pConnection,
+)
+from packages.fetchai.connections.p2p_libp2p_client.connection import (
+    P2PLibp2pClientConnection,
 )
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
@@ -133,7 +143,7 @@ UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", 
 UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
 LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
 P2P_CLIENT_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p_client", "0.1.0")
-HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.2.0")
+HTTP_CLIENT_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.3.0")
 HTTP_PROTOCOL_PUBLIC_ID = PublicId("fetchai", "http", "0.1.0")
 STUB_CONNECTION_PUBLIC_ID = DEFAULT_CONNECTION
 DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
@@ -643,7 +653,10 @@ def double_escape_windows_path_separator(path):
 
 
 def _make_dummy_connection() -> Connection:
-    dummy_connection = DummyConnection()
+    configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
+    dummy_connection = DummyConnection(
+        configuration=configuration, identity=Identity("name", "address")
+    )
     return dummy_connection
 
 
@@ -653,36 +666,43 @@ def _make_local_connection(
     restricted_to_protocols=None,
     excluded_protocols=None,
 ) -> Connection:
-    oef_local_connection = OEFLocalConnection(
-        node,
-        address=address,
-        connection_id=PublicId("fetchai", "local", "0.1.0"),
+    configuration = ConnectionConfig(
         restricted_to_protocols=restricted_to_protocols,
         excluded_protocols=excluded_protocols,
+        connection_id=OEFLocalConnection.connection_id,
+    )
+    oef_local_connection = OEFLocalConnection(
+        configuration=configuration, identity=Identity("name", address), local_node=node
     )
     return oef_local_connection
 
 
 def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+    configuration = ConnectionConfig(
+        addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
+    )
     oef_connection = OEFConnection(
-        oef_addr,
-        oef_port,
-        address=address,
-        connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        configuration=configuration, identity=Identity("name", address),
     )
     return oef_connection
 
 
 def _make_tcp_server_connection(address: str, host: str, port: int):
+    configuration = ConnectionConfig(
+        address=host, port=port, connection_id=TCPServerConnection.connection_id
+    )
     tcp_connection = TCPServerConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        configuration=configuration, identity=Identity("name", address),
     )
     return tcp_connection
 
 
 def _make_tcp_client_connection(address: str, host: str, port: int):
+    configuration = ConnectionConfig(
+        address=host, port=port, connection_id=TCPClientConnection.connection_id
+    )
     tcp_connection = TCPClientConnection(
-        host, port, address=address, connection_id=PublicId("fetchai", "tcp", "0.1.0")
+        configuration=configuration, identity=Identity("name", address),
     )
     return tcp_connection
 
@@ -690,22 +710,87 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
 def _make_p2p_client_connection(
     address: Address, provider_addr: str, provider_port: int
 ):
+    configuration = ConnectionConfig(
+        addr=provider_addr,
+        port=provider_port,
+        connection_id=PeerToPeerClientConnection.connection_id,
+    )
     p2p_client_connection = PeerToPeerClientConnection(
-        provider_addr,
-        provider_port,
-        address=address,
-        connection_id=PublicId("fetchai", "p2p", "0.1.0"),
+        configuration=configuration, identity=Identity("", address),
     )
     return p2p_client_connection
 
 
 def _make_stub_connection(input_file_path: str, output_file_path: str):
-    connection = StubConnection(
-        input_file_path=input_file_path,
-        output_file_path=output_file_path,
-        connection_id=DEFAULT_CONNECTION,
+    configuration = ConnectionConfig(
+        input_file=input_file_path,
+        output_file=output_file_path,
+        connection_id=StubConnection.connection_id,
     )
+    connection = StubConnection(configuration=configuration)
     return connection
+
+
+def _make_libp2p_connection(
+    port: int = 10234,
+    host: str = "127.0.0.1",
+    relay: bool = True,
+    delegate: bool = False,
+    entry_peers: Optional[Sequence[MultiAddr]] = None,
+    delegate_port: int = 11234,
+    delegate_host: str = "127.0.0.1",
+) -> P2PLibp2pConnection:
+    log_file = "libp2p_node_{}.log".format(port)
+    if os.path.exists(log_file):
+        os.remove(log_file)
+    identity = Identity("", address=FetchAICrypto().address)
+    if relay and delegate:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_public_host=host,
+            libp2p_public_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            libp2p_delegate_port=delegate_port,
+            libp2p_delegate_host=delegate_host,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    elif relay and not delegate:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_public_host=host,
+            libp2p_public_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    else:
+        configuration = ConnectionConfig(
+            libp2p_key_file=None,
+            libp2p_host=host,
+            libp2p_port=port,
+            libp2p_entry_peers=entry_peers,
+            libp2p_log_file=log_file,
+            connection_id=P2PLibp2pConnection.connection_id,
+        )
+    return P2PLibp2pConnection(configuration=configuration, identity=identity)
+
+
+def _make_libp2p_client_connection(
+    node_port: int = 11234, node_host: str = "127.0.0.1",
+) -> P2PLibp2pClientConnection:
+    identity = Identity("", address=FetchAICrypto().address)
+    configuration = ConnectionConfig(
+        libp2p_key_file=None,
+        libp2p_node_host=node_host,
+        libp2p_node_port=node_port,
+        connection_id=P2PLibp2pClientConnection.connection_id,
+    )
+    return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
 
 
 class CwdException(Exception):

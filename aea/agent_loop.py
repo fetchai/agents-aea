@@ -38,7 +38,7 @@ from aea.helpers.async_utils import (
     PeriodicCaller,
     ensure_loop,
 )
-from aea.mail.base import InBox
+from aea.multiplexer import InBox
 from aea.skills.base import Behaviour
 
 

@@ -42,7 +42,8 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import UseOef
@@ -833,7 +834,10 @@ class TestOefConnection(UseOef):
     # @pytest.mark.asyncio
     # async def test_oef_connect(self):
     #     """Test the OEFConnection."""
-    #     con = OEFConnection(address="pk", oef_addr="this_is_not_an_address")
+    #     config =  ConnectionConfig(
+    #         oef_addr=HOST, oef_port=PORT, connection_id=OEFConnection.connection_id
+    #     )
+    #     OEFConnection(configuration=configuration, identity=Identity("name", "this_is_not_an_address"))
     #     assert not con.connection_status.is_connected
     #     with pytest.raises(ConnectionError):
     #         await con.connect()

@@ -30,7 +30,7 @@ from defusedxml import ElementTree as ET
 
 import requests
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     Constraint,
@@ -54,7 +54,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "default_oef"
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.2.0")
 
 
 class SOEFChannel:
@@ -500,23 +500,10 @@ class SOEFChannel:
 class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
-    def __init__(
-        self,
-        api_key: str,
-        soef_addr: str = "127.0.0.1",
-        soef_port: int = 10001,
-        **kwargs
-    ):
-        """
-        Initialize.
+    connection_id = PUBLIC_ID
 
-        :param api_key: the SOEF API key
-        :param soef_addr: the SOEF IP address.
-        :param soef_port: the SOEF port.
-        :param kwargs: the keyword arguments (check the parent constructor)
-        """
-        if kwargs.get("configuration") is None and kwargs.get("connection_id") is None:
-            kwargs["connection_id"] = PUBLIC_ID
+    def __init__(self, **kwargs):
+        """Initialize."""
         if (
             kwargs.get("configuration") is None
             and kwargs.get("excluded_protocols") is None
@@ -530,6 +517,12 @@ class SOEFConnection(Connection):
                 PublicId.from_str("fetchai/oef_search:0.1.0")
             ]
         super().__init__(**kwargs)
+        api_key = cast(str, self.configuration.config.get("api_key"))
+        soef_addr = cast(str, self.configuration.config.get("soef_addr"))
+        soef_port = cast(int, self.configuration.config.get("soef_port"))
+        assert (
+            api_key is not None and soef_addr is not None and soef_port is not None
+        ), "api_key, soef_addr and soef_port must be set!"
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
@@ -608,20 +601,3 @@ class SOEFConnection(Connection):
         """
         if self.connection_status.is_connected:
             self.channel.send(envelope)
-
-    @classmethod
-    def from_config(
-        cls, address: Address, configuration: ConnectionConfig
-    ) -> "Connection":
-        """
-        Get the OEF connection from the connection configuration.
-        :param address: the address of the agent.
-        :param configuration: the connection configuration object.
-        :return: the connection object
-        """
-        api_key = cast(str, configuration.config.get("api_key"))
-        soef_addr = cast(str, configuration.config.get("soef_addr"))
-        soef_port = cast(int, configuration.config.get("soef_port"))
-        return SOEFConnection(
-            api_key, soef_addr, soef_port, address=address, configuration=configuration,
-        )

@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Type
 from aea.agent_loop import BaseAgentLoop, SyncAgentLoop
 from aea.connections.base import Connection
 from aea.identity.base import Identity
-from aea.mail.base import InBox, Multiplexer, OutBox
+from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.runtime import AsyncRuntime, BaseRuntime, ThreadedRuntime
 
 

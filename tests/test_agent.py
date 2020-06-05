@@ -22,7 +22,7 @@
 from threading import Thread
 
 from aea.agent import Agent, AgentState, Identity
-from aea.mail.base import InBox, OutBox
+from aea.multiplexer import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode
 

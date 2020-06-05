@@ -21,7 +21,7 @@
 import logging
 from threading import Thread
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.crypto.fetchai import FetchAICrypto
 from aea.helpers.search.models import (
     Attribute,
@@ -32,7 +32,9 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, Multiplexer
+from aea.identity.base import Identity
+from aea.mail.base import Envelope
+from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.soef.connection import SOEFConnection
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -50,14 +52,17 @@ def test_soef():
 
     # First run OEF in a separate terminal: python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
     crypto = FetchAICrypto()
+    identity = Identity("", address=crypto.address)
 
     # create the connection and multiplexer objects
-    soef_connection = SOEFConnection(
+    configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        address=crypto.address,
+        restricted_to_protocols={PublicId.from_str("fetchai/oef_search:0.1.0")},
+        connection_id=SOEFConnection.connection_id,
     )
+    soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
     multiplexer = Multiplexer([soef_connection])
 
     try:
