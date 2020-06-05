@@ -18,12 +18,11 @@ fingerprint_ignore_patterns:
 protocols: []
 class_name: P2PLibp2pConnection
 config:
-  entry_peers:
-  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
-  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
-  - /dns4/agents-p2p-dht.sandbox.fetch-ai.com/tcp/9002/p2p/16Uiu2HAmNJ8ZPRaXgYjhFf8xo8RBTX8YoUU5kzTW7Z4E5J3x9L1t
-  local_uri: 0.0.0.0:9000
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
+  local_uri: 127.0.0.1:9000
   log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9000
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
