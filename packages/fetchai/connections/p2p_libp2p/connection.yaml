@@ -8,18 +8,19 @@ license: Apache-2.0
 aea_version: '>=0.3.0, <0.4.0'
 fingerprint:
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  aea/api.go: QmcsuWE6AXuNVdB15Ln3hkZFyJg62XU3Fa7kPd7mdDhiaV
-  connection.py: Qmb5dP2nwSsxPWmgAqFmHx87rVte98iXvqpyDYcizSYgcZ
+  aea/api.go: QmP4K2iqPWwLb3GZxGKUAhBcJ4cZxu46JictgncYTC1C3E
+  connection.py: QmetF3EsMD48rKPgpJg1VgioUHp2NsarTrk7QdsmWpUtEc
   go.mod: QmV9S6Zxj6mBXUi28sphH3s74VyE8RhmSo4p3PxKKCeKwc
-  libp2p_node.go: QmThC8hDZcHTotDDLozF4Y27tHYGj47Hd3qFJYzJoXfW1m
+  libp2p_node.go: QmP3vjkGwDsYBKSi3JN2rqrxVBWsWohciSSxPnuoDATpjw
 fingerprint_ignore_patterns:
 - go.sum
 - libp2p_node
 protocols: []
 class_name: P2PLibp2pConnection
 config:
+  libp2p_delegate_port: 11000
   libp2p_entry_peers: []
-  libp2p_host: 0.0.0.0
+  libp2p_host: 127.0.0.1
   libp2p_log_file: libp2p_node.log
   libp2p_port: 9000
 excluded_protocols: []

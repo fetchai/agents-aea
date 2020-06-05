@@ -47,6 +47,7 @@ def _raise_psperror(*args, **kwargs):
 @mock.patch("builtins.open", mock.mock_open())
 @mock.patch("aea.cli.generate.ConfigLoader")
 @mock.patch("aea.cli.generate.os.path.join", return_value="joined-path")
+@mock.patch("aea.cli.utils.decorators._cast_ctx")
 class GenerateItemTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 

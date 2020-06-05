@@ -75,7 +75,7 @@ def _make_libp2p_connection(
 @skip_test_windows
 @pytest.mark.asyncio
 class TestP2PLibp2pConnectionConnectDisconnect:
-    """Test that connection will route envelope to destination"""
+    """Test that connection is established and torn down correctly"""
 
     @classmethod
     def setup_class(cls):
@@ -83,6 +83,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+
         cls.connection = _make_libp2p_connection()
 
     @pytest.mark.asyncio
