@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base message and serialization definition."""
-
+import importlib
 import inspect
 import json
 import logging
@@ -37,7 +37,7 @@ from aea.configurations.base import (
     ProtocolConfig,
     PublicId,
 )
-from aea.helpers.base import add_modules_to_sys_modules, load_all_modules, load_module
+from aea.helpers.base import load_aea_package
 
 logger = logging.getLogger(__name__)
 
@@ -309,21 +309,13 @@ class Protocol(Component):
         assert (
             configuration.directory is not None
         ), "Configuration must be associated with a directory."
-        directory = configuration.directory
-        package_modules = load_all_modules(
-            directory, glob="__init__.py", prefix=configuration.prefix_import_path
+        load_aea_package(configuration)
+        class_module = importlib.import_module(
+            configuration.prefix_import_path + ".message"
         )
-        add_modules_to_sys_modules(package_modules)
-        class_module = load_module("message", Path(directory, "message.py"))
         classes = inspect.getmembers(class_module, inspect.isclass)
         message_classes = list(filter(lambda x: re.match("\\w+Message", x[0]), classes))
         assert len(message_classes) == 1, "Not exactly one message class detected."
         message_class = message_classes[0][1]
-        class_module = load_module("serialization", Path(directory, "serialization.py"))
-        classes = inspect.getmembers(class_module, inspect.isclass)
-        ser_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
-        assert len(ser_classes) == 1, "Not exactly one serializer class detected."
-        ser_class = ser_classes[0][1]
-        message_class.serializer = ser_class
 
         return Protocol(configuration, message_class)
